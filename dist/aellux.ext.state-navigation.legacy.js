@@ -117,6 +117,7 @@
     if (!AelluxJs) {
       throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
     }
+    var PUSH_AJAX_REPLACE = "PushAjaxReplace", UPDATE_BASE_TITLE = "UpdateBaseTitle";
     var globalSnapshot = {};
     AelluxJs.extAttach(extensionName, {
       init: init,
@@ -131,11 +132,11 @@
     var baseTitle = "";
     var useHash = true;
     function init(options) {
-      window.addEventListener("popstate", onPopState);
-      window.addEventListener("hashchange", onHashChange);
+      AelluxJs.onEvent(window, "$popstate", onPopState);
+      AelluxJs.onEvent(window, "$hashchange", onHashChange);
       AelluxJs.on("PushState", OnPushState);
-      AelluxJs.on("PushAjaxReplace", OnPushAjaxReplace);
-      AelluxJs.on("UpdateBaseTitle", OnUpdateBaseTitle);
+      AelluxJs.on(PUSH_AJAX_REPLACE, OnPushAjaxReplace);
+      AelluxJs.on(UPDATE_BASE_TITLE, OnUpdateBaseTitle);
       if ("useHash" in AelluxJs.options) useHash = AelluxJs.options.useHash;
       baseTitle = document.title;
       onHashChange();
@@ -152,11 +153,11 @@
         return _regenerator().w(function(_context) {
           while (1) switch (_context.n) {
             case 0:
-              window.removeEventListener("popstate", onPopState);
-              window.removeEventListener("hashchange", onHashChange);
+              AelluxJs.offEvent(window, "$popstate", onPopState);
+              AelluxJs.offEvent(window, "$hashchange", onHashChange);
               AelluxJs.off("PushState", OnPushState);
-              AelluxJs.off("PushAjaxReplace", OnPushAjaxReplace);
-              AelluxJs.off("UpdateBaseTitle", OnUpdateBaseTitle);
+              AelluxJs.off(PUSH_AJAX_REPLACE, OnPushAjaxReplace);
+              AelluxJs.off(UPDATE_BASE_TITLE, OnUpdateBaseTitle);
             case 1:
               return _context.a(2);
           }
@@ -179,18 +180,19 @@
     }
     function _change() {
       _change = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee2(key, value) {
-        var title, silent, state, url, _args2 = arguments;
+        var title, silent, state, url, _args2 = arguments, _t;
         return _regenerator().w(function(_context2) {
-          while (1) switch (_context2.n) {
+          while (1) switch (_context2.p = _context2.n) {
             case 0:
               title = _args2.length > 2 && _args2[2] !== void 0 ? _args2[2] : void 0;
               silent = _args2.length > 3 && _args2[3] !== void 0 ? _args2[3] : false;
+              _context2.p = 1;
               if (!(globalSnapshot.title === title && globalSnapshot[key] === value)) {
-                _context2.n = 1;
+                _context2.n = 2;
                 break;
               }
               return _context2.a(2);
-            case 1:
+            case 2:
               if (title) globalSnapshot.title = title.replace(/\s+/g, " ");
               else delete globalSnapshot.title;
               globalSnapshot[key] = value;
@@ -203,10 +205,26 @@
               if (silent) history.replaceState(mergeHistoryState(state), "", url);
               else history.pushState(state, "", url);
               dispatchSnapshotEvent("SnapshotChange");
-            case 2:
+              _context2.n = 4;
+              break;
+            case 3:
+              _context2.p = 3;
+              _t = _context2.v;
+              AelluxJs.dispatch("StateNavigationError", {
+                detail: {
+                  operation: "setState",
+                  key: key,
+                  value: value,
+                  title: title,
+                  silent: silent,
+                  error: _t
+                }
+              });
+              throw _t;
+            case 4:
               return _context2.a(2);
           }
-        }, _callee2);
+        }, _callee2, null, [[1, 3]]);
       }));
       return _change.apply(this, arguments);
     }
@@ -237,13 +255,24 @@
       updateBaseTitle();
       var options = {
         detail: {
-          snapshot: globalSnapshot,
-          removeSnapshot: globalRemoveSnapshot,
-          popState: popState
+          snapshot: Object.assign({}, globalSnapshot),
+          removeSnapshot: Object.assign({}, globalRemoveSnapshot),
+          popState: copyHistoryState(popState)
         },
         bubbles: true
       };
       AelluxJs.dispatch(name, options);
+    }
+    function copyHistoryState(state) {
+      if (!state || _typeof(state) !== "object") return state;
+      if (typeof root.structuredClone === "function") return root.structuredClone(state);
+      var copy = Array.isArray(state) ? state.slice() : Object.assign({}, state);
+      if (state.snapshot && _typeof(state.snapshot) === "object") copy.snapshot = Object.assign({}, state.snapshot);
+      if (state.ajaxReplace && _typeof(state.ajaxReplace) === "object") {
+        copy.ajaxReplace = Object.assign({}, state.ajaxReplace);
+        if (Array.isArray(state.ajaxReplace.selectors)) copy.ajaxReplace.selectors = state.ajaxReplace.selectors.slice();
+      }
+      return copy;
     }
     function onHashChange() {
       if (!useHash) return;
@@ -303,7 +332,13 @@
           });
           return;
         }
-        setState(detail.key, detail.value, detail.title);
+        setState(detail.key, detail.value, detail.title).catch(function(cause) {
+          AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_CALLBACK, {
+            extension: extensionName,
+            event: "PushState",
+            cause: cause
+          });
+        });
       } catch (cause) {
         AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_CALLBACK, {
           extension: extensionName,
@@ -318,7 +353,7 @@
         if (!detail || _typeof(detail) !== "object" || typeof detail.url !== "string" || !detail.url.trim() || !Object.prototype.hasOwnProperty.call(detail, "selectors") || detail.selectors == null) {
           AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
             extension: extensionName,
-            event: "PushAjaxReplace",
+            event: PUSH_AJAX_REPLACE,
             expected: "detail: { url: non-empty string, selectors: value }"
           });
           return;
@@ -327,7 +362,7 @@
       } catch (cause) {
         AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_CALLBACK, {
           extension: extensionName,
-          event: "PushAjaxReplace",
+          event: PUSH_AJAX_REPLACE,
           cause: cause
         });
       }
@@ -338,7 +373,7 @@
         if (!detail || _typeof(detail) !== "object" || !Object.prototype.hasOwnProperty.call(detail, "title") || typeof detail.title !== "string") {
           AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
             extension: extensionName,
-            event: "UpdateBaseTitle",
+            event: UPDATE_BASE_TITLE,
             expected: "detail: { title: string }"
           });
           return;
@@ -347,7 +382,7 @@
       } catch (cause) {
         AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_CALLBACK, {
           extension: extensionName,
-          event: "UpdateBaseTitle",
+          event: UPDATE_BASE_TITLE,
           cause: cause
         });
       }

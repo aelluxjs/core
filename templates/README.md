@@ -1,6 +1,6 @@
 # aellux.js Extension Scaffold
 
-Copy `aellux.ext.template.js` to `src/aellux.ext.<extension-name>.js` for a core aellux.js Extension, or into a separate project for an experimental Extension. Templates are not included in the core build.
+Copy `aellux.ext.template.js` to `src/aellux.ext.<extension-name>.js` for a core aellux.js Extension, or into a separate project for a third-party Extension. Templates are not included in the core build.
 
 For a third-party package, copy both `aellux.ext.template.js` and `build-extension.mjs` into the Extension project. The complete contract is documented in [Authoring Third-Party aellux.js Extensions](../docs/extensions/authoring.md).
 
@@ -36,4 +36,4 @@ node build-extension.mjs ./src/aellux.ext.example.js ./dist
 
 The Legacy Core already provides `core-js/stable`, `fetch`, `CustomEvent`, animation frame functions, `Element.matches`, and `NodeList.forEach`. Observer APIs and any other additional browser APIs must be feature-detected and polyfilled by the Extension when required. Transpiling syntax does not polyfill missing browser APIs.
 
-Call `AelluxJs.ext("<extension-name>")` before `AelluxJs.init({ mode: "basic" })` when a core Extension should be loaded individually. To include it in the full core bundle, also add its loader to `src/aellux.full.js`. Experimental components can be declared by URL through `$ae.ext(...)` or `<link rel="aelluxjs-ext">`; they do not belong to the core bundle.
+Call `AelluxJs.ext("<extension-name>")` before `AelluxJs.init({ mode: "basic" })` when a core Extension should be loaded individually. To include it in the full core bundle, also add its loader to `src/aellux.full.js`. Third-party components can be declared by URL through `$ae.ext(...)` or `<link rel="aelluxjs-ext">`; they do not belong to the core bundle.

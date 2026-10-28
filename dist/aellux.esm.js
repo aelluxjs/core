@@ -6,6 +6,9 @@ function buildDiagnostics(catalog) {
   var historyLimit = 100;
   var history = [];
   var historyStart = 0;
+  var identities = [];
+  var resourceIds = typeof WeakMap === "function" ? /* @__PURE__ */ new WeakMap() : null;
+  var nextResourceId = 1;
   var diagnostics = {
     legacy: false,
     supported: false,
@@ -64,6 +67,8 @@ function buildDiagnostics(catalog) {
     return diagnostics.verboseLevel;
   }
   function emit(level, definition, context) {
+    var identity = String(level) + "|" + diagnosticIdentity(definition, context);
+    if (identities.indexOf(identity) !== -1) return diagnostics.create(definition, context);
     var diagnostic = diagnostics.create(definition, context);
     var entry = {
       timestamp: (/* @__PURE__ */ new Date()).toISOString(),
@@ -74,7 +79,9 @@ function buildDiagnostics(catalog) {
     };
     if (history.length < historyLimit) {
       history.push(entry);
+      identities.push(identity);
     } else {
+      identities[historyStart] = identity;
       history[historyStart] = entry;
       historyStart = (historyStart + 1) % historyLimit;
     }
@@ -87,6 +94,42 @@ function buildDiagnostics(catalog) {
       );
     }
     return diagnostic;
+  }
+  function diagnosticIdentity(definition, context) {
+    return String(definition.code) + "|" + identityValue(context, []);
+  }
+  function identityValue(value, seen) {
+    if (value === null) return "null";
+    var type = typeof value;
+    if (type !== "object" && type !== "function") return type + ":" + String(value);
+    if (value && value.nodeType) return "element:" + resourceId(value);
+    if (value instanceof Error) {
+      return "error:" + value.name + ":" + value.message + ":" + String(value.code || "");
+    }
+    if (seen.indexOf(value) !== -1) return "circular";
+    seen.push(value);
+    var result;
+    if (Array.isArray(value)) {
+      result = "[" + value.map(function(item) {
+        return identityValue(item, seen);
+      }).join(",") + "]";
+    } else {
+      var keys = Object.keys(value).sort();
+      result = "{" + keys.map(function(key) {
+        return key + ":" + identityValue(value[key], seen);
+      }).join(",") + "}";
+    }
+    seen.pop();
+    return result;
+  }
+  function resourceId(resource) {
+    if (!resourceIds) return String(resource);
+    var id = resourceIds.get(resource);
+    if (!id) {
+      id = nextResourceId++;
+      resourceIds.set(resource, id);
+    }
+    return id;
   }
   for (var name in catalog) {
     if (Object.prototype.hasOwnProperty.call(catalog, name)) {
@@ -189,60 +232,112 @@ function buildPersistMemory(root2, name, identifier, diagnostics) {
   };
 }
 
+// src/internal/create-save-element-memory-helper.js
+/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+function createSaveElementMemoryHelper() {
+  return { save: saveElementMemory };
+}
+function saveElementMemory(element, attributes, cssProperties) {
+  if (!element || typeof element.hasAttribute !== "function" || typeof element.setAttribute !== "function" || !element.style) {
+    throw new TypeError("persist.element.save requires an element");
+  }
+  if (typeof attributes === "undefined") attributes = [];
+  if (typeof cssProperties === "undefined") cssProperties = [];
+  if (!Array.isArray(attributes) || !Array.isArray(cssProperties)) {
+    throw new TypeError("persist.element.save requires arrays of attributes and CSS properties");
+  }
+  var savedAttributes = /* @__PURE__ */ Object.create(null);
+  var savedCssProperties = /* @__PURE__ */ Object.create(null);
+  var style = element.style;
+  var i;
+  for (i = 0; i < attributes.length; i++) {
+    var attribute = attributes[i];
+    savedAttributes[attribute] = {
+      present: element.hasAttribute(attribute),
+      value: element.getAttribute(attribute)
+    };
+  }
+  for (i = 0; i < cssProperties.length; i++) {
+    var property = cssProperties[i];
+    var value = style.getPropertyValue(property);
+    var priority = style.getPropertyPriority(property);
+    var present = value !== "" || priority !== "";
+    if (!present) {
+      for (var j = 0; j < style.length; j++) {
+        if (style.item(j) === property) {
+          present = true;
+          break;
+        }
+      }
+    }
+    savedCssProperties[property] = {
+      present,
+      value,
+      priority
+    };
+  }
+  return {
+    attributes: savedAttributes,
+    cssProperties: savedCssProperties,
+    restore: function() {
+      if (!element || typeof element.setAttribute !== "function" || !element.style) return false;
+      for (var name in savedAttributes) {
+        if (!Object.prototype.hasOwnProperty.call(savedAttributes, name)) continue;
+        var savedAttribute = savedAttributes[name];
+        if (savedAttribute.present) element.setAttribute(name, savedAttribute.value);
+        else element.removeAttribute(name);
+      }
+      for (var cssName in savedCssProperties) {
+        if (!Object.prototype.hasOwnProperty.call(savedCssProperties, cssName)) continue;
+        var savedCss = savedCssProperties[cssName];
+        if (savedCss.present) element.style.setProperty(cssName, savedCss.value, savedCss.priority);
+        else element.style.removeProperty(cssName);
+      }
+      return true;
+    }
+  };
+}
+
 // src/internal/build-preference-media-queries.js
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 function buildPreferenceMediaQueries(root2) {
   function mediaQuery(query) {
     return typeof root2.matchMedia === "function" ? root2.matchMedia(query) : null;
   }
+  var NO_PREFERENCE = "no-preference";
+  var PREFERS = "prefers-";
+  var REDUCED = "reduced";
+  var COLOR_SCHEME = PREFERS + "color-scheme";
+  var REDUCED_MOTION = PREFERS + "reduced-motion";
+  var REDUCED_TRANSPARENCY = PREFERS + "reduced-transparency";
+  var FORCED_COLORS = "forced-colors";
+  var CONTRAST = PREFERS + "contrast";
+  function preferenceQuery(feature, value) {
+    return mediaQuery("(" + feature + ": " + value + ")");
+  }
   return {
     colorScheme: {
-      light: mediaQuery("(prefers-color-scheme: light)"),
-      dark: mediaQuery("(prefers-color-scheme: dark)")
+      light: preferenceQuery(COLOR_SCHEME, "light"),
+      dark: preferenceQuery(COLOR_SCHEME, "dark")
     },
     reducedMotion: {
-      reduced: mediaQuery("(prefers-reduced-motion: reduced)"),
-      "no-preference": mediaQuery("(prefers-reduced-motion: no-preference)")
+      reduced: preferenceQuery(REDUCED_MOTION, "reduce"),
+      "no-preference": preferenceQuery(REDUCED_MOTION, NO_PREFERENCE)
     },
     reducedTransparency: {
-      reduced: mediaQuery("(prefers-reduced-transparency: reduced)"),
-      "no-preference": mediaQuery("(prefers-reduced-transparency: no-preference)")
+      reduced: preferenceQuery(REDUCED_TRANSPARENCY, REDUCED),
+      "no-preference": preferenceQuery(REDUCED_TRANSPARENCY, NO_PREFERENCE)
     },
     forcedColors: {
-      active: mediaQuery("(forced-colors: active)"),
-      "no-preference": mediaQuery("(forced-colors: no-preference)")
+      active: preferenceQuery(FORCED_COLORS, "active"),
+      "no-preference": preferenceQuery(FORCED_COLORS, NO_PREFERENCE)
     },
     contrast: {
-      more: mediaQuery("(prefers-contrast: more)"),
-      less: mediaQuery("(prefers-contrast: less)"),
-      "no-preference": mediaQuery("(prefers-contrast: no-preference)")
+      more: preferenceQuery(CONTRAST, "more"),
+      less: preferenceQuery(CONTRAST, "less"),
+      "no-preference": preferenceQuery(CONTRAST, NO_PREFERENCE)
     }
   };
-}
-
-// src/internal/build-initial-attr-memory.js
-/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-var savedAttributes;
-function saveAttr(target, attributes) {
-  if (!savedAttributes) savedAttributes = /* @__PURE__ */ new WeakMap();
-  var snapshot = [];
-  for (var i = 0; i < attributes.length; i++) {
-    var name = attributes[i];
-    snapshot.push([name, target.getAttribute(name)]);
-  }
-  savedAttributes.set(target, snapshot);
-}
-function restoreAttr(target) {
-  if (!savedAttributes) return;
-  var snapshot = savedAttributes.get(target);
-  if (!snapshot) return;
-  for (var i = 0; i < snapshot.length; i++) {
-    var name = snapshot[i][0];
-    var value = snapshot[i][1];
-    if (value === null) target.removeAttribute(name);
-    else target.setAttribute(name, value);
-  }
-  savedAttributes.delete(target);
 }
 
 // src/internal/utils-name-case.js
@@ -266,14 +361,56 @@ var utils_name_case_default = {
   fromCamelCase
 };
 
+// src/internal/create-naming-normalization.js
+/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+function createNamingNormalization(constants) {
+  var fromCamelCase2 = utils_name_case_default.fromCamelCase;
+  var toCapitalized2 = utils_name_case_default.toCapitalized;
+  return {
+    attr: function(name) {
+      name = fromCamelCase2(name);
+      return "data-" + constants.AELLUXJS_DATA_ATTRIBUTE_NAME_PREFFIX.replace(/\?/, name);
+    },
+    className: function(name) {
+      name = fromCamelCase2(name);
+      return constants.AELLUXJS_CLASS_NAME_PREFFIX.replace(/\?/, name);
+    },
+    cssVar: function(name) {
+      name = fromCamelCase2(name);
+      return constants.AELLUXJS_CSS_VAR_PREFFIX.replace(/\?/, name);
+    },
+    extFilename: function(extensionName) {
+      extensionName = fromCamelCase2(extensionName);
+      return "aellux." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "." + extensionName + (this.minified ? ".min.js" : ".js");
+    },
+    extName: function(filename) {
+      return filename.replace(
+        new RegExp("^.*aellux\\." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "\\.([^.\\/?#]+)(?:\\.min)?\\.js(?:[?#].*)?$"),
+        "$1"
+      );
+    },
+    eventName: function(name) {
+      if (/^[$#_!]/.test(name)) return name.slice(1).trim();
+      var format = constants.AELLUXJS_EVENT_NAME_PREFFIX;
+      var prefix = format.slice(0, format.indexOf("?"));
+      if (name.indexOf(prefix) === 0) return name;
+      return format.replace(/\?/, toCapitalized2(name));
+    }
+  };
+}
+
 // src/internal/create-preference-html-helper.js
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 function createPreferenceHtmlHelper(root2, getApi) {
   var document2 = root2.document;
   var fromCamelCase2 = utils_name_case_default.fromCamelCase;
   return {
-    updatePreferenceAttributesHTML
+    updatePreferenceAttributesHTML,
+    currentPreference
   };
+  function currentPreference(name) {
+    return document2.documentElement.getAttribute(getApi().attr(name));
+  }
   function updatePreferenceAttributesHTML(preferences) {
     var api = getApi();
     var allQueries = api.registry.preferenceMediaQueries;
@@ -355,16 +492,127 @@ function assetLoadHelper(asset, options) {
   return { clear };
 }
 
+// src/internal/resolve-element-or-id.js
+/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+function resolveElementOrId(root2, elementOrId, options) {
+  options = options || {};
+  var fallback = options.defaultElement;
+  if ((elementOrId === void 0 || elementOrId === null) && fallback) {
+    return fallback;
+  }
+  var requested = elementOrId;
+  if (typeof elementOrId === "string") {
+    var id = elementOrId.trim().replace(/^#/, "");
+    elementOrId = id ? root2.document.getElementById(id) : null;
+  }
+  var allowedNodeTypes = options.allowedNodeTypes || [root2.Node.ELEMENT_NODE];
+  if (elementOrId && allowedNodeTypes.indexOf(elementOrId.nodeType) !== -1) {
+    return elementOrId;
+  }
+  var diagnostics = root2.AelluxJs.diagnostics;
+  diagnostics.warn(diagnostics.WARN_INVALID_ELEMENT_OR_ID, {
+    elementOrId: requested,
+    method: options.method
+  });
+  return null;
+}
+
+// src/internal/create-selector-helper.js
+/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+function validateSelector(document2, value) {
+  if (typeof value !== "string" || !value.trim())
+    return { value, reason: "Expected a nonempty selector string." };
+  try {
+    document2.querySelector(value);
+    return null;
+  } catch (cause) {
+    return { value, reason: "Invalid CSS selector.", cause };
+  }
+}
+function createSelectorHelper(document2) {
+  function isValidSelector(value) {
+    return validateSelector(document2, value) === null;
+  }
+  function parseSelectors(value, onInvalid) {
+    var list = [];
+    var inputs = Array.isArray(value) ? value : [value];
+    function reject(input2, reason, cause) {
+      if (typeof onInvalid === "function")
+        onInvalid({ value: input2, reason, cause });
+      return null;
+    }
+    function append(input2, start2, end) {
+      var selector = input2.slice(start2, end).trim();
+      var invalid = validateSelector(document2, selector);
+      if (invalid) {
+        reject(input2, "Invalid CSS selector.", invalid.cause);
+        return false;
+      }
+      if (list.indexOf(selector) === -1) list.push(selector);
+      return true;
+    }
+    for (var inputIndex = 0; inputIndex < inputs.length; inputIndex++) {
+      var input = inputs[inputIndex];
+      if (typeof input !== "string" || !input.trim())
+        return reject(input, "Expected a nonempty selector string or array of strings.");
+      var start = 0, stack = [], quote = null, comment = false;
+      for (var index = 0; index < input.length; index++) {
+        var char = input[index];
+        if (comment) {
+          if (char === "*" && input[index + 1] === "/") {
+            comment = false;
+            index++;
+          }
+          continue;
+        }
+        if (char === "\\") {
+          index++;
+          continue;
+        }
+        if (quote) {
+          if (char === quote) quote = null;
+          continue;
+        }
+        if (char === "/" && input[index + 1] === "*") {
+          comment = true;
+          index++;
+          continue;
+        }
+        if (char === '"' || char === "'") {
+          quote = char;
+          continue;
+        }
+        if (char === "(" || char === "[") stack.push(char);
+        if (char === ")" || char === "]") {
+          if (stack.pop() !== (char === ")" ? "(" : "["))
+            return reject(input, "Invalid CSS selector.");
+        }
+        if (char === "," && !stack.length) {
+          if (!append(input, start, index)) return null;
+          start = index + 1;
+        }
+      }
+      if (!append(input, start, input.length)) return null;
+      if (quote || stack.length || comment)
+        return reject(input, "Unbalanced CSS selector.");
+    }
+    if (!list.length) return reject(value, "Expected at least one CSS selector.");
+    return list;
+  }
+  return { isValidSelector, parseSelectors };
+}
+
 // src/internal/aellux-api-integration.js
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 function createAelluxApi(root2, constants) {
-  var toCapitalized2 = utils_name_case_default.toCapitalized;
   var toCamelCase2 = utils_name_case_default.toCamelCase;
   var fromCamelCase2 = utils_name_case_default.fromCamelCase;
+  var namingNormalization = createNamingNormalization(constants);
   var options = constants.AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS;
   var diagnostics = buildDiagnostics(constants.AELLUXJS_DIAGNOSTICS);
   var oldShortInstance = root2[constants.AELLUXJS_SHORT_JS_NAME];
   var document2 = root2.document;
+  var selectors = createSelectorHelper(document2);
   var preferenceHtml = createPreferenceHtmlHelper(root2, function() {
     return api;
   });
@@ -373,10 +621,13 @@ function createAelluxApi(root2, constants) {
   };
   var apiProperties = {
     shortJSName: constants.AELLUXJS_SHORT_JS_NAME,
+    version: constants.AELLUXJS_VERSION,
+    orchestratorVersion: null,
     diagnostics,
     options,
     minified: false,
     waitLayout: null,
+    motion: null,
     mountManager: null,
     init: function() {
       throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
@@ -384,40 +635,97 @@ function createAelluxApi(root2, constants) {
     persist: {
       local: buildPersistMemory(root2, "localStorage", null, diagnostics),
       session: buildPersistMemory(root2, "sessionStorage", null, diagnostics),
-      preferences: buildPersistMemory(root2, "localStorage", "AelluxJsPreferences", diagnostics)
+      preferences: buildPersistMemory(root2, "localStorage", "AelluxJsPreferences", diagnostics),
+      element: createSaveElementMemoryHelper()
     },
     updatePreferenceAttributesHTML: preferenceHtml.updatePreferenceAttributesHTML,
+    currentPreference: preferenceHtml.currentPreference,
+    elementOrId: (elementOrId, options2) => resolveElementOrId(root2, elementOrId, options2),
+    isValidSelector: selectors.isValidSelector,
+    parseSelectors: selectors.parseSelectors,
     on: function(event, handler, options2) {
-      document2.addEventListener(api.eventName(event), handler, options2);
+      api.onEvent(document2, event, handler, options2);
     },
     off: function(event, handler, options2) {
-      document2.removeEventListener(api.eventName(event), handler, options2);
+      api.offEvent(document2, event, handler, options2);
     },
-    attr: function(name) {
-      name = fromCamelCase2(name);
-      return "data-" + constants.AELLUXJS_DATA_ATTRIBUTE_NAME_PREFFIX.replace(/\?/, name);
+    onEvent: function(target, event, handler, options2) {
+      target.addEventListener(api.eventName(event), handler, options2);
     },
-    attrMem: { save: saveAttr, restore: restoreAttr },
-    className: function(name) {
-      name = fromCamelCase2(name);
-      return constants.AELLUXJS_CLASS_NAME_PREFFIX.replace(/\?/, name);
+    offEvent: function(target, event, handler, options2) {
+      target.removeEventListener(api.eventName(event), handler, options2);
     },
-    extFilename: function(extensionName) {
-      extensionName = fromCamelCase2(extensionName);
-      return "aellux." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "." + extensionName + (api.minified ? ".min.js" : ".js");
+    attr: namingNormalization.attr,
+    className: namingNormalization.className,
+    cssVar: namingNormalization.cssVar,
+    registerCssProperty: function() {
+      if (!arguments.length || !root2.CSS || typeof root2.CSS.registerProperty !== "function") return false;
+      var registered = true;
+      for (var index = 0; index < arguments.length; index++) {
+        try {
+          var descriptor = arguments[index];
+          if (descriptor && typeof descriptor === "object" && !("inherits" in descriptor)) {
+            var normalized = {};
+            for (var key in descriptor)
+              if (Object.prototype.hasOwnProperty.call(descriptor, key))
+                normalized[key] = descriptor[key];
+            normalized.inherits = true;
+            descriptor = normalized;
+          }
+          root2.CSS.registerProperty(descriptor);
+        } catch (error) {
+          registered = false;
+        }
+      }
+      return registered;
     },
-    extName: function(filename) {
-      return filename.replace(
-        new RegExp("^.*aellux\\." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "\\.([^.\\/?#]+)(?:\\.min)?\\.js(?:[?#].*)?$"),
-        "$1"
-      );
+    // Shared by visual extensions. This value belongs only to the mounted
+    // element; it is intentionally not inherited from its ancestors.
+    layoutMaxFPS: function(element, specific) {
+      var value = element && typeof element.getAttribute === "function" ? element.getAttribute(api.attr("maxfps")) : null;
+      var generic;
+      if (value !== null) {
+        generic = String(value).trim() === "" ? NaN : Number(value);
+        if (!Number.isFinite(generic) || generic <= 0) {
+          diagnostics.warn(diagnostics.WARN_LAYOUT_MAX_FPS_INVALID, {
+            extension: "core",
+            element,
+            attribute: api.attr("maxfps"),
+            value,
+            reason: "Frame rate must be finite and greater than zero.",
+            suggestion: "Use a positive number or remove the attribute."
+          });
+          generic = void 0;
+        }
+      }
+      if (!Number.isFinite(specific) || specific <= 0) return generic;
+      return generic === void 0 ? specific : Math.min(generic, specific);
     },
-    eventName: function(name) {
-      name = toCapitalized2(name);
-      return constants.AELLUXJS_EVENT_NAME_PREFFIX.replace(/\?/, name);
-    },
+    // Keep minified tied to the API even when callers store this method separately.
+    extFilename: namingNormalization.extFilename.bind(api),
+    extName: namingNormalization.extName,
+    eventName: namingNormalization.eventName,
     noConflict: function() {
       return oldShortInstance;
+    },
+    extIndex: {
+      official: null,
+      officialURL: null,
+      fallback: null,
+      fallbackURL: null,
+      setFallback: function(url) {
+        if (typeof url !== "string" || !url.trim()) {
+          diagnostics.error(diagnostics.ERROR_EXTENSION_INDEX_INVALID, {
+            source: "custom",
+            expected: "a nonempty manifest URL"
+          });
+          return api;
+        }
+        this.fallbackURL = url.trim();
+        this.fallback = null;
+        this.fallbackPromise = null;
+        return api;
+      }
     },
     registry: {
       ext: {},
@@ -430,29 +738,24 @@ function createAelluxApi(root2, constants) {
       var name = fromCamelCase2(api.extName(nameOrUrl));
       var key = toCamelCase2(name);
       var url = nameOrUrl;
-      if (key in api.registry.ext) {
+      var implicit = url === api.extName(nameOrUrl);
+      var previous = api.registry.ext[key];
+      if (previous && (!previous.automatic || previous.state !== "wait")) {
         diagnostics.error(diagnostics.ERROR_EXTENSION_DUPLICATE, { extension: name });
         return;
       }
       if (url === api.extName(nameOrUrl)) url = "./" + api.extFilename(name);
       if (!options2) options2 = {};
+      var explicitBuilds = Object.prototype.hasOwnProperty.call(options2, "builds");
       var selector = options2.loadWhen;
       if (selector !== null && typeof selector !== "undefined") {
-        if (typeof selector !== "string" || !selector.trim()) {
+        var invalidSelector = validateSelector(document2, selector);
+        if (invalidSelector) {
           diagnostics.error(diagnostics.ERROR_EXTENSION_LOAD_WHEN, {
             extension: name,
             selector,
-            expected: "a valid nonempty CSS selector"
-          });
-          return;
-        }
-        try {
-          document2.querySelector(selector);
-        } catch (cause) {
-          diagnostics.error(diagnostics.ERROR_EXTENSION_LOAD_WHEN, {
-            extension: name,
-            selector,
-            cause
+            cause: invalidSelector.cause,
+            expected: invalidSelector.cause ? void 0 : "a valid nonempty CSS selector"
           });
           return;
         }
@@ -460,22 +763,35 @@ function createAelluxApi(root2, constants) {
       if (typeof options2.loadStyle === "undefined") options2.loadStyle = false;
       if (!options2.loadWhen) options2.loadWhen = null;
       options2.builds = normalizeExtensionBuilds(options2.builds);
+      options2.explicitBuilds = explicitBuilds;
+      delete api.registry.lazyExtSelectors[key];
       if (options2.loadWhen) api.registry.lazyExtSelectors[key] = options2.loadWhen;
       options2.url = url;
-      options2.load = options2.loadWhen ? false : true;
+      options2.implicit = implicit;
+      options2.load = options2.loadWhen ? false : options2.load !== false;
       options2.state = "wait";
       api.registry.ext[key] = options2;
     },
-    dep: function(label, url, options2) {
+    dep: function(label, url, integrity, crossOrigin) {
       if (typeof label !== "string" || !label.trim() || typeof url !== "string" || !url.trim()) {
         return root2.Promise.reject(diagnostics.error(
           diagnostics.ERROR_DEPENDENCY_ARGUMENT,
-          { label, url, expected: "a nonempty label and script URL" }
+          { label, url, expected: "a nonempty label and script or stylesheet URL" }
         ));
       }
-      var script = document2.createElement("script");
-      script.src = url.replace(/^\.\//, api.aelluxBasePath);
-      var resolvedURL = script.src;
+      var options2 = integrity && typeof integrity === "object" && !Array.isArray(integrity) ? integrity : { integrity, crossOrigin };
+      if (typeof options2.integrity !== "undefined" && options2.integrity !== null && typeof options2.integrity !== "string" || typeof options2.crossOrigin !== "undefined" && options2.crossOrigin !== null && typeof options2.crossOrigin !== "string") {
+        return root2.Promise.reject(diagnostics.error(
+          diagnostics.ERROR_DEPENDENCY_ARGUMENT,
+          { label, url, expected: "integrity and crossOrigin strings" }
+        ));
+      }
+      var isStyle = /\.css$/i.test(url.split(/[?#]/)[0]);
+      var asset = document2.createElement(isStyle ? "link" : "script");
+      var sourceAttribute = isStyle ? "href" : "src";
+      if (isStyle) asset.rel = "stylesheet";
+      asset[sourceAttribute] = url.replace(/^\.\//, api.aelluxBasePath);
+      var resolvedURL = asset[sourceAttribute];
       var registry = api.registry.dep;
       var existing = Object.prototype.hasOwnProperty.call(registry, label) ? registry[label] : null;
       if (existing) {
@@ -487,25 +803,26 @@ function createAelluxApi(root2, constants) {
         }
         return existing.promise;
       }
-      var registration = { url: resolvedURL, state: "loading", script, promise: null };
+      var registration = { url: resolvedURL, state: "loading", promise: null };
+      registration[isStyle ? "style" : "script"] = asset;
       registry[label] = registration;
-      script.setAttribute(api.attr("dep"), label);
-      if (options2 && options2.integrity) script.setAttribute("integrity", options2.integrity);
+      asset.setAttribute(api.attr("dep"), label);
+      if (options2 && options2.integrity) asset.setAttribute("integrity", options2.integrity);
       if (options2 && (options2.integrity || options2.crossOrigin) || api.options.crossOrigin) {
-        script.setAttribute(
+        asset.setAttribute(
           "crossorigin",
           options2 && options2.crossOrigin || api.options.crossOrigin || "anonymous"
         );
       }
       registration.promise = new root2.Promise(function(resolve, reject) {
         try {
-          assetLoadHelper(script, {
+          assetLoadHelper(asset, {
             loadCallback: function() {
               registration.state = "loaded";
-              resolve(script);
+              resolve(asset);
             },
             errorCallback: function(cause) {
-              if (script.parentNode) script.parentNode.removeChild(script);
+              if (asset.parentNode) asset.parentNode.removeChild(asset);
               delete registry[label];
               reject(diagnostics.error(
                 diagnostics.ERROR_DEPENDENCY_LOAD,
@@ -514,7 +831,7 @@ function createAelluxApi(root2, constants) {
             }
           });
         } catch (cause) {
-          if (script.parentNode) script.parentNode.removeChild(script);
+          if (asset.parentNode) asset.parentNode.removeChild(asset);
           delete registry[label];
           reject(diagnostics.error(
             diagnostics.ERROR_DEPENDENCY_LOAD,
@@ -568,23 +885,14 @@ function createAelluxApi(root2, constants) {
       var registration = api.registry.ext[key];
       var selector = registration && registration.loadWhen;
       if (selector !== null && typeof selector !== "undefined") {
-        if (typeof selector !== "string" || !selector.trim()) {
+        var invalidSelector = validateSelector(document2, selector);
+        if (invalidSelector) {
           diagnostics.error(diagnostics.ERROR_EXTENSION_ATTACH, {
             extension: name,
             argument: "loadWhen",
             selector,
-            expected: "a valid nonempty CSS selector"
-          });
-          return;
-        }
-        try {
-          document2.querySelector(selector);
-        } catch (cause) {
-          diagnostics.error(diagnostics.ERROR_EXTENSION_ATTACH, {
-            extension: name,
-            argument: "loadWhen",
-            selector,
-            cause
+            cause: invalidSelector.cause,
+            expected: invalidSelector.cause ? void 0 : "a valid nonempty CSS selector"
           });
           return;
         }
@@ -601,6 +909,7 @@ function createAelluxApi(root2, constants) {
       var bubbles = options2 && "bubbles" in options2 ? options2.bubbles : true;
       var cancelable = options2 && "cancelable" in options2 ? options2.cancelable : false;
       obj.initEvent(api.eventName(event), bubbles, cancelable);
+      if (options2 && "detail" in options2) obj.detail = options2.detail;
       return from.dispatchEvent(obj);
     },
     wait: function() {
@@ -613,6 +922,9 @@ function createAelluxApi(root2, constants) {
       throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
     },
     request: function() {
+      throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
+    },
+    ease: function() {
       throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
     },
     startAelluxJs: function() {
@@ -651,57 +963,100 @@ function createAelluxApi(root2, constants) {
 // src/internal/create-aellux-constants.js
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 function createAelluxConstants() {
+  var AELLUX = "aellux.js ", EXTENSION = AELLUX + "Extension ", DEPENDENCY = AELLUX + "Dependency ", INVALID_ARGUMENTS = " has invalid arguments.", LEGACY_RUNTIME = AELLUX + "Legacy runtime ", MODERN_RUNTIME = AELLUX + "Modern runtime ";
   return {
+    AELLUXJS_VERSION: true ? "0.1.0-beta.10" : "0.1.0-beta.10",
     AELLUXJS_SHORT_JS_NAME: "$ae",
     AELLUXJS_EXT_SCRIPT_PREFIX: "ext",
     AELLUXJS_CLASS_NAME_PREFFIX: "ae--?",
+    AELLUXJS_CSS_VAR_PREFFIX: "--ae-?",
     AELLUXJS_EVENT_NAME_PREFFIX: "AelluxJs?",
     AELLUXJS_DATA_ATTRIBUTE_NAME_PREFFIX: "ae-?",
     AELLUXJS_DIAGNOSTICS: {
-      ERROR_BOOTSTRAP_NOT_FOUND: { code: 1e3, message: "aellux.js boot script could not be located." },
-      ERROR_NOT_INITIALIZED: { code: 1001, message: "aellux.js has not been initialized." },
-      ERROR_INVALID_MODE: { code: 1002, message: "aellux.js mode must be basic or full." },
-      ERROR_INVALID_VERBOSE_LEVEL: { code: 1003, message: "aellux.js verboseLevel must be 0, 1, 2, or the matching error, warn, info key." },
+      ERROR_BOOTSTRAP_NOT_FOUND: { code: 1e3, message: AELLUX + "boot script could not be located." },
+      ERROR_NOT_INITIALIZED: { code: 1001, message: AELLUX + "has not been initialized." },
+      ERROR_INVALID_MODE: { code: 1002, message: AELLUX + "mode must be basic or full." },
+      ERROR_INVALID_VERBOSE_LEVEL: { code: 1003, message: AELLUX + "verboseLevel must be 0, 1, 2, or the matching error, warn, info key." },
       ERROR_CONTROLLER_NOT_FOUND: { code: 1004, message: "No controller was found for this element. It may not be mounted." },
-      ERROR_MOUNT: { code: 1006, message: "aellux.js failed to mount a root." },
-      ERROR_EXTENSION_DUPLICATE: { code: 1101, message: "aellux.js Extension is already registered." },
-      ERROR_EXTENSION_INITIALIZE: { code: 1102, message: "aellux.js Extension failed to initialize." },
-      ERROR_EXTENSION_MOUNT: { code: 1103, message: "aellux.js Extension failed to mount or unmount an element." },
-      ERROR_EXTENSION_UNMOUNT: { code: 1104, message: "aellux.js Extension failed to unmount." },
-      ERROR_EXTENSION_DESTROY: { code: 1105, message: "aellux.js Extension failed to destroy." },
-      ERROR_EXTENSION_INCOMPATIBLE: { code: 1106, message: "aellux.js Extension has no compatible build for the selected runtime." },
-      ERROR_EXTENSION_SELECTOR: { code: 1107, message: "aellux.js Extension failed to iterate a selector." },
-      ERROR_CALLBACK: { code: 1108, message: "aellux.js Extension selector callback failed." },
-      ERROR_EXTENSION_TRANSITION: { code: 1109, message: "aellux.js Extension transition failed." },
-      ERROR_EXTENSION_NOT_REGISTERED: { code: 1110, message: "aellux.js Extension is not registered." },
+      ERROR_MOUNT: { code: 1006, message: AELLUX + "failed to mount a root." },
+      ERROR_EXTENSION_DUPLICATE: { code: 1101, message: EXTENSION + "is already registered." },
+      ERROR_EXTENSION_INITIALIZE: { code: 1102, message: EXTENSION + "failed to initialize." },
+      ERROR_EXTENSION_MOUNT: { code: 1103, message: EXTENSION + "failed to mount or unmount an element." },
+      ERROR_EXTENSION_UNMOUNT: { code: 1104, message: EXTENSION + "failed to unmount." },
+      ERROR_EXTENSION_DESTROY: { code: 1105, message: EXTENSION + "failed to destroy." },
+      ERROR_EXTENSION_INCOMPATIBLE: { code: 1106, message: EXTENSION + "has no compatible build for the selected runtime." },
+      ERROR_EXTENSION_SELECTOR: { code: 1107, message: EXTENSION + "failed to iterate a selector." },
+      ERROR_CALLBACK: { code: 1108, message: EXTENSION + "selector callback failed." },
+      ERROR_EXTENSION_TRANSITION: { code: 1109, message: EXTENSION + "transition failed." },
+      ERROR_EXTENSION_NOT_REGISTERED: { code: 1110, message: EXTENSION + "is not registered." },
       ERROR_PRESENT_CONTROL_TARGET_MISSING: { code: 1111, message: "A present control has no target selector and is not inside a present container." },
-      ERROR_EXTENSION_ATTACH: { code: 1112, message: "aellux.js Extension attachment has invalid arguments." },
-      ERROR_MOUNT_REGISTRATION: { code: 1113, message: "aellux.js Mount registration has invalid arguments." },
-      ERROR_EXTENSION_LOAD_WHEN: { code: 1114, message: "aellux.js Extension loadWhen selector is invalid." },
+      ERROR_EXTENSION_ATTACH: { code: 1112, message: EXTENSION + "attachment" + INVALID_ARGUMENTS },
+      ERROR_MOUNT_REGISTRATION: { code: 1113, message: AELLUX + "Mount registration" + INVALID_ARGUMENTS },
+      ERROR_EXTENSION_LOAD_WHEN: { code: 1114, message: EXTENSION + "loadWhen selector is invalid." },
       ERROR_MOUNT_MAP_IN_USE: { code: 1115, message: "A mount map cannot be removed while elements are still mounted." },
-      ERROR_DEPENDENCY_ARGUMENT: { code: 1116, message: "aellux.js Dependency registration has invalid arguments." },
-      ERROR_DEPENDENCY_CONFLICT: { code: 1117, message: "aellux.js Dependency label is already registered with a different URL." },
-      ERROR_DEPENDENCY_LOAD: { code: 1118, message: "aellux.js Dependency script could not be loaded." },
-      ERROR_LEGACY_RUNTIME_START: { code: 1201, message: "aellux.js Legacy runtime failed to start." },
-      ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: "aellux.js Legacy runtime could not be loaded." },
-      ERROR_MODERN_RUNTIME_START: { code: 1203, message: "aellux.js Modern runtime failed to start; trying Legacy runtime." },
-      ERROR_MODERN_RUNTIME_LOAD: { code: 1204, message: "aellux.js Modern runtime could not be loaded; trying Legacy runtime." },
+      ERROR_DEPENDENCY_ARGUMENT: { code: 1116, message: DEPENDENCY + "registration" + INVALID_ARGUMENTS },
+      ERROR_DEPENDENCY_CONFLICT: { code: 1117, message: DEPENDENCY + "label is already registered with a different URL." },
+      ERROR_DEPENDENCY_LOAD: { code: 1118, message: DEPENDENCY + "script could not be loaded." },
+      ERROR_ANCHOR_REFERENCE_CONTEXT: { code: 1119, message: "Anchor target and anchored element must share the same containing block / absolute positioning reference." },
+      ERROR_SCROLLBOX_ELASTIC_WRAPPER: { code: 1120, message: "Elastic Scrollbox requires exactly one direct child marked with data-ae-scrollbox-elastic." },
+      ERROR_SCROLLBOX_SNAP_ITEMS: { code: 1121, message: "Snap Scrollbox requires at least one eligible data-ae-snap-item." },
+      ERROR_FEEDBACK_ARGUMENT: { code: 1122, message: "Feedback requires a string message, a known string type, a string motion when provided, and a DOM Element target when provided." },
+      ERROR_EXTENSION_VERSION_INCOMPATIBLE: { code: 1123, message: EXTENSION + "is incompatible with this Core version." },
+      ERROR_RUNTIME_VERSION_MISMATCH: { code: 1124, message: "Bootscript and runtime versions do not match." },
+      ERROR_EXTENSION_INDEX_LOAD: { code: 1125, message: "The extension manifest could not be loaded." },
+      ERROR_EXTENSION_INDEX_INVALID: { code: 1126, message: "The extension manifest is invalid." },
+      ERROR_EXTENSION_VARIANT_UNAVAILABLE: { code: 1127, message: "The extension manifest has no compatible runtime variant." },
+      ERROR_INVALID_ENVIRONMENT: { code: 1128, message: AELLUX + "environment must be production or development." },
+      ERROR_EXTENSION_INDEX_NOT_FOUND: { code: 1129, message: "The requested Extension was not found in an extension manifest." },
+      ERROR_LEGACY_RUNTIME_START: { code: 1201, message: LEGACY_RUNTIME + "failed to start." },
+      ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: LEGACY_RUNTIME + "could not be loaded." },
+      ERROR_MODERN_RUNTIME_START: { code: 1203, message: MODERN_RUNTIME + "failed to start; trying Legacy runtime." },
+      ERROR_MODERN_RUNTIME_LOAD: { code: 1204, message: MODERN_RUNTIME + "could not be loaded; trying Legacy runtime." },
       WARN_BROWSER_UNSUPPORTED: { code: 2e3, message: "Browser environment is not available." },
       WARN_BROWSER_CAPABILITIES: { code: 2001, message: "Some browser capabilities are unavailable; trying Legacy runtime." },
-      WARN_INTERRUPTION: { code: 2002, message: "aellux.js Extension transition was interrupted." },
-      WARN_EXTENSION_STYLE_LOAD: { code: 2004, message: "aellux.js Extension stylesheet could not be loaded." },
+      WARN_INTERRUPTION: { code: 2002, message: EXTENSION + "transition was interrupted." },
+      WARN_EXTENSION_STYLE_LOAD: { code: 2004, message: EXTENSION + "stylesheet could not be loaded." },
       WARN_CONTROLLER_METHOD_MISSING: { code: 2005, message: "A mounted controller method is not available on its Extension." },
       WARN_STORAGE_FALLBACK: { code: 2006, message: "Browser storage is unavailable; values will be kept in memory only." },
       WARN_PRESENT_MOTION_HIDDEN: { code: 2008, message: "A present-motion child should not be hidden; hidden belongs on its present container." },
       WARN_NAVIGATION_EVENT_INVALID: { code: 2009, message: "A state-navigation event has missing or invalid detail properties." },
       WARN_PRESENT_MOTION_MISSING: { code: 2010, message: "A present container has no direct present-motion child; one was generated automatically." },
       WARN_INVALID_ELEMENT_OR_ID: { code: 2011, message: "Expected a DOM Element or an existing element ID, optionally prefixed with #." },
-      INFO_LEGACY_FALLBACK: { code: 3e3, message: "aellux.js is starting the Legacy runtime." }
+      WARN_SCROLLBOX_MODE_INVALID: { code: 2012, message: "Scrollbox mode must be native or pointer; using native." },
+      WARN_SCROLLBOX_OPTIONS_JSON: { code: 2013, message: "Scrollbox options are not valid JSON; using defaults." },
+      WARN_SCROLLBOX_OPTIONS_OBJECT: { code: 2014, message: "Scrollbox options must be a JSON object; using defaults." },
+      WARN_SCROLLBOX_ELASTIC_LIMIT_INVALID: { code: 2015, message: "Scrollbox elastic limit must be one or two nonnegative fractions or pixel values; using 1/4." },
+      WARN_SCROLLBOX_WRAPPER_DISPLAY: { code: 2016, message: "Scrollbox elastic wrappers require an inline display; converting to an inline counterpart when available." },
+      WARN_LAYOUT_MAX_FPS_INVALID: { code: 2017, message: "data-ae-maxfps must be a finite number greater than zero; the limit was ignored." },
+      WARN_EXTENSION_COMPATIBILITY_SKIPPED: { code: 2018, message: "Extension compatibility verification was explicitly skipped." },
+      WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID: { code: 2019, message: "cssMotionPropertyMaxFPS is invalid; using 55 FPS." },
+      WARN_SCROLLBOX_SNAP_TRANSFORM: { code: 2020, message: "A transformed snap item can invalidate Scrollbox snap geometry; apply the visual transform to a child element instead." },
+      WARN_PRESENT_GROUP_SELECTION: { code: 2021, message: "Present Group selection is invalid or ambiguous; the previous selection is preserved." },
+      WARN_ANCHOR_MATCH: { code: 2022, message: "Anchor match accepts width and/or height." },
+      WARN_ANCHOR_GROUP: { code: 2023, message: "Anchor association or geometry is invalid." },
+      WARN_ATTRIBUTE_UNKNOWN: { code: 2024, message: "An Aellux attribute may be misspelled; check the suggested name." },
+      WARN_EXTENSION_REQUIRED: { code: 2025, message: "A declared behavior requires an initialized Extension." },
+      WARN_CONFIGURATION_VALUE: { code: 2026, message: "An Aellux configuration value is invalid; check the expected format." },
+      WARN_CONFIGURATION_TARGET: { code: 2027, message: "An Aellux target is missing, incompatible, or cannot be measured." },
+      WARN_CONFIGURATION_STRUCTURE: { code: 2028, message: "An Aellux declaration is missing required HTML structure." },
+      WARN_CONTROL_ACCESSIBILITY: { code: 2029, message: "An Aellux control is not reachable with the keyboard." },
+      WARN_CONFIGURATION_STYLE: { code: 2030, message: "Effective CSS prevents the declared Aellux behavior." },
+      WARN_PRESENT_ANCHOR_TRANSFORM: { code: 2031, message: "Anchor owns transform; Present transform is ignored." },
+      WARN_ATTRIBUTE_DUPLICATE: { code: 2032, message: "Duplicate HTML attributes discard values and may affect appearance or behavior." },
+      WARN_RESOURCE_CONFLICT: { code: 2033, message: "Behaviors replace the same CSS resource; animate a child element instead." },
+      INFO_LEGACY_FALLBACK: { code: 3e3, message: AELLUX + "is starting the Legacy runtime." },
+      INFO_PRESENT_MEASURED_LAYOUT: { code: 3001, message: "Present measures size transitions without a direct present-motion child; add one to use the grid layout strategy." },
+      INFO_FEEDBACK_MOTION_CUSTOM: { code: 3002, message: "The requested feedback motion is not standard. Standard motions are listed in the diagnostic context." },
+      INFO_EXTENSION_INDEX_LOADED: { code: 3003, message: "An extension manifest was loaded." }
     },
     AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS: {
       mode: "full",
       verboseLevel: 0,
+      environment: "production",
       forceLegacy: false,
+      skipGlobalMount: false,
+      cssMotionController: true,
+      cssMotionPropertyMaxFPS: 55,
       autoViewportMeta: true,
       basePath: null,
       crossOrigin: null,
@@ -715,7 +1070,8 @@ function createAelluxConstants() {
       "cancelAnimationFrame",
       "fetch",
       { name: "Object", function: ["assign", "entries", "freeze"] },
-      { name: "Array", function: ["from", "isArray"] }
+      { name: "Array", function: ["from", "isArray"] },
+      { name: ["HTMLDialogElement", "prototype"], function: ["show", "showModal", "close"] }
     ]
   };
 }

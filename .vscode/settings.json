@@ -1,3 +1,5 @@
 {
-  "editor.wordWrap": "off"
+  "editor.wordWrap": "off",
+  "html.customData": ["./dist/aellux.html-data.json"],
+  "css.customData": ["./dist/aellux.css-data.json"]
 }

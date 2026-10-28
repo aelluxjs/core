@@ -22,8 +22,11 @@ import createWeakCss from "./internal/create-weak-css.js";
   var coreAssetIntegrity = __AELLUX_CORE_ASSET_INTEGRITY__;
 
   var CONSTANTS = createAelluxConstants();
+  var embeddedOfficialManifest = typeof __AELLUX_OFFICIAL_EXTENSION_MANIFEST__ !== "undefined"
+    ? __AELLUX_OFFICIAL_EXTENSION_MANIFEST__ : null;
 
   var scriptExtension = ".js";
+  var loadingFullStyle = false;
   var existingApi = root.AelluxJs;
   var api = existingApi &&
     existingApi.shortJSName === CONSTANTS.AELLUXJS_SHORT_JS_NAME &&
@@ -31,7 +34,9 @@ import createWeakCss from "./internal/create-weak-css.js";
     existingApi.registry.dep &&
     existingApi.registry.lazyExtSelectors &&
     existingApi.registry.extMounters &&
-    existingApi.registry.preferenceMediaQueries && existingApi.diagnostics
+    existingApi.registry.preferenceMediaQueries && existingApi.diagnostics &&
+    typeof existingApi.registerCssProperty === "function" &&
+    typeof existingApi.currentPreference === "function"
     ? existingApi : createAelluxApi(root, CONSTANTS);
   var diagnostics = api.diagnostics;
 
@@ -52,10 +57,17 @@ import createWeakCss from "./internal/create-weak-css.js";
   api.minified = aelluxBootstrapSrc.indexOf(".min.js") !== -1;
   api.coreAssetIntegrity = coreAssetIntegrity;
   root.AelluxJs = api;
+  if (embeddedOfficialManifest) api.extIndex.official = embeddedOfficialManifest;
   root[api.shortJSName] = api;
   api.aelluxBasePath = aelluxBasePath;
   api.init = function (options) {
-    api.options.verboseLevel = diagnostics.update(options);
+    options = options || {};
+    var diagnosticsOptions = options;
+    if (options.environment === "development" &&
+      !Object.prototype.hasOwnProperty.call(options, "verboseLevel")) {
+      diagnosticsOptions = mergeOptions({ verboseLevel: "info" }, options);
+    }
+    api.options.verboseLevel = diagnostics.update(diagnosticsOptions);
 
     if (typeof document === "undefined") {
       diagnostics.warn(diagnostics.WARN_BROWSER_UNSUPPORTED);
@@ -65,21 +77,28 @@ import createWeakCss from "./internal/create-weak-css.js";
     if (document.querySelector("[" + api.attr("legacy") + "]") ||
       document.querySelector("[" + api.attr("esm") + "]")) return; //Already loaded
 
-    mergeOptions(api.options, options || {});
+    mergeOptions(api.options, options);
     api.options.verboseLevel = diagnostics.verboseLevel;
     api.options.extensions = normalizeExtensionOptions(api.options.extensions);
 
     if (api.options.mode !== "basic" && api.options.mode !== "full") {
       throw diagnostics.create(diagnostics.ERROR_INVALID_MODE);
     }
+    if (api.options.environment !== "production" && api.options.environment !== "development") {
+      throw diagnostics.create(diagnostics.ERROR_INVALID_ENVIRONMENT, {
+        environment: api.options.environment
+      });
+    }
     api.aelluxBasePath = api.options.basePath || aelluxBasePath;
     api.diagnostics.notAvailable = [];
 
     api.updatePreferenceAttributesHTML(); // Set HTML to persisted preferences.
-    updateHardwareAttribute();
-    addWeakStyles();
     updateViewportMeta();
-    loadOrchestrator();
+    if (api.options.mode === "full") loadFullStyle();
+    else {
+      addWeakStyles();
+      loadOrchestrator();
+    }
   };
   if (api.minified) scriptExtension = ".min.js";
 
@@ -94,8 +113,16 @@ import createWeakCss from "./internal/create-weak-css.js";
           }
         } else {
           option.function.forEach(function (method) {
-            if (!window[option.name] || typeof window[option.name][method] !== "function") {
-              AelluxJs.diagnostics.notAvailable.push(option.name + "." + method);
+            try {
+              var fullname = typeof option.name === "string" ? option.name : option.name.join(".");
+              var obj = typeof option.name === "string" ?
+                window[option.name] :
+                window[option.name[0]] && window[option.name[0]][option.name[1]];
+              if (!obj || typeof obj[method] !== "function") {
+                AelluxJs.diagnostics.notAvailable.push(fullname + "." + method);
+              }
+            } catch (error) {
+              console.error(error);
             }
           });
         }
@@ -184,6 +211,32 @@ import createWeakCss from "./internal/create-weak-css.js";
     });
   }
 
+  function loadFullStyle() {
+    if (loadingFullStyle) return;
+    loadingFullStyle = true;
+    var filename = "aellux.full" + (api.minified ? ".min.css" : ".css");
+    var link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = api.aelluxBasePath + filename;
+    link.setAttribute(api.attr("full-style"), "true");
+    applyCoreIntegrity(link, filename);
+    assetLoadHelper(link, {
+      loadCallback: finish,
+      errorCallback: function () {
+        diagnostics.warn(diagnostics.WARN_EXTENSION_STYLE_LOAD, {
+          extension: "full", element: link, url: link.href,
+          reason: "The Full stylesheet could not be loaded.",
+          suggestion: "Check the Full CSS URL, integrity metadata and CSP style-src policy."
+        });
+        finish();
+      }
+    });
+    function finish() {
+      loadingFullStyle = false;
+      loadOrchestrator();
+    }
+  }
+
   function addWeakStyles() {
     var attr = AelluxJs.attr("weak-style");
     if (typeof document === "undefined" ||
@@ -208,20 +261,6 @@ import createWeakCss from "./internal/create-weak-css.js";
     meta.name = "viewport";
     meta.content = "width=device-width, initial-scale=1";
     document.head.appendChild(meta);
-  }
-
-  function updateHardwareAttribute() {
-    var browserNavigator = root.navigator || {};
-    var lowHardware =
-      (typeof browserNavigator.hardwareConcurrency === "number" &&
-        browserNavigator.hardwareConcurrency > 0 &&
-        browserNavigator.hardwareConcurrency <= 4) ||
-      (typeof browserNavigator.deviceMemory === "number" &&
-        browserNavigator.deviceMemory > 0 &&
-        browserNavigator.deviceMemory <= 4);
-    if (lowHardware) {
-      document.documentElement.setAttribute(api.attr("low-hardware"), "");
-    }
   }
 
   function applyCoreIntegrity(asset, filename) {

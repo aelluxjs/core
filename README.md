@@ -5,13 +5,13 @@
 [![npm downloads](https://img.shields.io/npm/dm/%40aelluxjs%2Fcore)](https://www.npmjs.com/package/@aelluxjs/core)
 [![Node.js](https://img.shields.io/node/v/%40aelluxjs%2Fcore)](https://www.npmjs.com/package/@aelluxjs/core)
 [![npm license](https://img.shields.io/npm/l/%40aelluxjs%2Fcore)](https://github.com/aelluxjs/core/blob/main/LICENSE)
-[![Documentation](https://img.shields.io/badge/docs-online-blue)](https://aelluxjs.github.io/core/docs/0.1.0/)
+[![Documentation](https://img.shields.io/badge/docs-online-blue)](https://aelluxjs.github.io/core/docs/0.1.x/)
 
-aellux.js is a lightweight extension-management library for modular UX behaviors in browser interfaces. It complements Bootstrap and other visual systems with declarative HTML attributes and independently loadable JavaScript Extensions.
+aellux.js is a lightweight extension-management library for modular UX behaviors in browser interfaces. It complements [Bootstrap](https://getbootstrap.com/) and other visual systems with declarative HTML attributes and independently loadable JavaScript Extensions.
 
 An **EXT (aellux.js Extension)** owns one focused UX responsibility and exposes its API under `AelluxJs.ext` and its `$ae.ext` alias. The aellux.js boot script selects the runtime, while the orchestrator loads Extensions and coordinates `init`, `mount`, `unmount`, and `destroy`.
 
-aellux.js does not require or bundle Bootstrap. Its `data-ae-*` and `ae--*` namespaces are designed to coexist with existing applications and frameworks.
+aellux.js does not require or bundle [Bootstrap](https://getbootstrap.com/). Its `data-ae-*` and `ae--*` namespaces are designed to coexist with existing applications and frameworks.
 
 ## Quick Start
 
@@ -22,13 +22,12 @@ aellux.js does not require or bundle Bootstrap. Its `data-ae-*` and `ae--*` name
 </script>
 ```
 
-Use `full` to load all core Extensions. Use `basic` to register only what the page needs:
+Use `full` to make all fifteen official Core Extensions available without separate registration. **Bundled Extensions** are included in the Full JavaScript bundle: Adaptive, Anchor, Overflow Marquee, Feedback, Focus, Point, Preference, Present, Scrollbox, Scrollbox Snap and State Navigation. **Optional Extensions** (Ajax Href, Dialog, PWA and Viewport) load separate signed scripts when matching elements are mounted. These names describe delivery, rather than maturity or stability. [PWA](docs-source/0.1.x/core-extensions/optional/pwa.md) keeps its page code and independent reusable Service Worker outside Full/Core and shared CSS. See [Getting Started](docs-source/0.1.x/getting-started.md) for the loading details. Use `basic` to choose every Extension through explicit JavaScript or HTML declarations. Basic starts with no Extension registrations:
 
 ```html
 <script src="./dist/aellux.js"></script>
 <script>
-  $ae.ext("preference");
-  $ae.ext("feedback");
+  $ae.ext("scrollbox", { loadWhen: "[data-ae-scrollbox]", loadStyle: true });
   $ae.init({ mode: "basic" });
 </script>
 ```
@@ -43,29 +42,34 @@ AelluxJs.attr("preference");
 
 The module creates the core API if needed. The browser boot script still starts the runtime through `$ae.init()`.
 
-See [Getting Started](docs-source/0.1.0/getting-started.md) for build instructions, runtime modes, and distribution details.
+See [Getting Started](docs-source/0.1.x/getting-started.md) for build instructions, runtime modes, and distribution details.
 
 ## Documentation
 
-- [Published documentation](https://aelluxjs.github.io/core/docs/0.1.0/)
-- [Documentation source index](docs-source/0.1.0/README.md)
-- [Beta compatibility](docs-source/0.1.0/compatibility.md)
-- [Runtime API](docs-source/0.1.0/runtime/api.md)
-- [Diagnostics](docs-source/0.1.0/runtime/diagnostics.md)
-- [Modern and Legacy runtimes](docs-source/0.1.0/runtime/modern-legacy.md)
-- [Browser support baseline](docs-source/0.1.0/runtime/browser-support.md)
-- [ES5 support level](docs-source/0.1.0/runtime/es5-support.md)
-- [Visual mounting states](docs-source/0.1.0/runtime/visual-mounting.md)
-- [Bootstrap integration](docs-source/0.1.0/integrations/bootstrap.md)
-- [Registering aellux.js Extensions](docs-source/0.1.0/extensions/registration.md)
-- [Authoring third-party Extensions](docs-source/0.1.0/extensions/authoring.md)
-- [Accessibility requirements](docs-source/0.1.0/extensions/accessibility.md)
-- [Declarative Extension loading](docs-source/0.1.0/extensions/declarative-loading.md)
-- [Lazy loading](docs-source/0.1.0/extensions/lazy-loading.md)
-- [Optional Extension styles](docs-source/0.1.0/extensions/styles.md)
-- [CSP and Extension trust](docs-source/0.1.0/extensions/csp-and-trust.md)
-- [Modern and Legacy Extension variants](docs-source/0.1.0/extensions/legacy-variants.md)
-- [Browser validation scenarios](docs-source/0.1.0/validation-scenarios.md)
+- [Published documentation](https://aelluxjs.github.io/core/docs/0.1.x/)
+- [Documentation source index](docs-source/0.1.x/README.md)
+- [Core Extensions, distribution and stability](docs-source/0.1.x/core-extensions/README.md)
+- [Beta compatibility](docs-source/0.1.x/compatibility.md)
+- [Runtime API](docs-source/0.1.x/runtime/api.md)
+- [Runtime and Extension events](docs-source/0.1.x/runtime/events.md)
+- [Layout scheduling with `waitLayout`](docs-source/0.1.x/runtime/wait-layout.md)
+- [Diagnostics](docs-source/0.1.x/runtime/diagnostics.md)
+- [VS Code and JetBrains editor support](docs-source/0.1.x/integrations/editor-tooling.md)
+- [Modern and Legacy runtimes](docs-source/0.1.x/runtime/modern-legacy.md)
+- [Browser support baseline](docs-source/0.1.x/runtime/browser-support.md)
+- [ES5 support level](docs-source/0.1.x/runtime/es5-support.md)
+- [Visual mounting states](docs-source/0.1.x/runtime/visual-mounting.md)
+- [Integration guide](docs-source/0.1.x/integrations/bootstrap.md) for [Bootstrap](https://getbootstrap.com/)
+- [Registering aellux.js Extensions](docs-source/0.1.x/extensions/registration.md)
+- [Official Extension registry and compatibility](docs-source/0.1.x/extensions/official-registry.md)
+- [Authoring third-party Extensions](docs-source/0.1.x/extensions/authoring.md)
+- [Accessibility requirements](docs-source/0.1.x/extensions/accessibility.md)
+- [Declarative Extension loading](docs-source/0.1.x/extensions/declarative-loading.md)
+- [Lazy loading](docs-source/0.1.x/extensions/lazy-loading.md)
+- [Optional Extension styles](docs-source/0.1.x/extensions/styles.md)
+- [CSP and Extension trust](docs-source/0.1.x/extensions/csp-and-trust.md)
+- [Modern and Legacy Extension variants](docs-source/0.1.x/extensions/legacy-variants.md)
+- [Browser validation scenarios](docs-source/0.1.x/validation-scenarios.md)
 - [Extension scaffold](templates/README.md)
 
 ## Core Capabilities
@@ -75,7 +79,7 @@ See [Getting Started](docs-source/0.1.0/getting-started.md) for build instructio
 - Optional styles associated with individual Extensions.
 - Idempotent DOM mounting through `$ae.mount(elementOrId)`.
 - Browser history, preferences, feedback, persistence, and adaptive layout utilities.
-- ES5-compatible boot script with an [ES2017+ Modern browser baseline](docs-source/0.1.0/runtime/browser-support.md).
+- ES5-compatible boot script with an [ES2017+ Modern browser baseline](docs-source/0.1.x/runtime/browser-support.md).
 
 ## Build
 
@@ -85,16 +89,20 @@ Node.js 20 or newer is required for build tooling:
 npm install
 npx playwright install
 npm run build
+npm run test:unit
+npm run test:budget
 npm run test:browser
 ```
 
-`test:browser` rebuilds the distribution and runs the browser scenarios with Playwright in Chromium, Firefox, and WebKit. Use `npm run test:browser -- --project=chromium` to run one browser.
+`test:budget` checks the built files against raw and gzip size limits. `test:browser` rebuilds the distribution and runs the browser scenarios with Playwright in Chromium, Firefox, and WebKit. Use `npm run test:browser -- --project=chromium` to run one browser. See [Browser validation scenarios](docs-source/0.1.x/validation-scenarios.md) for focused runs and coverage.
 
-Generated browser files are written to `dist/`. The distribution uses classic scripts isolated in IIFEs; it does not expose ESM named or default exports.
+The CI workflow reports build, unit tests, bundle budget, and browser tests as named steps in its verification job. A successful GitHub Pages publication is a separate result and does not establish that verification passed.
+
+Generated browser files are written to `dist/`. The boot, runtimes, and Extensions are classic scripts isolated in IIFEs. `aellux.esm.js` and `aellux.esm.min.js` are separate module entries that export the shared Core API as their default; the browser boot script still starts the runtime through `$ae.init()`.
 
 ## Project Status
 
-aellux.js `0.1.0-beta.9` is the current prerelease. Beta 1 established the initial runtime, Extension contract, Modern/Legacy distributions, and repeatable browser validation scenarios. The remaining work for the stable `0.1.0` release is tracked in the milestone below.
+aellux.js `0.1.0-beta.10` is the current prerelease. Beta 1 established the initial runtime, Extension contract, Modern/Legacy distributions, and repeatable browser validation scenarios. The remaining work for the stable `0.1.0` release is tracked in the milestone below.
 
 Review the [0.1.0 milestone](milestones/0.1.0.md), the [Beta 1 milestone](milestones/0.1.0-beta.1.md), and delivered changes in the [changelog](CHANGELOG.md).
 

@@ -10,6 +10,22 @@ async function expectedIntegrity(filename) {
   return "sha384-" + createHash("sha384").update(bytes).digest("base64");
 }
 
+test("each boot embeds SRI only for its asset variant", async ({ page }) => {
+  for (const { boot, minified } of [
+    { boot: "aellux.js", minified: false },
+    { boot: "aellux.min.js", minified: true }
+  ]) {
+    await page.goto("/tests/index.htm");
+    await page.addScriptTag({ url: `/dist/${boot}` });
+    const entries = await page.evaluate(() => Object.entries(AelluxJs.coreAssetIntegrity));
+    expect(entries.length).toBeGreaterThan(0);
+    for (const [filename, integrity] of entries) {
+      expect(/\.min\.(?:js|css)$/.test(filename)).toBe(minified);
+      expect(integrity).toBe(await expectedIntegrity(filename));
+    }
+  }
+});
+
 test("generated integrity covers the orchestrator and built-in Extension assets", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
@@ -49,6 +65,34 @@ test("generated integrity covers the orchestrator and built-in Extension assets"
   }
 });
 
+test("minified core styles retain SRI when CDN bytes differ", async ({ page }) => {
+  const base = "https://cdn.jsdelivr.net/gh/aelluxjs/core@fixture/dist/";
+  await page.route(`${base}**`, async route => {
+    const filename = new URL(route.request().url()).pathname.split("/").pop();
+    const bytes = await readFile(join(distribution, filename));
+    await route.fulfill({
+      body: filename.endsWith(".min.css")
+        ? Buffer.concat([bytes, Buffer.from("/* CDN changed the CSS bytes */")])
+        : bytes,
+      contentType: filename.endsWith(".css") ? "text/css" : "text/javascript",
+      headers: { "access-control-allow-origin": "*" }
+    });
+  });
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: `${base}aellux.min.js` });
+  await page.evaluate(() => {
+    AelluxJs.ext("present", { loadStyle: true });
+    AelluxJs.init({ mode: "basic" });
+  });
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.present?.initialized)).toBe(true);
+  const style = page.locator('link[data-ae-ext-style="present"]');
+  await expect(style).toHaveAttribute("href", `${base}aellux.ext.present.min.css`);
+  expect(await style.getAttribute("integrity"))
+    .toBe(await expectedIntegrity("aellux.ext.present.min.css"));
+  expect(await page.locator('script[data-ae-ext="present"]').getAttribute("integrity"))
+    .toBe(await expectedIntegrity("aellux.ext.present.min.js"));
+});
+
 test("generated integrity matches each runtime variant", async ({ page }) => {
   for (const { boot, mode, forceLegacy, runtime } of [
     { boot: "aellux.js", mode: "basic", forceLegacy: true,
@@ -82,7 +126,7 @@ test("changed orchestrator bytes are rejected before Legacy fallback", async ({ 
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   await expect.poll(() => page.evaluate(() => typeof AelluxJs.wait)).toBe("function");
-  expect(await page.evaluate(() => ({
+  await expect.poll(() => page.evaluate(() => ({
     changedExecuted: Boolean(window.changedOrchestratorExecuted),
     legacy: AelluxJs.diagnostics.legacy
   }))).toEqual({ changedExecuted: false, legacy: true });

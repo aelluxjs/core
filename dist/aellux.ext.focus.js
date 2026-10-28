@@ -16,33 +16,34 @@
     const attribute = AelluxJs.attr(extensionName);
     const snapshotKey = "ae-focus";
     const entries = [];
-    const generatedHints = /* @__PURE__ */ new WeakSet();
+    const hintMemories = /* @__PURE__ */ new WeakMap();
     const nextElements = /* @__PURE__ */ new WeakSet();
     const textEntrySelector = "input:not([type]), input[type=text], input[type=search], input[type=email], input[type=url], input[type=tel], input[type=password], input[type=number], textarea, [contenteditable]:not([contenteditable=false])";
     const focusableSelector = "a[href], area[href], button, input, select, textarea, [tabindex], [contenteditable]:not([contenteditable=false])";
-    let sequence = 0, current = null, restoring = false;
+    let current = null, restoring = false;
     function init() {
       AelluxJs.mountManager.add({
         extensionName,
         selector: `[${attribute}]`,
+        priority: 0,
         mount: mountFocusElement,
         unmount: unmountFocusElement
       });
-      document.addEventListener("focusin", onFocusIn, true);
-      document.addEventListener("focus", onFocusChange, true);
-      document.addEventListener("blur", onBlur, true);
-      root.addEventListener("focus", onWindowFocus);
-      root.addEventListener("blur", onWindowBlur);
+      AelluxJs.on("$focusin", onFocusIn, true);
+      AelluxJs.on("$focus", onFocusChange, true);
+      AelluxJs.on("$blur", onBlur, true);
+      AelluxJs.onEvent(root, "$focus", onWindowFocus);
+      AelluxJs.onEvent(root, "$blur", onWindowBlur);
       AelluxJs.on("SnapshotRestore", onSnapshotRestore);
       AelluxJs.on("UnpopFocusLost", onUnpopFocusLost);
       remember(document.activeElement, false);
     }
     function destroy() {
-      document.removeEventListener("focusin", onFocusIn, true);
-      document.removeEventListener("focus", onFocusChange, true);
-      document.removeEventListener("blur", onBlur, true);
-      root.removeEventListener("focus", onWindowFocus);
-      root.removeEventListener("blur", onWindowBlur);
+      AelluxJs.off("$focusin", onFocusIn, true);
+      AelluxJs.off("$focus", onFocusChange, true);
+      AelluxJs.off("$blur", onBlur, true);
+      AelluxJs.offEvent(root, "$focus", onWindowFocus);
+      AelluxJs.offEvent(root, "$blur", onWindowBlur);
       AelluxJs.off("SnapshotRestore", onSnapshotRestore);
       AelluxJs.off("UnpopFocusLost", onUnpopFocusLost);
       AelluxJs.mountManager.remove({ extensionName });
@@ -53,18 +54,20 @@
       const type = element.getAttribute(attribute);
       switch (type) {
         case "next":
-          element.addEventListener("keydown", onNextKeyDown);
+          AelluxJs.onEvent(element, "$keydown", onNextKeyDown);
           nextElements.add(element);
           if (!element.hasAttribute("enterkeyhint") && element.matches(textEntrySelector)) {
+            hintMemories.set(element, AelluxJs.persist.element.save(element, ["enterkeyhint"], []));
             element.setAttribute("enterkeyhint", "next");
-            generatedHints.add(element);
           }
           break;
       }
     }
     function unmountFocusElement(element) {
-      if (nextElements.delete(element)) element.removeEventListener("keydown", onNextKeyDown);
-      if (generatedHints.delete(element)) element.removeAttribute("enterkeyhint");
+      var _a;
+      if (nextElements.delete(element)) AelluxJs.offEvent(element, "$keydown", onNextKeyDown);
+      (_a = hintMemories.get(element)) == null ? void 0 : _a.restore();
+      hintMemories.delete(element);
     }
     function onNextKeyDown(event) {
       if (event.key !== "Enter" || event.isComposing || event.repeat || event.defaultPrevented || event.target !== event.currentTarget && event.target.closest(focusableSelector) !== event.currentTarget) return;
@@ -91,14 +94,21 @@
     }
     function remember(element, push) {
       if (!isValid(element) || current && current.element === element) return;
-      const entry = { token: String(++sequence), element };
+      const entry = { element };
       entries.push(entry);
       if (entries.length > 100) entries.shift();
       current = entry;
-      if (!push) return;
+      if (!push || !stateNavigationEligible(element) || !element.id || !element.id.trim()) return;
       AelluxJs.dispatch("PushState", {
-        detail: { key: snapshotKey, value: entry.token }
+        detail: { key: snapshotKey, value: element.id }
       });
+    }
+    function stateNavigationEligible(element) {
+      if (element.hasAttribute(attribute)) return true;
+      const name = element.tagName && element.tagName.toLowerCase();
+      if (name === "textarea" || name === "select") return true;
+      if (name === "input") return String(element.type || "text").toLowerCase() !== "hidden";
+      return element.isContentEditable || element.hasAttribute("contenteditable") && element.getAttribute("contenteditable") !== "false";
     }
     function onFocusIn(event) {
       if (!restoring) remember(event.target, true);
@@ -141,11 +151,15 @@
     function onSnapshotRestore(event) {
       const snapshot = event.detail && event.detail.snapshot;
       if (!snapshot || !Object.prototype.hasOwnProperty.call(snapshot, snapshotKey)) return;
-      for (let i = entries.length - 1; i >= 0; i--) {
-        if (entries[i].token === snapshot[snapshotKey]) {
-          if (!restore(entries[i])) restoreLastFocus();
-          return;
+      const target = document.getElementById(snapshot[snapshotKey]);
+      if (target && stateNavigationEligible(target)) {
+        for (let i = entries.length - 1; i >= 0; i--) {
+          if (entries[i].element === target) {
+            if (!restore(entries[i])) restoreLastFocus();
+            return;
+          }
         }
+        if (restore({ element: target })) return;
       }
       restoreLastFocus();
     }

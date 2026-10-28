@@ -3,32 +3,35 @@
 import utilsNameCase from "./utils-name-case.js";
 import { createControllerHelper } from "./create-controller-helper.js";
 import { resolveElementOrId } from "./resolve-element-or-id.js";
+import { validateDeclarations } from "./validate-declarations.js";
+import { validateHTMLSource } from "./validate-html-source.js";
 
 export function createMountHelper(root, mountMaps, mountedElements, elementControllers) {
+  const UNMOUNT = "unmount";
+
   const { toCapitalized, toCamelCase, fromCamelCase } = utilsNameCase;
-  const initialAttributeValues = new WeakMap();
   const pendingMounts = new WeakMap();
   const pendingUnmounts = new WeakMap();
+  const mountRecords = new WeakMap();
+  let mountOrder = 0;
   const classPrefix = root.AelluxJs.className("");
+  const sourceURL = root.document.URL;
+  let sourceChecked = false;
 
-  return { mount, unmount, unmountDetached, update, initialAttribute };
-
-  function initialAttribute(element, name) {
-    return initialAttributeValues.get(element)?.initial.get(name) ?? null;
-  }
+  return { mount, unmount, unmountDetached, update };
 
   async function update(elementOrId, extensionNames = null) {
     const rootElement = resolveMountElement(elementOrId, "update");
     if (!rootElement) return false;
     await AelluxJsMounted(rootElement, "update", extensionNames);
+    validateDeclarations(root, rootElement, extensionNames, "update");
     return true;
   }
 
   async function unmount(elementOrId, extensionNames = null) {
-    const rootElement = resolveMountElement(elementOrId, "unmount");
+    const rootElement = resolveMountElement(elementOrId, UNMOUNT);
     if (!rootElement) return false;
-    await AelluxJsMounted(rootElement, "unmount", extensionNames);
-    return true;
+    return AelluxJsMounted(rootElement, UNMOUNT, extensionNames);
   }
 
   async function unmountDetached() {
@@ -40,8 +43,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
       }
     }
     if (!hasDetachedElement) return false;
-    await AelluxJsMounted(root.document, "unmount", null, true);
-    return true;
+    return AelluxJsMounted(root.document, UNMOUNT, null, true);
   }
 
   async function mount(elementOrId, extensionNames = null) {
@@ -49,6 +51,15 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
     const newlyMounted = new Set();
     const rootElement = resolveMountElement(elementOrId, "mount");
     if (!rootElement) return [];
+    if (!AelluxJs.dispatch("BeforeMount", {
+      cancelable: true,
+      detail: {
+        root: rootElement,
+        extensions: extensionNames == null ? null :
+          (typeof extensionNames === "string" ? [extensionNames] : extensionNames)
+            .map(name => fromCamelCase(name))
+      }
+    })) return [];
     const waitMountedAttr = AelluxJs.attr("wait-mounted");
     const allWaiters = findElements(rootElement, `[${waitMountedAttr}]`);
     allWaiters.forEach(waiter => waiter.setAttribute("aria-busy", "true"));
@@ -69,12 +80,14 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
       const waitExtensions = [];
       for (const [key, options] of
         Object.entries(root.AelluxJs.registry.ext)) {
-        if (options.loadWhen) continue;
+        if (options.load === false) continue;
         waitExtensions.push(AelluxJs.wait(key));
       }
       await Promise.all(waitExtensions);
 
       await AelluxJsMount(rootElement, extensionNames, newlyMounted);
+      validateDeclarations(root, rootElement, extensionNames);
+      if (rootElement === root.document && extensionNames == null) validateDocumentSource();
 
     } catch (error) {
       AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_MOUNT, {
@@ -84,6 +97,19 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
       allWaiters.forEach(waiter => waiter.setAttribute("aria-busy", "false"));
     }
     return Array.from(newlyMounted);
+  }
+
+  function validateDocumentSource() {
+    const api = root.AelluxJs;
+    if (api.options.environment !== "development" || sourceChecked ||
+        root.document.contentType !== "text/html" || !/^https?:/i.test(sourceURL)) return;
+    sourceChecked = true;
+    // Browsers discard duplicate attributes before mounting. Read the original
+    // source once, preferring the HTTP cache, without delaying mount/Ready.
+    Promise.resolve().then(() => api.request(sourceURL, { cache: "force-cache" }))
+      .then(response => response.text())
+      .then(html => validateHTMLSource(api, html, sourceURL))
+      .catch(() => { /* Source inspection is optional and must not fail mounting. */ });
   }
 
   async function AelluxJsMount(rootElement, extensionNames, newlyMounted) {
@@ -109,7 +135,12 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
           filter.push(selectorString);
     }
 
-    if (filter.length === 0) return;
+    if (filter.length === 0) {
+      AelluxJs.dispatch("Mount", {
+        detail: { root: rootElement, extensions: extensionNames, elements: [] }
+      });
+      return;
+    }
 
     const candidatesByExtension = new Map();
     const allElements = findElements(rootElement, filter.join(","));
@@ -153,85 +184,89 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
       if (Object.prototype.hasOwnProperty.call(result, "error")) throw result.error;
     }
 
-    const elementsAffected = new Set();
+    const registrations = [];
     for (let index = 0; index < extensions.length; index++) {
       if (!loaded[index].value) continue;
-      const [extensionName, candidates] = extensions[index];
+
+      const [extensionName] = extensions[index];
       const mounter = mountMaps.get(toCamelCase(extensionName));
-      if (!mounter) { continue; }
-      const searchRoots = [];
-      for (const candidate of candidates) {
-        let ancestor = candidate.parentNode;
-        while (ancestor && !candidates.has(ancestor)) ancestor = ancestor.parentNode;
-        if (!ancestor) searchRoots.push(candidate);
-      }
+      if (!mounter) continue;
+
       for (const [selector, controller] of mounter) {
-        try {
-          if (!controller.mount) { continue; }
-          for (const searchRoot of searchRoots) {
-            const mountableElements = findElements(searchRoot, selector);
-            for (const mountable of mountableElements) {
-              const mountId = `${extensionName}@${selector}`;
-              if (isMounted(mountable, mountId)) {
-                const pendingMount = getPendingMount(mountable, mountId);
-                if (pendingMount) await pendingMount;
-                continue;
-              }
-              if (!isMounted(mountable)) {
-                for (const name of Array.from(mountable.classList)) {
-                  if (name.startsWith(classPrefix)) mountable.classList.remove(name);
-                }
-              }
-              rememberInitialAttributes(mountable);
-              setMounted(mountable, mountId);
-              const finishPendingMount = beginPendingMount(mountable, mountId);
-              try {
-                await controller.mount(mountable);
-                let elementController = elementControllers.get(mountable);
-                if (!elementController) {
-                  elementController = createControllerHelper(root, mountable);
-                  elementControllers.set(mountable, elementController);
-                }
-                elementController.spawn(
-                  extensionName, mountId, controller.controllers,
-                  typeof controller.update === "function"
-                );
-                elementsAffected.add(mountable);
-                newlyMounted.add(mountable);
-              } catch (error) {
-                setMounted(mountable, mountId, false);
-                const elementController = elementControllers.get(mountable);
-                if (elementController) {
-                  elementController.despawn(mountId);
-                  if (!elementController.hasMounts()) elementControllers.delete(mountable);
-                }
-                restoreInitialAttributes(mountable);
-                AelluxJs.diagnostics.error(
-                  AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
-                  {
-                    cause: error,
-                    extension: extensionName,
-                    method: "mount",
-                    selector,
-                    element: mountable
-                  }
-                );
-              } finally {
-                finishPendingMount();
-              }
+        registrations.push({
+          extensionName, selector, controller,
+          priority: controller.priority,
+          order: registrations.length
+        });
+      }
+    }
+
+    registrations.sort((left, right) =>
+      left.priority - right.priority || left.order - right.order);
+
+    const elementsAffected = new Set();
+    for (const { extensionName, selector, controller } of registrations) {
+      try {
+        if (!controller.mount) { continue; }
+        const mountableElements = findElements(rootElement, selector);
+        for (const mountable of mountableElements) {
+          const mountId = `${extensionName}@${selector}`;
+          if (isMounted(mountable, mountId)) {
+            const pendingMount = getPendingMount(mountable, mountId);
+            if (pendingMount) await pendingMount;
+            continue;
+          }
+          if (!isMounted(mountable)) {
+            for (const name of Array.from(mountable.classList)) {
+              if (name.startsWith(classPrefix)) mountable.classList.remove(name);
             }
           }
-        } catch (error) {
-          AelluxJs.diagnostics.error(
-            AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
-            {
-              cause: error,
-              extension: extensionName,
-              method: "mount",
-              selector
+          setMounted(mountable, mountId, true, controller.priority);
+          const finishPendingMount = beginPendingMount(mountable, mountId);
+          try {
+            await controller.mount(mountable);
+            let elementController = elementControllers.get(mountable);
+            if (!elementController) {
+              elementController = createControllerHelper(root, mountable);
+              elementControllers.set(mountable, elementController);
             }
-          );
+            elementController.spawn(
+              extensionName, mountId, controller.controllers,
+              typeof controller.update === "function"
+            );
+            elementsAffected.add(mountable);
+            newlyMounted.add(mountable);
+          } catch (error) {
+            setMounted(mountable, mountId, false);
+            const elementController = elementControllers.get(mountable);
+            if (elementController) {
+              elementController.despawn(mountId);
+              if (!elementController.hasMounts()) elementControllers.delete(mountable);
+            }
+            AelluxJs.diagnostics.error(
+              AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
+              {
+                cause: error,
+                extension: extensionName,
+                method: "mount",
+                selector,
+                element: mountable
+              }
+            );
+          } finally {
+            finishPendingMount();
+          }
         }
+      } catch (error) {
+        AelluxJs.diagnostics.error(
+          AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
+          {
+            cause: error,
+            extension: extensionName,
+            method: "mount",
+            selector
+          }
+        );
       }
     }
 
@@ -243,7 +278,13 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
       }
       affected.classList.toggle(AelluxJs.className("mounted"), true);
     }
-    AelluxJs.dispatch("Mount");
+    AelluxJs.dispatch("Mount", {
+      detail: {
+        root: rootElement,
+        extensions: extensionNames,
+        elements: Array.from(newlyMounted)
+      }
+    });
   }
 
   async function AelluxJsMounted(rootElement, method, extensionNames = null, detachedOnly = false) {
@@ -252,10 +293,20 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
       ? null
       : new Set((typeof extensionNames === "string" ? [extensionNames] : extensionNames)
         .map(name => fromCamelCase(name)));
+    if (method === UNMOUNT && !AelluxJs.dispatch("BeforeUnmount", {
+      cancelable: true,
+      detail: {
+        root: rootElement,
+        extensions: selectedNames ? Array.from(selectedNames) : null,
+        detachedOnly
+      }
+    })) return false;
+    const affected = new Set();
 
+    const registrations = [];
     for (const [element, mountIds] of Array.from(mountedElements)) {
       const inRoot = element === rootElement || rootElement.contains(element);
-      const detachedInGlobalUnmount = method === "unmount" &&
+      const detachedInGlobalUnmount = method === UNMOUNT &&
         rootElement === root.document && !element.isConnected;
       if (detachedOnly ? element.isConnected || hasPendingMounts(element) :
         !inRoot && !detachedInGlobalUnmount) continue;
@@ -270,13 +321,14 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
         const mounter = mountMaps.get(extensionKey);
         const controller = mounter && mounter.get(selector);
 
-        if (method === "unmount") {
-          await unmountRegistration(element, mountId, controller, extensionName, selector);
+        if (method === UNMOUNT) {
+          registrations.push({ element, mountId, controller, extensionName, selector });
           continue;
         }
 
         try {
           if (controller && controller[method]) {
+            affected.add(element);
             await controller[method](element);
           }
         } catch (error) {
@@ -286,13 +338,27 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
         }
       }
     }
-    AelluxJs.dispatch(toCapitalized(method));
+    if (method === UNMOUNT) {
+      registrations.sort(compareUnmountOrder);
+      for (const { element, mountId, controller, extensionName, selector } of registrations) {
+        if (await unmountRegistration(element, mountId, controller, extensionName, selector))
+          affected.add(element);
+      }
+    }
+    AelluxJs.dispatch(toCapitalized(method), {
+      detail: {
+        root: rootElement,
+        extensions: selectedNames ? Array.from(selectedNames) : null,
+        elements: Array.from(affected)
+      }
+    });
+    return true;
   }
 
   async function unmountRegistration(element, mountId, controller, extensionName, selector) {
     const pendingMount = getPendingMount(element, mountId);
     if (pendingMount) await pendingMount;
-    if (!isMounted(element, mountId)) return;
+    if (!isMounted(element, mountId)) return false;
     let tasks = pendingUnmounts.get(element);
     if (!tasks) {
       tasks = new Map();
@@ -300,7 +366,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
     }
     if (tasks.has(mountId)) {
       await tasks.get(mountId);
-      return;
+      return false;
     }
     let finish;
     tasks.set(mountId, new Promise(resolve => { finish = resolve; }));
@@ -311,7 +377,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
         if (controller && controller.unmount) await controller.unmount(element);
       } catch (cause) {
         diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
-          cause, extension: extensionName, method: "unmount", selector
+          cause, extension: extensionName, method: UNMOUNT, selector
         });
       }
 
@@ -323,10 +389,9 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
           if (!elementController.hasMounts()) elementControllers.delete(element);
         }
         element.classList.toggle(AelluxJs.className("mounted"), isMounted(element));
-        restoreInitialAttributes(element);
       } catch (cause) {
         diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
-          cause, extension: extensionName, method: "unmount", selector
+          cause, extension: extensionName, method: UNMOUNT, selector
         });
       }
     } finally {
@@ -334,18 +399,29 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
       if (!tasks.size) pendingUnmounts.delete(element);
       finish();
     }
+    return !isMounted(element, mountId);
   }
 
   async function unmountElementRegistrations(element) {
-    const mountIds = Array.from(mountedElements.get(element) || []);
-    for (const mountId of mountIds) {
+    const registrations = Array.from(mountedElements.get(element) || [], mountId => {
       const separator = mountId.indexOf("@");
       const extensionName = mountId.slice(0, separator);
       const selector = mountId.slice(separator + 1);
       const mounter = mountMaps.get(toCamelCase(extensionName));
       const controller = mounter && mounter.get(selector);
+      return { element, mountId, controller, extensionName, selector };
+    });
+    registrations.sort(compareUnmountOrder);
+    for (const { mountId, controller, extensionName, selector } of registrations) {
       await unmountRegistration(element, mountId, controller, extensionName, selector);
     }
+  }
+
+  function compareUnmountOrder(left, right) {
+    const leftRecord = mountRecords.get(left.element)?.get(left.mountId);
+    const rightRecord = mountRecords.get(right.element)?.get(right.mountId);
+    return (rightRecord?.priority ?? 0) - (leftRecord?.priority ?? 0) ||
+      (rightRecord?.order ?? 0) - (leftRecord?.order ?? 0);
   }
 
   function beginPendingMount(element, mountId) {
@@ -404,44 +480,23 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
     return mountId ? mounts.has(mountId) : mounts.size > 0;
   }
 
-  function setMounted(element, mountId, mounted = true) {
+  function setMounted(element, mountId, mounted = true, priority = 0) {
     if (!mountedElements.has(element)) {
       mountedElements.set(element, new Set());
     }
     const mounts = mountedElements.get(element);
     mounts[mounted ? "add" : "delete"](mountId);
+    let records = mountRecords.get(element);
+    if (mounted) {
+      if (!records) {
+        records = new Map();
+        mountRecords.set(element, records);
+      }
+      records.set(mountId, { priority, order: mountOrder++ });
+    } else if (records) {
+      records.delete(mountId);
+      if (!records.size) mountRecords.delete(element);
+    }
     if (mounts.size === 0) mountedElements.delete(element);
-  }
-
-  function rememberInitialAttributes(element) {
-    const record = initialAttributeValues.get(element);
-    if (record) {
-      record.users++;
-      return;
-    }
-    const initial = new Map();
-    for (const attribute of element.attributes) {
-      if (isRestoredAttribute(attribute.name))
-        initial.set(attribute.name, attribute.value);
-    }
-    initialAttributeValues.set(element, { initial, users: 1 });
-  }
-
-  function restoreInitialAttributes(element) {
-    const record = initialAttributeValues.get(element);
-    if (!record || --record.users) return;
-    for (let index = element.attributes.length - 1; index >= 0; index--) {
-      const name = element.attributes[index].name;
-      if (isRestoredAttribute(name) && !record.initial.has(name))
-        element.removeAttribute(name);
-    }
-    for (const [name, value] of record.initial) {
-      if (element.getAttribute(name) !== value) element.setAttribute(name, value);
-    }
-    initialAttributeValues.delete(element);
-  }
-
-  function isRestoredAttribute(name) {
-    return name === "hidden" || name.startsWith("data-ae-") || name.startsWith("aria-");
   }
 }

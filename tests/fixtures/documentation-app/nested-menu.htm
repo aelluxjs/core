@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nested navigation scenario</title>
+  <link rel="stylesheet" href="../bootstrap-5.3.8.min.css">
+  <style>
+    /* Frozen layout and motion rules for the responsive navigation scenario. */
+    [data-ae-present] {
+      --ae-pop-aellux-ease: ease-out-circ;
+      --ae-unpop-aellux-ease: ease-in-cubic;
+    }
+    .navbar-collapse {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      height: calc(100% - 64px);
+      width: 250px;
+      overflow-x: clip;
+      overflow-y: auto;
+    }
+    #navbarSupportedContent {
+      --ae-from-transform: translateX(0);
+      --ae-pop-transform: translateX(0);
+      --ae-unpop-transform: translateX(0);
+      --ae-pop-duration: 0ms;
+      --ae-unpop-duration: 0ms;
+    }
+    @media (min-width: 768px) {
+      #navbarSupportedContent { transform: none !important; opacity: 1 !important; }
+    }
+    @media (max-width: 767.98px) {
+      .navbar-collapse { width: unset; right: 0; z-index: 1000; }
+      #navbarSupportedContent {
+        --ae-from-transform: translateX(100%);
+        --ae-unpop-transform: translateX(100%);
+        --ae-pop-duration: 250ms;
+        --ae-unpop-duration: 250ms;
+      }
+    }
+    .navbar-collapse .nav-item { padding: 0; cursor: pointer; }
+    .navbar-collapse .nav-link { display: flex; align-items: center; gap: 2px; }
+    .navbar-collapse .docs-menu-panel[data-ae-present] {
+      --ae-pop-duration: 350ms;
+      --ae-unpop-duration: 350ms;
+      --ae-pop-aellux-ease: ease-in-out-circ;
+      --ae-unpop-aellux-ease: ease-in-out-circ;
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar navbar-expand-md bg-white border-bottom" style="height:64px">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#home">Navigation scenario</a>
+      <button class="navbar-toggler" type="button" data-ae-trigger="toggle"
+        data-ae-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+        aria-expanded="false" aria-label="Toggle navigation">Menu</button>
+      <div class="navbar-collapse bg-white border-end d-md-block" id="navbarSupportedContent"
+        hidden data-ae-present="transform">
+        <nav class="h-100 w-100" style="overscroll-behavior:contain">
+          <div class="navbar-nav w-100 gap-1 p-2 flex-column">
+            <div class="d-flex flex-column" data-ae-present-group>
+              <div class="nav-item">
+                <button class="nav-link w-100 text-start p-2" type="button"
+                  data-ae-trigger="toggle" data-ae-target="#children-core-extensions">Core Extensions</button>
+              </div>
+              <div id="children-core-extensions" class="docs-menu-panel border-start ms-2"
+                data-ae-present="height opacity" data-ae-unpop-on-outside="false">
+                <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion data-ae-present-group>
+                  <div class="nav-item">
+                    <button class="nav-link w-100 text-start p-2" type="button"
+                      data-ae-trigger="toggle" data-ae-target="#children2-optional">Optional</button>
+                  </div>
+                  <div id="children2-optional" class="docs-menu-panel border-start ms-2"
+                    data-ae-present="height opacity" data-ae-unpop-on-outside="false">
+                    <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                      <a class="nav-link d-block p-2" href="#ajax">AJAX navigation</a>
+                      <a class="nav-link d-block p-2" href="#dialog">Dialog</a>
+                    </div>
+                  </div>
+                  <div class="nav-item">
+                    <button class="nav-link w-100 text-start p-2" type="button"
+                      data-ae-trigger="toggle" data-ae-target="#children2-bundled">Bundled</button>
+                  </div>
+                  <div id="children2-bundled" class="docs-menu-panel border-start ms-2"
+                    hidden data-ae-present="height opacity" data-ae-unpop-on-outside="false">
+                    <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                      <a class="nav-link d-block p-2" href="#anchor">Anchor</a>
+                      <a class="nav-link d-block p-2" href="#present">Present</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="nav-item">
+                <button class="nav-link w-100 text-start p-2" type="button"
+                  data-ae-trigger="toggle" data-ae-target="#children-runtime">Runtime</button>
+              </div>
+              <div id="children-runtime" class="docs-menu-panel border-start ms-2"
+                hidden data-ae-present="height opacity" data-ae-unpop-on-outside="false">
+                <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                  <a class="nav-link d-block p-2" href="#api">Runtime API</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </header>
+</body>
+</html>

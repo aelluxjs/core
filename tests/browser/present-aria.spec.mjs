@@ -1,5 +1,174 @@
 import { expect, test } from "@playwright/test";
 
+async function attachElementMemoryToStub(page) {
+  await page.evaluate(async () => {
+    const [{ createSaveElementMemoryHelper }, { createAriaHelper }] = await Promise.all([
+      import("/src/internal/create-save-element-memory-helper.js"),
+      import("/src/internal/create-aria-helper.js")
+    ]);
+    AelluxJs.persist = { element: createSaveElementMemoryHelper() };
+    AelluxJs.aria = createAriaHelper();
+    AelluxJs.onEvent = (target, event, handler) => target.addEventListener(event.replace(/^\$/, ""), handler);
+    AelluxJs.offEvent = (target, event, handler) => target.removeEventListener(event.replace(/^\$/, ""), handler);
+  });
+}
+
+for (const options of [
+  { name: "controlled", cssMotionController: true },
+  { name: "native", cssMotionController: false },
+  { name: "legacy", forceLegacy: true },
+  { name: "no motion", motion: "" }
+]) {
+  test(`present updates controls on acceptance and panel visibility on completion (${options.name})`, async ({ page }) => {
+    await page.goto("/tests/index.htm");
+    await page.evaluate(motion => {
+      document.body.innerHTML = `
+        <button id="trigger" data-ae-trigger="toggle" data-ae-target="#panel">Toggle</button>
+        <button id="dismiss" data-ae-dismiss="panel">Dismiss</button>
+        <button id="target" data-ae-target="panel">Target</button>
+        <div id="panel" data-ae-present="${motion}" hidden
+          style="--ae-pop-duration:120ms;--ae-unpop-duration:120ms">
+          <button id="inside" data-ae-dismiss>Close</button>
+        </div>`;
+    }, options.motion ?? "opacity");
+    await page.addScriptTag({ url: "/dist/aellux.js" });
+    await page.evaluate(options => AelluxJs.init({ mode: "full", ...options }), {
+      cssMotionController: options.cssMotionController ?? true,
+      forceLegacy: options.forceLegacy ?? false
+    });
+    await expect.poll(() => page.evaluate(() =>
+      typeof AelluxJs.mountManager?.controller("panel")?.present?.pop === "function"
+    )).toBe(true);
+    await page.evaluate(() => AelluxJs.mount(document, "present"));
+
+    const result = await page.evaluate(async () => {
+      const panel = document.getElementById("panel");
+      const controls = ["panel", "trigger", "dismiss", "target", "inside"]
+        .map(id => document.getElementById(id));
+      const expanded = () => controls.map(el => el.getAttribute("aria-expanded"));
+      const events = [];
+      for (const name of ["BeforePop", "Layout", "Popping", "Pop", "BeforeUnpop", "Unpopping", "Unpop"]) {
+        panel.addEventListener(`AelluxJs${name}`, () => {
+          events.push({ name, expanded: expanded(), hidden: panel.hidden });
+        });
+      }
+      const opening = $ae(panel).present.toggle(true);
+      const preparation = expanded();
+      await opening;
+      const closing = new Promise(resolve => panel.addEventListener("AelluxJsUnpop", resolve, { once: true }));
+      document.getElementById("dismiss").click();
+      await closing;
+      return { preparation, events };
+    });
+    const closed = Array(5).fill("false");
+    const opened = Array(5).fill("true");
+    const opening = ["false", "true", "true", "true", "true"];
+    const closing = ["true", "false", "false", "false", "false"];
+    expect(result.preparation).toEqual(opening);
+    expect(result.events).toEqual([
+      { name: "BeforePop", expanded: closed, hidden: true },
+      { name: "Layout", expanded: opening, hidden: false },
+      { name: "Popping", expanded: opening, hidden: false },
+      { name: "Pop", expanded: opened, hidden: false },
+      { name: "BeforeUnpop", expanded: opened, hidden: false },
+      { name: "Layout", expanded: closing, hidden: false },
+      { name: "Unpopping", expanded: closing, hidden: false },
+      { name: "Unpop", expanded: closed, hidden: true }
+    ]);
+  });
+}
+
+test("present keeps expanded state current through vetoes, reversals and newly mounted controls", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.body.innerHTML = `
+      <button id="trigger" data-ae-trigger="toggle" data-ae-target="panel">Toggle</button>
+      <div id="panel" data-ae-present="opacity" hidden
+        style="--ae-pop-duration:600ms;--ae-unpop-duration:600ms">Content</div>`;
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() =>
+    typeof AelluxJs.mountManager?.controller("panel")?.present?.pop === "function"
+  )).toBe(true);
+  await page.evaluate(() => AelluxJs.mount(document, "present"));
+
+  const result = await page.evaluate(async () => {
+    const panel = document.getElementById("panel");
+    const trigger = document.getElementById("trigger");
+    const controller = $ae(panel).present;
+    const state = () => [panel, trigger].map(el => el.getAttribute("aria-expanded"));
+    const completions = [];
+    panel.addEventListener("AelluxJsPop", () => completions.push("Pop"));
+    panel.addEventListener("AelluxJsUnpop", () => completions.push("Unpop"));
+    panel.addEventListener("AelluxJsBeforePop", event => event.preventDefault(), { once: true });
+    await controller.toggle(true);
+    const vetoedPop = { expanded: state(), hidden: panel.hidden };
+
+    const started = new Promise(resolve => panel.addEventListener("AelluxJsPopping", resolve, { once: true }));
+    const opening = controller.toggle(true);
+    await started;
+    panel.addEventListener("AelluxJsBeforeUnpop", event => event.preventDefault(), { once: true });
+    await controller.unpop();
+    const vetoedUnpop = state();
+
+    const closing = controller.unpop();
+    const reversing = { expanded: state(), hidden: panel.hidden };
+    document.body.insertAdjacentHTML("beforeend", '<button id="late" data-ae-trigger="toggle" data-ae-target="panel">Late</button>');
+    const late = document.getElementById("late");
+    await AelluxJs.mount(late, "present");
+    const mountedDuringClose = late.getAttribute("aria-expanded");
+    const reopening = controller.toggle(true);
+    const reopened = [...state(), late.getAttribute("aria-expanded")];
+    await Promise.all([opening, closing, reopening]);
+    return { vetoedPop, vetoedUnpop, reversing, mountedDuringClose, reopened, completions,
+      final: [...state(), late.getAttribute("aria-expanded")] };
+  });
+  expect(result).toEqual({
+    vetoedPop: { expanded: ["false", "false"], hidden: true },
+    vetoedUnpop: ["false", "true"],
+    reversing: { expanded: ["false", "false"], hidden: false },
+    mountedDuringClose: "false",
+    reopened: ["false", "true", "true"],
+    completions: ["Pop"],
+    final: ["true", "true", "true"]
+  });
+});
+
+test("present announces layout at transition start with its duration", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.body.innerHTML = `<div id="panel" data-ae-present="opacity" hidden
+      style="--ae-pop-duration:30ms;--ae-unpop-duration:40ms">
+      <div data-ae-present-motion></div>
+    </div>`;
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() =>
+    typeof AelluxJs.mountManager?.controller("panel")?.present?.pop === "function"
+  )).toBe(true);
+  expect(await page.locator("[data-ae-present-motion]").evaluate(element =>
+    getComputedStyle(element).getPropertyValue("--ae-pop-duration"))).toBe("0.03s");
+
+  const events = await page.evaluate(async () => {
+    const panel = document.getElementById("panel");
+    const received = [];
+    for (const name of ["Pop", "Unpop"])
+      panel.addEventListener(`AelluxJs${name}`, () => received.push(name));
+    document.body.addEventListener("AelluxJsLayout", event => {
+      received.push(`Layout:${event.target.id}:${event.detail.origin}:${event.detail.durationMs}`);
+    });
+    await $ae("panel").present.pop();
+    await $ae("panel").present.unpop();
+    return received;
+  });
+  expect(events).toEqual([
+    "Layout:panel:present.pop:30", "Pop",
+    "Layout:panel:present.unpop:40", "Unpop"
+  ]);
+});
+
 test("unpop restores previous focus only when hiding the active element", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
@@ -25,12 +194,21 @@ test("unpop restores previous focus only when hiding the active element", async 
   await page.locator("#inside").focus();
   await page.evaluate(() => {
     window.focusLostCount = 0;
-    AelluxJs.on("UnpopFocusLost", () => window.focusLostCount++);
+    window.focusLostDetails = [];
+    AelluxJs.on("UnpopFocusLost", event => {
+      window.focusLostCount++;
+      window.focusLostDetails.push({
+        element: event.detail.element.id,
+        focused: event.detail.focused.id
+      });
+    });
     AelluxJs.mountManager.controller("panel").present.unpop();
   });
   await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
   await expect.poll(() => page.evaluate(() => document.activeElement.id)).toBe("previous");
   expect(await page.evaluate(() => window.focusLostCount)).toBe(1);
+  expect(await page.evaluate(() => window.focusLostDetails))
+    .toEqual([{ element: "panel", focused: "inside" }]);
 
   await page.evaluate(() => AelluxJs.mountManager.controller("panel").present.pop());
   await expect(page.locator("#panel")).toHaveJSProperty("hidden", false);
@@ -105,8 +283,8 @@ test("present prepares will-change before starting a transition", async ({ page 
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
-  await expect(page.locator('link[data-ae-ext-style="present"]')).toHaveAttribute(
-    "href", /aellux\.ext\.present\.css$/
+  await expect(page.locator('link[data-ae-full-style]')).toHaveAttribute(
+    "href", /aellux\.full\.css$/
   );
   await expect.poll(() => page.evaluate(() =>
     typeof AelluxJs.mountManager?.controller("panel")?.present?.pop === "function"
@@ -191,7 +369,7 @@ test("replacement transitions reuse preparation and final interruptions clean it
   await page.evaluate(() => {
     document.body.innerHTML = `
       <div id="panel" data-ae-present="all" hidden
-        style="--ae-pop-duration: 500ms; --ae-unpop-duration: 120ms">
+        style="--ae-pop-duration: 1500ms; --ae-unpop-duration: 120ms">
         <div data-ae-present-motion></div>
       </div>`;
   });
@@ -258,7 +436,7 @@ test("replacement transitions reuse preparation and final interruptions clean it
   });
   expect(rapidReplacement).toEqual({
     willChange: true,
-    popping: true,
+    popping: false,
     unpopping: false
   });
   await page.evaluate(async () => {
@@ -288,6 +466,100 @@ test("replacement transitions reuse preparation and final interruptions clean it
   });
 });
 
+test("direct pop restarts from hidden during either transition and when already visible", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  // This case builds its own stub inside evaluate rather than using the shared helper.
+  const result = await page.evaluate(async () => {
+    const [{ createSaveElementMemoryHelper }, { createAriaHelper }] = await Promise.all([
+      import("/src/internal/create-save-element-memory-helper.js"),
+      import("/src/internal/create-aria-helper.js")
+    ]);
+    document.body.innerHTML = `
+      <div id="panel" data-ae-present="opacity" hidden
+        style="--ae-pop-duration: 80ms; --ae-unpop-duration: 80ms"></div>`;
+    const events = [];
+    window.AelluxJs = {
+      registerCssProperty: () => true,
+      persist: { element: createSaveElementMemoryHelper() },
+      aria: createAriaHelper(),
+      on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
+      off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
+      onEvent: (target, event, handler) => target.addEventListener(event.replace(/^\$/, ""), handler),
+      offEvent: (target, event, handler) => target.removeEventListener(event.replace(/^\$/, ""), handler),
+      attr: name => `data-ae-${name}`,
+      className: name => `ae-${name}`,
+      diagnostics: {
+        WARN_INTERRUPTION: { code: 2002 },
+        create: () => ({ code: 2002 }),
+        warn() {}, error() {}, info() {}
+      },
+      mountManager: {
+        add: ({ selector, mount }) => { (window.mountEntries ||= new Map()).set(selector, mount); },
+        remove() {}
+      },
+      extAttach: (_name, extension) => { window.presentExtension = extension; },
+      dispatchFrom: (_element, event) => { events.push(event); return true; }
+    };
+    await new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "/dist/aellux.ext.present.js";
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.append(script);
+    });
+    const extension = window.presentExtension;
+    extension.init();
+    const panel = document.querySelector("#panel");
+    window.mountEntries.get("[data-ae-present]")(panel);
+
+    const hiddenSnapshots = [];
+    const hiddenProperty = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "hidden");
+    Object.defineProperty(panel, "hidden", {
+      configurable: true,
+      get() { return hiddenProperty.get.call(this); },
+      set(value) {
+        hiddenProperty.set.call(this, value);
+        if (value) hiddenSnapshots.push([...this.classList]);
+      }
+    });
+    const waitFor = async event => {
+      while (!events.includes(event)) await new Promise(resolve => setTimeout(resolve, 5));
+      events.splice(events.indexOf(event), 1);
+    };
+
+    const first = extension.pop(panel);
+    await waitFor("Popping");
+    const restarted = extension.pop(panel);
+    await Promise.all([first, restarted]);
+
+    const closing = extension.unpop(panel);
+    await waitFor("Unpopping");
+    const reversed = extension.pop(panel);
+    await Promise.all([closing, reversed]);
+
+    const visibleRestart = extension.pop(panel);
+    await visibleRestart;
+    const beforeToggle = hiddenSnapshots.length;
+    await extension.toggle(panel, true);
+
+    return {
+      hiddenSnapshots,
+      beforeToggle,
+      hidden: panel.hidden,
+      expanded: panel.getAttribute("aria-expanded"),
+      popEvents: events.filter(event => event === "Pop").length
+    };
+  });
+  expect(result.hiddenSnapshots).toHaveLength(3);
+  for (const classes of result.hiddenSnapshots) {
+    expect(classes).not.toContain("ae-pop");
+    expect(classes).not.toContain("ae-popping");
+    expect(classes).not.toContain("ae-unpopping");
+    expect(classes).not.toContain("ae-will-change");
+  }
+  expect(result).toMatchObject({ beforeToggle: 3, hidden: false, expanded: "true", popEvents: 3 });
+});
+
 test("present disables transitions when reduced motion is active", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
@@ -295,8 +567,8 @@ test("present disables transitions when reduced motion is active", async ({ page
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
-  await expect(page.locator('link[data-ae-ext-style="present"]')).toHaveAttribute(
-    "href", /aellux\.ext\.present\.css$/
+  await expect(page.locator('link[data-ae-full-style]')).toHaveAttribute(
+    "href", /aellux\.full\.css$/
   );
   await page.evaluate(() => {
     document.documentElement.setAttribute("data-ae-reduced-motion", "reduced");
@@ -432,29 +704,37 @@ test("present attribute tokens independently select transition properties", asyn
     .toBe("opacity, transform, grid-template-columns, grid-template-rows");
 });
 
-test("present derives stepped easing from duration on low hardware", async ({ page }) => {
+test("present preserves easing without step variables when a low-hardware marker exists", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     document.documentElement.setAttribute("data-ae-low-hardware", "");
     document.body.innerHTML = `
       <div id="panel" data-ae-present="all" hidden
-        style="--ae-pop-duration: 500ms"><div data-ae-present-motion></div></div>`;
+        style="--ae-pop-duration: 500ms; --ae-pop-ease: ease-out; --ae-unpop-ease: ease-in"><div data-ae-present-motion></div></div>`;
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
   await expect.poll(() => page.evaluate(() =>
     typeof AelluxJs.mountManager?.controller("panel")?.present?.pop === "function"
   )).toBe(true);
-  await page.evaluate(() => AelluxJs.mountManager.controller("panel").present.pop());
-  await expect.poll(() => page.evaluate(() => {
+  const states = await page.evaluate(async () => {
     const panel = document.getElementById("panel");
-    const style = getComputedStyle(panel);
-    return {
-      steps: style.getPropertyValue("--ae-pop-low-steps").trim(),
-      easing: style.getPropertyValue("--ae-pop-ease").trim(),
-      inlineSteps: panel.style.getPropertyValue("--ae-pop-low-steps").trim()
-    };
-  })).toEqual({ steps: "8", easing: "steps(8)", inlineSteps: "8" });
+    const states = [];
+    for (const direction of ["pop", "unpop"]) {
+      await AelluxJs.mountManager.controller(panel).present[direction]();
+      const style = getComputedStyle(panel);
+      states.push({
+        easing: style.getPropertyValue(`--ae-${direction}-ease`).trim(),
+        steps: style.getPropertyValue(`--ae-${direction}-low-steps`).trim(),
+        inlineSteps: panel.style.getPropertyValue(`--ae-${direction}-low-steps`).trim()
+      });
+    }
+    return states;
+  });
+  expect(states).toEqual([
+    { easing: "ease-out", steps: "", inlineSteps: "" },
+    { easing: "ease-in", steps: "", inlineSteps: "" }
+  ]);
 });
 
 test("controller lookup diagnoses invalid inputs and unmounted elements", async ({ page }) => {
@@ -656,11 +936,11 @@ test("present restores initial attributes and captures fresh values on remount",
   });
 });
 
-test("present warns and generates a missing direct motion child", async ({ page }) => {
+test("present keeps content in place and reports measured layout without a motion child", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     document.body.innerHTML = `
-      <div id="missing" data-ae-present data-ae-present-motion hidden>
+      <div id="missing" data-ae-present="height width" data-ae-present-motion hidden>
         <button id="missing-control">Control</button>
       </div>
       <div id="valid" data-ae-present hidden>
@@ -679,13 +959,13 @@ test("present warns and generates a missing direct motion child", async ({ page 
     const motion = document.getElementById("motion");
     const mounted = {
       missingMarker: missing.getAttribute("data-ae-present-motion"),
-      generatedWrapper: missing.querySelector(":scope > [data-ae-present-motion]")?.tagName,
+      generatedWrapper: missing.querySelector(":scope > [data-ae-present-motion]")?.tagName || null,
       controlParentHasMotion: document.getElementById("missing-control").parentElement.hasAttribute("data-ae-present-motion"),
       existingMotionPreserved: document.querySelector("#valid > [data-ae-present-motion]") === motion,
       missingHidden: missing.hidden
     };
     const diagnostics = AelluxJs.diagnostics.showHistory()
-      .filter(entry => entry.code === 2010)
+      .filter(entry => entry.code === 3001)
       .map(entry => ({ code: entry.code, level: entry.level, element: entry.context.element.id }));
     await AelluxJs.unmount(document, "present");
     const restored = {
@@ -699,18 +979,134 @@ test("present warns and generates a missing direct motion child", async ({ page 
   expect(result).toEqual({
     mounted: {
       missingMarker: null,
-      generatedWrapper: "DIV",
-      controlParentHasMotion: true,
+      generatedWrapper: null,
+      controlParentHasMotion: false,
       existingMotionPreserved: true,
       missingHidden: true
     },
-    diagnostics: [{ code: 2010, level: 1, element: "missing" }],
+    diagnostics: [{ code: 3001, level: 2, element: "missing" }],
     restored: {
       missingMarker: "",
       generatedWrapper: null,
       controlParent: "missing",
       existingMotionPreserved: true
     }
+  });
+});
+
+test("present measures natural and explicit sizes without a motion child and restores inline maximums", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.body.innerHTML = `
+      <style>#fixed { width: 140px; height: 90px; }</style>
+      <div id="natural" data-ae-present="height width" hidden
+        style="display: inline-block; --ae-pop-duration: 40ms; --ae-unpop-duration: 40ms">
+        <div id="natural-content" style="width: 120px; height: 48px">Content</div>
+      </div>
+      <div id="fixed" data-ae-present="height width" hidden
+        style="max-height: 300px; max-width: 250px;
+          --ae-pop-duration: 40ms; --ae-unpop-duration: 40ms">Content</div>`;
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() =>
+    typeof AelluxJs.mountManager?.controller("fixed")?.present?.pop === "function"
+  )).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    const natural = document.getElementById("natural");
+    const fixed = document.getElementById("fixed");
+    const states = {};
+    for (const element of [natural, fixed]) {
+      states[element.id] = {};
+      element.addEventListener("AelluxJsPopping", () => {
+        states[element.id].opening = [element.style.maxHeight, element.style.maxWidth];
+      });
+      element.addEventListener("AelluxJsUnpopping", () => {
+        states[element.id].closing = [element.style.maxHeight, element.style.maxWidth];
+      });
+    }
+    await Promise.all([AelluxJs.ext.present.pop(natural), AelluxJs.ext.present.pop(fixed)]);
+    const opened = {
+      naturalHidden: natural.hidden,
+      naturalWrapper: natural.querySelector(":scope > [data-ae-present-motion]"),
+      naturalContentParent: document.getElementById("natural-content").parentElement.id,
+      naturalMaximums: [natural.style.maxHeight, natural.style.maxWidth],
+      fixedMaximums: [fixed.style.maxHeight, fixed.style.maxWidth],
+      measuredProperties: getComputedStyle(natural).transitionProperty
+    };
+    await Promise.all([AelluxJs.ext.present.unpop(natural), AelluxJs.ext.present.unpop(fixed)]);
+    return {
+      states,
+      opened,
+      closed: {
+        naturalHidden: natural.hidden,
+        fixedHidden: fixed.hidden,
+        naturalMaximums: [natural.style.maxHeight, natural.style.maxWidth],
+        fixedMaximums: [fixed.style.maxHeight, fixed.style.maxWidth]
+      }
+    };
+  });
+
+  expect(result.states.natural.opening.map(parseFloat)).toEqual([48, 120]);
+  expect(result.states.fixed.opening.map(parseFloat)).toEqual([90, 140]);
+  expect(result.states.natural.closing).toEqual(["0px", "0px"]);
+  expect(result.states.fixed.closing).toEqual(["0px", "0px"]);
+  expect(result.opened).toEqual({
+    naturalHidden: false,
+    naturalWrapper: null,
+    naturalContentParent: "natural",
+    naturalMaximums: ["", ""],
+    fixedMaximums: ["300px", "250px"],
+    measuredProperties: "opacity, transform, max-height, max-width"
+  });
+  expect(result.closed).toEqual({
+    naturalHidden: true,
+    fixedHidden: true,
+    naturalMaximums: ["", ""],
+    fixedMaximums: ["300px", "250px"]
+  });
+});
+
+test("present restores measured styles after a reversed transition", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.evaluate(() => {
+    document.body.innerHTML = `<div id="panel" data-ae-present="height width" hidden
+      style="width: 140px; height: 90px; max-height: 300px; max-width: 250px;
+        --ae-pop-duration: 200ms; --ae-unpop-duration: 40ms">Content</div>`;
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() =>
+    typeof AelluxJs.mountManager?.controller("panel")?.present?.pop === "function"
+  )).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    const panel = document.getElementById("panel");
+    let started;
+    const popping = new Promise(resolve => { started = resolve; });
+    panel.addEventListener("AelluxJsPopping", started, { once: true });
+    const first = AelluxJs.ext.present.pop(panel);
+    await popping;
+    await new Promise(resolve => setTimeout(resolve, 25));
+    const second = AelluxJs.ext.present.unpop(panel);
+    await Promise.all([first, second]);
+    const afterReverse = {
+      hidden: panel.hidden,
+      maximums: [panel.style.maxHeight, panel.style.maxWidth]
+    };
+    await AelluxJs.ext.present.pop(panel);
+    return {
+      afterReverse,
+      reopened: !panel.hidden,
+      maximums: [panel.style.maxHeight, panel.style.maxWidth]
+    };
+  });
+
+  expect(result).toEqual({
+    afterReverse: { hidden: true, maximums: ["300px", "250px"] },
+    reopened: true,
+    maximums: ["300px", "250px"]
   });
 });
 
@@ -723,9 +1119,11 @@ test("present reports invalid target IDs without throwing from click", async ({ 
     const reports = [];
     window.selectorReports = reports;
     window.AelluxJs = {
+      registerCssProperty: () => true,
+      on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
+      off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
       attr: name => `data-ae-${name}`,
       className: name => `ae-${name}`,
-      attrMem: { save() {}, restore() {} },
       diagnostics: {
         ERROR_EXTENSION_SELECTOR: { code: 1107 },
         error: (definition, context) => reports.push({ code: definition.code, selector: context.selector })
@@ -740,7 +1138,8 @@ test("present reports invalid target IDs without throwing from click", async ({ 
       dispatchFrom: () => true
     };
   });
-  await page.addScriptTag({ url: "/src/aellux.ext.present.js" });
+  await page.addScriptTag({ url: "/dist/aellux.ext.present.js" });
+  await attachElementMemoryToStub(page);
   const reports = await page.evaluate(() => {
     const extension = window.presentExtension;
     extension.init();
@@ -759,12 +1158,13 @@ test("present reports invalid target IDs without throwing from click", async ({ 
 test("present restores a trigger without targets and can mount it again", async ({ page }) => {
   await page.goto("/tests/index.htm");
   const result = await page.evaluate(async () => {
-    const { saveAttr, restoreAttr } = await import("/src/internal/build-initial-attr-memory.js");
     document.body.innerHTML = '<button id="control" data-ae-trigger="toggle" data-ae-target="#later"></button>';
     window.AelluxJs = {
+      registerCssProperty: () => true,
+      on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
+      off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
       attr: name => `data-ae-${name}`,
       className: name => `ae-${name}`,
-      attrMem: { save: saveAttr, restore: restoreAttr },
       mountManager: {
         add: ({ selector, mount, unmount, update, controllers }) => {
           (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
@@ -777,7 +1177,8 @@ test("present restores a trigger without targets and can mount it again", async 
     return true;
   });
   expect(result).toBe(true);
-  await page.addScriptTag({ url: "/src/aellux.ext.present.js" });
+  await page.addScriptTag({ url: "/dist/aellux.ext.present.js" });
+  await attachElementMemoryToStub(page);
   const state = await page.evaluate(() => {
     const extension = window.presentExtension;
     extension.init();
@@ -807,19 +1208,20 @@ test("present restores a trigger without targets and can mount it again", async 
   expect(state.afterRemount).toEqual({ expanded: "false", controls: "later" });
 });
 
-test("present records interrupted transitions as warnings and failures as errors", async ({ page }) => {
+test("present ignores expected cancellation, reports unexpected interruptions and preserves real errors", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(async () => {
-    const [{ buildDiagnostics }, { createAelluxConstants }, { saveAttr, restoreAttr }] = await Promise.all([
+    const [{ buildDiagnostics }, { createAelluxConstants }] = await Promise.all([
       import("/src/internal/build-diagnostics.js"),
-      import("/src/internal/create-aellux-constants.js"),
-      import("/src/internal/build-initial-attr-memory.js")
+      import("/src/internal/create-aellux-constants.js")
     ]);
     document.body.innerHTML = '<div id="panel" data-ae-present hidden style="--ae-pop-duration: 100ms; --ae-unpop-duration: 0ms"><div data-ae-present-motion></div></div>';
     window.AelluxJs = {
+      registerCssProperty: () => true,
+      on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
+      off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
       attr: name => `data-ae-${name}`,
       className: name => `ae-${name}`,
-      attrMem: { save: saveAttr, restore: restoreAttr },
       diagnostics: buildDiagnostics(createAelluxConstants().AELLUXJS_DIAGNOSTICS),
       mountManager: {
         add: ({ selector, mount, unmount, update, controllers }) => {
@@ -829,12 +1231,15 @@ test("present records interrupted transitions as warnings and failures as errors
       },
       extAttach: (_name, extension) => { window.presentExtension = extension; },
       dispatchFrom: (_element, event) => {
+        if (window.failPopping === "interruption" && event === "Popping")
+          throw AelluxJs.diagnostics.create(AelluxJs.diagnostics.WARN_INTERRUPTION);
         if (window.failPopping && event === "Popping") throw new Error("transition probe");
         return true;
       }
     };
   });
-  await page.addScriptTag({ url: "/src/aellux.ext.present.js" });
+  await page.addScriptTag({ url: "/dist/aellux.ext.present.js" });
+  await attachElementMemoryToStub(page);
   const entries = await page.evaluate(async () => {
     const extension = window.presentExtension;
     extension.init();
@@ -844,11 +1249,15 @@ test("present records interrupted transitions as warnings and failures as errors
     extension.pop(panel);
     extension.unpop(panel);
     await new Promise(resolve => setTimeout(resolve, 130));
+    window.expectedCancellationHistory = AelluxJs.diagnostics.showHistory().length;
+    window.failPopping = "interruption";
+    await extension.pop(panel);
     window.failPopping = true;
-    extension.pop(panel);
+    await extension.pop(panel);
     await new Promise(resolve => setTimeout(resolve, 130));
     return AelluxJs.diagnostics.showHistory().map(entry => ({ code: entry.code, level: entry.level }));
   });
+  expect(await page.evaluate(() => window.expectedCancellationHistory)).toBe(0);
   expect(entries).toEqual([
     { code: 2002, level: 1 },
     { code: 1109, level: 0 }
@@ -858,31 +1267,37 @@ test("present records interrupted transitions as warnings and failures as errors
 test("present reports a transition callback failure with its own diagnostic", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(async () => {
-    const [{ buildDiagnostics }, { createAelluxConstants }, { saveAttr, restoreAttr }] = await Promise.all([
+    const [{ buildDiagnostics }, { createAelluxConstants }] = await Promise.all([
       import("/src/internal/build-diagnostics.js"),
-      import("/src/internal/create-aellux-constants.js"),
-      import("/src/internal/build-initial-attr-memory.js")
+      import("/src/internal/create-aellux-constants.js")
     ]);
     document.body.innerHTML = `
       <button id="control" data-ae-trigger="pop" data-ae-target="#panel"></button>
       <div id="panel" data-ae-present hidden><div data-ae-present-motion></div></div>
     `;
     window.AelluxJs = {
+      registerCssProperty: () => true,
+      on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
+      off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
       attr: name => `data-ae-${name}`,
       className: name => `ae-${name}`,
-      attrMem: { save: saveAttr, restore: restoreAttr },
       diagnostics: buildDiagnostics(createAelluxConstants().AELLUXJS_DIAGNOSTICS),
+      ext: {},
       mountManager: {
         add: ({ selector, mount, unmount, update, controllers }) => {
           (window.mountEntries ||= new Map()).set(selector, { mount, unmount, update, controllers });
         },
         remove: () => window.mountEntries?.clear()
       },
-      extAttach: (_name, extension) => { window.presentExtension = extension; },
+      extAttach: (name, extension) => {
+        window.presentExtension = extension;
+        window.AelluxJs.ext[name] = extension;
+      },
       dispatchFrom: () => { throw new Error("callback probe"); }
     };
   });
-  await page.addScriptTag({ url: "/src/aellux.ext.present.js" });
+  await page.addScriptTag({ url: "/dist/aellux.ext.present.js" });
+  await attachElementMemoryToStub(page);
   const codes = await page.evaluate(() => {
     const extension = window.presentExtension;
     extension.init();

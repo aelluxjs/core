@@ -1,6 +1,7 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 import { build } from "esbuild";
+import { minify as minifyWithTerser } from "terser";
 import { createHash } from "node:crypto";
 import { transformAsync } from "@babel/core";
 import presetEnv from "@babel/preset-env";
@@ -10,6 +11,15 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { createContext, runInContext } from "node:vm";
 import { generateAdaptiveCSS } from "../src/aellux.ext.adaptive.css.js";
 import { generatePresentCSS } from "../src/aellux.ext.present.css.js";
+import { generateFeedbackCSS } from "../src/aellux.ext.feedback.css.js";
+import { generateScrollboxCSS } from "../src/aellux.ext.scrollbox.css.js";
+import { generateAnchorCSS } from "../src/aellux.ext.anchor.css.js";
+import { generateOverflowMarqueeCSS } from "../src/aellux.ext.overflow-marquee.css.js";
+import { generateFullCSS } from "../src/aellux.full.css.js";
+import { officialExtensionDefinitions } from "../src/official-extension-definitions.js";
+import { createOfficialExtensionManifest } from "./extension-manifest.mjs";
+import { normalizeSourceMapText } from "./normalize-source-map.mjs";
+import { buildEditorData } from "./build-editor-data.mjs";
 
 const projectRoot = fileURLToPath(new URL("../", import.meta.url));
 const sourceDirectory = join(projectRoot, "src");
@@ -17,15 +27,22 @@ const outputDirectory = join(projectRoot, "dist");
 const sourceFiles = [];
 
 for (const entry of await readdir(sourceDirectory, { withFileTypes: true })) {
-  if (entry.isFile() && entry.name.endsWith(".js") && !entry.name.endsWith(".css.js")) {
+  if (entry.isFile() && entry.name.endsWith(".js") && !entry.name.endsWith(".css.js") &&
+    entry.name !== "official-extension-definitions.js") {
     sourceFiles.push(join(sourceDirectory, entry.name));
   }
 }
 
 const generatedFiles = new Set();
+const packageMetadata = JSON.parse(await readFile(join(projectRoot, "package.json"), "utf8"));
+const packageVersion = packageMetadata.version;
+const versionDefine = { __AELLUX_VERSION__: JSON.stringify(packageVersion) };
 const legacyThirdPartyBanner =
   "/*! Includes Babel helpers, core-js, custom-event-polyfill, raf, performance-now and whatwg-fetch (MIT). " +
   "Copyright and license texts: third-party/licenses/ in this distribution. */";
+const dialogThirdPartyBanner =
+  "/*! Includes dialog-polyfill (BSD-3-Clause). Copyright and license text: " +
+  "third-party/licenses/dialog-polyfill.LICENSE in this distribution. */";
 const legacySourceFiles = sourceFiles.filter(sourceFile => {
   const filename = basename(sourceFile);
   return filename === "aellux.orchestrator.js" ||
@@ -76,7 +93,7 @@ const bootstrapEvaluationBuild = await build({
   target: "es2017",
   write: false,
   legalComments: "none",
-  define: { __AELLUX_CORE_ASSET_INTEGRITY__: "{}" }
+  define: { ...versionDefine, __AELLUX_CORE_ASSET_INTEGRITY__: "{}" }
 });
 runInContext(bootstrapEvaluationBuild.outputFiles[0].text, bootstrapContext);
 runInContext('AelluxJs.ext("adaptive")', bootstrapContext);
@@ -89,6 +106,23 @@ await buildGeneratedStylesheet(
   "aellux.ext.present.css",
   generatePresentCSS(bootstrapContext.AelluxJs)
 );
+await buildGeneratedStylesheet(
+  "aellux.ext.feedback.css",
+  generateFeedbackCSS(bootstrapContext.AelluxJs)
+);
+await buildGeneratedStylesheet(
+  "aellux.ext.scrollbox.css",
+  generateScrollboxCSS(bootstrapContext.AelluxJs)
+);
+await buildGeneratedStylesheet(
+  "aellux.ext.anchor.css",
+  generateAnchorCSS(bootstrapContext.AelluxJs)
+);
+await buildGeneratedStylesheet(
+  "aellux.ext.overflow-marquee.css",
+  generateOverflowMarqueeCSS(bootstrapContext.AelluxJs)
+);
+await buildGeneratedStylesheet("aellux.full.css", generateFullCSS(bootstrapContext.AelluxJs));
 
 async function buildGeneratedStylesheet(filename, contents) {
   const outputPath = join(outputDirectory, filename);
@@ -111,6 +145,8 @@ for (const sourceFile of sourceFiles) {
   if (classic) continue;
   const moduleEntry = filename === "aellux.esm.js";
   const full = filename === "aellux.full.js";
+  // aellux.pwa.sw.js is discovered as an independent classic entry, never an
+  // Extension dependency or Full import. It has no Legacy/DOM runtime variant.
   const distributionFilename = full ? "aellux.full.js" : filename;
 
   for (const minify of [false, true]) {
@@ -126,6 +162,7 @@ for (const sourceFile of sourceFiles) {
       minify,
       sourcemap: true,
       legalComments: "inline"
+      ,define: versionDefine
     });
     generatedFiles.add(outputFilename);
     generatedFiles.add(outputFilename + ".map");
@@ -137,7 +174,8 @@ for (const sourceFile of legacySourceFiles) {
   const distributionFilename = filename.replace(/\.js$/, ".legacy.js");
   const sourceFileName = relative(projectRoot, sourceFile).replace(/\\/g, "/");
   const isOrchestrator = filename === "aellux.orchestrator.js";
-  const transformed = isOrchestrator
+  const isDialog = filename === "aellux.ext.dialog.js";
+  const transformed = isOrchestrator || isDialog
     ? null
     : await transpileLegacySource(sourceFile, sourceFileName);
 
@@ -148,12 +186,13 @@ for (const sourceFile of legacySourceFiles) {
     await build({
       absWorkingDir: projectRoot,
       stdin: {
-        contents: isOrchestrator ? legacyOrchestratorEntry : transformed.code,
+        contents: isOrchestrator ? legacyOrchestratorEntry : isDialog
+          ? 'require("./src/internal/dialog.legacy.entry.js");' : transformed.code,
         loader: "js",
-        resolveDir: isOrchestrator ? projectRoot : sourceDirectory,
+        resolveDir: isOrchestrator || isDialog ? projectRoot : sourceDirectory,
         sourcefile: isOrchestrator
           ? "aellux.orchestrator.legacy.entry.js"
-          : sourceFileName
+          : isDialog ? "aellux.ext.dialog.legacy.entry.js" : sourceFileName
       },
       outfile: join(outputDirectory, outputFilename),
       bundle: true,
@@ -164,7 +203,9 @@ for (const sourceFile of legacySourceFiles) {
       sourcemap: true,
       legalComments: "inline",
       ...(isOrchestrator ? { banner: { js: legacyThirdPartyBanner } } : {}),
+      ...(isDialog ? { banner: { js: dialogThirdPartyBanner }, loader: { ".css": "text" } } : {}),
       plugins: [legacyBundlePlugin()]
+      ,define: versionDefine
     });
     generatedFiles.add(outputFilename);
     generatedFiles.add(outputFilename + ".map");
@@ -193,21 +234,74 @@ for (const minify of [false, true]) {
     legalComments: "inline",
     banner: { js: legacyThirdPartyBanner },
     plugins: [legacyBundlePlugin()]
+    ,define: versionDefine
   });
   generatedFiles.add(outputFilename);
   generatedFiles.add(outputFilename + ".map");
 }
 
+// Terser performs deeper compression than esbuild on the already bundled code.
+// Run it before computing integrity hashes so the boot script uses final bytes.
+for (const filename of generatedFiles) {
+  if (filename.endsWith(".min.js")) await compressJavaScript(filename);
+}
+
+async function compressJavaScript(filename) {
+  const outputPath = join(outputDirectory, filename);
+  const originalCode = await readFile(outputPath, "utf8");
+  const originalMap = await readFile(outputPath + ".map", "utf8");
+  const legacy = filename.includes(".legacy.") || filename === "aellux.min.js";
+  const result = await minifyWithTerser({ [filename]: originalCode }, {
+    ecma: legacy ? 5 : 2017,
+    compress: { passes: 1 },
+    mangle: true,
+    format: { comments: /^!/ },
+    sourceMap: { content: originalMap, url: filename + ".map" }
+  });
+  if (!result.code || !result.map) throw new Error(`Terser failed: ${filename}`);
+  // Keep esbuild's output if Terser does not actually reduce the file.
+  if (Buffer.byteLength(result.code) < Buffer.byteLength(originalCode)) {
+    await writeFile(outputPath, result.code, "utf8");
+    await writeFile(outputPath + ".map", result.map, "utf8");
+  }
+}
+
 // Hash the final bytes, then embed the map in the boot script that loads them.
 // The boot script cannot contain its own hash.
-const coreAssetIntegrity = {};
+const coreAssetIntegrity = { regular: {}, minified: {} };
 for (const filename of generatedFiles) {
   if (!/\.(?:js|css)$/.test(filename)) continue;
   const content = await readFile(join(outputDirectory, filename));
-  coreAssetIntegrity[filename] = "sha384-" +
+  const variant = /\.min\.(?:js|css)$/.test(filename) ? "minified" : "regular";
+  coreAssetIntegrity[variant][filename] = "sha384-" +
     createHash("sha384").update(content).digest("base64");
 }
 
+const extensionManifestResult = createOfficialExtensionManifest({
+  version: packageVersion,
+  definitions: officialExtensionDefinitions,
+  integrity: coreAssetIntegrity,
+  cdnBase: process.env.AELLUX_OFFICIAL_CDN_BASE || ""
+});
+await writeFile(
+  join(outputDirectory, "aellux.extensions.min.json"),
+  JSON.stringify(extensionManifestResult.manifest),
+  "utf8"
+);
+await writeFile(
+  join(outputDirectory, "aellux.extensions.report.json"),
+  JSON.stringify({
+    schemaVersion: 1,
+    coreVersion: packageVersion,
+    status: "valid",
+    extensions: extensionManifestResult.report
+  }, null, 2) + "\n",
+  "utf8"
+);
+
+// Only the boot script embeds the signed official index. Full reuses it, so
+// the Full artifacts already built and hashed above need no second build.
+const embeddedManifestDefine = JSON.stringify(extensionManifestResult.manifest);
 for (const minify of [false, true]) {
   const outputFilename = minify ? "aellux.min.js" : "aellux.js";
   await build({
@@ -222,11 +316,15 @@ for (const minify of [false, true]) {
     sourcemap: true,
     legalComments: "inline",
     define: {
-      __AELLUX_CORE_ASSET_INTEGRITY__: JSON.stringify(coreAssetIntegrity)
+      ...versionDefine,
+      __AELLUX_OFFICIAL_EXTENSION_MANIFEST__: embeddedManifestDefine,
+      __AELLUX_CORE_ASSET_INTEGRITY__: JSON.stringify(
+        coreAssetIntegrity[minify ? "minified" : "regular"])
     }
   });
   generatedFiles.add(outputFilename);
   generatedFiles.add(outputFilename + ".map");
+  if (minify) await compressJavaScript(outputFilename);
 }
 
 // Source maps embed the original source text. Normalize its line endings so
@@ -235,15 +333,7 @@ for (const filename of generatedFiles) {
   if (!filename.endsWith(".map")) continue;
   const mapPath = join(outputDirectory, filename);
   const mapText = await readFile(mapPath, "utf8");
-  const map = JSON.parse(mapText);
-  if (!Array.isArray(map.sourcesContent) || !/^  "sourcesContent": .*,$/m.test(mapText)) {
-    throw new Error(`Unexpected source map format: ${filename}`);
-  }
-  const sourcesContent = map.sourcesContent.map(source => source.replace(/\r\n?/g, "\n"));
-  const normalizedText = mapText.replace(
-    /^  "sourcesContent": .*,$/m,
-    `  "sourcesContent": ${JSON.stringify(sourcesContent)},`
-  );
+  const normalizedText = normalizeSourceMapText(mapText, filename);
   if (normalizedText !== mapText) await writeFile(mapPath, normalizedText, "utf8");
 }
 
@@ -308,6 +398,7 @@ await writeFile(join(outputDirectory, "README.md"), distributionReadme, "utf8");
 await copyFile(join(projectRoot, "LICENSE"), join(outputDirectory, "LICENSE"));
 await copyFile(join(projectRoot, "THIRD_PARTY_LICENSES.md"), join(outputDirectory, "THIRD_PARTY_LICENSES.md"));
 await cp(join(projectRoot, "third-party", "licenses"), join(outputDirectory, "third-party", "licenses"), { recursive: true });
+await buildEditorData();
 const generatedJavaScriptFiles = Array.from(generatedFiles)
   .filter(filename => filename.endsWith(".js")).length;
 console.log(`Build complete: ${generatedJavaScriptFiles} JavaScript files and source maps in dist/.`);

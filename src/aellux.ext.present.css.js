@@ -3,19 +3,22 @@
 export function generatePresentCSS(AelluxJs) {
   const presentAttribute = AelluxJs.attr("present");
   const motionAttribute = AelluxJs.attr("present-motion");
+  const anchorAttribute = AelluxJs.attr("anchor");
   const reducedMotionAttribute = AelluxJs.attr("reduced-motion");
-  const lowHardwareAttribute = AelluxJs.attr("low-hardware");
   const motion = `[${motionAttribute}]`;
   const present = `[${presentAttribute}]`;
   const presentWithoutMotion = `[${presentAttribute}=""]`;
   const presentOpacity = `[${presentAttribute}~="opacity"]`;
-  const presentTransform = `[${presentAttribute}~="transform"]`;
+  const presentTransform = `[${presentAttribute}~="transform"]:not([${anchorAttribute}])`;
   const presentHeight = `[${presentAttribute}~="height"]`;
   const presentWidth = `[${presentAttribute}~="width"]`;
   const pop = AelluxJs.className("pop");
   const popping = AelluxJs.className("popping");
   const unpopping = AelluxJs.className("unpopping");
   const willChange = AelluxJs.className("will-change");
+  const grid = AelluxJs.className("present-grid");
+  const gridPresent = `${present}.${grid}`;
+  const measuredPresent = `${present}:not(.${grid})`;
 
   return `/*! aellux.js Present Extension | SPDX-License-Identifier: Apache-2.0 */
 
@@ -34,13 +37,20 @@ ${present} {
   --ae-unpop-width: 0fr;
   --ae-pop-ease: ease-out;
   --ae-unpop-ease: ease-in;
-  --ae-pop-duration: 250ms;
-  --ae-unpop-duration: 250ms;
-  --ae-pop-low-steps: 4;
-  --ae-unpop-low-steps: 4;
+  --ae-pop-duration: 300ms;
+  --ae-unpop-duration: 150ms;
 
+  transition-property: var(--ae-present-properties);
+}
+${gridPresent} {
   display: inline-grid;
-  transition-property: opacity, transform, grid-template-rows, grid-template-columns;
+  --ae-present-properties: opacity, transform, grid-template-rows, grid-template-columns;
+}
+${measuredPresent} {
+  --ae-present-properties: opacity, transform, max-height, max-width;
+}
+${present}[${anchorAttribute}] {
+  --ae-present-properties: opacity, max-height, max-width, grid-template-rows, grid-template-columns;
 }
 ${present}>${motion} {
   place-self: stretch;
@@ -52,27 +62,33 @@ ${presentWithoutMotion} {
   --ae-pop-duration: 0s !important;
   --ae-unpop-duration: 0s !important;
 }
-${presentWidth}.${willChange}, ${presentWidth}.${willChange}>${motion}{
+${gridPresent}${presentWidth}.${willChange}, ${gridPresent}${presentWidth}.${willChange}>${motion}{
   min-width: 0 !important;
   width: auto !important;
   overflow: hidden !important;
 }
-${presentHeight}.${willChange}, ${presentHeight}.${willChange}>${motion}{
+${gridPresent}${presentHeight}.${willChange}, ${gridPresent}${presentHeight}.${willChange}>${motion}{
   min-height: 0 !important;
   height: auto !important;
   overflow: hidden !important;
 }
 html[${reducedMotionAttribute}="reduced"] ${present} {
   transition: none !important;
-  --ae-pop-duration: 0s;
-  --ae-unpop-duration: 0s;
-}
-html[${lowHardwareAttribute}] ${present} {
-  --ae-pop-ease: steps(var(--ae-pop-low-steps));
-  --ae-unpop-ease: steps(var(--ae-unpop-low-steps));
+  --ae-pop-duration: 0s !important;
+  --ae-unpop-duration: 0s !important;
 }
 ${present}.${willChange} {
+  will-change: opacity, transform;
+}
+${gridPresent}.${willChange} {
   will-change: opacity, transform, grid-template-columns, grid-template-rows;
+}
+${measuredPresent}.${willChange} {
+  will-change: opacity, transform, max-height, max-width;
+}
+${measuredPresent}${presentHeight}.${willChange},
+${measuredPresent}${presentWidth}.${willChange} {
+  overflow: hidden;
 }
 ${presentOpacity} {
   opacity: var(--ae-from-opacity, 0);
@@ -80,12 +96,10 @@ ${presentOpacity} {
 ${presentTransform} {
   transform: var(--ae-from-transform);
 }
-${presentOpacity}.${popping},
-${presentOpacity}.${pop} {
+${presentOpacity}:is(.${popping}, .${pop}) {
   opacity: var(--ae-pop-opacity, 1);
 }
-${presentTransform}.${popping},
-${presentTransform}.${pop} {
+${presentTransform}:is(.${popping}, .${pop}) {
   transform: var(--ae-pop-transform);
 }
 ${presentOpacity}.${unpopping} {
@@ -102,20 +116,26 @@ ${present}.${unpopping} {
   transition-duration: var(--ae-unpop-duration);
   transition-timing-function: var(--ae-unpop-ease);
 }
-${presentHeight} {
+${gridPresent}${presentHeight} {
   grid-template-rows: var(--ae-from-height);
 }
-${presentWidth} {
+${gridPresent}${presentWidth} {
   grid-template-columns: var(--ae-from-width);
 }
-${presentWidth}.${popping}, ${presentWidth}.${pop} {
+${gridPresent}${presentWidth}.${popping}, ${gridPresent}${presentWidth}.${pop} {
   grid-template-columns: var(--ae-pop-width);
 }
-${presentHeight}.${popping}, ${presentHeight}.${pop} {
+${gridPresent}${presentHeight}.${popping}, ${gridPresent}${presentHeight}.${pop} {
   grid-template-rows: var(--ae-pop-height);
 }
-${presentWidth}.${unpopping} { grid-template-columns: var(--ae-unpop-width); }
-${presentHeight}.${unpopping} { grid-template-rows: var(--ae-unpop-height); }
+${gridPresent}${presentWidth}.${unpopping} { grid-template-columns: var(--ae-unpop-width); }
+${gridPresent}${presentHeight}.${unpopping} { grid-template-rows: var(--ae-unpop-height); }
+${present}.${popping} {
+  transition-property: var(--ae-present-properties), --ae-present-pop-phase;
+}
+${present}.${unpopping} {
+  transition-property: var(--ae-present-properties), --ae-present-unpop-phase;
+}
 ${present}[hidden] { display: none; }
 `;
 }

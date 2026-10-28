@@ -9,6 +9,11 @@ export function buildDiagnostics(catalog) {
   var historyLimit = 100;
   var history = [];
   var historyStart = 0;
+  // This is deliberately bounded by history: diagnostics are often emitted from
+  // observers and an unbounded "already reported" cache would itself leak.
+  var identities = [];
+  var resourceIds = typeof WeakMap === "function" ? new WeakMap() : null;
+  var nextResourceId = 1;
   var diagnostics = {
     legacy: false,
     supported: false,
@@ -76,6 +81,8 @@ export function buildDiagnostics(catalog) {
   }
 
   function emit(level, definition, context) {
+    var identity = String(level) + "|" + diagnosticIdentity(definition, context);
+    if (identities.indexOf(identity) !== -1) return diagnostics.create(definition, context);
     var diagnostic = diagnostics.create(definition, context);
     var entry = {
       timestamp: new Date().toISOString(),
@@ -86,7 +93,9 @@ export function buildDiagnostics(catalog) {
     };
     if (history.length < historyLimit) {
       history.push(entry);
+      identities.push(identity);
     } else {
+      identities[historyStart] = identity;
       history[historyStart] = entry;
       historyStart = (historyStart + 1) % historyLimit;
     }
@@ -100,6 +109,40 @@ export function buildDiagnostics(catalog) {
       );
     }
     return diagnostic;
+  }
+
+  function diagnosticIdentity(definition, context) {
+    return String(definition.code) + "|" + identityValue(context, []);
+  }
+
+  function identityValue(value, seen) {
+    if (value === null) return "null";
+    var type = typeof value;
+    if (type !== "object" && type !== "function") return type + ":" + String(value);
+    if (value && value.nodeType) return "element:" + resourceId(value);
+    if (value instanceof Error) {
+      return "error:" + value.name + ":" + value.message + ":" + String(value.code || "");
+    }
+    if (seen.indexOf(value) !== -1) return "circular";
+    seen.push(value);
+    var result;
+    if (Array.isArray(value)) {
+      result = "[" + value.map(function (item) { return identityValue(item, seen); }).join(",") + "]";
+    } else {
+      var keys = Object.keys(value).sort();
+      result = "{" + keys.map(function (key) {
+        return key + ":" + identityValue(value[key], seen);
+      }).join(",") + "}";
+    }
+    seen.pop();
+    return result;
+  }
+
+  function resourceId(resource) {
+    if (!resourceIds) return String(resource);
+    var id = resourceIds.get(resource);
+    if (!id) { id = nextResourceId++; resourceIds.set(resource, id); }
+    return id;
   }
 
   for (var name in catalog) {

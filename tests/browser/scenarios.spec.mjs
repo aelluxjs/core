@@ -32,6 +32,20 @@ async function openScenario(page, name) {
   }).toBe("passed");
 }
 
+async function initialize(page, options = { mode: "basic" }) {
+  await page.evaluate(initOptions => new Promise((resolve, reject) => {
+    const eventName = AelluxJs.eventName("Ready");
+    const ready = () => resolve();
+    document.addEventListener(eventName, ready, { once: true });
+    try {
+      AelluxJs.init(initOptions);
+    } catch (error) {
+      document.removeEventListener(eventName, ready);
+      reject(error);
+    }
+  }), options);
+}
+
 for (const scenario of scenarios) {
   test(`${scenario} completes`, async ({ page }) => {
     const externalRequests = [];
@@ -59,38 +73,29 @@ test("callable API returns null before the mount manager starts", async ({ page 
   }))).toEqual({ sameAlias: true, callable: true, result: null });
 });
 
-test("boot marks the document when the browser reports low hardware", async ({ page }) => {
+test("boot does not mark the document when the browser reports low hardware", async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "hardwareConcurrency", {
       configurable: true,
-      value: 8
+      value: 2
     });
     Object.defineProperty(navigator, "deviceMemory", {
       configurable: true,
-      value: 4
-    });
-  });
-  await page.goto("/tests/index.htm");
-  await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
-  await expect(page.locator("html")).toHaveAttribute("data-ae-low-hardware", "");
-});
-
-test("boot leaves the low-hardware attribute unset for stronger hardware", async ({ page }) => {
-  await page.addInitScript(() => {
-    Object.defineProperty(navigator, "hardwareConcurrency", {
-      configurable: true,
-      value: 8
-    });
-    Object.defineProperty(navigator, "deviceMemory", {
-      configurable: true,
-      value: 8
+      value: 2
     });
   });
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   await expect(page.locator("html")).not.toHaveAttribute("data-ae-low-hardware", "");
+});
+
+test("boot preserves an explicitly set low-hardware attribute", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.locator("html").evaluate(element => element.setAttribute("data-ae-low-hardware", ""));
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect(page.locator("html")).toHaveAttribute("data-ae-low-hardware", "");
 });
 
 test("boot adds a missing viewport meta tag by default", async ({ page }) => {
@@ -115,6 +120,46 @@ test("autoViewportMeta false leaves a missing viewport meta tag absent", async (
   await page.evaluate(() => AelluxJs.init({ mode: "basic", autoViewportMeta: false }));
   await expect(page.locator('meta[name="viewport"]')).toHaveCount(0);
 });
+
+for (const [label, extraOptions, expectedInitialMounts] of [
+  ["default", {}, 1],
+  ["Modern skipGlobalMount", { skipGlobalMount: true }, 0],
+  ["Legacy skipGlobalMount", { skipGlobalMount: true, forceLegacy: true }, 0]
+]) {
+  test(`boot global mount: ${label}`, async ({ page }) => {
+    await page.goto("/tests/index.htm");
+    await page.addScriptTag({ url: "/dist/aellux.js" });
+
+    const result = await page.evaluate(async options => {
+      document.body.innerHTML = '<div id="skip-mount-target" data-skip-mount-probe></div>';
+      let mountCalls = 0;
+      AelluxJs.ext("skip-mount-probe");
+      AelluxJs.extAttach("skip-mount-probe", {
+        init() {
+          AelluxJs.mountManager.add({
+            extensionName: "skip-mount-probe",
+            selector: "[data-skip-mount-probe]",
+            mount() { mountCalls++; }
+          });
+        }
+      });
+      const ready = new Promise(resolve => AelluxJs.on("Ready", resolve, { once: true }));
+      AelluxJs.init({ mode: "basic", ...options });
+      await ready;
+      const beforeManualMount = mountCalls;
+      const readyBeforeManualMount = AelluxJs.diagnostics.legacy === Boolean(options.forceLegacy)
+        && AelluxJs.options.skipGlobalMount === Boolean(options.skipGlobalMount);
+      await AelluxJs.mount(document);
+      return { beforeManualMount, afterManualMount: mountCalls, readyBeforeManualMount };
+    }, extraOptions);
+
+    expect(result).toEqual({
+      beforeManualMount: expectedInitialMounts,
+      afterManualMount: 1,
+      readyBeforeManualMount: true
+    });
+  });
+}
 
 test("invalid element or ID inputs are recorded for mount and unmount", async ({ page }) => {
   await page.goto("/tests/index.htm");
@@ -216,6 +261,111 @@ test("mount resolves plain and hashed IDs to one root", async ({ page }) => {
   expect(result).toEqual({ first: ["first", "second"], second: [], missing: [] });
 });
 
+test("mount and unmount run in opposite priority order across extensions and selectors", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await initialize(page);
+
+  const result = await page.evaluate(async () => {
+    document.body.innerHTML = '<div id="priority-target" data-priority-probe></div>';
+    const calls = { mount: [], unmount: [] };
+
+    for (const name of ["priority-first", "priority-second"]) {
+      AelluxJs.ext(name);
+      AelluxJs.extAttach(name, { init() {} });
+      await AelluxJs.wait(name);
+    }
+
+    const add = (extensionName, selector, priority, label) =>
+      AelluxJs.mountManager.add({
+        extensionName, selector, priority,
+        mount() { calls.mount.push(label); },
+        unmount() { calls.unmount.push(label); }
+      });
+
+    add("priority-first", "[data-priority-probe]", 10, "high");
+    add("priority-first", "#priority-target", -10, "low");
+    add("priority-first", "div[data-priority-probe]", 0, "zero-first");
+    add("priority-second", "div#priority-target", 0, "zero-second");
+
+    await AelluxJs.mount("priority-target");
+    await AelluxJs.unmount("priority-target");
+    return calls;
+  });
+
+  expect(result).toEqual({
+    mount: ["low", "zero-first", "zero-second", "high"],
+    unmount: ["high", "zero-second", "zero-first", "low"]
+  });
+});
+
+test("equal-priority unmount reverses mount order across elements", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await initialize(page);
+
+  const calls = await page.evaluate(async () => {
+    document.body.innerHTML = '<div id="first" data-order-probe></div><div id="second" data-order-probe></div>';
+    const calls = { mount: [], unmount: [] };
+    AelluxJs.ext("order-probe");
+    AelluxJs.extAttach("order-probe", { init() {
+      AelluxJs.mountManager.add({
+        extensionName: "order-probe", selector: "[data-order-probe]",
+        mount(element) { calls.mount.push(element.id); },
+        unmount(element) { calls.unmount.push(element.id); }
+      });
+    } });
+    await AelluxJs.wait("order-probe");
+    await AelluxJs.mount(document, "order-probe");
+    await AelluxJs.unmount(document, "order-probe");
+    return calls;
+  });
+
+  expect(calls).toEqual({ mount: ["first", "second"], unmount: ["second", "first"] });
+});
+
+test("mount lifecycle events report the resolved root and distinct affected elements", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await initialize(page);
+
+  const result = await page.evaluate(async () => {
+    document.body.innerHTML = '<div id="lifecycle-detail" data-lifecycle-detail></div>';
+    const target = document.getElementById("lifecycle-detail");
+    const events = [];
+
+    AelluxJs.ext("lifecycle-detail-probe");
+    AelluxJs.extAttach("lifecycle-detail-probe", { init() {
+      for (const selector of ["[data-lifecycle-detail]", "#lifecycle-detail"]) {
+        AelluxJs.mountManager.add({
+          extensionName: "lifecycle-detail-probe", selector,
+          mount() {}, update() {}, unmount() {}
+        });
+      }
+    } });
+    await AelluxJs.wait("lifecycle-detail-probe");
+
+    for (const name of ["Mount", "Update", "Unmount"]) {
+      document.addEventListener(`AelluxJs${name}`, event => {
+        const { root, extensions, elements } = event.detail;
+        events.push({ name, root: root === target, extensions,
+          elements: elements.map(element => element.id) });
+      });
+    }
+
+    await AelluxJs.mountManager.mount(target, "lifecycle-detail-probe");
+    await AelluxJs.mountManager.update(target, "lifecycle-detail-probe");
+    await AelluxJs.mountManager.unmount(target, "lifecycle-detail-probe");
+    await AelluxJs.mountManager.update(target, "lifecycle-detail-probe");
+    return events;
+  });
+
+  expect(result).toEqual(["Mount", "Update", "Unmount", "Update"].map((name, index) => ({
+    name, root: true, extensions: ["lifecycle-detail-probe"],
+    elements: index === 3 ? [] : ["lifecycle-detail"]
+  })));
+});
+
 test("mount unmounts elements detached by an async mount callback", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
@@ -229,16 +379,22 @@ test("mount unmounts elements detached by an async mount callback", async ({ pag
     AelluxJs.ext("detach-probe");
     AelluxJs.extAttach("detach-probe", {
       init() {
+        const memories = new WeakMap();
         AelluxJs.mountManager.add({
           extensionName: "detach-probe",
           selector: "[data-detach-probe]",
           async mount(element) {
+            memories.set(element, AelluxJs.persist.element.save(element, ["aria-expanded"], []));
             element.setAttribute("aria-expanded", "mounting");
             element.remove();
             await Promise.resolve();
             element.setAttribute("aria-expanded", "mounted");
           },
-          unmount() { unmountCalls++; },
+          unmount(element) {
+            unmountCalls++;
+            memories.get(element)?.restore();
+            memories.delete(element);
+          },
           controllers: []
         });
       }
@@ -316,11 +472,22 @@ test("partial mount failures return only successful elements and restore the fai
     AelluxJs.ext("partial-probe");
     AelluxJs.extAttach("partial-probe", {
       init() {
+        const memories = new WeakMap();
         AelluxJs.mountManager.add({
           extensionName: "partial-probe", selector: "[data-partial]",
           mount(element) {
+            const memory = AelluxJs.persist.element.save(element, ["aria-label"], []);
+            memories.set(element, memory);
             element.setAttribute("aria-label", `mounted-${element.id}`);
-            if (element.id === "partial-failure") throw new Error("partial failure");
+            if (element.id === "partial-failure") {
+              memory.restore();
+              memories.delete(element);
+              throw new Error("partial failure");
+            }
+          },
+          unmount(element) {
+            memories.get(element)?.restore();
+            memories.delete(element);
           }
         });
       }
@@ -404,7 +571,7 @@ test("update and unmount failures are isolated and cleanup still completes", asy
     calls: ["second-mount", "second-update", "second-unmount"],
     methods: ["update", "unmount"],
     causes: ["update failed", "unmount failed"],
-    expanded: "initial",
+    expanded: "true",
     mountedClass: false,
     controllerHasMounts: false
   });
@@ -750,7 +917,8 @@ test("extAttach diagnoses invalid arguments without attaching the Extension", as
   });
 
   expect(result).toEqual({
-    arguments: ["name", "name", "name", "api", "api", "api"],
+    // Repeated invalid API shapes share one diagnostic identity.
+    arguments: ["name", "name", "name", "api"],
     registrationCodes: [1110, 1110, 1110, 1101],
     unregisteredAttachMethod: "extAttach",
     invalidSelectors: ["[", 123, " ", false, "["],
@@ -865,7 +1033,7 @@ test("mountManager.add diagnoses invalid registrations without changing the moun
     accepted: true,
     allRejected: true,
     arguments: ["options", "extensionName", "extensionName", "extensionName", "selector", "selector",
-      "mount", "unmount", "update", "controllers", "controllers",
+      "mount", "unmount", "update", "controllers",
       "initialAttributes", "mout"],
     mountCalls: 1,
     selectorIndex: "[data-mount-probe]"
@@ -932,7 +1100,7 @@ test("mount maps cannot be replaced or removed while in use", async ({ page }) =
   });
 });
 
-test("mount helper restores selected attributes only on mounted elements", async ({ page }) => {
+test("mount helper leaves attribute restoration to extensions", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
@@ -948,7 +1116,6 @@ test("mount helper restores selected attributes only on mounted elements", async
     const child = document.getElementById("child");
     const failure = document.getElementById("failure");
     const duringUnmount = [];
-    const initialSeen = [];
     const initialClassSeen = [];
     AelluxJs.ext("attribute-probe");
     AelluxJs.extAttach("attribute-probe", {
@@ -956,7 +1123,6 @@ test("mount helper restores selected attributes only on mounted elements", async
         AelluxJs.mountManager.add({
           extensionName: "attribute-probe", selector: "[data-track]",
           mount(element) {
-            initialSeen.push(AelluxJs.mountManager.initialAttribute(element, "data-ae-state"));
             initialClassSeen.push(element.classList.contains("ae--stale"));
             element.classList.add("ae--active");
             element.setAttribute("data-ae-state", "first");
@@ -976,7 +1142,6 @@ test("mount helper restores selected attributes only on mounted elements", async
         AelluxJs.mountManager.add({
           extensionName: "attribute-probe", selector: "[data-secondary]",
           mount(element) {
-            initialSeen.push(AelluxJs.mountManager.initialAttribute(element, "data-ae-state"));
             initialClassSeen.push(element.classList.contains("ae--active"));
             element.setAttribute("data-ae-state", "second");
           },
@@ -999,7 +1164,6 @@ test("mount helper restores selected attributes only on mounted elements", async
     await AelluxJs.mount(failure, "attribute-probe");
     return {
       mounted,
-      initialSeen,
       initialClassSeen,
       duringUnmount,
       restored: target.getAttribute("data-ae-state"),
@@ -1018,25 +1182,24 @@ test("mount helper restores selected attributes only on mounted elements", async
   });
   expect(result).toEqual({
     mounted: "second",
-    initialSeen: ["initial", "initial"],
     initialClassSeen: [false, true],
     duringUnmount: ["second", "second"],
-    restored: "initial",
-    addedRestored: false,
-    ariaRestored: "initial label",
-    hiddenRestored: true,
+    restored: "second",
+    addedRestored: true,
+    ariaRestored: "changed label",
+    hiddenRestored: false,
     unrelatedRetained: "keep",
     classRetained: true,
     staleClassRetained: false,
     styleRetained: "blue",
     childRetained: "changed",
-    failureRestored: "failure-initial",
-    failureAddedRestored: false,
+    failureRestored: "failed",
+    failureAddedRestored: true,
     failureMounted: false
   });
 });
 
-test("shared initial attributes survive partial unmount and failed mount", async ({ page }) => {
+test("extension memories restore owned attributes after partial unmount and failed mount", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
@@ -1044,7 +1207,7 @@ test("shared initial attributes survive partial unmount and failed mount", async
   const result = await page.evaluate(async () => {
     document.body.innerHTML = '<div id="shared" data-first data-second data-failing data-ae-state="initial"></div>';
     const element = document.getElementById("shared");
-    const initialSeen = [];
+    const savedValues = [];
     for (const [name, selector, value] of [
       ["first-probe", "[data-first]", "first"],
       ["second-probe", "[data-second]", "second"],
@@ -1053,14 +1216,24 @@ test("shared initial attributes survive partial unmount and failed mount", async
       AelluxJs.ext(name);
       AelluxJs.extAttach(name, {
         init() {
+          const memories = new WeakMap();
           AelluxJs.mountManager.add({
             extensionName: name, selector,
             mount(target) {
-              initialSeen.push(AelluxJs.mountManager.initialAttribute(target, "data-ae-state"));
+              const memory = AelluxJs.persist.element.save(target, ["data-ae-state"], []);
+              memories.set(target, memory);
+              savedValues.push(memory.attributes["data-ae-state"].value);
               target.setAttribute("data-ae-state", value);
-              if (name === "failing-probe") throw new Error("expected failure");
+              if (name === "failing-probe") {
+                memory.restore();
+                memories.delete(target);
+                throw new Error("expected failure");
+              }
             },
-            unmount() {}
+            unmount(target) {
+              memories.get(target)?.restore();
+              memories.delete(target);
+            }
           });
         }
       });
@@ -1068,23 +1241,21 @@ test("shared initial attributes survive partial unmount and failed mount", async
       await AelluxJs.mount(element, name);
     }
     const afterFailure = element.getAttribute("data-ae-state");
-    await AelluxJs.unmount(element, "first-probe");
-    const afterFirstUnmount = element.getAttribute("data-ae-state");
     await AelluxJs.unmount(element, "second-probe");
+    const afterSecondUnmount = element.getAttribute("data-ae-state");
+    await AelluxJs.unmount(element, "first-probe");
     return {
-      initialSeen,
+      savedValues,
       afterFailure,
-      afterFirstUnmount,
-      restored: element.getAttribute("data-ae-state"),
-      initialAfterUnmount: AelluxJs.mountManager.initialAttribute(element, "data-ae-state")
+      afterSecondUnmount,
+      restored: element.getAttribute("data-ae-state")
     };
   });
   expect(result).toEqual({
-    initialSeen: ["initial", "initial", "initial"],
-    afterFailure: "failed",
-    afterFirstUnmount: "failed",
-    restored: "initial",
-    initialAfterUnmount: null
+    savedValues: ["initial", "first", "second"],
+    afterFailure: "second",
+    afterSecondUnmount: "first",
+    restored: "initial"
   });
 });
 
@@ -1135,7 +1306,7 @@ test("mounted element controller runs mount, update, and unmount lifecycle metho
     counts: {
       mount: ["root", "child", "root", "child"],
       update: ["root", "child", "root", "child"],
-      unmount: ["root", "child"]
+      unmount: ["child", "root"]
     },
     removed: true,
     updateAfterUnmount: "function",
@@ -1268,12 +1439,18 @@ test("MutationObserver unmounts removed elements but preserves moved elements", 
     AelluxJs.ext("observed-detach");
     AelluxJs.extAttach("observed-detach", {
       init() {
+        const memories = new WeakMap();
         AelluxJs.mountManager.add({
           extensionName: "observed-detach", selector: "[data-observed-detach]",
-          mount(element) { element.setAttribute("aria-expanded", "true"); },
+          mount(element) {
+            memories.set(element, AelluxJs.persist.element.save(element, ["aria-expanded"], []));
+            element.setAttribute("aria-expanded", "true");
+          },
           async unmount(element) {
             await Promise.resolve();
             window.observedCalls.push(element.id);
+            memories.get(element)?.restore();
+            memories.delete(element);
           }
         });
       }
@@ -1298,6 +1475,52 @@ test("MutationObserver unmounts removed elements but preserves moved elements", 
     calls: window.observedCalls,
     aria: window.observedElement.getAttribute("aria-expanded")
   }))).toEqual({ mounted: false, calls: ["observed"], aria: "original" });
+});
+
+test("mounted controller listens and dispatches events on its element", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    document.body.innerHTML = '<div id="first" data-event-probe></div><div id="second" data-event-probe></div>';
+    AelluxJs.ext("event-probe");
+    AelluxJs.extAttach("event-probe", {
+      init() {
+        AelluxJs.mountManager.add({
+          extensionName: "event-probe", selector: "[data-event-probe]",
+          mount() {}, unmount() {}
+        });
+      }
+    });
+    await AelluxJs.wait("event-probe");
+    await AelluxJs.mount(document);
+    const first = document.getElementById("first");
+    const second = document.getElementById("second");
+    const controller = $ae("first");
+    const received = [];
+    const handler = event => received.push({
+      target: event.target.id, type: event.type,
+      bubbles: event.bubbles, cancelable: event.cancelable
+    });
+    controller.on("Example", handler);
+    second.dispatchEvent(new Event("AelluxJsExample", { bubbles: true }));
+    const dispatched = controller.dispatch("Example", { bubbles: false, cancelable: true });
+    controller.off("Example", handler);
+    controller.dispatch("Example");
+    return {
+      sameController: controller === AelluxJs(first),
+      received, dispatched,
+      dispatchTarget: first.id
+    };
+  });
+  expect(result).toEqual({
+    sameController: true,
+    received: [{ target: "first", type: "AelluxJsExample", bubbles: false, cancelable: true }],
+    dispatched: true,
+    dispatchTarget: "first"
+  });
 });
 
 test("MutationObserver cleans elements removed during an earlier async cleanup", async ({ page }) => {
@@ -1385,7 +1608,7 @@ test("observed cleanup and explicit unmount share each registration once", async
       childMounted: childController.hasMounts()
     };
   });
-  expect(result).toEqual({ calls: ["parent", "child"], parentMounted: false, childMounted: false });
+  expect(result).toEqual({ calls: ["child", "parent"], parentMounted: false, childMounted: false });
 });
 
 test("core destroy survives lifecycle failures and clears resources", async ({ page }) => {
@@ -1472,7 +1695,7 @@ test("core destroy survives lifecycle failures and clears resources", async ({ p
   });
 });
 
-test("mount manager exposes initial attributes and idempotent observer destruction", async ({ page }) => {
+test("mount manager has idempotent observer destruction", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     const NativeMutationObserver = window.MutationObserver;
@@ -1507,7 +1730,6 @@ test("mount manager exposes initial attributes and idempotent observer destructi
     });
     await AelluxJs.wait("manager-destroy");
     await AelluxJs.mount(target, "manager-destroy");
-    const initial = AelluxJs.mountManager.initialAttribute(target, "aria-label");
     const methods = {
       destroy: typeof AelluxJs.mountManager.destroy,
       initialAttribute: typeof AelluxJs.mountManager.initialAttribute
@@ -1520,7 +1742,6 @@ test("mount manager exposes initial attributes and idempotent observer destructi
     await new Promise(resolve => setTimeout(resolve, 0));
     return {
       methods,
-      initial,
       destroyed,
       observerDisconnects: window.observerDisconnects,
       unmountCalls
@@ -1528,8 +1749,7 @@ test("mount manager exposes initial attributes and idempotent observer destructi
   });
 
   expect(result).toEqual({
-    methods: { destroy: "function", initialAttribute: "function" },
-    initial: "initial",
+    methods: { destroy: "function", initialAttribute: "undefined" },
     destroyed: [true, false],
     observerDisconnects: 1,
     unmountCalls: 0
@@ -1593,6 +1813,55 @@ test("navigation exposes ajaxReplace metadata on snapshot restoration", async ({
     aelluxJsState: true,
     snapshot: null,
     ajaxReplace: { url: result.url, selectors: ["#content"] }
+  });
+});
+
+test("navigation event details retain snapshots after later changes", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full", useHash: false }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.stateNavigation?.initialized)).toBe(true);
+
+  const result = await page.evaluate(async () => {
+    let firstChange, restoration;
+    document.addEventListener("AelluxJsSnapshotChange", event => {
+      if (!firstChange) firstChange = event.detail;
+    });
+
+    await AelluxJs.ext.stateNavigation.setState("section", "one");
+    await AelluxJs.ext.stateNavigation.setState("section", "two");
+
+    const state = {
+      aelluxJsState: true,
+      snapshot: { section: "three" },
+      ajaxReplace: { url: "/next", selectors: ["#content"] }
+    };
+    document.addEventListener("AelluxJsSnapshotRestore", event => {
+      restoration = event.detail;
+    }, { once: true });
+    window.dispatchEvent(new PopStateEvent("popstate", { state }));
+    state.snapshot.section = "changed";
+    state.ajaxReplace.selectors.push("#other");
+
+    return {
+      firstSnapshot: firstChange.snapshot,
+      firstRemoved: firstChange.removeSnapshot,
+      restoredSnapshot: restoration.snapshot,
+      popState: restoration.popState,
+      copied: restoration.popState !== state
+    };
+  });
+
+  expect(result).toEqual({
+    firstSnapshot: { section: "one" },
+    firstRemoved: {},
+    restoredSnapshot: { section: "three" },
+    popState: {
+      aelluxJsState: true,
+      snapshot: { section: "three" },
+      ajaxReplace: { url: "/next", selectors: ["#content"] }
+    },
+    copied: true
   });
 });
 
@@ -1715,11 +1984,7 @@ test("navigation warns for malformed command events without changing history or 
     return { warnings, titleUnchanged: document.title === title, stateUnchanged: history.state === state };
   });
   expect(result).toEqual({
-    warnings: [
-      "PushState", "PushState", "PushState",
-      "PushAjaxReplace", "PushAjaxReplace",
-      "UpdateBaseTitle", "UpdateBaseTitle"
-    ],
+    warnings: ["PushState", "PushAjaxReplace", "UpdateBaseTitle"],
     titleUnchanged: true,
     stateUnchanged: true
   });
@@ -1729,6 +1994,8 @@ test("feedback reports callback failures and continues notifying subscribers", a
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
+  await page.evaluate(() => AelluxJs.wait("feedback"));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.feedback?.initialized)).toBe(true);
 
   const result = await page.evaluate(async () => {
@@ -1913,6 +2180,51 @@ test("renamed global and event prefix are available", async ({ page }) => {
   expect(dispatchedType).toBe("AelluxJsProbe");
 });
 
+test("event names preserve existing formatting and explicit raw names", async ({ page }) => {
+  await openScenario(page, "runtime-modern");
+  const result = await page.evaluate(() => {
+    const names = ["pointerdown", "AelluxJsPointerDown", "$pointerdown", "#pointerdown",
+      "_pointerdown", "!pointerdown", "!my-CustomEvent"];
+    const normalized = names.map(name => AelluxJs.eventName(name));
+    const received = [];
+    for (const name of ["AelluxJsPointerDown", "_pointerdown", "$pointerdown"]) {
+      const handler = event => received.push(event.type);
+      AelluxJs.on(name, handler);
+      AelluxJs.dispatch(name);
+      AelluxJs.off(name, handler);
+    }
+    const element = document.createElement("div");
+    element.addEventListener("pointerdown", event => received.push(event.type));
+    AelluxJs.dispatchFrom(element, "!pointerdown");
+    return { normalized, received };
+  });
+  expect(result).toEqual({
+    normalized: ["AelluxJsPointerdown", "AelluxJsPointerDown", "pointerdown",
+      "pointerdown", "pointerdown", "pointerdown", "my-CustomEvent"],
+    received: ["AelluxJsPointerDown", "pointerdown", "pointerdown", "pointerdown"]
+  });
+});
+
+test("target listeners handle native and Aellux events with matching removal", async ({ page }) => {
+  await openScenario(page, "runtime-modern");
+  const received = await page.evaluate(() => {
+    const target = document.createElement("div");
+    const events = [];
+    const onClick = event => events.push(event.type);
+    const onLayout = event => events.push(event.type);
+    AelluxJs.onEvent(target, "$click", onClick, { capture: true });
+    AelluxJs.onEvent(target, "Layout", onLayout);
+    AelluxJs.dispatchFrom(target, "$click");
+    AelluxJs.dispatchFrom(target, "Layout");
+    AelluxJs.offEvent(target, "$click", onClick, true);
+    AelluxJs.offEvent(target, "Layout", onLayout);
+    AelluxJs.dispatchFrom(target, "$click");
+    AelluxJs.dispatchFrom(target, "Layout");
+    return events;
+  });
+  expect(received).toEqual(["click", "AelluxJsLayout"]);
+});
+
 test("ESM entry exports the shared core API", async ({ page }) => {
   await page.goto("/tests/index.htm");
   const created = await page.evaluate(async () => {
@@ -2083,20 +2395,20 @@ test("full runtime writes the renamed history state marker", async ({ page }) =>
     oldBundled: Object.hasOwn(AelluxJs.bundledExtensions, "state-navigation")
   }))).toEqual({ registered: true, bundled: true, oldRegistered: false, oldBundled: false });
   expect(await page.evaluate(() => ({
-    initialized: AelluxJs.ext.adaptive?.initialized,
+    initialized: AelluxJs.ext.adaptive?.initialized === true,
     registered: Object.hasOwn(AelluxJs.registry.ext, "adaptive"),
     bundled: Object.hasOwn(AelluxJs.bundledExtensions, "adaptive"),
     style: AelluxJs.registry.ext.adaptive?.loadStyle,
-    presentInitialized: AelluxJs.ext.present?.initialized,
+    presentInitialized: AelluxJs.ext.present?.initialized === true,
     presentStyle: AelluxJs.registry.ext.present?.loadStyle,
     ajaxHrefBundled: Object.hasOwn(AelluxJs.bundledExtensions, "ajaxHref")
   }))).toEqual({
-    initialized: true,
+    initialized: false,
     registered: true,
     bundled: true,
-    style: true,
-    presentInitialized: true,
-    presentStyle: true,
+    style: false,
+    presentInitialized: false,
+    presentStyle: false,
     ajaxHrefBundled: false
   });
   expect(await page.evaluate(() => history.state?.aelluxJsState)).toBe(true);
@@ -2108,12 +2420,13 @@ test("minified distribution exposes the renamed global", async ({ page }) => {
   await page.addScriptTag({ url: "/dist/aellux.min.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
   await expect.poll(() => page.evaluate(() => window.AelluxJs.diagnostics.supported)).toBe(true);
+  await page.evaluate(() => Promise.all([AelluxJs.wait("adaptive"), AelluxJs.wait("present")]));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.adaptive?.initialized)).toBe(true);
-  await expect(page.locator('link[data-ae-ext-style="adaptive"]')).toHaveAttribute(
-    "href", /aellux\.ext\.adaptive\.min\.css$/
+  await expect(page.locator('link[data-ae-full-style]')).toHaveAttribute(
+    "href", /aellux\.full\.min\.css$/
   );
-  await expect(page.locator('link[data-ae-ext-style="present"]')).toHaveAttribute(
-    "href", /aellux\.ext\.present\.min\.css$/
+  await expect(page.locator('link[data-ae-full-style]')).toHaveAttribute(
+    "href", /aellux\.full\.min\.css$/
   );
   expect(await page.evaluate(() => window.AelluxJs === window.$ae)).toBe(true);
   expect(await page.evaluate(() => typeof window.Aellux)).toBe("undefined");
@@ -2123,12 +2436,14 @@ test("legacy full runtime loads generated Extension stylesheets", async ({ page 
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full", forceLegacy: true }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
+  await page.evaluate(() => Promise.all([AelluxJs.wait("adaptive"), AelluxJs.wait("present")]));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.adaptive?.initialized)).toBe(true);
-  await expect(page.locator('link[data-ae-ext-style="adaptive"]')).toHaveAttribute(
-    "href", /aellux\.ext\.adaptive\.css$/
+  await expect(page.locator('link[data-ae-full-style]')).toHaveAttribute(
+    "href", /aellux\.full\.css$/
   );
-  await expect(page.locator('link[data-ae-ext-style="present"]')).toHaveAttribute(
-    "href", /aellux\.ext\.present\.css$/
+  await expect(page.locator('link[data-ae-full-style]')).toHaveAttribute(
+    "href", /aellux\.full\.css$/
   );
 });
 
@@ -2164,6 +2479,40 @@ test("preference options update inputs and value-label visibility", async ({ pag
   await page.getByText("Dark", { exact: true }).click();
   await expect(page.locator("#label-light")).toBeHidden();
   await expect(page.locator("#label-dark")).toBeVisible();
+  await page.evaluate(() => AelluxJs.unmount(
+    document.querySelector("[data-ae-preference]"), "preference"
+  ));
+  await expect(page.locator("#label-auto")).toBeVisible();
+  await expect(page.locator("#label-light")).toBeVisible();
+  await expect(page.locator("#label-dark")).toBeVisible();
+});
+
+test("preference change details report changed keys and stable values", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.preference?.initialized)).toBe(true);
+
+  const result = await page.evaluate(() => {
+    const events = [];
+    document.addEventListener("AelluxJsPreferencesChange", event => events.push(event.detail));
+    const preference = AelluxJs.ext.preference;
+    preference.update();
+    preference.set("color-scheme", "light");
+    preference.update();
+    preference.set("color-scheme", "dark");
+    preference.update();
+    return events.map(detail => ({
+      changed: detail.changed,
+      colorScheme: detail.preferences.colorScheme
+    }));
+  });
+
+  expect(result).toEqual([
+    { changed: [], colorScheme: "auto" },
+    { changed: ["colorScheme"], colorScheme: "light" },
+    { changed: ["colorScheme"], colorScheme: "dark" }
+  ]);
 });
 
 test("preference updates only affected mounted controls and still dispatches change", async ({ page }) => {
@@ -2351,9 +2700,11 @@ test("full runtime loads generated adaptive styles", async ({ page }) => {
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
+  await page.evaluate(() => AelluxJs.wait("adaptive"));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.adaptive?.initialized)).toBe(true);
-  await expect(page.locator('link[data-ae-ext-style="adaptive"]')).toHaveAttribute(
-    "href", /aellux\.ext\.adaptive\.css$/
+  await expect(page.locator('link[data-ae-full-style]')).toHaveAttribute(
+    "href", /aellux\.full\.css$/
   );
   await expect.poll(() => page.locator("#adaptive-probe").evaluate(
     element => getComputedStyle(element).paddingTop

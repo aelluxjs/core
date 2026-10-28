@@ -38,11 +38,15 @@ import utilsNameCase from "./internal/utils-name-case.js";
     throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
   }
 
+  const NO_PREFERENCE = "no-preference";
+
   const userPreferences = Object.create(null);
   const defaultPreferences = Object.create(null);
   const computedPreferences = Object.create(null);
   const containersByPreference = new Map();
   const containerPreferences = new Map();
+  const containerLabels = new Map();
+  const labelMemories = new WeakMap();
 
   AelluxJs.extAttach(extensionName, { init, destroy, update, get, set });
 
@@ -61,10 +65,10 @@ import utilsNameCase from "./internal/utils-name-case.js";
 
   const prefOptions = {
     colorScheme: ["auto", "light", "dark"],
-    contrast: ["auto", "no-preference", "more", "less"],
-    reducedMotion: ["auto", "no-preference", "reduced"],
-    reducedTransparency: ["auto", "no-preference", "reduced"],
-    forcedColors: ["auto", "no-preference", "active"],
+    contrast: ["auto", NO_PREFERENCE, "more", "less"],
+    reducedMotion: ["auto", NO_PREFERENCE, "reduced"],
+    reducedTransparency: ["auto", NO_PREFERENCE, "reduced"],
+    forcedColors: ["auto", NO_PREFERENCE, "active"],
     textScale: [1, 1.5, 0.8],
     interfaceScale: [1, 1.5, 0.8],
     extendedTiming: ["off", "on"],
@@ -76,10 +80,11 @@ import utilsNameCase from "./internal/utils-name-case.js";
   function init(options) {
     AelluxJs.mountManager.add({
       extensionName, selector: `[${attr.preference}]`,
+      priority: 0,
       mount: mountPreferenceContainer, unmount: unmountPreferenceContainer
     });
 
-    window.addEventListener("storage", storageEvent);
+    AelluxJs.onEvent(window, "$storage", storageEvent);
 
     //Watch device changes
     const allQueries = AelluxJs.registry.preferenceMediaQueries;
@@ -87,7 +92,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
       Object.values(queries).forEach((query) => {
         if (!query) return;
         if (query.addEventListener) {
-          query.addEventListener("change", update);
+          AelluxJs.onEvent(query, "$change", update);
         } else if (query.addListener) {
           query.addListener(update);
         }
@@ -106,18 +111,19 @@ import utilsNameCase from "./internal/utils-name-case.js";
   }
 
   function destroy() {
+    for (const container of containerPreferences.keys()) unmountPreferenceContainer(container);
     AelluxJs.mountManager.remove({ extensionName });
     containersByPreference.clear();
     containerPreferences.clear();
-    window.removeEventListener("storage", storageEvent);
-    document.removeEventListener('DOMContentLoaded', update);
+    AelluxJs.offEvent(window, "$storage", storageEvent);
+    AelluxJs.off('$DOMContentLoaded', update);
 
     const allQueries = AelluxJs.registry.preferenceMediaQueries;
     Object.values(allQueries).forEach((queries) =>
       Object.values(queries).forEach((query) => {
         if (!query) return;
         if (query.removeEventListener) {
-          query.removeEventListener("change", update);
+          AelluxJs.offEvent(query, "$change", update);
         } else if (query.removeListener) {
           query.removeListener(update);
         }
@@ -169,7 +175,12 @@ import utilsNameCase from "./internal/utils-name-case.js";
       const containers = containersByPreference.get(key);
       if (containers) for (const container of containers) updateContainer(container);
     }
-    AelluxJs.dispatch("PreferencesChange");
+    AelluxJs.dispatch("PreferencesChange", {
+      detail: {
+        changed: Array.from(changed),
+        preferences: Object.assign({}, computedPreferences)
+      }
+    });
   }
 
   function indexContainer(container) {
@@ -197,6 +208,15 @@ import utilsNameCase from "./internal/utils-name-case.js";
     const labels = container.querySelectorAll(`[${attr.label}]`);
     const currentValue = get(preference || "");
     labels.forEach(label => {
+      let ownedLabels = containerLabels.get(container);
+      if (!ownedLabels) {
+        ownedLabels = new Set();
+        containerLabels.set(container, ownedLabels);
+      }
+      if (!ownedLabels.has(label)) {
+        labelMemories.set(label, AelluxJs.persist.element.save(label, ["hidden"], []));
+        ownedLabels.add(label);
+      }
       const value = label.getAttribute(attr.label);
       const selected = String(value) === String(currentValue);
       label.hidden = !selected;
@@ -227,11 +247,17 @@ import utilsNameCase from "./internal/utils-name-case.js";
   function mountPreferenceContainer(container) {
     indexContainer(container);
     updateContainer(container);
-    container.addEventListener("click", onContainerClick);
+    AelluxJs.onEvent(container, "$click", onContainerClick);
   }
 
   function unmountPreferenceContainer(container) {
-    container.removeEventListener("click", onContainerClick);
+    AelluxJs.offEvent(container, "$click", onContainerClick);
+    const labels = containerLabels.get(container);
+    if (labels) for (const label of labels) {
+      labelMemories.get(label)?.restore();
+      labelMemories.delete(label);
+    }
+    containerLabels.delete(container);
     const key = containerPreferences.get(container);
     if (key === undefined) return;
     const containers = containersByPreference.get(key);

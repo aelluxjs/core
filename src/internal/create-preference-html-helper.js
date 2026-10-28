@@ -9,8 +9,13 @@ export function createPreferenceHtmlHelper(root, getApi) {
   var fromCamelCase = utilsNameCase.fromCamelCase;
 
   return {
-    updatePreferenceAttributesHTML: updatePreferenceAttributesHTML
+    updatePreferenceAttributesHTML: updatePreferenceAttributesHTML,
+    currentPreference: currentPreference
   };
+
+  function currentPreference(name) {
+    return document.documentElement.getAttribute(getApi().attr(name));
+  }
 
   function updatePreferenceAttributesHTML(preferences) {
     var api = getApi();

@@ -1,0 +1,4310 @@
+import { expect, test } from "@playwright/test";
+
+const elasticAmount = (force, limit) => limit * (1 - Math.exp(-force / (3 * limit)));
+
+const box = (id, mode = "pointer", extra = "", content = "", momentum = "false") =>
+  `<div id="${id}" data-ae-scrollbox="${mode}" ${extra}
+    ${momentum === null ? "" : `data-ae-scrollbox-momentum="${momentum}"`}
+    style="width:100px;height:100px;overflow:auto;--ae-scroll-x-progress:.2;--ae-scroll-y-progress:.3">
+    <div style="width:300px;height:300px">${content}</div></div>`;
+
+async function setup(page, html, { coarse = false } = {}) {
+  const usesSnap = html.includes("data-ae-scrollbox-snap");
+  await page.goto("/tests/index.htm");
+  await page.mouse.move(-100, -100);
+  if (coarse) await page.evaluate(() => {
+    const matchMedia = window.matchMedia.bind(window);
+    window.matchMedia = query => query.includes("hover: hover")
+      ? { matches: false } : matchMedia(query);
+  });
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(({ markup, usesSnap }) => {
+    document.body.innerHTML = markup;
+    AelluxJs.ext("scrollbox", { loadStyle: true });
+    if (usesSnap) AelluxJs.ext("scrollbox-snap");
+  }, { markup: html, usesSnap });
+  await page.addScriptTag({ url: "/dist/aellux.ext.scrollbox.js" });
+  if (usesSnap) await page.addScriptTag({ url: "/src/aellux.ext.scrollbox-snap.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollbox?.initialized)).toBe(true);
+  if (usesSnap)
+    await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollboxSnap?.initialized)).toBe(true);
+}
+
+async function drag(page, id, pointerType = "mouse") {
+  return page.evaluate(({ id, pointerType }) => {
+    const element = document.getElementById(id);
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 70, y = rect.top + 70;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 17,
+      pointerType, button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 17,
+      pointerType, buttons: 1, clientX: x - 50, clientY: y - 40
+    }));
+    const during = element.style.getPropertyValue("user-select");
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 17, pointerType,
+      button: 0, buttons: 0, clientX: x - 50, clientY: y - 40
+    }));
+    return { x: element.scrollLeft, y: element.scrollTop,
+      during, after: element.style.getPropertyValue("user-select") };
+  }, { id, pointerType });
+}
+
+test("scroll edge classes follow both axes and clear on unmount", async ({ page }) => {
+  await setup(page, box("edges", "native"));
+
+  const classes = () => page.evaluate(() => {
+    const names = ["v-start", "v-end", "h-start", "h-end"];
+    const element = document.getElementById("edges");
+    return names.map(name => element.classList.contains(`ae--scroll-${name}`));
+  });
+
+  await expect.poll(classes).toEqual([true, false, true, false]);
+
+  await page.evaluate(() => document.getElementById("edges")
+    .scrollTo({ top: 4, left: 4, behavior: "instant" }));
+  await expect.poll(classes).toEqual([true, false, true, false]);
+
+  await page.evaluate(() => document.getElementById("edges")
+    .scrollTo({ top: 100, left: 100, behavior: "instant" }));
+  await expect.poll(classes).toEqual([false, false, false, false]);
+
+  await page.evaluate(() => {
+    const element = document.getElementById("edges");
+    element.scrollTo({
+      top: element.scrollHeight - element.clientHeight - 4,
+      left: element.scrollWidth - element.clientWidth - 4,
+      behavior: "instant"
+    });
+  });
+  await expect.poll(classes).toEqual([false, true, false, true]);
+
+  await page.evaluate(() => AelluxJs.mountManager.unmount("edges", "scrollbox"));
+  expect(await classes()).toEqual([false, false, false, false]);
+});
+
+test("scroll edge classes stay fixed during elastic pressure", async ({ page }) => {
+  await setup(page, `<div id="elastic-edges" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto">
+    <div data-ae-scrollbox-elastic style="display:inline-block;width:100px;height:300px"></div>
+  </div>`);
+
+  await page.evaluate(() => {
+    const element = document.getElementById("elastic-edges");
+    element.scrollTo({ top: element.scrollHeight - element.clientHeight, behavior: "instant" });
+  });
+  await expect.poll(() => page.evaluate(() => document.getElementById("elastic-edges")
+    .classList.contains("ae--scroll-v-end"))).toBe(true);
+
+  const duringPressure = await page.evaluate(async () => {
+    const element = document.getElementById("elastic-edges");
+    element.dispatchEvent(new WheelEvent("wheel", {
+      bubbles: true, cancelable: true, deltaY: 60
+    }));
+    element.scrollTo({ top: 50, behavior: "instant" });
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    return element.classList.contains("ae--scroll-v-end");
+  });
+
+  expect(duringPressure).toBe(true);
+  await expect.poll(() => page.evaluate(() => document.getElementById("elastic-edges")
+    .classList.contains("ae--scroll-v-end"))).toBe(false);
+});
+
+test("snap change reports the selected item after scrolling settles", async ({ page }) => {
+  await setup(page, `<div id="snap-events" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:300px;height:100px">
+      <div data-ae-snap-item id="snap-one" style="flex:none;width:100px"></div>
+      <div data-ae-snap-item id="snap-two" style="flex:none;width:100px"></div>
+      <div data-ae-snap-item id="snap-three" style="flex:none;width:100px"></div>
+    </div>
+  </div>`);
+
+  await page.evaluate(() => {
+    window.snapEvents = [];
+    document.getElementById("snap-events").addEventListener("AelluxJsScrollboxSnapChange", event => {
+      const { item, index, previousIndex, axis } = event.detail;
+      window.snapEvents.push({ item: item.id, index, previousIndex, axis });
+    });
+    AelluxJs.mountManager.controller("snap-events").scrollbox.goto(1);
+  });
+
+  await expect.poll(() => page.evaluate(() => window.snapEvents)).toEqual([
+    { item: "snap-two", index: 1, previousIndex: 0, axis: "x" }
+  ]);
+  await page.evaluate(() => AelluxJs.mountManager.controller("snap-events").scrollbox.goto(1));
+  await page.waitForTimeout(180);
+  expect(await page.evaluate(() => window.snapEvents)).toHaveLength(1);
+});
+
+test("long smooth snap navigation reports only the reached destination", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:500px;height:100px">
+      ${Array.from({ length: 5 }, (_, index) =>
+        `<div id="item-${index}" data-ae-snap-item style="flex:none;width:100px"></div>`).join("")}
+    </div>
+  </div>`);
+
+  await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    window.snapEvents = [];
+    element.addEventListener("AelluxJsScrollboxSnapChange", event => {
+      window.snapEvents.push(event.detail.index);
+    });
+    AelluxJs.mountManager.controller("gallery").scrollbox.goto(4);
+  });
+
+  await expect.poll(() => page.evaluate(() => window.snapEvents), { timeout: 10000 })
+    .toEqual([4]);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(400);
+  await page.waitForTimeout(250);
+  expect(await page.evaluate(() => window.snapEvents)).toEqual([4]);
+});
+
+test("interrupted snap navigation settles without scrollend", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:500px;height:100px">
+      ${Array.from({ length: 5 }, (_, index) =>
+        `<div data-ae-snap-item style="flex:none;width:100px"></div>`).join("")}
+    </div>
+  </div>`);
+
+  await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    window.snapEvents = [];
+    element.addEventListener("scrollend", event => event.stopImmediatePropagation(), true);
+    element.addEventListener("AelluxJsScrollboxSnapChange", event =>
+      window.snapEvents.push(event.detail.index));
+    element.classList.add("ae--snap-suspended");
+    element.scrollTo = () => {};
+    AelluxJs.mountManager.controller("gallery").scrollbox.goto(4);
+    delete element.scrollTo;
+    element.dispatchEvent(new WheelEvent("wheel", {
+      deltaX: -120, bubbles: true, cancelable: false
+    }));
+    element.scrollLeft = 100;
+  });
+
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(100);
+  await expect.poll(() => page.evaluate(() => window.snapEvents), { timeout: 5000 })
+    .toContain(1);
+  await page.evaluate(() => document.getElementById("gallery")
+    .classList.remove("ae--snap-suspended"));
+});
+
+test("a descendant scrollend does not finish its parent snap navigation", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:500px;height:100px">
+      ${Array.from({ length: 5 }, (_, index) =>
+        `<div id="item-${index}" data-ae-snap-item style="flex:none;width:100px"></div>`).join("")}
+    </div>
+  </div>`);
+
+  await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    window.snapEvents = [];
+    element.addEventListener("AelluxJsScrollboxSnapChange", event =>
+      window.snapEvents.push(event.detail.index));
+    AelluxJs.mountManager.controller("gallery").scrollbox.goto(4);
+    setTimeout(() => document.getElementById("item-0")
+      .dispatchEvent(new Event("scrollend", { bubbles: true })), 100);
+  });
+
+  await expect.poll(() => page.evaluate(() => window.snapEvents), { timeout: 10000 })
+    .toEqual([4]);
+  await page.waitForTimeout(250);
+  expect(await page.evaluate(() => window.snapEvents)).toEqual([4]);
+});
+
+test("pointer scroll start and end report the activated gesture", async ({ page }) => {
+  await setup(page, box("pointer-events"));
+
+  const events = await page.evaluate(() => {
+    const element = document.getElementById("pointer-events");
+    const events = [];
+    for (const name of ["PointerScrollStart", "PointerScrollEnd"]) {
+      element.addEventListener(`AelluxJs${name}`, event => {
+        const { axis, pointerId, pointerType, elements } = event.detail;
+        events.push({ name, axis, pointerId, pointerType,
+          elements: elements.map(item => item.id) });
+      });
+    }
+
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true,
+      pointerId: 29, pointerType: "mouse", button: 0, buttons: 1,
+      clientX: 70, clientY: 70
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true,
+      pointerId: 29, pointerType: "mouse", buttons: 1,
+      clientX: 30, clientY: 70
+    }));
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true,
+      pointerId: 29, pointerType: "mouse", button: 0, buttons: 0,
+      clientX: 30, clientY: 70
+    }));
+    return events;
+  });
+
+  expect(events).toEqual(["PointerScrollStart", "PointerScrollEnd"].map(name => ({
+    name, axis: "x", pointerId: 29, pointerType: "mouse", elements: ["pointer-events"]
+  })));
+});
+
+test("elastic wrapper normalizes non-inline display while snap keeps its layout", async ({ page }) => {
+  await setup(page, `<div id="block" data-ae-scrollbox style="width:100px;height:100px">
+    <div data-ae-scrollbox-elastic style="display:block!important;width:100px;height:300px"></div>
+  </div>
+  <div id="flex" data-ae-scrollbox data-ae-scrollbox-snap style="width:100px;height:100px">
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>
+  <div id="grid" data-ae-scrollbox data-ae-scrollbox-snap style="width:100px;height:100px">
+    <div data-ae-scrollbox-elastic
+      style="display:grid;grid-auto-flow:column;width:300px">
+      <div data-ae-snap-item style="width:100px;height:100px"></div>
+      <div data-ae-snap-item style="width:100px;height:100px"></div>
+      <div data-ae-snap-item style="width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(async () => {
+    const ids = ["block", "flex", "grid"];
+    const wrappers = ids.map(id => document.getElementById(id).firstElementChild);
+    const displays = wrappers.map(item => getComputedStyle(item).display);
+    const warnings = AelluxJs.diagnostics.showHistory().filter(item => item.code === 2016);
+    await AelluxJs.mountManager.unmount(document.body, "scrollbox");
+    return { displays, warnings: warnings.length,
+      restored: wrappers.map(item => [item.style.getPropertyValue("display"),
+        item.style.getPropertyPriority("display")]) };
+  });
+  expect(result).toEqual({ displays: ["inline-block", "flex", "inline-grid"],
+    warnings: 2, restored: [["block", "important"], ["flex", ""], ["grid", ""]] });
+});
+
+test("snap initializes and controller navigates its direct children", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow:auto">
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  expect(await page.evaluate(() => document.getElementById("gallery").scrollLeft)).toBe(0);
+  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(2))).toBe(true);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(200);
+  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.previous()))
+    .toBe(true);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(100);
+  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.next()))
+    .toBe(true);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(200);
+  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(3)))
+    .toBe(false);
+});
+
+test("snap without an elastic wrapper ignores custom scrollbars", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    data-ae-scrollbar="x"
+    style="display:flex;width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div id="first" data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    <div id="second" data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    <div id="third" data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+  </div>`);
+
+  const initial = await page.evaluate(() => {
+    const box = document.getElementById("gallery");
+    const bar = box.querySelector(":scope > [data-ae-scrollbar-horizontal]");
+    return {
+      children: box.children.length,
+      barAlign: bar.style.scrollSnapAlign,
+      itemAlign: getComputedStyle(box.children[1]).scrollSnapAlign,
+      errors: AelluxJs.diagnostics.showHistory().filter(item => item.code === 1121).length
+    };
+  });
+  expect(initial).toEqual({ children: 4, barAlign: "", itemAlign: "center", errors: 0 });
+
+  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(2)))
+    .toBe(true);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(200);
+  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(3)))
+    .toBe(false);
+});
+
+test("snap requires marked items and follows marker changes", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div id="item" style="width:300px;height:100px;scroll-snap-align:start"></div>
+  </div>`);
+
+  const initial = await page.evaluate(() => ({
+    enabled: AelluxJs.mountManager.controller("gallery").scrollbox.goto(0),
+    errors: AelluxJs.diagnostics.showHistory().filter(item => item.code === 1121).length
+  }));
+  expect(initial).toEqual({ enabled: false, errors: 1 });
+
+  await page.evaluate(() => document.getElementById("item")
+    .setAttribute("data-ae-snap-item", ""));
+  await expect.poll(() => page.evaluate(() => getComputedStyle(
+    document.getElementById("item")).scrollSnapAlign)).toBe("center");
+  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(0)))
+    .toBe(true);
+
+  await page.evaluate(() => document.getElementById("item")
+    .removeAttribute("data-ae-snap-item"));
+  await expect.poll(() => page.evaluate(() => getComputedStyle(
+    document.getElementById("item")).scrollSnapAlign)).toBe("start");
+  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(0)))
+    .toBe(false);
+});
+
+test("snap uses horizontal by default and centers only its selected axis", async ({ page }) => {
+  await setup(page, `<div id="horizontal" data-ae-scrollbox data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow:auto">
+    <div style="display:flex;width:300px;height:200px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:40px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:40px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:40px"></div>
+    </div>
+  </div>
+  <div id="vertical" data-ae-scrollbox data-ae-scrollbox-snap="vertical"
+    style="width:100px;height:100px;overflow-x:hidden;overflow-y:auto">
+    <div style="width:300px;height:300px">
+      <div data-ae-snap-item style="width:40px;height:100px"></div>
+      <div data-ae-snap-item style="width:40px;height:100px"></div>
+      <div data-ae-snap-item style="width:40px;height:100px"></div>
+    </div>
+  </div>`);
+  const styles = await page.evaluate(() => ["horizontal", "vertical"].map(id => {
+    const element = document.getElementById(id);
+    return [getComputedStyle(element).scrollSnapType,
+      getComputedStyle(element.firstElementChild.children[1]).scrollSnapAlign];
+  }));
+  expect(styles).toEqual([["x mandatory", "center"], ["y mandatory", "center"]]);
+
+  await page.evaluate(() => document.getElementById("vertical")
+    .setAttribute("data-ae-scrollbox-snap", "horizontal"));
+  await expect.poll(() => page.evaluate(() => getComputedStyle(
+    document.getElementById("vertical")).scrollSnapType)).toBe("x mandatory");
+  await page.evaluate(() => document.getElementById("vertical")
+    .setAttribute("data-ae-scrollbox-snap", "vertical"));
+  await expect.poll(() => page.evaluate(() => getComputedStyle(
+    document.getElementById("vertical")).scrollSnapType)).toBe("y mandatory");
+
+  await page.evaluate(() => {
+    AelluxJs.mountManager.controller("horizontal").scrollbox.goto(1);
+    AelluxJs.mountManager.controller("vertical").scrollbox.goto(1);
+  });
+  await expect.poll(() => page.evaluate(() => ["horizontal", "vertical"].map(id => {
+    const element = document.getElementById(id);
+    return [element.scrollLeft, element.scrollTop];
+  }))).toEqual([[100, 0], [0, 100]]);
+});
+
+test("snap item values align controller navigation on both axes", async ({ page }) => {
+  await setup(page, `<div id="horizontal" data-ae-scrollbox data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;gap:20px;width:260px;height:100px">
+      <div data-ae-snap-item style="flex:none;width:60px;height:100px"></div>
+      <div data-ae-snap-item="left" style="flex:none;width:60px;height:100px"></div>
+      <div data-ae-snap-item="right" style="flex:none;width:60px;height:100px"></div>
+    </div>
+  </div>
+  <div id="vertical" data-ae-scrollbox data-ae-scrollbox-snap="vertical"
+    style="width:100px;height:100px;overflow-x:hidden;overflow-y:auto">
+    <div style="display:flex;flex-direction:column;gap:20px;height:260px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:60px"></div>
+      <div data-ae-snap-item="top" style="flex:none;width:100px;height:60px"></div>
+      <div data-ae-snap-item="bottom" style="flex:none;width:100px;height:60px"></div>
+    </div>
+  </div>`);
+
+  const alignments = await page.evaluate(() => ["horizontal", "vertical"].map(id =>
+    Array.from(document.getElementById(id).firstElementChild.children,
+      item => getComputedStyle(item).scrollSnapAlign)));
+  expect(alignments).toEqual([["center", "start", "end"], ["center", "start", "end"]]);
+
+  await page.evaluate(() => ["horizontal", "vertical"].forEach(id =>
+    AelluxJs.mountManager.controller(id).scrollbox.goto(1)));
+  await expect.poll(() => page.evaluate(() => [
+    document.getElementById("horizontal").scrollLeft,
+    document.getElementById("vertical").scrollTop
+  ])).toEqual([80, 80]);
+  await expect.poll(() => page.evaluate(() => ["horizontal", "vertical"].map(id => {
+    const item = document.getElementById(id).firstElementChild.children[1];
+    return Number(item.style.getPropertyValue("--ae-snap-focus"));
+  }))).toEqual([1, 1]);
+
+  await page.evaluate(() => ["horizontal", "vertical"].forEach(id =>
+    AelluxJs.mountManager.controller(id).scrollbox.goto(2)));
+  await expect.poll(() => page.evaluate(() => [
+    document.getElementById("horizontal").scrollLeft,
+    document.getElementById("vertical").scrollTop
+  ])).toEqual([120, 120]);
+  await expect.poll(() => page.evaluate(() => ["horizontal", "vertical"].map(id => {
+    const item = document.getElementById(id).firstElementChild.children[2];
+    return Number(item.style.getPropertyValue("--ae-snap-focus"));
+  }))).toEqual([1, 1]);
+
+  await page.evaluate(() => {
+    const box = document.getElementById("horizontal");
+    box.firstElementChild.children[1].setAttribute("data-ae-snap-item", "center");
+    AelluxJs.mountManager.controller("horizontal").scrollbox.goto(1);
+  });
+  await expect.poll(() => page.evaluate(() => document.getElementById("horizontal")
+    .scrollLeft)).toBe(60);
+});
+
+test("snap restores the box and child inline rules on unmount", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:180px;height:100px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity">
+    <div style="display:flex;width:240px">
+      <div data-ae-snap-item style="flex:none;width:80px;height:100px;scroll-snap-align:start"></div>
+      <div data-ae-snap-item style="flex:none;width:80px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:80px;height:100px"></div>
+    </div>
+  </div>`);
+  const styles = await page.evaluate(async () => {
+    const element = document.getElementById("gallery");
+    const child = element.firstElementChild.firstElementChild;
+    const during = [getComputedStyle(element).scrollSnapType,
+      getComputedStyle(child).scrollSnapAlign];
+    await AelluxJs.mountManager.unmount(element, "scrollbox-snap");
+    return { during, after: [element.style.scrollSnapType, child.style.scrollSnapAlign],
+      ready: element.classList.contains("ae--snap-ready"),
+      scrollbox: !!AelluxJs.mountManager.controller(element)?.scrollbox };
+  });
+  expect(styles).toEqual({ during: ["x mandatory", "center"],
+    after: ["x", "start"], ready: false, scrollbox: true });
+});
+
+test("snap children publish focus only through native scrolling", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  const values = (left = null) => page.evaluate(async left => {
+    const element = document.getElementById("gallery");
+    if (left !== null) {
+      element.style.setProperty("scroll-snap-type", "none", "important");
+      element.scrollTo({ left, behavior: "instant" });
+      element.dispatchEvent(new Event("scroll"));
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    }
+    return Array.from(element.firstElementChild.children,
+      item => [item.style.getPropertyValue("--ae-snap-viewport"),
+        Number(item.style.getPropertyValue("--ae-snap-focus"))]);
+  }, left);
+  await expect.poll(values).toEqual([["", 1], ["", 0], ["", 0]]);
+  expect(await values(50)).toEqual([["", 0.5], ["", 0.5], ["", 0]]);
+  expect(await values(100)).toEqual([["", 0], ["", 1], ["", 0]]);
+  await page.evaluate(() => AelluxJs.mountManager.unmount(document.body, "scrollbox-snap"));
+  expect(await page.evaluate(() => Array.from(
+    document.querySelectorAll("[data-ae-snap-item]"), item => [
+      item.style.getPropertyValue("--ae-snap-viewport"),
+      item.style.getPropertyValue("--ae-snap-focus")
+    ]
+  ))).toEqual([["", ""], ["", ""], ["", ""]]);
+});
+
+test("vertical snap children publish values along the vertical axis", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap="vertical"
+    style="width:100px;height:100px;overflow-x:hidden;overflow-y:auto">
+    <div style="width:100px">
+      <div data-ae-snap-item style="height:100px"></div>
+      <div data-ae-snap-item style="height:100px"></div>
+      <div data-ae-snap-item style="height:100px"></div>
+    </div>
+  </div>`);
+  await page.evaluate(() => document.getElementById("gallery")
+    .scrollTo({ top: 100, behavior: "instant" }));
+  await expect.poll(() => page.evaluate(() => Array.from(
+    document.querySelectorAll("[data-ae-snap-item]"),
+    item => [item.style.getPropertyValue("--ae-snap-viewport"),
+      Number(item.style.getPropertyValue("--ae-snap-focus"))]
+  ))).toEqual([["", 0], ["", 1], ["", 0]]);
+});
+
+test("native scroll end snaps the nearest point after scrollbar scrolling", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap="vertical"
+    style="width:100px;height:100px;overflow:auto">
+    <div style="width:100px">
+      <div data-ae-snap-item style="height:100px"></div>
+      <div data-ae-snap-item style="height:100px"></div>
+      <div data-ae-snap-item style="height:100px"></div>
+    </div>
+  </div>`);
+  await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    element.scrollTo({ top: 130, behavior: "instant" });
+    element.dispatchEvent(new Event("scrollend"));
+  });
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollTop))
+    .toBe(100);
+});
+
+test("native snap compares centers only on the selected axis", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow:auto">
+    <div style="position:relative;width:400px;height:400px">
+      <div data-ae-snap-item id="first" style="position:absolute;left:0;top:0;width:100px;height:100px"></div>
+      <div data-ae-snap-item id="horizontal-nearest"
+        style="position:absolute;left:180px;top:300px;width:100px;height:100px"></div>
+      <div data-ae-snap-item id="diagonal-nearest"
+        style="position:absolute;left:240px;top:0;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    const events = [];
+    element.addEventListener("AelluxJsScrollboxSnapChange", event =>
+      events.push(event.detail.item.id));
+    element.style.setProperty("scroll-snap-type", "none", "important");
+    element.scrollTo({ left: 125, top: 0, behavior: "instant" });
+    element.dispatchEvent(new Event("scrollend"));
+    return { events, top: element.scrollTop };
+  });
+  expect(result).toEqual({ events: ["horizontal-nearest"], top: 0 });
+});
+
+test("snap change compares each item's requested alignment", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="position:relative;width:300px;height:100px">
+      <div data-ae-snap-item id="first"
+        style="position:absolute;left:0;width:40px;height:100px"></div>
+      <div data-ae-snap-item="left" id="aligned-left"
+        style="position:absolute;left:100px;width:40px;height:100px"></div>
+      <div data-ae-snap-item id="centered"
+        style="position:absolute;left:180px;width:40px;height:100px"></div>
+    </div>
+  </div>`);
+
+  const selected = await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    const events = [];
+    element.addEventListener("AelluxJsScrollboxSnapChange", event =>
+      events.push(event.detail.item.id));
+    element.style.setProperty("scroll-snap-type", "none", "important");
+    element.scrollTo({ left: 120, behavior: "instant" });
+    element.dispatchEvent(new Event("scrollend"));
+    return events;
+  });
+  expect(selected).toEqual(["aligned-left"]);
+});
+
+for (const ending of ["pointerup", "pointercancel"]) {
+  test(`snap completion waits for ${ending} before starting its idle timer`, async ({ page }) => {
+    await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+      style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+      <div style="display:flex;width:300px">
+        <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+        <div data-ae-snap-item id="second" style="flex:none;width:100px;height:100px"></div>
+        <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      </div>
+    </div>`);
+    await page.evaluate(() => {
+      const element = document.getElementById("gallery");
+      window.snapChanges = [];
+      element.addEventListener("AelluxJsScrollboxSnapChange", event =>
+        window.snapChanges.push(event.detail.index));
+      element.dispatchEvent(new PointerEvent("pointerdown", {
+        bubbles: true, isPrimary: true, pointerId: 91,
+        pointerType: "touch", button: 0, buttons: 1
+      }));
+      AelluxJs.mountManager.controller("gallery").scrollbox.goto(1);
+    });
+    await page.waitForTimeout(170);
+    expect(await page.evaluate(() => window.snapChanges)).toEqual([]);
+    await page.evaluate(ending => window.dispatchEvent(new PointerEvent(ending, {
+      bubbles: true, isPrimary: true, pointerId: 91,
+      pointerType: "touch", button: 0, buttons: 0
+    })), ending);
+    await expect.poll(() => page.evaluate(() => window.snapChanges)).toEqual([1]);
+  });
+}
+
+test("snap timer waits for touchend after a touch pointer is canceled", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item id="second" style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    window.snapChanges = [];
+    element.addEventListener("AelluxJsScrollboxSnapChange", event =>
+      window.snapChanges.push(event.detail.index));
+    const touch = { identifier: 92 };
+    const start = new Event("touchstart", { bubbles: true });
+    Object.defineProperty(start, "changedTouches", { value: [touch] });
+    element.dispatchEvent(start);
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 92,
+      pointerType: "touch", button: 0, buttons: 1
+    }));
+    element.scrollTo({ left: 100, behavior: "instant" });
+    window.dispatchEvent(new PointerEvent("pointercancel", {
+      bubbles: true, isPrimary: true, pointerId: 92,
+      pointerType: "touch", button: 0, buttons: 0
+    }));
+  });
+  await page.waitForTimeout(170);
+  expect(await page.evaluate(() => window.snapChanges)).toEqual([]);
+  await page.evaluate(() => {
+    const end = new Event("touchend", { bubbles: true });
+    Object.defineProperty(end, "changedTouches", { value: [{ identifier: 92 }] });
+    window.dispatchEvent(end);
+  });
+  await expect.poll(() => page.evaluate(() => window.snapChanges)).toEqual([1]);
+});
+
+test("snap reports the first or last point at a scroll limit", async ({ page }) => {
+  await setup(page, `<div id="start" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:280px">
+      <div data-ae-snap-item id="start-first" style="flex:none;width:20px;height:100px"></div>
+      <div data-ae-snap-item id="start-middle" style="flex:none;width:60px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:200px;height:100px"></div>
+    </div>
+  </div>
+  <div id="end" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:280px">
+      <div data-ae-snap-item style="flex:none;width:200px;height:100px"></div>
+      <div data-ae-snap-item id="end-middle" style="flex:none;width:60px;height:100px"></div>
+      <div data-ae-snap-item id="end-last" style="flex:none;width:20px;height:100px"></div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const start = document.getElementById("start");
+    const end = document.getElementById("end");
+    const events = [];
+    start.addEventListener("AelluxJsScrollboxSnapChange", event =>
+      events.push(event.detail.item.id));
+    end.addEventListener("AelluxJsScrollboxSnapChange", event =>
+      events.push(event.detail.item.id));
+    start.scrollTo({ left: 0, behavior: "instant" });
+    end.scrollTo({ left: end.scrollWidth - end.clientWidth, behavior: "instant" });
+    start.dispatchEvent(new Event("scrollend"));
+    end.dispatchEvent(new Event("scrollend"));
+    return events;
+  });
+  expect(result).toEqual(["end-last"]);
+});
+
+test("snap wheel advances one item per gesture, including inverted wheel", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow:auto">
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  const wheel = deltas => page.evaluate(values => {
+    const element = document.getElementById("gallery");
+    return values.map(({ deltaX = 0, deltaY = 0 }) => {
+      const event = new WheelEvent("wheel", {
+        deltaX, deltaY, bubbles: true, cancelable: true
+      });
+      element.dispatchEvent(event);
+      return event.defaultPrevented;
+    });
+  }, deltas);
+  expect(await wheel([{ deltaY: 120 }, { deltaY: 120 }])).toEqual([true, true]);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(100);
+  await page.waitForTimeout(150);
+  expect(await wheel([{ deltaX: 120 }])).toEqual([true]);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(200);
+  await page.waitForTimeout(150);
+  expect(await wheel([{ deltaY: 120 }])).toEqual([false]);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(200);
+  await page.waitForTimeout(150);
+  expect(await wheel([{ deltaY: -120 }])).toEqual([true]);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(100);
+});
+
+test("a nested vertical Scrollbox owns wheel input before an enclosing horizontal snap box", async ({ page }) => {
+  await setup(page, `<div id="outer" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:200px;height:100px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px">
+        <div id="inner" data-ae-scrollbox="native"
+          style="width:100px;height:80px;overflow-x:hidden;overflow-y:auto">
+          <div style="height:300px"></div>
+        </div>
+      </div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const outer = document.getElementById("outer");
+    const inner = document.getElementById("inner");
+    const wheel = element => {
+      const event = new WheelEvent("wheel", { deltaY: 120, bubbles: true, cancelable: true });
+      element.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    return { inner: wheel(inner), outer: wheel(outer), left: outer.scrollLeft };
+  });
+  expect(result).toEqual({ inner: false, outer: true, left: 0 });
+  await expect.poll(() => page.evaluate(() => document.getElementById("outer").scrollLeft))
+    .toBe(100);
+});
+
+for (const behavior of ["auto", "contain"]) {
+  test(`snap wheel at both list ends respects overscroll-behavior ${behavior}`, async ({ page }) => {
+    if (behavior === "contain") {
+      const supported = await page.evaluate(() => CSS.supports("overscroll-behavior-y", "contain"));
+      test.skip(!supported, "This browser does not support overscroll-behavior-y");
+    }
+    await setup(page, `<div id="parent" style="height:120px;overflow-y:auto">
+      <div style="height:150px"></div>
+      <div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap="vertical"
+        style="width:100px;height:100px;overflow-y:auto;overscroll-behavior-y:${behavior}">
+        <div data-ae-snap-item style="height:100px"></div>
+        <div data-ae-snap-item style="height:100px"></div>
+        <div data-ae-snap-item style="height:100px"></div>
+      </div>
+      <div style="height:400px"></div>
+    </div>`);
+    const parent = page.locator("#parent");
+    const gallery = page.locator("#gallery");
+    await parent.evaluate(element => element.scrollTo({ top: 100, behavior: "instant" }));
+    const point = await gallery.boundingBox();
+    await page.mouse.move(point.x + 50, point.y + 50);
+    await page.mouse.wheel(0, -120);
+    if (behavior === "auto") {
+      await expect.poll(() => parent.evaluate(element => element.scrollTop))
+        .toBeLessThan(100);
+    } else {
+      expect(await parent.evaluate(element => element.scrollTop)).toBe(100);
+    }
+
+    await parent.evaluate(element => element.scrollTo({ top: 100, behavior: "instant" }));
+    await gallery.evaluate(element => element.scrollTo({ top: 200, behavior: "instant" }));
+    await expect.poll(() => gallery.evaluate(element => element.scrollTop)).toBe(200);
+    await page.mouse.wheel(0, 120);
+    if (behavior === "auto") {
+      await expect.poll(() => parent.evaluate(element => element.scrollTop))
+        .toBeGreaterThan(100);
+    } else {
+      expect(await parent.evaluate(element => element.scrollTop)).toBe(100);
+    }
+    await expect.poll(() => gallery.evaluate(element =>
+      getComputedStyle(element).scrollSnapType)).toBe("y mandatory");
+  });
+}
+
+test("wheel at a snap edge waits for the navigation target before releasing", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  const pending = await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    const controller = AelluxJs.mountManager.controller("gallery").scrollbox;
+    const wheel = deltaY => {
+      const event = new WheelEvent("wheel", { deltaY, bubbles: true, cancelable: true });
+      element.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    controller.goto(2);
+    const end = wheel(120);
+    return { end, suspended: getComputedStyle(element).scrollSnapType };
+  });
+  expect(pending).toEqual({ end: true, suspended: "x mandatory" });
+  await page.locator("#gallery").evaluate(element =>
+    element.scrollTo({ left: 200, behavior: "instant" }));
+  await expect.poll(() => page.locator("#gallery").evaluate(element => element.scrollLeft))
+    .toBe(200);
+  const settled = await page.locator("#gallery").evaluate(element => {
+    const event = new WheelEvent("wheel", { deltaY: 120, bubbles: true, cancelable: true });
+    element.dispatchEvent(event);
+    return { prevented: event.defaultPrevented, suspended: getComputedStyle(element).scrollSnapType };
+  });
+  expect(settled).toEqual({ prevented: false, suspended: "none" });
+  await expect.poll(() => page.locator("#gallery").evaluate(element =>
+    getComputedStyle(element).scrollSnapType)).toBe("x mandatory");
+});
+
+test("horizontal snap releases vertical wheel to its parent at the last item", async ({ page }) => {
+  await setup(page, `<div id="parent" style="height:120px;overflow-y:auto">
+    <div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+      style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+      <div style="display:flex;width:300px">
+        <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+        <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+        <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      </div>
+    </div>
+    <div style="height:400px"></div>
+  </div>`);
+  const gallery = page.locator("#gallery");
+  await gallery.evaluate(element => element.scrollTo({ left: 200, behavior: "instant" }));
+  const point = await gallery.boundingBox();
+  await page.mouse.move(point.x + 50, point.y + 50);
+  await page.mouse.wheel(0, 120);
+  await expect.poll(() => page.locator("#parent").evaluate(element => element.scrollTop))
+    .toBeGreaterThan(0);
+  expect(await gallery.evaluate(element => element.scrollLeft)).toBe(200);
+  await expect.poll(() => gallery.evaluate(element =>
+    getComputedStyle(element).scrollSnapType)).toBe("x mandatory");
+});
+
+test("snap wheel uses the dominant gesture axis", async ({ page }) => {
+  await setup(page, `<div id="horizontal" data-ae-scrollbox data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:200px;height:100px">
+      <div data-ae-snap-item style="flex:none;width:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px"></div>
+    </div>
+  </div>
+  <div id="vertical" data-ae-scrollbox data-ae-scrollbox-snap="vertical"
+    style="width:100px;height:100px;overflow-y:auto;overflow-x:hidden">
+    <div data-ae-snap-item style="height:100px"></div>
+    <div data-ae-snap-item style="height:100px"></div>
+  </div>`);
+
+  const result = await page.evaluate(() => {
+    const horizontal = document.getElementById("horizontal");
+    const vertical = document.getElementById("vertical");
+    const wheel = (element, deltaX, deltaY) => {
+      const event = new WheelEvent("wheel", {
+        deltaX, deltaY, bubbles: true, cancelable: true
+      });
+      element.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    return {
+      diagonal: wheel(horizontal, -2, 120),
+      horizontalOnly: wheel(vertical, 120, 0)
+    };
+  });
+  expect(result).toEqual({ diagonal: true, horizontalOnly: false });
+  await expect.poll(() => page.evaluate(() => document.getElementById("horizontal").scrollLeft))
+    .toBe(100);
+  expect(await page.evaluate(() => document.getElementById("vertical").scrollTop))
+    .toBe(0);
+});
+
+test("horizontal snap honors disabled vertical wheel conversion", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox data-ae-scrollbox-snap
+    data-ae-scrollbox-wheel-horizontal="false"
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+
+  const wheel = deltas => page.evaluate(values => {
+    const element = document.getElementById("gallery");
+    return values.map(({ deltaX = 0, deltaY = 0 }) => {
+      const event = new WheelEvent("wheel", {
+        deltaX, deltaY, bubbles: true, cancelable: true
+      });
+      element.dispatchEvent(event);
+      return event.defaultPrevented;
+    });
+  }, deltas);
+
+  expect(await wheel([{ deltaY: 120 }])).toEqual([false]);
+  expect(await page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(0);
+  expect(await wheel([{ deltaX: 120 }])).toEqual([true]);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(100);
+});
+
+test("snap wheel at the edge stretches the elastic wrapper without scrolling a hidden axis", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div id="wrapper" data-ae-scrollbox-elastic
+      style="display:flex;width:300px;height:200px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:200px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:200px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:200px"></div>
+    </div>
+  </div>`);
+  await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(2));
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(200);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    const event = new WheelEvent("wheel", {
+      deltaY: 120, bubbles: true, cancelable: true
+    });
+    element.dispatchEvent(event);
+    return { prevented: event.defaultPrevented,
+      overflowY: getComputedStyle(element).overflowY,
+      maxY: element.scrollHeight - element.clientHeight,
+      transform: document.getElementById("wrapper").style.transform };
+  });
+  expect(result.prevented).toBe(true);
+  expect(result.overflowY).toBe("hidden");
+  expect(result.maxY).toBeGreaterThan(1);
+  expect(result.transform).toMatch(/^scale\([^,]+, 1\) translate3d\(-[^,]+, 0px, 0px\)/);
+});
+
+test("vertical snap wheel at its last item stretches elastic and scrolls the parent", async ({ page }) => {
+  await setup(page, `<div id="parent" style="height:120px;overflow-y:auto">
+    <div id="gallery" data-ae-scrollbox data-ae-scrollbox-snap="vertical"
+      style="width:100px;height:100px;overflow-y:auto;overflow-x:hidden">
+      <div id="wrapper" data-ae-scrollbox-elastic style="height:300px">
+        <div data-ae-snap-item style="height:100px"></div>
+        <div data-ae-snap-item style="height:100px"></div>
+        <div data-ae-snap-item style="height:100px"></div>
+      </div>
+    </div>
+    <div style="height:400px"></div>
+  </div>`);
+
+  await page.evaluate(() => document.getElementById("gallery")
+    .scrollTo({ top: 200, behavior: "instant" }));
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollTop))
+    .toBe(200);
+
+  await page.evaluate(() => {
+    const wrapper = document.getElementById("wrapper");
+    window.__elasticTransforms = [];
+    const observer = new MutationObserver(() => {
+      window.__elasticTransforms.push(wrapper.style.transform);
+    });
+    observer.observe(wrapper, { attributes: true, attributeFilter: ["style"] });
+  });
+
+  const box = await page.locator("#gallery").boundingBox();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.wheel(0, 120);
+
+  await expect.poll(() => page.evaluate(() => document.getElementById("parent").scrollTop))
+    .toBeGreaterThan(0);
+  expect(await page.evaluate(() => window.__elasticTransforms)).toContainEqual(
+    expect.stringMatching(/^scale\(1, [^,]+\) translate3d\(0px, -[^,]+, 0px\)/));
+});
+
+test("ctrl+wheel remains untouched by snap and elastic", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div id="wrapper" data-ae-scrollbox-elastic
+      style="display:flex;width:200px;height:100px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    const event = new WheelEvent("wheel", {
+      deltaY: 120, ctrlKey: true, bubbles: true, cancelable: true
+    });
+    element.dispatchEvent(event);
+    return { prevented: event.defaultPrevented, scroll: element.scrollLeft,
+      transform: document.getElementById("wrapper").style.transform };
+  });
+  expect(result).toEqual({ prevented: false, scroll: 0, transform: "" });
+});
+
+test("noncancelable wheel is ignored by snap, elastic and horizontal conversion", async ({ page }) => {
+  await setup(page, `<div id="snap" data-ae-scrollbox data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div id="wrapper" data-ae-scrollbox-elastic
+      style="display:flex;width:200px;height:100px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>
+  <div id="native" data-ae-scrollbox style="width:100px;height:100px;
+    overflow-x:auto;overflow-y:hidden">
+    <div style="width:200px;height:100px"></div>
+  </div>`);
+
+  const result = await page.evaluate(() => {
+    const snap = document.getElementById("snap");
+    const native = document.getElementById("native");
+    const wheel = element => element.dispatchEvent(new WheelEvent("wheel", {
+      deltaY: 120, bubbles: true, cancelable: false
+    }));
+
+    wheel(snap);
+    const first = snap.scrollLeft;
+    snap.scrollTo({ left: 100, behavior: "instant" });
+    wheel(snap);
+    wheel(native);
+    return { first, last: snap.scrollLeft, native: native.scrollLeft,
+      transform: document.getElementById("wrapper").style.transform };
+  });
+  expect(result).toEqual({ first: 0, last: 100, native: 0, transform: "" });
+});
+
+test("elastic pressure suspends CSS snap through the return animation", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div data-ae-scrollbox-elastic
+      style="display:flex;width:300px;height:100px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+
+  await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    element.scrollTo({ left: 200, behavior: "instant" });
+  });
+  const box = await page.locator("#gallery").boundingBox();
+  await page.mouse.move(box.x + 55, box.y + 50);
+  await page.mouse.down();
+  await page.waitForTimeout(120);
+  await page.mouse.move(box.x + 20, box.y + 50, { steps: 3 });
+  expect(await page.evaluate(() => getComputedStyle(
+    document.getElementById("gallery")).scrollSnapType)).toBe("none");
+  await page.mouse.up();
+  await page.waitForTimeout(120);
+  expect(await page.evaluate(() => getComputedStyle(
+    document.getElementById("gallery")).scrollSnapType)).toBe("none");
+  await expect.poll(() => page.evaluate(() => getComputedStyle(
+    document.getElementById("gallery")).scrollSnapType),
+    { timeout: 10000 }).toBe("x mandatory");
+});
+
+test("native touch release does not trigger scripted flick navigation", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+
+  await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    const start = new Event("touchstart", { bubbles: true });
+    Object.defineProperty(start, "changedTouches", { value: [{
+      identifier: 47, clientX: 60, clientY: 50
+    }] });
+    element.dispatchEvent(start);
+
+    const end = new Event("touchend", { bubbles: true });
+    Object.defineProperty(end, "changedTouches", { value: [{
+      identifier: 47, clientX: 58, clientY: 50
+    }] });
+    window.dispatchEvent(end);
+  });
+  await page.waitForTimeout(150);
+  expect(await page.evaluate(() => document.getElementById("gallery").scrollLeft)).toBe(0);
+});
+
+test("horizontal wheel ignores hidden vertical overflow during elastic pressure", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div id="wrapper" data-ae-scrollbox-elastic
+      style="width:300px;height:200px"></div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    element.scrollTo({ left: element.scrollWidth, behavior: "instant" });
+    const event = new WheelEvent("wheel", {
+      deltaX: 130, deltaY: 120, bubbles: true, cancelable: true
+    });
+    element.dispatchEvent(event);
+    return { maxY: element.scrollHeight - element.clientHeight,
+      maxX: element.scrollWidth - element.clientWidth,
+      scrollLeft: element.scrollLeft,
+      transform: document.getElementById("wrapper").style.transform };
+  });
+  expect(result.maxY).toBeGreaterThan(1);
+  expect(result.maxX).toBeGreaterThan(1);
+  expect(result.transform).toMatch(/^scale\([^,]+, 1\) translate3d\(-[^,]+, 0px, 0px\)/);
+});
+
+for (const axis of ["x", "y"]) {
+  test(`touch elastic ignores ${axis} overflow hidden despite excess content`, async ({ page }) => {
+    const overflow = axis === "x" ? "overflow-x:hidden;overflow-y:auto" :
+      "overflow-x:auto;overflow-y:hidden";
+    await setup(page, `<div id="box" data-ae-scrollbox="native"
+      style="width:100px;height:100px;${overflow}">
+      <div data-ae-scrollbox-elastic style="width:300px;height:300px"></div>
+    </div>`);
+    const result = await page.evaluate(axis => {
+      const element = document.getElementById("box");
+      const touchEvent = (type, x, y, active) => {
+        const event = new Event(type, { bubbles: true, cancelable: true });
+        Object.defineProperty(event, "touches", { value: active ? [
+          { identifier: 777, clientX: x, clientY: y }
+        ] : [] });
+        return event;
+      };
+      element.dispatchEvent(touchEvent("touchstart", 40, 40, true));
+      const move = touchEvent("touchmove", axis === "x" ? 100 : 40,
+        axis === "y" ? 100 : 40, true);
+      element.dispatchEvent(move);
+      const result = {
+        overflow: axis === "x" ? element.scrollWidth - element.clientWidth :
+          element.scrollHeight - element.clientHeight,
+        prevented: move.defaultPrevented,
+        transform: element.firstElementChild.style.transform
+      };
+      element.dispatchEvent(touchEvent("touchend", 100, 100, false));
+      return result;
+    }, axis);
+    expect(result.overflow).toBeGreaterThan(1);
+    expect(result.prevented).toBe(false);
+    expect(result.transform).toBe("");
+  });
+}
+
+for (const axis of ["x", "y"]) {
+  for (const elastic of [false, true]) {
+    test(`fractional ${axis} pointer steps stay proportional${elastic ? " with elastic" : ""}`, async ({ page }) => {
+      await setup(page, `<div id="gallery" data-ae-scrollbox="pointer"
+        data-ae-scrollbox-snap="${axis === "x" ? "horizontal" : "vertical"}"
+        style="width:100px;height:100px;overflow-${axis}:auto;overflow-${axis === "x" ? "y" : "x"}:hidden">
+        <div ${elastic ? "data-ae-scrollbox-elastic" : ""}
+          style="display:flex;flex-direction:${axis === "x" ? "row" : "column"};width:${axis === "x" ? 2000 : 100}px">
+          ${'<div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>'.repeat(20)}
+        </div>
+      </div>`);
+      const result = await page.evaluate(async axis => {
+        const element = document.getElementById("gallery"), rect = element.getBoundingClientRect();
+        const send = (type, distance) => new PointerEvent(type, {
+          bubbles: true, cancelable: true, isPrimary: true, pointerId: 314, pointerType: "mouse",
+          button: 0, buttons: type === "pointerup" ? 0 : 1,
+          clientX: rect.left + 70 - (axis === "x" ? distance : 0),
+          clientY: rect.top + 70 - (axis === "y" ? distance : 0)
+        });
+        const position = () => axis === "x" ? element.scrollLeft : element.scrollTop;
+        const down = send("pointerdown", 0);
+        const origin = axis === "x" ? down.clientX : down.clientY;
+        element.dispatchEvent(down);
+        const samples = [];
+        for (const distance of [250 / 3, 500 / 3, 250, 250.2, 250.4, 250.6, 250.8, 251,
+          250.8, 250.6, 250.4, 250.2, 250]) {
+          const move = send("pointermove", distance);
+          window.dispatchEvent(move);
+          // Some engines quantize PointerEvent coordinates at construction.
+          const delivered = origin - (axis === "x" ? move.clientX : move.clientY);
+          samples.push({ distance, delivered, position: position() });
+        }
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        const held = position(), transform = element.firstElementChild.style.transform;
+        window.dispatchEvent(send("pointerup", 250));
+        return { samples, held, transform };
+      }, axis);
+      // Native scroll offsets may truncate instead of rounding to nearest.
+      // Keep every sample within one CSS pixel and whole-pixel totals exact.
+      for (const sample of result.samples)
+        expect(Math.abs(sample.position - sample.delivered), JSON.stringify(sample)).toBeLessThan(1);
+      expect(result.samples.find(sample => sample.delivered === 251).position).toBe(251);
+      expect(result.held).toBe(250);
+      expect(result.transform).toBe("");
+    });
+  }
+}
+
+for (const axis of ["x", "y"]) {
+  test(`nested ${axis} pointer scrolling sends only real overflow to the parent`, async ({ page }) => {
+    await setup(page, `<div id="outer" data-ae-scrollbox="pointer" data-ae-scrollbox-momentum="false"
+      style="width:120px;height:120px;overflow:auto">
+      <div style="width:${axis === "x" ? 1000 : 120}px;height:${axis === "y" ? 1000 : 120}px">
+        <div id="inner" data-ae-scrollbox="pointer"
+          data-ae-scrollbox-snap="${axis === "x" ? "horizontal" : "vertical"}"
+          style="width:100px;height:100px;overflow-${axis}:auto;overflow-${axis === "x" ? "y" : "x"}:hidden">
+          <div style="display:flex;flex-direction:${axis === "x" ? "row" : "column"};width:${axis === "x" ? 300 : 100}px">
+            ${'<div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>'.repeat(3)}
+          </div>
+        </div>
+      </div>
+    </div>`);
+    const samples = await page.evaluate(axis => {
+      const inner = document.getElementById("inner"), outer = document.getElementById("outer");
+      const rect = inner.getBoundingClientRect();
+      const send = (type, distance) => new PointerEvent(type, {
+        bubbles: true, cancelable: true, isPrimary: true, pointerId: 315, pointerType: "mouse",
+        button: 0, buttons: type === "pointerup" ? 0 : 1,
+        clientX: rect.left + 70 - (axis === "x" ? distance : 0),
+        clientY: rect.top + 70 - (axis === "y" ? distance : 0)
+      });
+      const down = send("pointerdown", 0);
+      const origin = axis === "x" ? down.clientX : down.clientY;
+      inner.dispatchEvent(down);
+      const samples = [];
+      for (const distance of [190.2, 200.2, 250.2, 250.4, 250.6, 250.8, 251]) {
+        const move = send("pointermove", distance);
+        window.dispatchEvent(move);
+        const delivered = origin - (axis === "x" ? move.clientX : move.clientY);
+        samples.push({ distance: delivered, inner: axis === "x" ? inner.scrollLeft : inner.scrollTop,
+          outer: axis === "x" ? outer.scrollLeft : outer.scrollTop });
+      }
+      window.dispatchEvent(send("pointerup", 251));
+      return samples;
+    }, axis);
+    for (const sample of samples) {
+      expect(Math.abs(sample.inner - Math.min(200, sample.distance))).toBeLessThan(1);
+      expect(Math.abs(sample.outer - Math.max(0, sample.distance - 200))).toBeLessThan(1);
+    }
+    expect(samples.at(-1)).toEqual({ distance: 251, inner: 200, outer: 51 });
+  });
+}
+
+for (const axis of ["x", "y"]) {
+  for (const textOrigin of [false, true]) {
+    for (const trigger of ["controller", "wheel", "flick"]) {
+      test(`new ${axis} pointer press stops ${trigger} snap ${textOrigin ? "during the text selection wait" : "before the drag threshold"}`,
+        async ({ page }) => {
+          await setup(page, `<div id="gallery" data-ae-scrollbox="pointer"
+            data-ae-scrollbox-snap="${axis === "x" ? "horizontal" : "vertical"}"
+            style="width:100px;height:100px;overflow-${axis}:auto;overflow-${axis === "x" ? "y" : "x"}:hidden;font:12px/16px monospace">
+            <div style="display:flex;flex-direction:${axis === "x" ? "row" : "column"};width:${axis === "x" ? 3000 : 300}px">
+              ${Array.from({ length: 10 }, () => `<div data-ae-snap-item
+                style="flex:none;width:300px;height:300px;user-select:${textOrigin ? "text" : "none"}">${"selectable words ".repeat(60)}</div>`).join("")}
+            </div>
+          </div>`);
+          const result = await page.evaluate(async ({ axis, textOrigin, trigger }) => {
+            const element = document.getElementById("gallery");
+            const position = () => axis === "x" ? element.scrollLeft : element.scrollTop;
+            const point = await new Promise((resolve, reject) => {
+              const interrupt = () => {
+                if (position() <= 110) return;
+                element.removeEventListener("scroll", interrupt);
+                const box = element.getBoundingClientRect();
+                let x = box.left + 20, y = box.top + 20, target = element;
+                if (textOrigin) {
+                  for (const item of element.querySelectorAll("[data-ae-snap-item]")) {
+                    const range = document.createRange();
+                    range.selectNodeContents(item);
+                    const rect = Array.from(range.getClientRects()).find(rect =>
+                      rect.right > box.left + 8 && rect.left < box.left + 90 &&
+                      rect.bottom > box.top + 8 && rect.top < box.top + 90);
+                    if (!rect) continue;
+                    target = item;
+                    x = Math.max(box.left + 8, rect.left + 2);
+                    y = Math.max(box.top + 8, rect.top + 2);
+                    break;
+                  }
+                  if (target === element) {
+                    reject(new Error("No visible text for the selection wait"));
+                    return;
+                  }
+                }
+                const send = (type, distance) => new PointerEvent(type, {
+                  bubbles: true, cancelable: true, isPrimary: true, pointerId: 308,
+                  pointerType: "mouse", button: 0, buttons: type === "pointerup" ? 0 : 1,
+                  clientX: x - (axis === "x" ? distance : 0),
+                  clientY: y - (axis === "y" ? distance : 0)
+                });
+                const before = position();
+                target.dispatchEvent(send("pointerdown", 0));
+                window.dispatchEvent(send("pointermove", textOrigin ? 2 : 0.5));
+                resolve({ before, immediate: position(), send });
+              };
+              element.addEventListener("scroll", interrupt);
+              if (trigger === "controller") {
+                AelluxJs.mountManager.controller("gallery").scrollbox.goto(8);
+              } else if (trigger === "wheel") {
+                element.dispatchEvent(new WheelEvent("wheel", {
+                  bubbles: true, cancelable: true, [axis === "x" ? "deltaX" : "deltaY"]: 80
+                }));
+              } else {
+                const rect = element.getBoundingClientRect();
+                const send = (type, distance) => new PointerEvent(type, {
+                  bubbles: true, cancelable: true, isPrimary: true, pointerId: 307,
+                  pointerType: "mouse", button: 0, buttons: type === "pointerup" ? 0 : 1,
+                  clientX: rect.left + 70 - (axis === "x" ? distance : 0),
+                  clientY: rect.top + 70 - (axis === "y" ? distance : 0)
+                });
+                element.dispatchEvent(send("pointerdown", 0));
+                window.dispatchEvent(send("pointermove", 2));
+                window.dispatchEvent(send("pointerup", 2));
+              }
+            });
+            await new Promise(resolve => setTimeout(resolve, 60));
+            const duringWait = position();
+            await new Promise(resolve => setTimeout(resolve, 120));
+            const held = position();
+            const active = element.classList.contains("ae--pointerscrolling");
+            if (!textOrigin) window.dispatchEvent(point.send("pointermove", 2));
+            const moved = position();
+            window.dispatchEvent(point.send("pointerup", 2));
+            return { before: point.before, immediate: point.immediate, duringWait,
+              held, active, moved };
+          }, { axis, textOrigin, trigger });
+          expect(result.immediate).toBe(result.before);
+          expect(result.duringWait).toBeGreaterThanOrEqual(result.before);
+          expect(result.duringWait).toBeLessThanOrEqual(result.before + (textOrigin ? 2 : 0));
+          expect(result.held).toBe(result.before + (textOrigin ? 2 : 0));
+          expect(result.active).toBe(textOrigin);
+          expect(result.moved).toBe(result.before + 2);
+          await expect.poll(() => page.evaluate(() => {
+            const element = document.getElementById("gallery");
+            return getComputedStyle(element).scrollSnapType;
+          })).toBe(`${axis} mandatory`);
+        });
+    }
+  }
+}
+
+for (const ending of ["pointercancel", "blur"]) {
+  test(`${ending} restores snap after a pointer press without dragging`, async ({ page }) => {
+    await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
+      style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+      <div style="display:flex;width:300px">
+        ${'<div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>'.repeat(3)}
+      </div>
+    </div>`);
+    const during = await page.evaluate(ending => {
+      const element = document.getElementById("gallery"), rect = element.getBoundingClientRect();
+      element.dispatchEvent(new PointerEvent("pointerdown", {
+        bubbles: true, cancelable: true, isPrimary: true, pointerId: 309,
+        pointerType: "mouse", button: 0, buttons: 1,
+        clientX: rect.left + 50, clientY: rect.top + 50
+      }));
+      const during = getComputedStyle(element).scrollSnapType;
+      window.dispatchEvent(ending === "blur" ? new Event("blur") :
+        new PointerEvent("pointercancel", { pointerId: 309, pointerType: "mouse" }));
+      return during;
+    }, ending);
+    expect(during).toBe("none");
+    await expect.poll(() => page.evaluate(() => getComputedStyle(
+      document.getElementById("gallery")).scrollSnapType)).toBe("x mandatory");
+  });
+}
+
+test("real mouse interrupts a flick and only the new drag moves the held box", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:1500px">
+      ${'<div data-ae-snap-item style="flex:none;width:300px;height:100px"></div>'.repeat(5)}
+    </div>
+  </div>`);
+  const rect = await page.locator("#gallery").boundingBox();
+  await page.evaluate(() => {
+    const element = document.getElementById("gallery"), rect = element.getBoundingClientRect();
+    const send = (type, distance) => new PointerEvent(type, {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 313, pointerType: "mouse",
+      button: 0, buttons: type === "pointerup" ? 0 : 1,
+      clientX: rect.left + 70 - distance, clientY: rect.top + 50
+    });
+    element.dispatchEvent(send("pointerdown", 0));
+    window.dispatchEvent(send("pointermove", 2));
+    window.dispatchEvent(send("pointerup", 2));
+  });
+  await page.waitForFunction(() => {
+    const left = document.getElementById("gallery").scrollLeft;
+    return left > 110 && left < 400;
+  });
+  await page.mouse.move(rect.x + 30, rect.y + 50);
+  await page.mouse.down();
+  const position = () => page.evaluate(() => document.getElementById("gallery").scrollLeft);
+  const stopped = await position();
+  await page.waitForTimeout(150);
+  expect(await position()).toBe(stopped);
+  await page.mouse.move(rect.x + 32, rect.y + 50);
+  expect(await position()).toBe(stopped - 2);
+  await page.waitForTimeout(150);
+  expect(await position()).toBe(stopped - 2);
+  await page.mouse.move(rect.x + 34, rect.y + 50);
+  expect(await position()).toBe(stopped - 4);
+  await page.mouse.up();
+  await expect.poll(() => page.evaluate(() => getComputedStyle(
+    document.getElementById("gallery")).scrollSnapType)).toBe("x mandatory");
+  await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(2));
+  await expect.poll(position).toBe(700);
+});
+
+test("a new press discards the previous pending flick", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:900px">
+      ${'<div data-ae-snap-item style="flex:none;width:300px;height:100px"></div>'.repeat(3)}
+    </div>
+  </div>`);
+  const held = await page.evaluate(async () => {
+    const element = document.getElementById("gallery"), rect = element.getBoundingClientRect();
+    const send = (type, pointerId, x) => new PointerEvent(type, {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId, pointerType: "mouse",
+      button: 0, buttons: type === "pointerup" ? 0 : 1,
+      clientX: rect.left + x, clientY: rect.top + 50
+    });
+    element.dispatchEvent(send("pointerdown", 310, 70));
+    window.dispatchEvent(send("pointermove", 310, 68));
+    window.dispatchEvent(send("pointerup", 310, 68));
+    element.dispatchEvent(send("pointerdown", 311, 30));
+    const stopped = element.scrollLeft;
+    await new Promise(resolve => setTimeout(resolve, 160));
+    const held = element.scrollLeft;
+    window.dispatchEvent(send("pointerup", 311, 30));
+    return { stopped, held };
+  });
+  expect(held.held).toBe(held.stopped);
+  await page.waitForTimeout(500);
+  expect(await page.evaluate(() => document.getElementById("gallery").scrollLeft)).toBe(held.stopped);
+});
+
+test("a native touch press keeps CSS snap enabled", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden;display:flex">
+    ${'<div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>'.repeat(3)}
+  </div>`, { coarse: true });
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, pointerId: 312, pointerType: "touch", isPrimary: true, buttons: 1
+    }));
+    const type = getComputedStyle(element).scrollSnapType;
+    window.dispatchEvent(new PointerEvent("pointercancel", { pointerId: 312, pointerType: "touch" }));
+    return { type, active: element.classList.contains("ae--pointerscrolling") };
+  });
+  expect(result).toEqual({ type: "x mandatory", active: false });
+});
+
+test("pointer snap advances one point on a fast horizontal swipe", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow:auto">
+    <div data-ae-scrollbox-elastic
+      style="display:flex;width:300px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 70, y = rect.top + 70;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 232,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 232,
+      pointerType: "mouse", buttons: 1, clientX: x - 60, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 232, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 60, clientY: y
+    }));
+  });
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(100);
+});
+
+test("snap flick keeps its starting item across multiple pointer moves", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:500px">
+      ${'<div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>'.repeat(5)}
+    </div>
+  </div>`);
+  await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 80, y = rect.top + 50;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 305,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    for (const distance of [60, 61]) window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 305,
+      pointerType: "mouse", buttons: 1, clientX: x - distance, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 305, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 61, clientY: y
+    }));
+  });
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(100);
+});
+
+test("CSS snap flick advances wide items while a slow drag stays within one point", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:900px">
+      <div data-ae-snap-item style="flex:none;width:300px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:300px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:300px;height:100px"></div>
+    </div>
+  </div>`);
+  const move = async (distance, pointerId, immediateRelease = false) =>
+    page.evaluate(({ distance, pointerId, immediateRelease }) => {
+    const element = document.getElementById("gallery");
+    const rect = element.getBoundingClientRect();
+    // Distinct press positions keep these drags outside the multi-click guard.
+    const x = rect.left + (pointerId === 301 ? 70 : pointerId === 302 ? 45 : 20);
+    const y = rect.top + 50;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId,
+      pointerType: "mouse", buttons: 1, clientX: x - distance, clientY: y
+    }));
+    const point = { x: x - distance, y };
+    if (immediateRelease) window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: point.x, clientY: point.y
+    }));
+    return point;
+  }, { distance, pointerId, immediateRelease });
+  const release = async (point, pointerId) => page.evaluate(({ point, pointerId }) => {
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: point.x, clientY: point.y
+    }));
+  }, { point, pointerId });
+  const reset = async () => {
+    await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(0));
+    await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+      .toBe(100);
+  };
+
+  await move(2, 301, true);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(400);
+
+  await reset();
+  const drag = await move(35, 302);
+  await page.waitForTimeout(150);
+  expect(await page.evaluate(() => document.getElementById("gallery").scrollLeft)).toBe(135);
+  await release(drag, 302);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBeGreaterThan(125);
+
+  await reset();
+  const small = await move(2, 303);
+  await page.waitForTimeout(250);
+  expect(await page.evaluate(() => document.getElementById("gallery").scrollLeft)).toBe(102);
+  await release(small, 303);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBeLessThan(110);
+});
+
+test("a longer drag settles at the nearest snap point", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("gallery");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 95, y = rect.top + 50;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 304,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 304,
+      pointerType: "mouse", buttons: 1, clientX: x - 90, clientY: y
+    }));
+    const center = rect.left + element.clientWidth / 2;
+    const items = Array.from(element.firstElementChild.children);
+    const distances = items.map(item => {
+      const box = item.getBoundingClientRect();
+      return Math.abs(box.left + box.width / 2 - center);
+    });
+    const nearest = distances.indexOf(Math.min(...distances));
+    return { nearest, left: element.scrollLeft, x: x - 90, y };
+  });
+  expect(result.nearest).toBe(1);
+  expect(result.left).toBe(90);
+  await page.waitForTimeout(250);
+  expect(await page.evaluate(() => document.getElementById("gallery").scrollLeft)).toBe(90);
+  await page.evaluate(point => window.dispatchEvent(new PointerEvent("pointerup", {
+    bubbles: true, isPrimary: true, pointerId: 304, pointerType: "mouse",
+    button: 0, buttons: 0, clientX: point.x, clientY: point.y
+  })), result);
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(100);
+});
+
+test("real mouse text-origin flick waits for all pointerup handlers before settling", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:900px">
+      <div data-ae-snap-item style="flex:none;width:300px;height:100px"><span id="text">MMMMMMMMMMMMMMMMMMMM</span></div>
+      ${'<div data-ae-snap-item style="flex:none;width:300px;height:100px"></div>'.repeat(2)}
+    </div>
+  </div>`);
+  // Pick a visible glyph explicitly: platform fonts place the end of a short
+  // phrase at different positions inside an initially centered wide item.
+  const point = await page.evaluate(() => {
+    const viewport = document.getElementById("gallery").getBoundingClientRect();
+    const text = document.getElementById("text").firstChild;
+    const range = document.createRange();
+    let point;
+    for (let index = 0; index < text.length; index++) {
+      range.setStart(text, index);
+      range.setEnd(text, index + 1);
+      const rect = range.getBoundingClientRect();
+      if (rect.width >= 8 && rect.left >= viewport.left + 4 && rect.right <= viewport.right - 4)
+        point = { x: rect.left + rect.width * .8, y: rect.top + rect.height / 2 };
+    }
+    if (point) return point;
+    throw new Error("No visible text glyph for the flick");
+  });
+  await page.evaluate(() => {
+    // Keep selection unchanged while exercising trusted pointer events over
+    // text. A 60 px flick remains eligible throughout the 100 ms text wait.
+    document.getElementById("text").addEventListener("mousedown", event => event.preventDefault());
+    document.getElementById("gallery").addEventListener("AelluxJsScrollboxSnapGesture", event => {
+      if (event.detail.phase === "end") window.endedGesture = event.detail;
+    });
+  });
+  await page.mouse.move(point.x, point.y);
+  await page.mouse.down();
+  await page.mouse.move(point.x - 60, point.y);
+  await page.mouse.up();
+  const gesture = await page.evaluate(() => ({ moved: window.endedGesture?.moved,
+    elapsed: window.endedGesture?.endTime - window.endedGesture?.startTime,
+    selection: String(getSelection()) }));
+  expect(gesture.moved).toBe(false);
+  expect(gesture.selection).toBe("");
+  expect(gesture.elapsed).toBeLessThan(100);
+  await expect.poll(() => page.locator("#gallery").evaluate(element => element.scrollLeft)).toBe(400);
+});
+
+test("text-origin snap flick works before the 100 ms selection wait ends", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item id="text" style="flex:none;width:100px;height:100px">selectable words</div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  const pending = await page.evaluate(() => {
+    const text = document.getElementById("text");
+    const rect = text.getBoundingClientRect();
+    const x = rect.left + 10, y = rect.top + 10;
+    text.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 305,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    const move = new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 305,
+      pointerType: "mouse", buttons: 1, clientX: x - 2, clientY: y
+    });
+    window.dispatchEvent(move);
+    const pending = { prevented: move.defaultPrevented,
+      left: document.getElementById("gallery").scrollLeft };
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 305, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 2, clientY: y
+    }));
+    return pending;
+  });
+  expect(pending).toEqual({ prevented: false, left: 0 });
+  await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(100);
+});
+
+test("selection during the snap wait prevents an early flick", async ({ page }) => {
+  await setup(page, `<div id="gallery" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:300px">
+      <div data-ae-snap-item id="text" style="flex:none;width:100px;height:100px">selectable words</div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const text = document.getElementById("text");
+    const rect = text.getBoundingClientRect();
+    const x = rect.left + 10, y = rect.top + 10;
+    text.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 306,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 306,
+      pointerType: "mouse", buttons: 1, clientX: x - 2, clientY: y
+    }));
+    const range = document.createRange();
+    range.setStart(text.firstChild, 0);
+    range.setEnd(text.firstChild, 4);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 306, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 2, clientY: y
+    }));
+    return { selected: selection.toString(),
+      left: document.getElementById("gallery").scrollLeft };
+  });
+  expect(result).toEqual({ selected: "sele", left: 0 });
+  await page.waitForTimeout(150);
+  expect(await page.evaluate(() => document.getElementById("gallery").scrollLeft))
+    .toBe(0);
+});
+
+test("native is the default and never loads a dependency", async ({ page }) => {
+  let requests = 0;
+  await page.route("https://unpkg.com/**", route => { requests++; return route.abort(); });
+  await setup(page, box("empty", "") + box("native", "native") + box("pointer"));
+  expect(requests).toBe(0);
+  expect(await page.evaluate(() => Object.keys(AelluxJs.registry.dep))).toEqual([]);
+  expect(await drag(page, "empty")).toMatchObject({ x: 0, y: 0 });
+  expect(await drag(page, "native")).toMatchObject({ x: 0, y: 0 });
+  expect(await drag(page, "pointer")).toMatchObject({ x: 50, y: 0 });
+});
+
+test("native touch selects one axis across nested scrollboxes", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Touch drag injection uses the Chromium protocol");
+  await setup(page, `<div id="outer" data-ae-scrollbox
+    style="width:180px;height:140px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:540px;height:140px">
+      ${Array.from({ length: 3 }, (_, index) => `
+        <div id="inner-${index}" data-ae-scrollbox
+          style="flex:none;width:180px;height:140px;overflow-y:auto;overflow-x:hidden">
+          <div style="height:500px"></div>
+        </div>`).join("")}
+    </div>
+  </div>`);
+
+  const rect = await page.locator("#inner-0").boundingBox();
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Emulation.setTouchEmulationEnabled", { enabled: true });
+  const drag = async (startX, startY, moveX, moveY) => {
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchStart", touchPoints: [{ x: startX, y: startY, id: 1 }]
+    });
+    for (let step = 1; step <= 6; step++) {
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchMove", touchPoints: [{
+          x: startX + moveX * step / 6,
+          y: startY + moveY * step / 6,
+          id: 1
+        }]
+      });
+      await page.waitForTimeout(20);
+    }
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchEnd", touchPoints: []
+    });
+  };
+
+  await drag(rect.x + 125, rect.y + 110, 8, -75);
+  await expect.poll(() => page.evaluate(() => document.getElementById("inner-0").scrollTop))
+    .toBeGreaterThan(0);
+  expect(await page.evaluate(() => document.getElementById("outer").scrollLeft)).toBe(0);
+
+  // Native touch inertia must settle before measuring the next gesture's axis.
+  await page.locator("#inner-0").evaluate(element => new Promise(resolve => {
+    let position = element.scrollTop, changed = performance.now();
+    const sample = now => {
+      if (element.scrollTop !== position) { position = element.scrollTop; changed = now; }
+      if (now - changed >= 120) resolve();
+      else requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  }));
+  const vertical = await page.evaluate(() => document.getElementById("inner-0").scrollTop);
+  await drag(rect.x + 125, rect.y + 110, -75, 8);
+  await expect.poll(() => page.evaluate(() => document.getElementById("outer").scrollLeft))
+    .toBeGreaterThan(0);
+  expect(await page.evaluate(() => document.getElementById("inner-0").scrollTop))
+    .toBe(vertical);
+});
+
+test("a forced child pan-y blocks the horizontal parent gesture", async ({ page, browserName }) => {
+  test.skip(browserName !== "chromium", "Touch drag injection uses the Chromium protocol");
+  await setup(page, `<div id="outer" data-ae-scrollbox
+    style="width:180px;height:140px;overflow-x:auto;overflow-y:hidden">
+    <div style="display:flex;width:540px;height:140px">
+      <div id="inner" data-ae-scrollbox
+        style="flex:none;width:180px;height:140px;overflow-y:auto;overflow-x:hidden;touch-action:pan-y">
+        <div style="height:500px"></div>
+      </div>
+      <div style="flex:none;width:360px"></div>
+    </div>
+  </div>`);
+
+  const rect = await page.locator("#inner").boundingBox();
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Emulation.setTouchEmulationEnabled", { enabled: true });
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchStart", touchPoints: [{ x: rect.x + 125, y: rect.y + 100, id: 1 }]
+  });
+  for (let step = 1; step <= 6; step++) {
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchMove", touchPoints: [{
+        x: rect.x + 125 - 75 * step / 6,
+        y: rect.y + 100 + 8 * step / 6,
+        id: 1
+      }]
+    });
+    await page.waitForTimeout(20);
+  }
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  expect(await page.evaluate(() => document.getElementById("outer").scrollLeft))
+    .toBe(0);
+});
+
+test("pointer drag keeps native scroll events and progress", async ({ page }) => {
+  await setup(page, box("box"));
+  await page.evaluate(() => {
+    const element = document.getElementById("box");
+    window.scrollEvents = [];
+    window.addEventListener("scroll", event => {
+      if (event.target === element) window.scrollEvents.push(event.isTrusted);
+    }, true);
+  });
+  expect(await drag(page, "box")).toEqual({ x: 50, y: 0, during: "", after: "" });
+  await expect.poll(() => page.evaluate(() => ({
+    events: window.scrollEvents.length,
+    x: document.getElementById("box").style.getPropertyValue("--ae-scroll-x-progress"),
+    y: document.getElementById("box").style.getPropertyValue("--ae-scroll-y-progress")
+  }))).toMatchObject({ x: "0.25", y: "0" });
+  expect(await page.evaluate(() => window.scrollEvents.length)).toBeGreaterThan(0);
+  expect(await page.evaluate(() => window.scrollEvents.every(Boolean))).toBe(true);
+});
+
+for (const axis of ["x", "y"]) {
+  test(`nested pointer boxes hand ${axis} scrolling to ancestors at the edge`, async ({ page }) => {
+    await setup(page, `<div id="outer" data-ae-scrollbox="pointer"
+      data-ae-scrollbox-momentum="false" style="width:120px;height:120px;overflow:auto">
+      <div style="width:300px;height:360px">
+        <div id="inner" data-ae-scrollbox="pointer"
+          data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
+          <div style="width:300px;height:300px"></div>
+        </div>
+      </div>
+    </div>`);
+    const result = await page.evaluate(axis => {
+      const inner = document.getElementById("inner");
+      const outer = document.getElementById("outer");
+      const rect = inner.getBoundingClientRect();
+      const x = rect.left + 50, y = rect.top + 50;
+      inner.dispatchEvent(new PointerEvent("pointerdown", {
+        bubbles: true, cancelable: true, isPrimary: true, pointerId: 122,
+        pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+      }));
+      const move = (primary, secondary) => {
+        window.dispatchEvent(new PointerEvent("pointermove", {
+          bubbles: true, cancelable: true, isPrimary: true, pointerId: 122,
+          pointerType: "mouse", buttons: 1,
+          clientX: x - (axis === "x" ? primary : secondary),
+          clientY: y - (axis === "y" ? primary : secondary)
+        }));
+        return { inner: [inner.scrollLeft, inner.scrollTop],
+          outer: [outer.scrollLeft, outer.scrollTop] };
+      };
+      const first = move(150, 20);
+      const second = move(300, 40);
+      const reverse = move(280, 40);
+      window.dispatchEvent(new PointerEvent("pointerup", {
+        bubbles: true, isPrimary: true, pointerId: 122, pointerType: "mouse",
+        button: 0, buttons: 0, clientX: x, clientY: y
+      }));
+      return { first, second, reverse, classes: [
+        inner.classList.contains("ae--pointerscrolling"),
+        outer.classList.contains("ae--pointerscrolling")
+      ] };
+    }, axis);
+    const inner = axis === "x" ? [150, 0] : [0, 150];
+    const innerLimit = axis === "x" ? [200, 0] : [0, 200];
+    const innerReverse = axis === "x" ? [180, 0] : [0, 180];
+    const outer = axis === "x" ? [100, 0] : [0, 100];
+    expect(result).toEqual({ first: { inner, outer: [0, 0] },
+      second: { inner: innerLimit, outer }, reverse: { inner: innerReverse, outer },
+      classes: [false, false] });
+  });
+}
+
+for (const [axis, behavior] of [["x", "contain"], ["y", "none"]]) {
+  test(`pointer chaining stops at overscroll-behavior-${axis}: ${behavior}`, async ({ page }) => {
+    await setup(page, `<div id="outer" data-ae-scrollbox="pointer"
+      data-ae-scrollbox-momentum="false" style="width:120px;height:120px;overflow:auto">
+      <div style="width:300px;height:360px">
+        <div id="inner" data-ae-scrollbox="pointer"
+          data-ae-scrollbox-momentum="false"
+          style="width:100px;height:100px;overflow:auto;overscroll-behavior-${axis}:${behavior}">
+          <div style="width:300px;height:300px"></div>
+        </div>
+      </div>
+    </div>`);
+    const result = await page.evaluate(({ axis, behavior }) => {
+      const inner = document.getElementById("inner");
+      const outer = document.getElementById("outer");
+      const rect = inner.getBoundingClientRect();
+      const x = rect.left + 50, y = rect.top + 50;
+      inner.dispatchEvent(new PointerEvent("pointerdown", {
+        bubbles: true, cancelable: true, isPrimary: true, pointerId: 191,
+        pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+      }));
+      window.dispatchEvent(new PointerEvent("pointermove", {
+        bubbles: true, cancelable: true, isPrimary: true, pointerId: 191,
+        pointerType: "mouse", buttons: 1,
+        clientX: x - (axis === "x" ? 300 : 0),
+        clientY: y - (axis === "y" ? 300 : 0)
+      }));
+      const positions = {
+        inner: axis === "x" ? inner.scrollLeft : inner.scrollTop,
+        outer: axis === "x" ? outer.scrollLeft : outer.scrollTop,
+        supported: CSS.supports(`overscroll-behavior-${axis}`, behavior)
+      };
+      window.dispatchEvent(new PointerEvent("pointerup", {
+        bubbles: true, isPrimary: true, pointerId: 191,
+        pointerType: "mouse", button: 0, buttons: 0
+      }));
+      return positions;
+    }, { axis, behavior });
+    expect(result).toEqual({ inner: 200, outer: result.supported ? 0 : 100,
+      supported: result.supported });
+  });
+}
+
+test("nested pointer scrolling skips a child without the chosen axis", async ({ page }) => {
+  await setup(page, `<div id="outer" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:120px;height:120px;overflow:auto">
+    <div style="width:300px;height:360px">
+      <div id="inner" data-ae-scrollbox="pointer"
+        data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
+        <div style="width:100px;height:300px"></div>
+      </div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const inner = document.getElementById("inner");
+    const outer = document.getElementById("outer");
+    const rect = inner.getBoundingClientRect();
+    const x = rect.left + 50, y = rect.top + 50;
+    inner.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 123,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 123,
+      pointerType: "mouse", buttons: 1, clientX: x - 60, clientY: y - 10
+    }));
+    const during = { inner: [inner.scrollLeft, inner.scrollTop],
+      outer: [outer.scrollLeft, outer.scrollTop] };
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 123, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 60, clientY: y - 10
+    }));
+    return during;
+  });
+  expect(result).toEqual({ inner: [0, 0], outer: [60, 0] });
+});
+
+for (const axis of ["x", "y"]) {
+  test(`pointer scrolling ignores overflow-${axis}: hidden despite overflowing content`,
+    async ({ page }) => {
+      await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+        data-ae-scrollbox-momentum="false"
+        style="width:100px;height:100px;overflow-${axis}:hidden;overflow-${axis === "x" ? "y" : "x"}:auto">
+        <div style="width:300px;height:300px"></div>
+      </div>`);
+      const result = await page.evaluate(axis => {
+        const element = document.getElementById("box");
+        const rect = element.getBoundingClientRect();
+        const gesture = (id, startX, startY, moveX, moveY) => {
+          element.dispatchEvent(new PointerEvent("pointerdown", {
+            bubbles: true, cancelable: true, isPrimary: true, pointerId: id,
+            pointerType: "mouse", button: 0, buttons: 1,
+            clientX: rect.left + startX, clientY: rect.top + startY
+          }));
+          const move = new PointerEvent("pointermove", {
+            bubbles: true, cancelable: true, isPrimary: true, pointerId: id,
+            pointerType: "mouse", buttons: 1,
+            clientX: rect.left + moveX, clientY: rect.top + moveY
+          });
+          window.dispatchEvent(move);
+          const during = { prevented: move.defaultPrevented,
+            active: element.classList.contains("ae--pointerscrolling"),
+            x: element.scrollLeft, y: element.scrollTop };
+          window.dispatchEvent(new PointerEvent("pointerup", {
+            bubbles: true, isPrimary: true, pointerId: id, pointerType: "mouse",
+            button: 0, buttons: 0, clientX: rect.left + moveX, clientY: rect.top + moveY
+          }));
+          return during;
+        };
+        const disabled = gesture(151, 30, 30,
+          axis === "x" ? -30 : 30, axis === "y" ? -30 : 30);
+        const enabled = gesture(152, 70, 70,
+          axis === "y" ? 10 : 70, axis === "x" ? 10 : 70);
+        return { disabled, enabled, overflow: getComputedStyle(element)[
+          axis === "x" ? "overflowX" : "overflowY"] };
+      }, axis);
+      expect(result.overflow).toBe("hidden");
+      expect(result.disabled).toEqual({ prevented: false, active: false, x: 0, y: 0 });
+      expect(result.enabled).toEqual(axis === "x" ?
+        { prevented: true, active: true, x: 0, y: 60 } :
+        { prevented: true, active: true, x: 60, y: 0 });
+    });
+}
+
+test("nested pointer scrolling skips hidden overflow in the child and uses the parent", async ({ page }) => {
+  await setup(page, `<div id="outer" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:120px;height:120px;overflow:auto">
+    <div style="width:300px;height:360px">
+      <div id="inner" data-ae-scrollbox="pointer"
+        data-ae-scrollbox-momentum="false"
+        style="width:100px;height:100px;overflow-x:hidden;overflow-y:auto">
+        <div style="width:300px;height:300px"></div>
+      </div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const inner = document.getElementById("inner");
+    const outer = document.getElementById("outer");
+    const rect = inner.getBoundingClientRect();
+    const x = rect.left + 50, y = rect.top + 50;
+    inner.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 153,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 153,
+      pointerType: "mouse", buttons: 1, clientX: x - 60, clientY: y
+    }));
+    const during = { inner: inner.scrollLeft, outer: outer.scrollLeft };
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 153, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 60, clientY: y
+    }));
+    return during;
+  });
+  expect(result).toEqual({ inner: 0, outer: 60 });
+});
+
+test("pointer scrolling passes one gesture through three nested boxes", async ({ page }) => {
+  await setup(page, `<div id="outer" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
+    <div style="width:100px;height:500px">
+      <div id="middle" data-ae-scrollbox="pointer"
+        data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
+        <div style="width:100px;height:300px">
+          <div id="inner" data-ae-scrollbox="pointer"
+            data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
+            <div style="width:100px;height:200px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const boxes = ["inner", "middle", "outer"].map(id => document.getElementById(id));
+    const rect = boxes[0].getBoundingClientRect();
+    const x = rect.left + 50, y = rect.top + 50;
+    boxes[0].dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 125,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 125,
+      pointerType: "mouse", buttons: 1, clientX: x, clientY: y - 400
+    }));
+    const positions = boxes.map(element => element.scrollTop);
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 125, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x, clientY: y - 400
+    }));
+    return positions;
+  });
+  expect(result).toEqual([100, 200, 100]);
+});
+
+test("move defaults are canceled only after pointer scrolling begins", async ({ page }) => {
+  await setup(page, box("box", "pointer", "", "<input id='control'>"));
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 70, y = rect.top + 70;
+    const pointerMove = offset => {
+      const event = new PointerEvent("pointermove", {
+        bubbles: true, cancelable: true, isPrimary: true, pointerId: 96,
+        pointerType: "mouse", button: -1, buttons: 1,
+        clientX: x - offset, clientY: y - offset
+      });
+      window.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    const touchMove = () => {
+      const event = new Event("touchmove", { bubbles: true, cancelable: true });
+      element.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    const mouseMove = () => {
+      const event = new MouseEvent("mousemove", {
+        bubbles: true, cancelable: true, buttons: 1
+      });
+      element.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 96, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    const pending = { pointer: pointerMove(1), touch: touchMove(), mouse: mouseMove() };
+    const during = { pointer: pointerMove(30), touch: touchMove(), mouse: mouseMove() };
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 96, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 30, clientY: y - 30
+    }));
+    const after = { touch: touchMove(), mouse: mouseMove() };
+    document.getElementById("control").dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 97, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    const control = { touch: touchMove(), mouse: mouseMove() };
+    return { pending, during, after, control };
+  });
+  expect(result).toEqual({
+    pending: { pointer: false, touch: false, mouse: false },
+    during: { pointer: true, touch: true, mouse: true },
+    after: { touch: false, mouse: false },
+    control: { touch: false, mouse: false }
+  });
+});
+
+test("drag events are canceled only while pointer scrolling is active", async ({ page }) => {
+  await setup(page, box("box", "pointer", "", "<div id='item' draggable='true'>drag</div>"));
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const item = document.getElementById("item");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 70, y = rect.top + 70;
+    const drag = type => {
+      const event = new Event(type, { bubbles: true, cancelable: true });
+      item.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    const before = drag("dragstart");
+    item.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 97, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    const draggable = drag("dragstart");
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 98, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    const pending = drag("dragstart");
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 98,
+      pointerType: "mouse", buttons: 1, clientX: x - 30, clientY: y - 30
+    }));
+    const during = ["dragstart", "drag", "dragenter", "dragover", "dragleave", "drop", "dragend"]
+      .map(drag);
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 98, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 30, clientY: y - 30
+    }));
+    const after = drag("dragover");
+    return { before, draggable, pending, during, after };
+  });
+  expect(result).toEqual({ before: false, draggable: false, pending: false,
+    during: [true, true, true, true, true, true, true], after: false });
+});
+
+test("pointer scroll uses grab on open space and grabbing during text-origin scrolling", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:200px;height:100px;overflow:auto">
+    <div style="width:180px;height:300px;padding-top:20px">
+      <span id="text">selectable words here</span>
+      <button id="button">Click</button>
+      <div id="item" draggable="true">Drag me</div>
+    </div></div>`);
+  const box = await page.locator("#box").boundingBox();
+  await page.mouse.move(box.x + 160, box.y + 10);
+  expect(await page.locator("#box").evaluate(element => element.style.cursor)).toBe("grab");
+
+  for (const id of ["text", "button", "item"]) {
+    const rect = await page.locator(`#${id}`).boundingBox();
+    await page.mouse.move(rect.x + 4, rect.y + rect.height / 2);
+    expect(await page.locator("#box").evaluate(element => element.style.cursor)).toBe("");
+  }
+
+  const text = await page.locator("#text").boundingBox();
+  await page.mouse.move(text.x + 5, text.y + text.height / 2);
+  await page.mouse.down();
+  await page.waitForTimeout(120);
+  await page.mouse.move(text.x + 5, text.y - 10, { steps: 4 });
+  expect(await page.locator("#box").evaluate(element => ({
+    active: element.classList.contains("ae--pointerscrolling"),
+    cursor: getComputedStyle(element).cursor,
+    textCursor: getComputedStyle(element.querySelector("#text")).cursor
+  }))).toEqual({ active: true, cursor: "grabbing", textCursor: "grabbing" });
+  await page.mouse.up();
+  await page.mouse.move(box.x - 20, box.y - 20);
+  expect(await page.locator("#box").evaluate(element => element.style.cursor)).toBe("");
+});
+
+test("pointer scroll reserves open space but leaves text and controls native", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:200px;height:100px;overflow:auto">
+    <div style="width:180px;height:300px;padding-top:20px">
+      <span id="text">selectable words here</span>
+      <button id="button">Click</button>
+      <input id="input" value="editable text">
+      <div id="item" draggable="true">Drag me</div>
+    </div></div>`);
+  await page.evaluate(() => {
+    window.pointerDowns = [];
+    document.addEventListener("pointerdown", event => {
+      if (event.target.closest("#box")) window.pointerDowns.push({
+        target: event.target.id || "open", prevented: event.defaultPrevented
+      });
+    });
+  });
+  const rect = await page.locator("#box").boundingBox();
+  await page.mouse.click(rect.x + 160, rect.y + 10);
+  for (const id of ["text", "button", "input", "item"]) {
+    await page.locator(`#${id}`).click();
+  }
+  expect(await page.evaluate(() => window.pointerDowns)).toEqual([
+    { target: "open", prevented: true },
+    { target: "text", prevented: false },
+    { target: "button", prevented: false },
+    { target: "input", prevented: false },
+    { target: "item", prevented: false }
+  ]);
+});
+
+test("desktop pointer drag cancels wheel until pointer release", async ({ page }) => {
+  await setup(page, box("box"));
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 70, y = rect.top + 70;
+    let bubbled = 0;
+    document.body.addEventListener("wheel", () => { bubbled++; });
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 29, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 29,
+      pointerType: "mouse", buttons: 1, clientX: x - 30, clientY: y - 30
+    }));
+    const during = new WheelEvent("wheel", { deltaY: 40, bubbles: true, cancelable: true });
+    element.dispatchEvent(during);
+    const scrollLeft = element.scrollLeft, scrollTop = element.scrollTop;
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 29, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 30, clientY: y - 30
+    }));
+    const after = new WheelEvent("wheel", { deltaY: 40, bubbles: true, cancelable: true });
+    element.dispatchEvent(after);
+    return { preventedDuring: during.defaultPrevented, preventedAfter: after.defaultPrevented,
+      bubbled, scrollLeft, scrollTop };
+  });
+  expect(result).toEqual({ preventedDuring: true, preventedAfter: false,
+    bubbled: 1, scrollLeft: 30, scrollTop: 0 });
+});
+
+test("real mouse drag scrolls while the pointer leaves the box", async ({ page }) => {
+  await setup(page, box("box"));
+  const rect = await page.locator("#box").boundingBox();
+  await page.mouse.move(rect.x + 70, rect.y + 70);
+  await page.mouse.down();
+  await page.mouse.move(rect.x + 70, rect.y - 3, { steps: 3 });
+  await page.mouse.up();
+  await expect.poll(() => page.evaluate(() => document.getElementById("box").scrollTop))
+    .toBeGreaterThan(40);
+  expect(await page.evaluate(() => document.getElementById("box").scrollLeft)).toBe(0);
+});
+
+test("only the pointer drag button has mouse events canceled", async ({ page }) => {
+  await setup(page, box("box"));
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 50, y = rect.top + 50;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 93, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    const before = new MouseEvent("mousedown", {
+      bubbles: true, cancelable: true, button: 0, buttons: 1, detail: 1
+    });
+    element.dispatchEvent(before);
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 93,
+      pointerType: "mouse", buttons: 1, clientX: x - 30, clientY: y - 30
+    }));
+    const whileDragging = [0, 1, 2].map(button => {
+      const event = new MouseEvent("mousedown", {
+        bubbles: true, cancelable: true, button, buttons: 1, detail: 1
+      });
+      element.dispatchEvent(event);
+      return event.defaultPrevented;
+    });
+    const repeated = new MouseEvent("mousedown", {
+      bubbles: true, cancelable: true, button: 0, buttons: 1, detail: 2
+    });
+    element.dispatchEvent(repeated);
+    const after = new MouseEvent("mousedown", {
+      bubbles: true, cancelable: true, button: 0, buttons: 1, detail: 1
+    });
+    element.dispatchEvent(after);
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 93, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 30, clientY: y - 30
+    }));
+    return { before: before.defaultPrevented, whileDragging,
+      repeated: repeated.defaultPrevented, after: after.defaultPrevented };
+  });
+  expect(result).toEqual({ before: false, whileDragging: [true, false, false],
+    repeated: true, after: false });
+});
+
+test("mousemove is canceled only during pointer scrolling, including over a draggable child", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbox-momentum="false"
+    style="width:100px;height:100px;overflow:auto">
+    <div style="width:300px;height:300px"><div id="draggable" draggable="true">drag</div></div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const draggable = document.getElementById("draggable");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 70, y = rect.top + 70;
+    const mouseMove = (buttons = 1) => {
+      const event = new MouseEvent("mousemove", {
+        bubbles: true, cancelable: true, buttons, clientX: x, clientY: y
+      });
+      draggable.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    const before = mouseMove();
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 94, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    const pending = mouseMove();
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 94,
+      pointerType: "mouse", buttons: 1, clientX: x - 30, clientY: y - 30
+    }));
+    const during = mouseMove();
+    const otherButton = mouseMove(2);
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 94, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 30, clientY: y - 30
+    }));
+    const after = mouseMove(0);
+    return { before, pending, during, otherButton, after };
+  });
+  expect(result).toEqual({ before: false, pending: false, during: true,
+    otherButton: false, after: false });
+});
+
+test("mouse release and click are canceled only for the drag button", async ({ page }) => {
+  await setup(page, box("box"));
+  const result = await page.evaluate(async () => {
+    const element = document.getElementById("box");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 50, y = rect.top + 50;
+    const mouse = (type, button, buttons = 0) => {
+      const event = new MouseEvent(type, {
+        bubbles: true, cancelable: true, button, buttons
+      });
+      element.dispatchEvent(event);
+      return event.defaultPrevented;
+    };
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 95, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 95,
+      pointerType: "mouse", buttons: 1, clientX: x - 30, clientY: y - 30
+    }));
+    const during = {
+      mouseup: mouse("mouseup", 0), click: mouse("click", 0),
+      dblclick: mouse("dblclick", 0), contextmenu: mouse("contextmenu", 2),
+      rightClick: mouse("click", 2)
+    };
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 95, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 30, clientY: y - 30
+    }));
+    const release = { mouseup: mouse("mouseup", 0), click: mouse("click", 0),
+      rightClick: mouse("click", 2) };
+    await new Promise(resolve => setTimeout(resolve, 0));
+    const later = mouse("click", 0);
+    return { during, release, later };
+  });
+  expect(result).toEqual({
+    during: { mouseup: true, click: true, dblclick: true,
+      contextmenu: false, rightClick: false },
+    release: { mouseup: true, click: true, rightClick: false }, later: false
+  });
+});
+
+for (const axis of ["x", "y"]) {
+  for (const snap of [false, true]) {
+    test(`subthreshold cross-axis jitter does not cancel a ${axis} drag${snap ? " with snap" : ""}`, async ({ page }) => {
+      await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbox-momentum="false"
+        ${snap ? `data-ae-scrollbox-snap="${axis === "x" ? "horizontal" : "vertical"}"` : ""}
+        style="width:100px;height:100px;overflow-${axis}:auto;overflow-${axis === "x" ? "y" : "x"}:hidden">
+        <div style="display:flex;flex-direction:${axis === "x" ? "row" : "column"}">
+          ${'<div data-ae-snap-item style="width:100px;height:100px;flex:none"></div>'.repeat(3)}
+        </div></div>`);
+      const element = page.locator("#box"), rect = await element.boundingBox();
+      const x = rect.x + 70, y = rect.y + 70;
+      await page.mouse.move(x, y);
+      await page.mouse.down();
+      await page.mouse.move(x + (axis === "y" ? 1 : 0), y + (axis === "x" ? 1 : 0));
+      await expect(element).not.toHaveClass(/ae--pointerscrolling/);
+      await page.mouse.move(x - (axis === "x" ? 10 : 0), y - (axis === "y" ? 10 : 0));
+      const position = await element.evaluate((element, axis) => element[axis === "x" ? "scrollLeft" : "scrollTop"], axis);
+      expect(position).toBe(10);
+      await expect(element).toHaveCSS("cursor", "grabbing");
+      await page.mouse.up();
+    });
+
+    test(`rapid ${axis} drags can restart at the same position${snap ? " with snap" : ""}`, async ({ page }) => {
+      await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbox-momentum="false"
+        ${snap ? `data-ae-scrollbox-snap="${axis === "x" ? "horizontal" : "vertical"}"` : ""}
+        style="width:100px;height:100px;overflow:auto;user-select:none">
+        <div style="display:flex;flex-direction:${axis === "x" ? "row" : "column"};width:${axis === "x" ? 1000 : 100}px">
+          ${'<div data-ae-snap-item style="width:100px;height:100px;flex:none"></div>'.repeat(10)}
+        </div></div>`);
+      await page.locator("#box").evaluate((element, axis) => {
+        if (element.hasAttribute("data-ae-scrollbox-snap")) AelluxJs.ext.scrollboxSnap.goto(element, 3, "instant");
+        else element.scrollTo({ left: axis === "x" ? 300 : 0, top: axis === "y" ? 300 : 0, behavior: "instant" });
+      }, axis);
+      const rect = await page.locator("#box").boundingBox();
+      const position = () => page.locator("#box").evaluate((element, axis) => element[axis === "x" ? "scrollLeft" : "scrollTop"], axis);
+      for (let gesture = 0; gesture < 8; gesture++) {
+        await page.mouse.move(rect.x + 50, rect.y + 50);
+        await page.mouse.down();
+        const start = await position();
+        const distance = gesture % 2 ? 20 : -20;
+        await page.mouse.move(rect.x + 50 + (axis === "x" ? distance : 0),
+          rect.y + 50 + (axis === "y" ? distance : 0));
+        expect(await position(), `gesture ${gesture}: immediate re-grab follows the pointer`).toBe(start - distance);
+        expect(await page.locator("#box").evaluate(element => getComputedStyle(element).cursor)).toBe("grabbing");
+        await page.mouse.up();
+      }
+    });
+  }
+}
+
+test("a snap flick during the text wait does not block the next nearby press", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbox-snap
+    style="width:100px;height:100px;overflow:auto">
+    <div style="display:flex;width:900px">
+      <div data-ae-snap-item style="width:300px;height:100px;flex:none"><span id="text">MMMMMMMMMMMMMMMMMMMM</span></div>
+      ${'<div data-ae-snap-item style="width:300px;height:100px;flex:none"></div>'.repeat(2)}
+    </div></div>`);
+  const result = await page.evaluate(async () => {
+    const element = document.getElementById("box"), text = document.getElementById("text");
+    const rect = element.getBoundingClientRect();
+    let consumed = false, moved = null;
+    element.addEventListener("AelluxJsScrollboxSnapGesture", event => {
+      if (event.detail.phase === "end" && moved === null) {
+        consumed = event.defaultPrevented;
+        moved = event.detail.moved;
+      }
+    });
+    const send = (type, pointerId, distance = 0) => {
+      (type === "pointerdown" ? text : window).dispatchEvent(new PointerEvent(type, {
+        bubbles: true, cancelable: true, isPrimary: true, pointerType: "mouse", pointerId,
+        button: 0, buttons: type === "pointerup" ? 0 : 1,
+        clientX: rect.left + 70 - distance, clientY: rect.top + 10
+      }));
+    };
+    send("pointerdown", 751);
+    send("pointermove", 751, 2);
+    send("pointerup", 751, 2);
+    send("pointerdown", 752);
+    const start = element.scrollLeft;
+    send("pointermove", 752, 10);
+    await new Promise(resolve => setTimeout(resolve, 150));
+    const position = element.scrollLeft, cursor = getComputedStyle(element).cursor;
+    send("pointerup", 752, 10);
+    return { consumed, moved, start, position, cursor };
+  });
+  expect(result).toEqual({ consumed: true, moved: false, start: 100, position: 110, cursor: "grabbing" });
+});
+
+for (const clickCount of [2, 3]) {
+  test(`native click count ${clickCount} after a completed drag does not cancel the next drag`, async ({ page }) => {
+    await setup(page, box("box"));
+    const rect = await page.locator("#box").boundingBox();
+    const x = rect.x + 70, y = rect.y + 50;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x - 40, y);
+    await page.mouse.up();
+    expect(await page.locator("#box").evaluate(element => element.scrollLeft)).toBe(40);
+    await page.mouse.down({ clickCount });
+    await page.mouse.move(x - 50, y);
+    expect(await page.locator("#box").evaluate(element => element.scrollLeft)).toBe(50);
+    expect(await page.locator("#box").evaluate(element => getComputedStyle(element).cursor)).toBe("grabbing");
+    await page.mouse.up();
+  });
+}
+
+for (const elastic of [false, true]) {
+  test(`second click dragged outside does not start pointer scrolling${elastic ? " with elastic" : ""}`,
+    async ({ page }) => {
+      const childAttribute = elastic ? " data-ae-scrollbox-elastic" : "";
+      await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+        data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
+        <div${childAttribute} style="width:300px;height:300px"></div></div>`);
+      const rect = await page.locator("#box").boundingBox();
+      const x = rect.x + 50, y = rect.y + 50;
+      await page.mouse.move(x, y);
+      await page.mouse.click(x, y);
+      await page.mouse.down({ clickCount: 2 });
+      await page.mouse.move(rect.x - 20, rect.y - 20, { steps: 4 });
+      const during = await page.evaluate(() => {
+        const element = document.getElementById("box");
+        return { x: element.scrollLeft, y: element.scrollTop,
+          userSelect: element.style.getPropertyValue("user-select"),
+          transform: element.firstElementChild.style.transform };
+      });
+      await page.mouse.up();
+      expect(during).toEqual({ x: 0, y: 0, userSelect: "", transform: "" });
+    });
+}
+
+for (const clickCount of [2, 3]) {
+  test(`${clickCount} mouse clicks allow native selection without pointer dragging`, async ({ page }) => {
+    await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+      data-ae-scrollbox-momentum="false" style="width:200px;height:100px;overflow:auto;font:16px monospace">
+      <div style="width:180px;height:300px;padding-top:60px;box-sizing:border-box">
+        <span id="text">selectable words in the scrollbox</span>
+      </div></div>`);
+    await page.evaluate(() => {
+      window.mouseDownEvents = [];
+      document.addEventListener("mousedown", event => {
+        if (event.target.closest("#box")) window.mouseDownEvents.push({
+          detail: event.detail, prevented: event.defaultPrevented
+        });
+      });
+    });
+    const rect = await page.locator("#text").boundingBox();
+    const x = rect.x + 8, y = rect.y + rect.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.click(x, y);
+    await page.mouse.down({ clickCount });
+    await page.mouse.move(x + 80, y, { steps: 4 });
+    const during = await page.evaluate(() => ({
+      selection: getSelection().toString(),
+      scrollTop: document.getElementById("box").scrollTop,
+      userSelect: document.getElementById("box").style.getPropertyValue("user-select"),
+      events: window.mouseDownEvents
+    }));
+    await page.mouse.up();
+    expect(during.events.at(-1)).toEqual({ detail: clickCount, prevented: false });
+    expect(during.selection.length).toBeGreaterThan(0);
+    expect(during.scrollTop).toBe(0);
+    expect(during.userSelect).toBe("");
+  });
+}
+
+test("pointer mode keeps mousedown and horizontal selection native in vertical-only boxes", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbox-momentum="false"
+    style="width:200px;height:100px;overflow:auto;font:16px monospace">
+    <div style="width:180px;height:300px;padding-top:60px;box-sizing:border-box"><span id="text">abcdefghijklmno</span></div>
+  </div>`);
+  await page.evaluate(() => {
+    document.addEventListener("mousedown", event => {
+      window.mouseDownPrevented = event.defaultPrevented;
+    });
+  });
+  const rect = await page.locator("#text").boundingBox();
+  await page.mouse.move(rect.x + 5, rect.y + rect.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(rect.x + 100, rect.y + rect.height / 2, { steps: 5 });
+  await page.mouse.up();
+  const result = await page.evaluate(() => ({
+    selection: getSelection().toString(),
+    scrollTop: document.getElementById("box").scrollTop,
+    userSelect: document.getElementById("box").style.getPropertyValue("user-select"),
+    mouseDownPrevented: window.mouseDownPrevented
+  }));
+  expect(result.selection.length).toBeGreaterThan(0);
+  expect(result.scrollTop).toBe(0);
+  expect(result.userSelect).toBe("");
+  expect(result.mouseDownPrevented).toBe(false);
+});
+
+test("horizontal-first motion keeps selection even if the pointer later moves vertically", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:200px;height:100px;overflow:auto;font:16px monospace">
+    <div style="width:180px;height:300px;padding-top:60px;box-sizing:border-box">
+      <span id="text">selectable words here</span>
+    </div></div>`);
+  await page.evaluate(() => {
+    window.pointerMovesPrevented = [];
+    window.addEventListener("pointermove", event => {
+      if (event.buttons & 1) window.pointerMovesPrevented.push(event.defaultPrevented);
+    });
+  });
+  const rect = await page.locator("#text").boundingBox();
+  const x = rect.x + 5, y = rect.y + rect.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + 40, y + 8);
+  await page.mouse.move(x + 40, y - 35);
+  const result = await page.evaluate(() => ({
+    selection: getSelection().toString(),
+    userSelect: document.getElementById("box").style.getPropertyValue("user-select"),
+    movesPrevented: window.pointerMovesPrevented
+  }));
+  await page.mouse.up();
+  expect(result.selection.length).toBeGreaterThan(0);
+  expect(result.movesPrevented).toEqual([false, false]);
+  expect(result.userSelect).toBe("");
+});
+
+test("text selection takes precedence over pointer scrolling in a two-axis box", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:200px;height:100px;overflow:auto;font:16px monospace">
+    <div style="width:300px;height:300px;padding-top:60px;box-sizing:border-box">
+      <span id="text">selectable words here</span>
+    </div></div>`);
+  const rect = await page.locator("#text").boundingBox();
+  const x = rect.x + 5, y = rect.y + rect.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + 40, y + 8, { steps: 5 });
+  await expect.poll(() => page.evaluate(() => getSelection().toString().length))
+    .toBeGreaterThan(0);
+  await page.mouse.move(x + 40, y - 35);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    return { selection: getSelection().toString(), x: element.scrollLeft,
+      y: element.scrollTop, active: element.classList.contains("ae--pointerscrolling") };
+  });
+  await page.mouse.up();
+  expect(result.selection.length).toBeGreaterThan(0);
+  expect(result).toMatchObject({ x: 0, y: 0, active: false });
+});
+
+test("an active text selection stops pending pointer scrolling", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:200px;height:100px;overflow:auto">
+    <div style="width:300px;height:300px"><span id="text">selectable words here</span></div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const text = document.getElementById("text");
+    const rect = text.getBoundingClientRect();
+    const x = rect.left + 5, y = rect.top + rect.height / 2;
+    text.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 120, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    const range = document.createRange();
+    range.setStart(text.firstChild, 0);
+    range.setEnd(text.firstChild, 8);
+    const selection = getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    const move = new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 120,
+      pointerType: "mouse", buttons: 1, clientX: x, clientY: y - 30
+    });
+    window.dispatchEvent(move);
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 120, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x, clientY: y - 30
+    }));
+    return { selection: selection.toString(), prevented: move.defaultPrevented,
+      x: element.scrollLeft, y: element.scrollTop,
+      active: element.classList.contains("ae--pointerscrolling") };
+  });
+  expect(result).toEqual({ selection: "selectab", prevented: false,
+    x: 0, y: 0, active: false });
+});
+
+test("an unchanged selection from pointerdown does not block scrolling", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:200px;height:100px;overflow:auto">
+    <div style="width:300px;height:300px"><span id="text">selectable words here</span></div>
+  </div>`);
+  const pending = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const text = document.getElementById("text");
+    const range = document.createRange();
+    range.setStart(text.firstChild, 0);
+    range.setEnd(text.firstChild, 4);
+    const selection = getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    const rect = text.getBoundingClientRect();
+    const x = rect.left + 5, y = rect.top + rect.height / 2;
+    text.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 127, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 127,
+      pointerType: "mouse", buttons: 1, clientX: x - 30, clientY: y
+    }));
+    return { selection: selection.toString(), x: element.scrollLeft };
+  });
+  expect(pending).toEqual({ selection: "sele", x: 0 });
+  await expect.poll(() => page.evaluate(() => document.getElementById("box").scrollLeft))
+    .toBe(30);
+  const selection = await page.evaluate(() => {
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 127, pointerType: "mouse",
+      button: 0, buttons: 0
+    }));
+    return getSelection().toString();
+  });
+  expect(selection).toBe("sele");
+});
+
+test("changing a pre-existing selection during the wait prevents scrolling", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:200px;height:100px;overflow:auto">
+    <div style="width:300px;height:300px"><span id="text">selectable words here</span></div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const text = document.getElementById("text");
+    const selection = getSelection();
+    const range = document.createRange();
+    range.setStart(text.firstChild, 0);
+    range.setEnd(text.firstChild, 4);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    const rect = text.getBoundingClientRect();
+    const x = rect.left + 5, y = rect.top + rect.height / 2;
+    text.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 128, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    range.setEnd(text.firstChild, 8);
+    const move = new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 128,
+      pointerType: "mouse", buttons: 1, clientX: x - 30, clientY: y
+    });
+    window.dispatchEvent(move);
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 128, pointerType: "mouse",
+      button: 0, buttons: 0
+    }));
+    return { selection: selection.toString(), prevented: move.defaultPrevented,
+      x: element.scrollLeft, active: element.classList.contains("ae--pointerscrolling") };
+  });
+  expect(result).toEqual({ selection: "selectab", prevented: false, x: 0, active: false });
+});
+
+test("vertical-only text drag takes over before 100 ms when motion is vertical", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:200px;height:100px;overflow:auto">
+    <div style="width:180px;height:300px"><span id="text">selectable words here</span></div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const text = document.getElementById("text");
+    const rect = text.getBoundingClientRect();
+    const x = rect.left + 5, y = rect.top + rect.height / 2;
+    text.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 129, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    const move = new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 129,
+      pointerType: "mouse", buttons: 1, clientX: x + 8, clientY: y - 11
+    });
+    window.dispatchEvent(move);
+    const during = { prevented: move.defaultPrevented, x: element.scrollLeft,
+      y: element.scrollTop, active: element.classList.contains("ae--pointerscrolling") };
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 129, pointerType: "mouse",
+      button: 0, buttons: 0
+    }));
+    return during;
+  });
+  expect(result).toEqual({ prevented: true, x: 0, y: 11, active: true });
+});
+
+test("text-origin pointer scrolling waits 100 ms for selection", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:200px;height:100px;overflow:auto">
+    <div style="width:300px;height:300px"><span id="text">selectable words here</span></div>
+  </div>`);
+  const pending = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const text = document.getElementById("text");
+    const rect = text.getBoundingClientRect();
+    const x = rect.left + 5, y = rect.top + rect.height / 2;
+    window.textPointer = { x, y };
+    text.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 121, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    const move = new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 121,
+      pointerType: "mouse", buttons: 1, clientX: x, clientY: y - 30
+    });
+    window.dispatchEvent(move);
+    return { prevented: move.defaultPrevented, y: element.scrollTop,
+      active: element.classList.contains("ae--pointerscrolling") };
+  });
+  expect(pending).toEqual({ prevented: false, y: 0, active: false });
+  await page.waitForTimeout(120);
+  const active = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const { x, y } = window.textPointer;
+    const move = new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 121,
+      pointerType: "mouse", buttons: 1, clientX: x, clientY: y - 30
+    });
+    window.dispatchEvent(move);
+    const result = { prevented: move.defaultPrevented, y: element.scrollTop,
+      active: element.classList.contains("ae--pointerscrolling") };
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 121, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x, clientY: y - 30
+    }));
+    return result;
+  });
+  expect(active).toEqual({ prevented: true, y: 30, active: true });
+});
+
+test("the first text-origin direction stays locked after the selection wait", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
+    <div style="width:300px;height:300px"><span id="text">selectable words here</span></div>
+  </div>`);
+  await page.evaluate(() => {
+    const text = document.getElementById("text");
+    const rect = text.getBoundingClientRect();
+    const x = rect.left + 5, y = rect.top + rect.height / 2;
+    window.textPointer = { x, y };
+    text.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 126, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 126,
+      pointerType: "mouse", buttons: 1, clientX: x - 30, clientY: y - 10
+    }));
+  });
+  await page.waitForTimeout(120);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const { x, y } = window.textPointer;
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 126,
+      pointerType: "mouse", buttons: 1, clientX: x - 30, clientY: y - 60
+    }));
+    const positions = [element.scrollLeft, element.scrollTop];
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 126, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 30, clientY: y - 60
+    }));
+    return positions;
+  });
+  expect(result).toEqual([30, 0]);
+});
+
+test("vertical pointer movement still drags a vertical-only box", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbox-momentum="false"
+    style="width:200px;height:100px;overflow:auto;font:16px monospace">
+    <div style="width:180px;height:300px;padding-top:60px;box-sizing:border-box"><span id="text">abcdefghijklmno</span></div>
+  </div>`);
+  const rect = await page.locator("#text").boundingBox();
+  await page.mouse.move(rect.x + 5, rect.y + rect.height / 2);
+  await page.mouse.down();
+  await page.waitForTimeout(120);
+  await page.mouse.move(rect.x + 5, rect.y - 40, { steps: 5 });
+  await page.mouse.up();
+  expect(await page.evaluate(() => document.getElementById("box").scrollTop))
+    .toBeGreaterThan(0);
+  expect(await page.evaluate(() => document.getElementById("box")
+    .style.getPropertyValue("user-select"))).toBe("");
+});
+
+test("touch and interactive controls do not start pointer dragging", async ({ page }) => {
+  await setup(page, box("box", "pointer", "", "<button id='button'>Click</button>"));
+  expect(await drag(page, "box", "touch")).toMatchObject({ x: 0, y: 0 });
+  await page.evaluate(() => {
+    window.buttonClicks = 0;
+    document.getElementById("button").addEventListener("click", () => { window.buttonClicks++; });
+    document.addEventListener("mousedown", event => {
+      if (event.target.id === "button") window.buttonMouseDownPrevented = event.defaultPrevented;
+    });
+  });
+  await page.locator("#button").click();
+  expect(await page.evaluate(() => ({
+    prevented: window.buttonMouseDownPrevented, clicks: window.buttonClicks
+  }))).toEqual({ prevented: false, clicks: 1 });
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const button = document.getElementById("button");
+    const rect = button.getBoundingClientRect();
+    button.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 22, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: rect.left + 5, clientY: rect.top + 5
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, isPrimary: true, pointerId: 22, pointerType: "mouse",
+      buttons: 1, clientX: 0, clientY: 0
+    }));
+    return { x: element.scrollLeft, y: element.scrollTop,
+      userSelect: element.style.getPropertyValue("user-select") };
+  });
+  expect(result).toEqual({ x: 0, y: 0, userSelect: "" });
+});
+
+test("pointer mode keeps native behavior on a coarse-pointer device", async ({ page }) => {
+  await setup(page, box("box"), { coarse: true });
+  expect(await drag(page, "box")).toMatchObject({ x: 0, y: 0 });
+  await page.evaluate(() => document.getElementById("box").scrollTo(50, 40));
+  await expect.poll(() => page.evaluate(() => [
+    document.getElementById("box").style.getPropertyValue("--ae-scroll-x-progress"),
+    document.getElementById("box").style.getPropertyValue("--ae-scroll-y-progress")
+  ])).toEqual(["0.25", "0.2"]);
+});
+
+test("pointer mode follows live media capability changes without reloading", async ({ page }) => {
+  // Clone the capability boundary rather than relying on CDP to restore the
+  // operating system's desktop media features after touch emulation ends.
+  await page.addInitScript(() => {
+    const query = "(hover: hover) and (pointer: fine)";
+    const nativeMatchMedia = window.matchMedia.bind(window);
+    const media = Object.assign(new EventTarget(), { media: query, matches: true });
+    window.matchMedia = value => value === query ? media : nativeMatchMedia(value);
+    window.setScrollboxDesktop = matches => {
+      media.matches = matches;
+      media.dispatchEvent(Object.assign(new Event("change"), { matches, media: query }));
+    };
+  });
+  await setup(page, box("box"));
+  expect(await drag(page, "box")).toMatchObject({ x: 50, y: 0 });
+
+  await page.evaluate(() => window.setScrollboxDesktop(false));
+  await page.evaluate(() => document.getElementById("box")
+    .scrollTo({ left: 0, top: 0, behavior: "instant" }));
+  expect(await drag(page, "box")).toMatchObject({ x: 0, y: 0 });
+
+  await page.evaluate(() => window.setScrollboxDesktop(true));
+  expect(await drag(page, "box")).toMatchObject({ x: 50, y: 0 });
+});
+
+test("pointer dragging preserves an existing user-select declaration", async ({ page }) => {
+  await setup(page, box("box"));
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 70, y = rect.top + 70;
+    element.style.setProperty("user-select", "text", "important");
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 171,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 171,
+      pointerType: "mouse", buttons: 1, clientX: x - 50, clientY: y - 40
+    }));
+    const read = () => [element.style.getPropertyValue("user-select"),
+      element.style.getPropertyPriority("user-select")];
+    const during = read();
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 171, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 50, clientY: y - 40
+    }));
+    return { during, after: read(), x: element.scrollLeft, y: element.scrollTop };
+  });
+  expect(result).toEqual({ during: ["text", "important"], after: ["text", "important"],
+    x: 50, y: 0 });
+});
+
+test("content resize refreshes native progress", async ({ page }) => {
+  await setup(page, box("box", "native"));
+  await page.evaluate(() => document.getElementById("box").scrollTo(100, 0));
+  await expect.poll(() => page.evaluate(() => Number(document.getElementById("box")
+    .style.getPropertyValue("--ae-scroll-x-progress")))).toBe(0.5);
+  await page.evaluate(() => { document.getElementById("box").firstElementChild.style.width = "400px"; });
+  await expect.poll(() => page.evaluate(() => Number(document.getElementById("box")
+    .style.getPropertyValue("--ae-scroll-x-progress")))).toBeCloseTo(1 / 3, 3);
+});
+
+test("mode changes and unmount stop an active drag and restore inline styles", async ({ page }) => {
+  await setup(page, box("box"));
+  const result = await page.evaluate(async () => {
+    const element = document.getElementById("box");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 70, y = rect.top + 70;
+    element.style.setProperty("user-select", "text", "important");
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 7, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    element.setAttribute("data-ae-scrollbox", "native");
+    await AelluxJs.mountManager.update(element, "scrollbox");
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, isPrimary: true, pointerId: 7, pointerType: "mouse",
+      buttons: 1, clientX: x - 50, clientY: y - 50
+    }));
+    const afterSwitch = { x: element.scrollLeft, y: element.scrollTop,
+      userSelect: element.style.getPropertyValue("user-select"),
+      priority: element.style.getPropertyPriority("user-select") };
+    await AelluxJs.unmount(element, "scrollbox");
+    return { afterSwitch,
+      progress: [element.style.getPropertyValue("--ae-scroll-x-progress"),
+        element.style.getPropertyValue("--ae-scroll-y-progress")] };
+  });
+  expect(result).toEqual({
+    afterSwitch: { x: 0, y: 0, userSelect: "text", priority: "important" },
+    progress: [".2", ".3"]
+  });
+});
+
+test("vertical wheel converts for horizontal-only native boxes and hands only overflow to its parent", async ({ page }) => {
+  await setup(page, `<div id="parent" style="width:180px;height:120px;overflow:auto">
+    <div style="height:500px">
+      <div id="box" data-ae-scrollbox="pointer" style="width:100px;height:100px;overflow:auto">
+        <div style="width:300px;height:100px"></div>
+      </div>
+    </div></div>`);
+  const wheel = deltaY => page.evaluate(value => {
+    const element = document.getElementById("box");
+    const event = new WheelEvent("wheel", { deltaY: value, bubbles: true, cancelable: true });
+    element.dispatchEvent(event);
+    return { prevented: event.defaultPrevented, x: element.scrollLeft,
+      parent: document.getElementById("parent").scrollTop };
+  }, deltaY);
+  expect(await wheel(120)).toEqual({ prevented: true, x: 120, parent: 0 });
+  expect(await wheel(120)).toEqual({ prevented: true, x: 200, parent: 40 });
+  expect(await wheel(120)).toEqual({ prevented: true, x: 200, parent: 160 });
+});
+
+test("vertical wheel overflow is handed to eligible horizontal Scrollbox parents", async ({ page }) => {
+  await setup(page, `<div id="outer" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="width:300px;height:100px">
+      <div id="inner" data-ae-scrollbox="native"
+        style="width:100px;height:100px;overflow-x:hidden;overflow-y:auto">
+        <div style="height:300px"></div>
+      </div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const inner = document.getElementById("inner");
+    const outer = document.getElementById("outer");
+    inner.scrollTo({ top: 200, behavior: "instant" });
+    const event = new WheelEvent("wheel", { deltaY: 120, bubbles: true, cancelable: true });
+    inner.dispatchEvent(event);
+    return { prevented: event.defaultPrevented, inner: inner.scrollTop, outer: outer.scrollLeft };
+  });
+  expect(result).toEqual({ prevented: true, inner: 200, outer: 120 });
+});
+
+test("horizontal wheel handoff restores the vertical delta at each horizontal edge", async ({ page }) => {
+  await setup(page, `<div id="outer" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="width:300px;height:100px">
+      <div id="middle" data-ae-scrollbox="native"
+        style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+        <div style="width:300px;height:100px">
+          <div id="inner" data-ae-scrollbox="native"
+            style="width:100px;height:100px;overflow-x:hidden;overflow-y:auto">
+            <div style="height:300px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const inner = document.getElementById("inner");
+    const middle = document.getElementById("middle");
+    const outer = document.getElementById("outer");
+    inner.scrollTo({ top: 200, behavior: "instant" });
+    middle.scrollTo({ left: 200, behavior: "instant" });
+    const event = new WheelEvent("wheel", { deltaY: 120, bubbles: true, cancelable: true });
+    inner.dispatchEvent(event);
+    return { prevented: event.defaultPrevented, middle: middle.scrollLeft, outer: outer.scrollLeft };
+  });
+  expect(result).toEqual({ prevented: true, middle: 200, outer: 120 });
+});
+
+test("wheel overflow does not convert through a horizontally-disabled parent", async ({ page }) => {
+  await setup(page, `<div id="outer" data-ae-scrollbox="native"
+    data-ae-scrollbox-wheel-horizontal="false"
+    style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+    <div style="width:300px;height:100px">
+      <div id="inner" data-ae-scrollbox="native"
+        style="width:100px;height:100px;overflow-x:hidden;overflow-y:auto">
+        <div style="height:300px"></div>
+      </div>
+    </div>
+  </div>`);
+  const result = await page.evaluate(() => {
+    const inner = document.getElementById("inner");
+    const outer = document.getElementById("outer");
+    inner.scrollTo({ top: 200, behavior: "instant" });
+    const event = new WheelEvent("wheel", { deltaY: 120, bubbles: true, cancelable: true });
+    inner.dispatchEvent(event);
+    return { prevented: event.defaultPrevented, outer: outer.scrollLeft };
+  });
+  expect(result).toEqual({ prevented: false, outer: 0 });
+});
+
+test("vertical wheel stops converting when vertical scrolling becomes available", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto">
+    <div id="content" style="width:300px;height:100px"></div>
+  </div>`);
+  const wheel = () => page.evaluate(() => {
+    const element = document.getElementById("box");
+    const event = new WheelEvent("wheel", {
+      deltaY: 40, bubbles: true, cancelable: true
+    });
+    element.dispatchEvent(event);
+    return { prevented: event.defaultPrevented, x: element.scrollLeft };
+  });
+  expect(await wheel()).toEqual({ prevented: true, x: 40 });
+  await page.evaluate(() => document.getElementById("content").style.height = "300px");
+  expect(await wheel()).toEqual({ prevented: false, x: 40 });
+  await page.evaluate(() => document.getElementById("box").style.overflowY = "hidden");
+  expect(await wheel()).toEqual({ prevented: true, x: 80 });
+});
+
+test("converted wheel stretches an elastic child and scrolls its vertical parent", async ({ page }) => {
+  await setup(page, `<div id="parent" data-ae-scrollbox="native"
+    style="width:180px;height:120px;overflow:auto">
+    <div style="height:500px">
+      <div id="box" data-ae-scrollbox="pointer" style="width:100px;height:100px;overflow:auto">
+        <div id="elastic" data-ae-scrollbox-elastic style="width:300px;height:100px"></div>
+      </div>
+    </div></div>`);
+  const wheel = deltaY => page.evaluate(value => {
+    const element = document.getElementById("box");
+    const event = new WheelEvent("wheel", { deltaY: value, bubbles: true, cancelable: true });
+    element.dispatchEvent(event);
+    return { prevented: event.defaultPrevented, x: element.scrollLeft,
+      parent: document.getElementById("parent").scrollTop,
+      transform: document.getElementById("elastic").style.transform };
+  }, deltaY);
+  expect(await wheel(120)).toEqual({ prevented: true, x: 120, parent: 0, transform: "" });
+  const crossing = await wheel(120);
+  expect(crossing).toMatchObject({ prevented: true, x: 200, parent: 40 });
+  expect(crossing.transform).toContain("scale(");
+  const edge = await wheel(120);
+  expect(edge).toMatchObject({ prevented: true, x: 200, parent: 160 });
+  expect(edge.transform).toContain("scale(");
+  await page.evaluate(() => {
+    document.getElementById("parent").scrollTo({ top: 0, behavior: "instant" });
+    window.wheelAtParent = null;
+    document.getElementById("parent").addEventListener("wheel", event => {
+      window.wheelAtParent = {
+        prevented: event.defaultPrevented,
+        transform: document.getElementById("elastic").style.transform
+      };
+    });
+  });
+  const rect = await page.locator("#box").boundingBox();
+  await page.mouse.move(rect.x + 50, rect.y + 50);
+  await page.mouse.wheel(0, 120);
+  await expect.poll(() => page.evaluate(() => window.wheelAtParent)).toMatchObject({
+    prevented: true, transform: expect.stringContaining("scale(")
+  });
+  await expect.poll(() => page.evaluate(() => document.getElementById("parent").scrollTop))
+    .toBeGreaterThan(0);
+});
+
+for (const snapAxis of ["x", "y"]) {
+  test(`snap on ${snapAxis} disables PDS momentum in the other axis`, async ({ page }) => {
+    await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+      data-ae-scrollbox-snap="${snapAxis === "x" ? "horizontal" : "vertical"}"
+      data-ae-scrollbox-momentum="true" style="width:100px;height:100px;overflow:auto">
+      <div data-ae-snap-item="start" style="width:500px;height:500px"></div>
+    </div>`);
+    const result = await page.evaluate(snapAxis => {
+      const element = document.getElementById("box");
+      const rect = element.getBoundingClientRect();
+      const x = rect.left + 70, y = rect.top + 70;
+      const lastX = x - (snapAxis === "y" ? 40 : 0);
+      const lastY = y - (snapAxis === "x" ? 40 : 0);
+      element.dispatchEvent(new PointerEvent("pointerdown", {
+        bubbles: true, cancelable: true, isPrimary: true, pointerId: 306,
+        pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+      }));
+      window.dispatchEvent(new PointerEvent("pointermove", {
+        bubbles: true, cancelable: true, isPrimary: true, pointerId: 306,
+        pointerType: "mouse", buttons: 1, clientX: lastX, clientY: lastY
+      }));
+      window.dispatchEvent(new PointerEvent("pointerup", {
+        bubbles: true, isPrimary: true, pointerId: 306, pointerType: "mouse",
+        button: 0, buttons: 0, clientX: lastX, clientY: lastY
+      }));
+      return snapAxis === "x" ? element.scrollTop : element.scrollLeft;
+    }, snapAxis);
+    expect(result).toBe(40);
+    await page.waitForTimeout(250);
+    expect(await page.evaluate(snapAxis => {
+      const element = document.getElementById("box");
+      return snapAxis === "x" ? element.scrollTop : element.scrollLeft;
+    }, snapAxis)).toBe(40);
+  });
+}
+
+test("pointer release keeps scrolling with momentum enabled by default", async ({ page }) => {
+  await setup(page, box("box", "pointer", "", "", null)
+    .replace("width:300px;height:300px", "width:1000px;height:1000px"));
+  const released = await page.evaluate(async () => {
+    const element = document.getElementById("box");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 70, y = rect.top + 70;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 17, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    await new Promise(resolve => setTimeout(resolve, 16));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 17,
+      pointerType: "mouse", buttons: 1, clientX: x - 40, clientY: y - 40
+    }));
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 17, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 40, clientY: y - 40
+    }));
+    return [element.scrollLeft, element.scrollTop];
+  });
+  expect(released).toEqual([40, 0]);
+  await expect.poll(() => page.evaluate(() => document.getElementById("box").scrollLeft))
+    .toBeGreaterThan(40);
+  expect(await page.evaluate(() => document.getElementById("box").scrollTop)).toBe(0);
+});
+
+test("momentum advances ten percent of the remaining distance each frame and terminates", async ({ page }) => {
+  await setup(page, box("box", "pointer", "", "", null)
+    .replace("width:300px;height:300px", "width:1000px;height:1000px"));
+  await page.evaluate(() => {
+    window.pendingMomentumFrames = [];
+    window.originalRequestAnimationFrame = window.requestAnimationFrame;
+    window.requestAnimationFrame = callback => {
+      window.pendingMomentumFrames.push(callback);
+      return window.pendingMomentumFrames.length;
+    };
+  });
+  expect(await drag(page, "box")).toMatchObject({ x: 50, y: 0 });
+  const result = await page.evaluate(async () => {
+    const element = document.getElementById("box");
+    const positions = [];
+    let previous = element.scrollLeft;
+    try {
+      for (let step = 0; step < 360 && window.pendingMomentumFrames.length; step++) {
+        window.pendingMomentumFrames.shift()(performance.now());
+        if (previous !== element.scrollLeft) {
+          positions.push([element.scrollLeft, element.scrollTop]);
+          previous = element.scrollLeft;
+        }
+        await Promise.resolve();
+        await Promise.resolve();
+      }
+      return { positions, pending: window.pendingMomentumFrames.length };
+    } finally {
+      window.requestAnimationFrame = window.originalRequestAnimationFrame;
+      delete window.pendingMomentumFrames;
+      delete window.originalRequestAnimationFrame;
+    }
+  });
+  expect(result.positions[0]).toEqual([135, 0]);
+  expect(result.positions[1][0]).toBeGreaterThan(205);
+  expect(result.positions[1][0]).toBeLessThan(220);
+  expect(result.positions[1][1]).toBe(0);
+  expect(result.positions.at(-1)).toEqual([900, 0]);
+  expect(result.pending).toBe(0);
+});
+
+for (const interaction of ["content", "button", "multiclick", "touch", "prevented pointerdown", "wheel", "noncancelable wheel", "ctrl wheel", "prevented wheel"]) {
+  test(`momentum stops immediately on ${interaction} without requiring a new drag`, async ({ page }) => {
+    await setup(page, box("box", "pointer", "", '<button id="control">Action</button>', null)
+      .replace("width:300px;height:300px", "width:2000px;height:2000px"));
+    await page.evaluate(() => {
+      window.pendingMomentumFrames = [];
+      window.requestAnimationFrame = callback => {
+        window.pendingMomentumFrames.push(callback);
+        return window.pendingMomentumFrames.length;
+      };
+    });
+    await drag(page, "box");
+    const result = await page.evaluate(async interaction => {
+      const element = document.getElementById("box");
+      const frame = async () => {
+        const callbacks = window.pendingMomentumFrames.splice(0);
+        for (const callback of callbacks) callback(performance.now());
+        await Promise.resolve();
+      };
+      await frame();
+      const coasting = element.scrollLeft;
+      let event;
+      if (interaction.includes("wheel")) {
+        event = new WheelEvent("wheel", {
+          bubbles: true, cancelable: interaction !== "noncancelable wheel",
+          ctrlKey: interaction === "ctrl wheel", deltaY: 10
+        });
+        if (interaction === "prevented wheel") event.preventDefault();
+        element.dispatchEvent(event);
+      } else {
+        const target = interaction === "button" ? document.getElementById("control") : element;
+        const rect = target.getBoundingClientRect();
+        event = new PointerEvent("pointerdown", {
+          bubbles: true, cancelable: true, isPrimary: true, pointerId: 18,
+          pointerType: interaction === "touch" ? "touch" : "mouse",
+          button: 0, buttons: 1, detail: interaction === "multiclick" ? 2 : 1,
+          clientX: rect.left + 5, clientY: rect.top + 5
+        });
+        if (interaction === "prevented pointerdown") event.preventDefault();
+        target.dispatchEvent(event);
+      }
+      const stopped = element.scrollLeft;
+      for (let index = 0; index < 8; index++) await frame();
+      return { coasting, stopped, after: element.scrollLeft,
+        pending: window.pendingMomentumFrames.length, prevented: event.defaultPrevented };
+    }, interaction);
+    expect(result.coasting).toBeGreaterThan(50);
+    expect(result.after).toBe(result.stopped);
+    expect(result.pending).toBe(0);
+    if (["button", "touch", "noncancelable wheel", "ctrl wheel"].includes(interaction))
+      expect(result.prevented).toBe(false);
+  });
+}
+
+for (const axis of ["x", "y"]) for (const part of ["thumb", "track"]) {
+  test(`momentum stops on ${axis} scrollbar ${part} press before it moves`, async ({ page }) => {
+    await setup(page, box("box", "pointer", 'data-ae-scrollbar="x y"', "", null)
+      .replace("width:300px;height:300px", "width:2000px;height:2000px")
+      .replace('overflow:auto;', 'overflow:auto;--ae-scrollbar-track-color:rgb(70,80,90);--ae-scrollbar-opacity-fade:1;'));
+    await page.evaluate(() => {
+      window.pendingMomentumFrames = [];
+      window.requestAnimationFrame = callback => {
+        window.pendingMomentumFrames.push(callback);
+        return window.pendingMomentumFrames.length;
+      };
+    });
+    await drag(page, "box");
+    const coasting = await page.evaluate(async () => {
+      for (const callback of window.pendingMomentumFrames.splice(0)) callback(performance.now());
+      await Promise.resolve();
+      return document.getElementById("box").scrollLeft;
+    });
+    expect(coasting).toBeGreaterThan(50);
+    const position = await page.locator(`[data-ae-scrollbar-${axis === "x" ? "horizontal" : "vertical"}]`)
+      .evaluate((element, { axis, part }) => {
+        const rect = element.getBoundingClientRect();
+        const start = parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-position"));
+        const size = parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-size"));
+        const offset = part === "thumb" ? start + size / 2 : 80;
+        return { x: rect.left + (axis === "x" ? offset : 4), y: rect.top + (axis === "y" ? offset : 4) };
+      }, { axis, part });
+    await page.mouse.move(position.x, position.y);
+    await page.mouse.down();
+    const positions = await page.evaluate(async () => {
+      const element = document.getElementById("box");
+      const before = [element.scrollLeft, element.scrollTop];
+      for (let index = 0; index < 8; index++) {
+        for (const callback of window.pendingMomentumFrames.splice(0)) callback(performance.now());
+        await Promise.resolve();
+      }
+      return { before, after: [element.scrollLeft, element.scrollTop] };
+    });
+    expect(positions.after).toEqual(positions.before);
+    if (part === "thumb") {
+      await page.mouse.move(position.x + (axis === "x" ? 10 : 0), position.y + (axis === "y" ? 10 : 0));
+      const moved = await page.locator("#box").evaluate((element, axis) => axis === "x" ? element.scrollLeft : element.scrollTop, axis);
+      expect(moved).toBeGreaterThan(positions.before[axis === "x" ? 0 : 1]);
+    }
+    await page.mouse.up();
+  });
+}
+
+test("momentum false stops at release", async ({ page }) => {
+  await setup(page, box("box"));
+  expect(await drag(page, "box")).toMatchObject({ x: 50, y: 0 });
+  await page.waitForTimeout(100);
+  expect(await page.evaluate(() => {
+    const element = document.getElementById("box");
+    return [element.scrollLeft, element.scrollTop];
+  })).toEqual([50, 0]);
+});
+
+test("disabling momentum while coasting stops the animation", async ({ page }) => {
+  await setup(page, box("box", "pointer", "", "", null)
+    .replace("width:300px;height:300px", "width:1000px;height:1000px"));
+  await drag(page, "box");
+  await expect.poll(() => page.evaluate(() => document.getElementById("box").scrollLeft))
+    .toBeGreaterThan(50);
+  const stopped = await page.evaluate(async () => {
+    const element = document.getElementById("box");
+    element.setAttribute("data-ae-scrollbox-momentum", "false");
+    await AelluxJs.mountManager.update(element, "scrollbox");
+    return [element.scrollLeft, element.scrollTop];
+  });
+  await page.waitForTimeout(100);
+  expect(await page.evaluate(() => {
+    const element = document.getElementById("box");
+    return [element.scrollLeft, element.scrollTop];
+  })).toEqual(stopped);
+});
+
+test("a pause before release does not start momentum", async ({ page }) => {
+  await setup(page, box("box", "pointer", "", "", null));
+  const released = await page.evaluate(async () => {
+    const element = document.getElementById("box");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 70, y = rect.top + 70;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 17, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 17,
+      pointerType: "mouse", buttons: 1, clientX: x - 40, clientY: y - 40
+    }));
+    await new Promise(resolve => setTimeout(resolve, 350));
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 17, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 40, clientY: y - 40
+    }));
+    return [element.scrollLeft, element.scrollTop];
+  });
+  expect(released).toEqual([40, 0]);
+  await page.waitForTimeout(100);
+  expect(await page.evaluate(() => {
+    const element = document.getElementById("box");
+    return [element.scrollLeft, element.scrollTop];
+  })).toEqual([40, 0]);
+});
+
+test("weak CSS makes scrolling smooth and honors reduced motion on every element",
+  async ({ page, browserName }) => {
+  test.skip(browserName === "webkit",
+    "Playwright WebKit does not emulate prefers-reduced-motion in this environment.");
+  await setup(page, box("box", "native"));
+  const behaviors = () => page.evaluate(() => [
+    document.documentElement, document.body, document.getElementById("box")
+  ].map(element => getComputedStyle(element).scrollBehavior));
+  await expect.poll(behaviors).toEqual(["smooth", "smooth", "smooth"]);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "auto" }));
+  await expect.poll(behaviors).toEqual(["auto", "auto", "auto"]);
+  await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "no-preference" }));
+  await expect.poll(behaviors).toEqual(["smooth", "smooth", "smooth"]);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" }));
+  await expect.poll(behaviors).toEqual(["auto", "auto", "auto"]);
+});
+
+test("local reduced-motion preference removes custom scrollbar transitions", async ({ page }) => {
+  await setup(page, box("box", "native", 'data-ae-scrollbar="vertical"'));
+  const duration = () => page.locator("[data-ae-scrollbar-vertical]").evaluate(element =>
+    getComputedStyle(element).transitionDuration);
+  await expect.poll(duration).toBe("0.16s");
+  await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" }));
+  expect(await duration()).toBe("0s");
+});
+
+test("elastic pointer drag transforms its marked wrapper and restores it on unmount", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false"
+    style="width:100px;height:100px;overflow:auto;padding:7px 9px 11px 13px">
+    <div data-ae-scrollbox-elastic
+      style="width:300px;height:300px;transform:scale(1);transform-origin:25% 75%"></div></div>`);
+  const result = await page.evaluate(async () => {
+    const element = document.getElementById("box");
+    const wrapper = element.firstElementChild;
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 50, y = rect.top + 50;
+    const pointer = (type, clientX, clientY, buttons) => new PointerEvent(type, {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 19,
+      pointerType: "mouse", button: type === "pointermove" ? -1 : 0,
+      buttons, clientX, clientY
+    });
+    element.dispatchEvent(pointer("pointerdown", x, y, 1));
+    window.dispatchEvent(pointer("pointermove", x + 30, y + 60, 1));
+    const stretched = wrapper.style.transform;
+    const activeOrigin = wrapper.style.transformOrigin;
+    const partialRect = wrapper.getBoundingClientRect();
+    const partialGrowth = { x: partialRect.width - wrapper.offsetWidth,
+      y: partialRect.height - wrapper.offsetHeight };
+    window.dispatchEvent(pointer("pointermove", x + 120, y + 120, 1));
+    const maxRect = wrapper.getBoundingClientRect();
+    const maxGrowth = { x: maxRect.width - wrapper.offsetWidth,
+      y: maxRect.height - wrapper.offsetHeight };
+    const maxSpace = { x: element.clientWidth / 4, y: element.clientHeight / 4 };
+    window.dispatchEvent(pointer("pointerup", x + 120, y + 120, 0));
+    const releasing = wrapper.classList.contains("ae--scrollbox-elastic-release");
+    await AelluxJs.unmount(element, "scrollbox");
+    return { stretched, activeOrigin, partialGrowth, maxGrowth, maxSpace,
+      releasing, transform: wrapper.style.transform,
+      origin: wrapper.style.transformOrigin,
+      padding: element.style.getPropertyValue("padding"),
+      releaseClass: wrapper.classList.contains("ae--scrollbox-elastic-release") };
+  });
+  expect(result.stretched).toMatch(/translate3d\(0px, [\d.]+px, 0px\)/);
+  expect(result.stretched).toMatch(/scale\(1, 1\.\d+\)/);
+  expect(result.stretched.startsWith("scale(")).toBe(true);
+  expect(result.partialGrowth.x).toBe(0);
+  expect(result.partialGrowth.y).toBeCloseTo(2 * elasticAmount(60, result.maxSpace.y), 1);
+  expect(result.maxGrowth.x).toBe(0);
+  expect(result.maxGrowth.y).toBeCloseTo(2 * elasticAmount(120, result.maxSpace.y), 1);
+  expect(result.activeOrigin.split(" ")[1]).toBe("0%");
+  expect(result.releasing).toBe(true);
+  expect(result.transform).toBe("scale(1)");
+  expect(result.origin.startsWith("25% 75%")).toBe(true);
+  expect(result.padding).toBe("7px 9px 11px 13px");
+  expect(result.releaseClass).toBe(false);
+});
+
+for (const axis of ["x", "y"]) {
+  for (const edge of ["start", "end"]) {
+    test(`opposite ${axis} wheel finishes elastic recovery at ${edge} before snap navigation`,
+      async ({ page }) => {
+        await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+          data-ae-scrollbox-snap="${axis === "x" ? "horizontal" : "vertical"}"
+          style="width:100px;height:100px;overflow-${axis}:auto;overflow-${axis === "x" ? "y" : "x"}:hidden">
+          <div data-ae-scrollbox-elastic
+            style="display:flex;flex-direction:${axis === "x" ? "row" : "column"};width:${axis === "x" ? 500 : 100}px;height:${axis === "y" ? 500 : 100}px">
+            ${'<div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>'.repeat(5)}
+          </div>
+        </div>`);
+        await page.evaluate(({ axis, edge }) => {
+          const element = document.getElementById("box");
+          element.scrollTo({ [axis === "x" ? "left" : "top"]: edge === "end" ? 400 : 0,
+            behavior: "instant" });
+          element.dispatchEvent(new WheelEvent("wheel", {
+            bubbles: true, cancelable: true,
+            [axis === "x" ? "deltaX" : "deltaY"]: edge === "end" ? 80 : -80
+          }));
+        }, { axis, edge });
+        await expect.poll(() => page.evaluate(() => document.getElementById("box")
+          .firstElementChild.classList.contains("ae--scrollbox-elastic-release"))).toBe(true);
+        const interrupted = await page.evaluate(({ axis, edge }) => {
+          const element = document.getElementById("box"), wrapper = element.firstElementChild;
+          const before = wrapper.style.transform;
+          element.dispatchEvent(new WheelEvent("wheel", {
+            bubbles: true, cancelable: true,
+            [axis === "x" ? "deltaX" : "deltaY"]: edge === "end" ? -80 : 80
+          }));
+          return { before, transform: wrapper.style.transform,
+            releasing: wrapper.classList.contains("ae--scrollbox-elastic-release") };
+        }, { axis, edge });
+        expect(interrupted.before).not.toBe("");
+        expect(interrupted.transform).toBe("");
+        expect(interrupted.releasing).toBe(false);
+        await expect.poll(() => page.evaluate(axis => {
+          const element = document.getElementById("box");
+          return axis === "x" ? element.scrollLeft : element.scrollTop;
+        }, axis)).toBe(edge === "end" ? 300 : 100);
+        expect(await page.evaluate(() => document.getElementById("box")
+          .classList.contains("ae--snap-suspended"))).toBe(false);
+      });
+  }
+}
+
+for (const mode of ["native", "pointer"]) {
+  test(`pointer interaction on a button finishes ${mode} elastic recovery immediately`, async ({ page }) => {
+    await setup(page, `<div id="box" data-ae-scrollbox="${mode}" data-ae-scrollbox-snap
+      style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden">
+      <div data-ae-scrollbox-elastic style="display:flex;width:300px;transform:translateX(0px);transform-origin:3px 4px">
+        <div data-ae-snap-item style="flex:none;width:100px;height:100px"><button id="control">Click</button></div>
+        <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+        <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
+      </div>
+    </div>`);
+    const original = await page.evaluate(() => {
+      const element = document.getElementById("box"), wrapper = element.firstElementChild;
+      const original = wrapper.getAttribute("style");
+      element.dispatchEvent(new WheelEvent("wheel", {
+        bubbles: true, cancelable: true, deltaX: -80
+      }));
+      return original;
+    });
+    await expect.poll(() => page.evaluate(() => document.getElementById("box")
+      .firstElementChild.classList.contains("ae--scrollbox-elastic-release"))).toBe(true);
+    const result = await page.evaluate(async () => {
+      const element = document.getElementById("box"), wrapper = element.firstElementChild;
+      const control = document.getElementById("control");
+      const rect = control.getBoundingClientRect();
+      control.dispatchEvent(new PointerEvent("pointerdown", {
+        bubbles: true, cancelable: true, isPrimary: true, pointerId: 307,
+        pointerType: "mouse", button: 0, buttons: 1, detail: 2,
+        clientX: rect.left + 5, clientY: rect.top + 5
+      }));
+      const immediate = wrapper.getAttribute("style");
+      const releasing = wrapper.classList.contains("ae--scrollbox-elastic-release");
+      window.dispatchEvent(new PointerEvent("pointerup", {
+        bubbles: true, isPrimary: true, pointerId: 307, pointerType: "mouse", button: 0
+      }));
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      return { immediate, afterFrames: wrapper.getAttribute("style"), releasing,
+        left: element.scrollLeft };
+    });
+    // Interaction cleanup restores authored styles immediately. Fade geometry
+    // follows the next scheduled publication and must also settle afterward.
+    const withoutFadeGeometry = style => style.replace(/--ae-scrollbox-mask-(?:left|top|width|height):[^;]*;/g, "").trim();
+    expect({ ...result, immediate: withoutFadeGeometry(result.immediate) }).toEqual({
+      immediate: withoutFadeGeometry(original), afterFrames: original, releasing: false, left: 0
+    });
+  });
+}
+
+for (const axis of ["x", "y"]) {
+  test(`a small opposite ${axis} drag stays proportional after interrupting elastic recovery`, async ({ page }) => {
+    await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+      data-ae-scrollbox-snap="${axis === "x" ? "horizontal" : "vertical"}"
+      style="width:100px;height:100px;overflow-${axis}:auto;overflow-${axis === "x" ? "y" : "x"}:hidden">
+      <div data-ae-scrollbox-elastic
+        style="display:flex;flex-direction:${axis === "x" ? "row" : "column"};width:${axis === "x" ? 500 : 100}px;height:${axis === "y" ? 500 : 100}px">
+        ${'<div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>'.repeat(5)}
+      </div>
+    </div>`);
+    await page.evaluate(axis => document.getElementById("box").scrollTo({
+      [axis === "x" ? "left" : "top"]: 400, behavior: "instant"
+    }), axis);
+    const rect = await page.locator("#box").boundingBox();
+    const x = rect.x + 70, y = rect.y + 70;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x - (axis === "x" ? 60 : 0), y - (axis === "y" ? 60 : 0));
+    await page.mouse.up();
+    await expect.poll(() => page.evaluate(() => document.getElementById("box")
+      .firstElementChild.classList.contains("ae--scrollbox-elastic-release"))).toBe(true);
+    const nextX = rect.x + 30, nextY = rect.y + 30;
+    await page.mouse.move(nextX, nextY);
+    await page.mouse.down();
+    expect(await page.evaluate(() => {
+      const element = document.getElementById("box");
+      return { transform: element.firstElementChild.style.transform,
+        releasing: element.firstElementChild.classList.contains("ae--scrollbox-elastic-release") };
+    })).toEqual({ transform: "", releasing: false });
+    await page.mouse.move(nextX + (axis === "x" ? 4 : 0), nextY + (axis === "y" ? 4 : 0));
+    const position = () => page.evaluate(axis => {
+      const element = document.getElementById("box");
+      return axis === "x" ? element.scrollLeft : element.scrollTop;
+    }, axis);
+    expect(await position()).toBe(396);
+    await page.waitForTimeout(150);
+    expect(await position()).toBe(396);
+    await page.mouse.up();
+    await expect.poll(position).toBe(400);
+  });
+}
+
+test("elastic native wheel transforms its wrapper and settles", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto;padding:8px">
+    <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div></div>`);
+  const stretched = await page.evaluate(async () => {
+    const element = document.getElementById("box");
+    const wrapper = element.firstElementChild;
+    const event = new WheelEvent("wheel", { deltaY: -60, bubbles: true, cancelable: true });
+    element.dispatchEvent(event);
+    const transform = wrapper.style.transform;
+    await new Promise(resolve => setTimeout(resolve, 160));
+    return { prevented: event.defaultPrevented, limit: element.clientHeight / 4,
+      transform, releasing: wrapper.classList.contains("ae--scrollbox-elastic-release"),
+      settlingScale: new DOMMatrixReadOnly(getComputedStyle(wrapper).transform).m22 };
+  });
+  expect(stretched.prevented).toBe(true);
+  expect(Number.parseFloat(/translate3d\(0px, ([\d.]+)px/.exec(stretched.transform)[1]))
+    .toBeCloseTo(elasticAmount(60, stretched.limit), 1);
+  expect(stretched.transform).toMatch(/scale\(1, 1\.\d+\)/);
+  expect(stretched.releasing).toBe(true);
+  expect(stretched.settlingScale).toBeGreaterThan(1);
+  expect(stretched.settlingScale).toBeLessThan(1.1);
+  await expect.poll(() => page.evaluate(() => {
+    const element = document.getElementById("box");
+    const wrapper = element.firstElementChild;
+    return { transform: wrapper.style.transform,
+      releaseClass: wrapper.classList.contains("ae--scrollbox-elastic-release") };
+  })).toEqual({ transform: "", releaseClass: false });
+});
+
+test("overscroll-behavior none suppresses elastic pressure in its axis", async ({ page }) => {
+  const supported = await page.evaluate(() => CSS.supports("overscroll-behavior-y", "none"));
+  test.skip(!supported, "This browser does not support overscroll-behavior");
+
+  await setup(page, `<div id="none" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto;overscroll-behavior-y:none">
+    <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div>
+  </div>
+  <div id="contain" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto;overscroll-behavior-y:contain">
+    <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div>
+  </div>`);
+
+  const result = await page.evaluate(() => ["none", "contain"].map(id => {
+    const element = document.getElementById(id);
+    const wheel = new WheelEvent("wheel", {
+      deltaY: -60, bubbles: true, cancelable: true
+    });
+    element.dispatchEvent(wheel);
+    return { id, prevented: wheel.defaultPrevented,
+      transform: element.firstElementChild.style.transform };
+  }));
+
+  expect(result[0]).toEqual({ id: "none", prevented: true, transform: "" });
+  expect(result[1].prevented).toBe(true);
+  expect(result[1].transform).toContain("translate3d");
+});
+
+test("pointer drag with overscroll-behavior none reverses without elastic force", async ({ page }) => {
+  const supported = await page.evaluate(() => CSS.supports("overscroll-behavior-y", "none"));
+  test.skip(!supported, "This browser does not support overscroll-behavior");
+
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false"
+    style="width:100px;height:100px;overflow:auto;overscroll-behavior-y:none">
+    <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div>
+  </div>`);
+
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 50, y = rect.top + 50;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 340,
+      pointerType: "mouse", button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    for (const position of [y + 60, y - 40]) window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 340,
+      pointerType: "mouse", buttons: 1, clientX: x, clientY: position
+    }));
+    const result = { transform: element.firstElementChild.style.transform,
+      scrollTop: element.scrollTop };
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 340,
+      pointerType: "mouse", button: 0, buttons: 0,
+      clientX: x, clientY: y - 40
+    }));
+    return result;
+  });
+
+  expect(result.transform).toBe("");
+  expect(result.scrollTop).toBe(100);
+});
+
+test("native touch respects overscroll-behavior none during elastic pressure", async ({ page }) => {
+  const supported = await page.evaluate(() => CSS.supports("overscroll-behavior-y", "none"));
+  test.skip(!supported, "This browser does not support overscroll-behavior");
+
+  await setup(page, `<div id="box" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto;overscroll-behavior-y:none">
+    <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div>
+  </div>`);
+
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const touchEvent = (type, y, active) => {
+      const event = new Event(type, { bubbles: true, cancelable: true });
+      Object.defineProperty(event, "touches", { value: active ? [
+        { identifier: 341, clientX: 40, clientY: y }
+      ] : [] });
+      return event;
+    };
+    element.dispatchEvent(touchEvent("touchstart", 40, true));
+    const move = touchEvent("touchmove", 100, true);
+    element.dispatchEvent(move);
+    const result = { prevented: move.defaultPrevented,
+      transform: element.firstElementChild.style.transform };
+    element.dispatchEvent(touchEvent("touchend", 100, false));
+    return result;
+  });
+
+  expect(result).toEqual({ prevented: false, transform: "" });
+});
+
+test("elastic native touch stretches while pulling beyond an edge", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto;padding:6px">
+    <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div></div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const touchEvent = (type, y, active) => {
+      const event = new Event(type, { bubbles: true, cancelable: true });
+      Object.defineProperty(event, "touches", { value: active ? [
+        { identifier: 1, clientX: 40, clientY: y }
+      ] : [] });
+      return event;
+    };
+    element.dispatchEvent(touchEvent("touchstart", 40, true));
+    const move = touchEvent("touchmove", 100, true);
+    element.dispatchEvent(move);
+    const transform = element.firstElementChild.style.transform;
+    element.dispatchEvent(touchEvent("touchend", 100, false));
+    return { prevented: move.defaultPrevented, limit: element.clientHeight / 4, transform,
+      releasing: element.firstElementChild.classList.contains("ae--scrollbox-elastic-release") };
+  });
+  expect(result.prevented).toBe(true);
+  expect(Number.parseFloat(/translate3d\(0px, ([\d.]+)px/.exec(result.transform)[1]))
+    .toBeCloseTo(elasticAmount(60, result.limit), 1);
+  expect(result.transform).toMatch(/scale\(1, 1\.\d+\)/);
+  expect(result.releasing).toBe(true);
+});
+
+for (const behavior of ["auto", "contain"]) {
+  test(`horizontal touch pressure ${behavior === "auto" ? "passes" : "blocks"} vertical motion to the parent`, async ({ page }) => {
+    if (behavior === "contain")
+      test.skip(!await page.evaluate(() => CSS.supports("overscroll-behavior-y", "contain")));
+    await setup(page, `<div id="parent" style="width:120px;height:100px;overflow-y:auto;scroll-behavior:smooth!important">
+      <div id="box" data-ae-scrollbox="native"
+        style="width:100px;height:100px;overflow-x:auto;overflow-y:hidden;overscroll-behavior-y:${behavior}">
+        <div data-ae-scrollbox-elastic style="width:300px;height:300px"></div>
+      </div>
+      <div style="height:300px"></div>
+    </div>`);
+    const result = await page.evaluate(() => {
+      const box = document.getElementById("box");
+      const parent = document.getElementById("parent");
+      const touchEvent = (type, x, y, active) => {
+        const event = new Event(type, { bubbles: true, cancelable: true });
+        Object.defineProperty(event, "touches", { value: active ? [
+          { identifier: 1, clientX: x, clientY: y }
+        ] : [] });
+        return event;
+      };
+      box.dispatchEvent(touchEvent("touchstart", 40, 60, true));
+      const first = touchEvent("touchmove", 100, 40, true);
+      box.dispatchEvent(first);
+      const firstTop = parent.scrollTop;
+      const second = touchEvent("touchmove", 120, 20, true);
+      box.dispatchEvent(second);
+      const result = { firstTop, secondTop: parent.scrollTop, innerTop: box.scrollTop,
+        prevented: first.defaultPrevented && second.defaultPrevented };
+      box.dispatchEvent(touchEvent("touchend", 120, 20, false));
+      result.restored = parent.style.getPropertyValue("scroll-behavior") === "smooth" &&
+        parent.style.getPropertyPriority("scroll-behavior") === "important";
+      return result;
+    });
+    expect(result).toEqual({ firstTop: behavior === "auto" ? 20 : 0,
+      secondTop: behavior === "auto" ? 40 : 0, innerTop: 0,
+      prevented: true, restored: true });
+  });
+}
+
+test("elastic pointer drag moves its wrapper away from the right edge", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false"
+    style="width:100px;height:100px;overflow:auto;padding:7px 9px 11px 13px">
+    <div data-ae-scrollbox-elastic style="width:300px;height:300px"></div></div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const maxX = element.scrollWidth - element.clientWidth;
+    const maxY = element.scrollHeight - element.clientHeight;
+    element.scrollTo({ left: maxX, top: maxY, behavior: "instant" });
+    const rect = element.getBoundingClientRect();
+    const wrapper = element.firstElementChild;
+    const beforeGapX = rect.right - wrapper.getBoundingClientRect().right;
+    const beforeGapY = rect.bottom - wrapper.getBoundingClientRect().bottom;
+    const x = rect.left + 50, y = rect.top + 50;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 23, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 23,
+      pointerType: "mouse", buttons: 1, clientX: x - 60, clientY: y - 60
+    }));
+    return {
+      transform: wrapper.style.transform,
+      origin: wrapper.style.transformOrigin,
+      scrollLeft: element.scrollLeft, scrollTop: element.scrollTop, maxX, maxY,
+      gapX: rect.right - wrapper.getBoundingClientRect().right - beforeGapX,
+      gapY: rect.bottom - wrapper.getBoundingClientRect().bottom - beforeGapY
+    };
+  });
+  expect(result.transform).toMatch(/translate3d\(-[\d.]+px, 0px, 0px\)/);
+  expect(result.transform).toMatch(/scale\(1\.\d+, 1\)/);
+  expect(result.transform.startsWith("scale(")).toBe(true);
+  expect(Number.parseFloat(result.origin.split(" ")[0])).toBeGreaterThanOrEqual(300);
+  expect(Number.parseFloat(result.origin.split(" ")[1])).toBeGreaterThan(0);
+  expect(result.scrollLeft).toBe(result.maxX);
+  expect(result.scrollTop).toBe(result.maxY);
+  expect(result.gapX).toBeGreaterThan(10);
+  expect(result.gapY).toBeCloseTo(0, 1);
+});
+
+test("elastic pointer drag moves its wrapper away from the bottom edge", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
+    <div data-ae-scrollbox-elastic style="width:300px;height:300px"></div></div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const wrapper = element.firstElementChild;
+    element.scrollTo({ top: element.scrollHeight, behavior: "instant" });
+    const maxY = element.scrollHeight - element.clientHeight;
+    const rect = element.getBoundingClientRect();
+    const before = wrapper.getBoundingClientRect().bottom;
+    const x = rect.left + 50, y = rect.top + 50;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 124, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 124,
+      pointerType: "mouse", buttons: 1, clientX: x, clientY: y - 60
+    }));
+    const result = { transform: wrapper.style.transform,
+      origin: wrapper.style.transformOrigin, scrollTop: element.scrollTop,
+      maxY, gapY: before - wrapper.getBoundingClientRect().bottom };
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 124, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x, clientY: y - 60
+    }));
+    return result;
+  });
+  expect(result.transform).toMatch(/translate3d\(0px, -[\d.]+px, 0px\)/);
+  expect(result.transform).toMatch(/scale\(1, 1\.\d+\)/);
+  expect(Number.parseFloat(result.origin.split(" ")[1])).toBeGreaterThanOrEqual(300);
+  expect(result.scrollTop).toBe(result.maxY);
+  expect(result.gapY).toBeGreaterThan(10);
+});
+
+test("elastic trailing pivot keeps wrapper dimensions without minimum sizes", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
+    <div data-ae-scrollbox-elastic style="width:100px;height:100px">
+      <div id="content" style="width:400px;height:400px"></div>
+    </div></div>`);
+  const result = await page.evaluate(async () => {
+    const element = document.getElementById("box");
+    const wrapper = element.firstElementChild;
+    const content = document.getElementById("content");
+    const rect = element.getBoundingClientRect();
+    element.scrollTo({ left: element.scrollWidth, top: element.scrollHeight, behavior: "instant" });
+    const beforeWrapper = { width: wrapper.offsetWidth, height: wrapper.offsetHeight };
+    const x = rect.left + 50, y = rect.top + 50;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 53, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 53,
+      pointerType: "mouse", buttons: 1, clientX: x - 60, clientY: y - 60
+    }));
+    const origin = wrapper.style.transformOrigin.split(" ");
+    const result = { originX: Number.parseFloat(origin[0]), originY: Number.parseFloat(origin[1]),
+      wrapperWidth: wrapper.offsetWidth, wrapperHeight: wrapper.offsetHeight, beforeWrapper,
+      contentWidth: wrapper.scrollWidth, contentHeight: wrapper.scrollHeight,
+      minWidth: wrapper.style.minWidth, minHeight: wrapper.style.minHeight,
+      transform: wrapper.style.transform };
+    await AelluxJs.unmount(element, "scrollbox");
+    return { ...result, restoredMinWidth: wrapper.style.minWidth,
+      restoredMinHeight: wrapper.style.minHeight };
+  });
+  expect(result.beforeWrapper).toEqual({ width: 100, height: 100 });
+  expect(result.wrapperWidth).toBe(100);
+  expect(result.wrapperHeight).toBe(100);
+  expect(result.originX).toBeGreaterThanOrEqual(result.contentWidth);
+  expect(result.originY).toBe(50);
+  expect(result.transform).toMatch(/scale\(1\.\d+, 1\)/);
+  expect(result.minWidth).toBe("");
+  expect(result.minHeight).toBe("");
+  expect(result.restoredMinWidth).toBe("");
+  expect(result.restoredMinHeight).toBe("");
+});
+
+test("elastic bottom and right transform animates during release", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false"
+    style="width:100px;height:100px;overflow:auto;padding:8px">
+    <div data-ae-scrollbox-elastic style="width:300px;height:300px"></div></div>`);
+  const result = await page.evaluate(async () => {
+    const element = document.getElementById("box");
+    const wrapper = element.firstElementChild;
+    const rect = element.getBoundingClientRect();
+    const gap = () => ({
+      x: rect.right - wrapper.getBoundingClientRect().right,
+      y: rect.bottom - wrapper.getBoundingClientRect().bottom
+    });
+    element.scrollTo({ left: element.scrollWidth, top: element.scrollHeight, behavior: "instant" });
+    const before = gap();
+    const x = rect.left + 50, y = rect.top + 50;
+    element.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true, isPrimary: true, pointerId: 41, pointerType: "mouse",
+      button: 0, buttons: 1, clientX: x, clientY: y
+    }));
+    window.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 41,
+      pointerType: "mouse", buttons: 1, clientX: x - 60, clientY: y - 60
+    }));
+    const during = gap();
+    window.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true, isPrimary: true, pointerId: 41, pointerType: "mouse",
+      button: 0, buttons: 0, clientX: x - 60, clientY: y - 60
+    }));
+    await new Promise(resolve => setTimeout(resolve, 250));
+    const middle = gap();
+    const matrix = new DOMMatrixReadOnly(getComputedStyle(wrapper).transform);
+    return { before, during, middle, scaleX: matrix.m11, scaleY: matrix.m22 };
+  });
+  expect(result.scaleX).toBeGreaterThan(1);
+  expect(result.scaleX).toBeLessThan(1.1);
+  expect(result.scaleY).toBe(1);
+  expect(result.middle.x).toBeGreaterThan(result.before.x);
+  expect(result.middle.y).toBeCloseTo(result.before.y, 1);
+  expect(result.middle.x).toBeLessThan(result.during.x);
+  expect(result.middle.y).toBeCloseTo(result.during.y, 1);
+});
+
+test("elastic native wheel moves its wrapper at bottom and right limits", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto;padding:8px">
+    <div data-ae-scrollbox-elastic style="width:300px;height:300px"></div></div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    element.scrollTo({ left: element.scrollWidth, top: element.scrollHeight, behavior: "instant" });
+    const event = new WheelEvent("wheel", {
+      deltaX: 60, deltaY: 60, bubbles: true, cancelable: true
+    });
+    element.dispatchEvent(event);
+    return {
+      prevented: event.defaultPrevented,
+      transform: element.firstElementChild.style.transform,
+      scrollLeft: element.scrollLeft, scrollTop: element.scrollTop,
+      maxX: element.scrollWidth - element.clientWidth,
+      maxY: element.scrollHeight - element.clientHeight
+    };
+  });
+  expect(result.prevented).toBe(true);
+  expect(result.transform).toMatch(/translate3d\(-[\d.]+px, -[\d.]+px, 0px\)/);
+  expect(result.transform).toMatch(/scale\(1\.\d+(?:, 1\.\d+)?\)/);
+  expect(result.scrollLeft).toBe(result.maxX);
+  expect(result.scrollTop).toBe(result.maxY);
+});
+
+test("elastic margins preserve the scroll range at trailing edges", async ({ page }) => {
+  await setup(page, `<div id="start" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto">
+    <div data-ae-scrollbox-elastic style="width:300px;height:300px"></div></div>
+  <div id="end" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto">
+    <div data-ae-scrollbox-elastic style="width:300px;height:300px"></div></div>`);
+  const result = await page.evaluate(() => {
+    const read = (id, deltaX, deltaY, atEnd) => {
+      const element = document.getElementById(id);
+      const wrapper = element.firstElementChild;
+      if (atEnd) element.scrollTo({ left: element.scrollWidth, top: element.scrollHeight,
+        behavior: "instant" });
+      const before = { width: element.scrollWidth, height: element.scrollHeight };
+      element.dispatchEvent(new WheelEvent("wheel", {
+        deltaX, deltaY, bubbles: true, cancelable: true
+      }));
+      return {
+        before, width: element.scrollWidth, height: element.scrollHeight,
+        left: element.scrollLeft, top: element.scrollTop,
+        maxX: element.scrollWidth - element.clientWidth,
+        maxY: element.scrollHeight - element.clientHeight,
+        margins: {
+          top: wrapper.style.marginTop, right: wrapper.style.marginRight,
+          bottom: wrapper.style.marginBottom, left: wrapper.style.marginLeft
+        }
+      };
+    };
+    return { start: read("start", -600, -600, false), end: read("end", 600, 600, true) };
+  });
+  expect(result.start.margins.bottom).toMatch(/^calc\(-[\d.]+px\)$/);
+  expect(result.start.margins.right).toMatch(/^calc\(-[\d.]+px\)$/);
+  expect(result.start.margins.top).toBe("");
+  expect(result.start.margins.left).toBe("");
+  expect(result.end.margins.top).toBe("");
+  expect(result.end.margins.left).toBe("");
+  expect(result.end.margins.bottom).toBe("");
+  expect(result.end.margins.right).toBe("");
+  expect(result.end.left).toBe(result.end.maxX);
+  expect(result.end.top).toBe(result.end.maxY);
+});
+
+test("elastic limits accept fractions and pixel values per axis", async ({ page }) => {
+  const cases = [
+    { value: "", y: 25, x: 25 },
+    { value: "1/4 1/2", y: 25, x: 50 },
+    { value: "30px 40px", y: 30, x: 40 },
+    { value: "35 45", y: 35, x: 45 },
+    { value: "30px", y: 30, x: 30 },
+    { value: "invalid", y: 25, x: 25 }
+  ];
+  await setup(page, cases.map(({ value }, index) =>
+    `<div id="box-${index}" data-ae-scrollbox="native"
+      style="width:100px;height:100px;overflow:auto">
+      <div data-ae-scrollbox-elastic="${value}" style="width:300px;height:300px"></div>
+    </div>`).join(""));
+  const result = await page.evaluate(count => Array.from({ length: count }, (_, index) => {
+    const element = document.getElementById(`box-${index}`);
+    const wrapper = element.firstElementChild;
+    element.dispatchEvent(new WheelEvent("wheel", {
+      deltaX: -600, deltaY: -600, bubbles: true, cancelable: true
+    }));
+    const transform = wrapper.style.transform;
+    const scale = /scale\(([^,()]+)(?:,\s*([^)]+))?\)/.exec(transform);
+    const translate = /translate3d\(([^p]+)px, ([^p]+)px, 0(?:px)?\)/.exec(transform);
+    return {
+      x: Number(translate[1]), y: Number(translate[2]),
+      grownX: (Number(scale[1]) - 1) * Math.max(wrapper.offsetWidth, wrapper.scrollWidth),
+      grownY: (Number(scale[2] || scale[1]) - 1) *
+        Math.max(wrapper.offsetHeight, wrapper.scrollHeight),
+      width: element.clientWidth, height: element.clientHeight, transform
+    };
+  }), cases.length);
+  for (const [index, item] of result.entries()) {
+    const expected = cases[index];
+    const limitY = expected.value === "" || expected.value === "invalid" ||
+      expected.value.startsWith("1/4") ? item.height / 4 : expected.y;
+    const limitX = expected.value === "" || expected.value === "invalid"
+      ? item.width / 4 : expected.value === "1/4 1/2" ? item.width / 2 : expected.x;
+    const y = limitY * (1 - Math.exp(-600 / (3 * limitY)));
+    const x = limitX * (1 - Math.exp(-600 / (3 * limitX)));
+    expect(item.y).toBeCloseTo(y, 4);
+    expect(item.x).toBeCloseTo(x, 4);
+    expect(item.grownY, JSON.stringify(item)).toBeCloseTo(2 * y, 1);
+    expect(item.grownX).toBeCloseTo(2 * x, 1);
+  }
+  expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory(1)[0]?.code)).toBe(2015);
+});
+
+test("elastic pressure eases toward the limit and returns by 15 percent per frame", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
+    <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div></div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const wrapper = element.firstElementChild;
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 50, y = rect.top + 50;
+    const frameCallbacks = [];
+    window.requestAnimationFrame = callback => {
+      frameCallbacks.push(callback);
+      return frameCallbacks.length;
+    };
+    const amount = () => Number.parseFloat(/translate3d\(0px, ([\d.]+)px/.exec(
+      wrapper.style.transform)[1]);
+    const pointer = (type, clientY, buttons) => new PointerEvent(type, {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 91,
+      pointerType: "mouse", button: type === "pointermove" ? -1 : 0,
+      buttons, clientX: x, clientY
+    });
+    element.dispatchEvent(pointer("pointerdown", y, 1));
+    const pressures = [];
+    for (const force of [30, 60, 90]) {
+      window.dispatchEvent(pointer("pointermove", y + force, 1));
+      pressures.push(amount());
+    }
+    window.dispatchEvent(pointer("pointerup", y + 90, 0));
+    const beforeFrame = amount();
+    for (let step = 0; step < 4 && frameCallbacks.length && amount() === beforeFrame; step++)
+      frameCallbacks.shift()(performance.now());
+    const afterFrame = amount();
+    return { pressures, beforeFrame, afterFrame, limit: element.clientHeight / 4 };
+  });
+  for (const [index, force] of [30, 60, 90].entries()) {
+    expect(result.pressures[index]).toBeCloseTo(elasticAmount(force, result.limit), 2);
+  }
+  expect(result.pressures[1] - result.pressures[0])
+    .toBeLessThan(result.pressures[0]);
+  expect(result.pressures[2] - result.pressures[1])
+    .toBeLessThan(result.pressures[1] - result.pressures[0]);
+  expect(result.afterFrame).toBeCloseTo(result.beforeFrame * 0.85, 2);
+});
+
+test("elastic snapback is immediate with reduced motion", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
+    data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
+    <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div></div>`);
+  await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" }));
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const wrapper = element.firstElementChild;
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + 50, y = rect.top + 50;
+    const pointer = (type, clientY, buttons) => new PointerEvent(type, {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 92,
+      pointerType: "mouse", button: type === "pointermove" ? -1 : 0,
+      buttons, clientX: x, clientY
+    });
+    element.dispatchEvent(pointer("pointerdown", y, 1));
+    window.dispatchEvent(pointer("pointermove", y + 60, 1));
+    const during = wrapper.style.transform;
+    window.dispatchEvent(pointer("pointerup", y + 60, 0));
+    return { during, after: wrapper.style.transform,
+      releasing: wrapper.classList.contains("ae--scrollbox-elastic-release") };
+  });
+  expect(result.during).toContain("translate3d(");
+  expect(result.after).toBe("");
+  expect(result.releasing).toBe(false);
+});
+
+test("elastic false on the child leaves native wheel and transform unchanged", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="native"
+    style="width:100px;height:100px;overflow:auto;padding:8px">
+    <div data-ae-scrollbox-elastic="false" style="width:100px;height:300px"></div></div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const event = new WheelEvent("wheel", { deltaY: -60, bubbles: true, cancelable: true });
+    element.dispatchEvent(event);
+    return { prevented: event.defaultPrevented,
+      padding: element.style.getPropertyValue("padding"),
+      transform: element.firstElementChild.style.transform,
+      boxSizing: getComputedStyle(element).boxSizing };
+  });
+  expect(result).toEqual({ prevented: false, padding: "8px",
+    transform: "", boxSizing: "content-box" });
+});
+
+test("elastic reports a diagnostic when its marked child is not the only direct child", async ({ page }) => {
+  await setup(page, `<div id="box" data-ae-scrollbox="native" style="width:100px;height:100px">
+    <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div>
+    <div>extra child</div></div>`);
+  const result = await page.evaluate(() => {
+    const element = document.getElementById("box");
+    const event = new WheelEvent("wheel", { deltaY: -60, bubbles: true, cancelable: true });
+    element.dispatchEvent(event);
+    return { prevented: event.defaultPrevented,
+      code: AelluxJs.diagnostics.showHistory(1)[0]?.code,
+      transform: element.firstElementChild.style.transform };
+  });
+  expect(result).toEqual({ prevented: false, code: 1120, transform: "" });
+});

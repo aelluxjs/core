@@ -1,0 +1,24 @@
+<title>
+  <%= it.pageTitle %>
+</title>
+
+<meta name="description" content="<%= it.description %>">
+<% if (it.pageURL) { %>
+  <link rel="canonical" href="<%= it.pageURL %>">
+<% } %>
+
+    <meta property="og:title" content="<%= it.pageTitle %>" />
+    <meta property="og:type" content="website" />
+<% if (it.pageURL) { %>
+      <meta property="og:url" content="<%= it.pageURL %>" />
+<% } %>
+        <meta property="og:description" content="<%= it.description %>" />
+        <meta property="og:site_name" content="<%= it.title %>" />
+
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="<%= it.pageTitle %>">
+        <meta name="twitter:description" content="<%= it.description %>">
+
+<% if (it.structuredDataJson) { %>
+          <script type="application/ld+json"><%~ it.structuredDataJson %></script>
+<% } %>

@@ -21,7 +21,8 @@ createServer(async (request, response) => {
       throw new Error("Path outside project");
     }
     const content = await readFile(requestedPath);
-    response.writeHead(200, { "Content-Type": contentTypes[extname(requestedPath)] ?? "application/octet-stream" });
+    response.writeHead(200, { "Content-Type": contentTypes[extname(requestedPath)] ?? "application/octet-stream",
+      ...(pathname === "/tests/browser/fixtures/pwa/assets/private.txt" ? { "Cache-Control": "private, no-store" } : {}) });
     response.end(content);
   } catch {
     response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });

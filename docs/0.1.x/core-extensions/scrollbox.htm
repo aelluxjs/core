@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="color-scheme" content="normal">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <title>
+  Scrollbox | 0.1.x | aellux.js</title>
+
+<meta name="description" content="aellux.js">
+  <link rel="canonical" href="https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm">
+
+    <meta property="og:title" content="Scrollbox | 0.1.x | aellux.js" />
+    <meta property="og:type" content="website" />
+      <meta property="og:url" content="https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm" />
+        <meta property="og:description" content="aellux.js" />
+        <meta property="og:site_name" content="aellux.js" />
+
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="Scrollbox | 0.1.x | aellux.js">
+        <meta name="twitter:description" content="aellux.js">
+
+          <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Scrollbox | 0.1.x | aellux.js","description":"aellux.js","url":"https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"}</script>
+
+
+        <link rel="preconnect" href="https://cdn.jsdelivr.net">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="/core/docs/assets/docweaver/css/style.css">
+
+<script src="/core/dist/aellux.min.js"></script>
+<script src="/core/docs/assets/docweaver/js/main.js"></script>
+
+<link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
+  integrity="sha384-/EgOix3QlZtjoeNxjR0v0jee1G/Pa/iAOPWX5MjHn9BLMWc2sgSBv3Tnpbyv9wxo" crossorigin="anonymous">
+</head>
+
+<body data-ae-feedback="error" data-ae-transform-target="#toast-message" data-ae-message-target="#toast-message"
+  data-ae-present-target>
+
+  <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <symbol id="bi-circle-half" fill="currentColor"
+    viewBox="0 0 16 16">
+    <path d="M8 15A7 7 0 1 0 8 1zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16" />
+  </symbol>
+  <symbol id="bi-sun" fill="currentColor"
+    viewBox="0 0 16 16">
+    <path
+      d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708" />
+  </symbol>
+  <symbol id="bi-moon-fill" fill="currentColor"
+    viewBox="0 0 16 16">
+    <path
+      d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278" />
+  </symbol>
+  <symbol id="bi-link-45deg" fill="currentColor"
+    viewBox="0 0 16 16">
+    <path
+      d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z" />
+    <path
+      d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z" />
+  </symbol>
+  <symbol id="bi-chevron-right" fill="currentColor"
+    viewBox="0 0 16 16">
+    <path fill-rule="evenodd"
+      d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708" />
+  </symbol>
+  <symbol id="bi-layout-text-sidebar" viewBox="0 0 16 16" fill="currentColor">
+    <path d="M3.5 3a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM3 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1z" />
+    <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm12-1v14h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zm-1 0H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h9z" />
+  </symbol>
+</svg>
+    <div class="section d-flex border-bottom" data-view-frame=0 style="position:sticky;top:0px;z-index:5;height: 64px;">
+      <header class="animation_header_test navbar navbar-expand-md d-flex flex-fill p-0 m-0 user-select-none bg-white"
+        style=" --bar-color:#55606F; --bar-color2:var(--bs-link-color); --bar-bg:#F0F5F5;">
+        <div class="container-fluid gap-2" style='z-index: 1;'>
+
+          <div id="toast-present" class="position-fixed w-100 z-1 pe-none p-4 justify-content-center align-items-center"
+            data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true" style="display: flex;">
+            <div id="toast-message" class="text-bg-danger small rounded-1 p-2 w-100 text-center"
+              style="max-width: 300px;">
+              -
+            </div>
+          </div>
+
+          <div class="me-auto d-flex flex-row gap-2 align-items-center">
+
+            <a class="navbar-brand m-0 me-auto p-0 lh-1 fw-medium d-flex align-items-center" href="/core/docs/0.1.x/index.htm"
+              style="font-size:1.5em;letter-spacing:-0.03em;color:inherit;">
+              aellux.js            </a>
+
+          </div>
+
+          <button class="navbar-toggler" type="button" data-ae-trigger="toggle" data-ae-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" data-ae-point>
+            <div class="hamburger">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </button>
+
+          <div class="navbar-collapse bg-white border-end d-md-block" id="navbarSupportedContent" hidden
+            data-ae-present="transform">
+            <nav class="h-100 w-100" data-ae-scrollbox="pointer" data-ae-scrollbar
+              style="overscroll-behavior: contain;">
+              <div class="navbar-nav w-100 gap-1 my-0 p-2 ps-md-3 pe-md-3 pb-4 flex-column align-self-start text-white">
+
+                <div class="d-flex flex-row gap-2 justify-content-between pb-2 pt-0 pt-md-2">
+
+                  <div class="dropdown position-relative">
+  <button id="btn-version" class="btn btn-outline-adaptive ps-3 dropdown-toggle rounded-1 border" type="button"
+    data-ae-trigger="toggle" data-ae-target="dropdown-version" aria-expanded="false">
+    0.1.x  </button>
+  <div class="position-absolute" data-ae-anchor-target="btn-version" data-ae-anchor="bottom-right:top-right">
+    <ul id="dropdown-version" data-ae-present="opacity transform" hidden="true"
+      class="dropdown-menu dropdown-menu-start rounded-2 overflow-hidden position-relative show"
+      style="min-width: unset;transform-origin: 100% 0%;">
+
+              <li>
+          <a class="dropdown-item active" data-no-ajax=true
+            href="/core/docs/0.1.x/index.htm">
+            0.1.x          </a>
+        </li>
+
+    </ul>
+  </div>
+</div>
+                    <div data-ae-preference="color-scheme" class="btn-group border rounded-1 rounded overflow-hidden" role="group"
+  aria-label="Basic example" style="--bs-border-radius:--bs-border-radius-sm;gap:1px;">
+
+  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-light" autocomplete="off"
+    aria-label="Light Mode">
+  <label class="btn  btn-outline-adaptive py-1 border-0 d-inline-flex justify-content-center align-items-center"
+    for="radio-color-mode-light" data-ae-option="light" onclick aria-label="Light Mode">
+    <svg class="svg-icon" aria-hidden="true" focusable="false"><use href="#bi-sun"></use></svg>
+    <span class="visually-hidden">Light Mode</span>
+  </label>
+
+  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-dark" autocomplete="off"
+    aria-label="Dark Mode">
+  <label class="btn  btn-outline-adaptive py-1 border-0  d-inline-flex justify-content-center align-items-center"
+    for="radio-color-mode-dark" data-ae-option="dark" onclick aria-label="Dark Mode">
+    <svg class="svg-icon" aria-hidden="true" focusable="false"><use href="#bi-moon-fill"></use></svg>
+    <span class="visually-hidden">Dark Mode</span>
+  </label>
+
+  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-auto" autocomplete="off"
+    aria-label="Auto Mode">
+  <label class="btn  btn-outline-adaptive py-1 border-0 d-inline-flex justify-content-center align-items-center"
+    for="radio-color-mode-auto" data-ae-option="auto" onclick aria-label="Auto Mode">
+    <svg class="svg-icon" aria-hidden="true" focusable="false"><use href="#bi-circle-half"></use></svg>
+    <span class="visually-hidden">Auto Mode</span>
+  </label>
+
+</div>
+                </div>
+                <div class="d-flex flex-column" data-ae-present-group>
+                                      <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                      <button data-ae-point type="button"
+                        class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                        data-ae-trigger="toggle" data-ae-target="#children-overview">
+                        Overview                          <span class="chevron"><svg class="svg-icon small"
+                                aria-hidden="true" focusable="false">
+                                <use href="#bi-chevron-right"></use>
+                              </svg></span>
+                                                  </button>
+                    </div>
+
+                                          <div id="children-overview" class="docs-menu-panel border-start ms-2"
+                        data-ae-present="height opacity" data-ae-unpop-on-outside="false"                         hidden
+                        >
+                          <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
+                                        aellux.js Docs                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/getting-started.htm" data-ae-overflow-marquee="190px">
+                                        Getting Started                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/compatibility.htm" data-ae-overflow-marquee="190px">
+                                        Compatibility                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/validation-scenarios.htm" data-ae-overflow-marquee="190px">
+                                        Validation Scenarios                                      </a>
+                                    </div>
+                                                                                                    </div>
+                      </div>
+                                                                  <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                      <button data-ae-point type="button"
+                        class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                        data-ae-trigger="toggle" data-ae-target="#children-runtime">
+                        Runtime                          <span class="chevron"><svg class="svg-icon small"
+                                aria-hidden="true" focusable="false">
+                                <use href="#bi-chevron-right"></use>
+                              </svg></span>
+                                                  </button>
+                    </div>
+
+                                          <div id="children-runtime" class="docs-menu-panel border-start ms-2"
+                        data-ae-present="height opacity" data-ae-unpop-on-outside="false"                         hidden
+                        >
+                          <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/api.htm" data-ae-overflow-marquee="190px">
+                                        Runtime API                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/wait-layout.htm" data-ae-overflow-marquee="190px">
+                                        waitLayout                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/events.htm" data-ae-overflow-marquee="190px">
+                                        Events                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/modern-legacy.htm" data-ae-overflow-marquee="190px">
+                                        Modern &amp; Legacy                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/browser-support.htm" data-ae-overflow-marquee="190px">
+                                        Browser Support                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/performance.htm" data-ae-overflow-marquee="190px">
+                                        Performance and Bundle Budget                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/known-limits-and-risks.htm" data-ae-overflow-marquee="190px">
+                                        Known Limits &amp; Risks                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/es5-support.htm" data-ae-overflow-marquee="190px">
+                                        ES5 Support                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/visual-mounting.htm" data-ae-overflow-marquee="190px">
+                                        Visual Mounting                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/diagnostics.htm" data-ae-overflow-marquee="190px">
+                                        Diagnostics                                      </a>
+                                    </div>
+                                                                                                    </div>
+                      </div>
+                                                                  <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                      <button data-ae-point type="button"
+                        class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                        data-ae-trigger="toggle" data-ae-target="#children-extensions">
+                        Extensions                          <span class="chevron"><svg class="svg-icon small"
+                                aria-hidden="true" focusable="false">
+                                <use href="#bi-chevron-right"></use>
+                              </svg></span>
+                                                  </button>
+                    </div>
+
+                                          <div id="children-extensions" class="docs-menu-panel border-start ms-2"
+                        data-ae-present="height opacity" data-ae-unpop-on-outside="false"                         hidden
+                        >
+                          <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/authoring.htm" data-ae-overflow-marquee="190px">
+                                        Extension Authoring                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/accessibility.htm" data-ae-overflow-marquee="190px">
+                                        Accessibility Requirements                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/registration.htm" data-ae-overflow-marquee="190px">
+                                        Registration                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/official-registry.htm" data-ae-overflow-marquee="190px">
+                                        Official Registry                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/declarative-loading.htm" data-ae-overflow-marquee="190px">
+                                        Declarative Loading                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/lazy-loading.htm" data-ae-overflow-marquee="190px">
+                                        Lazy Loading                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/styles.htm" data-ae-overflow-marquee="190px">
+                                        Extension Styles                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/csp-and-trust.htm" data-ae-overflow-marquee="190px">
+                                        CSP and Extension Trust                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/legacy-variants.htm" data-ae-overflow-marquee="190px">
+                                        Modern &amp; Legacy Variants                                      </a>
+                                    </div>
+                                                                                                    </div>
+                      </div>
+                                                                  <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                      <button data-ae-point type="button"
+                        class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                        data-ae-trigger="toggle" data-ae-target="#children-core-extensions">
+                        Core Extensions                          <span class="chevron"><svg class="svg-icon small"
+                                aria-hidden="true" focusable="false">
+                                <use href="#bi-chevron-right"></use>
+                              </svg></span>
+                                                  </button>
+                    </div>
+
+                                          <div id="children-core-extensions" class="docs-menu-panel border-start ms-2"
+                        data-ae-present="height opacity" data-ae-unpop-on-outside="false" >
+                          <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion                            data-ae-present-group>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/core-extensions/index.htm" data-ae-overflow-marquee="190px">
+                                        Overview                                      </a>
+                                    </div>
+
+                                  <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
+                                    style="flex:0">
+                                    <button data-ae-point type="button"
+                                      class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      data-ae-trigger="toggle" data-ae-target="#children2-bundled">
+                                      Bundled Extensions                                        <span class="chevron"><svg
+                                              class="svg-icon small" aria-hidden="true" focusable="false">
+                                              <use href="#bi-chevron-right"></use>
+                                            </svg></span>
+                                                                              </button>
+                                  </div>
+
+                                  <div id="children2-bundled" class="docs-menu-panel border-start ms-2"
+                                    data-ae-present="height opacity" data-ae-unpop-on-outside="false" >
+                                      <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                                  <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/adaptive.htm" data-ae-overflow-marquee="190px">
+                                              Adaptive                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/anchor.htm" data-ae-overflow-marquee="190px">
+                                              Anchor                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/overflow-marquee.htm" data-ae-overflow-marquee="190px">
+                                              Overflow Marquee                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/feedback.htm" data-ae-overflow-marquee="190px">
+                                              Feedback                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/focus.htm" data-ae-overflow-marquee="190px">
+                                              Focus                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/point.htm" data-ae-overflow-marquee="190px">
+                                              Point                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/preference.htm" data-ae-overflow-marquee="190px">
+                                              Preference                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/present.htm" data-ae-overflow-marquee="190px">
+                                              Present                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1 active"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/scrollbox.htm" data-ae-overflow-marquee="190px">
+                                              Scrollbox                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/scrollbox-snap.htm" data-ae-overflow-marquee="190px">
+                                              Scrollbox Snap                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
+                                              State Navigation                                            </a>
+                                          </div>
+                                                                                </div>
+                                  </div>
+
+                                  <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
+                                    style="flex:0">
+                                    <button data-ae-point type="button"
+                                      class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      data-ae-trigger="toggle" data-ae-target="#children2-optional">
+                                      Optional Extensions                                        <span class="chevron"><svg
+                                              class="svg-icon small" aria-hidden="true" focusable="false">
+                                              <use href="#bi-chevron-right"></use>
+                                            </svg></span>
+                                                                              </button>
+                                  </div>
+
+                                  <div id="children2-optional" class="docs-menu-panel border-start ms-2"
+                                    data-ae-present="height opacity" data-ae-unpop-on-outside="false"                                     hidden>
+                                      <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                                  <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/ajax-href.htm" data-ae-overflow-marquee="190px">
+                                              Ajax Href                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/dialog.htm" data-ae-overflow-marquee="190px">
+                                              Dialog                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/pwa.htm" data-ae-overflow-marquee="190px">
+                                              PWA                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/viewport.htm" data-ae-overflow-marquee="190px">
+                                              Viewport                                            </a>
+                                          </div>
+                                                                                </div>
+                                  </div>
+                                                                                                  </div>
+                      </div>
+                                                                  <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                      <button data-ae-point type="button"
+                        class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                        data-ae-trigger="toggle" data-ae-target="#children-integrations">
+                        Integrations                          <span class="chevron"><svg class="svg-icon small"
+                                aria-hidden="true" focusable="false">
+                                <use href="#bi-chevron-right"></use>
+                              </svg></span>
+                                                  </button>
+                    </div>
+
+                                          <div id="children-integrations" class="docs-menu-panel border-start ms-2"
+                        data-ae-present="height opacity" data-ae-unpop-on-outside="false"                         hidden
+                        >
+                          <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/integrations/bootstrap.htm" data-ae-overflow-marquee="190px">
+                                        Bootstrap Integration                                      </a>
+                                    </div>
+                                                                                                    </div>
+                      </div>
+                                                              </div>
+              </div>
+            </nav>
+          </div>
+
+        </div>
+      </header>
+    </div>
+
+    <div id="page-progress"></div>
+
+    <div class="content-block position-relative d-flex justify-content-center">
+
+      <div class="content-wrapper p-0 position-relative w-100"
+        style=" max-width: 1024px;transition:opacity 0.5s linear;">
+
+        <div class=" toc-header position-relative bg-white p-2 position-sticky border-bottom border-md-0"
+          style="top:64px;z-index:1;" role="contentinfo">
+
+          <div class="menu-toggle d-flex flex-row gap-2 small">
+            <button data-ae-point id="button-toc-menu" type="button"
+              class="btn btn-outline-adaptive rounded-1 text-nowrap" data-ae-trigger="toggle"
+              data-ae-target="#toc-collapse" aria-expanded="false" aria-controls="toc-collapse"
+              aria-label="Table of Contents" title="Summary">
+              <svg class="svg-icon" aria-hidden="true" focusable="false">
+                <use href="#bi-layout-text-sidebar"></use>
+              </svg>
+            </button>
+            <button type="button"
+              class="p-2 text-nowrap overflow-hidden text-truncate fw-bold border-0 bg-transparent text-start"
+              id="tocbot-current-label" data-ae-trigger="toggle" data-ae-target="#toc-collapse">
+              -
+            </button>
+          </div>
+
+          <div class="toc-collapse bg-white overflow-hidden" id="toc-collapse" data-ae-present="transform opacity"
+            hidden>
+            <div data-ae-scrollbox data-ae-scrollbar class="d-block overflow-auto"
+              style="overscroll-behavior: contain;">
+              <div class="pt-1 pt-lg-2 p-4 p-lg-0 d-table w-100">
+                <div class="h6 fw-bold p-2 pb-1">On this page</div>
+                <div class="position-relative" style="padding-bottom: 3rem;">
+                  <div class="js-toc">
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="article p-4">
+
+          <nav id="doc-breadcrumb" style="--bs-breadcrumb-divider: '›';overflow-x:auto;overflow-y:clip;" class="w-100"
+            aria-label="breadcrumb" ajax-load="doc-breadcrumb" data-ae-scrollbox="pointer">
+            <ol class="breadcrumb flex-nowrap">
+
+                                                <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                    <a href="/core/docs/0.1.x/index.htm">
+                      Home                    </a>
+                  </li>
+                                                                          <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                    <a href="/core/docs/0.1.x/core-extensions/index.htm">
+                      Core Extensions                    </a>
+                  </li>
+                                                                          <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                    <a href="/core/docs/0.1.x/core-extensions/adaptive.htm">
+                      Bundled Extensions                    </a>
+                  </li>
+                                                                            <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                      Scrollbox                    </li>
+
+            </ol>
+          </nav>
+
+          <div id="doc-navlinks" ajax-load="doc-navlinks">
+            <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
+      <a href="/core/docs/0.1.x/core-extensions/present.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
+      ← <span class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill"
+        style="max-width:200px" data-ae-overflow-marquee="80">
+        Present      </span>
+    </a>
+
+                  <a href="/core/docs/0.1.x/core-extensions/scrollbox-snap.htm"
+            class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2" style="width: 40%;">
+            <span
+              class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
+              style="max-width:200px" data-ae-overflow-marquee="80">
+              Scrollbox Snap            </span> →
+          </a>
+          </div>          </div>
+
+          <main id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content"
+            ajax-load="doc-content">
+            <h1>Scrollbox Extension</h1>
+<p><strong>Distribution:</strong> Bundled Extension. <strong>Stability:</strong> Stable.</p>
+<p><code>data-ae-scrollbox</code> uses the browser&#39;s native scrolling and publishes <code>--ae-scroll-y-progress</code> and <code>--ae-scroll-x-progress</code> on the scroll container. Each value runs from 0 at the start to 1 at the end of its axis; an axis without overflow reports 0. Repeated scroll events share one layout read and one CSS update in the next frame, using the latest position. Native <code>scroll</code> events continue to reach ordinary listeners, including Anchor&#39;s capture listener. On unmount, Scrollbox restores the previous inline progress values and priorities.</p>
+<p>Scrollbox marks positions within 5 px of each scroll limit with <code>ae--scroll-v-start</code>, <code>ae--scroll-v-end</code>, <code>ae--scroll-h-start</code>, and <code>ae--scroll-h-end</code> on the container. An axis without overflow has both its start and end classes. During elastic pressure and its return animation, the classes keep their last state; they update again when the effect ends. Scrollbox removes these classes on unmount.</p>
+<pre><code class="language-css">[data-ae-scrollbox]:not(.ae--scroll-v-end) {
+  box-shadow: inset 0 -8px 8px -8px rgb(0 0 0 / 0.25);
+}
+</code></pre>
+<p>Scrollbox uses the external <code>aellux.ext.scrollbox.css</code>, requested with <code>{ loadStyle: true }</code> in Basic or included in the shared Full stylesheet. This weak CSS supplies <code>overflow: auto</code>, <code>contain: layout paint</code>, and thin scrollbars. It gives the elastic child <code>display: inline-block</code> with <code>vertical-align: top</code> so the inline line box adds no scrollable space below. If application CSS sets the elastic wrapper to <code>block</code>, <code>flex</code>, or <code>grid</code>, Scrollbox reports diagnostic 2016 and uses <code>inline-block</code>, <code>inline-flex</code>, or <code>inline-grid</code> respectively. It restores the previous inline <code>display</code> when the wrapper changes or unmounts. The boot&#39;s global weak CSS enables smooth programmatic scrolling on all elements; <code>html[data-ae-reduced-motion=&quot;reduced&quot;]</code> restores immediate scrolling and removes custom scrollbar transitions. Elastic snapback also finishes immediately under that attribute. Pointer dragging and momentum set each position immediately so they follow the gesture. An application can override the weak styles. Basic Scrollbox and snap do not require a content wrapper; elastic edges require a single marked content child.</p>
+<h2>Overflow fade</h2>
+<p>Scrollbox follows bubbling <code>AelluxJsLayout</code> events from its container, ancestors and descendants. A finite positive <code>detail.durationMs</code> keeps measurements updated through the transition at the configured layout FPS. Present&#39;s final <code>Pop</code> and <code>Unpop</code> events also refresh the box, so a fade measured while an ancestor has <code>scale(0)</code> recovers without scroll input.</p>
+<p>Overflowing Scrollboxes receive a visual transparency fade by default. The top, right, bottom and left fades correspond to the actual content hidden beyond each physical edge. User scrolling and programmatic scrolling, including smooth Snap travel, update them through the existing <code>publish(state)</code> layout read/update. Fitting content and axes whose computed overflow is not <code>auto</code> or <code>scroll</code> contribute no fade. RTL scroll offsets are normalized to physical left/right distances, including older positive-coordinate models. Native overscroll is clamped to the real range; Elastic uses the original scroll bounds and axis availability rather than its temporary transformed extent.</p>
+<pre><code class="language-html">&lt;div data-ae-scrollbox data-ae-scrollbox-fade=&quot;false&quot;&gt;
+  &lt;!-- Scrolling remains available without the visual fade. --&gt;
+&lt;/div&gt;
+</code></pre>
+<p>The attribute defaults to enabled; empty and <code>true</code> also enable it. Only <code>false</code> disables it. Attribute changes reconfigure the mounted box. Invalid values keep the default and use semantic configuration diagnostic 2026 in development mode.</p>
+<pre><code class="language-css">.scrollable {
+  --ae-scrollbox-fade-size: 16px;
+}
+</code></pre>
+<p>Use a nonnegative CSS length. Each fade&#39;s width is limited to the hidden distance, this maximum and half the visible axis. Its strength also decreases as the hidden distance approaches zero: 4px of hidden content produces a subtle fade covering at most 4px. <code>0px</code> removes the visual effect. Reduced motion keeps the indication because it adds no animation or artificial transition.</p>
+<p>When the Scrollbox has exactly one direct content element, the mask is applied to that child, preserving the Scrollbox&#39;s background, border and scrollbars. Direct custom scrollbar elements are excluded from this count. With multiple content elements, the mask is applied to the Scrollbox itself. Detection stops at the second content child, avoiding a scan of long lists on every scroll update. Adding, removing or replacing children transfers the mask and restores the previous target&#39;s owned values and priorities.</p>
+<p>The mask uses a horizontal and a vertical <code>linear-gradient()</code>, combined with <code>mask-composite:intersect</code> (WebKit&#39;s <code>source-in</code> equivalent). Their transparency multiplies at the corners. A child mask is sized and positioned against the scroll viewport during the existing <code>publish(state)</code> layout read/update, so the fade stays at the visible edges as the child scrolls or Elastic transforms it. If composition is unavailable, one gradient follows the configured Snap axis, otherwise the only scrollable axis or vertical when both scroll. Without mask support, scrolling continues without the effect. No wrappers or overlays are introduced; transition measurements use the shared layout scheduler. Private hidden-distance and mask-geometry properties are restored, including prior priorities, when the target changes or on unmount.</p>
+<p><strong>Painting limitation:</strong> a CSS mask composites its target together with the target&#39;s contents. With one content child, only that child&#39;s painting is faded. When the Scrollbox itself is the target, its background, border and any native or custom scrollbar painted in the faded region are also attenuated. Their interaction remains available. Use a single content child, keep decoration on an existing surrounding element, adjust the fade size or disable the effect when an opaque border, background or scrollbar is required. Native scrolling, PDS, Elastic, Snap, nested boxes and sticky descendants retain their structure and behavior. Masking does not change focus, keyboard operation, text selection or pointer hit testing.</p>
+<p>An application mask already present on the Scrollbox at the first publish reserves the container for the application: automatic masking remains disabled for that mount. A child with an existing application mask, or a child that is itself a Scrollbox, also retains ownership of its mask; the parent does not add an automatic fade. Scrollbox never writes inline <code>mask-*</code> properties. The generated mask rules use zero-specificity selectors, allowing later application styles to override them. Unmount restores the preceding marker, distance and geometry values without touching authored masks.</p>
+<h2>Custom scrollbars</h2>
+<p>Add <code>data-ae-scrollbar=&quot;vertical&quot;</code>, <code>&quot;horizontal&quot;</code>, or both (for example, <code>&quot;v h&quot;</code> or <code>&quot;y x&quot;</code>) to show custom scrollbars. An empty <code>data-ae-scrollbar</code> enables both axes. Set it to <code>&quot;none&quot;</code> to hide native scrollbars without creating custom bars. Scrollbox creates <code>data-ae-scrollbar-vertical</code> and <code>data-ae-scrollbar-horizontal</code> as direct children of the scrollbox, or reuses existing direct children with those attributes. They sit beside the content and are excluded from the elastic wrapper&#39;s single-child check. A bar is never a snap point unless explicitly marked with <code>data-ae-snap-item</code>. A bar appears only when its axis overflows and its computed <code>overflow-x</code> or <code>overflow-y</code> is <code>auto</code> or <code>scroll</code>; <code>hidden</code> and <code>clip</code> keep that axis&#39;s bar at <code>display: none</code>. Scrollbox adds <code>ae--native-sb-hide</code> for custom bars and for <code>&quot;none&quot;</code> to hide native scrollbars.</p>
+<p>The bars normally fade between opacity 0 and 1. Set inherited <code>--ae-scrollbar-opacity-fade</code> and <code>--ae-scrollbar-opacity-visible</code> on the scrollbox, including through inline CSS, to customize those values. Setting both to <code>1</code> keeps the bars opaque whenever their axis is scrollable. Mouse and pointer hover are tracked separately, so either one keeps the bars visible. They fade out after both hovers end or a click starts outside the box, unless PDS is active. After PDS ends, they remain visible for one second; when that timer ends, any active mouse or pointer hover still keeps them visible. The track overlays the viewport and follows scrolling with <code>translate3d</code>; its thumb uses a separate transform. Drag the thumb with a mouse, pen, or touch to scroll continuously; the track and thumb positions update during the movement so they remain under the pointer. While a scrollbar is being dragged, PDS cannot start on that scrollbox or its scroll chain, and CSS snap alignment is suspended until release. Clicking outside the thumb recenters it on the track only when the computed track background is visible and its opacity is greater than zero; a transparent or invisible track does not respond to that click. The weak CSS uses the same system <code>CanvasText</code> based colors as its native scrollbar styling. Set inherited <code>--ae-scrollbar-thumb-color</code>, <code>--ae-scrollbar-thumb-hover-color</code>, <code>--ae-scrollbar-track-color</code>, <code>--ae-scrollbar-thumb-radius</code>, and <code>--ae-scrollbar-size</code> on the scrollbox, including through inline CSS, to customize the thumb colors, track color, thumb corner radius, and bar thickness. The color properties have no registered initial value, so the weak CSS uses its <code>CanvasText</code> based thumb colors and transparent track when they are unset. The radius and thickness default to <code>10px</code> and <code>8px</code>. The same values style native scrollbars when custom bars are not enabled. Owned bar elements are removed at unmount; pre-existing bars and their original inline scrollbar properties are preserved.</p>
+<pre><code class="language-html">&lt;div data-ae-scrollbox=&quot;pointer&quot; data-ae-scrollbar=&quot;v h&quot;
+  style=&quot;width: 20rem; height: 12rem&quot;&gt;
+  &lt;div data-ae-scrollbox-elastic&gt;&lt;!-- scrollable content --&gt;&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<pre><code class="language-html">&lt;div data-ae-scrollbox style=&quot;width: 20rem; height: 12rem&quot;&gt;
+  &lt;div&gt;&lt;!-- scrollable content --&gt;&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h2>Modes</h2>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>native</code></td>
+<td><span class="large">Default, including an empty attribute. Uses browser scrolling and updates the progress properties.</span></td>
+</tr>
+<tr>
+<td><code>pointer</code></td>
+<td><span class="large">Adds mouse or pen drag-to-scroll on a hover-capable device with a fine pointer. Scrolling, wheel input, and progress remain native. On other devices it behaves like <code>native</code>.</span></td>
+</tr>
+</tbody></table>
+<pre><code class="language-html">&lt;div data-ae-scrollbox=&quot;pointer&quot; style=&quot;width: 20rem; height: 12rem&quot;&gt;
+  &lt;div&gt;&lt;!-- scrollable content --&gt;&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<p>Pointer Drag Scroll (PDS) uses the primary mouse button or pen. Once movement reaches 3 px, the larger component of that first movement locks the gesture to the horizontal or vertical axis. PDS keeps working when the pointer moves outside the box. Touch input retains native behavior. PDS does not start on links, buttons, form controls, editable content, or explicitly draggable elements. On open content, PDS prevents the pointer-down default so the browser does not start its own drag or edge scroll. Text and excluded elements keep their native pointer-down behavior. The cursor is <code>grab</code> over empty scrollable content, keeps its native appearance over selectable text and excluded elements, and becomes <code>grabbing</code> once PDS begins. On desktop, pointer mode cancels cancelable mouse events from the same button while PDS is moving, including when the pointer leaves the box. The matching release and click are canceled too; events from other mouse buttons remain available. A second or later mouse click stops drag tracking and allows native text selection when no drag is underway. PDS leaves <code>user-select</code> unchanged; its temporary scroll-behavior and cursor styles are restored when the gesture ends. Change the mode with <code>$ae.mountManager.update(element, &quot;scrollbox&quot;)</code> after editing the attribute.</p>
+<p>A completed PDS gesture, including a snap flick consumed during the text-selection wait, does not count toward the next double-click sequence. Rapid re-grabs near the same starting position remain draggable; ordinary double and triple clicks keep native text selection.</p>
+<p>Once PDS begins, Scrollbox adds <code>ae--pointerscrolling</code> to the box. Scrollbox&#39;s weak CSS applies <code>cursor: grabbing !important</code> to the box and its contents until the gesture ends. If its only direct child enables <code>data-ae-scrollbox-elastic</code>, that child and its descendants also receive <code>pointer-events: none !important</code> during PDS. Scrollbox cancels wheel input over the box during this interval, along with the default action of its <code>pointermove</code>, matching-button <code>mousemove</code>, <code>touchmove</code>, and cancelable drag events. Canceling <code>dragstart</code> prevents a native drag from taking over the gesture. Native <code>scroll</code> events still reach listeners and report the updated scroll position.</p>
+<p><code>AelluxJsPointerScrollStart</code> fires when PDS actually activates, after the axis is locked. <code>AelluxJsPointerScrollEnd</code> fires after its temporary classes and styles are removed. Both events originate on the scrollbox where the gesture began and bubble; their <code>detail</code> contains <code>{ axis, pointerId, pointerType, elements }</code>, where <code>elements</code> lists the activated boxes in a nested chain. A snap flick that ends before PDS activates emits neither event.</p>
+<p>Gestures starting on text wait 100 ms after pointer-down so a native selection can begin. The first qualifying movement still chooses the axis during that wait. A text selection that remains unchanged from pointer-down does not block PDS; a new or altered selection stops tracking and remains intact. A collapsed caret by itself does not count as a text selection. In a vertical-only scroll chain, movement of more than 10 px vertically starts PDS immediately when vertical movement is dominant, and prevents native selection. Otherwise PDS scrolls in the locked axis after the wait, including any movement already made while waiting. PDS only captures an axis whose computed overflow is <code>auto</code> or <code>scroll</code> and whose content overflows. <code>hidden</code>, <code>clip</code>, and other non-scrollable overflow values disable PDS on that axis even if its content is larger than the box. A nested gesture can continue on an ancestor that permits the chosen axis.</p>
+<p>In nested pointer Scrollboxes, the innermost box consumes movement in the locked axis until it reaches an edge. Any remaining movement goes to the next scrollable pointer Scrollbox, repeating upward as needed. Computed <code>overscroll-behavior-x</code> or <code>overscroll-behavior-y</code> on a box can stop this PDS chain in that axis: <code>contain</code> and <code>none</code> keep movement within that box, while <code>auto</code> allows the usual handoff. A box whose overflow is disabled in the chosen axis does not stop that axis&#39;s chain. Reversing direction returns to the innermost box first. Elastic pressure applies only after every eligible box reaches its edge; release momentum applies to the last box that moved. <code>contain</code> allows local elastic feedback at the edge; <code>none</code> disables that feedback in its axis.</p>
+<pre><code class="language-html">&lt;div data-ae-scrollbox=&quot;pointer&quot; style=&quot;overflow: auto&quot;&gt;
+  &lt;div data-ae-scrollbox=&quot;pointer&quot;
+       style=&quot;overflow: auto; overscroll-behavior-y: contain&quot;&gt;
+    &lt;div&gt;Vertical PDS stops at this inner box.&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<p>For native touch, keep the browser&#39;s default <code>touch-action</code> on nested boxes that scroll in different axes. A mostly vertical touch over a vertical child can scroll that child; a mostly horizontal touch can reach the horizontal parent. Forcing <code>touch-action: pan-y</code> on the child can block the parent&#39;s horizontal gesture when the touch starts inside the child.</p>
+<pre><code class="language-html">&lt;div data-ae-scrollbox style=&quot;width: 20rem; overflow-x: auto; overflow-y: hidden&quot;&gt;
+  &lt;div style=&quot;display: flex; width: max-content&quot;&gt;
+    &lt;div data-ae-scrollbox style=&quot;width: 20rem; height: 12rem; overflow-x: hidden; overflow-y: auto&quot;&gt;
+      &lt;!-- Vertical content --&gt;
+    &lt;/div&gt;
+    &lt;div data-ae-scrollbox style=&quot;width: 20rem; height: 12rem; overflow-x: hidden; overflow-y: auto&quot;&gt;
+      &lt;!-- Another vertical column --&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<p>In <code>pointer</code> mode, a quick release continues scrolling with gradually decreasing speed. Momentum is enabled by default and applies only to desktop pointer dragging. An enabled <code>data-ae-scrollbox-snap</code> disables PDS momentum for the entire box, including dragging in the other axis and when <code>data-ae-scrollbox-momentum=&quot;true&quot;</code>. Without snap, momentum starts after more than 15 px within the latest 300 ms of dragging and uses a deceleration value of 0.0015 to calculate the destination. Each animation frame moves 10% of the remaining distance to that destination; it ends when both axes match to three decimal places. It stops at the scroll boundary, immediately on pointer-down anywhere inside the box (including controls, nested content, native scrollbar presses, and custom scrollbar thumb/track grabs), or on any wheel event, even when that event is noncancelable, already prevented, or uses Ctrl for zoom. Interruption happens before drag eligibility checks and does not require pointer movement. Momentum does not resume when that interaction ends; only a new qualifying drag release can start it again. Enabling snap, changing the mode, or unmounting also stops momentum. Set <code>data-ae-scrollbox-momentum=&quot;false&quot;</code> to disable it:</p>
+<pre><code class="language-html">&lt;div data-ae-scrollbox=&quot;pointer&quot; data-ae-scrollbox-momentum=&quot;false&quot;&gt;
+  &lt;div&gt;Scrollable content&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h2>Horizontal wheel handoff</h2>
+<p>On a fine-pointer desktop, a predominantly vertical wheel gesture scrolls a horizontal-only box sideways while it has room in that direction. At a boundary, each box consumes only the distance still available and passes the remainder to the next eligible ancestor, including ordinary scroll containers and the document. This continues through three or more levels and alternating vertical and horizontal axes. Each horizontal-only Scrollbox evaluates its own conversion; after that box reaches its edge, the remaining intent keeps its original wheel axis for the next ancestor. A vertical child keeps its native wheel behavior while it has room.</p>
+<p>Elastic feedback at a boundary does not consume the remaining scroll intent: the wrapper may stretch while an ancestor scrolls. For example, a 120 px gesture with 20 px of space left scrolls that box 20 px and passes 100 px upward. <code>overscroll-behavior-x</code> or <code>overscroll-behavior-y</code> stops the handoff in the axis actually used by that level: <code>contain</code> retains local elastic feedback, and <code>none</code> also disables it. A restriction on an unused axis does not block the gesture. When Scrollbox handles the movement and handoff itself, it cancels the native default to avoid scrolling ancestors a second time.</p>
+<p>Only axes with <code>overflow: auto</code> or <code>scroll</code> count as wheel-scrollable, except the document&#39;s native scrolling element. Content taller than a box with <code>overflow-y: hidden</code> does not stop horizontal conversion or produce vertical elastic pressure. Wheel input wholly inside the original box&#39;s native range remains native. This behavior applies to both modes.</p>
+<p>With snap enabled, each wheel gesture advances to the next or previous point instead of scrolling by pixels. The dominant wheel delta determines the gesture direction. A predominantly vertical gesture also navigates a horizontal snap box; a horizontal-only gesture does not navigate a vertical snap box. Repeated cancelable wheel events within 120 ms count as one gesture. Some browsers make later events in a wheel sequence noncancelable, so native scrolling can continue after the first snap step. At the first or last item, a wheel gesture toward that edge follows the normal wheel path: it can stretch an elastic wrapper and continue to a scrollable ancestor when the browser permits chaining.</p>
+<p><code>Ctrl</code> + wheel is left to the browser for zoom. Scrollbox also leaves noncancelable wheel events untouched; neither gesture starts snap navigation, elastic pressure, or horizontal conversion.</p>
+<p>Set <code>data-ae-scrollbox-wheel-horizontal=&quot;false&quot;</code> to disable the vertical-to-horizontal conversion, including snap navigation. A vertical wheel gesture then follows its native path; a horizontal wheel gesture still navigates horizontal snap items:</p>
+<pre><code class="language-html">&lt;div data-ae-scrollbox data-ae-scrollbox-wheel-horizontal=&quot;false&quot;&gt;
+  &lt;div&gt;Horizontal content&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h2>Elastic edges</h2>
+<p>Place <code>data-ae-scrollbox-elastic</code> on the Scrollbox&#39;s only direct child to enable elastic edges in either <code>native</code> or <code>pointer</code> mode. That child wraps all scrollable content. A marked child alongside another direct child reports diagnostic 1120 and leaves the elastic effect disabled. When pointer dragging, touch dragging, or a wheel gesture pushes past a scroll limit, Scrollbox sets <code>transform-origin</code> to the pressed edge and applies <code>scale(...) translate3d(...)</code> to the wrapper. The effect applies only to axes with computed <code>overflow: auto</code> or <code>scroll</code> and actual scrollable overflow; <code>overflow: hidden</code> disables it on that axis even when content exceeds the box. Computed <code>overscroll-behavior-x: none</code> or <code>overscroll-behavior-y: none</code> also prevents this effect in the respective axis; <code>contain</code> still permits it. On each axis, the scale grows the wrapper&#39;s scrollable extent by the same number of pixels as the elastic displacement. Pressure starts with one third of the pointer or wheel movement and slows exponentially as it approaches the configured maximum. At the bottom or right edge, Scrollbox keeps the wrapper&#39;s scrollable extent stable while the transform moves its content, including content that overflows the wrapper&#39;s own box. On release, each animation frame moves the elastic displacement 15% toward zero; reduced-motion users get an immediate return. The original inline transform, transform origin, and minimum size are restored when the effect ends. Set the child&#39;s attribute to <code>false</code> to disable the effect.</p>
+<p>The attribute value sets the maximum displacement. With no value it defaults to <code>1/4</code> of the visible size on each axis. Fractions such as <code>1/2</code> use the visible size of their axis; <code>30px</code> and <code>30</code> both mean 30 pixels. One value applies to both axes. Two values follow CSS shorthand order: vertical, then horizontal. For example, <code>data-ae-scrollbox-elastic=&quot;1/4 40px&quot;</code> limits vertical pressure to one quarter of the visible height and horizontal pressure to 40 pixels. Invalid values report diagnostic 2015 and use the defaults.</p>
+<pre><code class="language-html">&lt;div data-ae-scrollbox=&quot;native&quot; style=&quot;width: 20rem; height: 12rem&quot;&gt;
+  &lt;div data-ae-scrollbox-elastic&gt;Scrollable content&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<p>Scrollbox updates measurements after content mutations, box resize, or window resize. Resize updates use a 100 ms throttle.</p>
+<h2>Snap points</h2>
+<p>Snap points are provided by the optional <a href="scrollbox-snap.htm">Scrollbox Snap</a> Extension. Register <code>scrollbox-snap</code>; it registers and waits for Scrollbox before mounting. Its API, events, and interaction hooks are documented on that page.</p>
+<p><code>AelluxJsScrollboxSnapChange</code> fires on the scrollbox when a newly selected snap point finishes settling. Its <code>detail</code> contains <code>{ item, index, previousIndex, axis }</code>; the initial selection uses <code>previousIndex: null</code>. Selecting the same item again does not emit another change.</p>
+<pre><code class="language-js">document.getElementById(&quot;gallery&quot;).addEventListener(&quot;AelluxJsScrollboxSnapChange&quot;, event =&gt; {
+  const { item, index } = event.detail;
+  console.log(index, item);
+});
+</code></pre>
+<p>Each <code>data-ae-snap-item</code> receives inline <code>--ae-snap-focus</code> at mount and as the box scrolls or refreshes. It uses the snap axis: <code>1</code> means aligned, falls by the alignment distance divided by the viewport size, and clamps to <code>0</code>. Prior inline values and priorities are restored on unmount. For normalized position and visible area, add <code>data-ae-viewport</code> to the item and use the independent <a href="optional/viewport.htm">Viewport Extension</a>. The former <code>--ae-snap-viewport</code> output has been removed; use <code>--ae-viewport-x</code> or <code>--ae-viewport-y</code>. Snap works without Viewport.</p>
+<p>Place <code>data-ae-scrollbox-snap</code> on the Scrollbox itself and mark each point with <code>data-ae-snap-item</code>. An empty value or <code>horizontal</code> selects the horizontal axis; <code>vertical</code> selects the vertical axis. Without elastic, marked descendants of the scrollbox are points; with elastic, only marked descendants inside its wrapper are points. Items belonging to a nested scrollbox are excluded. If no eligible item exists, diagnostic 1121 reports the missing points and snap stays disabled. The weak CSS applies <code>scroll-snap-type: x mandatory</code> or <code>y mandatory</code> to the box. An empty <code>data-ae-snap-item</code> aligns its center; <code>start</code>, <code>left</code>, and <code>top</code> align its start, while <code>end</code>, <code>right</code>, and <code>bottom</code> align its end along the selected axis. The directional names are aliases for CSS&#39;s logical <code>start</code> and <code>end</code>. The extension toggles CSS classes to suspend snapping during PDS, elastic pressure, scrollbar thumb dragging, and wheel input beyond the first or last item. At a list end, wheel input follows native scrolling and can reach an ancestor when <code>overscroll-behavior</code> permits it. The snap rule returns 120 ms after the last edge wheel event. The focus and viewport variables keep updating while snapping is suspended. At mount, Scrollbox aligns the first point immediately. Snap does not alter the box&#39;s or items&#39; inline snap declarations.</p>
+<p>For a quick flick in desktop PDS, Scrollbox advances one point from the gesture&#39;s starting item in the gesture direction. Further pointer moves in that drag keep the same starting item. The flick must last no more than 100 ms, move more than 1 px but less than 100 px, and either finish within 50 ms or reach 0.5 px/ms. Only movement along the snap axis counts. A short desktop flick can finish within the 100 ms text-selection wait if selection did not start. Longer PDS gestures let CSS Scroll Snap choose the destination. PDS momentum does not run while snap is enabled. Touch scrolling and its momentum remain native; snap items use <code>scroll-snap-stop: always</code> to prevent a native fling from passing over an intermediate point. Touch release does not trigger scripted flick navigation.</p>
+<p>Native CSS Scroll Snap permits free scrolling within a snap point wider or taller than the viewport. Use points no larger than the viewport when every release must align to one center; flicks and controller navigation can still move between oversized points.</p>
+<p>A new mouse or pen press interrupts smooth snap scrolling at its current position and discards any pending flick from the previous gesture. Snap is suspended immediately, before the PDS threshold or text-selection wait ends, so an earlier animation cannot continue moving the held box. Snap resumes after the last pointer is released or canceled, or when the window loses focus. Native touch scrolling keeps its usual snap and momentum behavior.</p>
+<p>Snap boxes use <code>scroll-behavior: auto</code> so native snap positioning does not inherit the boot&#39;s general smooth scrolling rule. Controllers, wheel steps, and scripted flicks still request smooth navigation explicitly. PDS preserves fractional pointer movement across events; rounding a scroll position does not create elastic pressure or send movement to a parent before an edge is reached.</p>
+<p>While elastic pressure is active and throughout its return, Scrollbox temporarily sets <code>scroll-snap-type: none</code>. It restores the snap rule only after the elastic wrapper returns to its original position. A new pointer press or cancelable wheel interaction during the return immediately restores the wrapper and cancels the remaining return frames before processing the new interaction. This also applies to pointer presses on controls and custom scrollbars. Snap navigation from the new wheel input therefore uses the restored item positions.</p>
+<p>When scrolling settles, Scrollbox identifies the selected point and emits <code>AelluxJsScrollboxSnapChange</code>. It uses <code>scrollend</code> when available, with a 120 ms scroll-idle fallback. During controller navigation and flick navigation, reaching the requested position completes the navigation. If scrolling stops at another position for 500 ms, the pending destination is cleared and the actual selected point is reported. A new cancelable wheel, pointer, or touch gesture also clears that pending destination. It waits for an active pointer or touch to end before using the fallback. A position within 10 px of either scroll limit selects the first or last point directly; otherwise it compares each item&#39;s requested alignment with the corresponding viewport position. The event reports the selection; it does not perform an additional alignment scroll.</p>
+<pre><code class="language-html">&lt;div id=&quot;gallery&quot; data-ae-scrollbox=&quot;pointer&quot; data-ae-scrollbox-snap
+  data-ae-scrollbar=&quot;horizontal&quot; style=&quot;display: flex; width: 20rem; overflow: auto&quot;&gt;
+  &lt;article data-ae-snap-item=&quot;left&quot;&gt;First&lt;/article&gt;
+  &lt;article data-ae-snap-item&gt;Second&lt;/article&gt;
+  &lt;article data-ae-snap-item=&quot;right&quot;&gt;Third&lt;/article&gt;
+&lt;/div&gt;
+</code></pre>
+<p>Keep Present transform and Feedback transform motion off the elastic wrapper itself; development diagnostics report competing writers with code <code>2033</code>. Animate a child of the wrapper instead. Apply visual transforms to children of <code>data-ae-snap-item</code> as well; development mounts and explicit updates report a transformed item with code <code>2020</code>. When <code>ResizeObserver</code> is available, Snap observes both the box and eligible items so its viewport/focus variables refresh when an item resizes without changing the box&#39;s dimensions.</p>
+<p>Snap can share the elastic wrapper:</p>
+<pre><code class="language-html">&lt;div data-ae-scrollbox data-ae-scrollbox-snap style=&quot;width: 20rem; overflow: auto&quot;&gt;
+  &lt;div data-ae-scrollbox-elastic style=&quot;display: flex&quot;&gt;
+    &lt;article data-ae-snap-item&gt;First&lt;/article&gt;
+    &lt;article data-ae-snap-item&gt;Second&lt;/article&gt;
+    &lt;article data-ae-snap-item&gt;Third&lt;/article&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<p>For a vertical list, use <code>data-ae-scrollbox-snap=&quot;vertical&quot;</code>:</p>
+<pre><code class="language-html">&lt;div data-ae-scrollbox data-ae-scrollbox-snap=&quot;vertical&quot;
+  style=&quot;height: 20rem; overflow-y: auto&quot;&gt;
+  &lt;section data-ae-snap-item=&quot;top&quot;&gt;First&lt;/section&gt;
+  &lt;section data-ae-snap-item=&quot;bottom&quot;&gt;Second&lt;/section&gt;
+&lt;/div&gt;
+</code></pre>
+<p>The mounted controller exposes <code>scrollbox.next()</code>, <code>scrollbox.previous()</code>, and <code>scrollbox.goto(index)</code>:</p>
+<pre><code class="language-js">const gallery = $ae(&quot;gallery&quot;).scrollbox;
+gallery.goto(2);     // Align the third point according to its attribute.
+gallery.next();      // Move to the following point.
+gallery.previous();  // Move to the preceding point.
+</code></pre>
+<p><code>index</code> is zero-based in DOM order. All three methods return <code>true</code> when a point is available and <code>false</code> otherwise. They work in both native and pointer modes.</p>
+<h2>Distribution cost</h2>
+<p>Tracking Layout transitions and Present completion adds 421/175 bytes to minified Scrollbox Modern and 477/176 bytes to Legacy (raw/gzip level 9). Legacy&#39;s limits change from 47/14.75 to 47.5/15 KiB; the other affected artifacts retain their limits.</p>
+<p>The four-edge fade adds 1,958/730 bytes to Scrollbox Modern, 2,108/698 bytes to Legacy and 1,706/242 bytes to its stylesheet (raw/gzip level 9), compared with the preceding checked-in artifacts. The Modern script retains its existing limits. The dedicated CSS raw limit increases from 5 to 6.5 KiB; Legacy changes from 44/14 to 46/14.5 KiB (raw/gzip).</p>
+<p>Applying the fade to a single content child adds viewport geometry and target restoration. Compared with the preceding checked-in artifacts, minified raw/gzip level 9 sizes change as follows:</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Before (bytes)</th>
+<th>After (bytes)</th>
+<th>Delta (bytes)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Scrollbox Modern</td>
+<td>41,063 / 13,259</td>
+<td>42,203 / 13,646</td>
+<td>+1,140 / +387</td>
+</tr>
+<tr>
+<td>Scrollbox Legacy</td>
+<td>46,757 / 14,584</td>
+<td>47,993 / 15,019</td>
+<td>+1,236 / +435</td>
+</tr>
+<tr>
+<td>Scrollbox CSS</td>
+<td>6,198 / 1,194</td>
+<td>6,650 / 1,270</td>
+<td>+452 / +76</td>
+</tr>
+<tr>
+<td>Full Modern</td>
+<td>190,334 / 58,564</td>
+<td>191,474 / 59,002</td>
+<td>+1,140 / +438</td>
+</tr>
+<tr>
+<td>Full Legacy</td>
+<td>517,450 / 152,324</td>
+<td>518,689 / 152,708</td>
+<td>+1,239 / +384</td>
+</tr>
+<tr>
+<td>Full CSS</td>
+<td>124,196 / 11,622</td>
+<td>124,648 / 11,701</td>
+<td>+452 / +79</td>
+</tr>
+</tbody></table>
+<p>Scrollbox Legacy&#39;s limits change from 46/14.5 to 47/14.75 KiB (raw/gzip). The other affected artifacts retain their existing limits.</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th align="right">Raw / gzip bytes</th>
+<th align="right">Limit raw / gzip</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>aellux.ext.scrollbox.min.js</code></td>
+<td align="right">41,063 / 13,259</td>
+<td align="right">46 / 14 KiB</td>
+</tr>
+<tr>
+<td><code>aellux.ext.scrollbox.legacy.min.js</code></td>
+<td align="right">46,757 / 14,584</td>
+<td align="right">46 / 14.5 KiB</td>
+</tr>
+<tr>
+<td><code>aellux.ext.scrollbox.min.css</code></td>
+<td align="right">6,198 / 1,194</td>
+<td align="right">6.5 / 1.5 KiB</td>
+</tr>
+<tr>
+<td><code>aellux.orchestrator.min.js</code></td>
+<td align="right">63,459 / 21,146</td>
+<td align="right">62 / 20.75 KiB</td>
+</tr>
+<tr>
+<td><code>aellux.orchestrator.legacy.min.js</code></td>
+<td align="right">336,068 / 106,160</td>
+<td align="right">328.5 / 104 KiB</td>
+</tr>
+<tr>
+<td><code>aellux.full.min.js</code></td>
+<td align="right">134,414 / 43,621</td>
+<td align="right">131.5 / 42.75 KiB</td>
+</tr>
+<tr>
+<td><code>aellux.full.legacy.min.js</code></td>
+<td align="right">447,169 / 133,006</td>
+<td align="right">437 / 138 KiB</td>
+</tr>
+<tr>
+<td><code>aellux.full.min.css</code></td>
+<td align="right">124,021 / 11,598</td>
+<td align="right">122 / 12 KiB</td>
+</tr>
+</tbody></table>
+<p>Together with Overflow Marquee&#39;s fade, the shared controller and semantic validation add 667/168 bytes to Orchestrator Modern and 690/162 bytes to Legacy. Their combined contribution to Full is 667/202 bytes in Modern, 690/162 bytes in Legacy and 3,265/436 bytes in Full CSS. Orchestrator Modern&#39;s gzip limit changes from 20.5 to 20.75 KiB; Orchestrator Legacy&#39;s raw limit changes from 328 to 328.5 KiB. Full Modern changes from 131/42.5 to 131.5/42.75 KiB, and Full CSS&#39;s raw limit changes from 121 to 122 KiB. Full Legacy retains its existing limits.</p>
+<h2>Known Limits &amp; Risks</h2>
+<p>See <a href="../runtime/known-limits-and-risks.htm">Core Known Limits &amp; Risks</a> for classifications and shared architecture, loading and lifecycle boundaries.</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Type</th>
+<th>Description</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Native input</td>
+<td>Known Limit</td>
+<td><span class="large">PDS enhances primary mouse/pen input on hover/fine-pointer devices; touch scrolling and momentum remain native. Excluded controls and active text selection keep their input behavior.</span></td>
+<td><span class="large">Choose native mode where appropriate and preserve browser touch-action and keyboard access.</span></td>
+</tr>
+<tr>
+<td>Nested scrolling</td>
+<td>Known Limit</td>
+<td><span class="large">Axis availability and overscroll-behavior govern handoff. Ctrl-wheel and noncancelable wheel events stay native; enabling Snap disables PDS momentum.</span></td>
+<td><span class="large">Configure each axis deliberately and follow the wheel and Snap interaction contracts.</span></td>
+</tr>
+<tr>
+<td>Elastic structure</td>
+<td>Known Limit</td>
+<td><span class="large">Elastic requires a single marked content child, excluding bars. It owns temporary wrapper transforms and adjusts block/flex/grid display to inline equivalents.</span></td>
+<td><span class="large">Use a dedicated wrapper and animate descendants instead of competing for transform.</span></td>
+</tr>
+<tr>
+<td>Custom bars</td>
+<td>Known Limit</td>
+<td><span class="large">Custom scrollbar dragging is a pointer enhancement. Hiding native bars does not add a complete keyboard or assistive-technology scrollbar widget.</span></td>
+<td><span class="large">Retain an operable scroll region and verify keyboard reachability when replacing native affordances.</span></td>
+</tr>
+<tr>
+<td>Fade painting</td>
+<td>Known Limit</td>
+<td><span class="large">With one content child, only that child is masked. Otherwise the mask attenuates the container, background, border and bars together. Missing mask/composite support reduces or omits fading; authored masks take precedence as documented.</span></td>
+<td><span class="large">Use one content child, keep decoration outside the masked box or disable fading when it obscures required visuals.</span></td>
+</tr>
+<tr>
+<td>Reconfiguration</td>
+<td>Potential Risk</td>
+<td><span class="large">Frequent mutations, resizing and many boxes add geometry and paint work. Large masks and elastic transforms have page-dependent composition costs; content is not virtualized.</span></td>
+<td><span class="large">Profile representative lists and gesture chains; avoid unnecessary active effects.</span></td>
+</tr>
+<tr>
+<td>Competing input</td>
+<td>Potential Risk</td>
+<td><span class="large">Other drag, selection and wheel handlers can claim the same gesture. New input cancels owned momentum/elastic recovery before the next interaction.</span></td>
+<td><span class="large">Coordinate handlers and allow the documented cancel/cleanup path to run.</span></td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Validation Gap</td>
+<td><span class="large">Nested axes, repeated drags, fades and scrollbar geometry have fixtures; desktop automation does not establish physical touchpad/pen behavior, mobile overscroll or every OS scrollbar mode.</span></td>
+<td><span class="large">Validate these environments and long-content performance directly.</span></td>
+</tr>
+</tbody></table>
+<p>Evidence: <a href="https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.scrollbox.js">Implementation</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/scrollbox-pointer.spec.mjs">scrollbox-pointer.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/scrollbox-wheel-chain.spec.mjs">scrollbox-wheel-chain.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/scrollbox-scrollbar.spec.mjs">scrollbox-scrollbar.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/scrollbox-fade.spec.mjs">scrollbox-fade.spec.mjs</a>.</p>
+          </main>
+
+          <div id="doc-navlinks2" ajax-load="doc-navlinks2">
+            <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
+      <a href="/core/docs/0.1.x/core-extensions/present.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
+      ← <span class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill"
+        style="max-width:200px" data-ae-overflow-marquee="80">
+        Present      </span>
+    </a>
+
+                  <a href="/core/docs/0.1.x/core-extensions/scrollbox-snap.htm"
+            class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2" style="width: 40%;">
+            <span
+              class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
+              style="max-width:200px" data-ae-overflow-marquee="80">
+              Scrollbox Snap            </span> →
+          </a>
+          </div>          </div>
+
+          <footer class="section bg-transparent" style="margin: 50vh 0;">
+            <div class="text-center small text-body opacity-50">
+              <div>
+                2026 ©aellux.js Docs
+              </div>
+              <div class="small mb-0 text-body">
+                Special thanks to
+                <a style="color:inherit!important;" href="https://chatgpt.com/" target="_blank"
+                  rel="noopener noreferrer">ChatGPT</a>,
+                <a style="color:inherit!important;" href="https://openai.com/codex/" target="_blank"
+                  rel="noopener noreferrer">Codex</a>,
+                <a style="color:inherit!important;" href="https://code.visualstudio.com/" target="_blank"
+                  rel="noopener noreferrer">Visual Studio Code</a>,
+                <a style="color:inherit!important;" href="https://getbootstrap.com/" target="_blank"
+                  rel="noopener noreferrer">Bootstrap</a>,
+                and
+                <a style="color:inherit!important;" href="https://github.com/" target="_blank"
+                  rel="noopener noreferrer">GitHub</a>
+                for the tools and technologies that supported the development of Aellux.
+              </div>
+            </div>
+          </footer>
+        </div>
+
+      </div>
+
+    </div>
+
+</body>
+
+</html>

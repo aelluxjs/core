@@ -1105,7 +1105,7 @@
       var getOwnPropertySymbolsModule = require_object_get_own_property_symbols();
       var anObject = require_an_object();
       var concat = uncurryThis([].concat);
-      module.exports = getBuiltIn("Reflect", "ownKeys") || function ownKeys(it) {
+      module.exports = getBuiltIn("Reflect", "ownKeys") || function ownKeys4(it) {
         var keys = getOwnPropertyNamesModule.f(anObject(it));
         var getOwnPropertySymbols = getOwnPropertySymbolsModule.f;
         return getOwnPropertySymbols ? concat(keys, getOwnPropertySymbols(it)) : keys;
@@ -1118,11 +1118,11 @@
     "node_modules/core-js/internals/copy-constructor-properties.js": function(exports, module) {
       "use strict";
       var hasOwn = require_has_own_property();
-      var ownKeys = require_own_keys();
+      var ownKeys4 = require_own_keys();
       var getOwnPropertyDescriptorModule = require_object_get_own_property_descriptor();
       var definePropertyModule = require_object_define_property();
       module.exports = function(target, source, exceptions) {
-        var keys = ownKeys(source);
+        var keys = ownKeys4(source);
         var defineProperty = definePropertyModule.f;
         var getOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
         for (var i = 0; i < keys.length; i++) {
@@ -10021,7 +10021,7 @@
       "use strict";
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
-      var ownKeys = require_own_keys();
+      var ownKeys4 = require_own_keys();
       var toIndexedObject = require_to_indexed_object();
       var getOwnPropertyDescriptorModule = require_object_get_own_property_descriptor();
       var createProperty = require_create_property();
@@ -10029,7 +10029,7 @@
         getOwnPropertyDescriptors: function getOwnPropertyDescriptors(object) {
           var O = toIndexedObject(object);
           var getOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
-          var keys = ownKeys(O);
+          var keys = ownKeys4(O);
           var result = {};
           var index = 0;
           var key, descriptor;
@@ -12201,9 +12201,9 @@
     "node_modules/core-js/modules/es.reflect.own-keys.js": function() {
       "use strict";
       var $ = require_export();
-      var ownKeys = require_own_keys();
+      var ownKeys4 = require_own_keys();
       $({ target: "Reflect", stat: true }, {
-        ownKeys: ownKeys
+        ownKeys: ownKeys4
       });
     }
   });
@@ -20901,105 +20901,26 @@
   });
 
   // src/internal/build-layout-scheduler.js
-  function buildLayoutScheduler() {
-    var readQueue = [];
-    var updateQueue = [];
-    var frameRequest = null;
-    var phase = "idle";
-    function scheduleFrame() {
-      if (frameRequest !== null || phase !== "idle") return;
-      frameRequest = requestAnimationFrame(flushFrame);
-    }
-    function flushFrame() {
-      frameRequest = null;
-      phase = "read";
-      var reads = readQueue.splice(0);
-      for (var i = 0; i < reads.length; i++) runTask(reads[i]);
-      Promise.resolve().then(function() {
-        phase = "update";
-        var updates = updateQueue.splice(0);
-        for (var i2 = 0; i2 < updates.length; i2++) runTask(updates[i2]);
-        phase = "idle";
-        if (readQueue.length || updateQueue.length) scheduleFrame();
-      });
-    }
-    function runTask(task) {
-      try {
-        task.resolve(task.parameters ? task.callback.apply(void 0, task.parameters) : task.callback());
-      } catch (error) {
-        task.reject(error);
-      }
-    }
-    function queueTask(queue, callback, parameters) {
-      var promise = new Promise(function(resolve, reject) {
-        queue.push({
-          callback: callback,
-          parameters: parameters,
-          resolve: resolve,
-          reject: reject
-        });
-      });
-      if (phase === "idle") scheduleFrame();
-      return promise;
-    }
-    function clear() {
-      if (frameRequest !== null) {
-        cancelAnimationFrame(frameRequest);
-        frameRequest = null;
-      }
-      settleQueue(readQueue);
-      settleQueue(updateQueue);
-      phase = "idle";
-    }
-    function settleQueue(queue) {
-      var tasks = queue.splice(0);
-      for (var i = 0; i < tasks.length; i++) {
-        tasks[i].resolve(void 0);
-      }
-    }
-    return Object.freeze({
-      read: function read(callback, parameters) {
-        return queueTask(readQueue, callback, parameters);
-      },
-      update: function update(callback, parameters) {
-        return queueTask(updateQueue, callback, parameters);
-      },
-      clear: clear
-    });
+  function _typeof(o) {
+    "@babel/helpers - typeof";
+    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof(o);
   }
-  var init_build_layout_scheduler = __esm({
-    "src/internal/build-layout-scheduler.js": function() {
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-    }
-  });
-
-  // src/internal/utils-name-case.js
-  function toCapitalized(name) {
-    return name.replace(/^([a-z])|-([a-z])/g, function(_, first, afterHyphen) {
-      return (first || afterHyphen).toUpperCase();
-    });
+  function _toConsumableArray(r) {
+    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread();
   }
-  function toCamelCase(name) {
-    return name.replace(/-([a-z])/g, function(_, character) {
-      return character.toUpperCase();
-    });
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function fromCamelCase(name) {
-    return name.replace(/([A-Z])/g, "-$1").toLowerCase();
+  function _iterableToArray(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  var utils_name_case_default;
-  var init_utils_name_case = __esm({
-    "src/internal/utils-name-case.js": function() {
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-      utils_name_case_default = {
-        toCapitalized: toCapitalized,
-        toCamelCase: toCamelCase,
-        fromCamelCase: fromCamelCase
-      };
-    }
-  });
-
-  // src/internal/create-controller-helper.js
+  function _arrayWithoutHoles(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray(r);
+  }
   function _createForOfIteratorHelper(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -21043,6 +20964,740 @@
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
+  function buildLayoutScheduler() {
+    var MIN_FPS = 5;
+    var FPS_STEP = 15;
+    var PRESSURE_WINDOW_MS = 3e3;
+    var PRESSURE_MIN_DURATION_MS = 2e3;
+    var PRESSURE_MIN_SAMPLES = 24;
+    var PRESSURE_MIN_SLOW_SAMPLES = 12;
+    var PRESSURE_SLOW_RATIO = 0.35;
+    var BASE_RECOVERY_DELAY = 1e3;
+    var MAX_RECOVERY_DELAY = 8e3;
+    var queues = {
+      read: [],
+      update: []
+    };
+    var groups = /* @__PURE__ */ new Map();
+    var tasks = /* @__PURE__ */ new Set();
+    var visualFPSLimits = /* @__PURE__ */ new Map();
+    var sequenceStarts = /* @__PURE__ */ new Map();
+    var frameRequest = null;
+    var phase = "idle";
+    var waitingForVisibility = false;
+    var idleSince = null;
+    var nativeFPS = null;
+    var limitFPS = null;
+    var initialDeltas = [];
+    var lastFrameTime = null;
+    var frameCredit = 0;
+    var samples = [];
+    var lastAdjustment = -Infinity;
+    var stableSince = null;
+    var recoveryDelay = BASE_RECOVERY_DELAY;
+    var trialLimit = null;
+    var now = function now2() {
+      return performance.now();
+    };
+    var hidden = function hidden2() {
+      return typeof document !== "undefined" && document.hidden;
+    };
+    var hasWork = function hasWork2() {
+      return queues.read.length > 0 || queues.update.length > 0;
+    };
+    function visualFPSLimit() {
+      var result = Infinity;
+      var _iterator = _createForOfIteratorHelper(visualFPSLimits.values()), _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+          var value = _step.value;
+          result = Math.min(result, value);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+      return result;
+    }
+    function setVisualFPSLimit(owner, value) {
+      validId(owner);
+      if (value === void 0 || value === null) visualFPSLimits.delete(owner);
+      else {
+        if (!Number.isFinite(value) || value <= 0) throw new RangeError("visual FPS must be positive");
+        visualFPSLimits.set(owner, value);
+      }
+      if (hasWork()) scheduleFrame();
+    }
+    function publishLimit() {
+      if (typeof document === "undefined" || !document.documentElement) return;
+      var value = nativeFPS !== null && limitFPS !== null && limitFPS < nativeFPS ? String(limitFPS) : null;
+      if (value === null) {
+        if (document.documentElement.hasAttribute("data-ae-fps")) document.documentElement.removeAttribute("data-ae-fps");
+      } else if (document.documentElement.getAttribute("data-ae-fps") !== value) {
+        document.documentElement.setAttribute("data-ae-fps", value);
+      }
+    }
+    function resetMeasurements(resetLimit) {
+      lastFrameTime = null;
+      frameCredit = 0;
+      samples = [];
+      stableSince = null;
+      initialDeltas = [];
+      if (resetLimit) {
+        nativeFPS = null;
+        limitFPS = null;
+        lastAdjustment = -Infinity;
+      }
+      publishLimit();
+      trialLimit = null;
+      recoveryDelay = BASE_RECOVERY_DELAY;
+    }
+    function onVisible() {
+      if (hidden()) return;
+      document.removeEventListener("visibilitychange", onVisible);
+      waitingForVisibility = false;
+      resetMeasurements(true);
+      scheduleFrame();
+    }
+    function scheduleFrame() {
+      if (frameRequest !== null || phase !== "idle" || !hasWork()) return;
+      if (hidden()) {
+        if (!waitingForVisibility) {
+          document.addEventListener("visibilitychange", onVisible);
+          waitingForVisibility = true;
+        }
+        return;
+      }
+      if (idleSince !== null && now() - idleSince > 250) resumeAfterIdle(now());
+      idleSince = null;
+      frameRequest = requestAnimationFrame(flushFrame);
+    }
+    function stopFrameIfIdle() {
+      if (hasWork()) return;
+      if (frameRequest !== null) cancelAnimationFrame(frameRequest);
+      frameRequest = null;
+      if (waitingForVisibility) document.removeEventListener("visibilitychange", onVisible);
+      waitingForVisibility = false;
+      if (phase === "idle") idleSince = now();
+    }
+    function observeFrame(time) {
+      var previous = lastFrameTime;
+      lastFrameTime = time;
+      if (previous === null) return true;
+      var delta = time - previous;
+      if (delta <= 0 || delta > 250) {
+        frameCredit = 0;
+        samples = [];
+        stableSince = null;
+        return true;
+      }
+      if (nativeFPS === null) {
+        initialDeltas.push(delta);
+        if (initialDeltas.length >= 8) {
+          var ordered = initialDeltas.slice().sort(function(a, b) {
+            return a - b;
+          });
+          nativeFPS = Math.max(MIN_FPS, Math.round(1e3 / ordered[4]));
+          limitFPS = nativeFPS;
+          initialDeltas = [];
+        }
+      } else {
+        var expected = 1e3 / Math.max(MIN_FPS, limitFPS);
+        var slow = delta > expected * 1.23;
+        samples.push({
+          time: time,
+          slow: slow,
+          delay: delta,
+          cost: 0
+        });
+        while (samples.length && time - samples[0].time > PRESSURE_WINDOW_MS) samples.shift();
+        adjustLimit(time);
+      }
+      var effectiveFPS = Math.min(limitFPS === null ? Infinity : limitFPS, visualFPSLimit());
+      if (effectiveFPS === Infinity || nativeFPS !== null && effectiveFPS >= nativeFPS) return true;
+      var period = 1e3 / effectiveFPS;
+      frameCredit += delta;
+      if (frameCredit + 1e-3 < period) return false;
+      frameCredit = Math.min(period, frameCredit - period);
+      return true;
+    }
+    function adjustLimit(time) {
+      if (samples.length < PRESSURE_MIN_SAMPLES || time - samples[0].time < PRESSURE_MIN_DURATION_MS) return;
+      var slowCount = samples.reduce(function(n, item) {
+        return n + (item.slow ? 1 : 0);
+      }, 0);
+      if (slowCount >= PRESSURE_MIN_SLOW_SAMPLES && slowCount / samples.length >= PRESSURE_SLOW_RATIO) {
+        stableSince = null;
+        if (time - lastAdjustment >= 1e3 && limitFPS > MIN_FPS) {
+          var previous = limitFPS;
+          var delay = Math.max.apply(Math, _toConsumableArray(samples.filter(function(sample) {
+            return sample.slow;
+          }).map(function(sample) {
+            return Math.max(sample.delay, sample.cost);
+          })));
+          limitFPS = Math.min(limitFPS, adaptiveLimit(1e3 / delay));
+          publishLimit();
+          if (trialLimit === previous) recoveryDelay = Math.min(MAX_RECOVERY_DELAY, recoveryDelay * 2);
+          trialLimit = null;
+          lastAdjustment = time;
+          samples = [];
+          frameCredit = 0;
+        }
+      } else {
+        if (stableSince === null) stableSince = time;
+        recoverLimitAfterStablePeriod(time);
+      }
+    }
+    function resumeAfterIdle(time) {
+      lastFrameTime = null;
+      frameCredit = 0;
+      samples = [];
+      initialDeltas = [];
+      if (nativeFPS === null || limitFPS >= nativeFPS) return;
+      if (stableSince === null) stableSince = idleSince;
+      recoverLimitAfterStablePeriod(time);
+    }
+    function recoverLimitAfterStablePeriod(time) {
+      if (stableSince === null || time - stableSince < recoveryDelay || time - lastAdjustment < recoveryDelay) return false;
+      if (trialLimit === limitFPS) {
+        trialLimit = null;
+        recoveryDelay = BASE_RECOVERY_DELAY;
+      }
+      if (limitFPS >= nativeFPS) return false;
+      limitFPS = recoveryLimit(limitFPS);
+      publishLimit();
+      trialLimit = limitFPS;
+      lastAdjustment = time;
+      stableSince = null;
+      samples = [];
+      frameCredit = 0;
+      return true;
+    }
+    function adaptiveLimit(observedFPS) {
+      var candidate = nativeFPS;
+      while (candidate > MIN_FPS && candidate > observedFPS) {
+        candidate = Math.max(MIN_FPS, candidate - FPS_STEP);
+      }
+      return candidate;
+    }
+    function recoveryLimit(current) {
+      var levels = [nativeFPS];
+      while (levels[levels.length - 1] > MIN_FPS) {
+        levels.push(Math.max(MIN_FPS, levels[levels.length - 1] - FPS_STEP));
+      }
+      for (var index = levels.length - 1; index >= 0; index--) {
+        if (levels[index] > current) return levels[index];
+      }
+      return nativeFPS;
+    }
+    function flushFrame(time) {
+      frameRequest = null;
+      if (hidden()) {
+        resetMeasurements(true);
+        scheduleFrame();
+        return;
+      }
+      if (!observeFrame(time)) {
+        scheduleFrame();
+        return;
+      }
+      var start = now();
+      phase = "read";
+      var reads = queues.read.splice(0);
+      var _iterator2 = _createForOfIteratorHelper(reads), _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+          var task = _step2.value;
+          runTask(task);
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+      Promise.resolve().then(function() {
+        phase = "update";
+        var updates = queues.update.splice(0);
+        var _iterator3 = _createForOfIteratorHelper(updates), _step3;
+        try {
+          for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+            var task2 = _step3.value;
+            runTask(task2);
+          }
+        } catch (err) {
+          _iterator3.e(err);
+        } finally {
+          _iterator3.f();
+        }
+        if (nativeFPS !== null && samples.length) {
+          var cost = now() - start;
+          var sample = samples[samples.length - 1];
+          sample.cost = cost;
+          if (cost > 1e3 / Math.max(MIN_FPS, limitFPS) * 0.8) sample.slow = true;
+        }
+        phase = "idle";
+        if (hasWork()) scheduleFrame();
+        else idleSince = now();
+      });
+    }
+    function removeTask(task) {
+      tasks.delete(task);
+      if (!task.group) return;
+      task.group.tasks.delete(task);
+      if (task.group[task.phase] === task) task.group[task.phase] = null;
+      if (!task.group.sequence && task.group.tasks.size === 0 && groups.get(task.group.id) === task.group) groups.delete(task.group.id);
+    }
+    function settleTask(task, error, value) {
+      if (task.state === "settled") return;
+      task.state = "settled";
+      removeTask(task);
+      if (error) task.reject(value);
+      else task.resolve(value);
+    }
+    function cancelTask(task) {
+      if (task.state === "settled") return;
+      if (task.state === "pending") {
+        var queue = queues[task.phase];
+        var index = queue.indexOf(task);
+        if (index !== -1) queue.splice(index, 1);
+      }
+      settleTask(task, false, void 0);
+    }
+    function runTask(task) {
+      if (task.state !== "pending") return;
+      task.state = "running";
+      if (task.group && task.group[task.phase] === task) task.group[task.phase] = null;
+      var result;
+      try {
+        result = task.parameters ? task.callback.apply(void 0, task.parameters) : task.callback();
+      } catch (error) {
+        settleTask(task, true, error);
+        return;
+      }
+      var then;
+      try {
+        then = result && result.then;
+      } catch (error) {
+        settleTask(task, true, error);
+        return;
+      }
+      if (typeof then === "function") {
+        Promise.resolve(result).then(function(value) {
+          return settleTask(task, false, value);
+        }, function(error) {
+          return settleTask(task, true, error);
+        });
+      } else {
+        settleTask(task, false, result);
+      }
+    }
+    function makeGroup(id) {
+      var group = {
+        id: id,
+        read: null,
+        update: null,
+        tasks: /* @__PURE__ */ new Set(),
+        sequence: null
+      };
+      groups.set(id, group);
+      return group;
+    }
+    function cancelGroup(group, status) {
+      if (groups.get(group.id) === group) groups.delete(group.id);
+      var sequence2 = group.sequence;
+      if (sequence2 && sequence2.active) {
+        sequence2.active = false;
+        if (sequence2.timer !== null) clearTimeout(sequence2.timer);
+        sequence2.timer = null;
+        detachAbortSignals(sequence2);
+        group.sequence = null;
+      }
+      for (var _i = 0, _Array$from = Array.from(group.tasks); _i < _Array$from.length; _i++) {
+        var task = _Array$from[_i];
+        cancelTask(task);
+      }
+      if (sequence2) sequence2.resolve({
+        id: group.id,
+        status: status
+      });
+      stopFrameIfIdle();
+    }
+    function queueTask(kind, callback, parameters, id, owner) {
+      var group = null;
+      if (id !== void 0) {
+        group = owner ? owner.group : groups.get(id);
+        if (!owner && group && (group.sequence || group[kind])) {
+          cancelGroup(group, "superseded");
+          group = null;
+        }
+        if (!group) group = makeGroup(id);
+      }
+      var task;
+      var promise = new Promise(function(resolve, reject) {
+        task = {
+          phase: kind,
+          callback: callback,
+          parameters: parameters,
+          group: group,
+          resolve: resolve,
+          reject: reject,
+          state: "pending"
+        };
+      });
+      tasks.add(task);
+      if (group) {
+        group[kind] = task;
+        group.tasks.add(task);
+      }
+      queues[kind].push(task);
+      scheduleFrame();
+      return promise;
+    }
+    function validId(id) {
+      if (!Number.isSafeInteger(id)) throw new TypeError("waitLayout ID must be a safe integer");
+    }
+    function request(kind, first, second, third) {
+      if (typeof first === "number") {
+        validId(first);
+        return queueTask(kind, second, third, first, null);
+      }
+      return queueTask(kind, first, second, void 0, null);
+    }
+    function validateStages(stages) {
+      if (!stages.length) throw new TypeError("sequence() requires at least one stage");
+      return stages.map(function(stage) {
+        if (!stage || _typeof(stage) !== "object" || typeof stage.read !== "function" && typeof stage.update !== "function") {
+          throw new TypeError("Each sequence stage needs a read or update callback");
+        }
+        if (stage.read !== void 0 && typeof stage.read !== "function" || stage.update !== void 0 && typeof stage.update !== "function") {
+          throw new TypeError("Sequence callbacks must be functions");
+        }
+        var abort = null;
+        var signal = null;
+        if (typeof stage.abort === "function") abort = stage.abort;
+        else if (stage.abort !== void 0) {
+          var candidate = stage.abort && (stage.abort.signal || stage.abort);
+          if (!candidate || typeof candidate.aborted !== "boolean" || typeof candidate.addEventListener !== "function" || typeof candidate.removeEventListener !== "function") {
+            throw new TypeError("abort must be a function, AbortController, or AbortSignal");
+          }
+          signal = candidate;
+        }
+        var interval = 0;
+        var times = 1;
+        if (stage.repeat !== void 0) {
+          var repeat = stage.repeat;
+          if (!repeat || _typeof(repeat) !== "object" || repeat.ms !== void 0 && repeat.s !== void 0) {
+            throw new TypeError("repeat must use either ms or s");
+          }
+          interval = repeat.ms !== void 0 ? repeat.ms : repeat.s !== void 0 ? repeat.s * 1e3 : 0;
+          if (!Number.isFinite(interval) || interval < 0) throw new RangeError("Invalid repeat interval");
+          times = repeat.times === void 0 ? repeat.ms !== void 0 || repeat.s !== void 0 ? Infinity : 1 : repeat.times;
+          if (repeat.times !== void 0 && (!Number.isSafeInteger(times) || times < 1)) {
+            throw new RangeError("repeat.times must be a positive integer");
+          }
+        }
+        if (stage.maxFPS !== void 0 && (!Number.isFinite(stage.maxFPS) || stage.maxFPS <= 0)) {
+          throw new RangeError("maxFPS must be positive");
+        }
+        return {
+          read: stage.read,
+          update: stage.update,
+          abort: abort,
+          signal: signal,
+          interval: interval,
+          times: times,
+          maxFPS: stage.maxFPS
+        };
+      });
+    }
+    function detachAbortSignals(owner) {
+      var _iterator4 = _createForOfIteratorHelper(owner.abortSignals), _step4;
+      try {
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+          var signal = _step4.value;
+          signal.removeEventListener("abort", owner.abortHandler);
+        }
+      } catch (err) {
+        _iterator4.e(err);
+      } finally {
+        _iterator4.f();
+      }
+      owner.abortSignals.length = 0;
+    }
+    function sequence(id) {
+      validId(id);
+      for (var _len = arguments.length, stages = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        stages[_key - 1] = arguments[_key];
+      }
+      var configs = validateStages(stages);
+      var previous = groups.get(id);
+      if (previous) cancelGroup(previous, "superseded");
+      var group = makeGroup(id);
+      var resolve;
+      var reject;
+      var result = new Promise(function(res, rej) {
+        resolve = res;
+        reject = rej;
+      });
+      var owner = {
+        group: group,
+        configs: configs,
+        index: 0,
+        count: 0,
+        lastStart: null,
+        timer: null,
+        active: true,
+        resolve: resolve,
+        reject: reject,
+        abortSignals: [],
+        abortHandler: null
+      };
+      group.sequence = owner;
+      owner.abortHandler = function() {
+        return finishSequence(owner, "aborted");
+      };
+      try {
+        var _iterator5 = _createForOfIteratorHelper(configs), _step5;
+        try {
+          for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+            var config = _step5.value;
+            if (config.signal && !owner.abortSignals.includes(config.signal)) {
+              config.signal.addEventListener("abort", owner.abortHandler);
+              owner.abortSignals.push(config.signal);
+            }
+          }
+        } catch (err) {
+          _iterator5.e(err);
+        } finally {
+          _iterator5.f();
+        }
+        if (owner.abortSignals.some(function(signal) {
+          return signal.aborted;
+        })) {
+          finishSequence(owner, "aborted");
+        } else {
+          startIteration(owner);
+        }
+      } catch (error) {
+        finishSequence(owner, null, error);
+      }
+      return result;
+    }
+    function finishSequence(owner, status, error) {
+      if (!owner.active) return;
+      var group = owner.group;
+      owner.active = false;
+      if (owner.timer !== null) clearTimeout(owner.timer);
+      owner.timer = null;
+      detachAbortSignals(owner);
+      group.sequence = null;
+      if (groups.get(group.id) === group) groups.delete(group.id);
+      for (var _i2 = 0, _Array$from2 = Array.from(group.tasks); _i2 < _Array$from2.length; _i2++) {
+        var task = _Array$from2[_i2];
+        cancelTask(task);
+      }
+      stopFrameIfIdle();
+      if (status === null) owner.reject(error);
+      else owner.resolve({
+        id: group.id,
+        status: status
+      });
+    }
+    function checkAbort(owner, config) {
+      if (!owner.active || !config.abort) return false;
+      var result = config.abort();
+      if (typeof result !== "boolean") throw new TypeError("abort must return a boolean");
+      if (result) finishSequence(owner, "aborted");
+      return result;
+    }
+    function startIteration(owner) {
+      if (!owner.active) return;
+      var config = owner.configs[owner.index];
+      var previousStart = sequenceStarts.get(owner.group.id);
+      var minimumStart = config.maxFPS === void 0 || !previousStart || previousStart.owner === owner ? 0 : previousStart.time + 1e3 / config.maxFPS;
+      if (minimumStart > now()) {
+        owner.timer = setTimeout(function() {
+          owner.timer = null;
+          startIteration(owner);
+        }, Math.max(0, minimumStart - now() - 1));
+        return;
+      }
+      try {
+        if (checkAbort(owner, config)) return;
+      } catch (error) {
+        finishSequence(owner, null, error);
+        return;
+      }
+      owner.lastStart = now();
+      sequenceStarts.set(owner.group.id, {
+        owner: owner,
+        time: owner.lastStart
+      });
+      var read = config.read ? queueTask("read", function() {
+        if (checkAbort(owner, config)) return;
+        return config.read();
+      }, void 0, owner.group.id, owner) : Promise.resolve(void 0);
+      read.then(function(value) {
+        if (!owner.active) return;
+        try {
+          if (checkAbort(owner, config)) return;
+        } catch (error) {
+          finishSequence(owner, null, error);
+          return;
+        }
+        return config.update ? queueTask("update", function(input) {
+          if (checkAbort(owner, config)) return;
+          return config.update(input);
+        }, [value], owner.group.id, owner) : void 0;
+      }).then(function() {
+        if (owner.active) completeIteration(owner, config);
+      }, function(error) {
+        return finishSequence(owner, null, error);
+      });
+    }
+    function completeIteration(owner, config) {
+      owner.count++;
+      if (owner.count >= config.times) {
+        owner.index++;
+        owner.count = 0;
+        owner.lastStart = null;
+        if (owner.index >= owner.configs.length) {
+          finishSequence(owner, "completed");
+          return;
+        }
+        startIteration(owner);
+        return;
+      }
+      var completed = now();
+      var fpsDue = config.maxFPS === void 0 ? completed : owner.lastStart + 1e3 / config.maxFPS;
+      var due = Math.max(completed + config.interval, fpsDue);
+      var delay = Math.max(0, due - now() - 1);
+      if (delay > 1) {
+        owner.timer = setTimeout(function() {
+          owner.timer = null;
+          startIteration(owner);
+        }, delay);
+      } else {
+        startIteration(owner);
+      }
+    }
+    function clear() {
+      if (frameRequest !== null) cancelAnimationFrame(frameRequest);
+      frameRequest = null;
+      if (waitingForVisibility) document.removeEventListener("visibilitychange", onVisible);
+      waitingForVisibility = false;
+      for (var _i3 = 0, _Array$from3 = Array.from(groups.values()); _i3 < _Array$from3.length; _i3++) {
+        var group = _Array$from3[_i3];
+        cancelGroup(group, "cleared");
+      }
+      for (var _i4 = 0, _Array$from4 = Array.from(tasks); _i4 < _Array$from4.length; _i4++) {
+        var task = _Array$from4[_i4];
+        cancelTask(task);
+      }
+      queues.read.length = 0;
+      queues.update.length = 0;
+      phase = "idle";
+      idleSince = null;
+      resetMeasurements(true);
+      sequenceStarts.clear();
+    }
+    function cancel(id) {
+      validId(id);
+      var group = groups.get(id);
+      if (!group) return false;
+      cancelGroup(group, "aborted");
+      return true;
+    }
+    return Object.freeze({
+      read: function read(first, second, third) {
+        return request("read", first, second, third);
+      },
+      update: function update(first, second, third) {
+        return request("update", first, second, third);
+      },
+      sequence: sequence,
+      cancel: cancel,
+      clear: clear,
+      setVisualFPSLimit: setVisualFPSLimit
+    });
+  }
+  var init_build_layout_scheduler = __esm({
+    "src/internal/build-layout-scheduler.js": function() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
+  // src/internal/utils-name-case.js
+  function toCapitalized(name) {
+    return name.replace(/^([a-z])|-([a-z])/g, function(_, first, afterHyphen) {
+      return (first || afterHyphen).toUpperCase();
+    });
+  }
+  function toCamelCase(name) {
+    return name.replace(/-([a-z])/g, function(_, character) {
+      return character.toUpperCase();
+    });
+  }
+  function fromCamelCase(name) {
+    return name.replace(/([A-Z])/g, "-$1").toLowerCase();
+  }
+  var utils_name_case_default;
+  var init_utils_name_case = __esm({
+    "src/internal/utils-name-case.js": function() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+      utils_name_case_default = {
+        toCapitalized: toCapitalized,
+        toCamelCase: toCamelCase,
+        fromCamelCase: fromCamelCase
+      };
+    }
+  });
+
+  // src/internal/create-controller-helper.js
+  function _createForOfIteratorHelper2(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray2(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _unsupportedIterableToArray2(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray2(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray2(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray2(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
   function createControllerHelper(root, element) {
     var toCamelCase2 = utils_name_case_default.toCamelCase, fromCamelCase2 = utils_name_case_default.fromCamelCase;
     var mounts = /* @__PURE__ */ new Map();
@@ -21050,6 +21705,15 @@
       spawn: spawn,
       despawn: despawn,
       hasMounts: hasMounts,
+      on: function on(event, handler, options) {
+        root.AelluxJs.onEvent(element, event, handler, options);
+      },
+      off: function off(event, handler, options) {
+        root.AelluxJs.offEvent(element, event, handler, options);
+      },
+      dispatch: function dispatch(event, options) {
+        return root.AelluxJs.dispatchFrom(element, event, options);
+      },
       mount: function mount() {
         var extensionNames = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : null;
         return root.AelluxJs.mountManager.mount(element, extensionNames);
@@ -21068,7 +21732,7 @@
       var key = toCamelCase2(fromCamelCase2(extensionName));
       var extension = root.AelluxJs.ext[key];
       var methods = Array.isArray(methodNames) ? methodNames : [];
-      var _iterator = _createForOfIteratorHelper(methods), _step;
+      var _iterator = _createForOfIteratorHelper2(methods), _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
           var name = _step.value;
@@ -21111,11 +21775,11 @@
         return registration2.extension === key;
       });
       var names = /* @__PURE__ */ new Set();
-      var _iterator2 = _createForOfIteratorHelper(registrations), _step2;
+      var _iterator2 = _createForOfIteratorHelper2(registrations), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
           var registration = _step2.value;
-          var _iterator4 = _createForOfIteratorHelper(registration.methods), _step4;
+          var _iterator4 = _createForOfIteratorHelper2(registration.methods), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
               var _name2 = _step4.value;
@@ -21150,7 +21814,7 @@
         var _name = _Object$keys2[_i2];
         if (_name !== "update" && !names.has(_name)) delete namespace[_name];
       }
-      var _iterator3 = _createForOfIteratorHelper(names), _step3;
+      var _iterator3 = _createForOfIteratorHelper2(names), _step3;
       try {
         var _loop = function _loop2() {
           var name2 = _step3.value;
@@ -21187,8 +21851,8 @@
   });
 
   // src/internal/resolve-element-or-id.js
-  function resolveElementOrId(root, elementOrId) {
-    var options = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : {};
+  function resolveElementOrId(root, elementOrId, options) {
+    options = options || {};
     var fallback = options.defaultElement;
     if ((elementOrId === void 0 || elementOrId === null) && fallback) {
       return fallback;
@@ -21215,7 +21879,1004 @@
     }
   });
 
+  // src/internal/report-configuration.js
+  function reportConfiguration(api, name, context) {
+    if (context.element && context.attribute && !("value" in context)) context.value = context.element.getAttribute(context.attribute);
+    return api.diagnostics.warn(api.diagnostics[name], context);
+  }
+  function diagnosePresentTarget(api, element, target, attribute, value) {
+    if (!value || /[\s#]/.test(value.replace(/^#/, ""))) return false;
+    if (target && target.hasAttribute(api.attr("present"))) return true;
+    reportConfiguration(api, "WARN_CONFIGURATION_TARGET", {
+      extension: "present",
+      element: element,
+      attribute: attribute,
+      value: value,
+      reason: target ? "Target is not a Present container." : "Target element was not found.",
+      suggestion: "Use one existing Present element ID, optionally prefixed with #, and mount it before interacting."
+    });
+    return false;
+  }
+  var init_report_configuration = __esm({
+    "src/internal/report-configuration.js": function() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
+  // src/internal/diagnose-resources.js
+  function _createForOfIteratorHelper3(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray3(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _toConsumableArray2(r) {
+    return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray3(r) || _nonIterableSpread2();
+  }
+  function _nonIterableSpread2() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _unsupportedIterableToArray3(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray3(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray3(r, a) : void 0;
+    }
+  }
+  function _iterableToArray2(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles2(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray3(r);
+  }
+  function _arrayLikeToArray3(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
+  function transformOwners(api, element) {
+    var _api$ext$anchor, _api$ext$scrollbox, _api$ext$present, _element$getAttribute;
+    var owners = [];
+    if ((_api$ext$anchor = api.ext.anchor) !== null && _api$ext$anchor !== void 0 && _api$ext$anchor.initialized && element.classList.contains(api.className("anchored"))) owners.push("anchor");
+    var parent = element.parentElement;
+    if ((_api$ext$scrollbox = api.ext.scrollbox) !== null && _api$ext$scrollbox !== void 0 && _api$ext$scrollbox.initialized && element.hasAttribute(api.attr("scrollbox-elastic")) && element.getAttribute(api.attr("scrollbox-elastic")) !== "false" && parent !== null && parent !== void 0 && parent.hasAttribute(api.attr("scrollbox"))) {
+      var children = _toConsumableArray2(parent.children).filter(function(child) {
+        return !child.hasAttribute(api.attr("scrollbar-vertical")) && !child.hasAttribute(api.attr("scrollbar-horizontal"));
+      });
+      if (children.length === 1) owners.push("scrollbox-elastic");
+    }
+    if ((_api$ext$present = api.ext.present) !== null && _api$ext$present !== void 0 && _api$ext$present.initialized && !element.hasAttribute(api.attr("anchor")) && (_element$getAttribute = element.getAttribute(api.attr("present"))) !== null && _element$getAttribute !== void 0 && _element$getAttribute.split(/\s+/).includes("transform")) owners.push("present");
+    return owners;
+  }
+  function diagnoseResource(api, element, property, writers) {
+    api.diagnostics.warn(api.diagnostics.WARN_RESOURCE_CONFLICT, {
+      extension: writers[writers.length - 1],
+      element: element,
+      attribute: "style",
+      property: property,
+      writers: writers,
+      reason: "".concat(writers.join(" and "), " replace the same ").concat(property, " on this element."),
+      suggestion: "Keep positioning and elastic transforms on the outer element; animate a child element instead."
+    });
+  }
+  function diagnoseMotionResources(api, element, animations, extension) {
+    if (api.options.environment !== "development") return;
+    var _iterator = _createForOfIteratorHelper3(animations), _step;
+    try {
+      var _loop = function _loop2() {
+        var animation = _step.value;
+        try {
+          var effect = animation.effect;
+          if ((effect === null || effect === void 0 ? void 0 : effect.target) !== element || effect.pseudoElement) return 0;
+          var frames = effect.getKeyframes();
+          if (!frames.some(function(frame) {
+            return "transform" in frame && (frame.composite === "replace" || (!frame.composite || frame.composite === "auto") && (!effect.composite || effect.composite === "replace"));
+          })) return 0;
+          var owners = transformOwners(api, element).filter(function(owner2) {
+            return owner2 !== extension;
+          });
+          var _iterator2 = _createForOfIteratorHelper3(owners), _step2;
+          try {
+            for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+              var owner = _step2.value;
+              diagnoseResource(api, element, "transform", [owner, extension]);
+            }
+          } catch (err) {
+            _iterator2.e(err);
+          } finally {
+            _iterator2.f();
+          }
+        } catch (_) {
+        }
+      }, _ret;
+      for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+        _ret = _loop();
+        if (_ret === 0) continue;
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  }
+  var init_diagnose_resources = __esm({
+    "src/internal/diagnose-resources.js": function() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
+  // src/internal/validate-declarations.js
+  function _typeof2(o) {
+    "@babel/helpers - typeof";
+    return _typeof2 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof2(o);
+  }
+  function ownKeys(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function(r2) {
+        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
+      })), t.push.apply(t, o);
+    }
+    return t;
+  }
+  function _objectSpread(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys(Object(t), true).forEach(function(r2) {
+        _defineProperty(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function(r2) {
+        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
+      });
+    }
+    return e;
+  }
+  function _defineProperty(e, r, t) {
+    return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  }
+  function _toPropertyKey(t) {
+    var i = _toPrimitive(t, "string");
+    return "symbol" == _typeof2(i) ? i : i + "";
+  }
+  function _toPrimitive(t, r) {
+    if ("object" != _typeof2(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r || "default");
+      if ("object" != _typeof2(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return ("string" === r ? String : Number)(t);
+  }
+  function _toConsumableArray3(r) {
+    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray4(r) || _nonIterableSpread3();
+  }
+  function _nonIterableSpread3() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArray3(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles3(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray4(r);
+  }
+  function _createForOfIteratorHelper4(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray4(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _slicedToArray(r, e) {
+    return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray4(r, e) || _nonIterableRest();
+  }
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _unsupportedIterableToArray4(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray4(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray4(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray4(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
+  function _iterableToArrayLimit(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles(r) {
+    if (Array.isArray(r)) return r;
+  }
+  function validateDeclarations(root, scope) {
+    var extensionNames = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : null;
+    var method = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : "mount";
+    var api = root.AelluxJs;
+    if (api.options.environment !== "development") return;
+    var selected = extensionNames === null ? null : new Set((Array.isArray(extensionNames) ? extensionNames : [extensionNames]).map(utils_name_case_default.fromCamelCase));
+    var attr = function attr2(name2) {
+      return api.attr(name2);
+    };
+    var prefix = attr("");
+    var owners = /* @__PURE__ */ new Map();
+    for (var _i = 0, _Object$entries = Object.entries(attributesByExtension); _i < _Object$entries.length; _i++) {
+      var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), extension = _Object$entries$_i[0], names = _Object$entries$_i[1];
+      var _iterator = _createForOfIteratorHelper4(names.split(" ")), _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+          var name = _step.value;
+          owners.set(attr(name), extension);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    }
+    var known = new Set([].concat(_toConsumableArray3(owners.keys()), _toConsumableArray3(coreAttributes.split(" ").map(attr)), _toConsumableArray3(Object.keys(api.registry.preferenceMediaQueries).map(function(name2) {
+      return attr(utils_name_case_default.fromCamelCase(name2));
+    }))));
+    for (var _i2 = 0, _arr = [].concat(_toConsumableArray3(Object.values(api.registry.extMounters)), _toConsumableArray3(Object.values(api.registry.lazyExtSelectors))); _i2 < _arr.length; _i2++) {
+      var selector = _arr[_i2];
+      var _iterator2 = _createForOfIteratorHelper4(selector.match(/\[[^\s\]~|^$*!=]+/g) || []), _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+          var match = _step2.value;
+          known.add(match.slice(1));
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+    }
+    var elements = [].concat(_toConsumableArray3(scope.nodeType === 1 ? [scope] : []), _toConsumableArray3(scope.querySelectorAll("*")));
+    var _iterator3 = _createForOfIteratorHelper4(elements), _step3;
+    try {
+      var _loop = function _loop2() {
+        var _element$parentElemen;
+        var element = _step3.value;
+        var has = function has2(name2) {
+          return element.hasAttribute(attr(name2));
+        };
+        var value = function value2(name2) {
+          return element.getAttribute(attr(name2));
+        };
+        var report = function report2(name2, extension2, attribute, reason, suggestion) {
+          var extra = arguments.length > 5 && arguments[5] !== void 0 ? arguments[5] : {};
+          return reportConfiguration(api, name2, _objectSpread({
+            extension: extension2,
+            element: element,
+            attribute: attr(attribute),
+            reason: reason,
+            suggestion: suggestion
+          }, extra));
+        };
+        var invalid = function invalid2(extension2, name2, reason, suggestion) {
+          var code = arguments.length > 4 && arguments[4] !== void 0 ? arguments[4] : "WARN_CONFIGURATION_VALUE";
+          return report(code, extension2, name2, reason, suggestion);
+        };
+        var _iterator4 = _createForOfIteratorHelper4(element.attributes), _step4;
+        try {
+          var _loop22 = function _loop23() {
+            var attribute = _step4.value;
+            var owner = owners.get(attribute.name);
+            if (selected && (!owner || !selected.has(owner))) return 1;
+            if (!selected && attribute.name.startsWith(prefix) && !known.has(attribute.name)) {
+              var candidate = _toConsumableArray3(known).find(function(name2) {
+                return oneEditApart(attribute.name, name2);
+              });
+              if (candidate) reportConfiguration(api, "WARN_ATTRIBUTE_UNKNOWN", {
+                extension: owners.get(candidate) || "core",
+                element: element,
+                attribute: attribute.name,
+                value: attribute.value,
+                reason: "Unknown Aellux attribute.",
+                suggestion: "Check the spelling; did you mean ".concat(candidate, "?")
+              });
+            }
+          };
+          for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+            if (_loop22()) continue;
+          }
+        } catch (err) {
+          _iterator4.e(err);
+        } finally {
+          _iterator4.f();
+        }
+        for (var _i3 = 0, _Object$entries2 = Object.entries(activation); _i3 < _Object$entries2.length; _i3++) {
+          var _api$ext$key;
+          var _Object$entries2$_i = _slicedToArray(_Object$entries2[_i3], 2), _extension = _Object$entries2$_i[0], declarations = _Object$entries2$_i[1];
+          if (selected && !selected.has(_extension)) continue;
+          var declaration = declarations.split(" ").find(function(name2) {
+            return has(name2) && (name2 !== "scrollbox-snap" || value(name2) !== "false");
+          });
+          if (!declaration) continue;
+          if (_extension === "scrollbox-snap" && !has("scrollbox")) invalid(_extension, "scrollbox-snap", "Snap requires Scrollbox on the same element.", "Add data-ae-scrollbox to the Snap container.", "WARN_CONFIGURATION_STRUCTURE");
+          var key = utils_name_case_default.toCamelCase(_extension);
+          if (!((_api$ext$key = api.ext[key]) !== null && _api$ext$key !== void 0 && _api$ext$key.initialized)) {
+            report("WARN_EXTENSION_REQUIRED", _extension, declaration, "The declared behavior's Extension is not initialized.", "Register ".concat(_extension, ' before mounting, await $ae.wait("').concat(_extension, '"), and check earlier load diagnostics.'));
+            continue;
+          }
+          if (_extension === "present") validatePresent();
+          if (_extension === "anchor") validateAnchor();
+          if (_extension === "overflow-marquee" && has("overflow-marquee-fade") && !["", "true", "false"].includes(value("overflow-marquee-fade"))) invalid(_extension, "overflow-marquee-fade", "Overflow Marquee fade expects a boolean value.", "Use true or false, or omit the attribute to enable the fade.");
+          if (_extension === "scrollbox") validateScrollbox();
+          if (_extension === "scrollbox" && has("scrollbox-fade") && !["", "true", "false"].includes(value("scrollbox-fade"))) invalid(_extension, "scrollbox-fade", "Scrollbox fade expects a boolean value.", "Use true or false, or omit the attribute to enable the fade.");
+          if (_extension === "scrollbox-snap") validateSnap();
+          if (_extension === "focus") {
+            if (value("focus") && value("focus") !== "next") invalid(_extension, "focus", "Unknown Focus mode.", "Use next for Enter navigation, or remove the attribute.");
+            if (value("focus") === "next" && !element.matches("input:not([type]),input[type=text],input[type=search],input[type=email],input[type=url],input[type=tel],input[type=password],input[type=number],textarea,[contenteditable]:not([contenteditable=false])")) invalid(_extension, "focus", "Enter navigation is declared on a non-text-entry element.", "Apply data-ae-focus=next to a text input, textarea or editable element.");
+          }
+          if (_extension === "point" && value("point") !== "" && (!/^\d+$/.test(value("point")) || !Number.isSafeInteger(Number(value("point"))))) invalid(_extension, "point", "Pointer count must be a nonnegative integer.", "Use an integer such as 1; 0 disables pointer association.");
+          if (_extension === "ajax-href") {
+            var selectors = api.parseSelectors(value("ajax-href").trim() || "title,body");
+            if (!selectors) {
+              invalid(_extension, "ajax-href", "The AJAX selector is invalid.", "Provide a valid CSS selector such as #content.");
+            } else if (selectors.some(function(selector2) {
+              return !root.document.querySelector(selector2);
+            })) invalid(_extension, "ajax-href", "No current content matches the AJAX selector.", "Provide a CSS selector present in both the current page and the response.");
+          }
+        }
+        if ((!selected || selected.has("scrollbox")) && has("scrollbox-elastic") && value("scrollbox-elastic") !== "false" && !((_element$parentElemen = element.parentElement) !== null && _element$parentElemen !== void 0 && _element$parentElemen.hasAttribute(attr("scrollbox")))) invalid("scrollbox", "scrollbox-elastic", "Elastic wrapper must be a direct child of Scrollbox.", "Place exactly one marked wrapper directly inside data-ae-scrollbox.", "WARN_CONFIGURATION_STRUCTURE");
+        if ((!selected || selected.has("scrollbox-snap")) && has("snap-item") && !element.closest("[".concat(attr("scrollbox"), "]"))) invalid("scrollbox-snap", "snap-item", "Snap item has no Scrollbox ancestor.", "Place snap items inside a Scrollbox with Snap enabled.", "WARN_CONFIGURATION_STRUCTURE");
+        if (!selected && has("maxfps") && (!value("maxfps").trim() || !Number.isFinite(Number(value("maxfps"))) || Number(value("maxfps")) <= 0)) invalid("core", "maxfps", "Frame rate must be finite and greater than zero.", "Use a positive number or remove the attribute.", "WARN_LAYOUT_MAX_FPS_INVALID");
+        if (!selected || selected.has("present") || selected.has("anchor")) validateCSS();
+        if ((!selected || selected.has("present") || selected.has("scrollbox")) && has("scrollbox-elastic")) {
+          var writers = transformOwners(api, element);
+          if (writers.includes("scrollbox-elastic") && writers.includes("present")) diagnoseResource(api, element, "transform", ["scrollbox-elastic", "present"]);
+        }
+        function validatePresent() {
+          if (has("present") && value("present").trim().split(/\s+/).some(function(token) {
+            return token && !["opacity", "transform", "height", "width"].includes(token);
+          })) invalid("present", "present", "Unknown animated Present property.", "Use opacity, transform, height, width, all, or an empty value to disable motion.");
+          if (has("present-when") && /\s/.test(value("present-when"))) invalid("present", "present-when", "A group condition must be one class token.", "Use one class name without spaces or a leading dot.", "WARN_PRESENT_GROUP_SELECTION");
+          for (var _i4 = 0, _arr2 = [["trigger", ["", "toggle", "pop", "unpop"]], ["trigger-on", ["", "click", "hover"]]]; _i4 < _arr2.length; _i4++) {
+            var _arr2$_i = _slicedToArray(_arr2[_i4], 2), _name = _arr2$_i[0], allowed = _arr2$_i[1];
+            if (has(_name) && !allowed.includes(_name === "trigger" ? value(_name).toLowerCase() : value(_name))) invalid("present", _name, "Unknown Present control value.", "Use ".concat(allowed.filter(Boolean).join(", "), "."));
+          }
+          if (has("trigger") || has("dismiss")) {
+            var _name2 = value("dismiss") ? "dismiss" : "target";
+            var reference = value(_name2);
+            if (reference) diagnosePresentTarget(api, element, root.document.getElementById(reference.replace(/^#/, "")), attr(_name2), reference);
+            else if (!element.closest("[".concat(attr("present"), "]"))) invalid("present", has("trigger") ? "trigger" : "dismiss", "Control has no target or enclosing Present container.", "Set data-ae-target to an existing Present ID or place the control inside its Present container.", "WARN_CONFIGURATION_TARGET");
+            if (element.tabIndex < 0 && !element.matches(":disabled,[inert]")) invalid("present", has("trigger") ? "trigger" : "dismiss", "Control is not reachable with the keyboard.", "Prefer a native button; custom controls need focusability and appropriate keyboard activation.", "WARN_CONTROL_ACCESSIBILITY");
+          }
+          if (has("auto-unpop") && value("auto-unpop") && !/^(?:\d+(?:\.\d+)?|\.\d+)(?:ms|s)?$/.test(value("auto-unpop").trim())) invalid("present", "auto-unpop", "Auto-unpop duration is invalid.", "Use a nonnegative duration such as 250ms or 2s.");
+          if (has("present-group")) {
+            var members = _toConsumableArray3(element.querySelectorAll("[".concat(attr("present"), "]"))).filter(function(member2) {
+              return member2.closest("[".concat(attr("present-group"), "]")) === element;
+            });
+            if (!members.some(function(member2) {
+              return member2.id;
+            })) invalid("present", "present-group", "Group has no identifiable Present members.", "Add Present descendants with unique native IDs.", "WARN_PRESENT_GROUP_SELECTION");
+            var _iterator5 = _createForOfIteratorHelper4(members), _step5;
+            try {
+              for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+                var member = _step5.value;
+                if (!member.id) reportConfiguration(api, "WARN_PRESENT_GROUP_SELECTION", {
+                  extension: "present",
+                  element: member,
+                  attribute: "id",
+                  value: member.id,
+                  reason: "Present Group member has no ID.",
+                  suggestion: "Assign a unique native ID so the group can select this member."
+                });
+              }
+            } catch (err) {
+              _iterator5.e(err);
+            } finally {
+              _iterator5.f();
+            }
+          }
+        }
+        function validateAnchor() {
+          var _target;
+          var pivots = new Set("top-left top-center top-right center-left center center-right bottom-left bottom-center bottom-right".split(" "));
+          var pairs = has("anchor") ? value("anchor").split(",") : [];
+          if (has("anchor") && !pairs.every(function(token) {
+            var pair = token.trim().toLowerCase().split(":");
+            return pair.length === 2 && pair.every(function(pivot) {
+              return pivots.has(pivot.trim());
+            });
+          })) invalid("anchor", "anchor", "Anchor pivot pair is invalid.", "Use target:self pairs such as bottom-center:top-center, separated by commas.");
+          if (has("anchor-match") && value("anchor-match").trim().split(/\s+/).some(function(token) {
+            return !["width", "height"].includes(token);
+          })) invalid("anchor", "anchor-match", "Unknown matching dimension.", "Use width, height, or width height.", "WARN_ANCHOR_MATCH");
+          var reference = value("anchor-target");
+          if (!reference) return;
+          var target;
+          try {
+            target = root.document.getElementById(reference.replace(/^#/, "")) || root.document.querySelector(reference);
+          } catch (_) {
+          }
+          if ((_target = target) !== null && _target !== void 0 && _target.hasAttribute(attr("present-group"))) {
+            var _api$ext$present, _api$ext$present2, _api$ext$present2$sel;
+            if (!((_api$ext$present = api.ext.present) !== null && _api$ext$present !== void 0 && _api$ext$present.initialized)) report("WARN_EXTENSION_REQUIRED", "present", "anchor-target", "A Present Group target requires Present.", "Register and initialize Present before mounting the group and its Anchors.");
+            target = (_api$ext$present2 = api.ext.present) === null || _api$ext$present2 === void 0 || (_api$ext$present2$sel = _api$ext$present2.selected) === null || _api$ext$present2$sel === void 0 ? void 0 : _api$ext$present2$sel.call(_api$ext$present2, target);
+            if (!target) return;
+          }
+          if (!target) invalid("anchor", "anchor-target", "Anchor target does not exist or the selector is invalid.", "Use an existing target ID or a valid CSS selector.", "WARN_CONFIGURATION_TARGET");
+          else if (method === "update" && element.getClientRects().length && !target.getClientRects().length && !target.closest("[".concat(attr("present"), "],[hidden]"))) invalid("anchor", "anchor-target", "The explicitly updated Anchor target cannot currently be measured.", "Reveal the target before requesting placement, or update again after it becomes measurable.", "WARN_CONFIGURATION_TARGET");
+        }
+        function validateScrollbox() {
+          if (value("scrollbox").trim().toLowerCase() !== "pointer" || !element.getClientRects().length) return;
+          var style = root.getComputedStyle(element);
+          var blockedX = element.scrollWidth > element.clientWidth + 1 && !["auto", "scroll"].includes(style.overflowX);
+          var blockedY = element.scrollHeight > element.clientHeight + 1 && !["auto", "scroll"].includes(style.overflowY);
+          var usableX = element.scrollWidth > element.clientWidth + 1 && ["auto", "scroll"].includes(style.overflowX);
+          var usableY = element.scrollHeight > element.clientHeight + 1 && ["auto", "scroll"].includes(style.overflowY);
+          if ((blockedX || blockedY) && !usableX && !usableY) invalid("scrollbox", "scrollbox", "Content overflows but CSS disables the pointer scrolling axes.", "Set overflow:auto or overflow:scroll on the intended axis.", "WARN_CONFIGURATION_STYLE");
+        }
+        function validateSnap() {
+          if (!["", "horizontal", "vertical", "false"].includes(value("scrollbox-snap"))) invalid("scrollbox-snap", "scrollbox-snap", "Unknown snap axis.", "Use horizontal, vertical, or false.");
+          var _iterator6 = _createForOfIteratorHelper4(element.querySelectorAll("[".concat(attr("snap-item"), "]"))), _step6;
+          try {
+            for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+              var item = _step6.value;
+              if (item.closest("[".concat(attr("scrollbox"), "]")) !== element) continue;
+              var alignment = item.getAttribute(attr("snap-item"));
+              var style = root.getComputedStyle(item);
+              if (item.getClientRects().length && [style.transform, style.translate, style.rotate, style.scale].some(function(value2) {
+                return value2 && value2 !== "none";
+              })) reportConfiguration(api, "WARN_SCROLLBOX_SNAP_TRANSFORM", {
+                extension: "scrollbox-snap",
+                element: item,
+                attribute: attr("snap-item"),
+                reason: "Snap geometry includes a transform applied to the item itself.",
+                suggestion: "Apply the visual transform to a child of the snap item."
+              });
+              if (!["", "start", "end", "center", "left", "right", "top", "bottom"].includes(alignment)) reportConfiguration(api, "WARN_CONFIGURATION_VALUE", {
+                extension: "scrollbox-snap",
+                element: item,
+                attribute: attr("snap-item"),
+                value: alignment,
+                reason: "Unknown snap item alignment.",
+                suggestion: "Use start, center, or end (left/right/top/bottom are aliases)."
+              });
+            }
+          } catch (err) {
+            _iterator6.e(err);
+          } finally {
+            _iterator6.f();
+          }
+        }
+        function validateCSS() {
+          var checkAnchor = has("anchor") && (!selected || selected.has("anchor"));
+          var checkPresent = (has("present") || has("present-motion")) && (!selected || selected.has("present"));
+          if (!checkAnchor && !checkPresent) return;
+          if (has("anchor") && has("present") && value("present").trim().split(/\s+/).some(function(token) {
+            return token === "transform" || token === "all";
+          })) invalid("present", "present", "Anchor and Present both declare transform; Anchor takes priority.", "Remove transform from Present, or animate a child element instead.", "WARN_PRESENT_ANCHOR_TRANSFORM");
+          var extension2 = checkAnchor ? "anchor" : "present";
+          var style = root.getComputedStyle(element);
+          var durations = [].concat(_toConsumableArray3(checkPresent ? ["--ae-pop-duration", "--ae-unpop-duration"] : []), _toConsumableArray3(checkAnchor ? ["--ae-anchor-switch-duration"] : []));
+          var _iterator7 = _createForOfIteratorHelper4(durations), _step7;
+          try {
+            for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+              var _root$CSS;
+              var _name3 = _step7.value;
+              var _value = (element.style.getPropertyValue(_name3) || style.getPropertyValue(_name3)).trim();
+              if (_value && (_root$CSS = root.CSS) !== null && _root$CSS !== void 0 && _root$CSS.supports && !root.CSS.supports("transition-duration", _value)) reportConfiguration(api, "WARN_CONFIGURATION_STYLE", {
+                extension: extension2,
+                element: element,
+                attribute: "style",
+                value: _value,
+                reason: "Invalid duration in ".concat(_name3, "."),
+                suggestion: "Use a nonnegative CSS time such as 250ms or 0s."
+              });
+            }
+          } catch (err) {
+            _iterator7.e(err);
+          } finally {
+            _iterator7.f();
+          }
+          if (!element.getClientRects().length) return;
+          if (checkPresent && has("present") && element.classList.contains(api.className("present-grid")) && /(?:^|\s)(height|width)(?:\s|$)/.test(value("present")) && !["grid", "inline-grid"].includes(style.display)) invalid(extension2, "present", "Present's size motion requires its grid layout stylesheet.", "Load the Present stylesheet, check CSP, and preserve the container's grid display.", "WARN_CONFIGURATION_STYLE");
+          if (checkAnchor && element.classList.contains(api.className("anchored")) && !["absolute", "fixed"].includes(style.position)) invalid(extension2, "anchor", "Effective CSS prevents Anchor's absolute positioning.", "Check the weak stylesheet, CSP and overriding position rules.", "WARN_CONFIGURATION_STYLE");
+          if (checkPresent && has("present") && element.hidden && style.display !== "none" && !invisible(element)) invalid(extension2, "present", "CSS makes a hidden Present container render.", "Preserve display:none for hidden Present containers; check overriding display rules.", "WARN_CONFIGURATION_STYLE");
+        }
+      };
+      for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+        _loop();
+      }
+    } catch (err) {
+      _iterator3.e(err);
+    } finally {
+      _iterator3.f();
+    }
+    function invisible(element) {
+      for (var node = element; node; node = node.parentElement) {
+        var style = root.getComputedStyle(node);
+        if (style.visibility !== "visible" || Number(style.opacity) === 0) return true;
+      }
+      return false;
+    }
+  }
+  function oneEditApart(left, right) {
+    if (Math.abs(left.length - right.length) > 1) return false;
+    var i = 0, j = 0, edits = 0;
+    while (i < left.length && j < right.length) {
+      if (left[i] === right[j]) {
+        i++;
+        j++;
+        continue;
+      }
+      if (++edits > 1) return false;
+      if (left[i] === right[j + 1] && left[i + 1] === right[j] && left.length === right.length) {
+        i += 2;
+        j += 2;
+      } else if (left.length > right.length) i++;
+      else if (right.length > left.length) j++;
+      else {
+        i++;
+        j++;
+      }
+    }
+    return edits + Number(i < left.length || j < right.length) === 1;
+  }
+  var attributesByExtension, coreAttributes, activation;
+  var init_validate_declarations = __esm({
+    "src/internal/validate-declarations.js": function() {
+      init_report_configuration();
+      init_utils_name_case();
+      init_diagnose_resources();
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+      attributesByExtension = {
+        present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside",
+        anchor: "anchor anchor-target anchor-match",
+        "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
+        scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
+        "scrollbox-snap": "scrollbox-snap snap-item",
+        focus: "focus",
+        point: "point",
+        adaptive: "adaptive",
+        "ajax-href": "ajax-href",
+        viewport: "viewport viewport-target",
+        preference: "preference option label next prev ready",
+        feedback: "feedback message-target transform-target present-target"
+      };
+      coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds load-style weak-style full-style legacy esm theme-color";
+      activation = {
+        present: "present present-group trigger dismiss",
+        anchor: "anchor",
+        "overflow-marquee": "overflow-marquee",
+        scrollbox: "scrollbox",
+        "scrollbox-snap": "scrollbox-snap",
+        focus: "focus",
+        point: "point",
+        adaptive: "adaptive",
+        "ajax-href": "ajax-href",
+        viewport: "viewport",
+        preference: "preference",
+        feedback: "feedback"
+      };
+    }
+  });
+
+  // src/internal/find-duplicate-attributes.js
+  function _createForOfIteratorHelper5(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray5(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _unsupportedIterableToArray5(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray5(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray5(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray5(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
+  function findDuplicateAttributes(html) {
+    var duplicates = [];
+    var space = /[\t\n\f\r ]/;
+    var lower = function lower2(text) {
+      return text.replace(/[A-Z]/g, function(char2) {
+        return char2.toLowerCase();
+      });
+    };
+    var index = 0, lineIndex = 0, line = 1, column = 1;
+    while ((index = html.indexOf("<", index)) !== -1) {
+      if (html.startsWith("<!--", index)) {
+        var end = /--!?>/.exec(html.slice(index + 4));
+        index = end ? index + 4 + end.index + end[0].length : html.length;
+        continue;
+      }
+      if (html.startsWith("<![CDATA[", index)) {
+        var _end = html.indexOf("]]>", index + 9);
+        index = _end < 0 ? html.length : _end + 3;
+        continue;
+      }
+      if (/[!?/]/.test(html[index + 1] || "")) {
+        var _end2 = html.indexOf(">", index + 2);
+        index = _end2 < 0 ? html.length : _end2 + 1;
+        continue;
+      }
+      if (!/[a-z]/i.test(html[index + 1] || "")) {
+        index++;
+        continue;
+      }
+      var tagStart = ++index;
+      while (index < html.length && !space.test(html[index]) && !/[/>]/.test(html[index])) index++;
+      var tagName = lower(html.slice(tagStart, index));
+      var attributes = /* @__PURE__ */ new Map();
+      while (index < html.length && html[index] !== ">") {
+        if (space.test(html[index]) || html[index] === "/") {
+          index++;
+          continue;
+        }
+        var offset = index++;
+        while (index < html.length && !space.test(html[index]) && !/[=/>]/.test(html[index])) index++;
+        var attribute = lower(html.slice(offset, index).replace(/\0/g, "\uFFFD"));
+        while (space.test(html[index] || "")) index++;
+        var value = "";
+        if (html[index] === "=") {
+          index++;
+          while (space.test(html[index] || "")) index++;
+          var quote = html[index];
+          if (quote === '"' || quote === "'") {
+            var start = ++index;
+            while (index < html.length && html[index] !== quote) index++;
+            value = html.slice(start, index);
+            if (index < html.length) index++;
+          } else {
+            var _start = index;
+            while (index < html.length && !space.test(html[index]) && html[index] !== ">") index++;
+            value = html.slice(_start, index);
+          }
+        }
+        var previous = attributes.get(attribute);
+        if (previous) {
+          previous.values.push(value);
+          if (!previous.duplicate) {
+            while (lineIndex < offset) {
+              var char = html[lineIndex++];
+              if (char === "\r" || char === "\n" && html[lineIndex - 2] !== "\r") {
+                line++;
+                column = 1;
+              } else if (char !== "\n") column++;
+            }
+            previous.duplicate = {
+              tagName: tagName,
+              attribute: attribute,
+              value: previous.values[0],
+              values: previous.values,
+              offset: offset,
+              line: line,
+              column: column
+            };
+          }
+        } else attributes.set(attribute, {
+          values: [value]
+        });
+      }
+      if (index >= html.length) break;
+      var _iterator = _createForOfIteratorHelper5(attributes.values()), _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+          var _attribute = _step.value;
+          if (_attribute.duplicate) duplicates.push(_attribute.duplicate);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+      index++;
+      if (tagName === "plaintext") break;
+      if (/^(script|style|textarea|title|xmp|iframe|noembed|noframes|noscript)$/.test(tagName)) {
+        var closing = new RegExp("</".concat(tagName, "(?=[\\t\\n\\f\\r />])"), "ig");
+        closing.lastIndex = index;
+        var _end3 = closing.exec(html);
+        index = _end3 ? _end3.index : html.length;
+      }
+    }
+    return duplicates;
+  }
+  var init_find_duplicate_attributes = __esm({
+    "src/internal/find-duplicate-attributes.js": function() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
+  // src/internal/validate-html-source.js
+  function _typeof3(o) {
+    "@babel/helpers - typeof";
+    return _typeof3 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof3(o);
+  }
+  function ownKeys2(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function(r2) {
+        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
+      })), t.push.apply(t, o);
+    }
+    return t;
+  }
+  function _objectSpread2(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys2(Object(t), true).forEach(function(r2) {
+        _defineProperty2(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys2(Object(t)).forEach(function(r2) {
+        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
+      });
+    }
+    return e;
+  }
+  function _defineProperty2(e, r, t) {
+    return (r = _toPropertyKey2(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  }
+  function _toPropertyKey2(t) {
+    var i = _toPrimitive2(t, "string");
+    return "symbol" == _typeof3(i) ? i : i + "";
+  }
+  function _toPrimitive2(t, r) {
+    if ("object" != _typeof3(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r || "default");
+      if ("object" != _typeof3(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return ("string" === r ? String : Number)(t);
+  }
+  function _createForOfIteratorHelper6(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray6(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _unsupportedIterableToArray6(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray6(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray6(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray6(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
+  function validateHTMLSource(api, html, source) {
+    if (api.options.environment !== "development") return;
+    var _iterator = _createForOfIteratorHelper6(findDuplicateAttributes(html)), _step;
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+        var duplicate = _step.value;
+        var attribute = duplicate.attribute;
+        reportConfiguration(api, "WARN_ATTRIBUTE_DUPLICATE", _objectSpread2(_objectSpread2({
+          extension: "core",
+          source: source
+        }, duplicate), {}, {
+          reason: "The ".concat(attribute, " attribute occurs more than once on the same start tag; the HTML parser keeps the first value and discards the others."),
+          suggestion: attribute === "class" ? "Combine all class names in one class attribute, separated by spaces." : attribute === "style" ? "Combine the intended CSS declarations in one style attribute, separated by semicolons." : "Keep one ".concat(attribute, " attribute with the intended value.")
+        }));
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  }
+  var init_validate_html_source = __esm({
+    "src/internal/validate-html-source.js": function() {
+      init_find_duplicate_attributes();
+      init_report_configuration();
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
   // src/internal/create-mount-helper.js
+  function _slicedToArray2(r, e) {
+    return _arrayWithHoles2(r) || _iterableToArrayLimit2(r, e) || _unsupportedIterableToArray7(r, e) || _nonIterableRest2();
+  }
+  function _nonIterableRest2() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit2(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles2(r) {
+    if (Array.isArray(r)) return r;
+  }
+  function _createForOfIteratorHelper7(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray7(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _unsupportedIterableToArray7(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray7(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray7(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray7(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
   function _regenerator() {
     /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
     var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag";
@@ -21294,79 +22955,6 @@
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
     }, _regeneratorDefine2(e, r, n, t);
   }
-  function _slicedToArray(r, e) {
-    return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray2(r, e) || _nonIterableRest();
-  }
-  function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArrayLimit(r, l) {
-    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (null != t) {
-      var e, n, i, u, a = [], f = true, o = false;
-      try {
-        if (i = (t = t.call(r)).next, 0 === l) {
-          if (Object(t) !== t) return;
-          f = false;
-        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
-      } catch (r2) {
-        o = true, n = r2;
-      } finally {
-        try {
-          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
-        } finally {
-          if (o) throw n;
-        }
-      }
-      return a;
-    }
-  }
-  function _arrayWithHoles(r) {
-    if (Array.isArray(r)) return r;
-  }
-  function _createForOfIteratorHelper2(r, e) {
-    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray2(r)) || e && r && "number" == typeof r.length) {
-        t && (r = t);
-        var _n = 0, F = function F2() {
-        };
-        return { s: F, n: function n() {
-          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
-        }, e: function e2(r2) {
-          throw r2;
-        }, f: F };
-      }
-      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-    }
-    var o, a = true, u = false;
-    return { s: function s() {
-      t = t.call(r);
-    }, n: function n() {
-      var r2 = t.next();
-      return a = r2.done, r2;
-    }, e: function e2(r2) {
-      u = true, o = r2;
-    }, f: function f() {
-      try {
-        a || null == t.return || t.return();
-      } finally {
-        if (u) throw o;
-      }
-    } };
-  }
-  function _unsupportedIterableToArray2(r, a) {
-    if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray2(r, a);
-      var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray2(r, a) : void 0;
-    }
-  }
-  function _arrayLikeToArray2(r, a) {
-    (null == a || a > r.length) && (a = r.length);
-    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
-    return n;
-  }
   function asyncGeneratorStep(n, t, e, r, o, a, c) {
     try {
       var i = n[a](c), u = i.value;
@@ -21391,22 +22979,21 @@
     };
   }
   function createMountHelper(root, mountMaps, mountedElements, elementControllers) {
+    var UNMOUNT = "unmount";
     var toCapitalized2 = utils_name_case_default.toCapitalized, toCamelCase2 = utils_name_case_default.toCamelCase, fromCamelCase2 = utils_name_case_default.fromCamelCase;
-    var initialAttributeValues = /* @__PURE__ */ new WeakMap();
     var pendingMounts = /* @__PURE__ */ new WeakMap();
     var pendingUnmounts = /* @__PURE__ */ new WeakMap();
+    var mountRecords = /* @__PURE__ */ new WeakMap();
+    var mountOrder = 0;
     var classPrefix = root.AelluxJs.className("");
+    var sourceURL = root.document.URL;
+    var sourceChecked = false;
     return {
       mount: mount,
       unmount: unmount,
       unmountDetached: unmountDetached,
-      update: update,
-      initialAttribute: initialAttribute
+      update: update
     };
-    function initialAttribute(element, name) {
-      var _initialAttributeValu, _initialAttributeValu2;
-      return (_initialAttributeValu = (_initialAttributeValu2 = initialAttributeValues.get(element)) === null || _initialAttributeValu2 === void 0 ? void 0 : _initialAttributeValu2.initial.get(name)) !== null && _initialAttributeValu !== void 0 ? _initialAttributeValu : null;
-    }
     function update(_x) {
       return _update.apply(this, arguments);
     }
@@ -21427,6 +23014,7 @@
               _context.n = 2;
               return AelluxJsMounted(rootElement, "update", extensionNames);
             case 2:
+              validateDeclarations(root, rootElement, extensionNames, "update");
               return _context.a(2, true);
           }
         }, _callee);
@@ -21443,17 +23031,14 @@
           while (1) switch (_context2.n) {
             case 0:
               extensionNames = _args2.length > 1 && _args2[1] !== void 0 ? _args2[1] : null;
-              rootElement = resolveMountElement(elementOrId, "unmount");
+              rootElement = resolveMountElement(elementOrId, UNMOUNT);
               if (rootElement) {
                 _context2.n = 1;
                 break;
               }
               return _context2.a(2, false);
             case 1:
-              _context2.n = 2;
-              return AelluxJsMounted(rootElement, "unmount", extensionNames);
-            case 2:
-              return _context2.a(2, true);
+              return _context2.a(2, AelluxJsMounted(rootElement, UNMOUNT, extensionNames));
           }
         }, _callee2);
       }));
@@ -21464,20 +23049,20 @@
     }
     function _unmountDetached() {
       _unmountDetached = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee3() {
-        var hasDetachedElement, _iterator3, _step3, element, _t;
+        var hasDetachedElement, _iterator, _step, element, _t;
         return _regenerator().w(function(_context3) {
           while (1) switch (_context3.p = _context3.n) {
             case 0:
               hasDetachedElement = false;
-              _iterator3 = _createForOfIteratorHelper2(mountedElements.keys());
+              _iterator = _createForOfIteratorHelper7(mountedElements.keys());
               _context3.p = 1;
-              _iterator3.s();
+              _iterator.s();
             case 2:
-              if ((_step3 = _iterator3.n()).done) {
+              if ((_step = _iterator.n()).done) {
                 _context3.n = 4;
                 break;
               }
-              element = _step3.value;
+              element = _step.value;
               if (element.isConnected) {
                 _context3.n = 3;
                 break;
@@ -21493,10 +23078,10 @@
             case 5:
               _context3.p = 5;
               _t = _context3.v;
-              _iterator3.e(_t);
+              _iterator.e(_t);
             case 6:
               _context3.p = 6;
-              _iterator3.f();
+              _iterator.f();
               return _context3.f(6);
             case 7:
               if (hasDetachedElement) {
@@ -21505,10 +23090,7 @@
               }
               return _context3.a(2, false);
             case 8:
-              _context3.n = 9;
-              return AelluxJsMounted(root.document, "unmount", null, true);
-            case 9:
-              return _context3.a(2, true);
+              return _context3.a(2, AelluxJsMounted(root.document, UNMOUNT, null, true));
           }
         }, _callee3, null, [[1, 5, 6, 7]]);
       }));
@@ -21519,7 +23101,7 @@
     }
     function _mount() {
       _mount = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee4(elementOrId) {
-        var extensionNames, AelluxJs2, newlyMounted, rootElement, waitMountedAttr, allWaiters, allLinks, _iterator4, _step4, link, href, loadWhen, builds, loadStyleValue, loadStyle, waitExtensions, _i, _Object$entries, _Object$entries$_i, key, options, _args4 = arguments, _t2;
+        var extensionNames, AelluxJs2, newlyMounted, rootElement, waitMountedAttr, allWaiters, allLinks, _iterator2, _step2, link, href, loadWhen, builds, loadStyleValue, loadStyle, waitExtensions, _i, _Object$entries, _Object$entries$_i, key, options, _args4 = arguments, _t2;
         return _regenerator().w(function(_context4) {
           while (1) switch (_context4.p = _context4.n) {
             case 0:
@@ -21533,17 +23115,31 @@
               }
               return _context4.a(2, []);
             case 1:
+              if (AelluxJs2.dispatch("BeforeMount", {
+                cancelable: true,
+                detail: {
+                  root: rootElement,
+                  extensions: extensionNames == null ? null : (typeof extensionNames === "string" ? [extensionNames] : extensionNames).map(function(name) {
+                    return fromCamelCase2(name);
+                  })
+                }
+              })) {
+                _context4.n = 2;
+                break;
+              }
+              return _context4.a(2, []);
+            case 2:
               waitMountedAttr = AelluxJs2.attr("wait-mounted");
               allWaiters = findElements(rootElement, "[".concat(waitMountedAttr, "]"));
               allWaiters.forEach(function(waiter) {
                 return waiter.setAttribute("aria-busy", "true");
               });
-              _context4.p = 2;
+              _context4.p = 3;
               allLinks = findElements(rootElement, "link[rel='aelluxjs-ext']");
-              _iterator4 = _createForOfIteratorHelper2(allLinks);
+              _iterator2 = _createForOfIteratorHelper7(allLinks);
               try {
-                for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-                  link = _step4.value;
+                for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+                  link = _step2.value;
                   href = link.getAttribute("href");
                   loadWhen = link.getAttribute(AelluxJs2.attr("load-when")) || void 0;
                   builds = link.getAttribute(AelluxJs2.attr("builds")) || void 0;
@@ -21557,65 +23153,82 @@
                   });
                 }
               } catch (err) {
-                _iterator4.e(err);
+                _iterator2.e(err);
               } finally {
-                _iterator4.f();
+                _iterator2.f();
               }
               waitExtensions = [];
               _i = 0, _Object$entries = Object.entries(root.AelluxJs.registry.ext);
-            case 3:
-              if (!(_i < _Object$entries.length)) {
-                _context4.n = 6;
-                break;
-              }
-              _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), key = _Object$entries$_i[0], options = _Object$entries$_i[1];
-              if (!options.loadWhen) {
-                _context4.n = 4;
-                break;
-              }
-              return _context4.a(3, 5);
             case 4:
-              waitExtensions.push(AelluxJs2.wait(key));
+              if (!(_i < _Object$entries.length)) {
+                _context4.n = 7;
+                break;
+              }
+              _Object$entries$_i = _slicedToArray2(_Object$entries[_i], 2), key = _Object$entries$_i[0], options = _Object$entries$_i[1];
+              if (!(options.load === false)) {
+                _context4.n = 5;
+                break;
+              }
+              return _context4.a(3, 6);
             case 5:
-              _i++;
-              _context4.n = 3;
-              break;
+              waitExtensions.push(AelluxJs2.wait(key));
             case 6:
-              _context4.n = 7;
-              return Promise.all(waitExtensions);
+              _i++;
+              _context4.n = 4;
+              break;
             case 7:
               _context4.n = 8;
-              return AelluxJsMount(rootElement, extensionNames, newlyMounted);
+              return Promise.all(waitExtensions);
             case 8:
-              _context4.n = 10;
-              break;
+              _context4.n = 9;
+              return AelluxJsMount(rootElement, extensionNames, newlyMounted);
             case 9:
-              _context4.p = 9;
+              validateDeclarations(root, rootElement, extensionNames);
+              if (rootElement === root.document && extensionNames == null) validateDocumentSource();
+              _context4.n = 11;
+              break;
+            case 10:
+              _context4.p = 10;
               _t2 = _context4.v;
               AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_MOUNT, {
                 cause: _t2,
                 root: rootElement,
                 extensions: extensionNames
               });
-            case 10:
-              _context4.p = 10;
+            case 11:
+              _context4.p = 11;
               allWaiters.forEach(function(waiter) {
                 return waiter.setAttribute("aria-busy", "false");
               });
-              return _context4.f(10);
-            case 11:
+              return _context4.f(11);
+            case 12:
               return _context4.a(2, Array.from(newlyMounted));
           }
-        }, _callee4, null, [[2, 9, 10, 11]]);
+        }, _callee4, null, [[3, 10, 11, 12]]);
       }));
       return _mount.apply(this, arguments);
+    }
+    function validateDocumentSource() {
+      var api = root.AelluxJs;
+      if (api.options.environment !== "development" || sourceChecked || root.document.contentType !== "text/html" || !/^https?:/i.test(sourceURL)) return;
+      sourceChecked = true;
+      Promise.resolve().then(function() {
+        return api.request(sourceURL, {
+          cache: "force-cache"
+        });
+      }).then(function(response) {
+        return response.text();
+      }).then(function(html) {
+        return validateHTMLSource(api, html, sourceURL);
+      }).catch(function() {
+      });
     }
     function AelluxJsMount(_x4, _x5, _x6) {
       return _AelluxJsMount.apply(this, arguments);
     }
     function _AelluxJsMount() {
       _AelluxJsMount = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee5(rootElement, extensionNames, newlyMounted) {
-        var AelluxJs2, filter, mounterSelectors, lazySelectors, _i2, _Object$entries2, _Object$entries2$_i, key, selectorString, _i3, _Object$entries3, _Object$entries3$_i, _key, _selectorString, candidatesByExtension, allElements, _iterator5, _step5, element, localExtensionNames, _i5, _Object$entries4, _Object$entries4$_i, _key2, _selector, _i6, _Object$entries5, _Object$entries5$_i, _key3, _selector2, _iterator10, _step10, _extensionName, _candidates, extensions, loaded, _iterator6, _step6, result, elementsAffected, index, _extensions$index, extensionName, candidates, mounter, searchRoots, _iterator7, _step7, candidate, ancestor, _iterator8, _step8, _step8$value, selector, controller, _iterator9, _step9, searchRoot, mountableElements, _iterator0, _step0, mountable, mountId, pendingMount, _i4, _Array$from, name, finishPendingMount, elementController, _elementController, _iterator1, _step1, affected, _t3, _t4, _t5, _t6, _t7, _t8, _t9;
+        var AelluxJs2, filter, mounterSelectors, lazySelectors, _i2, _Object$entries2, _Object$entries2$_i, key, selectorString, _i3, _Object$entries3, _Object$entries3$_i, _key, _selectorString, candidatesByExtension, allElements, _iterator3, _step3, element, localExtensionNames, _i6, _Object$entries4, _Object$entries4$_i, _key2, _selector2, _i7, _Object$entries5, _Object$entries5$_i, _key3, _selector3, _iterator8, _step8, _extensionName2, candidates, extensions, loaded, _iterator4, _step4, result, registrations, index, _extensions$index, extensionName, mounter, _iterator5, _step5, _step5$value, selector, controller, elementsAffected, _i4, _registrations, _registrations$_i, _extensionName, _selector, _controller, mountableElements, _iterator6, _step6, mountable, mountId, pendingMount, _i5, _Array$from, name, finishPendingMount, elementController, _elementController, _iterator7, _step7, affected, _t3, _t4, _t5, _t6, _t7;
         return _regenerator().w(function(_context5) {
           while (1) switch (_context5.p = _context5.n) {
             case 0:
@@ -21631,11 +23244,11 @@
                   return fromCamelCase2(_);
                 });
                 for (_i2 = 0, _Object$entries2 = Object.entries(AelluxJs2.registry.extMounters); _i2 < _Object$entries2.length; _i2++) {
-                  _Object$entries2$_i = _slicedToArray(_Object$entries2[_i2], 2), key = _Object$entries2$_i[0], selectorString = _Object$entries2$_i[1];
+                  _Object$entries2$_i = _slicedToArray2(_Object$entries2[_i2], 2), key = _Object$entries2$_i[0], selectorString = _Object$entries2$_i[1];
                   if (extensionNames.indexOf(fromCamelCase2(key)) !== -1) filter.push(selectorString);
                 }
                 for (_i3 = 0, _Object$entries3 = Object.entries(AelluxJs2.registry.lazyExtSelectors); _i3 < _Object$entries3.length; _i3++) {
-                  _Object$entries3$_i = _slicedToArray(_Object$entries3[_i3], 2), _key = _Object$entries3$_i[0], _selectorString = _Object$entries3$_i[1];
+                  _Object$entries3$_i = _slicedToArray2(_Object$entries3[_i3], 2), _key = _Object$entries3$_i[0], _selectorString = _Object$entries3$_i[1];
                   if (extensionNames.indexOf(fromCamelCase2(_key)) !== -1) filter.push(_selectorString);
                 }
               }
@@ -21643,54 +23256,61 @@
                 _context5.n = 1;
                 break;
               }
+              AelluxJs2.dispatch("Mount", {
+                detail: {
+                  root: rootElement,
+                  extensions: extensionNames,
+                  elements: []
+                }
+              });
               return _context5.a(2);
             case 1:
               candidatesByExtension = /* @__PURE__ */ new Map();
               allElements = findElements(rootElement, filter.join(","));
-              _iterator5 = _createForOfIteratorHelper2(allElements);
+              _iterator3 = _createForOfIteratorHelper7(allElements);
               try {
-                for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-                  element = _step5.value;
+                for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+                  element = _step3.value;
                   localExtensionNames = void 0;
                   if (extensionNames) {
                     localExtensionNames = extensionNames;
                   } else {
                     localExtensionNames = /* @__PURE__ */ new Set();
-                    for (_i5 = 0, _Object$entries4 = Object.entries(AelluxJs2.registry.lazyExtSelectors); _i5 < _Object$entries4.length; _i5++) {
-                      _Object$entries4$_i = _slicedToArray(_Object$entries4[_i5], 2), _key2 = _Object$entries4$_i[0], _selector = _Object$entries4$_i[1];
-                      if (element.matches(_selector) && filter.indexOf(_selector) !== -1) localExtensionNames.add(fromCamelCase2(_key2));
+                    for (_i6 = 0, _Object$entries4 = Object.entries(AelluxJs2.registry.lazyExtSelectors); _i6 < _Object$entries4.length; _i6++) {
+                      _Object$entries4$_i = _slicedToArray2(_Object$entries4[_i6], 2), _key2 = _Object$entries4$_i[0], _selector2 = _Object$entries4$_i[1];
+                      if (element.matches(_selector2) && filter.indexOf(_selector2) !== -1) localExtensionNames.add(fromCamelCase2(_key2));
                     }
-                    for (_i6 = 0, _Object$entries5 = Object.entries(AelluxJs2.registry.extMounters); _i6 < _Object$entries5.length; _i6++) {
-                      _Object$entries5$_i = _slicedToArray(_Object$entries5[_i6], 2), _key3 = _Object$entries5$_i[0], _selector2 = _Object$entries5$_i[1];
-                      if (element.matches(_selector2) && filter.indexOf(_selector2) !== -1) localExtensionNames.add(fromCamelCase2(_key3));
+                    for (_i7 = 0, _Object$entries5 = Object.entries(AelluxJs2.registry.extMounters); _i7 < _Object$entries5.length; _i7++) {
+                      _Object$entries5$_i = _slicedToArray2(_Object$entries5[_i7], 2), _key3 = _Object$entries5$_i[0], _selector3 = _Object$entries5$_i[1];
+                      if (element.matches(_selector3) && filter.indexOf(_selector3) !== -1) localExtensionNames.add(fromCamelCase2(_key3));
                     }
                   }
-                  _iterator10 = _createForOfIteratorHelper2(localExtensionNames);
+                  _iterator8 = _createForOfIteratorHelper7(localExtensionNames);
                   try {
-                    for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
-                      _extensionName = _step10.value;
-                      _candidates = candidatesByExtension.get(_extensionName);
-                      if (!_candidates) {
-                        _candidates = /* @__PURE__ */ new Set();
-                        candidatesByExtension.set(_extensionName, _candidates);
+                    for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+                      _extensionName2 = _step8.value;
+                      candidates = candidatesByExtension.get(_extensionName2);
+                      if (!candidates) {
+                        candidates = /* @__PURE__ */ new Set();
+                        candidatesByExtension.set(_extensionName2, candidates);
                       }
-                      _candidates.add(element);
+                      candidates.add(element);
                     }
                   } catch (err) {
-                    _iterator10.e(err);
+                    _iterator8.e(err);
                   } finally {
-                    _iterator10.f();
+                    _iterator8.f();
                   }
                 }
               } catch (err) {
-                _iterator5.e(err);
+                _iterator3.e(err);
               } finally {
-                _iterator5.f();
+                _iterator3.f();
               }
               extensions = Array.from(candidatesByExtension);
               _context5.n = 2;
               return Promise.all(extensions.map(function(_ref) {
-                var _ref2 = _slicedToArray(_ref, 1), extensionName2 = _ref2[0];
+                var _ref2 = _slicedToArray2(_ref, 1), extensionName2 = _ref2[0];
                 return AelluxJs2.wait(extensionName2).then(function(value) {
                   return {
                     value: value
@@ -21703,15 +23323,15 @@
               }));
             case 2:
               loaded = _context5.v;
-              _iterator6 = _createForOfIteratorHelper2(loaded);
+              _iterator4 = _createForOfIteratorHelper7(loaded);
               _context5.p = 3;
-              _iterator6.s();
+              _iterator4.s();
             case 4:
-              if ((_step6 = _iterator6.n()).done) {
+              if ((_step4 = _iterator4.n()).done) {
                 _context5.n = 6;
                 break;
               }
-              result = _step6.value;
+              result = _step4.value;
               if (!Object.prototype.hasOwnProperty.call(result, "error")) {
                 _context5.n = 5;
                 break;
@@ -21726,122 +23346,122 @@
             case 7:
               _context5.p = 7;
               _t3 = _context5.v;
-              _iterator6.e(_t3);
+              _iterator4.e(_t3);
             case 8:
               _context5.p = 8;
-              _iterator6.f();
+              _iterator4.f();
               return _context5.f(8);
             case 9:
-              elementsAffected = /* @__PURE__ */ new Set();
+              registrations = [];
               index = 0;
             case 10:
               if (!(index < extensions.length)) {
-                _context5.n = 42;
+                _context5.n = 14;
                 break;
               }
               if (loaded[index].value) {
                 _context5.n = 11;
                 break;
               }
-              return _context5.a(3, 41);
+              return _context5.a(3, 13);
             case 11:
-              _extensions$index = _slicedToArray(extensions[index], 2), extensionName = _extensions$index[0], candidates = _extensions$index[1];
+              _extensions$index = _slicedToArray2(extensions[index], 1), extensionName = _extensions$index[0];
               mounter = mountMaps.get(toCamelCase2(extensionName));
               if (mounter) {
                 _context5.n = 12;
                 break;
               }
-              return _context5.a(3, 41);
+              return _context5.a(3, 13);
             case 12:
-              searchRoots = [];
-              _iterator7 = _createForOfIteratorHelper2(candidates);
+              _iterator5 = _createForOfIteratorHelper7(mounter);
               try {
-                for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-                  candidate = _step7.value;
-                  ancestor = candidate.parentNode;
-                  while (ancestor && !candidates.has(ancestor)) ancestor = ancestor.parentNode;
-                  if (!ancestor) searchRoots.push(candidate);
+                for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+                  _step5$value = _slicedToArray2(_step5.value, 2), selector = _step5$value[0], controller = _step5$value[1];
+                  registrations.push({
+                    extensionName: extensionName,
+                    selector: selector,
+                    controller: controller,
+                    priority: controller.priority,
+                    order: registrations.length
+                  });
                 }
               } catch (err) {
-                _iterator7.e(err);
+                _iterator5.e(err);
               } finally {
-                _iterator7.f();
+                _iterator5.f();
               }
-              _iterator8 = _createForOfIteratorHelper2(mounter);
-              _context5.p = 13;
-              _iterator8.s();
+            case 13:
+              index++;
+              _context5.n = 10;
+              break;
             case 14:
-              if ((_step8 = _iterator8.n()).done) {
-                _context5.n = 38;
+              registrations.sort(function(left, right) {
+                return left.priority - right.priority || left.order - right.order;
+              });
+              elementsAffected = /* @__PURE__ */ new Set();
+              _i4 = 0, _registrations = registrations;
+            case 15:
+              if (!(_i4 < _registrations.length)) {
+                _context5.n = 33;
                 break;
               }
-              _step8$value = _slicedToArray(_step8.value, 2), selector = _step8$value[0], controller = _step8$value[1];
-              _context5.p = 15;
-              if (controller.mount) {
-                _context5.n = 16;
+              _registrations$_i = _registrations[_i4], _extensionName = _registrations$_i.extensionName, _selector = _registrations$_i.selector, _controller = _registrations$_i.controller;
+              _context5.p = 16;
+              if (_controller.mount) {
+                _context5.n = 17;
                 break;
               }
-              return _context5.a(3, 37);
-            case 16:
-              _iterator9 = _createForOfIteratorHelper2(searchRoots);
-              _context5.p = 17;
-              _iterator9.s();
-            case 18:
-              if ((_step9 = _iterator9.n()).done) {
-                _context5.n = 32;
+              return _context5.a(3, 32);
+            case 17:
+              mountableElements = findElements(rootElement, _selector);
+              _iterator6 = _createForOfIteratorHelper7(mountableElements);
+              _context5.p = 18;
+              _iterator6.s();
+            case 19:
+              if ((_step6 = _iterator6.n()).done) {
+                _context5.n = 27;
                 break;
               }
-              searchRoot = _step9.value;
-              mountableElements = findElements(searchRoot, selector);
-              _iterator0 = _createForOfIteratorHelper2(mountableElements);
-              _context5.p = 19;
-              _iterator0.s();
-            case 20:
-              if ((_step0 = _iterator0.n()).done) {
-                _context5.n = 28;
-                break;
-              }
-              mountable = _step0.value;
-              mountId = "".concat(extensionName, "@").concat(selector);
+              mountable = _step6.value;
+              mountId = "".concat(_extensionName, "@").concat(_selector);
               if (!isMounted(mountable, mountId)) {
-                _context5.n = 22;
+                _context5.n = 21;
                 break;
               }
               pendingMount = getPendingMount(mountable, mountId);
               if (!pendingMount) {
-                _context5.n = 21;
+                _context5.n = 20;
                 break;
               }
-              _context5.n = 21;
+              _context5.n = 20;
               return pendingMount;
+            case 20:
+              return _context5.a(3, 26);
             case 21:
-              return _context5.a(3, 27);
-            case 22:
               if (!isMounted(mountable)) {
-                for (_i4 = 0, _Array$from = Array.from(mountable.classList); _i4 < _Array$from.length; _i4++) {
-                  name = _Array$from[_i4];
+                for (_i5 = 0, _Array$from = Array.from(mountable.classList); _i5 < _Array$from.length; _i5++) {
+                  name = _Array$from[_i5];
                   if (name.startsWith(classPrefix)) mountable.classList.remove(name);
                 }
               }
-              rememberInitialAttributes(mountable);
-              setMounted(mountable, mountId);
+              setMounted(mountable, mountId, true, _controller.priority);
               finishPendingMount = beginPendingMount(mountable, mountId);
-              _context5.p = 23;
-              _context5.n = 24;
-              return controller.mount(mountable);
-            case 24:
+              _context5.p = 22;
+              _context5.n = 23;
+              return _controller.mount(mountable);
+            case 23:
               elementController = elementControllers.get(mountable);
               if (!elementController) {
                 elementController = createControllerHelper(root, mountable);
                 elementControllers.set(mountable, elementController);
               }
-              elementController.spawn(extensionName, mountId, controller.controllers, typeof controller.update === "function");
+              elementController.spawn(_extensionName, mountId, _controller.controllers, typeof _controller.update === "function");
               elementsAffected.add(mountable);
               newlyMounted.add(mountable);
-              _context5.n = 26;
+              _context5.n = 25;
               break;
-            case 25:
-              _context5.p = 25;
+            case 24:
+              _context5.p = 24;
               _t4 = _context5.v;
               setMounted(mountable, mountId, false);
               _elementController = elementControllers.get(mountable);
@@ -21849,121 +23469,98 @@
                 _elementController.despawn(mountId);
                 if (!_elementController.hasMounts()) elementControllers.delete(mountable);
               }
-              restoreInitialAttributes(mountable);
               AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
                 cause: _t4,
-                extension: extensionName,
+                extension: _extensionName,
                 method: "mount",
-                selector: selector,
+                selector: _selector,
                 element: mountable
               });
-            case 26:
-              _context5.p = 26;
+            case 25:
+              _context5.p = 25;
               finishPendingMount();
-              return _context5.f(26);
+              return _context5.f(25);
+            case 26:
+              _context5.n = 19;
+              break;
             case 27:
-              _context5.n = 20;
+              _context5.n = 29;
               break;
             case 28:
-              _context5.n = 30;
-              break;
+              _context5.p = 28;
+              _t5 = _context5.v;
+              _iterator6.e(_t5);
             case 29:
               _context5.p = 29;
-              _t5 = _context5.v;
-              _iterator0.e(_t5);
+              _iterator6.f();
+              return _context5.f(29);
             case 30:
-              _context5.p = 30;
-              _iterator0.f();
-              return _context5.f(30);
-            case 31:
-              _context5.n = 18;
+              _context5.n = 32;
               break;
+            case 31:
+              _context5.p = 31;
+              _t6 = _context5.v;
+              AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
+                cause: _t6,
+                extension: _extensionName,
+                method: "mount",
+                selector: _selector
+              });
             case 32:
-              _context5.n = 34;
+              _i4++;
+              _context5.n = 15;
               break;
             case 33:
-              _context5.p = 33;
-              _t6 = _context5.v;
-              _iterator9.e(_t6);
-            case 34:
+              _iterator7 = _createForOfIteratorHelper7(elementsAffected);
               _context5.p = 34;
-              _iterator9.f();
-              return _context5.f(34);
+              _iterator7.s();
             case 35:
-              _context5.n = 37;
-              break;
-            case 36:
-              _context5.p = 36;
-              _t7 = _context5.v;
-              AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
-                cause: _t7,
-                extension: extensionName,
-                method: "mount",
-                selector: selector
-              });
-            case 37:
-              _context5.n = 14;
-              break;
-            case 38:
-              _context5.n = 40;
-              break;
-            case 39:
-              _context5.p = 39;
-              _t8 = _context5.v;
-              _iterator8.e(_t8);
-            case 40:
-              _context5.p = 40;
-              _iterator8.f();
-              return _context5.f(40);
-            case 41:
-              index++;
-              _context5.n = 10;
-              break;
-            case 42:
-              _iterator1 = _createForOfIteratorHelper2(elementsAffected);
-              _context5.p = 43;
-              _iterator1.s();
-            case 44:
-              if ((_step1 = _iterator1.n()).done) {
-                _context5.n = 48;
+              if ((_step7 = _iterator7.n()).done) {
+                _context5.n = 39;
                 break;
               }
-              affected = _step1.value;
+              affected = _step7.value;
               if (!(!affected.isConnected || !isMounted(affected))) {
-                _context5.n = 46;
+                _context5.n = 37;
                 break;
               }
               if (affected.isConnected) {
-                _context5.n = 45;
+                _context5.n = 36;
                 break;
               }
-              _context5.n = 45;
+              _context5.n = 36;
               return unmountElementRegistrations(affected);
-            case 45:
+            case 36:
               newlyMounted.delete(affected);
-              return _context5.a(3, 47);
-            case 46:
+              return _context5.a(3, 38);
+            case 37:
               affected.classList.toggle(AelluxJs2.className("mounted"), true);
-            case 47:
-              _context5.n = 44;
+            case 38:
+              _context5.n = 35;
               break;
-            case 48:
-              _context5.n = 50;
+            case 39:
+              _context5.n = 41;
               break;
-            case 49:
-              _context5.p = 49;
-              _t9 = _context5.v;
-              _iterator1.e(_t9);
-            case 50:
-              _context5.p = 50;
-              _iterator1.f();
-              return _context5.f(50);
-            case 51:
-              AelluxJs2.dispatch("Mount");
-            case 52:
+            case 40:
+              _context5.p = 40;
+              _t7 = _context5.v;
+              _iterator7.e(_t7);
+            case 41:
+              _context5.p = 41;
+              _iterator7.f();
+              return _context5.f(41);
+            case 42:
+              AelluxJs2.dispatch("Mount", {
+                detail: {
+                  root: rootElement,
+                  extensions: extensionNames,
+                  elements: Array.from(newlyMounted)
+                }
+              });
+            case 43:
               return _context5.a(2);
           }
-        }, _callee5, null, [[43, 49, 50, 51], [23, 25, 26, 27], [19, 29, 30, 31], [17, 33, 34, 35], [15, 36], [13, 39, 40, 41], [3, 7, 8, 9]]);
+        }, _callee5, null, [[34, 40, 41, 42], [22, 24, 25, 26], [18, 28, 29, 30], [16, 31], [3, 7, 8, 9]]);
       }));
       return _AelluxJsMount.apply(this, arguments);
     }
@@ -21972,7 +23569,7 @@
     }
     function _AelluxJsMounted() {
       _AelluxJsMounted = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee6(rootElement, method) {
-        var extensionNames, detachedOnly, AelluxJs2, selectedNames, _i7, _Array$from2, _Array$from2$_i, element, mountIds, inRoot, detachedInGlobalUnmount, _i8, _Array$from3, mountId, separator, extensionName, selector, extensionKey, mounter, controller, _args6 = arguments, _t0;
+        var extensionNames, detachedOnly, AelluxJs2, selectedNames, affected, registrations, _i8, _Array$from2, _Array$from2$_i, element, mountIds, inRoot, detachedInGlobalUnmount, _i9, _Array$from3, mountId, separator, extensionName, selector, extensionKey, mounter, controller, _iterator9, _step9, _step9$value, _element, _mountId, _controller2, _extensionName3, _selector4, _args6 = arguments, _t8, _t9;
         return _regenerator().w(function(_context6) {
           while (1) switch (_context6.p = _context6.n) {
             case 0:
@@ -21982,47 +23579,66 @@
               selectedNames = extensionNames === null ? null : new Set((typeof extensionNames === "string" ? [extensionNames] : extensionNames).map(function(name) {
                 return fromCamelCase2(name);
               }));
-              _i7 = 0, _Array$from2 = Array.from(mountedElements);
+              if (!(method === UNMOUNT && !AelluxJs2.dispatch("BeforeUnmount", {
+                cancelable: true,
+                detail: {
+                  root: rootElement,
+                  extensions: selectedNames ? Array.from(selectedNames) : null,
+                  detachedOnly: detachedOnly
+                }
+              }))) {
+                _context6.n = 1;
+                break;
+              }
+              return _context6.a(2, false);
             case 1:
-              if (!(_i7 < _Array$from2.length)) {
+              affected = /* @__PURE__ */ new Set();
+              registrations = [];
+              _i8 = 0, _Array$from2 = Array.from(mountedElements);
+            case 2:
+              if (!(_i8 < _Array$from2.length)) {
                 _context6.n = 11;
                 break;
               }
-              _Array$from2$_i = _slicedToArray(_Array$from2[_i7], 2), element = _Array$from2$_i[0], mountIds = _Array$from2$_i[1];
+              _Array$from2$_i = _slicedToArray2(_Array$from2[_i8], 2), element = _Array$from2$_i[0], mountIds = _Array$from2$_i[1];
               inRoot = element === rootElement || rootElement.contains(element);
-              detachedInGlobalUnmount = method === "unmount" && rootElement === root.document && !element.isConnected;
+              detachedInGlobalUnmount = method === UNMOUNT && rootElement === root.document && !element.isConnected;
               if (!(detachedOnly ? element.isConnected || hasPendingMounts(element) : !inRoot && !detachedInGlobalUnmount)) {
-                _context6.n = 2;
+                _context6.n = 3;
                 break;
               }
               return _context6.a(3, 10);
-            case 2:
-              _i8 = 0, _Array$from3 = Array.from(mountIds);
             case 3:
-              if (!(_i8 < _Array$from3.length)) {
+              _i9 = 0, _Array$from3 = Array.from(mountIds);
+            case 4:
+              if (!(_i9 < _Array$from3.length)) {
                 _context6.n = 10;
                 break;
               }
-              mountId = _Array$from3[_i8];
+              mountId = _Array$from3[_i9];
               separator = mountId.indexOf("@");
               extensionName = mountId.slice(0, separator);
               selector = mountId.slice(separator + 1);
               if (!(selectedNames && !selectedNames.has(extensionName))) {
-                _context6.n = 4;
+                _context6.n = 5;
                 break;
               }
               return _context6.a(3, 9);
-            case 4:
+            case 5:
               extensionKey = toCamelCase2(extensionName);
               mounter = mountMaps.get(extensionKey);
               controller = mounter && mounter.get(selector);
-              if (!(method === "unmount")) {
+              if (!(method === UNMOUNT)) {
                 _context6.n = 6;
                 break;
               }
-              _context6.n = 5;
-              return unmountRegistration(element, mountId, controller, extensionName, selector);
-            case 5:
+              registrations.push({
+                element: element,
+                mountId: mountId,
+                controller: controller,
+                extensionName: extensionName,
+                selector: selector
+              });
               return _context6.a(3, 9);
             case 6:
               _context6.p = 6;
@@ -22030,6 +23646,7 @@
                 _context6.n = 7;
                 break;
               }
+              affected.add(element);
               _context6.n = 7;
               return controller[method](element);
             case 7:
@@ -22037,27 +23654,69 @@
               break;
             case 8:
               _context6.p = 8;
-              _t0 = _context6.v;
+              _t8 = _context6.v;
               AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
-                cause: _t0,
+                cause: _t8,
                 extension: extensionName,
                 method: method,
                 selector: selector
               });
             case 9:
-              _i8++;
-              _context6.n = 3;
+              _i9++;
+              _context6.n = 4;
               break;
             case 10:
-              _i7++;
-              _context6.n = 1;
+              _i8++;
+              _context6.n = 2;
               break;
             case 11:
-              AelluxJs2.dispatch(toCapitalized2(method));
-            case 12:
-              return _context6.a(2);
+              if (!(method === UNMOUNT)) {
+                _context6.n = 19;
+                break;
+              }
+              registrations.sort(compareUnmountOrder);
+              _iterator9 = _createForOfIteratorHelper7(registrations);
+              _context6.p = 12;
+              _iterator9.s();
+            case 13:
+              if ((_step9 = _iterator9.n()).done) {
+                _context6.n = 16;
+                break;
+              }
+              _step9$value = _step9.value, _element = _step9$value.element, _mountId = _step9$value.mountId, _controller2 = _step9$value.controller, _extensionName3 = _step9$value.extensionName, _selector4 = _step9$value.selector;
+              _context6.n = 14;
+              return unmountRegistration(_element, _mountId, _controller2, _extensionName3, _selector4);
+            case 14:
+              if (!_context6.v) {
+                _context6.n = 15;
+                break;
+              }
+              affected.add(_element);
+            case 15:
+              _context6.n = 13;
+              break;
+            case 16:
+              _context6.n = 18;
+              break;
+            case 17:
+              _context6.p = 17;
+              _t9 = _context6.v;
+              _iterator9.e(_t9);
+            case 18:
+              _context6.p = 18;
+              _iterator9.f();
+              return _context6.f(18);
+            case 19:
+              AelluxJs2.dispatch(toCapitalized2(method), {
+                detail: {
+                  root: rootElement,
+                  extensions: selectedNames ? Array.from(selectedNames) : null,
+                  elements: Array.from(affected)
+                }
+              });
+              return _context6.a(2, true);
           }
-        }, _callee6, null, [[6, 8]]);
+        }, _callee6, null, [[12, 17, 18, 19], [6, 8]]);
       }));
       return _AelluxJsMounted.apply(this, arguments);
     }
@@ -22066,7 +23725,7 @@
     }
     function _unmountRegistration() {
       _unmountRegistration = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee7(element, mountId, controller, extensionName, selector) {
-        var pendingMount, tasks, finish, AelluxJs2, diagnostics, elementController, _t1;
+        var pendingMount, tasks, finish, AelluxJs2, diagnostics, elementController, _t0;
         return _regenerator().w(function(_context7) {
           while (1) switch (_context7.p = _context7.n) {
             case 0:
@@ -22082,7 +23741,7 @@
                 _context7.n = 2;
                 break;
               }
-              return _context7.a(2);
+              return _context7.a(2, false);
             case 2:
               tasks = pendingUnmounts.get(element);
               if (!tasks) {
@@ -22096,7 +23755,7 @@
               _context7.n = 3;
               return tasks.get(mountId);
             case 3:
-              return _context7.a(2);
+              return _context7.a(2, false);
             case 4:
               tasks.set(mountId, new Promise(function(resolve) {
                 finish = resolve;
@@ -22116,11 +23775,11 @@
               break;
             case 8:
               _context7.p = 8;
-              _t1 = _context7.v;
+              _t0 = _context7.v;
               diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
-                cause: _t1,
+                cause: _t0,
                 extension: extensionName,
-                method: "unmount",
+                method: UNMOUNT,
                 selector: selector
               });
             case 9:
@@ -22132,12 +23791,11 @@
                   if (!elementController.hasMounts()) elementControllers.delete(element);
                 }
                 element.classList.toggle(AelluxJs2.className("mounted"), isMounted(element));
-                restoreInitialAttributes(element);
               } catch (cause) {
                 diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
                   cause: cause,
                   extension: extensionName,
-                  method: "unmount",
+                  method: UNMOUNT,
                   selector: selector
                 });
               }
@@ -22148,7 +23806,7 @@
               finish();
               return _context7.f(10);
             case 11:
-              return _context7.a(2);
+              return _context7.a(2, !isMounted(element, mountId));
           }
         }, _callee7, null, [[6, 8], [5, , 10, 11]]);
       }));
@@ -22159,27 +23817,36 @@
     }
     function _unmountElementRegistrations() {
       _unmountElementRegistrations = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee8(element) {
-        var mountIds, _i9, _mountIds, mountId, separator, extensionName, selector, mounter, controller;
+        var registrations, _i0, _registrations2, _registrations2$_i, mountId, controller, extensionName, selector;
         return _regenerator().w(function(_context8) {
           while (1) switch (_context8.n) {
             case 0:
-              mountIds = Array.from(mountedElements.get(element) || []);
-              _i9 = 0, _mountIds = mountIds;
+              registrations = Array.from(mountedElements.get(element) || [], function(mountId2) {
+                var separator = mountId2.indexOf("@");
+                var extensionName2 = mountId2.slice(0, separator);
+                var selector2 = mountId2.slice(separator + 1);
+                var mounter = mountMaps.get(toCamelCase2(extensionName2));
+                var controller2 = mounter && mounter.get(selector2);
+                return {
+                  element: element,
+                  mountId: mountId2,
+                  controller: controller2,
+                  extensionName: extensionName2,
+                  selector: selector2
+                };
+              });
+              registrations.sort(compareUnmountOrder);
+              _i0 = 0, _registrations2 = registrations;
             case 1:
-              if (!(_i9 < _mountIds.length)) {
+              if (!(_i0 < _registrations2.length)) {
                 _context8.n = 3;
                 break;
               }
-              mountId = _mountIds[_i9];
-              separator = mountId.indexOf("@");
-              extensionName = mountId.slice(0, separator);
-              selector = mountId.slice(separator + 1);
-              mounter = mountMaps.get(toCamelCase2(extensionName));
-              controller = mounter && mounter.get(selector);
+              _registrations2$_i = _registrations2[_i0], mountId = _registrations2$_i.mountId, controller = _registrations2$_i.controller, extensionName = _registrations2$_i.extensionName, selector = _registrations2$_i.selector;
               _context8.n = 2;
               return unmountRegistration(element, mountId, controller, extensionName, selector);
             case 2:
-              _i9++;
+              _i0++;
               _context8.n = 1;
               break;
             case 3:
@@ -22188,6 +23855,12 @@
         }, _callee8);
       }));
       return _unmountElementRegistrations.apply(this, arguments);
+    }
+    function compareUnmountOrder(left, right) {
+      var _mountRecords$get, _mountRecords$get2, _rightRecord$priority, _leftRecord$priority, _rightRecord$order, _leftRecord$order;
+      var leftRecord = (_mountRecords$get = mountRecords.get(left.element)) === null || _mountRecords$get === void 0 ? void 0 : _mountRecords$get.get(left.mountId);
+      var rightRecord = (_mountRecords$get2 = mountRecords.get(right.element)) === null || _mountRecords$get2 === void 0 ? void 0 : _mountRecords$get2.get(right.mountId);
+      return ((_rightRecord$priority = rightRecord === null || rightRecord === void 0 ? void 0 : rightRecord.priority) !== null && _rightRecord$priority !== void 0 ? _rightRecord$priority : 0) - ((_leftRecord$priority = leftRecord === null || leftRecord === void 0 ? void 0 : leftRecord.priority) !== null && _leftRecord$priority !== void 0 ? _leftRecord$priority : 0) || ((_rightRecord$order = rightRecord === null || rightRecord === void 0 ? void 0 : rightRecord.order) !== null && _rightRecord$order !== void 0 ? _rightRecord$order : 0) - ((_leftRecord$order = leftRecord === null || leftRecord === void 0 ? void 0 : leftRecord.order) !== null && _leftRecord$order !== void 0 ? _leftRecord$order : 0);
     }
     function beginPendingMount(element, mountId) {
       var mounts = pendingMounts.get(element);
@@ -22240,58 +23913,27 @@
     }
     function setMounted(element, mountId) {
       var mounted = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : true;
+      var priority = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : 0;
       if (!mountedElements.has(element)) {
         mountedElements.set(element, /* @__PURE__ */ new Set());
       }
       var mounts = mountedElements.get(element);
       mounts[mounted ? "add" : "delete"](mountId);
+      var records = mountRecords.get(element);
+      if (mounted) {
+        if (!records) {
+          records = /* @__PURE__ */ new Map();
+          mountRecords.set(element, records);
+        }
+        records.set(mountId, {
+          priority: priority,
+          order: mountOrder++
+        });
+      } else if (records) {
+        records.delete(mountId);
+        if (!records.size) mountRecords.delete(element);
+      }
       if (mounts.size === 0) mountedElements.delete(element);
-    }
-    function rememberInitialAttributes(element) {
-      var record = initialAttributeValues.get(element);
-      if (record) {
-        record.users++;
-        return;
-      }
-      var initial = /* @__PURE__ */ new Map();
-      var _iterator = _createForOfIteratorHelper2(element.attributes), _step;
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-          var attribute = _step.value;
-          if (isRestoredAttribute(attribute.name)) initial.set(attribute.name, attribute.value);
-        }
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
-      }
-      initialAttributeValues.set(element, {
-        initial: initial,
-        users: 1
-      });
-    }
-    function restoreInitialAttributes(element) {
-      var record = initialAttributeValues.get(element);
-      if (!record || --record.users) return;
-      for (var index = element.attributes.length - 1; index >= 0; index--) {
-        var name = element.attributes[index].name;
-        if (isRestoredAttribute(name) && !record.initial.has(name)) element.removeAttribute(name);
-      }
-      var _iterator2 = _createForOfIteratorHelper2(record.initial), _step2;
-      try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-          var _step2$value = _slicedToArray(_step2.value, 2), _name = _step2$value[0], value = _step2$value[1];
-          if (element.getAttribute(_name) !== value) element.setAttribute(_name, value);
-        }
-      } catch (err) {
-        _iterator2.e(err);
-      } finally {
-        _iterator2.f();
-      }
-      initialAttributeValues.delete(element);
-    }
-    function isRestoredAttribute(name) {
-      return name === "hidden" || name.startsWith("data-ae-") || name.startsWith("aria-");
     }
   }
   var init_create_mount_helper = __esm({
@@ -22299,35 +23941,60 @@
       init_utils_name_case();
       init_create_controller_helper();
       init_resolve_element_or_id();
+      init_validate_declarations();
+      init_validate_html_source();
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
+  // src/internal/create-selector-helper.js
+  function validateSelector(document2, value) {
+    if (typeof value !== "string" || !value.trim()) return {
+      value: value,
+      reason: "Expected a nonempty selector string."
+    };
+    try {
+      document2.querySelector(value);
+      return null;
+    } catch (cause) {
+      return {
+        value: value,
+        reason: "Invalid CSS selector.",
+        cause: cause
+      };
+    }
+  }
+  var init_create_selector_helper = __esm({
+    "src/internal/create-selector-helper.js": function() {
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
     }
   });
 
   // src/internal/build-mount-map-manager.js
-  function _toConsumableArray(r) {
-    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray3(r) || _nonIterableSpread();
+  function _toConsumableArray4(r) {
+    return _arrayWithoutHoles4(r) || _iterableToArray4(r) || _unsupportedIterableToArray8(r) || _nonIterableSpread4();
   }
-  function _nonIterableSpread() {
+  function _nonIterableSpread4() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray(r) {
+  function _iterableToArray4(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray3(r);
+  function _arrayWithoutHoles4(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray8(r);
   }
-  function _typeof(o) {
+  function _typeof4(o) {
     "@babel/helpers - typeof";
-    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof4 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof(o);
+    }, _typeof4(o);
   }
-  function _createForOfIteratorHelper3(r, e) {
+  function _createForOfIteratorHelper8(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray3(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray8(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -22355,14 +24022,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray3(r, a) {
+  function _unsupportedIterableToArray8(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray3(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray8(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray3(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray8(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray3(r, a) {
+  function _arrayLikeToArray8(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -22383,7 +24050,6 @@
       mount: helper.mount,
       unmount: helper.unmount,
       update: helper.update,
-      initialAttribute: helper.initialAttribute,
       destroy: destroy
     };
     var observer = null;
@@ -22411,7 +24077,7 @@
       return task;
     }
     function hasRemovedNodes(records) {
-      var _iterator = _createForOfIteratorHelper3(records), _step;
+      var _iterator = _createForOfIteratorHelper8(records), _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
           var record = _step.value;
@@ -22425,7 +24091,7 @@
       return false;
     }
     function hasDetachedMountedElement() {
-      var _iterator2 = _createForOfIteratorHelper3(mountedElements.keys()), _step2;
+      var _iterator2 = _createForOfIteratorHelper8(mountedElements.keys()), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
           var element = _step2.value;
@@ -22469,7 +24135,10 @@
       var found = elementControllers.get(elementOrId);
       if (found) return found;
       diagnostics.error(diagnostics.ERROR_CONTROLLER_NOT_FOUND, {
-        element: elementOrId
+        element: elementOrId,
+        method: "controller",
+        reason: "No completed mount exposes a controller for this element.",
+        suggestion: "Register the required Extension, await $ae.mount(element), and inspect earlier load or mount diagnostics."
       });
       return null;
     }
@@ -22487,25 +24156,23 @@
         });
         return false;
       }
-      if (!options || _typeof(options) !== "object" || Array.isArray(options)) return reject("options");
+      if (!options || _typeof4(options) !== "object" || Array.isArray(options)) return reject("options");
       var extensionName = options.extensionName, selector = options.selector, mount = options.mount, unmount = options.unmount, update = options.update, controllers = options.controllers;
+      var priority = options.priority === void 0 ? 0 : options.priority;
       if (typeof extensionName !== "string" || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$|^[a-z][a-zA-Z0-9]*$/.test(extensionName)) return reject("extensionName");
       var key = keyFor(extensionName);
       if (key in Object.prototype || key === "prototype") return reject("extensionName");
       if (!Object.prototype.hasOwnProperty.call(root.AelluxJs.registry.ext, key)) return reject("extensionName");
-      if (typeof selector !== "string" || !selector.trim()) return reject("selector");
-      try {
-        root.document.querySelector(selector);
-      } catch (cause) {
-        return reject("selector", cause);
-      }
+      var invalidSelector = validateSelector(root.document, selector);
+      if (invalidSelector) return reject("selector", invalidSelector.cause);
       if (typeof mount !== "function") return reject("mount");
+      if (typeof priority !== "number" || !isFinite(priority)) return reject("priority");
       if (unmount !== void 0 && typeof unmount !== "function") return reject("unmount");
       if (update !== void 0 && typeof update !== "function") return reject("update");
       if (controllers !== void 0 && (!Array.isArray(controllers) || controllers.some(function(name) {
         return typeof name !== "string" || !name.trim();
       }))) return reject("controllers");
-      var allowed = ["extensionName", "selector", "mount", "unmount", "update", "controllers"];
+      var allowed = ["extensionName", "selector", "mount", "unmount", "update", "controllers", "priority"];
       var unknown = Object.keys(options).find(function(name) {
         return !allowed.includes(name);
       });
@@ -22520,9 +24187,10 @@
         mount: mount,
         unmount: unmount,
         update: update,
-        controllers: controllers
+        controllers: controllers,
+        priority: priority
       });
-      root.AelluxJs.registry.extMounters[key] = _toConsumableArray(map.keys()).join(",");
+      root.AelluxJs.registry.extMounters[key] = _toConsumableArray4(map.keys()).join(",");
       return manager;
     }
     function remove() {
@@ -22544,14 +24212,14 @@
         maps.delete(key);
         delete root.AelluxJs.registry.extMounters[key];
       } else if (removed) {
-        root.AelluxJs.registry.extMounters[key] = _toConsumableArray(map.keys()).join(",");
+        root.AelluxJs.registry.extMounters[key] = _toConsumableArray4(map.keys()).join(",");
       }
       return removed;
     }
     function hasMountedRegistration(extensionName, selector) {
       var prefix = "".concat(fromCamelCase2(extensionName), "@");
       var mountId = selector === void 0 ? null : "".concat(prefix).concat(selector);
-      var _iterator3 = _createForOfIteratorHelper3(mountedElements.values()), _step3;
+      var _iterator3 = _createForOfIteratorHelper8(mountedElements.values()), _step3;
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
           var registrations = _step3.value;
@@ -22559,7 +24227,7 @@
             if (registrations.has(mountId)) return true;
             continue;
           }
-          var _iterator4 = _createForOfIteratorHelper3(registrations), _step4;
+          var _iterator4 = _createForOfIteratorHelper8(registrations), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
               var id = _step4.value;
@@ -22583,17 +24251,203 @@
     "src/internal/build-mount-map-manager.js": function() {
       init_create_mount_helper();
       init_resolve_element_or_id();
+      init_create_selector_helper();
       init_utils_name_case();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
     }
   });
 
-  // src/aellux.orchestrator.js
-  var aellux_orchestrator_exports = {};
-  function _createForOfIteratorHelper4(r, e) {
+  // src/internal/create-aria-helper.js
+  function _slicedToArray3(r, e) {
+    return _arrayWithHoles3(r) || _iterableToArrayLimit3(r, e) || _unsupportedIterableToArray9(r, e) || _nonIterableRest3();
+  }
+  function _nonIterableRest3() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _unsupportedIterableToArray9(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray9(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray9(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray9(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
+  function _iterableToArrayLimit3(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles3(r) {
+    if (Array.isArray(r)) return r;
+  }
+  function _typeof5(o) {
+    "@babel/helpers - typeof";
+    return _typeof5 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof5(o);
+  }
+  function createAriaHelper() {
+    var elements = /* @__PURE__ */ new WeakMap();
+    var nextOrder = 0;
+    function attributeName(name) {
+      if (typeof name !== "string" || !/^(?:aria-)?[a-z][a-z0-9-]*$/.test(name)) {
+        throw new TypeError("Invalid ARIA name");
+      }
+      return name.startsWith("aria-") ? name : "aria-".concat(name);
+    }
+    function attributeValue(name, value) {
+      if (value === null || value === void 0) {
+        throw new TypeError("Use unset() for null");
+      }
+      if (Array.isArray(value)) {
+        return value.join(" ");
+      }
+      if (name === "aria-hidden" && typeof value !== "boolean") {
+        throw new TypeError("Invalid aria-hidden value");
+      }
+      return String(value);
+    }
+    function write(element, name, value) {
+      if (value === null) {
+        if (element.hasAttribute(name)) element.removeAttribute(name);
+      } else if (element.getAttribute(name) !== value) {
+        element.setAttribute(name, value);
+      }
+    }
+    function reconcile(element, record, name) {
+      var winner = null;
+      var hidden = false;
+      record.handlers.forEach(function(handler) {
+        if (!handler.values.has(name)) return;
+        if (name === "aria-hidden" && handler.values.get(name) === "true") hidden = true;
+        if (!winner || handler.priority > winner.priority || handler.priority === winner.priority && handler.order > winner.order) {
+          winner = handler;
+        }
+      });
+      if (!winner) {
+        var _record$baseline$get;
+        write(element, name, (_record$baseline$get = record.baseline.get(name)) !== null && _record$baseline$get !== void 0 ? _record$baseline$get : null);
+        record.baseline.delete(name);
+        return;
+      }
+      write(element, name, name === "aria-hidden" && hidden ? "true" : winner.values.get(name));
+    }
+    function register(element) {
+      var options = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
+      if (!element || element.nodeType !== 1) {
+        throw new TypeError("Invalid ARIA element");
+      }
+      var priority = options.priority === void 0 ? 0 : options.priority;
+      if (typeof priority !== "number" || !Number.isFinite(priority)) {
+        throw new TypeError("Invalid ARIA priority");
+      }
+      var record = elements.get(element);
+      if (!record) {
+        record = {
+          handlers: /* @__PURE__ */ new Set(),
+          baseline: /* @__PURE__ */ new Map()
+        };
+        elements.set(element, record);
+      }
+      var handler = {
+        priority: priority,
+        order: nextOrder++,
+        values: /* @__PURE__ */ new Map()
+      };
+      record.handlers.add(handler);
+      var released = false;
+      return {
+        set: function set(values) {
+          if (released) return false;
+          if (!values || _typeof5(values) !== "object") {
+            throw new TypeError("Invalid ARIA values");
+          }
+          var updates = Object.entries(values).map(function(_ref) {
+            var _ref2 = _slicedToArray3(_ref, 2), key = _ref2[0], value = _ref2[1];
+            var name = attributeName(key);
+            return [name, attributeValue(name, value)];
+          });
+          updates.forEach(function(_ref3) {
+            var _ref4 = _slicedToArray3(_ref3, 2), name = _ref4[0], value = _ref4[1];
+            if (!record.baseline.has(name)) record.baseline.set(name, element.getAttribute(name));
+            handler.values.set(name, value);
+            reconcile(element, record, name);
+          });
+          return true;
+        },
+        unset: function unset(key) {
+          if (released) return false;
+          var name = attributeName(key);
+          if (!handler.values.delete(name)) return false;
+          reconcile(element, record, name);
+          return true;
+        },
+        initial: function initial(key) {
+          var name = attributeName(key);
+          return record.baseline.has(name) ? record.baseline.get(name) : element.getAttribute(name);
+        },
+        release: function release() {
+          if (released) return false;
+          released = true;
+          record.handlers.delete(handler);
+          handler.values.forEach(function(_, name) {
+            return reconcile(element, record, name);
+          });
+          handler.values.clear();
+          if (!record.handlers.size) elements.delete(element);
+          return true;
+        }
+      };
+    }
+    return {
+      register: register
+    };
+  }
+  var init_create_aria_helper = __esm({
+    "src/internal/create-aria-helper.js": function() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
+  // src/internal/create-css-motion-controller.js
+  function _toConsumableArray5(r) {
+    return _arrayWithoutHoles5(r) || _iterableToArray5(r) || _unsupportedIterableToArray10(r) || _nonIterableSpread5();
+  }
+  function _nonIterableSpread5() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArray5(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles5(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray10(r);
+  }
+  function _createForOfIteratorHelper9(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray4(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray10(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -22621,14 +24475,838 @@
       }
     } };
   }
-  function _unsupportedIterableToArray4(r, a) {
+  function _unsupportedIterableToArray10(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray4(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray10(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray4(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray10(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray4(r, a) {
+  function _arrayLikeToArray10(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
+  function createCssMotionController(root, getAelluxJs) {
+    var operations = /* @__PURE__ */ new Map();
+    var lightweightProperties = /* @__PURE__ */ new Set(["transform", "opacity", "--ae-pop-progress", "--ae-unpop-progress", "--ae-present-pop-phase", "--ae-present-unpop-phase"]);
+    var nextId = 4e6;
+    function id() {
+      return nextId++;
+    }
+    function supported(element) {
+      if (getAelluxJs().options.cssMotionController === false) return false;
+      var Animation = root.Animation;
+      return !!(element && typeof element.getAnimations === "function" && Animation && Animation.prototype && typeof Animation.prototype.pause === "function" && "currentTime" in Animation.prototype);
+    }
+    function cancel(operationId) {
+      var operation = operations.get(operationId);
+      if (!operation) return false;
+      operation.cancelled = true;
+      getAelluxJs().waitLayout.cancel(operationId);
+      var nativeResolve = operation.nativeResolve;
+      release(operation, false);
+      if (nativeResolve) nativeResolve({
+        id: operationId,
+        status: "aborted",
+        mode: "native"
+      });
+      return true;
+    }
+    function run(element) {
+      var options = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
+      var AelluxJs2 = getAelluxJs();
+      var operationId = options.id;
+      if (!Number.isSafeInteger(operationId)) return Promise.reject(new TypeError("motion.run() requires a safe integer ID"));
+      if (!element || element.nodeType !== 1 || typeof options.apply !== "function") return Promise.reject(new TypeError("motion.run() requires an Element and apply callback"));
+      cancel(operationId);
+      var operation = {
+        id: operationId,
+        element: element,
+        options: options,
+        animations: [],
+        before: /* @__PURE__ */ new Set(),
+        start: 0,
+        endTime: 0,
+        done: false,
+        cancelled: false,
+        controlled: false,
+        captureFailed: false,
+        conservative: false,
+        nativeTimer: null,
+        nativeResolve: null
+      };
+      operations.set(operationId, operation);
+      if (AelluxJs2.currentPreference("reduced-motion") === "reduced") {
+        options.apply();
+        operations.delete(operationId);
+        return Promise.resolve({
+          id: operationId,
+          status: "completed",
+          mode: "reduced"
+        });
+      }
+      if (!supported(element)) return nativeRun(operation);
+      try {
+        var _iterator = _createForOfIteratorHelper9(animationsFor(operation)), _step;
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+            var animation = _step.value;
+            operation.before.add(animation);
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+        options.apply();
+      } catch (error) {
+        operations.delete(operationId);
+        return Promise.reject(error);
+      }
+      var requestedMaxFPS = options.maxFPS === void 0 ? AelluxJs2.layoutMaxFPS(element) : options.maxFPS;
+      var externalAbort = typeof options.abort === "function" ? options.abort : null;
+      var shouldAbort = function shouldAbort2() {
+        return operation.cancelled || !element.isConnected || (externalAbort ? externalAbort() : false);
+      };
+      var captureResult = AelluxJs2.waitLayout.sequence(operationId, {
+        read: function read() {
+          return capture(operation);
+        },
+        update: function update(animations) {
+          return prepare(operation, animations);
+        },
+        abort: shouldAbort
+      });
+      return captureResult.then(function(sequenceResult) {
+        if (operation.cancelled || operations.get(operationId) !== operation) {
+          release(operation, false);
+          return {
+            id: operationId,
+            status: "aborted",
+            mode: "native"
+          };
+        }
+        if (sequenceResult.status !== "completed") {
+          release(operation, false);
+          return {
+            id: operationId,
+            status: sequenceResult.status,
+            mode: "native"
+          };
+        }
+        if (operation.captureFailed && !operation.cancelled) {
+          release(operation, false);
+          operations.set(operationId, operation);
+          return nativeWait(operation);
+        }
+        var policyFPS = operation.conservative ? propertyPolicyFPS(AelluxJs2.options.cssMotionPropertyMaxFPS, AelluxJs2) : void 0;
+        var maxFPS = minimumFPS(requestedMaxFPS, policyFPS);
+        operation.visualFPS = maxFPS;
+        AelluxJs2.waitLayout.setVisualFPSLimit(operation.id, maxFPS);
+        return AelluxJs2.waitLayout.sequence(operationId, {
+          update: function update() {
+            return advance(operation);
+          },
+          repeat: {
+            ms: 0
+          },
+          abort: function abort() {
+            return operation.done || shouldAbort();
+          }
+        }).then(function(progressResult) {
+          var completed = operation.done && !operation.cancelled;
+          release(operation, completed);
+          return {
+            id: operationId,
+            status: completed ? "completed" : progressResult.status,
+            mode: "controlled"
+          };
+        });
+      }, function(error) {
+        release(operation, false, true);
+        throw error;
+      });
+    }
+    function capture(operation) {
+      operation.element.getBoundingClientRect();
+      var animations = animationsFor(operation).filter(function(animation) {
+        return !operation.before.has(animation) && controllable(animation);
+      });
+      diagnoseMotionResources(getAelluxJs(), operation.element, animations, operation.options.extension || "css-motion");
+      return animations;
+    }
+    function controllable(animation) {
+      try {
+        var effect = animation && animation.effect;
+        return !!(effect && typeof effect.getComputedTiming === "function" && typeof animation.pause === "function");
+      } catch (_) {
+        return false;
+      }
+    }
+    function animationsFor(operation) {
+      var element = operation.element, options = operation.options;
+      if (!options.subtree) return element.getAnimations();
+      return [element].concat(_toConsumableArray5(element.querySelectorAll("*"))).flatMap(function(node) {
+        return node.getAnimations();
+      });
+    }
+    function prepare(operation, animations) {
+      if (!animations.length) {
+        operation.captureFailed = true;
+        operation.done = true;
+        return;
+      }
+      var endTime = 0;
+      operation.animations = animations;
+      var _iterator2 = _createForOfIteratorHelper9(animations), _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+          var animation = _step2.value;
+          animation.pause();
+          animation.currentTime = 0;
+          var timing = animation.effect.getComputedTiming();
+          var end = Number(timing.endTime);
+          if (Number.isFinite(end)) endTime = Math.max(endTime, end);
+          applyAelluxEasing(operation, animation);
+          if (!onlyLightweightProperties(animation)) operation.conservative = true;
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+      operation.endTime = endTime;
+      operation.start = now();
+      operation.controlled = true;
+      if (!(endTime > 0)) operation.done = true;
+    }
+    function onlyLightweightProperties(animation) {
+      try {
+        if (typeof root.CSSTransition === "function" && animation instanceof root.CSSTransition) {
+          return lightweightProperties.has(animation.transitionProperty);
+        }
+        var frames = animation.effect.getKeyframes();
+        if (!frames.length) return false;
+        var metadata = /* @__PURE__ */ new Set(["offset", "computedOffset", "easing", "composite"]);
+        var found = false;
+        var _iterator3 = _createForOfIteratorHelper9(frames), _step3;
+        try {
+          for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+            var frame = _step3.value;
+            for (var _i = 0, _Object$keys = Object.keys(frame); _i < _Object$keys.length; _i++) {
+              var property = _Object$keys[_i];
+              if (metadata.has(property)) continue;
+              found = true;
+              if (!lightweightProperties.has(property)) return false;
+            }
+          }
+        } catch (err) {
+          _iterator3.e(err);
+        } finally {
+          _iterator3.f();
+        }
+        return found;
+      } catch (_) {
+        return false;
+      }
+    }
+    function positiveFPS(value, fallback) {
+      var number = Number(value);
+      return Number.isFinite(number) && number > 0 ? number : fallback;
+    }
+    function propertyPolicyFPS(value, AelluxJs2) {
+      if (value === null || value === 0) return void 0;
+      var number = Number(value);
+      if (Number.isFinite(number) && number > 0) return number;
+      if (value !== void 0) {
+        AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID, {
+          extension: "core",
+          option: "cssMotionPropertyMaxFPS",
+          attribute: "cssMotionPropertyMaxFPS",
+          value: value,
+          fallback: 55,
+          reason: "CSS Motion frame rate must be finite and greater than zero; using 55 FPS.",
+          suggestion: "Use a positive finite number or omit the option for the default."
+        });
+      }
+      return 55;
+    }
+    function minimumFPS(first, second) {
+      var values = [first, second].filter(function(value) {
+        return Number.isFinite(value) && value > 0;
+      });
+      return values.length ? Math.min.apply(Math, _toConsumableArray5(values)) : void 0;
+    }
+    function advance(operation) {
+      if (!operation.controlled || operation.done) return;
+      var elapsed = Math.max(0, now() - operation.start);
+      var time = Math.min(elapsed, operation.endTime);
+      var _iterator4 = _createForOfIteratorHelper9(operation.animations), _step4;
+      try {
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+          var animation = _step4.value;
+          animation.currentTime = time;
+        }
+      } catch (err) {
+        _iterator4.e(err);
+      } finally {
+        _iterator4.f();
+      }
+      if (elapsed >= operation.endTime) operation.done = true;
+    }
+    function applyAelluxEasing(operation, animation) {
+      var name = operation.options.easing;
+      if (!name || !root.CSS || typeof root.CSS.supports !== "function" || !animation.effect || typeof animation.effect.updateTiming !== "function") return;
+      var easing = sampledLinear(name);
+      if (!easing || !root.CSS.supports("animation-timing-function", easing)) return;
+      animation.effect.updateTiming({
+        easing: easing
+      });
+    }
+    function sampledLinear(name) {
+      var AelluxJs2 = getAelluxJs();
+      var points = [];
+      try {
+        for (var index = 0; index <= 60; index++) {
+          var progress = index / 60;
+          var value = AelluxJs2.ease(name, progress);
+          if (!Number.isFinite(value)) return null;
+          points.push("".concat(round(value), " ").concat(round(progress * 100), "%"));
+        }
+      } catch (_) {
+        return null;
+      }
+      return "linear(".concat(points.join(", "), ")");
+    }
+    function nativeRun(operation) {
+      var before = operation.before;
+      if ((operation.options.subtree || getAelluxJs().options.environment === "development") && typeof operation.element.getAnimations === "function") before = new Set(animationsFor(operation));
+      if (operation.options.subtree) operation.before = before;
+      operation.options.apply();
+      return nativeWait(operation, before);
+    }
+    function nativeWait(operation) {
+      var before = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : operation.before;
+      var animations = typeof operation.element.getAnimations === "function" ? animationsFor(operation).filter(function(animation) {
+        return !operation.before.has(animation);
+      }) : [];
+      diagnoseMotionResources(getAelluxJs(), operation.element, before === operation.before ? animations : animations.filter(function(animation) {
+        return !before.has(animation);
+      }), operation.options.extension || "css-motion");
+      return new Promise(function(resolve) {
+        operation.nativeResolve = resolve;
+        var complete = function complete2() {
+          if (operations.get(operation.id) !== operation) return;
+          operations.delete(operation.id);
+          operation.nativeResolve = null;
+          resolve({
+            id: operation.id,
+            status: "completed",
+            mode: "native"
+          });
+        };
+        if (animations.length && animations.every(function(animation) {
+          return animation.finished && typeof animation.finished.then === "function";
+        })) {
+          Promise.all(animations.map(function(animation) {
+            return animation.finished.catch(function() {
+              return void 0;
+            });
+          })).then(complete);
+          return;
+        }
+        var explicit = Number(operation.options.nativeDuration);
+        var duration = Number.isFinite(explicit) ? explicit : cssMotionTime(operation.element);
+        if (Number.isFinite(duration) && duration > 0) {
+          operation.nativeTimer = root.setTimeout(complete, duration);
+        } else {
+          Promise.resolve().then(complete);
+        }
+      });
+    }
+    function cssMotionTime(element) {
+      try {
+        var style = root.getComputedStyle(element);
+        return Math.max(listTime(style.animationDuration, style.animationDelay, style.animationIterationCount), listTime(style.transitionDuration, style.transitionDelay));
+      } catch (_) {
+        return 0;
+      }
+    }
+    function listTime(durations, delays, iterations) {
+      var durationList = String(durations || "0s").split(",");
+      var delayList = String(delays || "0s").split(",");
+      var iterationList = String(iterations || "1").split(",");
+      var count = Math.max(durationList.length, delayList.length, iterationList.length);
+      var maximum = 0;
+      for (var index = 0; index < count; index++) {
+        var duration = cssTime(durationList[index % durationList.length]);
+        var delay = cssTime(delayList[index % delayList.length]);
+        var rawIterations = iterationList[index % iterationList.length].trim();
+        var iterationCount = rawIterations === "infinite" ? 1 : Number(rawIterations);
+        maximum = Math.max(maximum, Math.max(0, delay) + duration * (Number.isFinite(iterationCount) ? Math.max(0, iterationCount) : 1));
+      }
+      return maximum;
+    }
+    function cssTime(value) {
+      var text = String(value || "0s").trim().toLowerCase();
+      var number = parseFloat(text);
+      if (!Number.isFinite(number)) return 0;
+      return text.endsWith("ms") ? number : number * 1e3;
+    }
+    function release(operation, finish) {
+      var resume = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
+      if (operations.get(operation.id) === operation) getAelluxJs().waitLayout.setVisualFPSLimit(operation.id, null);
+      if (operation.nativeTimer !== null) root.clearTimeout(operation.nativeTimer);
+      operation.nativeTimer = null;
+      var _iterator5 = _createForOfIteratorHelper9(operation.animations), _step5;
+      try {
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+          var animation = _step5.value;
+          try {
+            if (finish) {
+              animation.finish();
+              if (typeof root.CSSTransition === "function" && animation instanceof root.CSSTransition) animation.cancel();
+            } else if (resume) animation.play();
+            else animation.cancel();
+          } catch (_) {
+          }
+        }
+      } catch (err) {
+        _iterator5.e(err);
+      } finally {
+        _iterator5.f();
+      }
+      operation.animations.length = 0;
+      if (operations.get(operation.id) === operation) operations.delete(operation.id);
+    }
+    function now() {
+      return root.performance && typeof root.performance.now === "function" ? root.performance.now() : Date.now();
+    }
+    function round(value) {
+      return Math.round(value * 1e5) / 1e5;
+    }
+    return Object.freeze({
+      run: run,
+      cancel: cancel,
+      id: id,
+      supported: supported
+    });
+  }
+  var init_create_css_motion_controller = __esm({
+    "src/internal/create-css-motion-controller.js": function() {
+      init_diagnose_resources();
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
+  // src/internal/ease.js
+  function _createForOfIteratorHelper10(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray11(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _toConsumableArray6(r) {
+    return _arrayWithoutHoles6(r) || _iterableToArray6(r) || _unsupportedIterableToArray11(r) || _nonIterableSpread6();
+  }
+  function _nonIterableSpread6() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _unsupportedIterableToArray11(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray11(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray11(r, a) : void 0;
+    }
+  }
+  function _iterableToArray6(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles6(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray11(r);
+  }
+  function _arrayLikeToArray11(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
+  function bezierCoordinate(u, p1, p2) {
+    var v = 1 - u;
+    return 3 * v * v * u * p1 + 3 * v * u * u * p2 + u * u * u;
+  }
+  function cubicBezier(t, x1, y1, x2, y2) {
+    if (![t, x1, y1, x2, y2].every(function(value) {
+      return typeof value === "number" && Number.isFinite(value);
+    })) {
+      throw new TypeError("cubicBezier(t, x1, y1, x2, y2) requires finite numbers");
+    }
+    if (x1 < 0 || x1 > 1 || x2 < 0 || x2 > 1) {
+      throw new RangeError("Cubic bezier x coordinates must be between 0 and 1");
+    }
+    t = Math.min(1, Math.max(0, t));
+    if (t === 0 || t === 1) return t;
+    if (x1 === y1 && x2 === y2) return t;
+    var low = 0;
+    var high = 1;
+    var u = t;
+    for (var i = 0; i < 40; i++) {
+      var x = bezierCoordinate(u, x1, x2);
+      if (x === t) break;
+      if (x < t) low = u;
+      else high = u;
+      u = (low + high) / 2;
+    }
+    return bezierCoordinate(u, y1, y2);
+  }
+  function bounceOut(t) {
+    var n = 7.5625;
+    var d = 2.75;
+    if (t < 1 / d) return n * t * t;
+    if (t < 2 / d) {
+      t -= 1.5 / d;
+      return n * t * t + 0.75;
+    }
+    if (t < 2.5 / d) {
+      t -= 2.25 / d;
+      return n * t * t + 0.9375;
+    }
+    t -= 2.625 / d;
+    return n * t * t + 0.984375;
+  }
+  function easeIn(family, t) {
+    switch (family) {
+      case QUAD:
+        return t * t;
+      case CUBIC:
+        return t * t * t;
+      case QUART:
+        return t * t * t * t;
+      case QUINT:
+        return t * t * t * t * t;
+      case SINE:
+        return 1 - Math.cos(t * Math.PI / 2);
+      case EXPO:
+        return t === 0 ? 0 : Math.pow(2, 10 * t - 10);
+      case CIRC:
+        return 1 - Math.sqrt(1 - t * t);
+      case BACK:
+        return t * t * (2.70158 * t - 1.70158);
+      case ELASTIC:
+        return t === 0 || t === 1 ? t : -Math.pow(2, 10 * t - 10) * Math.sin((10 * t - 10.75) * 2 * Math.PI / 3);
+      case BOUNCE:
+        return 1 - bounceOut(1 - t);
+      default:
+        throw new RangeError("Unknown easing family: ".concat(family));
+    }
+  }
+  function ease(name, t) {
+    if (typeof name !== "string" || typeof t !== "number" || !Number.isFinite(t)) {
+      throw new TypeError("ease(name, t) requires a name and a finite number");
+    }
+    t = Math.min(1, Math.max(0, t));
+    var bezier = /^cubic-bezier\(([^()]*)\)$/i.exec(name.trim());
+    if (bezier) {
+      var points = bezier[1].split(",").map(function(value) {
+        return value.trim();
+      });
+      if (points.length !== 4 || !points.every(function(value) {
+        return CSS_NUMBER.test(value);
+      })) {
+        throw new RangeError("Invalid cubic bezier: ".concat(name));
+      }
+      return cubicBezier.apply(void 0, [t].concat(_toConsumableArray6(points.map(Number))));
+    }
+    var key = name.replace(/[\s_-]/g, "").toLowerCase();
+    if (key.startsWith(EASE_PREFIX)) key = key.slice(EASE_PREFIX.length);
+    if (key === "linear") return t;
+    if (key === "smoothstep") return t * t * (3 - 2 * t);
+    if (key === "smootherstep") return t * t * t * (t * (6 * t - 15) + 10);
+    var family = "";
+    var direction = "";
+    var _iterator = _createForOfIteratorHelper10(DIRECTIONS), _step;
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+        var candidate = _step.value;
+        if (key.endsWith(candidate)) {
+          family = key.slice(0, -candidate.length);
+          direction = candidate;
+          break;
+        }
+        if (key.startsWith(candidate)) {
+          family = key.slice(candidate.length);
+          direction = candidate;
+          break;
+        }
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+    family = ALIASES[family] || family;
+    if (!FAMILIES.includes(family)) throw new RangeError("Unknown easing: ".concat(name));
+    if (direction === IN) return easeIn(family, t);
+    if (direction === OUT) return 1 - easeIn(family, 1 - t);
+    if (family === BACK) {
+      var c = 1.70158 * 1.525;
+      var x = t < 0.5 ? 2 * t : 2 * t - 2;
+      return t < 0.5 ? x * x * ((c + 1) * x - c) / 2 : (x * x * ((c + 1) * x + c) + 2) / 2;
+    }
+    if (family === ELASTIC) {
+      if (t === 0 || t === 1) return t;
+      var wave = Math.sin((20 * t - 11.125) * 2 * Math.PI / 4.5);
+      return t < 0.5 ? -Math.pow(2, 20 * t - 10) * wave / 2 : Math.pow(2, -20 * t + 10) * wave / 2 + 1;
+    }
+    return t < 0.5 ? easeIn(family, 2 * t) / 2 : 1 - easeIn(family, 2 - 2 * t) / 2;
+  }
+  var EASE_PREFIX, IN, OUT, IN_OUT, DIRECTIONS, QUAD, CUBIC, QUART, QUINT, SINE, EXPO, CIRC, BACK, ELASTIC, BOUNCE, FAMILIES, ALIASES, CSS_NUMBER;
+  var init_ease = __esm({
+    "src/internal/ease.js": function() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+      EASE_PREFIX = "ease";
+      IN = "in";
+      OUT = "out";
+      IN_OUT = "inout";
+      DIRECTIONS = [IN_OUT, OUT, IN];
+      QUAD = "quad";
+      CUBIC = "cubic";
+      QUART = "quart";
+      QUINT = "quint";
+      SINE = "sine";
+      EXPO = "expo";
+      CIRC = "circ";
+      BACK = "back";
+      ELASTIC = "elastic";
+      BOUNCE = "bounce";
+      FAMILIES = [QUAD, CUBIC, QUART, QUINT, SINE, EXPO, CIRC, BACK, ELASTIC, BOUNCE];
+      ALIASES = {
+        quadratic: QUAD,
+        quartic: QUART,
+        quintic: QUINT,
+        sinusoidal: SINE,
+        exponential: EXPO,
+        circular: CIRC
+      };
+      CSS_NUMBER = /^[+-]?(?:\d*\.\d+|\d+)(?:e[+-]?\d+)?$/i;
+    }
+  });
+
+  // src/official-extension-definitions.js
+  var officialExtensionDefinitions;
+  var init_official_extension_definitions = __esm({
+    "src/official-extension-definitions.js": function() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+      officialExtensionDefinitions = Object.freeze([Object.freeze({
+        name: "preference",
+        style: false,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "state-navigation",
+        style: false,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "feedback",
+        style: true,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "focus",
+        style: false,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "dialog",
+        optional: true,
+        style: false,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "pwa",
+        optional: true,
+        style: false,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "viewport",
+        optional: true,
+        style: false,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "point",
+        style: false,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "anchor",
+        style: true,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "overflow-marquee",
+        style: true,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "ajax-href",
+        optional: true,
+        style: false,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "scrollbox",
+        style: true,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "scrollbox-snap",
+        style: false,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "adaptive",
+        style: true,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
+        name: "present",
+        style: true,
+        dependencies: Object.freeze([])
+      })]);
+    }
+  });
+
+  // src/aellux.orchestrator.js
+  var aellux_orchestrator_exports = {};
+  function ownKeys3(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function(r2) {
+        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
+      })), t.push.apply(t, o);
+    }
+    return t;
+  }
+  function _objectSpread3(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys3(Object(t), true).forEach(function(r2) {
+        _defineProperty3(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys3(Object(t)).forEach(function(r2) {
+        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
+      });
+    }
+    return e;
+  }
+  function _defineProperty3(e, r, t) {
+    return (r = _toPropertyKey3(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  }
+  function _toPropertyKey3(t) {
+    var i = _toPrimitive3(t, "string");
+    return "symbol" == _typeof6(i) ? i : i + "";
+  }
+  function _toPrimitive3(t, r) {
+    if ("object" != _typeof6(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r || "default");
+      if ("object" != _typeof6(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return ("string" === r ? String : Number)(t);
+  }
+  function _slicedToArray4(r, e) {
+    return _arrayWithHoles4(r) || _iterableToArrayLimit4(r, e) || _unsupportedIterableToArray12(r, e) || _nonIterableRest4();
+  }
+  function _nonIterableRest4() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit4(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles4(r) {
+    if (Array.isArray(r)) return r;
+  }
+  function _typeof6(o) {
+    "@babel/helpers - typeof";
+    return _typeof6 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof6(o);
+  }
+  function _createForOfIteratorHelper11(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray12(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _unsupportedIterableToArray12(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray12(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray12(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray12(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -22739,14 +25417,36 @@
       init_asset_load_helper();
       init_build_layout_scheduler();
       init_build_mount_map_manager();
+      init_create_aria_helper();
+      init_create_css_motion_controller();
+      init_ease();
       init_utils_name_case();
+      init_official_extension_definitions();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root) {
         "use strict";
         var toCamelCase2 = utils_name_case_default.toCamelCase, fromCamelCase2 = utils_name_case_default.fromCamelCase;
+        var officialPackage = "@aelluxjs/core";
+        var orchestratorVersion = true ? "0.1.0-beta.10" : "0.1.0-beta.10";
+        if (root.AelluxJs.version !== orchestratorVersion) {
+          var error = root.AelluxJs.diagnostics.error(root.AelluxJs.diagnostics.ERROR_RUNTIME_VERSION_MISMATCH, {
+            expected: root.AelluxJs.version,
+            found: orchestratorVersion
+          });
+          root.AelluxJs.orchestratorVersion = orchestratorVersion;
+          root.AelluxJs.startAelluxJs = function() {
+            return Promise.reject(error);
+          };
+          return;
+        }
+        root.AelluxJs.orchestratorVersion = orchestratorVersion;
         var extensionPromises = {};
+        var aria = createAriaHelper();
         var mountManager = buildMountMapManager(root);
         var layoutScheduler = buildLayoutScheduler();
+        var motion = createCssMotionController(root, function() {
+          return root.AelluxJs;
+        });
         root.AelluxJs = Object.assign(root.AelluxJs, {
           startAelluxJs: function startAelluxJs() {
             return _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee() {
@@ -22756,20 +25456,38 @@
                     if (root.AelluxJs.bundledExtensions) {
                       Object.keys(root.AelluxJs.bundledExtensions).forEach(function(key) {
                         if (!(key in AelluxJs.registry.ext)) AelluxJs.ext(key);
+                        var name = fromCamelCase2(key);
+                        var metadata = AelluxJs.extIndex.official && AelluxJs.extIndex.official.extensions[name];
+                        if (metadata && metadata.coreCompatibility) {
+                          AelluxJs.registry.ext[key].coreCompatibility = metadata.coreCompatibility;
+                          AelluxJs.registry.ext[key].official = true;
+                        }
                       });
                     }
                     _context.n = 1;
-                    return new Promise(function(resolve) {
-                      var _startMountCallback = function startMountCallback() {
-                        AelluxJs.mount().then(function() {
-                          document.removeEventListener("DOMContentLoaded", _startMountCallback);
+                    return new Promise(function(resolve, reject) {
+                      var _startCallback = function startCallback() {
+                        AelluxJs.off("$DOMContentLoaded", _startCallback);
+                        if (AelluxJs.options.skipGlobalMount === true) {
                           resolve();
-                        });
+                          return;
+                        }
+                        Promise.resolve().then(function() {
+                          return AelluxJs.mount();
+                        }).then(resolve, reject);
                       };
-                      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", _startMountCallback, {
+                      if (document.readyState === "loading") AelluxJs.on("$DOMContentLoaded", _startCallback, {
                         once: true
                       });
-                      else _startMountCallback();
+                      else _startCallback();
+                    }).catch(function(error2) {
+                      AelluxJs.dispatch("RuntimeStartError", {
+                        detail: {
+                          error: error2,
+                          operation: "mount"
+                        }
+                      });
+                      throw error2;
                     });
                   case 1:
                     AelluxJs.dispatch("Ready");
@@ -22806,15 +25524,24 @@
           },
           destroy: function destroy() {
             return _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee4() {
+              var _t;
               return _regenerator2().w(function(_context4) {
                 while (1) switch (_context4.n) {
                   case 0:
-                    AelluxJs.waitLayout.clear();
                     _context4.n = 1;
-                    return AelluxJs.destroyExtensions();
+                    return _destroyExtensions(null, function() {
+                      return AelluxJs.waitLayout.clear();
+                    });
                   case 1:
-                    mountManager.destroy();
+                    _t = _context4.v;
+                    if (!(_t === false)) {
+                      _context4.n = 2;
+                      break;
+                    }
+                    return _context4.a(2, false);
                   case 2:
+                    mountManager.destroy();
+                  case 3:
                     return _context4.a(2);
                 }
               }, _callee4);
@@ -22822,97 +25549,12 @@
           },
           destroyExtensions: function destroyExtensions(extensionNames) {
             return _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee5() {
-              var _iterator, _step, extensionName, key, extension, _t, _t2, _t3;
               return _regenerator2().w(function(_context5) {
-                while (1) switch (_context5.p = _context5.n) {
+                while (1) switch (_context5.n) {
                   case 0:
-                    if (typeof extensionNames === "string") extensionNames = [extensionNames];
-                    if (!extensionNames) extensionNames = Object.keys(AelluxJs.registry.ext);
-                    extensionNames = extensionNames.map(function(_) {
-                      return fromCamelCase2(_);
-                    });
-                    _context5.p = 1;
-                    _context5.n = 2;
-                    return AelluxJs.unmount(document, extensionNames);
-                  case 2:
-                    _context5.n = 4;
-                    break;
-                  case 3:
-                    _context5.p = 3;
-                    _t = _context5.v;
-                    AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT, {
-                      cause: _t,
-                      extensions: extensionNames
-                    });
-                  case 4:
-                    _iterator = _createForOfIteratorHelper4(extensionNames);
-                    _context5.p = 5;
-                    _iterator.s();
-                  case 6:
-                    if ((_step = _iterator.n()).done) {
-                      _context5.n = 14;
-                      break;
-                    }
-                    extensionName = _step.value;
-                    key = toCamelCase2(extensionName);
-                    extension = void 0;
-                    _context5.p = 7;
-                    if (extensionPromises[key]) {
-                      _context5.n = 8;
-                      break;
-                    }
-                    return _context5.a(3, 13);
-                  case 8:
-                    _context5.n = 9;
-                    return extensionPromises[key];
-                  case 9:
-                    extension = _context5.v;
-                    if (!(extension && extension.destroy)) {
-                      _context5.n = 10;
-                      break;
-                    }
-                    _context5.n = 10;
-                    return extension.destroy();
-                  case 10:
-                    _context5.n = 12;
-                    break;
-                  case 11:
-                    _context5.p = 11;
-                    _t2 = _context5.v;
-                    AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_DESTROY, {
-                      cause: _t2,
-                      extension: extensionName
-                    });
-                  case 12:
-                    _context5.p = 12;
-                    delete AelluxJs.ext[key];
-                    delete extensionPromises[key];
-                    delete AelluxJs.registry.ext[key];
-                    mountManager.remove({
-                      extensionName: extensionName
-                    });
-                    delete AelluxJs.registry.lazyExtSelectors[key];
-                    removeExtensionAssets(extensionName);
-                    if (extension) extension.initialized = false;
-                    return _context5.f(12);
-                  case 13:
-                    _context5.n = 6;
-                    break;
-                  case 14:
-                    _context5.n = 16;
-                    break;
-                  case 15:
-                    _context5.p = 15;
-                    _t3 = _context5.v;
-                    _iterator.e(_t3);
-                  case 16:
-                    _context5.p = 16;
-                    _iterator.f();
-                    return _context5.f(16);
-                  case 17:
-                    return _context5.a(2);
+                    return _context5.a(2, _destroyExtensions(extensionNames));
                 }
-              }, _callee5, null, [[7, 11, 12, 13], [5, 15, 16, 17], [1, 3]]);
+              }, _callee5);
             }))();
           },
           dispatchFrom: function dispatchFrom(from, event, options) {
@@ -22929,144 +25571,398 @@
             return getExtension(extensionName);
           },
           request: defaultRequest,
+          ease: ease,
+          aria: aria,
+          motion: motion,
           waitLayout: layoutScheduler,
           mountManager: mountManager
         });
         root[root.AelluxJs.shortJSName] = root.AelluxJs;
+        if (root.AelluxJs.options.mode === "full") registerCoreExtensions();
+        function registerCoreExtensions() {
+          var api = root.AelluxJs;
+          var attr = function attr2(name2) {
+            return "[".concat(api.attr(name2), "]");
+          };
+          var _iterator = _createForOfIteratorHelper11(officialExtensionDefinitions), _step;
+          try {
+            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+              var name = _step.value.name;
+              var key = toCamelCase2(name);
+              if (key in api.registry.ext) continue;
+              var loadWhen = name === "dialog" ? "dialog" : attr(name);
+              if (name === "ajax-href") loadWhen = "a" + loadWhen;
+              if (name === "present") {
+                loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
+              }
+              if (name === "state-navigation" || name === "preference") loadWhen = null;
+              api.ext(name, {
+                loadWhen: loadWhen,
+                load: true
+              });
+              api.registry.ext[key].automatic = true;
+            }
+          } catch (err) {
+            _iterator.e(err);
+          } finally {
+            _iterator.f();
+          }
+        }
+        function _destroyExtensions(_x, _x2) {
+          return _destroyExtensions2.apply(this, arguments);
+        }
+        function _destroyExtensions2() {
+          _destroyExtensions2 = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee7(extensionNames, onUnmounted) {
+            var _iterator3, _step3, extensionName, key, extension, _t2, _t3, _t4, _t5;
+            return _regenerator2().w(function(_context7) {
+              while (1) switch (_context7.p = _context7.n) {
+                case 0:
+                  if (typeof extensionNames === "string") extensionNames = [extensionNames];
+                  if (!extensionNames) extensionNames = Object.keys(AelluxJs.registry.ext);
+                  extensionNames = extensionNames.map(function(_) {
+                    return fromCamelCase2(_);
+                  });
+                  _context7.p = 1;
+                  _context7.n = 2;
+                  return AelluxJs.unmount(document, extensionNames);
+                case 2:
+                  _t2 = _context7.v;
+                  if (!(_t2 === false)) {
+                    _context7.n = 3;
+                    break;
+                  }
+                  return _context7.a(2, false);
+                case 3:
+                  _context7.n = 5;
+                  break;
+                case 4:
+                  _context7.p = 4;
+                  _t3 = _context7.v;
+                  AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT, {
+                    cause: _t3,
+                    extensions: extensionNames
+                  });
+                case 5:
+                  if (onUnmounted) onUnmounted();
+                  _iterator3 = _createForOfIteratorHelper11(extensionNames);
+                  _context7.p = 6;
+                  _iterator3.s();
+                case 7:
+                  if ((_step3 = _iterator3.n()).done) {
+                    _context7.n = 15;
+                    break;
+                  }
+                  extensionName = _step3.value;
+                  key = toCamelCase2(extensionName);
+                  extension = void 0;
+                  _context7.p = 8;
+                  if (extensionPromises[key]) {
+                    _context7.n = 9;
+                    break;
+                  }
+                  return _context7.a(3, 14);
+                case 9:
+                  _context7.n = 10;
+                  return extensionPromises[key];
+                case 10:
+                  extension = _context7.v;
+                  if (!(extension && extension.destroy)) {
+                    _context7.n = 11;
+                    break;
+                  }
+                  _context7.n = 11;
+                  return extension.destroy();
+                case 11:
+                  _context7.n = 13;
+                  break;
+                case 12:
+                  _context7.p = 12;
+                  _t4 = _context7.v;
+                  AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_DESTROY, {
+                    cause: _t4,
+                    extension: extensionName
+                  });
+                case 13:
+                  _context7.p = 13;
+                  delete AelluxJs.ext[key];
+                  delete extensionPromises[key];
+                  delete AelluxJs.registry.ext[key];
+                  mountManager.remove({
+                    extensionName: extensionName
+                  });
+                  delete AelluxJs.registry.lazyExtSelectors[key];
+                  removeExtensionAssets(extensionName);
+                  if (extension) extension.initialized = false;
+                  return _context7.f(13);
+                case 14:
+                  _context7.n = 7;
+                  break;
+                case 15:
+                  _context7.n = 17;
+                  break;
+                case 16:
+                  _context7.p = 16;
+                  _t5 = _context7.v;
+                  _iterator3.e(_t5);
+                case 17:
+                  _context7.p = 17;
+                  _iterator3.f();
+                  return _context7.f(17);
+                case 18:
+                  return _context7.a(2);
+              }
+            }, _callee7, null, [[8, 12, 13, 14], [6, 16, 17, 18], [1, 4]]);
+          }));
+          return _destroyExtensions2.apply(this, arguments);
+        }
         function getExtension(extensionName) {
-          extensionName = fromCamelCase2(extensionName);
+          var request = parseExtensionRequest(extensionName);
+          extensionName = request.name;
           var key = toCamelCase2(extensionName);
           if (extensionPromises[key]) return extensionPromises[key];
-          var data = AelluxJs.registry.ext[key];
-          if (data && !hasCompatibleBuild(data)) {
-            AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE, {
-              extension: extensionName,
-              runtime: AelluxJs.diagnostics.legacy ? "legacy" : "modern",
-              builds: data.builds
-            });
-            delete AelluxJs.registry.lazyExtSelectors[key];
-            extensionPromises[key] = Promise.resolve(null);
-            return extensionPromises[key];
-          }
-          if (AelluxJs.ext[key]) {
-            if (!AelluxJs.ext[key].initialized) {
-              extensionPromises[key] = Promise.resolve().then(function() {
-                return extensionInitialize(extensionName);
-              }).catch(function(error) {
-                AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE, {
-                  cause: error,
-                  extension: extensionName
-                });
-                delete extensionPromises[key];
-                return null;
-              });
-              return extensionPromises[key];
-            }
-            extensionPromises[key] = Promise.resolve(AelluxJs.ext[key]);
-            return extensionPromises[key];
-          }
           if (!(key in AelluxJs.registry.ext)) {
             return Promise.reject(AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_NOT_REGISTERED, {
               extension: extensionName
             }));
           }
+          AelluxJs.registry.ext[key].automatic = false;
+          if (AelluxJs.ext[key]) {
+            if (AelluxJs.ext[key].initialized) {
+              extensionPromises[key] = Promise.resolve(AelluxJs.ext[key]);
+            } else {
+              var registration = AelluxJs.registry.ext[key];
+              extensionPromises[key] = (registration.loadStyle && registration.loadStyle !== "false" ? appendExtensionAssets(extensionName) : Promise.resolve()).then(function() {
+                return extensionInitialize(extensionName);
+              }).catch(function(error2) {
+                if (!error2 || !error2.aelluxCompatibility) {
+                  AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE, {
+                    cause: error2,
+                    extension: extensionName
+                  });
+                }
+                delete extensionPromises[key];
+                return null;
+              });
+            }
+            return extensionPromises[key];
+          }
           var bundledLoader = AelluxJs.bundledExtensions ? AelluxJs.bundledExtensions[key] : null;
-          extensionPromises[key] = appendExtensionAssets(extensionName, bundledLoader).then(function() {
-            return extensionInitialize(extensionName);
-          }).catch(function(error) {
-            AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE, {
-              cause: error,
-              extension: extensionName
-            });
+          extensionPromises[key] = Promise.resolve().then(function() {
+            var registration2 = AelluxJs.registry.ext[key];
+            return (registration2.implicit || request.version) && !bundledLoader && !AelluxJs.ext[key] ? resolveImplicitRegistration(extensionName, registration2, request.version) : registration2;
+          }).then(/* @__PURE__ */ (function() {
+            var _ref = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee6(data) {
+              return _regenerator2().w(function(_context6) {
+                while (1) switch (_context6.n) {
+                  case 0:
+                    if (hasCompatibleBuild(data)) {
+                      _context6.n = 1;
+                      break;
+                    }
+                    AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE, {
+                      extension: extensionName,
+                      runtime: AelluxJs.diagnostics.legacy ? "legacy" : "modern",
+                      builds: data && data.builds
+                    });
+                    delete AelluxJs.registry.lazyExtSelectors[key];
+                    return _context6.a(2, null);
+                  case 1:
+                    if (AelluxJs.ext[key]) {
+                      _context6.n = 2;
+                      break;
+                    }
+                    _context6.n = 2;
+                    return appendExtensionAssets(extensionName, bundledLoader);
+                  case 2:
+                    if (AelluxJs.ext[key].initialized) {
+                      _context6.n = 3;
+                      break;
+                    }
+                    return _context6.a(2, extensionInitialize(extensionName));
+                  case 3:
+                    return _context6.a(2, AelluxJs.ext[key]);
+                }
+              }, _callee6);
+            }));
+            return function(_x3) {
+              return _ref.apply(this, arguments);
+            };
+          })()).catch(function(error2) {
+            if (!error2 || !error2.aelluxCompatibility) {
+              var _registration = AelluxJs.registry.ext[key];
+              if (_registration && _registration.implicit && !_registration.manifestResolved) {
+                AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_NOT_FOUND, {
+                  extension: extensionName
+                });
+              }
+              AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE, {
+                cause: error2,
+                extension: extensionName
+              });
+            }
             delete extensionPromises[key];
             return null;
           });
           return extensionPromises[key];
         }
-        function extensionInitialize(_x) {
+        function parseExtensionRequest(value) {
+          var text = String(value || "").trim();
+          var match = /^([a-z][a-z0-9-]*)(?:@([0-9]+(?:\.[0-9]+){0,2}(?:-[0-9A-Za-z.-]+)?))?$/i.exec(text);
+          return {
+            name: fromCamelCase2(match ? match[1] : text),
+            version: match && match[2] || null
+          };
+        }
+        function extensionInitialize(_x4) {
           return _extensionInitialize.apply(this, arguments);
         }
         function _extensionInitialize() {
-          _extensionInitialize = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee6(extensionName) {
-            var key, options;
-            return _regenerator2().w(function(_context6) {
-              while (1) switch (_context6.n) {
+          _extensionInitialize = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee8(extensionName) {
+            var key, registration, context, _error, options;
+            return _regenerator2().w(function(_context8) {
+              while (1) switch (_context8.n) {
                 case 0:
                   extensionName = fromCamelCase2(extensionName);
                   key = toCamelCase2(extensionName);
-                  options = AelluxJs.options.extensions[key] || {};
-                  _context6.n = 1;
-                  return AelluxJs.ext[key].init(options);
+                  registration = AelluxJs.registry.ext[key];
+                  if (!(registration.coreCompatibility && !versionSatisfies(AelluxJs.version, registration.coreCompatibility))) {
+                    _context8.n = 2;
+                    break;
+                  }
+                  context = {
+                    extension: extensionName,
+                    coreVersion: AelluxJs.version,
+                    coreCompatibility: registration.coreCompatibility
+                  };
+                  if (!(registration.skipCompatibilityCheck === true)) {
+                    _context8.n = 1;
+                    break;
+                  }
+                  AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_EXTENSION_COMPATIBILITY_SKIPPED, _objectSpread3(_objectSpread3({}, context), {}, {
+                    explicitlySkipped: true
+                  }));
+                  _context8.n = 2;
+                  break;
                 case 1:
+                  _error = AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_VERSION_INCOMPATIBLE, context);
+                  _error.aelluxCompatibility = true;
+                  throw _error;
+                case 2:
+                  options = AelluxJs.options.extensions[key] || {};
+                  _context8.n = 3;
+                  return AelluxJs.ext[key].init(options);
+                case 3:
                   AelluxJs.ext[key].initialized = true;
                   delete AelluxJs.registry.lazyExtSelectors[key];
-                  return _context6.a(2, AelluxJs.ext[key]);
+                  return _context8.a(2, AelluxJs.ext[key]);
               }
-            }, _callee6);
+            }, _callee8);
           }));
           return _extensionInitialize.apply(this, arguments);
         }
-        function appendExtensionAssets(_x2) {
+        function appendExtensionAssets(_x5) {
           return _appendExtensionAssets.apply(this, arguments);
         }
         function _appendExtensionAssets() {
-          _appendExtensionAssets = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee7(extensionName) {
-            var bundledLoader, key, data, url, useLegacyBuild, scriptURL, minifiedScript, scriptVariant, loadPromises, _args7 = arguments;
-            return _regenerator2().w(function(_context7) {
-              while (1) switch (_context7.n) {
+          _appendExtensionAssets = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee9(extensionName) {
+            var bundledLoader, key, data, useLegacyBuild, artifact, url, scriptURL, minifiedScript, scriptVariant, loadPromises, _iterator4, _step4, dependency, defaultStyle, fullStyle, _args9 = arguments, _t6;
+            return _regenerator2().w(function(_context9) {
+              while (1) switch (_context9.p = _context9.n) {
                 case 0:
-                  bundledLoader = _args7.length > 1 && _args7[1] !== void 0 ? _args7[1] : null;
+                  bundledLoader = _args9.length > 1 && _args9[1] !== void 0 ? _args9[1] : null;
                   extensionName = fromCamelCase2(extensionName);
                   key = toCamelCase2(extensionName);
                   data = AelluxJs.registry.ext[key];
-                  url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
                   useLegacyBuild = AelluxJs.diagnostics.legacy || data.builds.indexOf("modern") === -1;
-                  scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;
+                  artifact = data.artifacts && data.artifacts[useLegacyBuild ? "legacy" : "modern"];
+                  url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
+                  scriptURL = artifact ? artifact.url : useLegacyBuild ? toLegacyScriptURL(url) : url;
                   minifiedScript = /\.min\.js(?=[?#]|$)/.test(scriptURL);
                   scriptVariant = useLegacyBuild ? minifiedScript ? "legacyMin" : "legacy" : minifiedScript ? "modernMin" : "modern";
                   loadPromises = [];
+                  _iterator4 = _createForOfIteratorHelper11(data.dependencies || []);
+                  _context9.p = 1;
+                  _iterator4.s();
+                case 2:
+                  if ((_step4 = _iterator4.n()).done) {
+                    _context9.n = 5;
+                    break;
+                  }
+                  dependency = _step4.value;
+                  if (!(typeof dependency === "string")) {
+                    _context9.n = 3;
+                    break;
+                  }
+                  return _context9.a(3, 4);
+                case 3:
+                  loadPromises.push(AelluxJs.dep(dependency.label, dependency.url, {
+                    integrity: dependency.integrity,
+                    crossOrigin: dependency.crossOrigin
+                  }));
+                case 4:
+                  _context9.n = 2;
+                  break;
+                case 5:
+                  _context9.n = 7;
+                  break;
+                case 6:
+                  _context9.p = 6;
+                  _t6 = _context9.v;
+                  _iterator4.e(_t6);
+                case 7:
+                  _context9.p = 7;
+                  _iterator4.f();
+                  return _context9.f(7);
+                case 8:
                   if (bundledLoader) {
                     loadPromises.push(Promise.resolve().then(function() {
                       return bundledLoader();
                     }));
-                  } else {
+                  } else if (!AelluxJs.ext[key]) {
                     loadPromises.push(new Promise(function(resolve, reject) {
                       var attr = AelluxJs.attr("ext");
                       var script = document.createElement("script");
                       script.src = scriptURL;
                       script.setAttribute(attr, extensionName);
-                      applyAssetIntegrity(script, getExtensionIntegrity(data, scriptVariant, scriptURL), data.crossOrigin);
+                      applyAssetIntegrity(script, artifact && artifact.integrity || getExtensionIntegrity(data, scriptVariant, scriptURL), data.crossOrigin);
                       assetLoadHelper(script, {
                         loadCallback: resolve,
                         errorCallback: reject
                       });
                     }));
                   }
-                  if (data.loadStyle && data.loadStyle !== "false") {
+                  defaultStyle = data.loadStyle === true || data.loadStyle === "true";
+                  fullStyle = AelluxJs.bundledExtensions && (bundledLoader || data.official) && document.querySelector("link[".concat(AelluxJs.attr("full-style"), "]"));
+                  if (data.loadStyle && data.loadStyle !== "false" && !(defaultStyle && fullStyle)) {
                     loadPromises.push(new Promise(function(resolve) {
                       var styleDefaultURL = data.loadStyle === true || data.loadStyle === "true" || data.loadStyle === "";
-                      var href = styleDefaultURL ? url.replace(/\.js(?=[?#]|$)/, ".css") : data.loadStyle;
+                      var href = data.styleArtifact ? data.styleArtifact.url : styleDefaultURL ? url.replace(/\.js(?=[?#]|$)/, ".css") : data.loadStyle;
                       var attrStyle = AelluxJs.attr("ext-style");
                       var link = document.createElement("link");
                       link.href = href;
                       link.rel = "stylesheet";
                       link.setAttribute(attrStyle, extensionName);
-                      applyAssetIntegrity(link, getExtensionIntegrity(data, "style", href), data.crossOrigin);
+                      applyAssetIntegrity(link, data.styleArtifact && data.styleArtifact.integrity || getExtensionIntegrity(data, "style", href), data.crossOrigin);
                       assetLoadHelper(link, {
                         loadCallback: resolve,
                         errorCallback: function errorCallback() {
                           AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_EXTENSION_STYLE_LOAD, {
                             extension: extensionName,
-                            url: link.href
+                            element: link,
+                            attribute: "href",
+                            value: link.href,
+                            url: link.href,
+                            reason: "The Extension stylesheet could not be loaded.",
+                            suggestion: "Check the stylesheet URL, network response, integrity metadata and CSP style-src policy."
                           });
                           resolve();
                         }
                       });
                     }));
                   }
-                  return _context7.a(2, Promise.all(loadPromises));
+                  return _context9.a(2, Promise.all(loadPromises));
               }
-            }, _callee7);
+            }, _callee9, null, [[1, 6, 7, 8]]);
           }));
           return _appendExtensionAssets.apply(this, arguments);
         }
@@ -23098,6 +25994,278 @@
             }
           });
         }
+        function resolveImplicitRegistration(_x6, _x7) {
+          return _resolveImplicitRegistration.apply(this, arguments);
+        }
+        function _resolveImplicitRegistration() {
+          _resolveImplicitRegistration = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee0(extensionName, registration) {
+            var requestedVersion, officialURL, requestedURL, entry, sourceURL, embeddedOfficial, embeddedEntry, official, fallback, _args0 = arguments, _t7, _t8, _t9, _t0;
+            return _regenerator2().w(function(_context0) {
+              while (1) switch (_context0.p = _context0.n) {
+                case 0:
+                  requestedVersion = _args0.length > 2 && _args0[2] !== void 0 ? _args0[2] : null;
+                  officialURL = AelluxJs.extIndex.officialURL || AelluxJs.aelluxBasePath + "aellux.extensions.min.json";
+                  requestedURL = requestedVersion && requestedVersion !== AelluxJs.version ? "https://cdn.jsdelivr.net/npm/".concat(officialPackage, "@").concat(encodeURIComponent(requestedVersion), "/dist/aellux.extensions.min.json") : officialURL;
+                  entry = null;
+                  sourceURL = requestedURL;
+                  _context0.p = 1;
+                  embeddedOfficial = requestedVersion ? null : AelluxJs.extIndex.official;
+                  embeddedEntry = embeddedOfficial && embeddedOfficial.extensions[extensionName];
+                  if (!(embeddedEntry && embeddedEntry.builds)) {
+                    _context0.n = 2;
+                    break;
+                  }
+                  _t7 = embeddedOfficial;
+                  _context0.n = 4;
+                  break;
+                case 2:
+                  _context0.n = 3;
+                  return loadExtensionIndex(requestedVersion ? "official@".concat(requestedVersion) : "official", requestedURL);
+                case 3:
+                  _t7 = _context0.v;
+                case 4:
+                  official = _t7;
+                  entry = official.extensions[extensionName] || null;
+                  _context0.n = 6;
+                  break;
+                case 5:
+                  _context0.p = 5;
+                  _t8 = _context0.v;
+                  reportIndexFailure(_t8, "official", requestedURL);
+                case 6:
+                  if (!(!entry && AelluxJs.extIndex.fallbackURL)) {
+                    _context0.n = 11;
+                    break;
+                  }
+                  sourceURL = AelluxJs.extIndex.fallbackURL;
+                  _context0.p = 7;
+                  _t9 = AelluxJs.extIndex.fallback;
+                  if (_t9) {
+                    _context0.n = 9;
+                    break;
+                  }
+                  _context0.n = 8;
+                  return loadExtensionIndex("fallback", sourceURL);
+                case 8:
+                  _t9 = _context0.v;
+                case 9:
+                  fallback = _t9;
+                  entry = fallback.extensions[extensionName] || null;
+                  _context0.n = 11;
+                  break;
+                case 10:
+                  _context0.p = 10;
+                  _t0 = _context0.v;
+                  reportIndexFailure(_t0, "custom", sourceURL);
+                case 11:
+                  if (entry) {
+                    _context0.n = 12;
+                    break;
+                  }
+                  return _context0.a(2, registration);
+                case 12:
+                  applyManifestEntry(registration, entry, sourceURL, extensionName);
+                  return _context0.a(2, registration);
+              }
+            }, _callee0, null, [[7, 10], [1, 5]]);
+          }));
+          return _resolveImplicitRegistration.apply(this, arguments);
+        }
+        function loadExtensionIndex(kind, url) {
+          var promiseKey = kind + "Promise";
+          if (AelluxJs.extIndex[promiseKey]) return AelluxJs.extIndex[promiseKey];
+          validateManifestURL(url, kind);
+          AelluxJs.extIndex[promiseKey] = AelluxJs.request(url).then(function(response) {
+            return response.json();
+          }).then(function(index) {
+            validateExtensionIndex(index, kind, url);
+            AelluxJs.extIndex[kind] = index;
+            AelluxJs.diagnostics.info(AelluxJs.diagnostics.INFO_EXTENSION_INDEX_LOADED, {
+              source: kind,
+              url: url,
+              extensions: Object.keys(index.extensions).length
+            });
+            return index;
+          }).catch(function(error2) {
+            AelluxJs.extIndex[promiseKey] = null;
+            throw error2;
+          });
+          return AelluxJs.extIndex[promiseKey];
+        }
+        function validateManifestURL(url, kind) {
+          var parsed;
+          try {
+            parsed = new URL(url, document.baseURI);
+          } catch (_) {
+            throw manifestError(kind, url, "valid URL");
+          }
+          var development = AelluxJs.options.environment === "development";
+          if (parsed.protocol !== "https:" && parsed.origin !== location.origin && !development) {
+            throw manifestError(kind, url, "HTTPS for external manifests");
+          }
+        }
+        function validateExtensionIndex(index, kind, url) {
+          if (!index || index.schemaVersion !== 1 || typeof index.coreVersion !== "string" || !index.extensions || _typeof6(index.extensions) !== "object" || Array.isArray(index.extensions)) {
+            throw manifestError(kind, url, "schemaVersion 1, coreVersion, and extensions object");
+          }
+          if (index.coreVersion !== AelluxJs.version) {
+            throw manifestError(kind, url, "coreVersion ".concat(AelluxJs.version, " (received ").concat(index.coreVersion, ")"));
+          }
+          for (var _i = 0, _Object$entries = Object.entries(index.extensions); _i < _Object$entries.length; _i++) {
+            var _Object$entries$_i = _slicedToArray4(_Object$entries[_i], 2), name = _Object$entries$_i[0], entry = _Object$entries$_i[1];
+            if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(name) || !entry || typeof entry.coreCompatibility !== "string" || !entry.builds || _typeof6(entry.builds) !== "object") {
+              throw manifestError(kind, url, "valid metadata for ".concat(name));
+            }
+            for (var _i2 = 0, _arr = ["modern", "legacy"]; _i2 < _arr.length; _i2++) {
+              var variant = _arr[_i2];
+              var artifact = entry.builds[variant];
+              if (!artifact) continue;
+              if (typeof artifact.url !== "string" || typeof artifact.integrity !== "string" || !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(artifact.integrity)) {
+                throw manifestError(kind, url, "URL and SHA-384 integrity for ".concat(name, "/").concat(variant));
+              }
+              validateArtifactURL(artifact.url, url, kind);
+              if (artifact.regular) {
+                if (typeof artifact.regular.url !== "string" || !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(artifact.regular.integrity || "")) {
+                  throw manifestError(kind, url, "regular URL and SHA-384 integrity for ".concat(name, "/").concat(variant));
+                }
+                validateArtifactURL(artifact.regular.url, url, kind);
+              }
+            }
+            if (!entry.builds.modern && !entry.builds.legacy) throw manifestError(kind, url, "a runtime build for ".concat(name));
+            if (entry.style) {
+              if (typeof entry.style.url !== "string" || !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(entry.style.integrity || "")) {
+                throw manifestError(kind, url, "URL and SHA-384 integrity for ".concat(name, "/style"));
+              }
+              validateArtifactURL(entry.style.url, url, kind);
+              if (entry.style.regular) {
+                if (typeof entry.style.regular.url !== "string" || !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(entry.style.regular.integrity || "")) {
+                  throw manifestError(kind, url, "regular URL and SHA-384 integrity for ".concat(name, "/style"));
+                }
+                validateArtifactURL(entry.style.regular.url, url, kind);
+              }
+            }
+            if (!Array.isArray(entry.dependencies)) {
+              throw manifestError(kind, url, "dependencies array for ".concat(name));
+            }
+            var _iterator2 = _createForOfIteratorHelper11(entry.dependencies), _step2;
+            try {
+              for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+                var dependency = _step2.value;
+                if (typeof dependency === "string") continue;
+                if (!dependency || typeof dependency.label !== "string" || !dependency.label.trim() || typeof dependency.url !== "string" || typeof dependency.integrity !== "string" || !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(dependency.integrity)) {
+                  throw manifestError(kind, url, "dependency URL and SHA-384 integrity for ".concat(name));
+                }
+                validateArtifactURL(dependency.url, url, kind);
+              }
+            } catch (err) {
+              _iterator2.e(err);
+            } finally {
+              _iterator2.f();
+            }
+          }
+        }
+        function validateArtifactURL(url, manifestURL, kind) {
+          var parsed;
+          try {
+            parsed = new URL(url, new URL(manifestURL, document.baseURI));
+          } catch (_) {
+            throw manifestError(kind, manifestURL, "valid artifact URL: ".concat(url));
+          }
+          var development = AelluxJs.options.environment === "development";
+          if (parsed.protocol !== "https:" && parsed.origin !== location.origin && !development) throw manifestError(kind, manifestURL, "HTTPS artifact URL: ".concat(url));
+        }
+        function manifestError(kind, url, expected) {
+          return AelluxJs.diagnostics.create(AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_INVALID, {
+            source: kind,
+            url: url,
+            expected: expected
+          });
+        }
+        function reportIndexFailure(error2, source, url) {
+          if (error2 && error2.code === AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_INVALID.code) {
+            AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_INVALID, {
+              source: source,
+              url: url,
+              expected: error2.context && error2.context.expected,
+              cause: error2
+            });
+          } else {
+            AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_LOAD, {
+              source: source,
+              url: url,
+              cause: error2
+            });
+          }
+        }
+        function applyManifestEntry(registration, entry, manifestURL, extensionName) {
+          var base = new URL(manifestURL, document.baseURI);
+          var artifacts = {};
+          for (var _i3 = 0, _arr2 = ["modern", "legacy"]; _i3 < _arr2.length; _i3++) {
+            var variant = _arr2[_i3];
+            if (entry.builds[variant] && (!registration.explicitBuilds || registration.builds.includes(variant))) {
+              var declared = !AelluxJs.minified && entry.builds[variant].regular ? entry.builds[variant].regular : entry.builds[variant];
+              artifacts[variant] = {
+                url: new URL(declared.url, base).href,
+                integrity: declared.integrity
+              };
+            }
+          }
+          var selected = artifacts[AelluxJs.diagnostics.legacy ? "legacy" : "modern"] || !AelluxJs.diagnostics.legacy && artifacts.legacy;
+          registration.artifacts = artifacts;
+          registration.manifestResolved = true;
+          registration.builds = Object.keys(artifacts);
+          if (selected) registration.url = selected.url;
+          registration.coreCompatibility = entry.coreCompatibility;
+          registration.dependencies = (entry.dependencies || []).map(function(dependency) {
+            return typeof dependency === "string" ? dependency : _objectSpread3(_objectSpread3({}, dependency), {}, {
+              url: new URL(dependency.url, base).href
+            });
+          });
+          registration.official = AelluxJs.extIndex.official && AelluxJs.extIndex.official.extensions[extensionName] === entry;
+          if (entry.style && registration.loadStyle && registration.loadStyle !== "false") {
+            var declaredStyle = !AelluxJs.minified && entry.style.regular ? entry.style.regular : entry.style;
+            registration.styleArtifact = {
+              url: new URL(declaredStyle.url, base).href,
+              integrity: declaredStyle.integrity
+            };
+          }
+        }
+        function versionSatisfies(version, range) {
+          if (typeof range !== "string" || !range.trim()) return true;
+          return range.split("||").some(function(group) {
+            return group.trim().split(/\s+/).every(function(token) {
+              if (token === "*" || token.toLowerCase() === "latest") return true;
+              var match = token.match(/^(\^|~|>=|<=|>|<|=)?(.+)$/);
+              if (!match) return false;
+              var operator = match[1] || "=";
+              var comparison = compareVersions(version, match[2]);
+              if (operator === "=") return comparison === 0;
+              if (operator === ">") return comparison > 0;
+              if (operator === ">=") return comparison >= 0;
+              if (operator === "<") return comparison < 0;
+              if (operator === "<=") return comparison <= 0;
+              var current = parseVersion(version);
+              var expected = parseVersion(match[2]);
+              if (!current || !expected || comparison < 0) return false;
+              if (operator === "~") return current[0] === expected[0] && current[1] === expected[1];
+              return expected[0] > 0 ? current[0] === expected[0] : expected[1] > 0 ? current[0] === 0 && current[1] === expected[1] : current[0] === 0 && current[1] === 0 && current[2] === expected[2];
+            });
+          });
+        }
+        function compareVersions(first, second) {
+          var a = parseVersion(first);
+          var b = parseVersion(second);
+          if (!a || !b) return first === second ? 0 : -1;
+          for (var index = 0; index < 3; index++) if (a[index] !== b[index]) return a[index] > b[index] ? 1 : -1;
+          if (a[3] === b[3]) return 0;
+          if (!a[3]) return 1;
+          if (!b[3]) return -1;
+          return a[3] > b[3] ? 1 : -1;
+        }
+        function parseVersion(version) {
+          var match = String(version).match(/^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?/);
+          return match ? [Number(match[1]), Number(match[2]), Number(match[3]), match[4] || ""] : null;
+        }
         function hasCompatibleBuild(data) {
           if (!data || !Array.isArray(data.builds) || data.builds.length === 0) return false;
           if (AelluxJs.diagnostics.legacy) return data.builds.indexOf("legacy") !== -1;
@@ -23110,16 +26278,16 @@
           }, options);
           return fetch(url, requestOptions).then(function(response) {
             if (!response.ok) {
-              var error = new Error("HTTP " + response.status + " " + response.statusText);
-              error.name = "AelluxJsRequestError";
-              error.status = response.status;
-              error.statusText = response.statusText;
-              error.response = response;
-              throw error;
+              var error2 = new Error("HTTP " + response.status + " " + response.statusText);
+              error2.name = "AelluxJsRequestError";
+              error2.status = response.status;
+              error2.statusText = response.statusText;
+              error2.response = response;
+              throw error2;
             }
             return response;
-          }).catch(function(error) {
-            throw error;
+          }).catch(function(error2) {
+            throw error2;
           });
         }
         ;

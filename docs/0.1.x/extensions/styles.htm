@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="color-scheme" content="normal">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <title>
+  Extension Styles | 0.1.x | aellux.js</title>
+
+<meta name="description" content="aellux.js">
+  <link rel="canonical" href="https://aelluxjs.github.io/core/docs/0.1.x/extensions/styles.htm">
+
+    <meta property="og:title" content="Extension Styles | 0.1.x | aellux.js" />
+    <meta property="og:type" content="website" />
+      <meta property="og:url" content="https://aelluxjs.github.io/core/docs/0.1.x/extensions/styles.htm" />
+        <meta property="og:description" content="aellux.js" />
+        <meta property="og:site_name" content="aellux.js" />
+
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="Extension Styles | 0.1.x | aellux.js">
+        <meta name="twitter:description" content="aellux.js">
+
+          <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Extension Styles | 0.1.x | aellux.js","description":"aellux.js","url":"https://aelluxjs.github.io/core/docs/0.1.x/extensions/styles.htm"}</script>
+
+
+        <link rel="preconnect" href="https://cdn.jsdelivr.net">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="/core/docs/assets/docweaver/css/style.css">
+
+<script src="/core/dist/aellux.min.js"></script>
+<script src="/core/docs/assets/docweaver/js/main.js"></script>
+
+<link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
+  integrity="sha384-/EgOix3QlZtjoeNxjR0v0jee1G/Pa/iAOPWX5MjHn9BLMWc2sgSBv3Tnpbyv9wxo" crossorigin="anonymous">
+</head>
+
+<body data-ae-feedback="error" data-ae-transform-target="#toast-message" data-ae-message-target="#toast-message"
+  data-ae-present-target>
+
+  <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <symbol id="bi-circle-half" fill="currentColor"
+    viewBox="0 0 16 16">
+    <path d="M8 15A7 7 0 1 0 8 1zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16" />
+  </symbol>
+  <symbol id="bi-sun" fill="currentColor"
+    viewBox="0 0 16 16">
+    <path
+      d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708" />
+  </symbol>
+  <symbol id="bi-moon-fill" fill="currentColor"
+    viewBox="0 0 16 16">
+    <path
+      d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278" />
+  </symbol>
+  <symbol id="bi-link-45deg" fill="currentColor"
+    viewBox="0 0 16 16">
+    <path
+      d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z" />
+    <path
+      d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z" />
+  </symbol>
+  <symbol id="bi-chevron-right" fill="currentColor"
+    viewBox="0 0 16 16">
+    <path fill-rule="evenodd"
+      d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708" />
+  </symbol>
+  <symbol id="bi-layout-text-sidebar" viewBox="0 0 16 16" fill="currentColor">
+    <path d="M3.5 3a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM3 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1z" />
+    <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm12-1v14h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zm-1 0H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h9z" />
+  </symbol>
+</svg>
+    <div class="section d-flex border-bottom" data-view-frame=0 style="position:sticky;top:0px;z-index:5;height: 64px;">
+      <header class="animation_header_test navbar navbar-expand-md d-flex flex-fill p-0 m-0 user-select-none bg-white"
+        style=" --bar-color:#55606F; --bar-color2:var(--bs-link-color); --bar-bg:#F0F5F5;">
+        <div class="container-fluid gap-2" style='z-index: 1;'>
+
+          <div id="toast-present" class="position-fixed w-100 z-1 pe-none p-4 justify-content-center align-items-center"
+            data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true" style="display: flex;">
+            <div id="toast-message" class="text-bg-danger small rounded-1 p-2 w-100 text-center"
+              style="max-width: 300px;">
+              -
+            </div>
+          </div>
+
+          <div class="me-auto d-flex flex-row gap-2 align-items-center">
+
+            <a class="navbar-brand m-0 me-auto p-0 lh-1 fw-medium d-flex align-items-center" href="/core/docs/0.1.x/index.htm"
+              style="font-size:1.5em;letter-spacing:-0.03em;color:inherit;">
+              aellux.js            </a>
+
+          </div>
+
+          <button class="navbar-toggler" type="button" data-ae-trigger="toggle" data-ae-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" data-ae-point>
+            <div class="hamburger">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </button>
+
+          <div class="navbar-collapse bg-white border-end d-md-block" id="navbarSupportedContent" hidden
+            data-ae-present="transform">
+            <nav class="h-100 w-100" data-ae-scrollbox="pointer" data-ae-scrollbar
+              style="overscroll-behavior: contain;">
+              <div class="navbar-nav w-100 gap-1 my-0 p-2 ps-md-3 pe-md-3 pb-4 flex-column align-self-start text-white">
+
+                <div class="d-flex flex-row gap-2 justify-content-between pb-2 pt-0 pt-md-2">
+
+                  <div class="dropdown position-relative">
+  <button id="btn-version" class="btn btn-outline-adaptive ps-3 dropdown-toggle rounded-1 border" type="button"
+    data-ae-trigger="toggle" data-ae-target="dropdown-version" aria-expanded="false">
+    0.1.x  </button>
+  <div class="position-absolute" data-ae-anchor-target="btn-version" data-ae-anchor="bottom-right:top-right">
+    <ul id="dropdown-version" data-ae-present="opacity transform" hidden="true"
+      class="dropdown-menu dropdown-menu-start rounded-2 overflow-hidden position-relative show"
+      style="min-width: unset;transform-origin: 100% 0%;">
+
+              <li>
+          <a class="dropdown-item active" data-no-ajax=true
+            href="/core/docs/0.1.x/index.htm">
+            0.1.x          </a>
+        </li>
+
+    </ul>
+  </div>
+</div>
+                    <div data-ae-preference="color-scheme" class="btn-group border rounded-1 rounded overflow-hidden" role="group"
+  aria-label="Basic example" style="--bs-border-radius:--bs-border-radius-sm;gap:1px;">
+
+  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-light" autocomplete="off"
+    aria-label="Light Mode">
+  <label class="btn  btn-outline-adaptive py-1 border-0 d-inline-flex justify-content-center align-items-center"
+    for="radio-color-mode-light" data-ae-option="light" onclick aria-label="Light Mode">
+    <svg class="svg-icon" aria-hidden="true" focusable="false"><use href="#bi-sun"></use></svg>
+    <span class="visually-hidden">Light Mode</span>
+  </label>
+
+  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-dark" autocomplete="off"
+    aria-label="Dark Mode">
+  <label class="btn  btn-outline-adaptive py-1 border-0  d-inline-flex justify-content-center align-items-center"
+    for="radio-color-mode-dark" data-ae-option="dark" onclick aria-label="Dark Mode">
+    <svg class="svg-icon" aria-hidden="true" focusable="false"><use href="#bi-moon-fill"></use></svg>
+    <span class="visually-hidden">Dark Mode</span>
+  </label>
+
+  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-auto" autocomplete="off"
+    aria-label="Auto Mode">
+  <label class="btn  btn-outline-adaptive py-1 border-0 d-inline-flex justify-content-center align-items-center"
+    for="radio-color-mode-auto" data-ae-option="auto" onclick aria-label="Auto Mode">
+    <svg class="svg-icon" aria-hidden="true" focusable="false"><use href="#bi-circle-half"></use></svg>
+    <span class="visually-hidden">Auto Mode</span>
+  </label>
+
+</div>
+                </div>
+                <div class="d-flex flex-column" data-ae-present-group>
+                                      <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                      <button data-ae-point type="button"
+                        class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                        data-ae-trigger="toggle" data-ae-target="#children-overview">
+                        Overview                          <span class="chevron"><svg class="svg-icon small"
+                                aria-hidden="true" focusable="false">
+                                <use href="#bi-chevron-right"></use>
+                              </svg></span>
+                                                  </button>
+                    </div>
+
+                                          <div id="children-overview" class="docs-menu-panel border-start ms-2"
+                        data-ae-present="height opacity" data-ae-unpop-on-outside="false"                         hidden
+                        >
+                          <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
+                                        aellux.js Docs                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/getting-started.htm" data-ae-overflow-marquee="190px">
+                                        Getting Started                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/compatibility.htm" data-ae-overflow-marquee="190px">
+                                        Compatibility                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/validation-scenarios.htm" data-ae-overflow-marquee="190px">
+                                        Validation Scenarios                                      </a>
+                                    </div>
+                                                                                                    </div>
+                      </div>
+                                                                  <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                      <button data-ae-point type="button"
+                        class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                        data-ae-trigger="toggle" data-ae-target="#children-runtime">
+                        Runtime                          <span class="chevron"><svg class="svg-icon small"
+                                aria-hidden="true" focusable="false">
+                                <use href="#bi-chevron-right"></use>
+                              </svg></span>
+                                                  </button>
+                    </div>
+
+                                          <div id="children-runtime" class="docs-menu-panel border-start ms-2"
+                        data-ae-present="height opacity" data-ae-unpop-on-outside="false"                         hidden
+                        >
+                          <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/api.htm" data-ae-overflow-marquee="190px">
+                                        Runtime API                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/wait-layout.htm" data-ae-overflow-marquee="190px">
+                                        waitLayout                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/events.htm" data-ae-overflow-marquee="190px">
+                                        Events                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/modern-legacy.htm" data-ae-overflow-marquee="190px">
+                                        Modern &amp; Legacy                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/browser-support.htm" data-ae-overflow-marquee="190px">
+                                        Browser Support                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/performance.htm" data-ae-overflow-marquee="190px">
+                                        Performance and Bundle Budget                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/known-limits-and-risks.htm" data-ae-overflow-marquee="190px">
+                                        Known Limits &amp; Risks                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/es5-support.htm" data-ae-overflow-marquee="190px">
+                                        ES5 Support                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/visual-mounting.htm" data-ae-overflow-marquee="190px">
+                                        Visual Mounting                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/diagnostics.htm" data-ae-overflow-marquee="190px">
+                                        Diagnostics                                      </a>
+                                    </div>
+                                                                                                    </div>
+                      </div>
+                                                                  <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                      <button data-ae-point type="button"
+                        class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                        data-ae-trigger="toggle" data-ae-target="#children-extensions">
+                        Extensions                          <span class="chevron"><svg class="svg-icon small"
+                                aria-hidden="true" focusable="false">
+                                <use href="#bi-chevron-right"></use>
+                              </svg></span>
+                                                  </button>
+                    </div>
+
+                                          <div id="children-extensions" class="docs-menu-panel border-start ms-2"
+                        data-ae-present="height opacity" data-ae-unpop-on-outside="false" >
+                          <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/authoring.htm" data-ae-overflow-marquee="190px">
+                                        Extension Authoring                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/accessibility.htm" data-ae-overflow-marquee="190px">
+                                        Accessibility Requirements                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/registration.htm" data-ae-overflow-marquee="190px">
+                                        Registration                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/official-registry.htm" data-ae-overflow-marquee="190px">
+                                        Official Registry                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/declarative-loading.htm" data-ae-overflow-marquee="190px">
+                                        Declarative Loading                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/lazy-loading.htm" data-ae-overflow-marquee="190px">
+                                        Lazy Loading                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1 active"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/styles.htm" data-ae-overflow-marquee="190px">
+                                        Extension Styles                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/csp-and-trust.htm" data-ae-overflow-marquee="190px">
+                                        CSP and Extension Trust                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/legacy-variants.htm" data-ae-overflow-marquee="190px">
+                                        Modern &amp; Legacy Variants                                      </a>
+                                    </div>
+                                                                                                    </div>
+                      </div>
+                                                                  <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                      <button data-ae-point type="button"
+                        class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                        data-ae-trigger="toggle" data-ae-target="#children-core-extensions">
+                        Core Extensions                          <span class="chevron"><svg class="svg-icon small"
+                                aria-hidden="true" focusable="false">
+                                <use href="#bi-chevron-right"></use>
+                              </svg></span>
+                                                  </button>
+                    </div>
+
+                                          <div id="children-core-extensions" class="docs-menu-panel border-start ms-2"
+                        data-ae-present="height opacity" data-ae-unpop-on-outside="false"                         hidden
+                        >
+                          <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion                            data-ae-present-group>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/core-extensions/index.htm" data-ae-overflow-marquee="190px">
+                                        Overview                                      </a>
+                                    </div>
+
+                                  <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
+                                    style="flex:0">
+                                    <button data-ae-point type="button"
+                                      class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      data-ae-trigger="toggle" data-ae-target="#children2-bundled">
+                                      Bundled Extensions                                        <span class="chevron"><svg
+                                              class="svg-icon small" aria-hidden="true" focusable="false">
+                                              <use href="#bi-chevron-right"></use>
+                                            </svg></span>
+                                                                              </button>
+                                  </div>
+
+                                  <div id="children2-bundled" class="docs-menu-panel border-start ms-2"
+                                    data-ae-present="height opacity" data-ae-unpop-on-outside="false"                                     hidden>
+                                      <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                                  <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/adaptive.htm" data-ae-overflow-marquee="190px">
+                                              Adaptive                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/anchor.htm" data-ae-overflow-marquee="190px">
+                                              Anchor                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/overflow-marquee.htm" data-ae-overflow-marquee="190px">
+                                              Overflow Marquee                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/feedback.htm" data-ae-overflow-marquee="190px">
+                                              Feedback                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/focus.htm" data-ae-overflow-marquee="190px">
+                                              Focus                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/point.htm" data-ae-overflow-marquee="190px">
+                                              Point                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/preference.htm" data-ae-overflow-marquee="190px">
+                                              Preference                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/present.htm" data-ae-overflow-marquee="190px">
+                                              Present                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/scrollbox.htm" data-ae-overflow-marquee="190px">
+                                              Scrollbox                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/scrollbox-snap.htm" data-ae-overflow-marquee="190px">
+                                              Scrollbox Snap                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
+                                              State Navigation                                            </a>
+                                          </div>
+                                                                                </div>
+                                  </div>
+
+                                  <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
+                                    style="flex:0">
+                                    <button data-ae-point type="button"
+                                      class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      data-ae-trigger="toggle" data-ae-target="#children2-optional">
+                                      Optional Extensions                                        <span class="chevron"><svg
+                                              class="svg-icon small" aria-hidden="true" focusable="false">
+                                              <use href="#bi-chevron-right"></use>
+                                            </svg></span>
+                                                                              </button>
+                                  </div>
+
+                                  <div id="children2-optional" class="docs-menu-panel border-start ms-2"
+                                    data-ae-present="height opacity" data-ae-unpop-on-outside="false"                                     hidden>
+                                      <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                                  <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/ajax-href.htm" data-ae-overflow-marquee="190px">
+                                              Ajax Href                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/dialog.htm" data-ae-overflow-marquee="190px">
+                                              Dialog                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/pwa.htm" data-ae-overflow-marquee="190px">
+                                              PWA                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/viewport.htm" data-ae-overflow-marquee="190px">
+                                              Viewport                                            </a>
+                                          </div>
+                                                                                </div>
+                                  </div>
+                                                                                                  </div>
+                      </div>
+                                                                  <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                      <button data-ae-point type="button"
+                        class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                        data-ae-trigger="toggle" data-ae-target="#children-integrations">
+                        Integrations                          <span class="chevron"><svg class="svg-icon small"
+                                aria-hidden="true" focusable="false">
+                                <use href="#bi-chevron-right"></use>
+                              </svg></span>
+                                                  </button>
+                    </div>
+
+                                          <div id="children-integrations" class="docs-menu-panel border-start ms-2"
+                        data-ae-present="height opacity" data-ae-unpop-on-outside="false"                         hidden
+                        >
+                          <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/integrations/bootstrap.htm" data-ae-overflow-marquee="190px">
+                                        Bootstrap Integration                                      </a>
+                                    </div>
+                                                                                                    </div>
+                      </div>
+                                                              </div>
+              </div>
+            </nav>
+          </div>
+
+        </div>
+      </header>
+    </div>
+
+    <div id="page-progress"></div>
+
+    <div class="content-block position-relative d-flex justify-content-center">
+
+      <div class="content-wrapper p-0 position-relative w-100"
+        style=" max-width: 1024px;transition:opacity 0.5s linear;">
+
+        <div class=" toc-header position-relative bg-white p-2 position-sticky border-bottom border-md-0"
+          style="top:64px;z-index:1;" role="contentinfo">
+
+          <div class="menu-toggle d-flex flex-row gap-2 small">
+            <button data-ae-point id="button-toc-menu" type="button"
+              class="btn btn-outline-adaptive rounded-1 text-nowrap" data-ae-trigger="toggle"
+              data-ae-target="#toc-collapse" aria-expanded="false" aria-controls="toc-collapse"
+              aria-label="Table of Contents" title="Summary">
+              <svg class="svg-icon" aria-hidden="true" focusable="false">
+                <use href="#bi-layout-text-sidebar"></use>
+              </svg>
+            </button>
+            <button type="button"
+              class="p-2 text-nowrap overflow-hidden text-truncate fw-bold border-0 bg-transparent text-start"
+              id="tocbot-current-label" data-ae-trigger="toggle" data-ae-target="#toc-collapse">
+              -
+            </button>
+          </div>
+
+          <div class="toc-collapse bg-white overflow-hidden" id="toc-collapse" data-ae-present="transform opacity"
+            hidden>
+            <div data-ae-scrollbox data-ae-scrollbar class="d-block overflow-auto"
+              style="overscroll-behavior: contain;">
+              <div class="pt-1 pt-lg-2 p-4 p-lg-0 d-table w-100">
+                <div class="h6 fw-bold p-2 pb-1">On this page</div>
+                <div class="position-relative" style="padding-bottom: 3rem;">
+                  <div class="js-toc">
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="article p-4">
+
+          <nav id="doc-breadcrumb" style="--bs-breadcrumb-divider: '›';overflow-x:auto;overflow-y:clip;" class="w-100"
+            aria-label="breadcrumb" ajax-load="doc-breadcrumb" data-ae-scrollbox="pointer">
+            <ol class="breadcrumb flex-nowrap">
+
+                                                <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                    <a href="/core/docs/0.1.x/index.htm">
+                      Home                    </a>
+                  </li>
+                                                                          <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                    <a href="/core/docs/0.1.x/extensions/authoring.htm">
+                      Extensions                    </a>
+                  </li>
+                                                                            <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                      Extension Styles                    </li>
+
+            </ol>
+          </nav>
+
+          <div id="doc-navlinks" ajax-load="doc-navlinks">
+            <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
+      <a href="/core/docs/0.1.x/extensions/lazy-loading.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
+      ← <span class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill"
+        style="max-width:200px" data-ae-overflow-marquee="80">
+        Lazy Loading      </span>
+    </a>
+
+                  <a href="/core/docs/0.1.x/extensions/csp-and-trust.htm"
+            class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2" style="width: 40%;">
+            <span
+              class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
+              style="max-width:200px" data-ae-overflow-marquee="80">
+              CSP and Extension Trust            </span> →
+          </a>
+          </div>          </div>
+
+          <main id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content"
+            ajax-load="doc-content">
+            <h1>Optional Extension Styles</h1>
+<p>Extensions may be JavaScript-only or may request a stylesheet associated with their script.</p>
+<h2>JavaScript Only</h2>
+<pre><code class="language-js">$ae.ext(&quot;example&quot;);
+</code></pre>
+<p><code>loadStyle</code> defaults to <code>false</code>.</p>
+<p>In Basic mode, request each Extension stylesheet with <code>{ loadStyle: true }</code>, or provide the CSS yourself. This applies to Adaptive, Present, Feedback, Scrollbox, Anchor and Overflow Marquee. Their JavaScript does not generate inline stylesheet blocks. Scrollbox&#39;s CSS includes snap, elastic and scrollbar rules. Unmounting elements retains the loader&#39;s stylesheet; destroying the Extension removes its individual stylesheet link.</p>
+<h2>Full stylesheet</h2>
+<p>The build generates <code>aellux.full.css</code> and <code>aellux.full.min.css</code> from the global weak CSS and every Extension CSS generator. <code>init({ mode: &quot;full&quot; })</code> loads the matching file through one <code>&lt;link data-ae-full-style&gt;</code>, using the configured base path and SHA-384 integrity. Modern and Legacy runtimes share the same CSS; a minified boot selects the minified CSS.</p>
+<p>The boot waits for this stylesheet before starting the Full runtime and mounting Extensions. Full does not insert the global weak inline style, request individual Core stylesheets or inject Extension style blocks. Extensions remain lazy; the shared CSS is available before any of them initialize. Explicit custom stylesheet URLs still load independently. Destroying an Extension retains the shared Full stylesheet. If Full CSS fails to load, diagnostic 2004 reports it and JavaScript startup continues.</p>
+<p>The combined CSS has a 121/12 KiB raw/gzip budget. Full JavaScript retains its 131/42.5 KiB Modern and 437/138 KiB Legacy limits; Scrollbox Legacy retains 44/14 KiB because CSS is external.</p>
+<h2>JavaScript and CSS</h2>
+<p>Use <code>true</code> to derive the stylesheet URL from the Extension script URL:</p>
+<pre><code class="language-js">$ae.ext(&quot;example&quot;, { loadStyle: true });
+</code></pre>
+<p>For <code>aellux.ext.example.js</code>, the runtime derives <code>aellux.ext.example.css</code>. Query strings and fragments are preserved by the script URL handling where applicable. The example Extension and stylesheet must be supplied by the application.</p>
+<p>The declarative equivalent is:</p>
+<pre><code class="language-html">&lt;link rel=&quot;aelluxjs-ext&quot; href=&quot;example&quot; data-ae-load-style&gt;
+</code></pre>
+<h2>Specific Stylesheet URL</h2>
+<p>Set <code>loadStyle</code> to a URL when the stylesheet does not follow the Extension filename convention:</p>
+<pre><code class="language-js">$ae.ext(&quot;feedback&quot;, {
+  loadStyle: &quot;./styles/feedback-theme.css&quot;
+});
+</code></pre>
+<p>The declarative equivalent places the URL directly in <code>data-ae-load-style</code>:</p>
+<pre><code class="language-html">&lt;link rel=&quot;aelluxjs-ext&quot;
+      href=&quot;feedback&quot;
+      data-ae-load-style=&quot;./styles/feedback-theme.css&quot;&gt;
+</code></pre>
+<p>Relative custom stylesheet URLs are resolved by the browser relative to the document URL. An empty attribute or the value <code>true</code> requests the derived stylesheet; the value <code>false</code> disables stylesheet loading.</p>
+<p>The orchestrator waits for requested assets before initializing and mounting the Extension. A stylesheet load error is treated as non-fatal so JavaScript behavior can continue when possible.</p>
+<p>Extensions remain responsible for declaring their own required assets.</p>
+          </main>
+
+          <div id="doc-navlinks2" ajax-load="doc-navlinks2">
+            <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
+      <a href="/core/docs/0.1.x/extensions/lazy-loading.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
+      ← <span class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill"
+        style="max-width:200px" data-ae-overflow-marquee="80">
+        Lazy Loading      </span>
+    </a>
+
+                  <a href="/core/docs/0.1.x/extensions/csp-and-trust.htm"
+            class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2" style="width: 40%;">
+            <span
+              class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
+              style="max-width:200px" data-ae-overflow-marquee="80">
+              CSP and Extension Trust            </span> →
+          </a>
+          </div>          </div>
+
+          <footer class="section bg-transparent" style="margin: 50vh 0;">
+            <div class="text-center small text-body opacity-50">
+              <div>
+                2026 ©aellux.js Docs
+              </div>
+              <div class="small mb-0 text-body">
+                Special thanks to
+                <a style="color:inherit!important;" href="https://chatgpt.com/" target="_blank"
+                  rel="noopener noreferrer">ChatGPT</a>,
+                <a style="color:inherit!important;" href="https://openai.com/codex/" target="_blank"
+                  rel="noopener noreferrer">Codex</a>,
+                <a style="color:inherit!important;" href="https://code.visualstudio.com/" target="_blank"
+                  rel="noopener noreferrer">Visual Studio Code</a>,
+                <a style="color:inherit!important;" href="https://getbootstrap.com/" target="_blank"
+                  rel="noopener noreferrer">Bootstrap</a>,
+                and
+                <a style="color:inherit!important;" href="https://github.com/" target="_blank"
+                  rel="noopener noreferrer">GitHub</a>
+                for the tools and technologies that supported the development of Aellux.
+              </div>
+            </div>
+          </footer>
+        </div>
+
+      </div>
+
+    </div>
+
+</body>
+
+</html>

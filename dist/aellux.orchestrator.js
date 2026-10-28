@@ -1,4 +1,24 @@
 (() => {
+  var __defProp = Object.defineProperty;
+  var __defProps = Object.defineProperties;
+  var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+  var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __propIsEnum = Object.prototype.propertyIsEnumerable;
+  var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+  var __spreadValues = (a, b) => {
+    for (var prop in b || (b = {}))
+      if (__hasOwnProp.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    if (__getOwnPropSymbols)
+      for (var prop of __getOwnPropSymbols(b)) {
+        if (__propIsEnum.call(b, prop))
+          __defNormalProp(a, prop, b[prop]);
+      }
+    return a;
+  };
+  var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+
   // src/internal/asset-load-helper.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function assetLoadHelper(asset, options) {
@@ -27,67 +47,545 @@
   // src/internal/build-layout-scheduler.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function buildLayoutScheduler() {
-    var readQueue = [];
-    var updateQueue = [];
-    var frameRequest = null;
-    var phase = "idle";
+    const MIN_FPS = 5;
+    const FPS_STEP = 15;
+    const PRESSURE_WINDOW_MS = 3e3;
+    const PRESSURE_MIN_DURATION_MS = 2e3;
+    const PRESSURE_MIN_SAMPLES = 24;
+    const PRESSURE_MIN_SLOW_SAMPLES = 12;
+    const PRESSURE_SLOW_RATIO = 0.35;
+    const BASE_RECOVERY_DELAY = 1e3;
+    const MAX_RECOVERY_DELAY = 8e3;
+    const queues = { read: [], update: [] };
+    const groups = /* @__PURE__ */ new Map();
+    const tasks = /* @__PURE__ */ new Set();
+    const visualFPSLimits = /* @__PURE__ */ new Map();
+    const sequenceStarts = /* @__PURE__ */ new Map();
+    let frameRequest = null;
+    let phase = "idle";
+    let waitingForVisibility = false;
+    let idleSince = null;
+    let nativeFPS = null;
+    let limitFPS = null;
+    let initialDeltas = [];
+    let lastFrameTime = null;
+    let frameCredit = 0;
+    let samples = [];
+    let lastAdjustment = -Infinity;
+    let stableSince = null;
+    let recoveryDelay = BASE_RECOVERY_DELAY;
+    let trialLimit = null;
+    const now = () => performance.now();
+    const hidden = () => typeof document !== "undefined" && document.hidden;
+    const hasWork = () => queues.read.length > 0 || queues.update.length > 0;
+    function visualFPSLimit() {
+      let result = Infinity;
+      for (const value of visualFPSLimits.values()) result = Math.min(result, value);
+      return result;
+    }
+    function setVisualFPSLimit(owner, value) {
+      validId(owner);
+      if (value === void 0 || value === null) visualFPSLimits.delete(owner);
+      else {
+        if (!Number.isFinite(value) || value <= 0) throw new RangeError("visual FPS must be positive");
+        visualFPSLimits.set(owner, value);
+      }
+      if (hasWork()) scheduleFrame();
+    }
+    function publishLimit() {
+      if (typeof document === "undefined" || !document.documentElement) return;
+      const value = nativeFPS !== null && limitFPS !== null && limitFPS < nativeFPS ? String(limitFPS) : null;
+      if (value === null) {
+        if (document.documentElement.hasAttribute("data-ae-fps"))
+          document.documentElement.removeAttribute("data-ae-fps");
+      } else if (document.documentElement.getAttribute("data-ae-fps") !== value) {
+        document.documentElement.setAttribute("data-ae-fps", value);
+      }
+    }
+    function resetMeasurements(resetLimit) {
+      lastFrameTime = null;
+      frameCredit = 0;
+      samples = [];
+      stableSince = null;
+      initialDeltas = [];
+      if (resetLimit) {
+        nativeFPS = null;
+        limitFPS = null;
+        lastAdjustment = -Infinity;
+      }
+      publishLimit();
+      trialLimit = null;
+      recoveryDelay = BASE_RECOVERY_DELAY;
+    }
+    function onVisible() {
+      if (hidden()) return;
+      document.removeEventListener("visibilitychange", onVisible);
+      waitingForVisibility = false;
+      resetMeasurements(true);
+      scheduleFrame();
+    }
     function scheduleFrame() {
-      if (frameRequest !== null || phase !== "idle") return;
+      if (frameRequest !== null || phase !== "idle" || !hasWork()) return;
+      if (hidden()) {
+        if (!waitingForVisibility) {
+          document.addEventListener("visibilitychange", onVisible);
+          waitingForVisibility = true;
+        }
+        return;
+      }
+      if (idleSince !== null && now() - idleSince > 250) resumeAfterIdle(now());
+      idleSince = null;
       frameRequest = requestAnimationFrame(flushFrame);
     }
-    function flushFrame() {
+    function stopFrameIfIdle() {
+      if (hasWork()) return;
+      if (frameRequest !== null) cancelAnimationFrame(frameRequest);
       frameRequest = null;
+      if (waitingForVisibility) document.removeEventListener("visibilitychange", onVisible);
+      waitingForVisibility = false;
+      if (phase === "idle") idleSince = now();
+    }
+    function observeFrame(time) {
+      const previous = lastFrameTime;
+      lastFrameTime = time;
+      if (previous === null) return true;
+      const delta = time - previous;
+      if (delta <= 0 || delta > 250) {
+        frameCredit = 0;
+        samples = [];
+        stableSince = null;
+        return true;
+      }
+      if (nativeFPS === null) {
+        initialDeltas.push(delta);
+        if (initialDeltas.length >= 8) {
+          const ordered = initialDeltas.slice().sort((a, b) => a - b);
+          nativeFPS = Math.max(MIN_FPS, Math.round(1e3 / ordered[4]));
+          limitFPS = nativeFPS;
+          initialDeltas = [];
+        }
+      } else {
+        const expected = 1e3 / Math.max(MIN_FPS, limitFPS);
+        const slow = delta > expected * 1.23;
+        samples.push({ time, slow, delay: delta, cost: 0 });
+        while (samples.length && time - samples[0].time > PRESSURE_WINDOW_MS) samples.shift();
+        adjustLimit(time);
+      }
+      const effectiveFPS = Math.min(limitFPS === null ? Infinity : limitFPS, visualFPSLimit());
+      if (effectiveFPS === Infinity || nativeFPS !== null && effectiveFPS >= nativeFPS) return true;
+      const period = 1e3 / effectiveFPS;
+      frameCredit += delta;
+      if (frameCredit + 1e-3 < period) return false;
+      frameCredit = Math.min(period, frameCredit - period);
+      return true;
+    }
+    function adjustLimit(time) {
+      if (samples.length < PRESSURE_MIN_SAMPLES || time - samples[0].time < PRESSURE_MIN_DURATION_MS) return;
+      const slowCount = samples.reduce((n, item) => n + (item.slow ? 1 : 0), 0);
+      if (slowCount >= PRESSURE_MIN_SLOW_SAMPLES && slowCount / samples.length >= PRESSURE_SLOW_RATIO) {
+        stableSince = null;
+        if (time - lastAdjustment >= 1e3 && limitFPS > MIN_FPS) {
+          const previous = limitFPS;
+          const delay = Math.max(...samples.filter((sample) => sample.slow).map((sample) => Math.max(sample.delay, sample.cost)));
+          limitFPS = Math.min(limitFPS, adaptiveLimit(1e3 / delay));
+          publishLimit();
+          if (trialLimit === previous) recoveryDelay = Math.min(MAX_RECOVERY_DELAY, recoveryDelay * 2);
+          trialLimit = null;
+          lastAdjustment = time;
+          samples = [];
+          frameCredit = 0;
+        }
+      } else {
+        if (stableSince === null) stableSince = time;
+        recoverLimitAfterStablePeriod(time);
+      }
+    }
+    function resumeAfterIdle(time) {
+      lastFrameTime = null;
+      frameCredit = 0;
+      samples = [];
+      initialDeltas = [];
+      if (nativeFPS === null || limitFPS >= nativeFPS) return;
+      if (stableSince === null) stableSince = idleSince;
+      recoverLimitAfterStablePeriod(time);
+    }
+    function recoverLimitAfterStablePeriod(time) {
+      if (stableSince === null || time - stableSince < recoveryDelay || time - lastAdjustment < recoveryDelay) return false;
+      if (trialLimit === limitFPS) {
+        trialLimit = null;
+        recoveryDelay = BASE_RECOVERY_DELAY;
+      }
+      if (limitFPS >= nativeFPS) return false;
+      limitFPS = recoveryLimit(limitFPS);
+      publishLimit();
+      trialLimit = limitFPS;
+      lastAdjustment = time;
+      stableSince = null;
+      samples = [];
+      frameCredit = 0;
+      return true;
+    }
+    function adaptiveLimit(observedFPS) {
+      let candidate = nativeFPS;
+      while (candidate > MIN_FPS && candidate > observedFPS) {
+        candidate = Math.max(MIN_FPS, candidate - FPS_STEP);
+      }
+      return candidate;
+    }
+    function recoveryLimit(current) {
+      const levels = [nativeFPS];
+      while (levels[levels.length - 1] > MIN_FPS) {
+        levels.push(Math.max(MIN_FPS, levels[levels.length - 1] - FPS_STEP));
+      }
+      for (let index = levels.length - 1; index >= 0; index--) {
+        if (levels[index] > current) return levels[index];
+      }
+      return nativeFPS;
+    }
+    function flushFrame(time) {
+      frameRequest = null;
+      if (hidden()) {
+        resetMeasurements(true);
+        scheduleFrame();
+        return;
+      }
+      if (!observeFrame(time)) {
+        scheduleFrame();
+        return;
+      }
+      const start = now();
       phase = "read";
-      var reads = readQueue.splice(0);
-      for (var i = 0; i < reads.length; i++)
-        runTask(reads[i]);
-      Promise.resolve().then(function() {
+      const reads = queues.read.splice(0);
+      for (const task of reads) runTask(task);
+      Promise.resolve().then(() => {
         phase = "update";
-        var updates = updateQueue.splice(0);
-        for (var i2 = 0; i2 < updates.length; i2++)
-          runTask(updates[i2]);
+        const updates = queues.update.splice(0);
+        for (const task of updates) runTask(task);
+        if (nativeFPS !== null && samples.length) {
+          const cost = now() - start;
+          const sample = samples[samples.length - 1];
+          sample.cost = cost;
+          if (cost > 1e3 / Math.max(MIN_FPS, limitFPS) * 0.8) sample.slow = true;
+        }
         phase = "idle";
-        if (readQueue.length || updateQueue.length) scheduleFrame();
+        if (hasWork()) scheduleFrame();
+        else idleSince = now();
       });
+    }
+    function removeTask(task) {
+      tasks.delete(task);
+      if (!task.group) return;
+      task.group.tasks.delete(task);
+      if (task.group[task.phase] === task) task.group[task.phase] = null;
+      if (!task.group.sequence && task.group.tasks.size === 0 && groups.get(task.group.id) === task.group) groups.delete(task.group.id);
+    }
+    function settleTask(task, error, value) {
+      if (task.state === "settled") return;
+      task.state = "settled";
+      removeTask(task);
+      if (error) task.reject(value);
+      else task.resolve(value);
+    }
+    function cancelTask(task) {
+      if (task.state === "settled") return;
+      if (task.state === "pending") {
+        const queue = queues[task.phase];
+        const index = queue.indexOf(task);
+        if (index !== -1) queue.splice(index, 1);
+      }
+      settleTask(task, false, void 0);
     }
     function runTask(task) {
+      if (task.state !== "pending") return;
+      task.state = "running";
+      if (task.group && task.group[task.phase] === task) task.group[task.phase] = null;
+      let result;
       try {
-        task.resolve(task.parameters ? task.callback.apply(void 0, task.parameters) : task.callback());
+        result = task.parameters ? task.callback.apply(void 0, task.parameters) : task.callback();
       } catch (error) {
-        task.reject(error);
+        settleTask(task, true, error);
+        return;
+      }
+      let then;
+      try {
+        then = result && result.then;
+      } catch (error) {
+        settleTask(task, true, error);
+        return;
+      }
+      if (typeof then === "function") {
+        Promise.resolve(result).then(
+          (value) => settleTask(task, false, value),
+          (error) => settleTask(task, true, error)
+        );
+      } else {
+        settleTask(task, false, result);
       }
     }
-    function queueTask(queue, callback, parameters) {
-      var promise = new Promise(function(resolve, reject) {
-        queue.push({
-          callback,
-          parameters,
-          resolve,
-          reject
-        });
+    function makeGroup(id) {
+      const group = { id, read: null, update: null, tasks: /* @__PURE__ */ new Set(), sequence: null };
+      groups.set(id, group);
+      return group;
+    }
+    function cancelGroup(group, status) {
+      if (groups.get(group.id) === group) groups.delete(group.id);
+      const sequence2 = group.sequence;
+      if (sequence2 && sequence2.active) {
+        sequence2.active = false;
+        if (sequence2.timer !== null) clearTimeout(sequence2.timer);
+        sequence2.timer = null;
+        detachAbortSignals(sequence2);
+        group.sequence = null;
+      }
+      for (const task of Array.from(group.tasks)) cancelTask(task);
+      if (sequence2) sequence2.resolve({ id: group.id, status });
+      stopFrameIfIdle();
+    }
+    function queueTask(kind, callback, parameters, id, owner) {
+      let group = null;
+      if (id !== void 0) {
+        group = owner ? owner.group : groups.get(id);
+        if (!owner && group && (group.sequence || group[kind])) {
+          cancelGroup(group, "superseded");
+          group = null;
+        }
+        if (!group) group = makeGroup(id);
+      }
+      let task;
+      const promise = new Promise((resolve, reject) => {
+        task = { phase: kind, callback, parameters, group, resolve, reject, state: "pending" };
       });
-      if (phase === "idle") scheduleFrame();
+      tasks.add(task);
+      if (group) {
+        group[kind] = task;
+        group.tasks.add(task);
+      }
+      queues[kind].push(task);
+      scheduleFrame();
       return promise;
     }
-    function clear() {
-      if (frameRequest !== null) {
-        cancelAnimationFrame(frameRequest);
-        frameRequest = null;
-      }
-      settleQueue(readQueue);
-      settleQueue(updateQueue);
-      phase = "idle";
+    function validId(id) {
+      if (!Number.isSafeInteger(id)) throw new TypeError("waitLayout ID must be a safe integer");
     }
-    function settleQueue(queue) {
-      var tasks = queue.splice(0);
-      for (var i = 0; i < tasks.length; i++) {
-        tasks[i].resolve(void 0);
+    function request(kind, first, second, third) {
+      if (typeof first === "number") {
+        validId(first);
+        return queueTask(kind, second, third, first, null);
       }
+      return queueTask(kind, first, second, void 0, null);
+    }
+    function validateStages(stages) {
+      if (!stages.length) throw new TypeError("sequence() requires at least one stage");
+      return stages.map((stage) => {
+        if (!stage || typeof stage !== "object" || typeof stage.read !== "function" && typeof stage.update !== "function") {
+          throw new TypeError("Each sequence stage needs a read or update callback");
+        }
+        if (stage.read !== void 0 && typeof stage.read !== "function" || stage.update !== void 0 && typeof stage.update !== "function") {
+          throw new TypeError("Sequence callbacks must be functions");
+        }
+        let abort = null;
+        let signal = null;
+        if (typeof stage.abort === "function") abort = stage.abort;
+        else if (stage.abort !== void 0) {
+          const candidate = stage.abort && (stage.abort.signal || stage.abort);
+          if (!candidate || typeof candidate.aborted !== "boolean" || typeof candidate.addEventListener !== "function" || typeof candidate.removeEventListener !== "function") {
+            throw new TypeError("abort must be a function, AbortController, or AbortSignal");
+          }
+          signal = candidate;
+        }
+        let interval = 0;
+        let times = 1;
+        if (stage.repeat !== void 0) {
+          const repeat = stage.repeat;
+          if (!repeat || typeof repeat !== "object" || repeat.ms !== void 0 && repeat.s !== void 0) {
+            throw new TypeError("repeat must use either ms or s");
+          }
+          interval = repeat.ms !== void 0 ? repeat.ms : repeat.s !== void 0 ? repeat.s * 1e3 : 0;
+          if (!Number.isFinite(interval) || interval < 0) throw new RangeError("Invalid repeat interval");
+          times = repeat.times === void 0 ? repeat.ms !== void 0 || repeat.s !== void 0 ? Infinity : 1 : repeat.times;
+          if (repeat.times !== void 0 && (!Number.isSafeInteger(times) || times < 1)) {
+            throw new RangeError("repeat.times must be a positive integer");
+          }
+        }
+        if (stage.maxFPS !== void 0 && (!Number.isFinite(stage.maxFPS) || stage.maxFPS <= 0)) {
+          throw new RangeError("maxFPS must be positive");
+        }
+        return {
+          read: stage.read,
+          update: stage.update,
+          abort,
+          signal,
+          interval,
+          times,
+          maxFPS: stage.maxFPS
+        };
+      });
+    }
+    function detachAbortSignals(owner) {
+      for (const signal of owner.abortSignals) {
+        signal.removeEventListener("abort", owner.abortHandler);
+      }
+      owner.abortSignals.length = 0;
+    }
+    function sequence(id, ...stages) {
+      validId(id);
+      const configs = validateStages(stages);
+      const previous = groups.get(id);
+      if (previous) cancelGroup(previous, "superseded");
+      const group = makeGroup(id);
+      let resolve;
+      let reject;
+      const result = new Promise((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
+      const owner = {
+        group,
+        configs,
+        index: 0,
+        count: 0,
+        lastStart: null,
+        timer: null,
+        active: true,
+        resolve,
+        reject,
+        abortSignals: [],
+        abortHandler: null
+      };
+      group.sequence = owner;
+      owner.abortHandler = () => finishSequence(owner, "aborted");
+      try {
+        for (const config of configs) {
+          if (config.signal && !owner.abortSignals.includes(config.signal)) {
+            config.signal.addEventListener("abort", owner.abortHandler);
+            owner.abortSignals.push(config.signal);
+          }
+        }
+        if (owner.abortSignals.some((signal) => signal.aborted)) {
+          finishSequence(owner, "aborted");
+        } else {
+          startIteration(owner);
+        }
+      } catch (error) {
+        finishSequence(owner, null, error);
+      }
+      return result;
+    }
+    function finishSequence(owner, status, error) {
+      if (!owner.active) return;
+      const group = owner.group;
+      owner.active = false;
+      if (owner.timer !== null) clearTimeout(owner.timer);
+      owner.timer = null;
+      detachAbortSignals(owner);
+      group.sequence = null;
+      if (groups.get(group.id) === group) groups.delete(group.id);
+      for (const task of Array.from(group.tasks)) cancelTask(task);
+      stopFrameIfIdle();
+      if (status === null) owner.reject(error);
+      else owner.resolve({ id: group.id, status });
+    }
+    function checkAbort(owner, config) {
+      if (!owner.active || !config.abort) return false;
+      const result = config.abort();
+      if (typeof result !== "boolean") throw new TypeError("abort must return a boolean");
+      if (result) finishSequence(owner, "aborted");
+      return result;
+    }
+    function startIteration(owner) {
+      if (!owner.active) return;
+      const config = owner.configs[owner.index];
+      const previousStart = sequenceStarts.get(owner.group.id);
+      const minimumStart = config.maxFPS === void 0 || !previousStart || previousStart.owner === owner ? 0 : previousStart.time + 1e3 / config.maxFPS;
+      if (minimumStart > now()) {
+        owner.timer = setTimeout(() => {
+          owner.timer = null;
+          startIteration(owner);
+        }, Math.max(0, minimumStart - now() - 1));
+        return;
+      }
+      try {
+        if (checkAbort(owner, config)) return;
+      } catch (error) {
+        finishSequence(owner, null, error);
+        return;
+      }
+      owner.lastStart = now();
+      sequenceStarts.set(owner.group.id, { owner, time: owner.lastStart });
+      const read = config.read ? queueTask("read", () => {
+        if (checkAbort(owner, config)) return;
+        return config.read();
+      }, void 0, owner.group.id, owner) : Promise.resolve(void 0);
+      read.then((value) => {
+        if (!owner.active) return;
+        try {
+          if (checkAbort(owner, config)) return;
+        } catch (error) {
+          finishSequence(owner, null, error);
+          return;
+        }
+        return config.update ? queueTask("update", (input) => {
+          if (checkAbort(owner, config)) return;
+          return config.update(input);
+        }, [value], owner.group.id, owner) : void 0;
+      }).then(() => {
+        if (owner.active) completeIteration(owner, config);
+      }, (error) => finishSequence(owner, null, error));
+    }
+    function completeIteration(owner, config) {
+      owner.count++;
+      if (owner.count >= config.times) {
+        owner.index++;
+        owner.count = 0;
+        owner.lastStart = null;
+        if (owner.index >= owner.configs.length) {
+          finishSequence(owner, "completed");
+          return;
+        }
+        startIteration(owner);
+        return;
+      }
+      const completed = now();
+      const fpsDue = config.maxFPS === void 0 ? completed : owner.lastStart + 1e3 / config.maxFPS;
+      const due = Math.max(completed + config.interval, fpsDue);
+      const delay = Math.max(0, due - now() - 1);
+      if (delay > 1) {
+        owner.timer = setTimeout(() => {
+          owner.timer = null;
+          startIteration(owner);
+        }, delay);
+      } else {
+        startIteration(owner);
+      }
+    }
+    function clear() {
+      if (frameRequest !== null) cancelAnimationFrame(frameRequest);
+      frameRequest = null;
+      if (waitingForVisibility) document.removeEventListener("visibilitychange", onVisible);
+      waitingForVisibility = false;
+      for (const group of Array.from(groups.values())) cancelGroup(group, "cleared");
+      for (const task of Array.from(tasks)) cancelTask(task);
+      queues.read.length = 0;
+      queues.update.length = 0;
+      phase = "idle";
+      idleSince = null;
+      resetMeasurements(true);
+      sequenceStarts.clear();
+    }
+    function cancel(id) {
+      validId(id);
+      const group = groups.get(id);
+      if (!group) return false;
+      cancelGroup(group, "aborted");
+      return true;
     }
     return Object.freeze({
-      read: (callback, parameters) => queueTask(readQueue, callback, parameters),
-      update: (callback, parameters) => queueTask(updateQueue, callback, parameters),
-      clear
+      read: (first, second, third) => request("read", first, second, third),
+      update: (first, second, third) => request("update", first, second, third),
+      sequence,
+      cancel,
+      clear,
+      setVisualFPSLimit
     });
   }
 
@@ -121,6 +619,15 @@
       spawn,
       despawn,
       hasMounts,
+      on(event, handler, options) {
+        root.AelluxJs.onEvent(element, event, handler, options);
+      },
+      off(event, handler, options) {
+        root.AelluxJs.offEvent(element, event, handler, options);
+      },
+      dispatch(event, options) {
+        return root.AelluxJs.dispatchFrom(element, event, options);
+      },
       mount(extensionNames = null) {
         return root.AelluxJs.mountManager.mount(element, extensionNames);
       },
@@ -201,21 +708,22 @@
 
   // src/internal/resolve-element-or-id.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  function resolveElementOrId(root, elementOrId, options = {}) {
-    const fallback = options.defaultElement;
+  function resolveElementOrId(root, elementOrId, options) {
+    options = options || {};
+    var fallback = options.defaultElement;
     if ((elementOrId === void 0 || elementOrId === null) && fallback) {
       return fallback;
     }
-    const requested = elementOrId;
+    var requested = elementOrId;
     if (typeof elementOrId === "string") {
-      const id = elementOrId.trim().replace(/^#/, "");
+      var id = elementOrId.trim().replace(/^#/, "");
       elementOrId = id ? root.document.getElementById(id) : null;
     }
-    const allowedNodeTypes = options.allowedNodeTypes || [root.Node.ELEMENT_NODE];
+    var allowedNodeTypes = options.allowedNodeTypes || [root.Node.ELEMENT_NODE];
     if (elementOrId && allowedNodeTypes.indexOf(elementOrId.nodeType) !== -1) {
       return elementOrId;
     }
-    const diagnostics = root.AelluxJs.diagnostics;
+    var diagnostics = root.AelluxJs.diagnostics;
     diagnostics.warn(diagnostics.WARN_INVALID_ELEMENT_OR_ID, {
       elementOrId: requested,
       method: options.method
@@ -223,30 +731,503 @@
     return null;
   }
 
+  // src/internal/report-configuration.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function reportConfiguration(api, name, context) {
+    if (context.element && context.attribute && !("value" in context))
+      context.value = context.element.getAttribute(context.attribute);
+    return api.diagnostics.warn(api.diagnostics[name], context);
+  }
+  function diagnosePresentTarget(api, element, target, attribute, value) {
+    if (!value || /[\s#]/.test(value.replace(/^#/, ""))) return false;
+    if (target && target.hasAttribute(api.attr("present"))) return true;
+    reportConfiguration(api, "WARN_CONFIGURATION_TARGET", {
+      extension: "present",
+      element,
+      attribute,
+      value,
+      reason: target ? "Target is not a Present container." : "Target element was not found.",
+      suggestion: "Use one existing Present element ID, optionally prefixed with #, and mount it before interacting."
+    });
+    return false;
+  }
+
+  // src/internal/diagnose-resources.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function transformOwners(api, element) {
+    var _a, _b, _c, _d;
+    const owners = [];
+    if (((_a = api.ext.anchor) == null ? void 0 : _a.initialized) && element.classList.contains(api.className("anchored"))) owners.push("anchor");
+    const parent = element.parentElement;
+    if (((_b = api.ext.scrollbox) == null ? void 0 : _b.initialized) && element.hasAttribute(api.attr("scrollbox-elastic")) && element.getAttribute(api.attr("scrollbox-elastic")) !== "false" && (parent == null ? void 0 : parent.hasAttribute(api.attr("scrollbox")))) {
+      const children = [...parent.children].filter((child) => !child.hasAttribute(api.attr("scrollbar-vertical")) && !child.hasAttribute(api.attr("scrollbar-horizontal")));
+      if (children.length === 1) owners.push("scrollbox-elastic");
+    }
+    if (((_c = api.ext.present) == null ? void 0 : _c.initialized) && !element.hasAttribute(api.attr("anchor")) && ((_d = element.getAttribute(api.attr("present"))) == null ? void 0 : _d.split(/\s+/).includes("transform"))) owners.push("present");
+    return owners;
+  }
+  function diagnoseResource(api, element, property, writers) {
+    api.diagnostics.warn(api.diagnostics.WARN_RESOURCE_CONFLICT, {
+      extension: writers[writers.length - 1],
+      element,
+      attribute: "style",
+      property,
+      writers,
+      reason: `${writers.join(" and ")} replace the same ${property} on this element.`,
+      suggestion: "Keep positioning and elastic transforms on the outer element; animate a child element instead."
+    });
+  }
+  function diagnoseMotionResources(api, element, animations, extension) {
+    if (api.options.environment !== "development") return;
+    for (const animation of animations) {
+      try {
+        const effect = animation.effect;
+        if ((effect == null ? void 0 : effect.target) !== element || effect.pseudoElement) continue;
+        const frames = effect.getKeyframes();
+        if (!frames.some((frame) => "transform" in frame && (frame.composite === "replace" || (!frame.composite || frame.composite === "auto") && (!effect.composite || effect.composite === "replace")))) continue;
+        const owners = transformOwners(api, element).filter((owner) => owner !== extension);
+        for (const owner of owners) diagnoseResource(api, element, "transform", [owner, extension]);
+      } catch (_) {
+      }
+    }
+  }
+
+  // src/internal/validate-declarations.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  var attributesByExtension = {
+    present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside",
+    anchor: "anchor anchor-target anchor-match",
+    "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
+    scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
+    "scrollbox-snap": "scrollbox-snap snap-item",
+    focus: "focus",
+    point: "point",
+    adaptive: "adaptive",
+    "ajax-href": "ajax-href",
+    viewport: "viewport viewport-target",
+    preference: "preference option label next prev ready",
+    feedback: "feedback message-target transform-target present-target"
+  };
+  var coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds load-style weak-style full-style legacy esm theme-color";
+  var activation = {
+    present: "present present-group trigger dismiss",
+    anchor: "anchor",
+    "overflow-marquee": "overflow-marquee",
+    scrollbox: "scrollbox",
+    "scrollbox-snap": "scrollbox-snap",
+    focus: "focus",
+    point: "point",
+    adaptive: "adaptive",
+    "ajax-href": "ajax-href",
+    viewport: "viewport",
+    preference: "preference",
+    feedback: "feedback"
+  };
+  function validateDeclarations(root, scope, extensionNames = null, method = "mount") {
+    var _a, _b;
+    const api = root.AelluxJs;
+    if (api.options.environment !== "development") return;
+    const selected = extensionNames === null ? null : new Set(
+      (Array.isArray(extensionNames) ? extensionNames : [extensionNames]).map(utils_name_case_default.fromCamelCase)
+    );
+    const attr = (name) => api.attr(name);
+    const prefix = attr("");
+    const owners = /* @__PURE__ */ new Map();
+    for (const [extension, names] of Object.entries(attributesByExtension))
+      for (const name of names.split(" ")) owners.set(attr(name), extension);
+    const known = /* @__PURE__ */ new Set([
+      ...owners.keys(),
+      ...coreAttributes.split(" ").map(attr),
+      ...Object.keys(api.registry.preferenceMediaQueries).map((name) => attr(utils_name_case_default.fromCamelCase(name)))
+    ]);
+    for (const selector of [...Object.values(api.registry.extMounters), ...Object.values(api.registry.lazyExtSelectors)])
+      for (const match of selector.match(/\[[^\s\]~|^$*!=]+/g) || []) known.add(match.slice(1));
+    const elements = [...scope.nodeType === 1 ? [scope] : [], ...scope.querySelectorAll("*")];
+    for (const element of elements) {
+      let validatePresent = function() {
+        if (has("present") && value("present").trim().split(/\s+/).some((token) => token && !["opacity", "transform", "height", "width"].includes(token)))
+          invalid("present", "present", "Unknown animated Present property.", "Use opacity, transform, height, width, all, or an empty value to disable motion.");
+        if (has("present-when") && /\s/.test(value("present-when")))
+          invalid("present", "present-when", "A group condition must be one class token.", "Use one class name without spaces or a leading dot.", "WARN_PRESENT_GROUP_SELECTION");
+        for (const [name, allowed] of [["trigger", ["", "toggle", "pop", "unpop"]], ["trigger-on", ["", "click", "hover"]]])
+          if (has(name) && !allowed.includes(name === "trigger" ? value(name).toLowerCase() : value(name)))
+            invalid("present", name, "Unknown Present control value.", `Use ${allowed.filter(Boolean).join(", ")}.`);
+        if (has("trigger") || has("dismiss")) {
+          const name = value("dismiss") ? "dismiss" : "target";
+          const reference = value(name);
+          if (reference) diagnosePresentTarget(api, element, root.document.getElementById(reference.replace(/^#/, "")), attr(name), reference);
+          else if (!element.closest(`[${attr("present")}]`))
+            invalid(
+              "present",
+              has("trigger") ? "trigger" : "dismiss",
+              "Control has no target or enclosing Present container.",
+              "Set data-ae-target to an existing Present ID or place the control inside its Present container.",
+              "WARN_CONFIGURATION_TARGET"
+            );
+          if (element.tabIndex < 0 && !element.matches(":disabled,[inert]"))
+            invalid(
+              "present",
+              has("trigger") ? "trigger" : "dismiss",
+              "Control is not reachable with the keyboard.",
+              "Prefer a native button; custom controls need focusability and appropriate keyboard activation.",
+              "WARN_CONTROL_ACCESSIBILITY"
+            );
+        }
+        if (has("auto-unpop") && value("auto-unpop") && !/^(?:\d+(?:\.\d+)?|\.\d+)(?:ms|s)?$/.test(value("auto-unpop").trim()))
+          invalid("present", "auto-unpop", "Auto-unpop duration is invalid.", "Use a nonnegative duration such as 250ms or 2s.");
+        if (has("present-group")) {
+          const members = [...element.querySelectorAll(`[${attr("present")}]`)].filter((member) => member.closest(`[${attr("present-group")}]`) === element);
+          if (!members.some((member) => member.id))
+            invalid("present", "present-group", "Group has no identifiable Present members.", "Add Present descendants with unique native IDs.", "WARN_PRESENT_GROUP_SELECTION");
+          for (const member of members) if (!member.id) reportConfiguration(api, "WARN_PRESENT_GROUP_SELECTION", {
+            extension: "present",
+            element: member,
+            attribute: "id",
+            value: member.id,
+            reason: "Present Group member has no ID.",
+            suggestion: "Assign a unique native ID so the group can select this member."
+          });
+        }
+      }, validateAnchor = function() {
+        var _a2, _b2, _c;
+        const pivots = new Set("top-left top-center top-right center-left center center-right bottom-left bottom-center bottom-right".split(" "));
+        const pairs = has("anchor") ? value("anchor").split(",") : [];
+        if (has("anchor") && !pairs.every((token) => {
+          const pair = token.trim().toLowerCase().split(":");
+          return pair.length === 2 && pair.every((pivot) => pivots.has(pivot.trim()));
+        }))
+          invalid("anchor", "anchor", "Anchor pivot pair is invalid.", "Use target:self pairs such as bottom-center:top-center, separated by commas.");
+        if (has("anchor-match") && value("anchor-match").trim().split(/\s+/).some((token) => !["width", "height"].includes(token)))
+          invalid("anchor", "anchor-match", "Unknown matching dimension.", "Use width, height, or width height.", "WARN_ANCHOR_MATCH");
+        const reference = value("anchor-target");
+        if (!reference) return;
+        let target;
+        try {
+          target = root.document.getElementById(reference.replace(/^#/, "")) || root.document.querySelector(reference);
+        } catch (_) {
+        }
+        if (target == null ? void 0 : target.hasAttribute(attr("present-group"))) {
+          if (!((_a2 = api.ext.present) == null ? void 0 : _a2.initialized))
+            report("WARN_EXTENSION_REQUIRED", "present", "anchor-target", "A Present Group target requires Present.", "Register and initialize Present before mounting the group and its Anchors.");
+          target = (_c = (_b2 = api.ext.present) == null ? void 0 : _b2.selected) == null ? void 0 : _c.call(_b2, target);
+          if (!target) return;
+        }
+        if (!target) invalid("anchor", "anchor-target", "Anchor target does not exist or the selector is invalid.", "Use an existing target ID or a valid CSS selector.", "WARN_CONFIGURATION_TARGET");
+        else if (method === "update" && element.getClientRects().length && !target.getClientRects().length && !target.closest(`[${attr("present")}],[hidden]`))
+          invalid("anchor", "anchor-target", "The explicitly updated Anchor target cannot currently be measured.", "Reveal the target before requesting placement, or update again after it becomes measurable.", "WARN_CONFIGURATION_TARGET");
+      }, validateScrollbox = function() {
+        if (value("scrollbox").trim().toLowerCase() !== "pointer" || !element.getClientRects().length) return;
+        const style = root.getComputedStyle(element);
+        const blockedX = element.scrollWidth > element.clientWidth + 1 && !["auto", "scroll"].includes(style.overflowX);
+        const blockedY = element.scrollHeight > element.clientHeight + 1 && !["auto", "scroll"].includes(style.overflowY);
+        const usableX = element.scrollWidth > element.clientWidth + 1 && ["auto", "scroll"].includes(style.overflowX);
+        const usableY = element.scrollHeight > element.clientHeight + 1 && ["auto", "scroll"].includes(style.overflowY);
+        if ((blockedX || blockedY) && !usableX && !usableY)
+          invalid("scrollbox", "scrollbox", "Content overflows but CSS disables the pointer scrolling axes.", "Set overflow:auto or overflow:scroll on the intended axis.", "WARN_CONFIGURATION_STYLE");
+      }, validateSnap = function() {
+        if (!["", "horizontal", "vertical", "false"].includes(value("scrollbox-snap")))
+          invalid("scrollbox-snap", "scrollbox-snap", "Unknown snap axis.", "Use horizontal, vertical, or false.");
+        for (const item of element.querySelectorAll(`[${attr("snap-item")}]`)) {
+          if (item.closest(`[${attr("scrollbox")}]`) !== element) continue;
+          const alignment = item.getAttribute(attr("snap-item"));
+          const style = root.getComputedStyle(item);
+          if (item.getClientRects().length && [style.transform, style.translate, style.rotate, style.scale].some((value2) => value2 && value2 !== "none"))
+            reportConfiguration(api, "WARN_SCROLLBOX_SNAP_TRANSFORM", {
+              extension: "scrollbox-snap",
+              element: item,
+              attribute: attr("snap-item"),
+              reason: "Snap geometry includes a transform applied to the item itself.",
+              suggestion: "Apply the visual transform to a child of the snap item."
+            });
+          if (!["", "start", "end", "center", "left", "right", "top", "bottom"].includes(alignment))
+            reportConfiguration(api, "WARN_CONFIGURATION_VALUE", {
+              extension: "scrollbox-snap",
+              element: item,
+              attribute: attr("snap-item"),
+              value: alignment,
+              reason: "Unknown snap item alignment.",
+              suggestion: "Use start, center, or end (left/right/top/bottom are aliases)."
+            });
+        }
+      }, validateCSS = function() {
+        var _a2;
+        const checkAnchor = has("anchor") && (!selected || selected.has("anchor"));
+        const checkPresent = (has("present") || has("present-motion")) && (!selected || selected.has("present"));
+        if (!checkAnchor && !checkPresent) return;
+        if (has("anchor") && has("present") && value("present").trim().split(/\s+/).some((token) => token === "transform" || token === "all"))
+          invalid(
+            "present",
+            "present",
+            "Anchor and Present both declare transform; Anchor takes priority.",
+            "Remove transform from Present, or animate a child element instead.",
+            "WARN_PRESENT_ANCHOR_TRANSFORM"
+          );
+        const extension = checkAnchor ? "anchor" : "present";
+        const style = root.getComputedStyle(element);
+        const durations = [
+          ...checkPresent ? ["--ae-pop-duration", "--ae-unpop-duration"] : [],
+          ...checkAnchor ? ["--ae-anchor-switch-duration"] : []
+        ];
+        for (const name of durations) {
+          const value2 = (element.style.getPropertyValue(name) || style.getPropertyValue(name)).trim();
+          if (value2 && ((_a2 = root.CSS) == null ? void 0 : _a2.supports) && !root.CSS.supports("transition-duration", value2))
+            reportConfiguration(api, "WARN_CONFIGURATION_STYLE", {
+              extension,
+              element,
+              attribute: "style",
+              value: value2,
+              reason: `Invalid duration in ${name}.`,
+              suggestion: "Use a nonnegative CSS time such as 250ms or 0s."
+            });
+        }
+        if (!element.getClientRects().length) return;
+        if (checkPresent && has("present") && element.classList.contains(api.className("present-grid")) && /(?:^|\s)(height|width)(?:\s|$)/.test(value("present")) && !["grid", "inline-grid"].includes(style.display))
+          invalid(extension, "present", "Present's size motion requires its grid layout stylesheet.", "Load the Present stylesheet, check CSP, and preserve the container's grid display.", "WARN_CONFIGURATION_STYLE");
+        if (checkAnchor && element.classList.contains(api.className("anchored")) && !["absolute", "fixed"].includes(style.position))
+          invalid(extension, "anchor", "Effective CSS prevents Anchor's absolute positioning.", "Check the weak stylesheet, CSP and overriding position rules.", "WARN_CONFIGURATION_STYLE");
+        if (checkPresent && has("present") && element.hidden && style.display !== "none" && !invisible(element))
+          invalid(extension, "present", "CSS makes a hidden Present container render.", "Preserve display:none for hidden Present containers; check overriding display rules.", "WARN_CONFIGURATION_STYLE");
+      };
+      const has = (name) => element.hasAttribute(attr(name));
+      const value = (name) => element.getAttribute(attr(name));
+      const report = (name, extension, attribute, reason, suggestion, extra = {}) => reportConfiguration(api, name, __spreadValues({ extension, element, attribute: attr(attribute), reason, suggestion }, extra));
+      const invalid = (extension, name, reason, suggestion, code = "WARN_CONFIGURATION_VALUE") => report(code, extension, name, reason, suggestion);
+      for (const attribute of element.attributes) {
+        const owner = owners.get(attribute.name);
+        if (selected && (!owner || !selected.has(owner))) continue;
+        if (!selected && attribute.name.startsWith(prefix) && !known.has(attribute.name)) {
+          const candidate = [...known].find((name) => oneEditApart(attribute.name, name));
+          if (candidate) reportConfiguration(api, "WARN_ATTRIBUTE_UNKNOWN", {
+            extension: owners.get(candidate) || "core",
+            element,
+            attribute: attribute.name,
+            value: attribute.value,
+            reason: "Unknown Aellux attribute.",
+            suggestion: `Check the spelling; did you mean ${candidate}?`
+          });
+        }
+      }
+      for (const [extension, declarations] of Object.entries(activation)) {
+        if (selected && !selected.has(extension)) continue;
+        const declaration = declarations.split(" ").find((name) => has(name) && (name !== "scrollbox-snap" || value(name) !== "false"));
+        if (!declaration) continue;
+        if (extension === "scrollbox-snap" && !has("scrollbox"))
+          invalid(extension, "scrollbox-snap", "Snap requires Scrollbox on the same element.", "Add data-ae-scrollbox to the Snap container.", "WARN_CONFIGURATION_STRUCTURE");
+        const key = utils_name_case_default.toCamelCase(extension);
+        if (!((_a = api.ext[key]) == null ? void 0 : _a.initialized)) {
+          report(
+            "WARN_EXTENSION_REQUIRED",
+            extension,
+            declaration,
+            "The declared behavior's Extension is not initialized.",
+            `Register ${extension} before mounting, await $ae.wait("${extension}"), and check earlier load diagnostics.`
+          );
+          continue;
+        }
+        if (extension === "present") validatePresent();
+        if (extension === "anchor") validateAnchor();
+        if (extension === "overflow-marquee" && has("overflow-marquee-fade") && !["", "true", "false"].includes(value("overflow-marquee-fade")))
+          invalid(
+            extension,
+            "overflow-marquee-fade",
+            "Overflow Marquee fade expects a boolean value.",
+            "Use true or false, or omit the attribute to enable the fade."
+          );
+        if (extension === "scrollbox") validateScrollbox();
+        if (extension === "scrollbox" && has("scrollbox-fade") && !["", "true", "false"].includes(value("scrollbox-fade")))
+          invalid(
+            extension,
+            "scrollbox-fade",
+            "Scrollbox fade expects a boolean value.",
+            "Use true or false, or omit the attribute to enable the fade."
+          );
+        if (extension === "scrollbox-snap") validateSnap();
+        if (extension === "focus") {
+          if (value("focus") && value("focus") !== "next")
+            invalid(extension, "focus", "Unknown Focus mode.", "Use next for Enter navigation, or remove the attribute.");
+          if (value("focus") === "next" && !element.matches("input:not([type]),input[type=text],input[type=search],input[type=email],input[type=url],input[type=tel],input[type=password],input[type=number],textarea,[contenteditable]:not([contenteditable=false])"))
+            invalid(extension, "focus", "Enter navigation is declared on a non-text-entry element.", "Apply data-ae-focus=next to a text input, textarea or editable element.");
+        }
+        if (extension === "point" && value("point") !== "" && (!/^\d+$/.test(value("point")) || !Number.isSafeInteger(Number(value("point")))))
+          invalid(extension, "point", "Pointer count must be a nonnegative integer.", "Use an integer such as 1; 0 disables pointer association.");
+        if (extension === "ajax-href") {
+          const selectors = api.parseSelectors(value("ajax-href").trim() || "title,body");
+          if (!selectors) {
+            invalid(extension, "ajax-href", "The AJAX selector is invalid.", "Provide a valid CSS selector such as #content.");
+          } else if (selectors.some((selector) => !root.document.querySelector(selector)))
+            invalid(extension, "ajax-href", "No current content matches the AJAX selector.", "Provide a CSS selector present in both the current page and the response.");
+        }
+      }
+      if ((!selected || selected.has("scrollbox")) && has("scrollbox-elastic") && value("scrollbox-elastic") !== "false" && !((_b = element.parentElement) == null ? void 0 : _b.hasAttribute(attr("scrollbox"))))
+        invalid("scrollbox", "scrollbox-elastic", "Elastic wrapper must be a direct child of Scrollbox.", "Place exactly one marked wrapper directly inside data-ae-scrollbox.", "WARN_CONFIGURATION_STRUCTURE");
+      if ((!selected || selected.has("scrollbox-snap")) && has("snap-item") && !element.closest(`[${attr("scrollbox")}]`))
+        invalid("scrollbox-snap", "snap-item", "Snap item has no Scrollbox ancestor.", "Place snap items inside a Scrollbox with Snap enabled.", "WARN_CONFIGURATION_STRUCTURE");
+      if (!selected && has("maxfps") && (!value("maxfps").trim() || !Number.isFinite(Number(value("maxfps"))) || Number(value("maxfps")) <= 0))
+        invalid("core", "maxfps", "Frame rate must be finite and greater than zero.", "Use a positive number or remove the attribute.", "WARN_LAYOUT_MAX_FPS_INVALID");
+      if (!selected || selected.has("present") || selected.has("anchor")) validateCSS();
+      if ((!selected || selected.has("present") || selected.has("scrollbox")) && has("scrollbox-elastic")) {
+        const writers = transformOwners(api, element);
+        if (writers.includes("scrollbox-elastic") && writers.includes("present"))
+          diagnoseResource(api, element, "transform", ["scrollbox-elastic", "present"]);
+      }
+    }
+    function invisible(element) {
+      for (let node = element; node; node = node.parentElement) {
+        const style = root.getComputedStyle(node);
+        if (style.visibility !== "visible" || Number(style.opacity) === 0) return true;
+      }
+      return false;
+    }
+  }
+  function oneEditApart(left, right) {
+    if (Math.abs(left.length - right.length) > 1) return false;
+    let i = 0, j = 0, edits = 0;
+    while (i < left.length && j < right.length) {
+      if (left[i] === right[j]) {
+        i++;
+        j++;
+        continue;
+      }
+      if (++edits > 1) return false;
+      if (left[i] === right[j + 1] && left[i + 1] === right[j] && left.length === right.length) {
+        i += 2;
+        j += 2;
+      } else if (left.length > right.length) i++;
+      else if (right.length > left.length) j++;
+      else {
+        i++;
+        j++;
+      }
+    }
+    return edits + Number(i < left.length || j < right.length) === 1;
+  }
+
+  // src/internal/find-duplicate-attributes.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function findDuplicateAttributes(html) {
+    const duplicates = [];
+    const space = /[\t\n\f\r ]/;
+    const lower = (text) => text.replace(/[A-Z]/g, (char) => char.toLowerCase());
+    let index = 0, lineIndex = 0, line = 1, column = 1;
+    while ((index = html.indexOf("<", index)) !== -1) {
+      if (html.startsWith("<!--", index)) {
+        const end = /--!?>/.exec(html.slice(index + 4));
+        index = end ? index + 4 + end.index + end[0].length : html.length;
+        continue;
+      }
+      if (html.startsWith("<![CDATA[", index)) {
+        const end = html.indexOf("]]>", index + 9);
+        index = end < 0 ? html.length : end + 3;
+        continue;
+      }
+      if (/[!?/]/.test(html[index + 1] || "")) {
+        const end = html.indexOf(">", index + 2);
+        index = end < 0 ? html.length : end + 1;
+        continue;
+      }
+      if (!/[a-z]/i.test(html[index + 1] || "")) {
+        index++;
+        continue;
+      }
+      const tagStart = ++index;
+      while (index < html.length && !space.test(html[index]) && !/[/>]/.test(html[index])) index++;
+      const tagName = lower(html.slice(tagStart, index));
+      const attributes = /* @__PURE__ */ new Map();
+      while (index < html.length && html[index] !== ">") {
+        if (space.test(html[index]) || html[index] === "/") {
+          index++;
+          continue;
+        }
+        const offset = index++;
+        while (index < html.length && !space.test(html[index]) && !/[=/>]/.test(html[index])) index++;
+        const attribute = lower(html.slice(offset, index).replace(/\0/g, "\uFFFD"));
+        while (space.test(html[index] || "")) index++;
+        let value = "";
+        if (html[index] === "=") {
+          index++;
+          while (space.test(html[index] || "")) index++;
+          const quote = html[index];
+          if (quote === '"' || quote === "'") {
+            const start = ++index;
+            while (index < html.length && html[index] !== quote) index++;
+            value = html.slice(start, index);
+            if (index < html.length) index++;
+          } else {
+            const start = index;
+            while (index < html.length && !space.test(html[index]) && html[index] !== ">") index++;
+            value = html.slice(start, index);
+          }
+        }
+        const previous = attributes.get(attribute);
+        if (previous) {
+          previous.values.push(value);
+          if (!previous.duplicate) {
+            while (lineIndex < offset) {
+              const char = html[lineIndex++];
+              if (char === "\r" || char === "\n" && html[lineIndex - 2] !== "\r") {
+                line++;
+                column = 1;
+              } else if (char !== "\n") column++;
+            }
+            previous.duplicate = { tagName, attribute, value: previous.values[0], values: previous.values, offset, line, column };
+          }
+        } else attributes.set(attribute, { values: [value] });
+      }
+      if (index >= html.length) break;
+      for (const attribute of attributes.values())
+        if (attribute.duplicate) duplicates.push(attribute.duplicate);
+      index++;
+      if (tagName === "plaintext") break;
+      if (/^(script|style|textarea|title|xmp|iframe|noembed|noframes|noscript)$/.test(tagName)) {
+        const closing = new RegExp(`</${tagName}(?=[\\t\\n\\f\\r />])`, "ig");
+        closing.lastIndex = index;
+        const end = closing.exec(html);
+        index = end ? end.index : html.length;
+      }
+    }
+    return duplicates;
+  }
+
+  // src/internal/validate-html-source.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function validateHTMLSource(api, html, source) {
+    if (api.options.environment !== "development") return;
+    for (const duplicate of findDuplicateAttributes(html)) {
+      const { attribute } = duplicate;
+      reportConfiguration(api, "WARN_ATTRIBUTE_DUPLICATE", __spreadProps(__spreadValues({
+        extension: "core",
+        source
+      }, duplicate), {
+        reason: `The ${attribute} attribute occurs more than once on the same start tag; the HTML parser keeps the first value and discards the others.`,
+        suggestion: attribute === "class" ? "Combine all class names in one class attribute, separated by spaces." : attribute === "style" ? "Combine the intended CSS declarations in one style attribute, separated by semicolons." : `Keep one ${attribute} attribute with the intended value.`
+      }));
+    }
+  }
+
   // src/internal/create-mount-helper.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createMountHelper(root, mountMaps, mountedElements, elementControllers) {
+    const UNMOUNT = "unmount";
     const { toCapitalized: toCapitalized2, toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
-    const initialAttributeValues = /* @__PURE__ */ new WeakMap();
     const pendingMounts = /* @__PURE__ */ new WeakMap();
     const pendingUnmounts = /* @__PURE__ */ new WeakMap();
+    const mountRecords = /* @__PURE__ */ new WeakMap();
+    let mountOrder = 0;
     const classPrefix = root.AelluxJs.className("");
-    return { mount, unmount, unmountDetached, update, initialAttribute };
-    function initialAttribute(element, name) {
-      var _a, _b;
-      return (_b = (_a = initialAttributeValues.get(element)) == null ? void 0 : _a.initial.get(name)) != null ? _b : null;
-    }
+    const sourceURL = root.document.URL;
+    let sourceChecked = false;
+    return { mount, unmount, unmountDetached, update };
     async function update(elementOrId, extensionNames = null) {
       const rootElement = resolveMountElement(elementOrId, "update");
       if (!rootElement) return false;
       await AelluxJsMounted(rootElement, "update", extensionNames);
+      validateDeclarations(root, rootElement, extensionNames, "update");
       return true;
     }
     async function unmount(elementOrId, extensionNames = null) {
-      const rootElement = resolveMountElement(elementOrId, "unmount");
+      const rootElement = resolveMountElement(elementOrId, UNMOUNT);
       if (!rootElement) return false;
-      await AelluxJsMounted(rootElement, "unmount", extensionNames);
-      return true;
+      return AelluxJsMounted(rootElement, UNMOUNT, extensionNames);
     }
     async function unmountDetached() {
       let hasDetachedElement = false;
@@ -257,14 +1238,20 @@
         }
       }
       if (!hasDetachedElement) return false;
-      await AelluxJsMounted(root.document, "unmount", null, true);
-      return true;
+      return AelluxJsMounted(root.document, UNMOUNT, null, true);
     }
     async function mount(elementOrId, extensionNames = null) {
       const AelluxJs2 = root.AelluxJs;
       const newlyMounted = /* @__PURE__ */ new Set();
       const rootElement = resolveMountElement(elementOrId, "mount");
       if (!rootElement) return [];
+      if (!AelluxJs2.dispatch("BeforeMount", {
+        cancelable: true,
+        detail: {
+          root: rootElement,
+          extensions: extensionNames == null ? null : (typeof extensionNames === "string" ? [extensionNames] : extensionNames).map((name) => fromCamelCase2(name))
+        }
+      })) return [];
       const waitMountedAttr = AelluxJs2.attr("wait-mounted");
       const allWaiters = findElements(rootElement, `[${waitMountedAttr}]`);
       allWaiters.forEach((waiter) => waiter.setAttribute("aria-busy", "true"));
@@ -281,11 +1268,13 @@
         }
         const waitExtensions = [];
         for (const [key, options] of Object.entries(root.AelluxJs.registry.ext)) {
-          if (options.loadWhen) continue;
+          if (options.load === false) continue;
           waitExtensions.push(AelluxJs2.wait(key));
         }
         await Promise.all(waitExtensions);
         await AelluxJsMount(rootElement, extensionNames, newlyMounted);
+        validateDeclarations(root, rootElement, extensionNames);
+        if (rootElement === root.document && extensionNames == null) validateDocumentSource();
       } catch (error) {
         AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_MOUNT, {
           cause: error,
@@ -296,6 +1285,13 @@
         allWaiters.forEach((waiter) => waiter.setAttribute("aria-busy", "false"));
       }
       return Array.from(newlyMounted);
+    }
+    function validateDocumentSource() {
+      const api = root.AelluxJs;
+      if (api.options.environment !== "development" || sourceChecked || root.document.contentType !== "text/html" || !/^https?:/i.test(sourceURL)) return;
+      sourceChecked = true;
+      Promise.resolve().then(() => api.request(sourceURL, { cache: "force-cache" })).then((response) => response.text()).then((html) => validateHTMLSource(api, html, sourceURL)).catch(() => {
+      });
     }
     async function AelluxJsMount(rootElement, extensionNames, newlyMounted) {
       const AelluxJs2 = root.AelluxJs;
@@ -316,7 +1312,12 @@
           if (extensionNames.indexOf(fromCamelCase2(key)) !== -1)
             filter.push(selectorString);
       }
-      if (filter.length === 0) return;
+      if (filter.length === 0) {
+        AelluxJs2.dispatch("Mount", {
+          detail: { root: rootElement, extensions: extensionNames, elements: [] }
+        });
+        return;
+      }
       const candidatesByExtension = /* @__PURE__ */ new Map();
       const allElements = findElements(rootElement, filter.join(","));
       for (const element of allElements) {
@@ -351,91 +1352,90 @@
       for (const result of loaded) {
         if (Object.prototype.hasOwnProperty.call(result, "error")) throw result.error;
       }
-      const elementsAffected = /* @__PURE__ */ new Set();
+      const registrations = [];
       for (let index = 0; index < extensions.length; index++) {
         if (!loaded[index].value) continue;
-        const [extensionName, candidates] = extensions[index];
+        const [extensionName] = extensions[index];
         const mounter = mountMaps.get(toCamelCase2(extensionName));
-        if (!mounter) {
-          continue;
-        }
-        const searchRoots = [];
-        for (const candidate of candidates) {
-          let ancestor = candidate.parentNode;
-          while (ancestor && !candidates.has(ancestor)) ancestor = ancestor.parentNode;
-          if (!ancestor) searchRoots.push(candidate);
-        }
+        if (!mounter) continue;
         for (const [selector, controller] of mounter) {
-          try {
-            if (!controller.mount) {
+          registrations.push({
+            extensionName,
+            selector,
+            controller,
+            priority: controller.priority,
+            order: registrations.length
+          });
+        }
+      }
+      registrations.sort((left, right) => left.priority - right.priority || left.order - right.order);
+      const elementsAffected = /* @__PURE__ */ new Set();
+      for (const { extensionName, selector, controller } of registrations) {
+        try {
+          if (!controller.mount) {
+            continue;
+          }
+          const mountableElements = findElements(rootElement, selector);
+          for (const mountable of mountableElements) {
+            const mountId = `${extensionName}@${selector}`;
+            if (isMounted(mountable, mountId)) {
+              const pendingMount = getPendingMount(mountable, mountId);
+              if (pendingMount) await pendingMount;
               continue;
             }
-            for (const searchRoot of searchRoots) {
-              const mountableElements = findElements(searchRoot, selector);
-              for (const mountable of mountableElements) {
-                const mountId = `${extensionName}@${selector}`;
-                if (isMounted(mountable, mountId)) {
-                  const pendingMount = getPendingMount(mountable, mountId);
-                  if (pendingMount) await pendingMount;
-                  continue;
-                }
-                if (!isMounted(mountable)) {
-                  for (const name of Array.from(mountable.classList)) {
-                    if (name.startsWith(classPrefix)) mountable.classList.remove(name);
-                  }
-                }
-                rememberInitialAttributes(mountable);
-                setMounted(mountable, mountId);
-                const finishPendingMount = beginPendingMount(mountable, mountId);
-                try {
-                  await controller.mount(mountable);
-                  let elementController = elementControllers.get(mountable);
-                  if (!elementController) {
-                    elementController = createControllerHelper(root, mountable);
-                    elementControllers.set(mountable, elementController);
-                  }
-                  elementController.spawn(
-                    extensionName,
-                    mountId,
-                    controller.controllers,
-                    typeof controller.update === "function"
-                  );
-                  elementsAffected.add(mountable);
-                  newlyMounted.add(mountable);
-                } catch (error) {
-                  setMounted(mountable, mountId, false);
-                  const elementController = elementControllers.get(mountable);
-                  if (elementController) {
-                    elementController.despawn(mountId);
-                    if (!elementController.hasMounts()) elementControllers.delete(mountable);
-                  }
-                  restoreInitialAttributes(mountable);
-                  AelluxJs2.diagnostics.error(
-                    AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
-                    {
-                      cause: error,
-                      extension: extensionName,
-                      method: "mount",
-                      selector,
-                      element: mountable
-                    }
-                  );
-                } finally {
-                  finishPendingMount();
-                }
+            if (!isMounted(mountable)) {
+              for (const name of Array.from(mountable.classList)) {
+                if (name.startsWith(classPrefix)) mountable.classList.remove(name);
               }
             }
-          } catch (error) {
-            AelluxJs2.diagnostics.error(
-              AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
-              {
-                cause: error,
-                extension: extensionName,
-                method: "mount",
-                selector
+            setMounted(mountable, mountId, true, controller.priority);
+            const finishPendingMount = beginPendingMount(mountable, mountId);
+            try {
+              await controller.mount(mountable);
+              let elementController = elementControllers.get(mountable);
+              if (!elementController) {
+                elementController = createControllerHelper(root, mountable);
+                elementControllers.set(mountable, elementController);
               }
-            );
+              elementController.spawn(
+                extensionName,
+                mountId,
+                controller.controllers,
+                typeof controller.update === "function"
+              );
+              elementsAffected.add(mountable);
+              newlyMounted.add(mountable);
+            } catch (error) {
+              setMounted(mountable, mountId, false);
+              const elementController = elementControllers.get(mountable);
+              if (elementController) {
+                elementController.despawn(mountId);
+                if (!elementController.hasMounts()) elementControllers.delete(mountable);
+              }
+              AelluxJs2.diagnostics.error(
+                AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
+                {
+                  cause: error,
+                  extension: extensionName,
+                  method: "mount",
+                  selector,
+                  element: mountable
+                }
+              );
+            } finally {
+              finishPendingMount();
+            }
           }
+        } catch (error) {
+          AelluxJs2.diagnostics.error(
+            AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
+            {
+              cause: error,
+              extension: extensionName,
+              method: "mount",
+              selector
+            }
+          );
         }
       }
       for (const affected of elementsAffected) {
@@ -446,14 +1446,30 @@
         }
         affected.classList.toggle(AelluxJs2.className("mounted"), true);
       }
-      AelluxJs2.dispatch("Mount");
+      AelluxJs2.dispatch("Mount", {
+        detail: {
+          root: rootElement,
+          extensions: extensionNames,
+          elements: Array.from(newlyMounted)
+        }
+      });
     }
     async function AelluxJsMounted(rootElement, method, extensionNames = null, detachedOnly = false) {
       const AelluxJs2 = root.AelluxJs;
       const selectedNames = extensionNames === null ? null : new Set((typeof extensionNames === "string" ? [extensionNames] : extensionNames).map((name) => fromCamelCase2(name)));
+      if (method === UNMOUNT && !AelluxJs2.dispatch("BeforeUnmount", {
+        cancelable: true,
+        detail: {
+          root: rootElement,
+          extensions: selectedNames ? Array.from(selectedNames) : null,
+          detachedOnly
+        }
+      })) return false;
+      const affected = /* @__PURE__ */ new Set();
+      const registrations = [];
       for (const [element, mountIds] of Array.from(mountedElements)) {
         const inRoot = element === rootElement || rootElement.contains(element);
-        const detachedInGlobalUnmount = method === "unmount" && rootElement === root.document && !element.isConnected;
+        const detachedInGlobalUnmount = method === UNMOUNT && rootElement === root.document && !element.isConnected;
         if (detachedOnly ? element.isConnected || hasPendingMounts(element) : !inRoot && !detachedInGlobalUnmount) continue;
         for (const mountId of Array.from(mountIds)) {
           const separator = mountId.indexOf("@");
@@ -463,12 +1479,13 @@
           const extensionKey = toCamelCase2(extensionName);
           const mounter = mountMaps.get(extensionKey);
           const controller = mounter && mounter.get(selector);
-          if (method === "unmount") {
-            await unmountRegistration(element, mountId, controller, extensionName, selector);
+          if (method === UNMOUNT) {
+            registrations.push({ element, mountId, controller, extensionName, selector });
             continue;
           }
           try {
             if (controller && controller[method]) {
+              affected.add(element);
               await controller[method](element);
             }
           } catch (error) {
@@ -481,12 +1498,26 @@
           }
         }
       }
-      AelluxJs2.dispatch(toCapitalized2(method));
+      if (method === UNMOUNT) {
+        registrations.sort(compareUnmountOrder);
+        for (const { element, mountId, controller, extensionName, selector } of registrations) {
+          if (await unmountRegistration(element, mountId, controller, extensionName, selector))
+            affected.add(element);
+        }
+      }
+      AelluxJs2.dispatch(toCapitalized2(method), {
+        detail: {
+          root: rootElement,
+          extensions: selectedNames ? Array.from(selectedNames) : null,
+          elements: Array.from(affected)
+        }
+      });
+      return true;
     }
     async function unmountRegistration(element, mountId, controller, extensionName, selector) {
       const pendingMount = getPendingMount(element, mountId);
       if (pendingMount) await pendingMount;
-      if (!isMounted(element, mountId)) return;
+      if (!isMounted(element, mountId)) return false;
       let tasks = pendingUnmounts.get(element);
       if (!tasks) {
         tasks = /* @__PURE__ */ new Map();
@@ -494,7 +1525,7 @@
       }
       if (tasks.has(mountId)) {
         await tasks.get(mountId);
-        return;
+        return false;
       }
       let finish;
       tasks.set(mountId, new Promise((resolve) => {
@@ -509,7 +1540,7 @@
           diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
             cause,
             extension: extensionName,
-            method: "unmount",
+            method: UNMOUNT,
             selector
           });
         }
@@ -521,12 +1552,11 @@
             if (!elementController.hasMounts()) elementControllers.delete(element);
           }
           element.classList.toggle(AelluxJs2.className("mounted"), isMounted(element));
-          restoreInitialAttributes(element);
         } catch (cause) {
           diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
             cause,
             extension: extensionName,
-            method: "unmount",
+            method: UNMOUNT,
             selector
           });
         }
@@ -535,17 +1565,27 @@
         if (!tasks.size) pendingUnmounts.delete(element);
         finish();
       }
+      return !isMounted(element, mountId);
     }
     async function unmountElementRegistrations(element) {
-      const mountIds = Array.from(mountedElements.get(element) || []);
-      for (const mountId of mountIds) {
+      const registrations = Array.from(mountedElements.get(element) || [], (mountId) => {
         const separator = mountId.indexOf("@");
         const extensionName = mountId.slice(0, separator);
         const selector = mountId.slice(separator + 1);
         const mounter = mountMaps.get(toCamelCase2(extensionName));
         const controller = mounter && mounter.get(selector);
+        return { element, mountId, controller, extensionName, selector };
+      });
+      registrations.sort(compareUnmountOrder);
+      for (const { mountId, controller, extensionName, selector } of registrations) {
         await unmountRegistration(element, mountId, controller, extensionName, selector);
       }
+    }
+    function compareUnmountOrder(left, right) {
+      var _a, _b, _c, _d, _e, _f;
+      const leftRecord = (_a = mountRecords.get(left.element)) == null ? void 0 : _a.get(left.mountId);
+      const rightRecord = (_b = mountRecords.get(right.element)) == null ? void 0 : _b.get(right.mountId);
+      return ((_c = rightRecord == null ? void 0 : rightRecord.priority) != null ? _c : 0) - ((_d = leftRecord == null ? void 0 : leftRecord.priority) != null ? _d : 0) || ((_e = rightRecord == null ? void 0 : rightRecord.order) != null ? _e : 0) - ((_f = leftRecord == null ? void 0 : leftRecord.order) != null ? _f : 0);
     }
     function beginPendingMount(element, mountId) {
       let mounts = pendingMounts.get(element);
@@ -599,42 +1639,37 @@
       if (!mounts) return false;
       return mountId ? mounts.has(mountId) : mounts.size > 0;
     }
-    function setMounted(element, mountId, mounted = true) {
+    function setMounted(element, mountId, mounted = true, priority = 0) {
       if (!mountedElements.has(element)) {
         mountedElements.set(element, /* @__PURE__ */ new Set());
       }
       const mounts = mountedElements.get(element);
       mounts[mounted ? "add" : "delete"](mountId);
+      let records = mountRecords.get(element);
+      if (mounted) {
+        if (!records) {
+          records = /* @__PURE__ */ new Map();
+          mountRecords.set(element, records);
+        }
+        records.set(mountId, { priority, order: mountOrder++ });
+      } else if (records) {
+        records.delete(mountId);
+        if (!records.size) mountRecords.delete(element);
+      }
       if (mounts.size === 0) mountedElements.delete(element);
     }
-    function rememberInitialAttributes(element) {
-      const record = initialAttributeValues.get(element);
-      if (record) {
-        record.users++;
-        return;
-      }
-      const initial = /* @__PURE__ */ new Map();
-      for (const attribute of element.attributes) {
-        if (isRestoredAttribute(attribute.name))
-          initial.set(attribute.name, attribute.value);
-      }
-      initialAttributeValues.set(element, { initial, users: 1 });
-    }
-    function restoreInitialAttributes(element) {
-      const record = initialAttributeValues.get(element);
-      if (!record || --record.users) return;
-      for (let index = element.attributes.length - 1; index >= 0; index--) {
-        const name = element.attributes[index].name;
-        if (isRestoredAttribute(name) && !record.initial.has(name))
-          element.removeAttribute(name);
-      }
-      for (const [name, value] of record.initial) {
-        if (element.getAttribute(name) !== value) element.setAttribute(name, value);
-      }
-      initialAttributeValues.delete(element);
-    }
-    function isRestoredAttribute(name) {
-      return name === "hidden" || name.startsWith("data-ae-") || name.startsWith("aria-");
+  }
+
+  // src/internal/create-selector-helper.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function validateSelector(document2, value) {
+    if (typeof value !== "string" || !value.trim())
+      return { value, reason: "Expected a nonempty selector string." };
+    try {
+      document2.querySelector(value);
+      return null;
+    } catch (cause) {
+      return { value, reason: "Invalid CSS selector.", cause };
     }
   }
 
@@ -661,7 +1696,6 @@
       mount: helper.mount,
       unmount: helper.unmount,
       update: helper.update,
-      initialAttribute: helper.initialAttribute,
       destroy
     };
     let observer = null;
@@ -724,7 +1758,12 @@
       if (!elementOrId) return null;
       const found = elementControllers.get(elementOrId);
       if (found) return found;
-      diagnostics.error(diagnostics.ERROR_CONTROLLER_NOT_FOUND, { element: elementOrId });
+      diagnostics.error(diagnostics.ERROR_CONTROLLER_NOT_FOUND, {
+        element: elementOrId,
+        method: "controller",
+        reason: "No completed mount exposes a controller for this element.",
+        suggestion: "Register the required Extension, await $ae.mount(element), and inspect earlier load or mount diagnostics."
+      });
       return null;
     }
     function keyFor(extensionName) {
@@ -744,6 +1783,7 @@
       if (!options || typeof options !== "object" || Array.isArray(options))
         return reject("options");
       const { extensionName, selector, mount, unmount, update, controllers } = options;
+      const priority = options.priority === void 0 ? 0 : options.priority;
       if (typeof extensionName !== "string" || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$|^[a-z][a-zA-Z0-9]*$/.test(extensionName))
         return reject("extensionName");
       const key = keyFor(extensionName);
@@ -751,19 +1791,15 @@
         return reject("extensionName");
       if (!Object.prototype.hasOwnProperty.call(root.AelluxJs.registry.ext, key))
         return reject("extensionName");
-      if (typeof selector !== "string" || !selector.trim())
-        return reject("selector");
-      try {
-        root.document.querySelector(selector);
-      } catch (cause) {
-        return reject("selector", cause);
-      }
+      const invalidSelector = validateSelector(root.document, selector);
+      if (invalidSelector) return reject("selector", invalidSelector.cause);
       if (typeof mount !== "function") return reject("mount");
+      if (typeof priority !== "number" || !isFinite(priority)) return reject("priority");
       if (unmount !== void 0 && typeof unmount !== "function") return reject("unmount");
       if (update !== void 0 && typeof update !== "function") return reject("update");
       if (controllers !== void 0 && (!Array.isArray(controllers) || controllers.some((name) => typeof name !== "string" || !name.trim())))
         return reject("controllers");
-      const allowed = ["extensionName", "selector", "mount", "unmount", "update", "controllers"];
+      const allowed = ["extensionName", "selector", "mount", "unmount", "update", "controllers", "priority"];
       const unknown = Object.keys(options).find((name) => !allowed.includes(name));
       if (unknown) return reject(unknown);
       let map = maps.get(key);
@@ -772,7 +1808,7 @@
         maps.set(key, map);
       }
       if (map.has(selector)) return reject("selector");
-      map.set(selector, { mount, unmount, update, controllers });
+      map.set(selector, { mount, unmount, update, controllers, priority });
       root.AelluxJs.registry.extMounters[key] = [...map.keys()].join(",");
       return manager;
     }
@@ -814,14 +1850,626 @@
     }
   }
 
+  // src/internal/create-aria-helper.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function createAriaHelper() {
+    const elements = /* @__PURE__ */ new WeakMap();
+    let nextOrder = 0;
+    function attributeName(name) {
+      if (typeof name !== "string" || !/^(?:aria-)?[a-z][a-z0-9-]*$/.test(name)) {
+        throw new TypeError("Invalid ARIA name");
+      }
+      return name.startsWith("aria-") ? name : `aria-${name}`;
+    }
+    function attributeValue(name, value) {
+      if (value === null || value === void 0) {
+        throw new TypeError("Use unset() for null");
+      }
+      if (Array.isArray(value)) {
+        return value.join(" ");
+      }
+      if (name === "aria-hidden" && typeof value !== "boolean") {
+        throw new TypeError("Invalid aria-hidden value");
+      }
+      return String(value);
+    }
+    function write(element, name, value) {
+      if (value === null) {
+        if (element.hasAttribute(name)) element.removeAttribute(name);
+      } else if (element.getAttribute(name) !== value) {
+        element.setAttribute(name, value);
+      }
+    }
+    function reconcile(element, record, name) {
+      var _a;
+      let winner = null;
+      let hidden = false;
+      record.handlers.forEach((handler) => {
+        if (!handler.values.has(name)) return;
+        if (name === "aria-hidden" && handler.values.get(name) === "true") hidden = true;
+        if (!winner || handler.priority > winner.priority || handler.priority === winner.priority && handler.order > winner.order) {
+          winner = handler;
+        }
+      });
+      if (!winner) {
+        write(element, name, (_a = record.baseline.get(name)) != null ? _a : null);
+        record.baseline.delete(name);
+        return;
+      }
+      write(element, name, name === "aria-hidden" && hidden ? "true" : winner.values.get(name));
+    }
+    function register(element, options = {}) {
+      if (!element || element.nodeType !== 1) {
+        throw new TypeError("Invalid ARIA element");
+      }
+      const priority = options.priority === void 0 ? 0 : options.priority;
+      if (typeof priority !== "number" || !Number.isFinite(priority)) {
+        throw new TypeError("Invalid ARIA priority");
+      }
+      let record = elements.get(element);
+      if (!record) {
+        record = { handlers: /* @__PURE__ */ new Set(), baseline: /* @__PURE__ */ new Map() };
+        elements.set(element, record);
+      }
+      const handler = { priority, order: nextOrder++, values: /* @__PURE__ */ new Map() };
+      record.handlers.add(handler);
+      let released = false;
+      return {
+        set(values) {
+          if (released) return false;
+          if (!values || typeof values !== "object") {
+            throw new TypeError("Invalid ARIA values");
+          }
+          const updates = Object.entries(values).map(([key, value]) => {
+            const name = attributeName(key);
+            return [name, attributeValue(name, value)];
+          });
+          updates.forEach(([name, value]) => {
+            if (!record.baseline.has(name)) record.baseline.set(name, element.getAttribute(name));
+            handler.values.set(name, value);
+            reconcile(element, record, name);
+          });
+          return true;
+        },
+        unset(key) {
+          if (released) return false;
+          const name = attributeName(key);
+          if (!handler.values.delete(name)) return false;
+          reconcile(element, record, name);
+          return true;
+        },
+        initial(key) {
+          const name = attributeName(key);
+          return record.baseline.has(name) ? record.baseline.get(name) : element.getAttribute(name);
+        },
+        release() {
+          if (released) return false;
+          released = true;
+          record.handlers.delete(handler);
+          handler.values.forEach((_, name) => reconcile(element, record, name));
+          handler.values.clear();
+          if (!record.handlers.size) elements.delete(element);
+          return true;
+        }
+      };
+    }
+    return { register };
+  }
+
+  // src/internal/create-css-motion-controller.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function createCssMotionController(root, getAelluxJs) {
+    const operations = /* @__PURE__ */ new Map();
+    const lightweightProperties = /* @__PURE__ */ new Set([
+      "transform",
+      "opacity",
+      "--ae-pop-progress",
+      "--ae-unpop-progress",
+      "--ae-present-pop-phase",
+      "--ae-present-unpop-phase"
+    ]);
+    let nextId = 4e6;
+    function id() {
+      return nextId++;
+    }
+    function supported(element) {
+      if (getAelluxJs().options.cssMotionController === false) return false;
+      const Animation = root.Animation;
+      return !!(element && typeof element.getAnimations === "function" && Animation && Animation.prototype && typeof Animation.prototype.pause === "function" && "currentTime" in Animation.prototype);
+    }
+    function cancel(operationId) {
+      const operation = operations.get(operationId);
+      if (!operation) return false;
+      operation.cancelled = true;
+      getAelluxJs().waitLayout.cancel(operationId);
+      const nativeResolve = operation.nativeResolve;
+      release(operation, false);
+      if (nativeResolve) nativeResolve({ id: operationId, status: "aborted", mode: "native" });
+      return true;
+    }
+    function run(element, options = {}) {
+      const AelluxJs2 = getAelluxJs();
+      const operationId = options.id;
+      if (!Number.isSafeInteger(operationId))
+        return Promise.reject(new TypeError("motion.run() requires a safe integer ID"));
+      if (!element || element.nodeType !== 1 || typeof options.apply !== "function")
+        return Promise.reject(new TypeError("motion.run() requires an Element and apply callback"));
+      cancel(operationId);
+      const operation = {
+        id: operationId,
+        element,
+        options,
+        animations: [],
+        before: /* @__PURE__ */ new Set(),
+        start: 0,
+        endTime: 0,
+        done: false,
+        cancelled: false,
+        controlled: false,
+        captureFailed: false,
+        conservative: false,
+        nativeTimer: null,
+        nativeResolve: null
+      };
+      operations.set(operationId, operation);
+      if (AelluxJs2.currentPreference("reduced-motion") === "reduced") {
+        options.apply();
+        operations.delete(operationId);
+        return Promise.resolve({ id: operationId, status: "completed", mode: "reduced" });
+      }
+      if (!supported(element)) return nativeRun(operation);
+      try {
+        for (const animation of animationsFor(operation)) operation.before.add(animation);
+        options.apply();
+      } catch (error) {
+        operations.delete(operationId);
+        return Promise.reject(error);
+      }
+      const requestedMaxFPS = options.maxFPS === void 0 ? AelluxJs2.layoutMaxFPS(element) : options.maxFPS;
+      const externalAbort = typeof options.abort === "function" ? options.abort : null;
+      const shouldAbort = () => operation.cancelled || !element.isConnected || (externalAbort ? externalAbort() : false);
+      const captureResult = AelluxJs2.waitLayout.sequence(operationId, {
+        read: () => capture(operation),
+        update: (animations) => prepare(operation, animations),
+        abort: shouldAbort
+      });
+      return captureResult.then((sequenceResult) => {
+        if (operation.cancelled || operations.get(operationId) !== operation) {
+          release(operation, false);
+          return { id: operationId, status: "aborted", mode: "native" };
+        }
+        if (sequenceResult.status !== "completed") {
+          release(operation, false);
+          return { id: operationId, status: sequenceResult.status, mode: "native" };
+        }
+        if (operation.captureFailed && !operation.cancelled) {
+          release(operation, false);
+          operations.set(operationId, operation);
+          return nativeWait(operation);
+        }
+        const policyFPS = operation.conservative ? propertyPolicyFPS(AelluxJs2.options.cssMotionPropertyMaxFPS, AelluxJs2) : void 0;
+        const maxFPS = minimumFPS(requestedMaxFPS, policyFPS);
+        operation.visualFPS = maxFPS;
+        AelluxJs2.waitLayout.setVisualFPSLimit(operation.id, maxFPS);
+        return AelluxJs2.waitLayout.sequence(operationId, {
+          update: () => advance(operation),
+          repeat: { ms: 0 },
+          abort: () => operation.done || shouldAbort()
+        }).then((progressResult) => {
+          const completed = operation.done && !operation.cancelled;
+          release(operation, completed);
+          return {
+            id: operationId,
+            status: completed ? "completed" : progressResult.status,
+            mode: "controlled"
+          };
+        });
+      }, (error) => {
+        release(operation, false, true);
+        throw error;
+      });
+    }
+    function capture(operation) {
+      operation.element.getBoundingClientRect();
+      const animations = animationsFor(operation).filter((animation) => !operation.before.has(animation) && controllable(animation));
+      diagnoseMotionResources(getAelluxJs(), operation.element, animations, operation.options.extension || "css-motion");
+      return animations;
+    }
+    function controllable(animation) {
+      try {
+        const effect = animation && animation.effect;
+        return !!(effect && typeof effect.getComputedTiming === "function" && typeof animation.pause === "function");
+      } catch (_) {
+        return false;
+      }
+    }
+    function animationsFor(operation) {
+      const { element, options } = operation;
+      if (!options.subtree) return element.getAnimations();
+      return [element, ...element.querySelectorAll("*")].flatMap((node) => node.getAnimations());
+    }
+    function prepare(operation, animations) {
+      if (!animations.length) {
+        operation.captureFailed = true;
+        operation.done = true;
+        return;
+      }
+      let endTime = 0;
+      operation.animations = animations;
+      for (const animation of animations) {
+        animation.pause();
+        animation.currentTime = 0;
+        const timing = animation.effect.getComputedTiming();
+        const end = Number(timing.endTime);
+        if (Number.isFinite(end)) endTime = Math.max(endTime, end);
+        applyAelluxEasing(operation, animation);
+        if (!onlyLightweightProperties(animation)) operation.conservative = true;
+      }
+      operation.endTime = endTime;
+      operation.start = now();
+      operation.controlled = true;
+      if (!(endTime > 0)) operation.done = true;
+    }
+    function onlyLightweightProperties(animation) {
+      try {
+        if (typeof root.CSSTransition === "function" && animation instanceof root.CSSTransition) {
+          return lightweightProperties.has(animation.transitionProperty);
+        }
+        const frames = animation.effect.getKeyframes();
+        if (!frames.length) return false;
+        const metadata = /* @__PURE__ */ new Set(["offset", "computedOffset", "easing", "composite"]);
+        let found = false;
+        for (const frame of frames) {
+          for (const property of Object.keys(frame)) {
+            if (metadata.has(property)) continue;
+            found = true;
+            if (!lightweightProperties.has(property)) return false;
+          }
+        }
+        return found;
+      } catch (_) {
+        return false;
+      }
+    }
+    function positiveFPS(value, fallback) {
+      const number = Number(value);
+      return Number.isFinite(number) && number > 0 ? number : fallback;
+    }
+    function propertyPolicyFPS(value, AelluxJs2) {
+      if (value === null || value === 0) return void 0;
+      const number = Number(value);
+      if (Number.isFinite(number) && number > 0) return number;
+      if (value !== void 0) {
+        AelluxJs2.diagnostics.warn(
+          AelluxJs2.diagnostics.WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID,
+          {
+            extension: "core",
+            option: "cssMotionPropertyMaxFPS",
+            attribute: "cssMotionPropertyMaxFPS",
+            value,
+            fallback: 55,
+            reason: "CSS Motion frame rate must be finite and greater than zero; using 55 FPS.",
+            suggestion: "Use a positive finite number or omit the option for the default."
+          }
+        );
+      }
+      return 55;
+    }
+    function minimumFPS(first, second) {
+      const values = [first, second].filter((value) => Number.isFinite(value) && value > 0);
+      return values.length ? Math.min(...values) : void 0;
+    }
+    function advance(operation) {
+      if (!operation.controlled || operation.done) return;
+      const elapsed = Math.max(0, now() - operation.start);
+      const time = Math.min(elapsed, operation.endTime);
+      for (const animation of operation.animations) animation.currentTime = time;
+      if (elapsed >= operation.endTime) operation.done = true;
+    }
+    function applyAelluxEasing(operation, animation) {
+      const name = operation.options.easing;
+      if (!name || !root.CSS || typeof root.CSS.supports !== "function" || !animation.effect || typeof animation.effect.updateTiming !== "function") return;
+      const easing = sampledLinear(name);
+      if (!easing || !root.CSS.supports("animation-timing-function", easing)) return;
+      animation.effect.updateTiming({ easing });
+    }
+    function sampledLinear(name) {
+      const AelluxJs2 = getAelluxJs();
+      const points = [];
+      try {
+        for (let index = 0; index <= 60; index++) {
+          const progress = index / 60;
+          const value = AelluxJs2.ease(name, progress);
+          if (!Number.isFinite(value)) return null;
+          points.push(`${round(value)} ${round(progress * 100)}%`);
+        }
+      } catch (_) {
+        return null;
+      }
+      return `linear(${points.join(", ")})`;
+    }
+    function nativeRun(operation) {
+      let before = operation.before;
+      if ((operation.options.subtree || getAelluxJs().options.environment === "development") && typeof operation.element.getAnimations === "function")
+        before = new Set(animationsFor(operation));
+      if (operation.options.subtree) operation.before = before;
+      operation.options.apply();
+      return nativeWait(operation, before);
+    }
+    function nativeWait(operation, before = operation.before) {
+      const animations = typeof operation.element.getAnimations === "function" ? animationsFor(operation).filter((animation) => !operation.before.has(animation)) : [];
+      diagnoseMotionResources(
+        getAelluxJs(),
+        operation.element,
+        before === operation.before ? animations : animations.filter((animation) => !before.has(animation)),
+        operation.options.extension || "css-motion"
+      );
+      return new Promise((resolve) => {
+        operation.nativeResolve = resolve;
+        const complete = () => {
+          if (operations.get(operation.id) !== operation) return;
+          operations.delete(operation.id);
+          operation.nativeResolve = null;
+          resolve({ id: operation.id, status: "completed", mode: "native" });
+        };
+        if (animations.length && animations.every((animation) => animation.finished && typeof animation.finished.then === "function")) {
+          Promise.all(animations.map((animation) => animation.finished.catch(() => void 0))).then(complete);
+          return;
+        }
+        const explicit = Number(operation.options.nativeDuration);
+        const duration = Number.isFinite(explicit) ? explicit : cssMotionTime(operation.element);
+        if (Number.isFinite(duration) && duration > 0) {
+          operation.nativeTimer = root.setTimeout(complete, duration);
+        } else {
+          Promise.resolve().then(complete);
+        }
+      });
+    }
+    function cssMotionTime(element) {
+      try {
+        const style = root.getComputedStyle(element);
+        return Math.max(
+          listTime(style.animationDuration, style.animationDelay, style.animationIterationCount),
+          listTime(style.transitionDuration, style.transitionDelay)
+        );
+      } catch (_) {
+        return 0;
+      }
+    }
+    function listTime(durations, delays, iterations) {
+      const durationList = String(durations || "0s").split(",");
+      const delayList = String(delays || "0s").split(",");
+      const iterationList = String(iterations || "1").split(",");
+      const count = Math.max(durationList.length, delayList.length, iterationList.length);
+      let maximum = 0;
+      for (let index = 0; index < count; index++) {
+        const duration = cssTime(durationList[index % durationList.length]);
+        const delay = cssTime(delayList[index % delayList.length]);
+        const rawIterations = iterationList[index % iterationList.length].trim();
+        const iterationCount = rawIterations === "infinite" ? 1 : Number(rawIterations);
+        maximum = Math.max(maximum, Math.max(0, delay) + duration * (Number.isFinite(iterationCount) ? Math.max(0, iterationCount) : 1));
+      }
+      return maximum;
+    }
+    function cssTime(value) {
+      const text = String(value || "0s").trim().toLowerCase();
+      const number = parseFloat(text);
+      if (!Number.isFinite(number)) return 0;
+      return text.endsWith("ms") ? number : number * 1e3;
+    }
+    function release(operation, finish, resume = false) {
+      if (operations.get(operation.id) === operation)
+        getAelluxJs().waitLayout.setVisualFPSLimit(operation.id, null);
+      if (operation.nativeTimer !== null) root.clearTimeout(operation.nativeTimer);
+      operation.nativeTimer = null;
+      for (const animation of operation.animations) {
+        try {
+          if (finish) {
+            animation.finish();
+            if (typeof root.CSSTransition === "function" && animation instanceof root.CSSTransition)
+              animation.cancel();
+          } else if (resume) animation.play();
+          else animation.cancel();
+        } catch (_) {
+        }
+      }
+      operation.animations.length = 0;
+      if (operations.get(operation.id) === operation) operations.delete(operation.id);
+    }
+    function now() {
+      return root.performance && typeof root.performance.now === "function" ? root.performance.now() : Date.now();
+    }
+    function round(value) {
+      return Math.round(value * 1e5) / 1e5;
+    }
+    return Object.freeze({ run, cancel, id, supported });
+  }
+
+  // src/internal/ease.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  var EASE_PREFIX = "ease";
+  var IN = "in";
+  var OUT = "out";
+  var IN_OUT = "inout";
+  var DIRECTIONS = [IN_OUT, OUT, IN];
+  var QUAD = "quad";
+  var CUBIC = "cubic";
+  var QUART = "quart";
+  var QUINT = "quint";
+  var SINE = "sine";
+  var EXPO = "expo";
+  var CIRC = "circ";
+  var BACK = "back";
+  var ELASTIC = "elastic";
+  var BOUNCE = "bounce";
+  var FAMILIES = [QUAD, CUBIC, QUART, QUINT, SINE, EXPO, CIRC, BACK, ELASTIC, BOUNCE];
+  var ALIASES = {
+    quadratic: QUAD,
+    quartic: QUART,
+    quintic: QUINT,
+    sinusoidal: SINE,
+    exponential: EXPO,
+    circular: CIRC
+  };
+  var CSS_NUMBER = /^[+-]?(?:\d*\.\d+|\d+)(?:e[+-]?\d+)?$/i;
+  function bezierCoordinate(u, p1, p2) {
+    const v = 1 - u;
+    return 3 * v * v * u * p1 + 3 * v * u * u * p2 + u * u * u;
+  }
+  function cubicBezier(t, x1, y1, x2, y2) {
+    if (![t, x1, y1, x2, y2].every((value) => typeof value === "number" && Number.isFinite(value))) {
+      throw new TypeError("cubicBezier(t, x1, y1, x2, y2) requires finite numbers");
+    }
+    if (x1 < 0 || x1 > 1 || x2 < 0 || x2 > 1) {
+      throw new RangeError("Cubic bezier x coordinates must be between 0 and 1");
+    }
+    t = Math.min(1, Math.max(0, t));
+    if (t === 0 || t === 1) return t;
+    if (x1 === y1 && x2 === y2) return t;
+    let low = 0;
+    let high = 1;
+    let u = t;
+    for (let i = 0; i < 40; i++) {
+      const x = bezierCoordinate(u, x1, x2);
+      if (x === t) break;
+      if (x < t) low = u;
+      else high = u;
+      u = (low + high) / 2;
+    }
+    return bezierCoordinate(u, y1, y2);
+  }
+  function bounceOut(t) {
+    const n = 7.5625;
+    const d = 2.75;
+    if (t < 1 / d) return n * t * t;
+    if (t < 2 / d) {
+      t -= 1.5 / d;
+      return n * t * t + 0.75;
+    }
+    if (t < 2.5 / d) {
+      t -= 2.25 / d;
+      return n * t * t + 0.9375;
+    }
+    t -= 2.625 / d;
+    return n * t * t + 0.984375;
+  }
+  function easeIn(family, t) {
+    switch (family) {
+      case QUAD:
+        return t * t;
+      case CUBIC:
+        return t * t * t;
+      case QUART:
+        return t * t * t * t;
+      case QUINT:
+        return t * t * t * t * t;
+      case SINE:
+        return 1 - Math.cos(t * Math.PI / 2);
+      case EXPO:
+        return t === 0 ? 0 : Math.pow(2, 10 * t - 10);
+      case CIRC:
+        return 1 - Math.sqrt(1 - t * t);
+      case BACK:
+        return t * t * (2.70158 * t - 1.70158);
+      case ELASTIC:
+        return t === 0 || t === 1 ? t : -Math.pow(2, 10 * t - 10) * Math.sin((10 * t - 10.75) * 2 * Math.PI / 3);
+      case BOUNCE:
+        return 1 - bounceOut(1 - t);
+      default:
+        throw new RangeError(`Unknown easing family: ${family}`);
+    }
+  }
+  function ease(name, t) {
+    if (typeof name !== "string" || typeof t !== "number" || !Number.isFinite(t)) {
+      throw new TypeError("ease(name, t) requires a name and a finite number");
+    }
+    t = Math.min(1, Math.max(0, t));
+    const bezier = /^cubic-bezier\(([^()]*)\)$/i.exec(name.trim());
+    if (bezier) {
+      const points = bezier[1].split(",").map((value) => value.trim());
+      if (points.length !== 4 || !points.every((value) => CSS_NUMBER.test(value))) {
+        throw new RangeError(`Invalid cubic bezier: ${name}`);
+      }
+      return cubicBezier(t, ...points.map(Number));
+    }
+    let key = name.replace(/[\s_-]/g, "").toLowerCase();
+    if (key.startsWith(EASE_PREFIX)) key = key.slice(EASE_PREFIX.length);
+    if (key === "linear") return t;
+    if (key === "smoothstep") return t * t * (3 - 2 * t);
+    if (key === "smootherstep") return t * t * t * (t * (6 * t - 15) + 10);
+    let family = "";
+    let direction = "";
+    for (const candidate of DIRECTIONS) {
+      if (key.endsWith(candidate)) {
+        family = key.slice(0, -candidate.length);
+        direction = candidate;
+        break;
+      }
+      if (key.startsWith(candidate)) {
+        family = key.slice(candidate.length);
+        direction = candidate;
+        break;
+      }
+    }
+    family = ALIASES[family] || family;
+    if (!FAMILIES.includes(family)) throw new RangeError(`Unknown easing: ${name}`);
+    if (direction === IN) return easeIn(family, t);
+    if (direction === OUT) return 1 - easeIn(family, 1 - t);
+    if (family === BACK) {
+      const c = 1.70158 * 1.525;
+      const x = t < 0.5 ? 2 * t : 2 * t - 2;
+      return t < 0.5 ? x * x * ((c + 1) * x - c) / 2 : (x * x * ((c + 1) * x + c) + 2) / 2;
+    }
+    if (family === ELASTIC) {
+      if (t === 0 || t === 1) return t;
+      const wave = Math.sin((20 * t - 11.125) * 2 * Math.PI / 4.5);
+      return t < 0.5 ? -Math.pow(2, 20 * t - 10) * wave / 2 : Math.pow(2, -20 * t + 10) * wave / 2 + 1;
+    }
+    return t < 0.5 ? easeIn(family, 2 * t) / 2 : 1 - easeIn(family, 2 - 2 * t) / 2;
+  }
+
+  // src/official-extension-definitions.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  var officialExtensionDefinitions = Object.freeze([
+    Object.freeze({ name: "preference", style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "state-navigation", style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "feedback", style: true, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "focus", style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "dialog", optional: true, style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "pwa", optional: true, style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "viewport", optional: true, style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "point", style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "anchor", style: true, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "overflow-marquee", style: true, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "ajax-href", optional: true, style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "scrollbox", style: true, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "scrollbox-snap", style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "adaptive", style: true, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "present", style: true, dependencies: Object.freeze([]) })
+  ]);
+
   // src/aellux.orchestrator.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
     const { toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
+    const officialPackage = "@aelluxjs/core";
+    const orchestratorVersion = true ? "0.1.0-beta.10" : "0.1.0-beta.10";
+    if (root.AelluxJs.version !== orchestratorVersion) {
+      const error = root.AelluxJs.diagnostics.error(
+        root.AelluxJs.diagnostics.ERROR_RUNTIME_VERSION_MISMATCH,
+        { expected: root.AelluxJs.version, found: orchestratorVersion }
+      );
+      root.AelluxJs.orchestratorVersion = orchestratorVersion;
+      root.AelluxJs.startAelluxJs = () => Promise.reject(error);
+      return;
+    }
+    root.AelluxJs.orchestratorVersion = orchestratorVersion;
     const extensionPromises = {};
+    const aria = createAriaHelper();
     const mountManager = buildMountMapManager(root);
     const layoutScheduler = buildLayoutScheduler();
+    const motion = createCssMotionController(root, () => root.AelluxJs);
     root.AelluxJs = Object.assign(
       root.AelluxJs,
       {
@@ -829,26 +2477,30 @@
           if (root.AelluxJs.bundledExtensions) {
             Object.keys(root.AelluxJs.bundledExtensions).forEach((key) => {
               if (!(key in AelluxJs.registry.ext)) AelluxJs.ext(key);
+              const name = fromCamelCase2(key);
+              const metadata = AelluxJs.extIndex.official && AelluxJs.extIndex.official.extensions[name];
+              if (metadata && metadata.coreCompatibility) {
+                AelluxJs.registry.ext[key].coreCompatibility = metadata.coreCompatibility;
+                AelluxJs.registry.ext[key].official = true;
+              }
             });
           }
-          await new Promise((resolve) => {
-            const startMountCallback = function() {
-              AelluxJs.mount().then(function() {
-                document.removeEventListener(
-                  "DOMContentLoaded",
-                  startMountCallback
-                );
+          await new Promise((resolve, reject) => {
+            const startCallback = function() {
+              AelluxJs.off("$DOMContentLoaded", startCallback);
+              if (AelluxJs.options.skipGlobalMount === true) {
                 resolve();
-              });
+                return;
+              }
+              Promise.resolve().then(() => AelluxJs.mount()).then(resolve, reject);
             };
             if (document.readyState === "loading")
-              document.addEventListener(
-                "DOMContentLoaded",
-                startMountCallback,
-                { once: true }
-              );
+              AelluxJs.on("$DOMContentLoaded", startCallback, { once: true });
             else
-              startMountCallback();
+              startCallback();
+          }).catch((error) => {
+            AelluxJs.dispatch("RuntimeStartError", { detail: { error, operation: "mount" } });
+            throw error;
           });
           AelluxJs.dispatch("Ready");
           return true;
@@ -860,48 +2512,12 @@
           return mountManager.unmount(elementOrId, extensionNames);
         },
         async destroy() {
-          AelluxJs.waitLayout.clear();
-          await AelluxJs.destroyExtensions();
+          if (await destroyExtensions(null, () => AelluxJs.waitLayout.clear()) === false)
+            return false;
           mountManager.destroy();
         },
         async destroyExtensions(extensionNames) {
-          if (typeof extensionNames === "string")
-            extensionNames = [extensionNames];
-          if (!extensionNames)
-            extensionNames = Object.keys(AelluxJs.registry.ext);
-          extensionNames = extensionNames.map((_) => fromCamelCase2(_));
-          try {
-            await AelluxJs.unmount(document, extensionNames);
-          } catch (error) {
-            AelluxJs.diagnostics.error(
-              AelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT,
-              { cause: error, extensions: extensionNames }
-            );
-          }
-          for (const extensionName of extensionNames) {
-            const key = toCamelCase2(extensionName);
-            let extension;
-            try {
-              if (!extensionPromises[key]) continue;
-              extension = await extensionPromises[key];
-              if (extension && extension.destroy) {
-                await extension.destroy();
-              }
-            } catch (error) {
-              AelluxJs.diagnostics.error(
-                AelluxJs.diagnostics.ERROR_EXTENSION_DESTROY,
-                { cause: error, extension: extensionName }
-              );
-            } finally {
-              delete AelluxJs.ext[key];
-              delete extensionPromises[key];
-              delete AelluxJs.registry.ext[key];
-              mountManager.remove({ extensionName });
-              delete AelluxJs.registry.lazyExtSelectors[key];
-              removeExtensionAssets(extensionName);
-              if (extension) extension.initialized = false;
-            }
-          }
+          return destroyExtensions(extensionNames);
         },
         dispatchFrom(from, event, options) {
           options = options || {};
@@ -922,65 +2538,166 @@
           return getExtension(extensionName);
         },
         request: defaultRequest,
+        ease,
+        aria,
+        motion,
         waitLayout: layoutScheduler,
         mountManager
       }
     );
     root[root.AelluxJs.shortJSName] = root.AelluxJs;
+    if (root.AelluxJs.options.mode === "full") registerCoreExtensions();
+    function registerCoreExtensions() {
+      const api = root.AelluxJs;
+      const attr = (name) => `[${api.attr(name)}]`;
+      for (const { name } of officialExtensionDefinitions) {
+        const key = toCamelCase2(name);
+        if (key in api.registry.ext) continue;
+        let loadWhen = name === "dialog" ? "dialog" : attr(name);
+        if (name === "ajax-href") loadWhen = "a" + loadWhen;
+        if (name === "present") {
+          loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
+        }
+        if (name === "state-navigation" || name === "preference") loadWhen = null;
+        api.ext(name, { loadWhen, load: true });
+        api.registry.ext[key].automatic = true;
+      }
+    }
+    async function destroyExtensions(extensionNames, onUnmounted) {
+      if (typeof extensionNames === "string") extensionNames = [extensionNames];
+      if (!extensionNames) extensionNames = Object.keys(AelluxJs.registry.ext);
+      extensionNames = extensionNames.map((_) => fromCamelCase2(_));
+      try {
+        if (await AelluxJs.unmount(document, extensionNames) === false) return false;
+      } catch (error) {
+        AelluxJs.diagnostics.error(
+          AelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT,
+          { cause: error, extensions: extensionNames }
+        );
+      }
+      if (onUnmounted) onUnmounted();
+      for (const extensionName of extensionNames) {
+        const key = toCamelCase2(extensionName);
+        let extension;
+        try {
+          if (!extensionPromises[key]) continue;
+          extension = await extensionPromises[key];
+          if (extension && extension.destroy) await extension.destroy();
+        } catch (error) {
+          AelluxJs.diagnostics.error(
+            AelluxJs.diagnostics.ERROR_EXTENSION_DESTROY,
+            { cause: error, extension: extensionName }
+          );
+        } finally {
+          delete AelluxJs.ext[key];
+          delete extensionPromises[key];
+          delete AelluxJs.registry.ext[key];
+          mountManager.remove({ extensionName });
+          delete AelluxJs.registry.lazyExtSelectors[key];
+          removeExtensionAssets(extensionName);
+          if (extension) extension.initialized = false;
+        }
+      }
+    }
     function getExtension(extensionName) {
-      extensionName = fromCamelCase2(extensionName);
+      const request = parseExtensionRequest(extensionName);
+      extensionName = request.name;
       const key = toCamelCase2(extensionName);
       if (extensionPromises[key])
         return extensionPromises[key];
-      const data = AelluxJs.registry.ext[key];
-      if (data && !hasCompatibleBuild(data)) {
-        AelluxJs.diagnostics.error(
-          AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE,
-          {
-            extension: extensionName,
-            runtime: AelluxJs.diagnostics.legacy ? "legacy" : "modern",
-            builds: data.builds
-          }
-        );
-        delete AelluxJs.registry.lazyExtSelectors[key];
-        extensionPromises[key] = Promise.resolve(null);
-        return extensionPromises[key];
-      }
-      if (AelluxJs.ext[key]) {
-        if (!AelluxJs.ext[key].initialized) {
-          extensionPromises[key] = Promise.resolve().then(() => extensionInitialize(extensionName)).catch((error) => {
-            AelluxJs.diagnostics.error(
-              AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
-              { cause: error, extension: extensionName }
-            );
-            delete extensionPromises[key];
-            return null;
-          });
-          return extensionPromises[key];
-        }
-        extensionPromises[key] = Promise.resolve(AelluxJs.ext[key]);
-        return extensionPromises[key];
-      }
       if (!(key in AelluxJs.registry.ext)) {
         return Promise.reject(AelluxJs.diagnostics.error(
           AelluxJs.diagnostics.ERROR_EXTENSION_NOT_REGISTERED,
           { extension: extensionName }
         ));
       }
+      AelluxJs.registry.ext[key].automatic = false;
+      if (AelluxJs.ext[key]) {
+        if (AelluxJs.ext[key].initialized) {
+          extensionPromises[key] = Promise.resolve(AelluxJs.ext[key]);
+        } else {
+          const registration = AelluxJs.registry.ext[key];
+          extensionPromises[key] = (registration.loadStyle && registration.loadStyle !== "false" ? appendExtensionAssets(extensionName) : Promise.resolve()).then(() => extensionInitialize(extensionName)).catch((error) => {
+            if (!error || !error.aelluxCompatibility) {
+              AelluxJs.diagnostics.error(
+                AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
+                { cause: error, extension: extensionName }
+              );
+            }
+            delete extensionPromises[key];
+            return null;
+          });
+        }
+        return extensionPromises[key];
+      }
       const bundledLoader = AelluxJs.bundledExtensions ? AelluxJs.bundledExtensions[key] : null;
-      extensionPromises[key] = appendExtensionAssets(extensionName, bundledLoader).then(() => extensionInitialize(extensionName)).catch((error) => {
-        AelluxJs.diagnostics.error(
-          AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
-          { cause: error, extension: extensionName }
-        );
+      extensionPromises[key] = Promise.resolve().then(() => {
+        const registration = AelluxJs.registry.ext[key];
+        return (registration.implicit || request.version) && !bundledLoader && !AelluxJs.ext[key] ? resolveImplicitRegistration(extensionName, registration, request.version) : registration;
+      }).then(async (data) => {
+        if (!hasCompatibleBuild(data)) {
+          AelluxJs.diagnostics.error(
+            AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE,
+            {
+              extension: extensionName,
+              runtime: AelluxJs.diagnostics.legacy ? "legacy" : "modern",
+              builds: data && data.builds
+            }
+          );
+          delete AelluxJs.registry.lazyExtSelectors[key];
+          return null;
+        }
+        if (!AelluxJs.ext[key]) await appendExtensionAssets(extensionName, bundledLoader);
+        if (!AelluxJs.ext[key].initialized) return extensionInitialize(extensionName);
+        return AelluxJs.ext[key];
+      }).catch((error) => {
+        if (!error || !error.aelluxCompatibility) {
+          const registration = AelluxJs.registry.ext[key];
+          if (registration && registration.implicit && !registration.manifestResolved) {
+            AelluxJs.diagnostics.error(
+              AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_NOT_FOUND,
+              { extension: extensionName }
+            );
+          }
+          AelluxJs.diagnostics.error(
+            AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
+            { cause: error, extension: extensionName }
+          );
+        }
         delete extensionPromises[key];
         return null;
       });
       return extensionPromises[key];
     }
+    function parseExtensionRequest(value) {
+      const text = String(value || "").trim();
+      const match = /^([a-z][a-z0-9-]*)(?:@([0-9]+(?:\.[0-9]+){0,2}(?:-[0-9A-Za-z.-]+)?))?$/i.exec(text);
+      return { name: fromCamelCase2(match ? match[1] : text), version: match && match[2] || null };
+    }
     async function extensionInitialize(extensionName) {
       extensionName = fromCamelCase2(extensionName);
       const key = toCamelCase2(extensionName);
+      const registration = AelluxJs.registry.ext[key];
+      if (registration.coreCompatibility && !versionSatisfies(AelluxJs.version, registration.coreCompatibility)) {
+        const context = {
+          extension: extensionName,
+          coreVersion: AelluxJs.version,
+          coreCompatibility: registration.coreCompatibility
+        };
+        if (registration.skipCompatibilityCheck === true) {
+          AelluxJs.diagnostics.warn(
+            AelluxJs.diagnostics.WARN_EXTENSION_COMPATIBILITY_SKIPPED,
+            __spreadProps(__spreadValues({}, context), { explicitlySkipped: true })
+          );
+        } else {
+          const error = AelluxJs.diagnostics.error(
+            AelluxJs.diagnostics.ERROR_EXTENSION_VERSION_INCOMPATIBLE,
+            context
+          );
+          error.aelluxCompatibility = true;
+          throw error;
+        }
+      }
       const options = AelluxJs.options.extensions[key] || {};
       await AelluxJs.ext[key].init(options);
       AelluxJs.ext[key].initialized = true;
@@ -991,22 +2708,31 @@
       extensionName = fromCamelCase2(extensionName);
       const key = toCamelCase2(extensionName);
       const data = AelluxJs.registry.ext[key];
-      const url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
       const useLegacyBuild = AelluxJs.diagnostics.legacy || data.builds.indexOf("modern") === -1;
-      const scriptURL = useLegacyBuild ? toLegacyScriptURL(url) : url;
+      const artifact = data.artifacts && data.artifacts[useLegacyBuild ? "legacy" : "modern"];
+      const url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
+      const scriptURL = artifact ? artifact.url : useLegacyBuild ? toLegacyScriptURL(url) : url;
       const minifiedScript = /\.min\.js(?=[?#]|$)/.test(scriptURL);
       const scriptVariant = useLegacyBuild ? minifiedScript ? "legacyMin" : "legacy" : minifiedScript ? "modernMin" : "modern";
       const loadPromises = [];
+      for (const dependency of data.dependencies || []) {
+        if (typeof dependency === "string") continue;
+        loadPromises.push(AelluxJs.dep(
+          dependency.label,
+          dependency.url,
+          { integrity: dependency.integrity, crossOrigin: dependency.crossOrigin }
+        ));
+      }
       if (bundledLoader) {
         loadPromises.push(Promise.resolve().then(() => bundledLoader()));
-      } else {
+      } else if (!AelluxJs.ext[key]) {
         loadPromises.push(new Promise(
           (resolve, reject) => {
             const attr = AelluxJs.attr("ext");
             const script = document.createElement("script");
             script.src = scriptURL;
             script.setAttribute(attr, extensionName);
-            applyAssetIntegrity(script, getExtensionIntegrity(data, scriptVariant, scriptURL), data.crossOrigin);
+            applyAssetIntegrity(script, artifact && artifact.integrity || getExtensionIntegrity(data, scriptVariant, scriptURL), data.crossOrigin);
             assetLoadHelper(script, {
               loadCallback: resolve,
               errorCallback: reject
@@ -1014,23 +2740,33 @@
           }
         ));
       }
-      if (data.loadStyle && data.loadStyle !== "false") {
+      const defaultStyle = data.loadStyle === true || data.loadStyle === "true";
+      const fullStyle = AelluxJs.bundledExtensions && (bundledLoader || data.official) && document.querySelector(`link[${AelluxJs.attr("full-style")}]`);
+      if (data.loadStyle && data.loadStyle !== "false" && !(defaultStyle && fullStyle)) {
         loadPromises.push(new Promise(
           (resolve) => {
             const styleDefaultURL = data.loadStyle === true || data.loadStyle === "true" || data.loadStyle === "";
-            const href = styleDefaultURL ? url.replace(/\.js(?=[?#]|$)/, ".css") : data.loadStyle;
+            const href = data.styleArtifact ? data.styleArtifact.url : styleDefaultURL ? url.replace(/\.js(?=[?#]|$)/, ".css") : data.loadStyle;
             const attrStyle = AelluxJs.attr("ext-style");
             const link = document.createElement("link");
             link.href = href;
             link.rel = "stylesheet";
             link.setAttribute(attrStyle, extensionName);
-            applyAssetIntegrity(link, getExtensionIntegrity(data, "style", href), data.crossOrigin);
+            applyAssetIntegrity(link, data.styleArtifact && data.styleArtifact.integrity || getExtensionIntegrity(data, "style", href), data.crossOrigin);
             assetLoadHelper(link, {
               loadCallback: resolve,
               errorCallback: () => {
                 AelluxJs.diagnostics.warn(
                   AelluxJs.diagnostics.WARN_EXTENSION_STYLE_LOAD,
-                  { extension: extensionName, url: link.href }
+                  {
+                    extension: extensionName,
+                    element: link,
+                    attribute: "href",
+                    value: link.href,
+                    url: link.href,
+                    reason: "The Extension stylesheet could not be loaded.",
+                    suggestion: "Check the stylesheet URL, network response, integrity metadata and CSP style-src policy."
+                  }
                 );
                 resolve();
               }
@@ -1070,6 +2806,211 @@
           asset.remove();
         }
       });
+    }
+    async function resolveImplicitRegistration(extensionName, registration, requestedVersion = null) {
+      const officialURL = AelluxJs.extIndex.officialURL || AelluxJs.aelluxBasePath + "aellux.extensions.min.json";
+      const requestedURL = requestedVersion && requestedVersion !== AelluxJs.version ? `https://cdn.jsdelivr.net/npm/${officialPackage}@${encodeURIComponent(requestedVersion)}/dist/aellux.extensions.min.json` : officialURL;
+      let entry = null;
+      let sourceURL = requestedURL;
+      try {
+        const embeddedOfficial = requestedVersion ? null : AelluxJs.extIndex.official;
+        const embeddedEntry = embeddedOfficial && embeddedOfficial.extensions[extensionName];
+        const official = embeddedEntry && embeddedEntry.builds ? embeddedOfficial : await loadExtensionIndex(requestedVersion ? `official@${requestedVersion}` : "official", requestedURL);
+        entry = official.extensions[extensionName] || null;
+      } catch (error) {
+        reportIndexFailure(error, "official", requestedURL);
+      }
+      if (!entry && AelluxJs.extIndex.fallbackURL) {
+        sourceURL = AelluxJs.extIndex.fallbackURL;
+        try {
+          const fallback = AelluxJs.extIndex.fallback || await loadExtensionIndex("fallback", sourceURL);
+          entry = fallback.extensions[extensionName] || null;
+        } catch (error) {
+          reportIndexFailure(error, "custom", sourceURL);
+        }
+      }
+      if (!entry) return registration;
+      applyManifestEntry(registration, entry, sourceURL, extensionName);
+      return registration;
+    }
+    function loadExtensionIndex(kind, url) {
+      const promiseKey = kind + "Promise";
+      if (AelluxJs.extIndex[promiseKey]) return AelluxJs.extIndex[promiseKey];
+      validateManifestURL(url, kind);
+      AelluxJs.extIndex[promiseKey] = AelluxJs.request(url).then((response) => response.json()).then((index) => {
+        validateExtensionIndex(index, kind, url);
+        AelluxJs.extIndex[kind] = index;
+        AelluxJs.diagnostics.info(
+          AelluxJs.diagnostics.INFO_EXTENSION_INDEX_LOADED,
+          { source: kind, url, extensions: Object.keys(index.extensions).length }
+        );
+        return index;
+      }).catch((error) => {
+        AelluxJs.extIndex[promiseKey] = null;
+        throw error;
+      });
+      return AelluxJs.extIndex[promiseKey];
+    }
+    function validateManifestURL(url, kind) {
+      let parsed;
+      try {
+        parsed = new URL(url, document.baseURI);
+      } catch (_) {
+        throw manifestError(kind, url, "valid URL");
+      }
+      const development = AelluxJs.options.environment === "development";
+      if (parsed.protocol !== "https:" && parsed.origin !== location.origin && !development) {
+        throw manifestError(kind, url, "HTTPS for external manifests");
+      }
+    }
+    function validateExtensionIndex(index, kind, url) {
+      if (!index || index.schemaVersion !== 1 || typeof index.coreVersion !== "string" || !index.extensions || typeof index.extensions !== "object" || Array.isArray(index.extensions)) {
+        throw manifestError(kind, url, "schemaVersion 1, coreVersion, and extensions object");
+      }
+      if (index.coreVersion !== AelluxJs.version) {
+        throw manifestError(
+          kind,
+          url,
+          `coreVersion ${AelluxJs.version} (received ${index.coreVersion})`
+        );
+      }
+      for (const [name, entry] of Object.entries(index.extensions)) {
+        if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(name) || !entry || typeof entry.coreCompatibility !== "string" || !entry.builds || typeof entry.builds !== "object") {
+          throw manifestError(kind, url, `valid metadata for ${name}`);
+        }
+        for (const variant of ["modern", "legacy"]) {
+          const artifact = entry.builds[variant];
+          if (!artifact) continue;
+          if (typeof artifact.url !== "string" || typeof artifact.integrity !== "string" || !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(artifact.integrity)) {
+            throw manifestError(kind, url, `URL and SHA-384 integrity for ${name}/${variant}`);
+          }
+          validateArtifactURL(artifact.url, url, kind);
+          if (artifact.regular) {
+            if (typeof artifact.regular.url !== "string" || !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(artifact.regular.integrity || "")) {
+              throw manifestError(kind, url, `regular URL and SHA-384 integrity for ${name}/${variant}`);
+            }
+            validateArtifactURL(artifact.regular.url, url, kind);
+          }
+        }
+        if (!entry.builds.modern && !entry.builds.legacy)
+          throw manifestError(kind, url, `a runtime build for ${name}`);
+        if (entry.style) {
+          if (typeof entry.style.url !== "string" || !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(entry.style.integrity || "")) {
+            throw manifestError(kind, url, `URL and SHA-384 integrity for ${name}/style`);
+          }
+          validateArtifactURL(entry.style.url, url, kind);
+          if (entry.style.regular) {
+            if (typeof entry.style.regular.url !== "string" || !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(entry.style.regular.integrity || "")) {
+              throw manifestError(kind, url, `regular URL and SHA-384 integrity for ${name}/style`);
+            }
+            validateArtifactURL(entry.style.regular.url, url, kind);
+          }
+        }
+        if (!Array.isArray(entry.dependencies)) {
+          throw manifestError(kind, url, `dependencies array for ${name}`);
+        }
+        for (const dependency of entry.dependencies) {
+          if (typeof dependency === "string") continue;
+          if (!dependency || typeof dependency.label !== "string" || !dependency.label.trim() || typeof dependency.url !== "string" || typeof dependency.integrity !== "string" || !/^sha384-[A-Za-z0-9+/]+={0,2}$/.test(dependency.integrity)) {
+            throw manifestError(kind, url, `dependency URL and SHA-384 integrity for ${name}`);
+          }
+          validateArtifactURL(dependency.url, url, kind);
+        }
+      }
+    }
+    function validateArtifactURL(url, manifestURL, kind) {
+      let parsed;
+      try {
+        parsed = new URL(url, new URL(manifestURL, document.baseURI));
+      } catch (_) {
+        throw manifestError(kind, manifestURL, `valid artifact URL: ${url}`);
+      }
+      const development = AelluxJs.options.environment === "development";
+      if (parsed.protocol !== "https:" && parsed.origin !== location.origin && !development)
+        throw manifestError(kind, manifestURL, `HTTPS artifact URL: ${url}`);
+    }
+    function manifestError(kind, url, expected) {
+      return AelluxJs.diagnostics.create(
+        AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_INVALID,
+        { source: kind, url, expected }
+      );
+    }
+    function reportIndexFailure(error, source, url) {
+      if (error && error.code === AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_INVALID.code) {
+        AelluxJs.diagnostics.error(
+          AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_INVALID,
+          { source, url, expected: error.context && error.context.expected, cause: error }
+        );
+      } else {
+        AelluxJs.diagnostics.error(
+          AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_LOAD,
+          { source, url, cause: error }
+        );
+      }
+    }
+    function applyManifestEntry(registration, entry, manifestURL, extensionName) {
+      const base = new URL(manifestURL, document.baseURI);
+      const artifacts = {};
+      for (const variant of ["modern", "legacy"]) {
+        if (entry.builds[variant] && (!registration.explicitBuilds || registration.builds.includes(variant))) {
+          const declared = !AelluxJs.minified && entry.builds[variant].regular ? entry.builds[variant].regular : entry.builds[variant];
+          artifacts[variant] = {
+            url: new URL(declared.url, base).href,
+            integrity: declared.integrity
+          };
+        }
+      }
+      const selected = artifacts[AelluxJs.diagnostics.legacy ? "legacy" : "modern"] || !AelluxJs.diagnostics.legacy && artifacts.legacy;
+      registration.artifacts = artifacts;
+      registration.manifestResolved = true;
+      registration.builds = Object.keys(artifacts);
+      if (selected) registration.url = selected.url;
+      registration.coreCompatibility = entry.coreCompatibility;
+      registration.dependencies = (entry.dependencies || []).map((dependency) => typeof dependency === "string" ? dependency : __spreadProps(__spreadValues({}, dependency), {
+        url: new URL(dependency.url, base).href
+      }));
+      registration.official = AelluxJs.extIndex.official && AelluxJs.extIndex.official.extensions[extensionName] === entry;
+      if (entry.style && registration.loadStyle && registration.loadStyle !== "false") {
+        const declaredStyle = !AelluxJs.minified && entry.style.regular ? entry.style.regular : entry.style;
+        registration.styleArtifact = {
+          url: new URL(declaredStyle.url, base).href,
+          integrity: declaredStyle.integrity
+        };
+      }
+    }
+    function versionSatisfies(version, range) {
+      if (typeof range !== "string" || !range.trim()) return true;
+      return range.split("||").some((group) => group.trim().split(/\s+/).every((token) => {
+        if (token === "*" || token.toLowerCase() === "latest") return true;
+        const match = token.match(/^(\^|~|>=|<=|>|<|=)?(.+)$/);
+        if (!match) return false;
+        const operator = match[1] || "=";
+        const comparison = compareVersions(version, match[2]);
+        if (operator === "=") return comparison === 0;
+        if (operator === ">") return comparison > 0;
+        if (operator === ">=") return comparison >= 0;
+        if (operator === "<") return comparison < 0;
+        if (operator === "<=") return comparison <= 0;
+        const current = parseVersion(version);
+        const expected = parseVersion(match[2]);
+        if (!current || !expected || comparison < 0) return false;
+        if (operator === "~") return current[0] === expected[0] && current[1] === expected[1];
+        return expected[0] > 0 ? current[0] === expected[0] : expected[1] > 0 ? current[0] === 0 && current[1] === expected[1] : current[0] === 0 && current[1] === 0 && current[2] === expected[2];
+      }));
+    }
+    function compareVersions(first, second) {
+      const a = parseVersion(first);
+      const b = parseVersion(second);
+      if (!a || !b) return first === second ? 0 : -1;
+      for (let index = 0; index < 3; index++) if (a[index] !== b[index]) return a[index] > b[index] ? 1 : -1;
+      if (a[3] === b[3]) return 0;
+      if (!a[3]) return 1;
+      if (!b[3]) return -1;
+      return a[3] > b[3] ? 1 : -1;
+    }
+    function parseVersion(version) {
+      const match = String(version).match(/^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?/);
+      return match ? [Number(match[1]), Number(match[2]), Number(match[3]), match[4] || ""] : null;
     }
     function hasCompatibleBuild(data) {
       if (!data || !Array.isArray(data.builds) || data.builds.length === 0) return false;

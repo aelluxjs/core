@@ -1,0 +1,108 @@
+# Registering aellux.js Extensions
+
+Use `$ae.ext(...)` to declare an Extension before the runtime needs it.
+
+## Label
+
+```js
+$ae.ext("preference");
+```
+
+A name resolves to `aellux.ext.<name>.js` relative to the aellux.js boot script. Loading `aellux.min.js` selects matching `.min.js` Extension files.
+
+## URL
+
+```js
+$ae.ext("./extensions/aellux.ext.example.js");
+```
+
+Custom URLs should preserve the `aellux.ext.<name>.js` filename convention so the runtime can derive the Extension name and optional stylesheet URL reliably.
+
+## Options
+
+```js
+$ae.ext("preference", {
+  builds: ["modern", "legacy"],
+  loadWhen: "[data-ae-preference]"
+});
+```
+
+- `builds` declares published JavaScript variants: `modern`, `legacy`, or both. Omitting it promises both variants.
+- `loadWhen` delays loading until a matching element is discovered.
+- `load: false` defers loading until `$ae.wait(name)` when no `loadWhen` selector is supplied. This can defer State Navigation, which has no DOM selector.
+- An invalid `loadWhen` selector reports `ERROR_EXTENSION_LOAD_WHEN` (`1114`), and `ext()` leaves the Extension undeclared.
+- `loadStyle: true` requests the stylesheet derived from the Extension script URL; a URL string requests that specific stylesheet.
+- `integrity` supplies SRI hashes for third-party Extension files; `crossOrigin` controls the associated `crossorigin` attribute. See [CSP and Extension trust](csp-and-trust.md#subresource-integrity).
+- `coreCompatibility` declares the supported Core version or range. `skipCompatibilityCheck: true` is an explicit, warned override and does not bypass integrity checks. See the [official registry and compatibility rules](official-registry.md).
+
+Register each name once. Duplicate host declarations report an error. An unused automatic Full registration can be replaced by an explicit JavaScript or declarative registration; registrations that have started loading cannot be replaced.
+
+Basic starts with no Extension registrations. Declare every desired official or third-party Extension explicitly through JavaScript or a link declaration. Markup attributes alone do not activate an undeclared Extension. Register before `$ae.init()` or before a later mount, choosing styles, selectors and eager or deferred loading:
+
+```js
+$ae.ext("feedback");
+$ae.init({ mode: "basic" });
+```
+
+## Extension dependencies
+
+When an Extension needs another aellux.js Extension, declare and await that Extension from its own `init()`. This is required before using the dependency's public API, controllers, or events. Do not add the Extension name to `$ae.dep()` or to a manifest `dependencies` list; those APIs describe third-party script assets, not aellux.js Extensions.
+
+```js
+async function init() {
+  if (!AelluxJs.registry.ext.point)
+    AelluxJs.ext("point");
+
+  const point = await AelluxJs.wait("point");
+  if (!point) throw new Error("The Point extension could not initialize.");
+
+  // Point is loaded and initialized here.
+  // It is safe to use point.pointers(...) or subscribe to its events.
+}
+```
+
+`$ae.ext("point")` records the dependency only when the host has not already declared it. `$ae.wait("point")` shares any pending load, selects the compatible Modern or Legacy artifact, runs the dependency's `init()`, and resolves to its attached API. The dependent Extension's `init()` remains pending until that Promise settles. This same pattern works with official registry entries, bundled Extensions, and custom registrations.
+
+## Shared script and stylesheet dependencies
+
+Call `$ae.dep(label, url)` before or after `$ae.init()`, including from an Extension's `init()`, to load a classic script or stylesheet immediately. URLs whose path ends in `.css` (case-insensitive, with optional query string or fragment) create a `<link rel="stylesheet">`; other URLs create a `<script>`. It returns a Promise that resolves to the created element only after the browser's `load` event. Await it before using a global supplied by the dependency:
+
+```js
+async function init() {
+  await AelluxJs.dep("shared-widget@1.0", "/vendor/shared-widget.min.js");
+  await AelluxJs.dep("shared-widget-css@1.0", "/vendor/shared-widget.min.css");
+  // The script and stylesheet are ready here.
+}
+```
+
+The first call owns the label. Calls from other Extensions with the same label and URL return the same Promise, including while the asset is still loading, so the element is inserted only once. A later call with the same label but a different URL rejects with `ERROR_DEPENDENCY_CONFLICT` (`1117`). A failed load rejects with `ERROR_DEPENDENCY_LOAD` (`1118`), removes its element and registry entry, and lets a later call retry. Empty labels or URLs reject with `ERROR_DEPENDENCY_ARGUMENT` (`1116`). Records are available at `$ae.registry.dep[label]` and remain cached when an Extension is destroyed.
+
+As with Extension assets, a URL beginning with `./` resolves relative to the aellux.js base path. Other relative URLs follow normal browser URL resolution. Optional arguments `integrity, crossOrigin`, or a third argument `{ integrity, crossOrigin }`, apply SRI and CORS attributes to either asset type.
+
+## Extension Attachment
+
+An Extension script exposes its API through `AelluxJs.extAttach()`:
+
+```js
+(function (root) {
+  "use strict";
+
+  const AelluxJs = root.AelluxJs;
+  const extensionName = "example";
+  if (!AelluxJs) {
+    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+  }
+  AelluxJs.extAttach(extensionName, { init, destroy });
+
+  function init() {}
+  function destroy() {}
+})(typeof globalThis !== "undefined" ? globalThis : window);
+```
+
+Declare the Extension with `ext()` before calling `extAttach()`. The attachment supplies its definitive API object. `extAttach()` requires a valid kebab-case or camelCase Extension name and an API object with an `init()` function. `destroy()`, when provided, must also be a function. Invalid arguments report `ERROR_EXTENSION_ATTACH` (`1112`) and leave the Extension unattached. A missing declaration reports `ERROR_EXTENSION_NOT_REGISTERED` (`1110`); a second attachment reports `ERROR_EXTENSION_DUPLICATE` (`1101`).
+
+`init(options)` may complete synchronously or return a Promise. The runtime awaits it before marking the Extension as initialized and resolving `$ae.wait(extensionName)`. A thrown error or rejected Promise reports `ERROR_EXTENSION_INITIALIZE` (`1102`), leaves the Extension uninitialized, and permits a later initialization attempt.
+
+Use the [aellux.js Extension scaffold](https://github.com/aelluxjs/core/blob/main/templates/README.md) for the complete lifecycle structure.
+Third-party authors should also follow the [Extension authoring and compatibility contract](authoring.md).
+Review [CSP requirements and Extension trust](csp-and-trust.md) before registering assets from another origin.

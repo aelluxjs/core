@@ -2,6 +2,7 @@
 
 import { createMountHelper } from "./create-mount-helper.js";
 import { resolveElementOrId } from "./resolve-element-or-id.js";
+import { validateSelector } from "./create-selector-helper.js";
 import utilsNameCase from "./utils-name-case.js";
 
 export function buildMountMapManager(root) {
@@ -27,7 +28,6 @@ export function buildMountMapManager(root) {
     mount: helper.mount,
     unmount: helper.unmount,
     update: helper.update,
-    initialAttribute: helper.initialAttribute,
     destroy
   };
 
@@ -99,7 +99,11 @@ export function buildMountMapManager(root) {
     const found = elementControllers.get(elementOrId);
     if (found) return found;
 
-    diagnostics.error(diagnostics.ERROR_CONTROLLER_NOT_FOUND, { element: elementOrId });
+    diagnostics.error(diagnostics.ERROR_CONTROLLER_NOT_FOUND, {
+      element: elementOrId, method: "controller",
+      reason: "No completed mount exposes a controller for this element.",
+      suggestion: "Register the required Extension, await $ae.mount(element), and inspect earlier load or mount diagnostics."
+    });
     return null;
   }
 
@@ -121,6 +125,7 @@ export function buildMountMapManager(root) {
       return reject("options");
 
     const { extensionName, selector, mount, unmount, update, controllers } = options;
+    const priority = options.priority === undefined ? 0 : options.priority;
     if (typeof extensionName !== "string" ||
       !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$|^[a-z][a-zA-Z0-9]*$/.test(extensionName))
       return reject("extensionName");
@@ -129,20 +134,16 @@ export function buildMountMapManager(root) {
       return reject("extensionName");
     if (!Object.prototype.hasOwnProperty.call(root.AelluxJs.registry.ext, key))
       return reject("extensionName");
-    if (typeof selector !== "string" || !selector.trim())
-      return reject("selector");
-    try {
-      root.document.querySelector(selector);
-    } catch (cause) {
-      return reject("selector", cause);
-    }
+    const invalidSelector = validateSelector(root.document, selector);
+    if (invalidSelector) return reject("selector", invalidSelector.cause);
     if (typeof mount !== "function") return reject("mount");
+    if (typeof priority !== "number" || !isFinite(priority)) return reject("priority");
     if (unmount !== undefined && typeof unmount !== "function") return reject("unmount");
     if (update !== undefined && typeof update !== "function") return reject("update");
     if (controllers !== undefined &&
       (!Array.isArray(controllers) || controllers.some(name => typeof name !== "string" || !name.trim())))
       return reject("controllers");
-    const allowed = ["extensionName", "selector", "mount", "unmount", "update", "controllers"];
+    const allowed = ["extensionName", "selector", "mount", "unmount", "update", "controllers", "priority"];
     const unknown = Object.keys(options).find(name => !allowed.includes(name));
     if (unknown) return reject(unknown);
 
@@ -152,7 +153,7 @@ export function buildMountMapManager(root) {
       maps.set(key, map);
     }
     if (map.has(selector)) return reject("selector");
-    map.set(selector, { mount, unmount, update, controllers });
+    map.set(selector, { mount, unmount, update, controllers, priority });
     root.AelluxJs.registry.extMounters[key] = [...map.keys()].join(",");
     return manager;
   }

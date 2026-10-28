@@ -7,6 +7,17 @@ export function createControllerHelper(root, element) {
   const mounts = new Map();
   const controller = {
     spawn, despawn, hasMounts,
+
+    on(event, handler, options) {
+      root.AelluxJs.onEvent(element, event, handler, options);
+    },
+    off(event, handler, options) {
+      root.AelluxJs.offEvent(element, event, handler, options);
+    },
+    dispatch(event, options) {
+      return root.AelluxJs.dispatchFrom(element, event, options);
+    },
+
     mount(extensionNames = null) {
       return root.AelluxJs.mountManager.mount(element, extensionNames);
     },

@@ -31,6 +31,44 @@
       }
     } };
   }
+  function ownKeys(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function(r2) {
+        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
+      })), t.push.apply(t, o);
+    }
+    return t;
+  }
+  function _objectSpread(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys(Object(t), true).forEach(function(r2) {
+        _defineProperty(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function(r2) {
+        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
+      });
+    }
+    return e;
+  }
+  function _defineProperty(e, r, t) {
+    return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  }
+  function _toPropertyKey(t) {
+    var i = _toPrimitive(t, "string");
+    return "symbol" == _typeof(i) ? i : i + "";
+  }
+  function _toPrimitive(t, r) {
+    if ("object" != _typeof(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r || "default");
+      if ("object" != _typeof(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return ("string" === r ? String : Number)(t);
+  }
   function _slicedToArray(r, e) {
     return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
   }
@@ -98,8 +136,13 @@
       shapeSquare: AelluxJs.className("shape-square")
     };
     var adaptiveElements = /* @__PURE__ */ new Set();
+    var elementMemories = /* @__PURE__ */ new WeakMap();
+    var dimensionProperties = ["--ae-width", "--ae-height"];
     var pendingResizeEntries = /* @__PURE__ */ new Map();
     var pendingResizeElements = /* @__PURE__ */ new Set();
+    var layoutIds = /* @__PURE__ */ new WeakMap();
+    var orientationLayoutIds = /* @__PURE__ */ new WeakMap();
+    var nextLayoutId = 1e6;
     var adaptiveParams = {
       experienceScale: {
         near: 1,
@@ -118,11 +161,9 @@
         xxl: 1600
       }
     };
-    var UPDATE_INTERVAL_MS = 100;
+    var ariaHandlers = /* @__PURE__ */ new WeakMap();
     var managedClasses;
     var sizeThresholds = [];
-    var updateTimeout = null;
-    var lastUpdateTime = -UPDATE_INTERVAL_MS;
     var resizeObserver = typeof root.ResizeObserver === "function" ? new root.ResizeObserver(onResize) : null;
     AelluxJs.extAttach(extensionName, {
       init: init,
@@ -131,22 +172,59 @@
     });
     function init() {
       var options = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
-      var overrides = options.adaptiveParams || {};
+      AelluxJs.registerCssProperty({
+        name: "--ae-width",
+        syntax: "<number>",
+        initialValue: "0"
+      }, {
+        name: "--ae-height",
+        syntax: "<number>",
+        initialValue: "0"
+      });
+      var overrides = options.adaptiveParams === void 0 ? {} : options.adaptiveParams;
+      if (!overrides || _typeof(overrides) !== "object" || Array.isArray(overrides)) {
+        parameterDiagnostic("", overrides, "Expected an object of Adaptive parameter groups; using defaults.");
+        overrides = {};
+      }
       for (var _i = 0, _Object$keys = Object.keys(adaptiveParams); _i < _Object$keys.length; _i++) {
         var group = _Object$keys[_i];
+        if (group in overrides && (!overrides[group] || _typeof(overrides[group]) !== "object" || Array.isArray(overrides[group]))) {
+          parameterDiagnostic(group, overrides[group], "Expected a parameter group object; using defaults.");
+          continue;
+        }
         if (overrides[group] && _typeof(overrides[group]) === "object") {
-          Object.assign(adaptiveParams[group], overrides[group]);
+          for (var _i2 = 0, _Object$entries = Object.entries(overrides[group]); _i2 < _Object$entries.length; _i2++) {
+            var _Object$entries$_i = _slicedToArray(_Object$entries[_i2], 2), key = _Object$entries$_i[0], value = _Object$entries$_i[1];
+            if (typeof value !== "number" || !Number.isFinite(value) || (group === "minSizes" ? value < 0 : value <= 0)) {
+              parameterDiagnostic("".concat(group, ".").concat(key), value, "Expected a finite positive number (zero is allowed for minimum sizes).");
+              continue;
+            }
+            adaptiveParams[group][key] = value;
+          }
         }
       }
+      for (var _i3 = 0, _arr = [["ratioShapes", "vertical", "horizontal", [0.8, 1.25]], ["experienceScale", "near", "far", [1, 1.5]]]; _i3 < _arr.length; _i3++) {
+        var _arr$_i = _slicedToArray(_arr[_i3], 4), _group = _arr$_i[0], lower = _arr$_i[1], upper = _arr$_i[2], fallback = _arr$_i[3];
+        if (adaptiveParams[_group][lower] >= adaptiveParams[_group][upper]) {
+          parameterDiagnostic(_group, _objectSpread({}, adaptiveParams[_group]), "The lower boundary must be less than the upper boundary; using defaults.");
+          adaptiveParams[_group][lower] = fallback[0];
+          adaptiveParams[_group][upper] = fallback[1];
+        }
+      }
+      var orderedSizes = ["compact", "small", "medium", "large", "xl", "xxl"];
+      if (orderedSizes.some(function(name, index) {
+        return index > 0 && adaptiveParams.minSizes[name] < adaptiveParams.minSizes[orderedSizes[index - 1]];
+      })) parameterDiagnostic("minSizes", _objectSpread({}, adaptiveParams.minSizes), "Named minimum sizes are out of order; the configured thresholds are preserved.");
       managedClasses = getManagedClasses();
-      for (var _i2 = 0, _Object$keys2 = Object.keys(adaptiveParams); _i2 < _Object$keys2.length; _i2++) {
-        var _group = _Object$keys2[_i2];
-        Object.freeze(adaptiveParams[_group]);
+      for (var _i4 = 0, _Object$keys2 = Object.keys(adaptiveParams); _i4 < _Object$keys2.length; _i4++) {
+        var _group2 = _Object$keys2[_i4];
+        Object.freeze(adaptiveParams[_group2]);
       }
       Object.freeze(adaptiveParams);
       AelluxJs.mountManager.add({
         extensionName: extensionName,
         selector: "[".concat(attr.adaptive, "]"),
+        priority: 0,
         mount: mountAdaptive,
         unmount: unmountAdaptive
       });
@@ -154,8 +232,8 @@
     function getManagedClasses() {
       var classes = [modifier.shapeHorizontal, modifier.shapeVertical, modifier.shapeSquare];
       sizeThresholds = [];
-      for (var _i3 = 0, _Object$entries = Object.entries(adaptiveParams.minSizes); _i3 < _Object$entries.length; _i3++) {
-        var _Object$entries$_i = _slicedToArray(_Object$entries[_i3], 2), size = _Object$entries$_i[0], minimum = _Object$entries$_i[1];
+      for (var _i5 = 0, _Object$entries2 = Object.entries(adaptiveParams.minSizes); _i5 < _Object$entries2.length; _i5++) {
+        var _Object$entries2$_i = _slicedToArray(_Object$entries2[_i5], 2), size = _Object$entries2$_i[0], minimum = _Object$entries2$_i[1];
         var className = AelluxJs.className("fits-" + size);
         sizeThresholds.push({
           className: className,
@@ -165,14 +243,18 @@
       }
       return classes;
     }
+    function parameterDiagnostic(attribute, value, reason) {
+      AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
+        extension: extensionName,
+        attribute: "adaptiveParams".concat(attribute ? "." + attribute : ""),
+        value: value,
+        reason: reason,
+        suggestion: "Use finite nonnegative minimum sizes and positive, ordered ratio/experience boundaries."
+      });
+    }
     function destroy() {
-      if (updateTimeout !== null) {
-        clearTimeout(updateTimeout);
-        updateTimeout = null;
-      }
       pendingResizeEntries.clear();
       pendingResizeElements.clear();
-      lastUpdateTime = -UPDATE_INTERVAL_MS;
       var _iterator = _createForOfIteratorHelper(adaptiveElements), _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
@@ -191,18 +273,26 @@
     }
     function mountAdaptive(element) {
       if (adaptiveElements.has(element)) return;
+      elementMemories.set(element, AelluxJs.persist.element.save(element, [], dimensionProperties));
+      ariaHandlers.set(element, AelluxJs.aria.register(element));
       adaptiveElements.add(element);
-      var bounds = element.getBoundingClientRect();
-      updateAdaptive(element, bounds.width, bounds.height);
+      layoutIds.set(element, nextLayoutId++);
       if (resizeObserver) resizeObserver.observe(element);
-      else if (adaptiveElements.size === 1) root.addEventListener("resize", onWindowResize);
+      else {
+        scheduleElement(element, null);
+        if (adaptiveElements.size === 1) AelluxJs.onEvent(root, "$resize", onWindowResize);
+      }
     }
     function unmountAdaptive(element) {
+      var _ariaHandlers$get, _elementMemories$get;
       if (!adaptiveElements.delete(element)) return;
       pendingResizeEntries.delete(element);
       pendingResizeElements.delete(element);
+      var id = layoutIds.get(element);
+      if (id !== void 0) AelluxJs.waitLayout.cancel(id);
+      layoutIds.delete(element);
       if (resizeObserver) resizeObserver.unobserve(element);
-      else if (adaptiveElements.size === 0) root.removeEventListener("resize", onWindowResize);
+      else if (adaptiveElements.size === 0) AelluxJs.offEvent(root, "$resize", onWindowResize);
       var _iterator2 = _createForOfIteratorHelper(managedClasses), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
@@ -214,6 +304,10 @@
       } finally {
         _iterator2.f();
       }
+      (_ariaHandlers$get = ariaHandlers.get(element)) === null || _ariaHandlers$get === void 0 || _ariaHandlers$get.release();
+      ariaHandlers.delete(element);
+      (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
+      elementMemories.delete(element);
     }
     function onResize(entries) {
       var _iterator3 = _createForOfIteratorHelper(entries), _step3;
@@ -246,46 +340,58 @@
       scheduleUpdate();
     }
     function scheduleUpdate() {
-      var elapsed = now() - lastUpdateTime;
-      if (elapsed >= UPDATE_INTERVAL_MS) {
-        if (updateTimeout !== null) {
-          clearTimeout(updateTimeout);
-          updateTimeout = null;
-        }
-        flushPendingUpdate();
-        return;
-      }
-      if (updateTimeout !== null) return;
-      updateTimeout = setTimeout(flushPendingUpdate, UPDATE_INTERVAL_MS - elapsed);
+      flushPendingUpdate();
     }
     function flushPendingUpdate() {
-      updateTimeout = null;
       if (!pendingResizeEntries.size && !pendingResizeElements.size) return;
-      lastUpdateTime = now();
-      var entries = Array.from(pendingResizeEntries.values());
+      var entries = Array.from(pendingResizeEntries.entries());
       pendingResizeEntries.clear();
-      for (var _i4 = 0, _entries = entries; _i4 < _entries.length; _i4++) {
-        var entry = _entries[_i4];
-        updateAdaptive(entry.target, entry.contentRect.width, entry.contentRect.height);
+      for (var _i6 = 0, _entries = entries; _i6 < _entries.length; _i6++) {
+        var _entries$_i = _slicedToArray(_entries[_i6], 2), element = _entries$_i[0], entry = _entries$_i[1];
+        scheduleElement(element, entry.contentRect);
       }
       var elements = Array.from(pendingResizeElements);
       pendingResizeElements.clear();
-      for (var _i5 = 0, _elements = elements; _i5 < _elements.length; _i5++) {
-        var element = _elements[_i5];
-        AelluxJs.waitLayout.read(readBounds, [element]);
+      for (var _i7 = 0, _elements = elements; _i7 < _elements.length; _i7++) {
+        var _element = _elements[_i7];
+        scheduleElement(_element, null);
       }
     }
-    function now() {
-      return root.performance && typeof root.performance.now === "function" ? root.performance.now() : Date.now();
-    }
-    function readBounds(entry) {
-      var _entry$getBoundingCli = entry.getBoundingClientRect(), width = _entry$getBoundingCli.width, height = _entry$getBoundingCli.height;
-      AelluxJs.waitLayout.update(updateAdaptive, [entry, width, height]);
+    function scheduleElement(element, contentRect) {
+      var id = layoutIds.get(element);
+      if (id === void 0) return;
+      var maxFPS = AelluxJs.layoutMaxFPS(element);
+      var abort = function abort2() {
+        return !adaptiveElements.has(element);
+      };
+      if (contentRect) {
+        AelluxJs.waitLayout.sequence(id, {
+          update: function update() {
+            return updateAdaptive(element, contentRect.width, contentRect.height);
+          },
+          maxFPS: maxFPS,
+          abort: abort
+        });
+        return;
+      }
+      AelluxJs.waitLayout.sequence(id, {
+        read: function read() {
+          return element.getBoundingClientRect();
+        },
+        update: function update(rect) {
+          return updateAdaptive(element, rect.width, rect.height);
+        },
+        maxFPS: maxFPS,
+        abort: abort
+      });
     }
     function updateAdaptive(element, width, height) {
+      var _ariaHandlers$get2;
       if (!adaptiveElements.has(element)) return;
       var ratio = height > 0 ? width / height : 0;
-      element.setAttribute("aria-orientation", height > width ? "vertical" : "horizontal");
+      (_ariaHandlers$get2 = ariaHandlers.get(element)) === null || _ariaHandlers$get2 === void 0 || _ariaHandlers$get2.set({
+        orientation: height > width ? "vertical" : "horizontal"
+      });
       element.classList.toggle(modifier.shapeVertical, ratio < adaptiveParams.ratioShapes.vertical);
       element.classList.toggle(modifier.shapeHorizontal, ratio > adaptiveParams.ratioShapes.horizontal);
       element.classList.toggle(modifier.shapeSquare, ratio >= adaptiveParams.ratioShapes.vertical && ratio <= adaptiveParams.ratioShapes.horizontal);
@@ -294,13 +400,35 @@
         var threshold = sizeThresholds[i];
         element.classList.toggle(threshold.className, space >= threshold.minimum);
       }
+      var _iterator5 = _createForOfIteratorHelper(dimensionProperties), _step5;
+      try {
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+          var name = _step5.value;
+          if (element.style.getPropertyPriority(name)) element.style.removeProperty(name);
+        }
+      } catch (err) {
+        _iterator5.e(err);
+      } finally {
+        _iterator5.f();
+      }
+      element.style.setProperty("--ae-width", width);
+      element.style.setProperty("--ae-height", height);
       AelluxJs.dispatchFrom(element, "AdaptiveUpdate", {
-        detail: null
+        detail: {
+          width: width,
+          height: height,
+          ratio: ratio
+        }
       });
     }
     function inferOrientation(flexBox) {
       var selector = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : "*";
-      return AelluxJs.waitLayout.read(function() {
+      var id = orientationLayoutIds.get(flexBox);
+      if (id === void 0) {
+        id = nextLayoutId++;
+        orientationLayoutIds.set(flexBox, id);
+      }
+      return AelluxJs.waitLayout.read(id, function() {
         var fallback = "horizontal";
         var style = getComputedStyle(flexBox);
         if (style.display === "flex" || style.display === "inline-flex") {

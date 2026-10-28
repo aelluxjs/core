@@ -1,5 +1,42 @@
 import { expect, test } from "@playwright/test";
 
+test("adaptive restores prior inline dimension variables on unmount", async ({ page }) => {
+  await page.goto("/tests/index.htm");
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => {
+    document.body.innerHTML = `
+      <div id="custom" data-ae-adaptive
+        style="width: 120px; height: 80px; --ae-width: 42 !important; --ae-height: 24px"></div>
+      <div id="unset" data-ae-adaptive style="width: 120px; height: 80px">
+        <span id="adaptive-child"></span>
+      </div>`;
+    AelluxJs.ext("adaptive");
+  });
+  await page.addScriptTag({ url: "/src/aellux.ext.adaptive.js" });
+  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.adaptive?.initialized)).toBe(true);
+
+  const values = () => page.evaluate(() => ["custom", "unset"].map(id => {
+    const style = document.getElementById(id).style;
+    return ["--ae-width", "--ae-height"].map(name => ({
+      value: style.getPropertyValue(name),
+      priority: style.getPropertyPriority(name)
+    }));
+  }));
+  await expect.poll(values).toEqual([
+    [{ value: "120", priority: "" }, { value: "80", priority: "" }],
+    [{ value: "120", priority: "" }, { value: "80", priority: "" }]
+  ]);
+  expect(await page.locator("#adaptive-child").evaluate(element =>
+    Number(getComputedStyle(element).getPropertyValue("--ae-width")))).toBe(120);
+
+  await page.evaluate(() => AelluxJs.unmount(document.body, "adaptive"));
+  expect(await values()).toEqual([
+    [{ value: "42", priority: "important" }, { value: "24px", priority: "" }],
+    [{ value: "", priority: "" }, { value: "", priority: "" }]
+  ]);
+});
+
 test("adaptive updates shape and size classes as its dimensions change", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
@@ -19,10 +56,15 @@ test("adaptive updates shape and size classes as its dimensions change", async (
 
   await page.evaluate(() => {
     const element = document.querySelector("#adaptive");
+    window.adaptiveDetails = [];
+    element.addEventListener("AelluxJsAdaptiveUpdate", event =>
+      window.adaptiveDetails.push(event.detail));
     element.style.width = "200px";
     element.style.height = "500px";
   });
   await expect(element).toHaveClass(/ae--shape-vertical/);
+  await expect.poll(() => page.evaluate(() => window.adaptiveDetails.at(-1)))
+    .toEqual({ width: 200, height: 500, ratio: 0.4 });
   await expect(element).toHaveAttribute("aria-orientation", "vertical");
   await expect(element).not.toHaveClass(/ae--shape-horizontal/);
   await expect(element).not.toHaveClass(/ae--fits-small/);

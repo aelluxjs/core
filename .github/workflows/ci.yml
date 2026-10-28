@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   test:
+    name: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -18,12 +19,20 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps
-      - run: npm run build
-      - run: npm run test:budget
-      - run: npm run test:browser -- --workers=1
-      - run: npm pack --dry-run
+      - name: Install dependencies
+        run: npm ci
+      - name: Install browser dependencies
+        run: npx playwright install --with-deps
+      - name: Build distributions and documentation
+        run: npm run build
+      - name: Unit tests
+        run: npm run test:unit
+      - name: Bundle budget
+        run: npm run test:budget
+      - name: Browser tests (Chromium, Firefox, WebKit)
+        run: npm run test:browser -- --workers=1
+      - name: Verify package contents
+        run: npm pack --dry-run
       - name: Check generated files
         run: |
           git diff --exit-code

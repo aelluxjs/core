@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "coreVersion": "0.1.0-beta.10",
+  "status": "valid",
+  "extensions": [
+    {
+      "name": "preference",
+      "status": "valid",
+      "artifacts": 2
+    },
+    {
+      "name": "state-navigation",
+      "status": "valid",
+      "artifacts": 2
+    },
+    {
+      "name": "feedback",
+      "status": "valid",
+      "artifacts": 3
+    },
+    {
+      "name": "focus",
+      "status": "valid",
+      "artifacts": 2
+    },
+    {
+      "name": "dialog",
+      "status": "valid",
+      "artifacts": 2
+    },
+    {
+      "name": "pwa",
+      "status": "valid",
+      "artifacts": 2
+    },
+    {
+      "name": "viewport",
+      "status": "valid",
+      "artifacts": 2
+    },
+    {
+      "name": "point",
+      "status": "valid",
+      "artifacts": 2
+    },
+    {
+      "name": "anchor",
+      "status": "valid",
+      "artifacts": 3
+    },
+    {
+      "name": "overflow-marquee",
+      "status": "valid",
+      "artifacts": 3
+    },
+    {
+      "name": "ajax-href",
+      "status": "valid",
+      "artifacts": 2
+    },
+    {
+      "name": "scrollbox",
+      "status": "valid",
+      "artifacts": 3
+    },
+    {
+      "name": "scrollbox-snap",
+      "status": "valid",
+      "artifacts": 2
+    },
+    {
+      "name": "adaptive",
+      "status": "valid",
+      "artifacts": 3
+    },
+    {
+      "name": "present",
+      "status": "valid",
+      "artifacts": 3
+    }
+  ]
+}

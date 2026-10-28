@@ -1,0 +1,77 @@
+# Dialog Extension
+
+**Distribution:** Optional Extension. **Stability:** Not stable.
+
+Dialog mounts native `<dialog>` elements without requiring `data-ae-dialog`. It exposes the standard element API through the existing Aellux controllers. It adds no animations or custom modal state.
+
+## Loading and mounting
+
+Full registers the Optional Dialog Extension for lazy loading when a subtree containing `<dialog>` is mounted. Basic requires explicit registration and can use the same selector. With lazy registration, pages without dialogs do not request its script. Its implementation stays outside the Full bundle.
+
+Declare Dialog explicitly when using Basic:
+
+```html
+<dialog id="example" aria-labelledby="example-title">
+  <h2 id="example-title">Confirm action</h2>
+  <form method="dialog"><button value="accepted">Accept</button></form>
+</dialog>
+<script src="./dist/aellux.js"></script>
+<script>
+  $ae.ext("dialog", { loadWhen: "dialog" });
+  $ae.init({ mode: "basic" });
+</script>
+```
+
+Explicit registration can customize loading. Missing dialog methods still select the Legacy runtime, but the fallback is installed only when a dialog is mounted.
+
+Await the initial `Ready` event or an explicit mount before using controllers. With `skipGlobalMount: true`, mount the desired element or subtree yourself. Dynamic dialogs use the same lifecycle:
+
+```js
+const dialog = document.getElementById("example");
+await $ae.mount(dialog);
+$ae(dialog).dialog.showModal();
+$ae(dialog).dialog.close("accepted");
+```
+
+Dialog mounts at priority `-1`, before ordinary priority `0` Extensions, so consumers can call its methods during their mount callbacks. Register Dialog alongside those consumers and include it in the same mount operation; a mount explicitly filtered to a consumer does not load omitted Extensions.
+
+## Controller API
+
+| Method | Forwarded call |
+| --- | --- |
+| `$ae(dialog).dialog.show()` | `dialog.show()` |
+| `$ae(dialog).dialog.showModal()` | `dialog.showModal()` |
+| `$ae(dialog).dialog.close()` | `dialog.close()` |
+| `$ae(dialog).dialog.close(returnValue)` | `dialog.close(returnValue)` |
+
+Methods preserve arguments, return values, receiver and exceptions. Native calls remain available. The element owns `open`, `returnValue`, focus and the `cancel` and `close` events; the Extension does not maintain a second open state. It does not add `requestClose()` or `closedby` support.
+
+## Modern and Legacy
+
+Modern only registers the mount map and forwards methods. It leaves native functions and `HTMLDialogElement.prototype` unchanged, and installs no Dialog listeners or CSS.
+
+Legacy checks each element for all three methods: `show`, `showModal` and `close`. Complete native implementations are preserved even with `forceLegacy: true`. If any method is missing, the Extension registers that element with `dialog-polyfill` 0.5.6, including for partially available APIs.
+
+The four scripts are `aellux.ext.dialog.js`, `aellux.ext.dialog.min.js`, `aellux.ext.dialog.legacy.js` and `aellux.ext.dialog.legacy.min.js`. Only the two Legacy Dialog files include the polyfill and its CSS. CSS is installed once, when fallback registration is first needed; it requires no separate stylesheet, script or CDN download. Neither the Legacy orchestrator nor Full includes this dependency.
+
+## Lifecycle and limitations
+
+Repeated mounts do not duplicate controllers or polyfill registrations. Unmount removes the controller namespace using the standard controller lifecycle. Destroy removes the mount map; registering and mounting Dialog again restores controllers. Native methods remain unchanged. Legacy keeps its element registrations, shared stylesheet and upstream manager for the document lifetime so other dialogs and direct element calls remain usable. Reloading the Extension reuses that shared manager.
+
+The fallback supports `show()`, `showModal()`, `close()`, `returnValue`, Escape/cancel and `<form method="dialog">`. It cannot reproduce the native top layer. Place modal dialogs directly under `<body>` where possible because ancestor stacking contexts can obscure a polyfilled modal. Style both `dialog::backdrop` and `dialog + .backdrop` for backdrop customization. See the [upstream limitations](https://github.com/GoogleChrome/dialog-polyfill#limitations).
+
+Consumers provide accessible names, appropriate content and usable controls. The Legacy syntax target does not establish support for untested historical browsers; see [ES5 support](../../runtime/es5-support.md). Third-party BSD-3-Clause notices ship with the Legacy Dialog artifact and in the distribution license files.
+
+## Known Limits & Risks
+
+See [Core Known Limits & Risks](../../runtime/known-limits-and-risks.md) for classifications and shared architecture, loading and lifecycle boundaries.
+
+| Area | Type | Description | Recommendation |
+| --- | --- | --- | --- |
+| Platform boundary | Known Limit | <span class="large">Controllers forward show(), showModal() and close(), preserving native exceptions. They add neither animations nor recent APIs such as requestClose()/closedby.</span> | <span class="large">Await mounting and use capabilities available in the native/fallback API.</span> |
+| Fallback rendering | Known Limit | <span class="large">The Legacy polyfill cannot reproduce the native top layer and is affected by ancestor stacking contexts. Native implementations are preserved, including with forced Legacy.</span> | <span class="large">Prefer dialogs directly under body and style native and polyfill backdrops.</span> |
+| Lifetime | Known Limit | <span class="large">Unmount releases controllers, while fallback registrations, CSS and the upstream manager remain for the document lifetime.</span> | <span class="large">Do not treat Extension destruction as removing polyfilled methods or shared CSS.</span> |
+| Integration | Potential Risk | <span class="large">External CSS, competing modal/focus handlers and dynamic removal can change the usable dialog experience.</span> | <span class="large">Provide accessible names and test Escape, cancel, forms and focus return with the actual integration.</span> |
+| Coverage | Validation Gap | <span class="large">Tests cover missing/partial APIs, forwarding, dynamic roots, forms and lifecycle. They do not establish native/polyfill equivalence on historical browsers or physical mobile assistive technologies.</span> | Validate required devices and modal workflows directly. |
+
+Evidence: [Implementation](https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.dialog.js), [dialog-polyfill.spec.mjs](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/dialog-polyfill.spec.mjs), [Fallback registration](https://github.com/aelluxjs/core/blob/update/beta.10/src/internal/install-dialog-polyfill.js).

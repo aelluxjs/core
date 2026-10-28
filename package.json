@@ -1,6 +1,6 @@
 {
   "name": "@aelluxjs/core",
-  "version": "0.1.0-beta.9",
+  "version": "0.1.0-beta.10",
   "license": "Apache-2.0",
   "description": "Modular UX behavior management for browser interfaces with an ES5-compatible aellux.js boot script and an ES2017+ runtime",
   "keywords": [
@@ -22,6 +22,7 @@
     "url": "git+https://github.com/aelluxjs/core.git"
   },
   "type": "module",
+  "web-types": "./dist/aellux.web-types.json",
   "exports": {
     ".": {
       "import": "./dist/aellux.esm.js",
@@ -33,6 +34,10 @@
     "./full/legacy": "./dist/aellux.full.legacy.js",
     "./orchestrator": "./dist/aellux.orchestrator.js",
     "./orchestrator/legacy": "./dist/aellux.orchestrator.legacy.js",
+    "./semantic": "./dist/aellux.semantic.json",
+    "./html-data": "./dist/aellux.html-data.json",
+    "./css-data": "./dist/aellux.css-data.json",
+    "./web-types": "./dist/aellux.web-types.json",
     "./dist/*": "./dist/*"
   },
   "files": [
@@ -47,7 +52,9 @@
     "build": "npm run build:core && npm run build:docs",
     "build:core": "node scripts/build-core.mjs",
     "build:docs": "node scripts/build-docs.mjs",
+    "build:editor-data": "node scripts/build-editor-data.mjs",
     "test:budget": "node scripts/check-bundle-budget.mjs",
+    "test:unit": "node --test tests/unit/*.test.mjs",
     "pretest:browser": "npm run build:core",
     "test:browser": "playwright test",
     "prepack": "npm run build"
@@ -65,8 +72,11 @@
     "@wolimp/docweaver": "github:wolimp-inc/docweaver#141bb1a9c76155341fb4d9b13e09f8f284798fdf",
     "core-js": "^3.50.0",
     "custom-event-polyfill": "^1.0.7",
+    "dialog-polyfill": "^0.5.6",
     "esbuild": "^0.25.0",
+    "jsonschema": "^1.5.0",
     "raf": "^3.4.1",
+    "terser": "^5.51.2",
     "whatwg-fetch": "^3.6.20"
   }
 }

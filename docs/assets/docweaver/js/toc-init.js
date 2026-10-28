@@ -18,13 +18,19 @@ const tocOptions = {
   activeListItemClass: "is-active-li",
   scrollEndCallback: function (e) {
     // Example: Adjust active link position
-    const active = document.querySelector('.is-active-link'); //.scrollIntoView()
+    const active = document.querySelector('.is-active-link');
+    active?.scrollIntoView({
+      block: "center",
+      container: "nearest",
+      behavior: "smooth"
+    });
     const currentLabel = document.getElementById('tocbot-current-label');
     if (active && currentLabel) currentLabel.innerText = active.innerText;
   }
 };
 
 async function initOrRefreshToc() {
+  if (!("tocbot" in window)) return;
   ensureHeadingIds(document.querySelector(tocOptions.contentSelector));
 
   const hasHeadings = document.querySelector(
@@ -48,6 +54,10 @@ async function initOrRefreshToc() {
     tocbot.refresh(tocOptions);
     tocbot._options?.scrollEndCallback();
   }
+
+  toc?.querySelectorAll("a[href]").forEach((link) => {
+    link.setAttribute("data-ae-dismiss", "toc-collapse");
+  });
 }
 
 function ensureHeadingIds(container) {
@@ -73,7 +83,7 @@ function ensureHeadingIds(container) {
     heading.setAttribute("id", id);
     heading.innerHTML = `
     <a href='#${id}' style='text-decoration: none;color: inherit;margin-left:-5px;'>
-      <i class="bi bi-link-45deg align-middle opacity-50" style="font-size:0.5em"></i>${heading.innerText}
+      <svg class="svg-icon align-middle opacity-50" style="font-size:0.5em" aria-hidden="true" focusable="false"><use href="#bi-link-45deg"></use></svg>${heading.innerText}
     </a>`;
     used.add(id);
   });

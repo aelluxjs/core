@@ -1,4 +1,21 @@
 (() => {
+  var __defProp = Object.defineProperty;
+  var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __propIsEnum = Object.prototype.propertyIsEnumerable;
+  var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+  var __spreadValues = (a, b) => {
+    for (var prop in b || (b = {}))
+      if (__hasOwnProp.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    if (__getOwnPropSymbols)
+      for (var prop of __getOwnPropSymbols(b)) {
+        if (__propIsEnum.call(b, prop))
+          __defNormalProp(a, prop, b[prop]);
+      }
+    return a;
+  };
+
   // src/aellux.ext.adaptive.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
@@ -17,8 +34,13 @@
       shapeSquare: AelluxJs.className("shape-square")
     };
     const adaptiveElements = /* @__PURE__ */ new Set();
+    const elementMemories = /* @__PURE__ */ new WeakMap();
+    const dimensionProperties = ["--ae-width", "--ae-height"];
     const pendingResizeEntries = /* @__PURE__ */ new Map();
     const pendingResizeElements = /* @__PURE__ */ new Set();
+    const layoutIds = /* @__PURE__ */ new WeakMap();
+    const orientationLayoutIds = /* @__PURE__ */ new WeakMap();
+    let nextLayoutId = 1e6;
     const adaptiveParams = {
       experienceScale: { near: 1, far: 1.5 },
       ratioShapes: { vertical: 0.8, horizontal: 1.25 },
@@ -31,26 +53,54 @@
         xxl: 1600
       }
     };
-    const UPDATE_INTERVAL_MS = 100;
+    const ariaHandlers = /* @__PURE__ */ new WeakMap();
     let managedClasses;
     let sizeThresholds = [];
-    let updateTimeout = null;
-    let lastUpdateTime = -UPDATE_INTERVAL_MS;
     const resizeObserver = typeof root.ResizeObserver === "function" ? new root.ResizeObserver(onResize) : null;
     AelluxJs.extAttach(extensionName, { init, destroy, adaptiveParams });
     function init(options = {}) {
-      const overrides = options.adaptiveParams || {};
+      AelluxJs.registerCssProperty(
+        { name: "--ae-width", syntax: "<number>", initialValue: "0" },
+        { name: "--ae-height", syntax: "<number>", initialValue: "0" }
+      );
+      let overrides = options.adaptiveParams === void 0 ? {} : options.adaptiveParams;
+      if (!overrides || typeof overrides !== "object" || Array.isArray(overrides)) {
+        parameterDiagnostic("", overrides, "Expected an object of Adaptive parameter groups; using defaults.");
+        overrides = {};
+      }
       for (const group of Object.keys(adaptiveParams)) {
+        if (group in overrides && (!overrides[group] || typeof overrides[group] !== "object" || Array.isArray(overrides[group]))) {
+          parameterDiagnostic(group, overrides[group], "Expected a parameter group object; using defaults.");
+          continue;
+        }
         if (overrides[group] && typeof overrides[group] === "object") {
-          Object.assign(adaptiveParams[group], overrides[group]);
+          for (const [key, value] of Object.entries(overrides[group])) {
+            if (typeof value !== "number" || !Number.isFinite(value) || (group === "minSizes" ? value < 0 : value <= 0)) {
+              parameterDiagnostic(`${group}.${key}`, value, "Expected a finite positive number (zero is allowed for minimum sizes).");
+              continue;
+            }
+            adaptiveParams[group][key] = value;
+          }
         }
       }
+      for (const [group, lower, upper, fallback] of [
+        ["ratioShapes", "vertical", "horizontal", [0.8, 1.25]],
+        ["experienceScale", "near", "far", [1, 1.5]]
+      ]) if (adaptiveParams[group][lower] >= adaptiveParams[group][upper]) {
+        parameterDiagnostic(group, __spreadValues({}, adaptiveParams[group]), "The lower boundary must be less than the upper boundary; using defaults.");
+        adaptiveParams[group][lower] = fallback[0];
+        adaptiveParams[group][upper] = fallback[1];
+      }
+      const orderedSizes = ["compact", "small", "medium", "large", "xl", "xxl"];
+      if (orderedSizes.some((name, index) => index > 0 && adaptiveParams.minSizes[name] < adaptiveParams.minSizes[orderedSizes[index - 1]]))
+        parameterDiagnostic("minSizes", __spreadValues({}, adaptiveParams.minSizes), "Named minimum sizes are out of order; the configured thresholds are preserved.");
       managedClasses = getManagedClasses();
       for (const group of Object.keys(adaptiveParams)) Object.freeze(adaptiveParams[group]);
       Object.freeze(adaptiveParams);
       AelluxJs.mountManager.add({
         extensionName,
         selector: `[${attr.adaptive}]`,
+        priority: 0,
         mount: mountAdaptive,
         unmount: unmountAdaptive
       });
@@ -69,35 +119,55 @@
       }
       return classes;
     }
+    function parameterDiagnostic(attribute, value, reason) {
+      AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
+        extension: extensionName,
+        attribute: `adaptiveParams${attribute ? "." + attribute : ""}`,
+        value,
+        reason,
+        suggestion: "Use finite nonnegative minimum sizes and positive, ordered ratio/experience boundaries."
+      });
+    }
     function destroy() {
-      if (updateTimeout !== null) {
-        clearTimeout(updateTimeout);
-        updateTimeout = null;
-      }
       pendingResizeEntries.clear();
       pendingResizeElements.clear();
-      lastUpdateTime = -UPDATE_INTERVAL_MS;
       for (const element of adaptiveElements) unmountAdaptive(element);
       if (resizeObserver) resizeObserver.disconnect();
       AelluxJs.mountManager.remove({ extensionName });
     }
     function mountAdaptive(element) {
       if (adaptiveElements.has(element)) return;
+      elementMemories.set(element, AelluxJs.persist.element.save(
+        element,
+        [],
+        dimensionProperties
+      ));
+      ariaHandlers.set(element, AelluxJs.aria.register(element));
       adaptiveElements.add(element);
-      const bounds = element.getBoundingClientRect();
-      updateAdaptive(element, bounds.width, bounds.height);
+      layoutIds.set(element, nextLayoutId++);
       if (resizeObserver) resizeObserver.observe(element);
-      else if (adaptiveElements.size === 1) root.addEventListener("resize", onWindowResize);
+      else {
+        scheduleElement(element, null);
+        if (adaptiveElements.size === 1) AelluxJs.onEvent(root, "$resize", onWindowResize);
+      }
     }
     function unmountAdaptive(element) {
+      var _a, _b;
       if (!adaptiveElements.delete(element)) return;
       pendingResizeEntries.delete(element);
       pendingResizeElements.delete(element);
+      const id = layoutIds.get(element);
+      if (id !== void 0) AelluxJs.waitLayout.cancel(id);
+      layoutIds.delete(element);
       if (resizeObserver) resizeObserver.unobserve(element);
-      else if (adaptiveElements.size === 0) root.removeEventListener("resize", onWindowResize);
+      else if (adaptiveElements.size === 0) AelluxJs.offEvent(root, "$resize", onWindowResize);
       for (const name of managedClasses) {
         element.classList.remove(name);
       }
+      (_a = ariaHandlers.get(element)) == null ? void 0 : _a.release();
+      ariaHandlers.delete(element);
+      (_b = elementMemories.get(element)) == null ? void 0 : _b.restore();
+      elementMemories.delete(element);
     }
     function onResize(entries) {
       for (const entry of entries) {
@@ -114,53 +184,44 @@
       scheduleUpdate();
     }
     function scheduleUpdate() {
-      const elapsed = now() - lastUpdateTime;
-      if (elapsed >= UPDATE_INTERVAL_MS) {
-        if (updateTimeout !== null) {
-          clearTimeout(updateTimeout);
-          updateTimeout = null;
-        }
-        flushPendingUpdate();
-        return;
-      }
-      if (updateTimeout !== null) return;
-      updateTimeout = setTimeout(
-        flushPendingUpdate,
-        UPDATE_INTERVAL_MS - elapsed
-      );
+      flushPendingUpdate();
     }
     function flushPendingUpdate() {
-      updateTimeout = null;
       if (!pendingResizeEntries.size && !pendingResizeElements.size) return;
-      lastUpdateTime = now();
-      const entries = Array.from(pendingResizeEntries.values());
+      const entries = Array.from(pendingResizeEntries.entries());
       pendingResizeEntries.clear();
-      for (const entry of entries) {
-        updateAdaptive(entry.target, entry.contentRect.width, entry.contentRect.height);
-      }
+      for (const [element, entry] of entries) scheduleElement(element, entry.contentRect);
       const elements = Array.from(pendingResizeElements);
       pendingResizeElements.clear();
-      for (const element of elements) {
-        AelluxJs.waitLayout.read(readBounds, [element]);
+      for (const element of elements) scheduleElement(element, null);
+    }
+    function scheduleElement(element, contentRect) {
+      const id = layoutIds.get(element);
+      if (id === void 0) return;
+      const maxFPS = AelluxJs.layoutMaxFPS(element);
+      const abort = () => !adaptiveElements.has(element);
+      if (contentRect) {
+        AelluxJs.waitLayout.sequence(id, {
+          update: () => updateAdaptive(element, contentRect.width, contentRect.height),
+          maxFPS,
+          abort
+        });
+        return;
       }
-    }
-    function now() {
-      return root.performance && typeof root.performance.now === "function" ? root.performance.now() : Date.now();
-    }
-    function readBounds(entry) {
-      const { width, height } = entry.getBoundingClientRect();
-      AelluxJs.waitLayout.update(
-        updateAdaptive,
-        [entry, width, height]
-      );
+      AelluxJs.waitLayout.sequence(id, {
+        read: () => element.getBoundingClientRect(),
+        update: (rect) => updateAdaptive(element, rect.width, rect.height),
+        maxFPS,
+        abort
+      });
     }
     function updateAdaptive(element, width, height) {
+      var _a;
       if (!adaptiveElements.has(element)) return;
       const ratio = height > 0 ? width / height : 0;
-      element.setAttribute(
-        "aria-orientation",
-        height > width ? "vertical" : "horizontal"
-      );
+      (_a = ariaHandlers.get(element)) == null ? void 0 : _a.set({
+        orientation: height > width ? "vertical" : "horizontal"
+      });
       element.classList.toggle(
         modifier.shapeVertical,
         ratio < adaptiveParams.ratioShapes.vertical
@@ -176,12 +237,27 @@
       const space = Math.sqrt(width * height);
       for (let i = 0; i < sizeThresholds.length; i++) {
         const threshold = sizeThresholds[i];
-        element.classList.toggle(threshold.className, space >= threshold.minimum);
+        element.classList.toggle(
+          threshold.className,
+          space >= threshold.minimum
+        );
       }
-      AelluxJs.dispatchFrom(element, "AdaptiveUpdate", { detail: null });
+      for (const name of dimensionProperties) {
+        if (element.style.getPropertyPriority(name)) element.style.removeProperty(name);
+      }
+      element.style.setProperty("--ae-width", width);
+      element.style.setProperty("--ae-height", height);
+      AelluxJs.dispatchFrom(element, "AdaptiveUpdate", {
+        detail: { width, height, ratio }
+      });
     }
     function inferOrientation(flexBox, selector = "*") {
-      return AelluxJs.waitLayout.read(() => {
+      let id = orientationLayoutIds.get(flexBox);
+      if (id === void 0) {
+        id = nextLayoutId++;
+        orientationLayoutIds.set(flexBox, id);
+      }
+      return AelluxJs.waitLayout.read(id, () => {
         const fallback = "horizontal";
         var style = getComputedStyle(flexBox);
         if (style.display === "flex" || style.display === "inline-flex") {

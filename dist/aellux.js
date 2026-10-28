@@ -1,6 +1,9 @@
 (function() {
   // <define:__AELLUX_CORE_ASSET_INTEGRITY__>
-  var define_AELLUX_CORE_ASSET_INTEGRITY_default = { "aellux.ext.adaptive.css": "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0", "aellux.ext.adaptive.min.css": "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", "aellux.ext.present.css": "sha384-v8wPzYiY8oDtW0rsBd/mrvay2D2n1geOkDsC1jNHYnG5Ma/XqjzfpJx9YbrqInCh", "aellux.ext.present.min.css": "sha384-LDKCxAjoPTE0CmT4mkGs76QcrAJGKk5h+ODgVCIet4BnRvLB6FPkiKOYG/h2a/PU", "aellux.esm.js": "sha384-MpfktBBE4H5AcIPL5FiIDLyYywQr3Q9RPlKRpWKbfijM8owuOQd+2OzYXcj4SN0G", "aellux.esm.min.js": "sha384-dsS2pzP+63OgtMXGDt0cWOQJOv3lmDEUdkzHweD1qT1i1Zf30082zpuGiLqqPOBd", "aellux.ext.adaptive.js": "sha384-wrdlJQkscfydVmBC4CpvjxmKiL6EHSC8FYlVBjHVuTAnD/YPazDBqNjr3boXUNHF", "aellux.ext.adaptive.min.js": "sha384-Mzebl9/HhXvVpT1CfDZzES4/346gkRN3izYEcrf3GrlZl2UHImRH6JicK9yiRFaP", "aellux.ext.feedback.js": "sha384-sUr2lKsTasJ3yf1tg1IhDk5slfwTjAOCX2t5jQV/Ls4WAPRh2r/k36/8OXjJJaBv", "aellux.ext.feedback.min.js": "sha384-dHsisS4smcj355Pnq/l4R4J1PKFx62zNDFaF1TqlIahZzOb2k2p0AR9IYIPKaKxB", "aellux.ext.focus.js": "sha384-anEEvo/ORlaACIX0X89LtHpJjPgW5JuxdhdiyFjHwWOSCuTEc1/sQWfIG+lLsXeH", "aellux.ext.focus.min.js": "sha384-gES+QtECljb8NOd4tIimBP4xVkf2WU1qI1Kl3vBnkNl+ib6Qa3NKGbBb5s1vJntp", "aellux.ext.point.js": "sha384-wFVSTCY7KG2AWYXvrw9w60FqNGn4xWmnjVzHKJzT1739aI2dv4oiSVOCXBQqlXf+", "aellux.ext.point.min.js": "sha384-NY0UDzKAa5F25KwmXs6AidvtyLK3VHeSKTYWw/fj9bc6IDLyJTW23gEl208t8Ic7", "aellux.ext.preference.js": "sha384-gQMBfBvnipftalCd3O/E2zToYbvR6vgWIY0RxvrY4aIX9C/fkGue5nGRfFctvq5z", "aellux.ext.preference.min.js": "sha384-846PZv3FCFbHlklLWb6fWcjFN6hXSehQ+NrjYmdUHd3nsDc4NtwLibNFANDKMjCy", "aellux.ext.present.js": "sha384-mDAIQVR83mxQX1HADbCf3ZmgKf4q6kXIcXgBSWiDITBinisqm/o5B4uBL98NmZD/", "aellux.ext.present.min.js": "sha384-5L3QxSiVBA/PK1B5PU5zKciv3B/iatNElFIyiGlP6c0IASKnWq09tzXtvCS4vK80", "aellux.ext.state-navigation.js": "sha384-LFT3Gy16qKjnomzrkx/f/umVDQbsiU+rQ5m05Kl9EbvnQIV5e2IuLEkEqNeFzMsB", "aellux.ext.state-navigation.min.js": "sha384-hhAKBKsLoM20KeJwrtuUINucyNe3DxW6/o8e7NrwT48Y+rQpmZCYSz13g1cdcXQg", "aellux.full.js": "sha384-UC6OHoPZPK/YHgsdSDy2yoXuGTqDGUGVgbM0/zUGdppA4rb42s5PQN/idUrgC9Ok", "aellux.full.min.js": "sha384-aDJPMHBaEn3CC+jtv+rTQramTle9To3biZYkSp2AXKEaJI/Bs4QeTuyv9SvRp566", "aellux.orchestrator.js": "sha384-Lm5msaaOOapWCnBIDnlHs/rHGyGXjTuYYsySEAMDTnMCTDWBJB9KqTDOJYO8zxt6", "aellux.orchestrator.min.js": "sha384-tNIlkPaHLJn4iPwhBmPh9b+0g6VKhnsxtu0b9GOvdOGRa/yTi1GNtjzMUo5b/VPX", "aellux.ext.adaptive.legacy.js": "sha384-gQLk3M25cBb3KCV6Y7Crx6pq5xEhMt7hW1zjUOVzXOS0W/xBHD8hoDefsHK2g2bO", "aellux.ext.adaptive.legacy.min.js": "sha384-l0i67WXYO8+nMrEWR+exfpH6orl2fLiwg7Gyug7UOflVtDBGoieDs7vrj0PrJSCQ", "aellux.ext.feedback.legacy.js": "sha384-jyvYvbzuSua5FWZsAWeXWqmab/DjA1LVg2oOHb6Ey6wH4W2bB9qwt+QhGwIkk1gL", "aellux.ext.feedback.legacy.min.js": "sha384-y4s7SxXMb4y56JPQIrxH9z9NZSrpb112UlT0VSLPhWAyyq4DazOuvNKIoTUEmfk+", "aellux.ext.focus.legacy.js": "sha384-SfEgZ39a6eBYQggY/mFsW4PanFtChQG1eCnVRmDOsx49ylNsV6fh7sh6oDDu34sv", "aellux.ext.focus.legacy.min.js": "sha384-ZbLn0Gi6Hspit81ugQ0II0XHdnYhn/7uKifuvyS6ztMKathrMwO2vy+ziWd0KvDU", "aellux.ext.point.legacy.js": "sha384-HvHZ1FcETFKo3sAAbPwQoQEKUjLcdWzg/2EmyDozbIJ7rBL1y7DJbGsN/cf9Z243", "aellux.ext.point.legacy.min.js": "sha384-NAtX/PKVuzk2jvVEQDSuXM9Kco4y86/TSEO4S0P0JcMUO8pdPsv8gs1pj2SEhgKA", "aellux.ext.preference.legacy.js": "sha384-BnmiZDjvg4nirECXQeDP+VRdYMkAaswfP6CQ8GvINCQp+XvuXo0XwuEPkJqP0J/L", "aellux.ext.preference.legacy.min.js": "sha384-zGx/g9Qnp8ON/IouwwgyI2rU28iy59p1AodkbUgXxAR+9EFHYehq6uM+TZ/ipL5t", "aellux.ext.present.legacy.js": "sha384-hCM/0b0UXup4PonWlwhjLwVfwU4l1et6b7EBadEG5sPl5hQdLGd3XXJDp88RQmWB", "aellux.ext.present.legacy.min.js": "sha384-wzS+kO26NLL5MLePvc2Q9SGmeRv+H4eyHI/0eIE3q84LtMhy3DycWUPf9JPnz7aS", "aellux.ext.state-navigation.legacy.js": "sha384-oscUHkkxCKSiAYJdSaOYv3a1ONSbXV/py3lq7T7sO/YoG6kHN2zCzCoRXWmS1qc1", "aellux.ext.state-navigation.legacy.min.js": "sha384-e6XxU4BX6tFfC3FQI76sMdHZyy1Y3ta+WxtT8duNWx093M/VcYg3BYE/ZTEY5h2g", "aellux.orchestrator.legacy.js": "sha384-k6Utfs8YtmZHHCjLJAcpKcMos7vkGRZL/cLOAhNcKLJqu7VfmNFi7oC59BqDSH6C", "aellux.orchestrator.legacy.min.js": "sha384-80BgzJPrG2PAusORWQ0k2N4eJgPBABQJ/wIKaoyqX1ffU1LoE3/XpftKgOKiWDJo", "aellux.full.legacy.js": "sha384-yJC5orE0hOGLiVYuORdnGv4j4UeoErWmr9SrU7uYteRWZOgCY3VE2Qq1osr/GiTt", "aellux.full.legacy.min.js": "sha384-GfvoMyB1UO5o1YAUDer1SK6pxn2vD04uL2yFc9Js/Iu6lumTlSVnSDsffQGn4DPk" };
+  var define_AELLUX_CORE_ASSET_INTEGRITY_default = { "aellux.ext.adaptive.css": "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0", "aellux.ext.present.css": "sha384-uZ/OPZK9sRFcaejKJHrc0wPaPXFKeGS+pBWWbkMEe3+3M6zLEa7nBc/cD0Tejsmr", "aellux.ext.feedback.css": "sha384-IPP/dIlWH4WGrBbr5Uou6H7jsWRQZZ9j8AXckptqBy3QnZIGeNbgwEUuzwElMcg1", "aellux.ext.scrollbox.css": "sha384-YTrc/Z1vWPZZtN74Mz7sf6AqjIigeGLoZC1iUbR5aAT75pt2OyaKnoGFQ5ko8mn/", "aellux.ext.anchor.css": "sha384-tHVCjTT3bvlmkAIDfMyevvrkAB7crjBXQAfY1l8XcaWhBFSersWJk+JndC6Bd9mO", "aellux.ext.overflow-marquee.css": "sha384-HyIVGE6lr+ZML8gekuK733ELP8Bd2gdj/+to+QhBYPN+tytaTEHP07ub3nAkOG3y", "aellux.full.css": "sha384-A8OWs2GaiR46SBPChz5mM6FWEgRU0lepPPUt/YjSKKaKr8oi46MfGR845FblXXsy", "aellux.esm.js": "sha384-1KsYzo9sUKTIUrCV6r/lWPJbFKPvhGbezfh+aBYcxBSTpSlFAsfhz2OC+pdGcmN2", "aellux.ext.adaptive.js": "sha384-Qzf9wU6DSSaaE+8lr96vnYqjKQqYxep8dhCZmjgNdqreuk9fL3qKMn3NW7DGAEaT", "aellux.ext.ajax-href.js": "sha384-KnEREb+SVDeV+GhSXwyMxlj7eMOXd+bSnEvP5q5NQaLRV+infL7Y5D3z2CGY4uuc", "aellux.ext.anchor.js": "sha384-LaYGJ6p9H5QBGJf5j19wHgT+CFcMim2h0Ro+itxYnLkIE29RFtPdj8P8L9EYWAWr", "aellux.ext.dialog.js": "sha384-l/JiEWfwZjoRstLvtduKXEprGYknbGI8N+UCthSf4eV2IeBrbJhArdrQ+KTtffIS", "aellux.ext.feedback.js": "sha384-W/2/WHgipyDkr4TjMDV/gEUMnDg9GTeS5/Egoyhv5IpPxAB1QBL3LoJvn83YCKA8", "aellux.ext.focus.js": "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe", "aellux.ext.overflow-marquee.js": "sha384-KgktBr/obiBSzHGOhEVPNV0TyhaHjKVHV3wgLEuSixQzCPrchX4SlW5m8s6xujab", "aellux.ext.point.js": "sha384-SADPZVR4ANG+cju1qXjtio97ylPp5DbnMbBZORgkHUjjPUKWa2dJ3xw4/X7geubu", "aellux.ext.preference.js": "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7", "aellux.ext.present.js": "sha384-J/mWEj4jLGHfxvvPXMXLBt+09WhXRyGxQ8dNx7FIdXzXDLaeNi7bsBeuWbCg/i9Y", "aellux.ext.pwa.js": "sha384-2Z7dwOZwzEi1SxX2E5DZK0nHwMPNzRU+r4+6bkXHRhw0CxJGwahseR1q7D0+kePd", "aellux.ext.scrollbox-snap.js": "sha384-Cv1o//5XnaGJuD1MvaOryR517NcomPCj+QGcDPYEmf7jhgBSHkKPFWzLeUBBhYAz", "aellux.ext.scrollbox.js": "sha384-EC7MSLm5Ci5MHEzTULzJRkEqIuWvgGbIaur/HvYVBOzL/o4fQKVJIq/Sg067Tldm", "aellux.ext.state-navigation.js": "sha384-9ODyxQd12oywtfOlG/ip10HnlqX9Duv1qtj8I6SARShuT0X2+XaazkNb0q6MToIo", "aellux.ext.viewport.js": "sha384-Ai6XdL8zuOo+ylegYhdWziKl4EBoMB5pZT7TMu7nrwSPBfiPVGSG4VREBWH79Rzy", "aellux.full.js": "sha384-p9cFCCpwkgAzMMFEZbr/izWAbL/APXD+uiwxwKBnOgVSwTm/fln2J+eY5wJ6c7cW", "aellux.orchestrator.js": "sha384-r8C31Ule1xbjSo1x1dB0olMvcyQMzf1qr/8P9iOK+9UdyIlH0dUzELLTp8sYTV9L", "aellux.pwa.sw.js": "sha384-QS3FsQxQCya8CgroIuwsMjPJxzA10x66Dgl6RBE9PAWhTTmO6K0KEBwLDy0uRFNA", "aellux.ext.adaptive.legacy.js": "sha384-gBkxqbBpIqdj5ozJm/NsenI/yKOvEGarZBl2SrPjYiiYx6cez2/FGTMf5XyzHrTj", "aellux.ext.ajax-href.legacy.js": "sha384-9Xc/0ctLrdTbC3ZCW7lNXSwmZiDnUWv7mvJauSgUpUz/Tfj5AR7YUvP6rCY5UQmS", "aellux.ext.anchor.legacy.js": "sha384-bN9t1anpKLUDUvnbE845H1+9UvP+XDfrsN5AhrKLUQJ5fm3YcFqiylDNFuE02RlJ", "aellux.ext.dialog.legacy.js": "sha384-j9FgIwwar14yeeayJ7oLhqCdCzFyKaXjea8aYIP+gUO94IjZ0vkskGCfaSflrFnH", "aellux.ext.feedback.legacy.js": "sha384-zMn2f44gff9x8erIktXd/h5ZRPUA6PyeBfzvM2qI5nHe/45a9P05wmmxW/HjkmKb", "aellux.ext.focus.legacy.js": "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw", "aellux.ext.overflow-marquee.legacy.js": "sha384-2r6PsL2bhYVotZftfm3zHYrnFZnorf3FSJshm3iD5IH7AbCJOgWfOxoTU89Ok8S3", "aellux.ext.point.legacy.js": "sha384-4ZTxlwhOgRY7WLohaQm3vPaCAr0Il1zbLDXx4FxcrqHPbe/jufJftB+nCty6zBdb", "aellux.ext.preference.legacy.js": "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk", "aellux.ext.present.legacy.js": "sha384-++NYmpMqNbWqFDSZ32aasH6/X/nSAqixtJeYSYWXTus8kcdaAH2PyYcZNXWbj/L1", "aellux.ext.pwa.legacy.js": "sha384-2Lsz4jJVPPyhgXg3mIuceKj5HAgSQFb+WteFB9doJZblzVL7HSfzWnAKaL9mZjqi", "aellux.ext.scrollbox-snap.legacy.js": "sha384-heKlN6PfmmQkw9etZgFsjIMvXDSWSqqDCJJ9gUJy3CiO4sToqqIxiFK4swXQrAN6", "aellux.ext.scrollbox.legacy.js": "sha384-07PUZiYQI6noySuLarbThX8ZPTPyvReSTKQR32YFud7SbR8mthhvnzDEVGQ1yWwj", "aellux.ext.state-navigation.legacy.js": "sha384-uvHYocQH74OpLikjFvfxa2BR3BV+WTs4wxmJBrrwqpQBFKtguRjwBlfOoNThMt6F", "aellux.ext.viewport.legacy.js": "sha384-65qW50X3xYWP5FyPCJQcd5CEFKLhHJaVAXMM6VvoTRK63YljuZIjztqdf1iSghvL", "aellux.orchestrator.legacy.js": "sha384-ZzpkZIjQZVwpT7aQToGIP7rhGoojlCSetSYz7DpA9WUXotTq+eucJFZ9LOVbhgZl", "aellux.full.legacy.js": "sha384-Yt3odWsBxhJFKG0XEXv9pEl1+lcrc/I4NiyII+umzlKGDcF1HWfBCiCWaZXymlRn" };
+
+  // <define:__AELLUX_OFFICIAL_EXTENSION_MANIFEST__>
+  var define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default = { schemaVersion: 1, coreVersion: "0.1.0-beta.10", extensions: { preference: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.preference.min.js", integrity: "sha384-mSOgb0DekFTRXXZAgyNrPjamdlSqzL4SSGZYVWgVg+WlG+pBj11xT81v/6Xk43yO", regular: { url: "./aellux.ext.preference.js", integrity: "sha384-MlikpdHSzHzF6kz5+oJGtq3eoFsKTsx/g+FTrf+dFOU8iQGHsCpn4fP1jLlbNrj7" } }, legacy: { url: "./aellux.ext.preference.legacy.min.js", integrity: "sha384-1LMsK0W9J/PoM4tXhFgkYLRY4yWdzVoYmFy4OMDGd8lRdtptKoEb1sI9L1kzNaBu", regular: { url: "./aellux.ext.preference.legacy.js", integrity: "sha384-pozuz43OyfXrnkmuBu6KTM2lqRSqcI5LMgwAtqnzXq8xZGdVqpnmOtrBcYcMskWk" } } }, dependencies: [] }, "state-navigation": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.state-navigation.min.js", integrity: "sha384-LaBxAjHiqPGHHL8zCnmSeKc0tnyUeVWa7Dl2CQ1xN/ZjoheuYhTuR3igZt2dZrRO", regular: { url: "./aellux.ext.state-navigation.js", integrity: "sha384-9ODyxQd12oywtfOlG/ip10HnlqX9Duv1qtj8I6SARShuT0X2+XaazkNb0q6MToIo" } }, legacy: { url: "./aellux.ext.state-navigation.legacy.min.js", integrity: "sha384-OVKSOiluMvmZUPaxDG5JJKZt8IA8Yci64w57dTEA4orAb0JFS19i+4zfcbolCSGL", regular: { url: "./aellux.ext.state-navigation.legacy.js", integrity: "sha384-uvHYocQH74OpLikjFvfxa2BR3BV+WTs4wxmJBrrwqpQBFKtguRjwBlfOoNThMt6F" } } }, dependencies: [] }, feedback: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.feedback.min.js", integrity: "sha384-rQIqE6+7IfGvCpiuET21s2U79HKeLx32OtIgUxj0CCTh3xfnkdsBhxNw7gKckAgi", regular: { url: "./aellux.ext.feedback.js", integrity: "sha384-W/2/WHgipyDkr4TjMDV/gEUMnDg9GTeS5/Egoyhv5IpPxAB1QBL3LoJvn83YCKA8" } }, legacy: { url: "./aellux.ext.feedback.legacy.min.js", integrity: "sha384-tTKgxRh2XcZ1O6/xncOUKv04Yy0zABRiYq7vg0mhVIueqyQJ4MWkNylJ7NObFSmj", regular: { url: "./aellux.ext.feedback.legacy.js", integrity: "sha384-zMn2f44gff9x8erIktXd/h5ZRPUA6PyeBfzvM2qI5nHe/45a9P05wmmxW/HjkmKb" } } }, dependencies: [], style: { url: "./aellux.ext.feedback.min.css", integrity: "sha384-7qlVgbuAFsrTGNgG21E4KL6jLEOZ2tjFZHi0C59ZqWanU4W/SegBu/i1GRecUxVc", regular: { url: "./aellux.ext.feedback.css", integrity: "sha384-IPP/dIlWH4WGrBbr5Uou6H7jsWRQZZ9j8AXckptqBy3QnZIGeNbgwEUuzwElMcg1" } } }, focus: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.focus.min.js", integrity: "sha384-AXpUv/Ur2Z4cKvO9EqIFqfxxdSQR5j75q0okOAWPvHhSneQ5LPjrOzk6Sl9MOo4a", regular: { url: "./aellux.ext.focus.js", integrity: "sha384-VjQzcnhLRrvRlbVQ0X4/tO0+8gqJXAmIFoeIVimjOud1wRNuBXNnSQHHW9XQPzTe" } }, legacy: { url: "./aellux.ext.focus.legacy.min.js", integrity: "sha384-I5QpUmKsA1T8NiKfKXQgbdG19Ld1ZGCWSmosygO3yGj43tdxp5zCfLyfBuFoHlKu", regular: { url: "./aellux.ext.focus.legacy.js", integrity: "sha384-5/y3J1NC/qMyV9myEj29+wGbqCVI8ICPafSebtJVfl15Qmup6vMiJzveShd3CLnw" } } }, dependencies: [] }, dialog: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.dialog.min.js", integrity: "sha384-81nKjx0YpSsLAomqC9KkisQwzb4vuBlCt2LDzrQKmbySglCi2uL+TMog9IsgM6fY", regular: { url: "./aellux.ext.dialog.js", integrity: "sha384-l/JiEWfwZjoRstLvtduKXEprGYknbGI8N+UCthSf4eV2IeBrbJhArdrQ+KTtffIS" } }, legacy: { url: "./aellux.ext.dialog.legacy.min.js", integrity: "sha384-HD1NDBMWzJf3cjZKnbpL1pE4s5KTfvlyRai5l/1jfintahqpf87jEoMjwT+nO473", regular: { url: "./aellux.ext.dialog.legacy.js", integrity: "sha384-j9FgIwwar14yeeayJ7oLhqCdCzFyKaXjea8aYIP+gUO94IjZ0vkskGCfaSflrFnH" } } }, dependencies: [] }, pwa: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.pwa.min.js", integrity: "sha384-lUzmqXVfvulDUfA+/mMYwo+PQp36KaccIR005XaAChpJxZmt4tXulDzBRx9t/OjK", regular: { url: "./aellux.ext.pwa.js", integrity: "sha384-2Z7dwOZwzEi1SxX2E5DZK0nHwMPNzRU+r4+6bkXHRhw0CxJGwahseR1q7D0+kePd" } }, legacy: { url: "./aellux.ext.pwa.legacy.min.js", integrity: "sha384-Ish94mV3lN/GeUA5CZsQaueBH8oMJU6QHsL2nwGbKv+0pNNsTp+svKY+XrDgJ2gX", regular: { url: "./aellux.ext.pwa.legacy.js", integrity: "sha384-2Lsz4jJVPPyhgXg3mIuceKj5HAgSQFb+WteFB9doJZblzVL7HSfzWnAKaL9mZjqi" } } }, dependencies: [] }, viewport: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.viewport.min.js", integrity: "sha384-wHFokCbrIqA0vLAevlumxG8m4Miav3DR0jLakeLNymAmBMAa8bzAzPfaGq37VvmS", regular: { url: "./aellux.ext.viewport.js", integrity: "sha384-Ai6XdL8zuOo+ylegYhdWziKl4EBoMB5pZT7TMu7nrwSPBfiPVGSG4VREBWH79Rzy" } }, legacy: { url: "./aellux.ext.viewport.legacy.min.js", integrity: "sha384-B2h38dd19rVGWrvL5FOqSNLMU07MrWmTmdAQMV2FXaE3E/wGJTC0ucprO91Mf+AU", regular: { url: "./aellux.ext.viewport.legacy.js", integrity: "sha384-65qW50X3xYWP5FyPCJQcd5CEFKLhHJaVAXMM6VvoTRK63YljuZIjztqdf1iSghvL" } } }, dependencies: [] }, point: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.point.min.js", integrity: "sha384-Xs6j53KcvGe+uxFvAZxA33QVWZUTQdbRLvx/SmPRYwtI1FdRqtg7HX1vvqw3sllx", regular: { url: "./aellux.ext.point.js", integrity: "sha384-SADPZVR4ANG+cju1qXjtio97ylPp5DbnMbBZORgkHUjjPUKWa2dJ3xw4/X7geubu" } }, legacy: { url: "./aellux.ext.point.legacy.min.js", integrity: "sha384-PNoKlNYaZJ1K+RPkFVJ/KWGu2xcY/qD/wS2bZIBrtYOhKPeJz/N0S7ddMQEWtlRb", regular: { url: "./aellux.ext.point.legacy.js", integrity: "sha384-4ZTxlwhOgRY7WLohaQm3vPaCAr0Il1zbLDXx4FxcrqHPbe/jufJftB+nCty6zBdb" } } }, dependencies: [] }, anchor: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.anchor.min.js", integrity: "sha384-vpHUGJwyY3qnW78C6Yo8CLc2vgbn1KJ8FcOtQawBtCKarQ0CoihuNQ7ZCKnMbOjx", regular: { url: "./aellux.ext.anchor.js", integrity: "sha384-LaYGJ6p9H5QBGJf5j19wHgT+CFcMim2h0Ro+itxYnLkIE29RFtPdj8P8L9EYWAWr" } }, legacy: { url: "./aellux.ext.anchor.legacy.min.js", integrity: "sha384-Ym0BnY5sDflVI4JyPVWymZKurBcJTAbPNe2gy+6qHcD7x6RyIKwvff6o+6BfeZDy", regular: { url: "./aellux.ext.anchor.legacy.js", integrity: "sha384-bN9t1anpKLUDUvnbE845H1+9UvP+XDfrsN5AhrKLUQJ5fm3YcFqiylDNFuE02RlJ" } } }, dependencies: [], style: { url: "./aellux.ext.anchor.min.css", integrity: "sha384-DwxfMH5mNSvmF0U4/dgL6dbe+5U1x97y2H4skxW7nUUzjr99IXNl9aVDwRjfvNGz", regular: { url: "./aellux.ext.anchor.css", integrity: "sha384-tHVCjTT3bvlmkAIDfMyevvrkAB7crjBXQAfY1l8XcaWhBFSersWJk+JndC6Bd9mO" } } }, "overflow-marquee": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.overflow-marquee.min.js", integrity: "sha384-tFLjjool1K/ZadXUjVCVT5xRm2E4jhhaL/edTP+3Rcsx7cCOf7LcAPFt3NiUA/Bj", regular: { url: "./aellux.ext.overflow-marquee.js", integrity: "sha384-KgktBr/obiBSzHGOhEVPNV0TyhaHjKVHV3wgLEuSixQzCPrchX4SlW5m8s6xujab" } }, legacy: { url: "./aellux.ext.overflow-marquee.legacy.min.js", integrity: "sha384-ABKPe9/TndHdiGyrFIYhS1mPMulweuuZEMO+/TnX+ibHW+4DuP6xBtuetP6sSc8g", regular: { url: "./aellux.ext.overflow-marquee.legacy.js", integrity: "sha384-2r6PsL2bhYVotZftfm3zHYrnFZnorf3FSJshm3iD5IH7AbCJOgWfOxoTU89Ok8S3" } } }, dependencies: [], style: { url: "./aellux.ext.overflow-marquee.min.css", integrity: "sha384-PD8sxZJw/8gWr9Rq2l7wwUzADqBY74KSE1nn258niuXi97P+MSKN6tCxvocJPGd/", regular: { url: "./aellux.ext.overflow-marquee.css", integrity: "sha384-HyIVGE6lr+ZML8gekuK733ELP8Bd2gdj/+to+QhBYPN+tytaTEHP07ub3nAkOG3y" } } }, "ajax-href": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.ajax-href.min.js", integrity: "sha384-HEU5Z0uIXbX/YEc8/ZAngJQhyvY5DUi0LMftV4mngVCmizmLXQTY0KH68P8kMpnf", regular: { url: "./aellux.ext.ajax-href.js", integrity: "sha384-KnEREb+SVDeV+GhSXwyMxlj7eMOXd+bSnEvP5q5NQaLRV+infL7Y5D3z2CGY4uuc" } }, legacy: { url: "./aellux.ext.ajax-href.legacy.min.js", integrity: "sha384-fcbeDkYJ+hWFTY1H+0vrmZzT2npx0zDQgtB2c1Ecq1M/2X/yvq+VMBO8LFyhV8W4", regular: { url: "./aellux.ext.ajax-href.legacy.js", integrity: "sha384-9Xc/0ctLrdTbC3ZCW7lNXSwmZiDnUWv7mvJauSgUpUz/Tfj5AR7YUvP6rCY5UQmS" } } }, dependencies: [] }, scrollbox: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox.min.js", integrity: "sha384-uPXayeL9ofNXbIZqPfAc8vN+Pc+scoZqUhyQvh72w0eX0VXpGiZBD58zC56EyFB1", regular: { url: "./aellux.ext.scrollbox.js", integrity: "sha384-EC7MSLm5Ci5MHEzTULzJRkEqIuWvgGbIaur/HvYVBOzL/o4fQKVJIq/Sg067Tldm" } }, legacy: { url: "./aellux.ext.scrollbox.legacy.min.js", integrity: "sha384-ckjQO4rxe65QMTkcJRhMJoZ5gXnaj2ICHsDNTux8DD/BPvfOytBQljZ2VEf1oK7g", regular: { url: "./aellux.ext.scrollbox.legacy.js", integrity: "sha384-07PUZiYQI6noySuLarbThX8ZPTPyvReSTKQR32YFud7SbR8mthhvnzDEVGQ1yWwj" } } }, dependencies: [], style: { url: "./aellux.ext.scrollbox.min.css", integrity: "sha384-MwxOMDcM2kt8W5mipI/yF+OsftP+CDkMf0UxgdbcLPLUfBXyhB8KW8blHc/wKYld", regular: { url: "./aellux.ext.scrollbox.css", integrity: "sha384-YTrc/Z1vWPZZtN74Mz7sf6AqjIigeGLoZC1iUbR5aAT75pt2OyaKnoGFQ5ko8mn/" } } }, "scrollbox-snap": { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.scrollbox-snap.min.js", integrity: "sha384-gkje6qfPxaZi98j+wfJo2V2MN+F4g2l+GmJMobSG3RlKg1jjNwwxaYFbluyumiXd", regular: { url: "./aellux.ext.scrollbox-snap.js", integrity: "sha384-Cv1o//5XnaGJuD1MvaOryR517NcomPCj+QGcDPYEmf7jhgBSHkKPFWzLeUBBhYAz" } }, legacy: { url: "./aellux.ext.scrollbox-snap.legacy.min.js", integrity: "sha384-SOJ+nqT7wvC0k15iW72MBclgl2KryHUmk/IsdpnxS4kWmF3IXDxoEfEFqvEeCSki", regular: { url: "./aellux.ext.scrollbox-snap.legacy.js", integrity: "sha384-heKlN6PfmmQkw9etZgFsjIMvXDSWSqqDCJJ9gUJy3CiO4sToqqIxiFK4swXQrAN6" } } }, dependencies: [] }, adaptive: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.adaptive.min.js", integrity: "sha384-bkeOnTW/3uzbuhLc8fujaWnWGC+pwNAkZwci9M09paKqudp0v/flMrJ49JXw16vv", regular: { url: "./aellux.ext.adaptive.js", integrity: "sha384-Qzf9wU6DSSaaE+8lr96vnYqjKQqYxep8dhCZmjgNdqreuk9fL3qKMn3NW7DGAEaT" } }, legacy: { url: "./aellux.ext.adaptive.legacy.min.js", integrity: "sha384-YVHHWZOvf+65r/CU89nBPZXhj3j5sn4r2ho+CNUCUaYs1WE6pWIeypcq7n5OCBor", regular: { url: "./aellux.ext.adaptive.legacy.js", integrity: "sha384-gBkxqbBpIqdj5ozJm/NsenI/yKOvEGarZBl2SrPjYiiYx6cez2/FGTMf5XyzHrTj" } } }, dependencies: [], style: { url: "./aellux.ext.adaptive.min.css", integrity: "sha384-8yUP1PStfDqBCyCskP3k9WLIKgv/yl1nyDhmPz7hsX5NZ4z3ZT3ajolA+RhYlUiG", regular: { url: "./aellux.ext.adaptive.css", integrity: "sha384-HfIjX9Zk0VFRimzPvUaTS5AtwuHJHjXKoM/xbNJXj5vE7bSdBGEzbrBHfbNmYah0" } } }, present: { coreCompatibility: "0.1.0-beta.10", builds: { modern: { url: "./aellux.ext.present.min.js", integrity: "sha384-e9Ugejn8LF60AH/CrY7S33a6WkJKok6FLfMPnveyXRFRu0itRKedTU3317VirXIq", regular: { url: "./aellux.ext.present.js", integrity: "sha384-J/mWEj4jLGHfxvvPXMXLBt+09WhXRyGxQ8dNx7FIdXzXDLaeNi7bsBeuWbCg/i9Y" } }, legacy: { url: "./aellux.ext.present.legacy.min.js", integrity: "sha384-vaLbshfAzl9Wjx/bCsgkeY7d8QUD7sAXowycvuBAZWdGB71uD6Jtgbz+6bJpSDhm", regular: { url: "./aellux.ext.present.legacy.js", integrity: "sha384-++NYmpMqNbWqFDSZ32aasH6/X/nSAqixtJeYSYWXTus8kcdaAH2PyYcZNXWbj/L1" } } }, dependencies: [], style: { url: "./aellux.ext.present.min.css", integrity: "sha384-2QoNgFTu/KOOrgaTKZV4VXCoIaU2h5PMPILW5LHseXK2ygNpF6miOfxZUwkTBgPY", regular: { url: "./aellux.ext.present.css", integrity: "sha384-uZ/OPZK9sRFcaejKJHrc0wPaPXFKeGS+pBWWbkMEe3+3M6zLEa7nBc/cD0Tejsmr" } } } } };
 
   // src/internal/asset-load-helper.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
@@ -35,6 +38,9 @@
     var historyLimit = 100;
     var history = [];
     var historyStart = 0;
+    var identities = [];
+    var resourceIds = typeof WeakMap === "function" ? /* @__PURE__ */ new WeakMap() : null;
+    var nextResourceId = 1;
     var diagnostics = {
       legacy: false,
       supported: false,
@@ -93,6 +99,8 @@
       return diagnostics.verboseLevel;
     }
     function emit(level, definition, context) {
+      var identity = String(level) + "|" + diagnosticIdentity(definition, context);
+      if (identities.indexOf(identity) !== -1) return diagnostics.create(definition, context);
       var diagnostic = diagnostics.create(definition, context);
       var entry = {
         timestamp: (/* @__PURE__ */ new Date()).toISOString(),
@@ -103,7 +111,9 @@
       };
       if (history.length < historyLimit) {
         history.push(entry);
+        identities.push(identity);
       } else {
+        identities[historyStart] = identity;
         history[historyStart] = entry;
         historyStart = (historyStart + 1) % historyLimit;
       }
@@ -116,6 +126,42 @@
         );
       }
       return diagnostic;
+    }
+    function diagnosticIdentity(definition, context) {
+      return String(definition.code) + "|" + identityValue(context, []);
+    }
+    function identityValue(value, seen) {
+      if (value === null) return "null";
+      var type = typeof value;
+      if (type !== "object" && type !== "function") return type + ":" + String(value);
+      if (value && value.nodeType) return "element:" + resourceId(value);
+      if (value instanceof Error) {
+        return "error:" + value.name + ":" + value.message + ":" + String(value.code || "");
+      }
+      if (seen.indexOf(value) !== -1) return "circular";
+      seen.push(value);
+      var result;
+      if (Array.isArray(value)) {
+        result = "[" + value.map(function(item) {
+          return identityValue(item, seen);
+        }).join(",") + "]";
+      } else {
+        var keys = Object.keys(value).sort();
+        result = "{" + keys.map(function(key) {
+          return key + ":" + identityValue(value[key], seen);
+        }).join(",") + "}";
+      }
+      seen.pop();
+      return result;
+    }
+    function resourceId(resource) {
+      if (!resourceIds) return String(resource);
+      var id = resourceIds.get(resource);
+      if (!id) {
+        id = nextResourceId++;
+        resourceIds.set(resource, id);
+      }
+      return id;
     }
     for (var name in catalog) {
       if (Object.prototype.hasOwnProperty.call(catalog, name)) {
@@ -218,60 +264,112 @@
     };
   }
 
+  // src/internal/create-save-element-memory-helper.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function createSaveElementMemoryHelper() {
+    return { save: saveElementMemory };
+  }
+  function saveElementMemory(element, attributes, cssProperties) {
+    if (!element || typeof element.hasAttribute !== "function" || typeof element.setAttribute !== "function" || !element.style) {
+      throw new TypeError("persist.element.save requires an element");
+    }
+    if (typeof attributes === "undefined") attributes = [];
+    if (typeof cssProperties === "undefined") cssProperties = [];
+    if (!Array.isArray(attributes) || !Array.isArray(cssProperties)) {
+      throw new TypeError("persist.element.save requires arrays of attributes and CSS properties");
+    }
+    var savedAttributes = /* @__PURE__ */ Object.create(null);
+    var savedCssProperties = /* @__PURE__ */ Object.create(null);
+    var style = element.style;
+    var i;
+    for (i = 0; i < attributes.length; i++) {
+      var attribute = attributes[i];
+      savedAttributes[attribute] = {
+        present: element.hasAttribute(attribute),
+        value: element.getAttribute(attribute)
+      };
+    }
+    for (i = 0; i < cssProperties.length; i++) {
+      var property = cssProperties[i];
+      var value = style.getPropertyValue(property);
+      var priority = style.getPropertyPriority(property);
+      var present = value !== "" || priority !== "";
+      if (!present) {
+        for (var j = 0; j < style.length; j++) {
+          if (style.item(j) === property) {
+            present = true;
+            break;
+          }
+        }
+      }
+      savedCssProperties[property] = {
+        present: present,
+        value: value,
+        priority: priority
+      };
+    }
+    return {
+      attributes: savedAttributes,
+      cssProperties: savedCssProperties,
+      restore: function() {
+        if (!element || typeof element.setAttribute !== "function" || !element.style) return false;
+        for (var name in savedAttributes) {
+          if (!Object.prototype.hasOwnProperty.call(savedAttributes, name)) continue;
+          var savedAttribute = savedAttributes[name];
+          if (savedAttribute.present) element.setAttribute(name, savedAttribute.value);
+          else element.removeAttribute(name);
+        }
+        for (var cssName in savedCssProperties) {
+          if (!Object.prototype.hasOwnProperty.call(savedCssProperties, cssName)) continue;
+          var savedCss = savedCssProperties[cssName];
+          if (savedCss.present) element.style.setProperty(cssName, savedCss.value, savedCss.priority);
+          else element.style.removeProperty(cssName);
+        }
+        return true;
+      }
+    };
+  }
+
   // src/internal/build-preference-media-queries.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function buildPreferenceMediaQueries(root) {
     function mediaQuery(query) {
       return typeof root.matchMedia === "function" ? root.matchMedia(query) : null;
     }
+    var NO_PREFERENCE = "no-preference";
+    var PREFERS = "prefers-";
+    var REDUCED = "reduced";
+    var COLOR_SCHEME = PREFERS + "color-scheme";
+    var REDUCED_MOTION = PREFERS + "reduced-motion";
+    var REDUCED_TRANSPARENCY = PREFERS + "reduced-transparency";
+    var FORCED_COLORS = "forced-colors";
+    var CONTRAST = PREFERS + "contrast";
+    function preferenceQuery(feature, value) {
+      return mediaQuery("(" + feature + ": " + value + ")");
+    }
     return {
       colorScheme: {
-        light: mediaQuery("(prefers-color-scheme: light)"),
-        dark: mediaQuery("(prefers-color-scheme: dark)")
+        light: preferenceQuery(COLOR_SCHEME, "light"),
+        dark: preferenceQuery(COLOR_SCHEME, "dark")
       },
       reducedMotion: {
-        reduced: mediaQuery("(prefers-reduced-motion: reduced)"),
-        "no-preference": mediaQuery("(prefers-reduced-motion: no-preference)")
+        reduced: preferenceQuery(REDUCED_MOTION, "reduce"),
+        "no-preference": preferenceQuery(REDUCED_MOTION, NO_PREFERENCE)
       },
       reducedTransparency: {
-        reduced: mediaQuery("(prefers-reduced-transparency: reduced)"),
-        "no-preference": mediaQuery("(prefers-reduced-transparency: no-preference)")
+        reduced: preferenceQuery(REDUCED_TRANSPARENCY, REDUCED),
+        "no-preference": preferenceQuery(REDUCED_TRANSPARENCY, NO_PREFERENCE)
       },
       forcedColors: {
-        active: mediaQuery("(forced-colors: active)"),
-        "no-preference": mediaQuery("(forced-colors: no-preference)")
+        active: preferenceQuery(FORCED_COLORS, "active"),
+        "no-preference": preferenceQuery(FORCED_COLORS, NO_PREFERENCE)
       },
       contrast: {
-        more: mediaQuery("(prefers-contrast: more)"),
-        less: mediaQuery("(prefers-contrast: less)"),
-        "no-preference": mediaQuery("(prefers-contrast: no-preference)")
+        more: preferenceQuery(CONTRAST, "more"),
+        less: preferenceQuery(CONTRAST, "less"),
+        "no-preference": preferenceQuery(CONTRAST, NO_PREFERENCE)
       }
     };
-  }
-
-  // src/internal/build-initial-attr-memory.js
-  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  var savedAttributes;
-  function saveAttr(target, attributes) {
-    if (!savedAttributes) savedAttributes = /* @__PURE__ */ new WeakMap();
-    var snapshot = [];
-    for (var i = 0; i < attributes.length; i++) {
-      var name = attributes[i];
-      snapshot.push([name, target.getAttribute(name)]);
-    }
-    savedAttributes.set(target, snapshot);
-  }
-  function restoreAttr(target) {
-    if (!savedAttributes) return;
-    var snapshot = savedAttributes.get(target);
-    if (!snapshot) return;
-    for (var i = 0; i < snapshot.length; i++) {
-      var name = snapshot[i][0];
-      var value = snapshot[i][1];
-      if (value === null) target.removeAttribute(name);
-      else target.setAttribute(name, value);
-    }
-    savedAttributes.delete(target);
   }
 
   // src/internal/utils-name-case.js
@@ -295,14 +393,56 @@
     fromCamelCase: fromCamelCase
   };
 
+  // src/internal/create-naming-normalization.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function createNamingNormalization(constants) {
+    var fromCamelCase2 = utils_name_case_default.fromCamelCase;
+    var toCapitalized2 = utils_name_case_default.toCapitalized;
+    return {
+      attr: function(name) {
+        name = fromCamelCase2(name);
+        return "data-" + constants.AELLUXJS_DATA_ATTRIBUTE_NAME_PREFFIX.replace(/\?/, name);
+      },
+      className: function(name) {
+        name = fromCamelCase2(name);
+        return constants.AELLUXJS_CLASS_NAME_PREFFIX.replace(/\?/, name);
+      },
+      cssVar: function(name) {
+        name = fromCamelCase2(name);
+        return constants.AELLUXJS_CSS_VAR_PREFFIX.replace(/\?/, name);
+      },
+      extFilename: function(extensionName) {
+        extensionName = fromCamelCase2(extensionName);
+        return "aellux." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "." + extensionName + (this.minified ? ".min.js" : ".js");
+      },
+      extName: function(filename) {
+        return filename.replace(
+          new RegExp("^.*aellux\\." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "\\.([^.\\/?#]+)(?:\\.min)?\\.js(?:[?#].*)?$"),
+          "$1"
+        );
+      },
+      eventName: function(name) {
+        if (/^[$#_!]/.test(name)) return name.slice(1).trim();
+        var format = constants.AELLUXJS_EVENT_NAME_PREFFIX;
+        var prefix = format.slice(0, format.indexOf("?"));
+        if (name.indexOf(prefix) === 0) return name;
+        return format.replace(/\?/, toCapitalized2(name));
+      }
+    };
+  }
+
   // src/internal/create-preference-html-helper.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createPreferenceHtmlHelper(root, getApi) {
     var document2 = root.document;
     var fromCamelCase2 = utils_name_case_default.fromCamelCase;
     return {
-      updatePreferenceAttributesHTML: updatePreferenceAttributesHTML
+      updatePreferenceAttributesHTML: updatePreferenceAttributesHTML,
+      currentPreference: currentPreference
     };
+    function currentPreference(name) {
+      return document2.documentElement.getAttribute(getApi().attr(name));
+    }
     function updatePreferenceAttributesHTML(preferences) {
       var api = getApi();
       var allQueries = api.registry.preferenceMediaQueries;
@@ -359,16 +499,127 @@
     }
   }
 
+  // src/internal/resolve-element-or-id.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function resolveElementOrId(root, elementOrId, options) {
+    options = options || {};
+    var fallback = options.defaultElement;
+    if ((elementOrId === void 0 || elementOrId === null) && fallback) {
+      return fallback;
+    }
+    var requested = elementOrId;
+    if (typeof elementOrId === "string") {
+      var id = elementOrId.trim().replace(/^#/, "");
+      elementOrId = id ? root.document.getElementById(id) : null;
+    }
+    var allowedNodeTypes = options.allowedNodeTypes || [root.Node.ELEMENT_NODE];
+    if (elementOrId && allowedNodeTypes.indexOf(elementOrId.nodeType) !== -1) {
+      return elementOrId;
+    }
+    var diagnostics = root.AelluxJs.diagnostics;
+    diagnostics.warn(diagnostics.WARN_INVALID_ELEMENT_OR_ID, {
+      elementOrId: requested,
+      method: options.method
+    });
+    return null;
+  }
+
+  // src/internal/create-selector-helper.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function validateSelector(document2, value) {
+    if (typeof value !== "string" || !value.trim())
+      return { value: value, reason: "Expected a nonempty selector string." };
+    try {
+      document2.querySelector(value);
+      return null;
+    } catch (cause) {
+      return { value: value, reason: "Invalid CSS selector.", cause: cause };
+    }
+  }
+  function createSelectorHelper(document2) {
+    function isValidSelector(value) {
+      return validateSelector(document2, value) === null;
+    }
+    function parseSelectors(value, onInvalid) {
+      var list = [];
+      var inputs = Array.isArray(value) ? value : [value];
+      function reject(input2, reason, cause) {
+        if (typeof onInvalid === "function")
+          onInvalid({ value: input2, reason: reason, cause: cause });
+        return null;
+      }
+      function append(input2, start2, end) {
+        var selector = input2.slice(start2, end).trim();
+        var invalid = validateSelector(document2, selector);
+        if (invalid) {
+          reject(input2, "Invalid CSS selector.", invalid.cause);
+          return false;
+        }
+        if (list.indexOf(selector) === -1) list.push(selector);
+        return true;
+      }
+      for (var inputIndex = 0; inputIndex < inputs.length; inputIndex++) {
+        var input = inputs[inputIndex];
+        if (typeof input !== "string" || !input.trim())
+          return reject(input, "Expected a nonempty selector string or array of strings.");
+        var start = 0, stack = [], quote = null, comment = false;
+        for (var index = 0; index < input.length; index++) {
+          var char = input[index];
+          if (comment) {
+            if (char === "*" && input[index + 1] === "/") {
+              comment = false;
+              index++;
+            }
+            continue;
+          }
+          if (char === "\\") {
+            index++;
+            continue;
+          }
+          if (quote) {
+            if (char === quote) quote = null;
+            continue;
+          }
+          if (char === "/" && input[index + 1] === "*") {
+            comment = true;
+            index++;
+            continue;
+          }
+          if (char === '"' || char === "'") {
+            quote = char;
+            continue;
+          }
+          if (char === "(" || char === "[") stack.push(char);
+          if (char === ")" || char === "]") {
+            if (stack.pop() !== (char === ")" ? "(" : "["))
+              return reject(input, "Invalid CSS selector.");
+          }
+          if (char === "," && !stack.length) {
+            if (!append(input, start, index)) return null;
+            start = index + 1;
+          }
+        }
+        if (!append(input, start, input.length)) return null;
+        if (quote || stack.length || comment)
+          return reject(input, "Unbalanced CSS selector.");
+      }
+      if (!list.length) return reject(value, "Expected at least one CSS selector.");
+      return list;
+    }
+    return { isValidSelector: isValidSelector, parseSelectors: parseSelectors };
+  }
+
   // src/internal/aellux-api-integration.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createAelluxApi(root, constants) {
-    var toCapitalized2 = utils_name_case_default.toCapitalized;
     var toCamelCase2 = utils_name_case_default.toCamelCase;
     var fromCamelCase2 = utils_name_case_default.fromCamelCase;
+    var namingNormalization = createNamingNormalization(constants);
     var options = constants.AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS;
     var diagnostics = buildDiagnostics(constants.AELLUXJS_DIAGNOSTICS);
     var oldShortInstance = root[constants.AELLUXJS_SHORT_JS_NAME];
     var document2 = root.document;
+    var selectors = createSelectorHelper(document2);
     var preferenceHtml = createPreferenceHtmlHelper(root, function() {
       return api;
     });
@@ -377,10 +628,13 @@
     };
     var apiProperties = {
       shortJSName: constants.AELLUXJS_SHORT_JS_NAME,
+      version: constants.AELLUXJS_VERSION,
+      orchestratorVersion: null,
       diagnostics: diagnostics,
       options: options,
       minified: false,
       waitLayout: null,
+      motion: null,
       mountManager: null,
       init: function() {
         throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
@@ -388,40 +642,99 @@
       persist: {
         local: buildPersistMemory(root, "localStorage", null, diagnostics),
         session: buildPersistMemory(root, "sessionStorage", null, diagnostics),
-        preferences: buildPersistMemory(root, "localStorage", "AelluxJsPreferences", diagnostics)
+        preferences: buildPersistMemory(root, "localStorage", "AelluxJsPreferences", diagnostics),
+        element: createSaveElementMemoryHelper()
       },
       updatePreferenceAttributesHTML: preferenceHtml.updatePreferenceAttributesHTML,
+      currentPreference: preferenceHtml.currentPreference,
+      elementOrId: function(elementOrId, options2) {
+        return resolveElementOrId(root, elementOrId, options2);
+      },
+      isValidSelector: selectors.isValidSelector,
+      parseSelectors: selectors.parseSelectors,
       on: function(event, handler, options2) {
-        document2.addEventListener(api.eventName(event), handler, options2);
+        api.onEvent(document2, event, handler, options2);
       },
       off: function(event, handler, options2) {
-        document2.removeEventListener(api.eventName(event), handler, options2);
+        api.offEvent(document2, event, handler, options2);
       },
-      attr: function(name) {
-        name = fromCamelCase2(name);
-        return "data-" + constants.AELLUXJS_DATA_ATTRIBUTE_NAME_PREFFIX.replace(/\?/, name);
+      onEvent: function(target, event, handler, options2) {
+        target.addEventListener(api.eventName(event), handler, options2);
       },
-      attrMem: { save: saveAttr, restore: restoreAttr },
-      className: function(name) {
-        name = fromCamelCase2(name);
-        return constants.AELLUXJS_CLASS_NAME_PREFFIX.replace(/\?/, name);
+      offEvent: function(target, event, handler, options2) {
+        target.removeEventListener(api.eventName(event), handler, options2);
       },
-      extFilename: function(extensionName) {
-        extensionName = fromCamelCase2(extensionName);
-        return "aellux." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "." + extensionName + (api.minified ? ".min.js" : ".js");
+      attr: namingNormalization.attr,
+      className: namingNormalization.className,
+      cssVar: namingNormalization.cssVar,
+      registerCssProperty: function() {
+        if (!arguments.length || !root.CSS || typeof root.CSS.registerProperty !== "function") return false;
+        var registered = true;
+        for (var index = 0; index < arguments.length; index++) {
+          try {
+            var descriptor = arguments[index];
+            if (descriptor && typeof descriptor === "object" && !("inherits" in descriptor)) {
+              var normalized = {};
+              for (var key in descriptor)
+                if (Object.prototype.hasOwnProperty.call(descriptor, key))
+                  normalized[key] = descriptor[key];
+              normalized.inherits = true;
+              descriptor = normalized;
+            }
+            root.CSS.registerProperty(descriptor);
+          } catch (error) {
+            registered = false;
+          }
+        }
+        return registered;
       },
-      extName: function(filename) {
-        return filename.replace(
-          new RegExp("^.*aellux\\." + constants.AELLUXJS_EXT_SCRIPT_PREFIX + "\\.([^.\\/?#]+)(?:\\.min)?\\.js(?:[?#].*)?$"),
-          "$1"
-        );
+      // Shared by visual extensions. This value belongs only to the mounted
+      // element; it is intentionally not inherited from its ancestors.
+      layoutMaxFPS: function(element, specific) {
+        var value = element && typeof element.getAttribute === "function" ? element.getAttribute(api.attr("maxfps")) : null;
+        var generic;
+        if (value !== null) {
+          generic = String(value).trim() === "" ? NaN : Number(value);
+          if (!Number.isFinite(generic) || generic <= 0) {
+            diagnostics.warn(diagnostics.WARN_LAYOUT_MAX_FPS_INVALID, {
+              extension: "core",
+              element: element,
+              attribute: api.attr("maxfps"),
+              value: value,
+              reason: "Frame rate must be finite and greater than zero.",
+              suggestion: "Use a positive number or remove the attribute."
+            });
+            generic = void 0;
+          }
+        }
+        if (!Number.isFinite(specific) || specific <= 0) return generic;
+        return generic === void 0 ? specific : Math.min(generic, specific);
       },
-      eventName: function(name) {
-        name = toCapitalized2(name);
-        return constants.AELLUXJS_EVENT_NAME_PREFFIX.replace(/\?/, name);
-      },
+      // Keep minified tied to the API even when callers store this method separately.
+      extFilename: namingNormalization.extFilename.bind(api),
+      extName: namingNormalization.extName,
+      eventName: namingNormalization.eventName,
       noConflict: function() {
         return oldShortInstance;
+      },
+      extIndex: {
+        official: null,
+        officialURL: null,
+        fallback: null,
+        fallbackURL: null,
+        setFallback: function(url) {
+          if (typeof url !== "string" || !url.trim()) {
+            diagnostics.error(diagnostics.ERROR_EXTENSION_INDEX_INVALID, {
+              source: "custom",
+              expected: "a nonempty manifest URL"
+            });
+            return api;
+          }
+          this.fallbackURL = url.trim();
+          this.fallback = null;
+          this.fallbackPromise = null;
+          return api;
+        }
       },
       registry: {
         ext: {},
@@ -434,29 +747,24 @@
         var name = fromCamelCase2(api.extName(nameOrUrl));
         var key = toCamelCase2(name);
         var url = nameOrUrl;
-        if (key in api.registry.ext) {
+        var implicit = url === api.extName(nameOrUrl);
+        var previous = api.registry.ext[key];
+        if (previous && (!previous.automatic || previous.state !== "wait")) {
           diagnostics.error(diagnostics.ERROR_EXTENSION_DUPLICATE, { extension: name });
           return;
         }
         if (url === api.extName(nameOrUrl)) url = "./" + api.extFilename(name);
         if (!options2) options2 = {};
+        var explicitBuilds = Object.prototype.hasOwnProperty.call(options2, "builds");
         var selector = options2.loadWhen;
         if (selector !== null && typeof selector !== "undefined") {
-          if (typeof selector !== "string" || !selector.trim()) {
+          var invalidSelector = validateSelector(document2, selector);
+          if (invalidSelector) {
             diagnostics.error(diagnostics.ERROR_EXTENSION_LOAD_WHEN, {
               extension: name,
               selector: selector,
-              expected: "a valid nonempty CSS selector"
-            });
-            return;
-          }
-          try {
-            document2.querySelector(selector);
-          } catch (cause) {
-            diagnostics.error(diagnostics.ERROR_EXTENSION_LOAD_WHEN, {
-              extension: name,
-              selector: selector,
-              cause: cause
+              cause: invalidSelector.cause,
+              expected: invalidSelector.cause ? void 0 : "a valid nonempty CSS selector"
             });
             return;
           }
@@ -464,22 +772,35 @@
         if (typeof options2.loadStyle === "undefined") options2.loadStyle = false;
         if (!options2.loadWhen) options2.loadWhen = null;
         options2.builds = normalizeExtensionBuilds(options2.builds);
+        options2.explicitBuilds = explicitBuilds;
+        delete api.registry.lazyExtSelectors[key];
         if (options2.loadWhen) api.registry.lazyExtSelectors[key] = options2.loadWhen;
         options2.url = url;
-        options2.load = options2.loadWhen ? false : true;
+        options2.implicit = implicit;
+        options2.load = options2.loadWhen ? false : options2.load !== false;
         options2.state = "wait";
         api.registry.ext[key] = options2;
       },
-      dep: function(label, url, options2) {
+      dep: function(label, url, integrity, crossOrigin) {
         if (typeof label !== "string" || !label.trim() || typeof url !== "string" || !url.trim()) {
           return root.Promise.reject(diagnostics.error(
             diagnostics.ERROR_DEPENDENCY_ARGUMENT,
-            { label: label, url: url, expected: "a nonempty label and script URL" }
+            { label: label, url: url, expected: "a nonempty label and script or stylesheet URL" }
           ));
         }
-        var script = document2.createElement("script");
-        script.src = url.replace(/^\.\//, api.aelluxBasePath);
-        var resolvedURL = script.src;
+        var options2 = integrity && typeof integrity === "object" && !Array.isArray(integrity) ? integrity : { integrity: integrity, crossOrigin: crossOrigin };
+        if (typeof options2.integrity !== "undefined" && options2.integrity !== null && typeof options2.integrity !== "string" || typeof options2.crossOrigin !== "undefined" && options2.crossOrigin !== null && typeof options2.crossOrigin !== "string") {
+          return root.Promise.reject(diagnostics.error(
+            diagnostics.ERROR_DEPENDENCY_ARGUMENT,
+            { label: label, url: url, expected: "integrity and crossOrigin strings" }
+          ));
+        }
+        var isStyle = /\.css$/i.test(url.split(/[?#]/)[0]);
+        var asset = document2.createElement(isStyle ? "link" : "script");
+        var sourceAttribute = isStyle ? "href" : "src";
+        if (isStyle) asset.rel = "stylesheet";
+        asset[sourceAttribute] = url.replace(/^\.\//, api.aelluxBasePath);
+        var resolvedURL = asset[sourceAttribute];
         var registry = api.registry.dep;
         var existing = Object.prototype.hasOwnProperty.call(registry, label) ? registry[label] : null;
         if (existing) {
@@ -491,25 +812,26 @@
           }
           return existing.promise;
         }
-        var registration = { url: resolvedURL, state: "loading", script: script, promise: null };
+        var registration = { url: resolvedURL, state: "loading", promise: null };
+        registration[isStyle ? "style" : "script"] = asset;
         registry[label] = registration;
-        script.setAttribute(api.attr("dep"), label);
-        if (options2 && options2.integrity) script.setAttribute("integrity", options2.integrity);
+        asset.setAttribute(api.attr("dep"), label);
+        if (options2 && options2.integrity) asset.setAttribute("integrity", options2.integrity);
         if (options2 && (options2.integrity || options2.crossOrigin) || api.options.crossOrigin) {
-          script.setAttribute(
+          asset.setAttribute(
             "crossorigin",
             options2 && options2.crossOrigin || api.options.crossOrigin || "anonymous"
           );
         }
         registration.promise = new root.Promise(function(resolve, reject) {
           try {
-            assetLoadHelper(script, {
+            assetLoadHelper(asset, {
               loadCallback: function() {
                 registration.state = "loaded";
-                resolve(script);
+                resolve(asset);
               },
               errorCallback: function(cause) {
-                if (script.parentNode) script.parentNode.removeChild(script);
+                if (asset.parentNode) asset.parentNode.removeChild(asset);
                 delete registry[label];
                 reject(diagnostics.error(
                   diagnostics.ERROR_DEPENDENCY_LOAD,
@@ -518,7 +840,7 @@
               }
             });
           } catch (cause) {
-            if (script.parentNode) script.parentNode.removeChild(script);
+            if (asset.parentNode) asset.parentNode.removeChild(asset);
             delete registry[label];
             reject(diagnostics.error(
               diagnostics.ERROR_DEPENDENCY_LOAD,
@@ -572,23 +894,14 @@
         var registration = api.registry.ext[key];
         var selector = registration && registration.loadWhen;
         if (selector !== null && typeof selector !== "undefined") {
-          if (typeof selector !== "string" || !selector.trim()) {
+          var invalidSelector = validateSelector(document2, selector);
+          if (invalidSelector) {
             diagnostics.error(diagnostics.ERROR_EXTENSION_ATTACH, {
               extension: name,
               argument: "loadWhen",
               selector: selector,
-              expected: "a valid nonempty CSS selector"
-            });
-            return;
-          }
-          try {
-            document2.querySelector(selector);
-          } catch (cause) {
-            diagnostics.error(diagnostics.ERROR_EXTENSION_ATTACH, {
-              extension: name,
-              argument: "loadWhen",
-              selector: selector,
-              cause: cause
+              cause: invalidSelector.cause,
+              expected: invalidSelector.cause ? void 0 : "a valid nonempty CSS selector"
             });
             return;
           }
@@ -605,6 +918,7 @@
         var bubbles = options2 && "bubbles" in options2 ? options2.bubbles : true;
         var cancelable = options2 && "cancelable" in options2 ? options2.cancelable : false;
         obj.initEvent(api.eventName(event), bubbles, cancelable);
+        if (options2 && "detail" in options2) obj.detail = options2.detail;
         return from.dispatchEvent(obj);
       },
       wait: function() {
@@ -617,6 +931,9 @@
         throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
       },
       request: function() {
+        throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
+      },
+      ease: function() {
         throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
       },
       startAelluxJs: function() {
@@ -655,57 +972,100 @@
   // src/internal/create-aellux-constants.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createAelluxConstants() {
+    var AELLUX = "aellux.js ", EXTENSION = AELLUX + "Extension ", DEPENDENCY = AELLUX + "Dependency ", INVALID_ARGUMENTS = " has invalid arguments.", LEGACY_RUNTIME = AELLUX + "Legacy runtime ", MODERN_RUNTIME = AELLUX + "Modern runtime ";
     return {
+      AELLUXJS_VERSION: true ? "0.1.0-beta.10" : "0.1.0-beta.10",
       AELLUXJS_SHORT_JS_NAME: "$ae",
       AELLUXJS_EXT_SCRIPT_PREFIX: "ext",
       AELLUXJS_CLASS_NAME_PREFFIX: "ae--?",
+      AELLUXJS_CSS_VAR_PREFFIX: "--ae-?",
       AELLUXJS_EVENT_NAME_PREFFIX: "AelluxJs?",
       AELLUXJS_DATA_ATTRIBUTE_NAME_PREFFIX: "ae-?",
       AELLUXJS_DIAGNOSTICS: {
-        ERROR_BOOTSTRAP_NOT_FOUND: { code: 1e3, message: "aellux.js boot script could not be located." },
-        ERROR_NOT_INITIALIZED: { code: 1001, message: "aellux.js has not been initialized." },
-        ERROR_INVALID_MODE: { code: 1002, message: "aellux.js mode must be basic or full." },
-        ERROR_INVALID_VERBOSE_LEVEL: { code: 1003, message: "aellux.js verboseLevel must be 0, 1, 2, or the matching error, warn, info key." },
+        ERROR_BOOTSTRAP_NOT_FOUND: { code: 1e3, message: AELLUX + "boot script could not be located." },
+        ERROR_NOT_INITIALIZED: { code: 1001, message: AELLUX + "has not been initialized." },
+        ERROR_INVALID_MODE: { code: 1002, message: AELLUX + "mode must be basic or full." },
+        ERROR_INVALID_VERBOSE_LEVEL: { code: 1003, message: AELLUX + "verboseLevel must be 0, 1, 2, or the matching error, warn, info key." },
         ERROR_CONTROLLER_NOT_FOUND: { code: 1004, message: "No controller was found for this element. It may not be mounted." },
-        ERROR_MOUNT: { code: 1006, message: "aellux.js failed to mount a root." },
-        ERROR_EXTENSION_DUPLICATE: { code: 1101, message: "aellux.js Extension is already registered." },
-        ERROR_EXTENSION_INITIALIZE: { code: 1102, message: "aellux.js Extension failed to initialize." },
-        ERROR_EXTENSION_MOUNT: { code: 1103, message: "aellux.js Extension failed to mount or unmount an element." },
-        ERROR_EXTENSION_UNMOUNT: { code: 1104, message: "aellux.js Extension failed to unmount." },
-        ERROR_EXTENSION_DESTROY: { code: 1105, message: "aellux.js Extension failed to destroy." },
-        ERROR_EXTENSION_INCOMPATIBLE: { code: 1106, message: "aellux.js Extension has no compatible build for the selected runtime." },
-        ERROR_EXTENSION_SELECTOR: { code: 1107, message: "aellux.js Extension failed to iterate a selector." },
-        ERROR_CALLBACK: { code: 1108, message: "aellux.js Extension selector callback failed." },
-        ERROR_EXTENSION_TRANSITION: { code: 1109, message: "aellux.js Extension transition failed." },
-        ERROR_EXTENSION_NOT_REGISTERED: { code: 1110, message: "aellux.js Extension is not registered." },
+        ERROR_MOUNT: { code: 1006, message: AELLUX + "failed to mount a root." },
+        ERROR_EXTENSION_DUPLICATE: { code: 1101, message: EXTENSION + "is already registered." },
+        ERROR_EXTENSION_INITIALIZE: { code: 1102, message: EXTENSION + "failed to initialize." },
+        ERROR_EXTENSION_MOUNT: { code: 1103, message: EXTENSION + "failed to mount or unmount an element." },
+        ERROR_EXTENSION_UNMOUNT: { code: 1104, message: EXTENSION + "failed to unmount." },
+        ERROR_EXTENSION_DESTROY: { code: 1105, message: EXTENSION + "failed to destroy." },
+        ERROR_EXTENSION_INCOMPATIBLE: { code: 1106, message: EXTENSION + "has no compatible build for the selected runtime." },
+        ERROR_EXTENSION_SELECTOR: { code: 1107, message: EXTENSION + "failed to iterate a selector." },
+        ERROR_CALLBACK: { code: 1108, message: EXTENSION + "selector callback failed." },
+        ERROR_EXTENSION_TRANSITION: { code: 1109, message: EXTENSION + "transition failed." },
+        ERROR_EXTENSION_NOT_REGISTERED: { code: 1110, message: EXTENSION + "is not registered." },
         ERROR_PRESENT_CONTROL_TARGET_MISSING: { code: 1111, message: "A present control has no target selector and is not inside a present container." },
-        ERROR_EXTENSION_ATTACH: { code: 1112, message: "aellux.js Extension attachment has invalid arguments." },
-        ERROR_MOUNT_REGISTRATION: { code: 1113, message: "aellux.js Mount registration has invalid arguments." },
-        ERROR_EXTENSION_LOAD_WHEN: { code: 1114, message: "aellux.js Extension loadWhen selector is invalid." },
+        ERROR_EXTENSION_ATTACH: { code: 1112, message: EXTENSION + "attachment" + INVALID_ARGUMENTS },
+        ERROR_MOUNT_REGISTRATION: { code: 1113, message: AELLUX + "Mount registration" + INVALID_ARGUMENTS },
+        ERROR_EXTENSION_LOAD_WHEN: { code: 1114, message: EXTENSION + "loadWhen selector is invalid." },
         ERROR_MOUNT_MAP_IN_USE: { code: 1115, message: "A mount map cannot be removed while elements are still mounted." },
-        ERROR_DEPENDENCY_ARGUMENT: { code: 1116, message: "aellux.js Dependency registration has invalid arguments." },
-        ERROR_DEPENDENCY_CONFLICT: { code: 1117, message: "aellux.js Dependency label is already registered with a different URL." },
-        ERROR_DEPENDENCY_LOAD: { code: 1118, message: "aellux.js Dependency script could not be loaded." },
-        ERROR_LEGACY_RUNTIME_START: { code: 1201, message: "aellux.js Legacy runtime failed to start." },
-        ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: "aellux.js Legacy runtime could not be loaded." },
-        ERROR_MODERN_RUNTIME_START: { code: 1203, message: "aellux.js Modern runtime failed to start; trying Legacy runtime." },
-        ERROR_MODERN_RUNTIME_LOAD: { code: 1204, message: "aellux.js Modern runtime could not be loaded; trying Legacy runtime." },
+        ERROR_DEPENDENCY_ARGUMENT: { code: 1116, message: DEPENDENCY + "registration" + INVALID_ARGUMENTS },
+        ERROR_DEPENDENCY_CONFLICT: { code: 1117, message: DEPENDENCY + "label is already registered with a different URL." },
+        ERROR_DEPENDENCY_LOAD: { code: 1118, message: DEPENDENCY + "script could not be loaded." },
+        ERROR_ANCHOR_REFERENCE_CONTEXT: { code: 1119, message: "Anchor target and anchored element must share the same containing block / absolute positioning reference." },
+        ERROR_SCROLLBOX_ELASTIC_WRAPPER: { code: 1120, message: "Elastic Scrollbox requires exactly one direct child marked with data-ae-scrollbox-elastic." },
+        ERROR_SCROLLBOX_SNAP_ITEMS: { code: 1121, message: "Snap Scrollbox requires at least one eligible data-ae-snap-item." },
+        ERROR_FEEDBACK_ARGUMENT: { code: 1122, message: "Feedback requires a string message, a known string type, a string motion when provided, and a DOM Element target when provided." },
+        ERROR_EXTENSION_VERSION_INCOMPATIBLE: { code: 1123, message: EXTENSION + "is incompatible with this Core version." },
+        ERROR_RUNTIME_VERSION_MISMATCH: { code: 1124, message: "Bootscript and runtime versions do not match." },
+        ERROR_EXTENSION_INDEX_LOAD: { code: 1125, message: "The extension manifest could not be loaded." },
+        ERROR_EXTENSION_INDEX_INVALID: { code: 1126, message: "The extension manifest is invalid." },
+        ERROR_EXTENSION_VARIANT_UNAVAILABLE: { code: 1127, message: "The extension manifest has no compatible runtime variant." },
+        ERROR_INVALID_ENVIRONMENT: { code: 1128, message: AELLUX + "environment must be production or development." },
+        ERROR_EXTENSION_INDEX_NOT_FOUND: { code: 1129, message: "The requested Extension was not found in an extension manifest." },
+        ERROR_LEGACY_RUNTIME_START: { code: 1201, message: LEGACY_RUNTIME + "failed to start." },
+        ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: LEGACY_RUNTIME + "could not be loaded." },
+        ERROR_MODERN_RUNTIME_START: { code: 1203, message: MODERN_RUNTIME + "failed to start; trying Legacy runtime." },
+        ERROR_MODERN_RUNTIME_LOAD: { code: 1204, message: MODERN_RUNTIME + "could not be loaded; trying Legacy runtime." },
         WARN_BROWSER_UNSUPPORTED: { code: 2e3, message: "Browser environment is not available." },
         WARN_BROWSER_CAPABILITIES: { code: 2001, message: "Some browser capabilities are unavailable; trying Legacy runtime." },
-        WARN_INTERRUPTION: { code: 2002, message: "aellux.js Extension transition was interrupted." },
-        WARN_EXTENSION_STYLE_LOAD: { code: 2004, message: "aellux.js Extension stylesheet could not be loaded." },
+        WARN_INTERRUPTION: { code: 2002, message: EXTENSION + "transition was interrupted." },
+        WARN_EXTENSION_STYLE_LOAD: { code: 2004, message: EXTENSION + "stylesheet could not be loaded." },
         WARN_CONTROLLER_METHOD_MISSING: { code: 2005, message: "A mounted controller method is not available on its Extension." },
         WARN_STORAGE_FALLBACK: { code: 2006, message: "Browser storage is unavailable; values will be kept in memory only." },
         WARN_PRESENT_MOTION_HIDDEN: { code: 2008, message: "A present-motion child should not be hidden; hidden belongs on its present container." },
         WARN_NAVIGATION_EVENT_INVALID: { code: 2009, message: "A state-navigation event has missing or invalid detail properties." },
         WARN_PRESENT_MOTION_MISSING: { code: 2010, message: "A present container has no direct present-motion child; one was generated automatically." },
         WARN_INVALID_ELEMENT_OR_ID: { code: 2011, message: "Expected a DOM Element or an existing element ID, optionally prefixed with #." },
-        INFO_LEGACY_FALLBACK: { code: 3e3, message: "aellux.js is starting the Legacy runtime." }
+        WARN_SCROLLBOX_MODE_INVALID: { code: 2012, message: "Scrollbox mode must be native or pointer; using native." },
+        WARN_SCROLLBOX_OPTIONS_JSON: { code: 2013, message: "Scrollbox options are not valid JSON; using defaults." },
+        WARN_SCROLLBOX_OPTIONS_OBJECT: { code: 2014, message: "Scrollbox options must be a JSON object; using defaults." },
+        WARN_SCROLLBOX_ELASTIC_LIMIT_INVALID: { code: 2015, message: "Scrollbox elastic limit must be one or two nonnegative fractions or pixel values; using 1/4." },
+        WARN_SCROLLBOX_WRAPPER_DISPLAY: { code: 2016, message: "Scrollbox elastic wrappers require an inline display; converting to an inline counterpart when available." },
+        WARN_LAYOUT_MAX_FPS_INVALID: { code: 2017, message: "data-ae-maxfps must be a finite number greater than zero; the limit was ignored." },
+        WARN_EXTENSION_COMPATIBILITY_SKIPPED: { code: 2018, message: "Extension compatibility verification was explicitly skipped." },
+        WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID: { code: 2019, message: "cssMotionPropertyMaxFPS is invalid; using 55 FPS." },
+        WARN_SCROLLBOX_SNAP_TRANSFORM: { code: 2020, message: "A transformed snap item can invalidate Scrollbox snap geometry; apply the visual transform to a child element instead." },
+        WARN_PRESENT_GROUP_SELECTION: { code: 2021, message: "Present Group selection is invalid or ambiguous; the previous selection is preserved." },
+        WARN_ANCHOR_MATCH: { code: 2022, message: "Anchor match accepts width and/or height." },
+        WARN_ANCHOR_GROUP: { code: 2023, message: "Anchor association or geometry is invalid." },
+        WARN_ATTRIBUTE_UNKNOWN: { code: 2024, message: "An Aellux attribute may be misspelled; check the suggested name." },
+        WARN_EXTENSION_REQUIRED: { code: 2025, message: "A declared behavior requires an initialized Extension." },
+        WARN_CONFIGURATION_VALUE: { code: 2026, message: "An Aellux configuration value is invalid; check the expected format." },
+        WARN_CONFIGURATION_TARGET: { code: 2027, message: "An Aellux target is missing, incompatible, or cannot be measured." },
+        WARN_CONFIGURATION_STRUCTURE: { code: 2028, message: "An Aellux declaration is missing required HTML structure." },
+        WARN_CONTROL_ACCESSIBILITY: { code: 2029, message: "An Aellux control is not reachable with the keyboard." },
+        WARN_CONFIGURATION_STYLE: { code: 2030, message: "Effective CSS prevents the declared Aellux behavior." },
+        WARN_PRESENT_ANCHOR_TRANSFORM: { code: 2031, message: "Anchor owns transform; Present transform is ignored." },
+        WARN_ATTRIBUTE_DUPLICATE: { code: 2032, message: "Duplicate HTML attributes discard values and may affect appearance or behavior." },
+        WARN_RESOURCE_CONFLICT: { code: 2033, message: "Behaviors replace the same CSS resource; animate a child element instead." },
+        INFO_LEGACY_FALLBACK: { code: 3e3, message: AELLUX + "is starting the Legacy runtime." },
+        INFO_PRESENT_MEASURED_LAYOUT: { code: 3001, message: "Present measures size transitions without a direct present-motion child; add one to use the grid layout strategy." },
+        INFO_FEEDBACK_MOTION_CUSTOM: { code: 3002, message: "The requested feedback motion is not standard. Standard motions are listed in the diagnostic context." },
+        INFO_EXTENSION_INDEX_LOADED: { code: 3003, message: "An extension manifest was loaded." }
       },
       AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS: {
         mode: "full",
         verboseLevel: 0,
+        environment: "production",
         forceLegacy: false,
+        skipGlobalMount: false,
+        cssMotionController: true,
+        cssMotionPropertyMaxFPS: 55,
         autoViewportMeta: true,
         basePath: null,
         crossOrigin: null,
@@ -719,7 +1079,8 @@
         "cancelAnimationFrame",
         "fetch",
         { name: "Object", function: ["assign", "entries", "freeze"] },
-        { name: "Array", function: ["from", "isArray"] }
+        { name: "Array", function: ["from", "isArray"] },
+        { name: ["HTMLDialogElement", "prototype"], function: ["show", "showModal", "close"] }
       ]
     };
   }
@@ -727,7 +1088,7 @@
   // src/internal/create-weak-css.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createWeakCss() {
-    return "\n:where(html) { color-scheme: light dark; }\n:where(html[?color-scheme='dark']) { color-scheme: dark; }\n:where(html[?color-scheme='light']) { color-scheme: light; }\n:where(body,html) { font-family: system-ui; background-color: Canvas; color: CanvasText; }\n:where(button,a[href],[role='button'],[role='tab']) { touch-action: manipulation; }\n[?wait-mounted]:not(.%mounted) > *:not([?loader]) { visibility: hidden !important; }\n[?wait-mounted].%mounted > [?loader] { display: none !important; }\n";
+    return "\n    :where(html) {\n      color-scheme: light dark;\n    }\n\n    :where(html[?color-scheme='dark']) {\n      color-scheme: dark;\n    }\n\n    :where(html[?color-scheme='light']) {\n      color-scheme: light;\n    }\n\n    :where(body, html) {\n      font-family: system-ui;\n      background-color: Canvas;\n      color: CanvasText;\n      margin: 0;\n    }\n\n    :where(*) {\n      scroll-behavior: smooth;\n    }\n\n    :where(html[?reduced-motion='reduced'],\n    html[?reduced-motion='reduced'] *) {\n      scroll-behavior: initial !important;\n    }\n\n    :where([draggable='true']){\n      cursor: grab;\n    }\n\n    :where(button, a[href], [role='button'], [role='tab']) {\n      user-select: none;\n      touch-action: manipulation;\n      cursor: pointer;\n    }\n\n    [?wait-mounted]:not(.%mounted) {\n      cursor: wait!important;\n    }\n\n    [?wait-mounted]:not(.%mounted) > *:not([?loader]) {\n      visibility: hidden !important;\n    }\n\n    [?wait-mounted].%mounted > [?loader] {\n      display: none !important;\n    }\n\n  ".replace(/\s*([{};:,])\s*/g, "$1").replace(/;}/g, "}").trim();
   }
 
   // src/aellux.js
@@ -736,9 +1097,11 @@
     var toCamelCase2 = utils_name_case_default.toCamelCase;
     var coreAssetIntegrity = define_AELLUX_CORE_ASSET_INTEGRITY_default;
     var CONSTANTS = createAelluxConstants();
+    var embeddedOfficialManifest = typeof define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default !== "undefined" ? define_AELLUX_OFFICIAL_EXTENSION_MANIFEST_default : null;
     var scriptExtension = ".js";
+    var loadingFullStyle = false;
     var existingApi = root.AelluxJs;
-    var api = existingApi && existingApi.shortJSName === CONSTANTS.AELLUXJS_SHORT_JS_NAME && existingApi.registry && existingApi.registry.ext && existingApi.registry.dep && existingApi.registry.lazyExtSelectors && existingApi.registry.extMounters && existingApi.registry.preferenceMediaQueries && existingApi.diagnostics ? existingApi : createAelluxApi(root, CONSTANTS);
+    var api = existingApi && existingApi.shortJSName === CONSTANTS.AELLUXJS_SHORT_JS_NAME && existingApi.registry && existingApi.registry.ext && existingApi.registry.dep && existingApi.registry.lazyExtSelectors && existingApi.registry.extMounters && existingApi.registry.preferenceMediaQueries && existingApi.diagnostics && typeof existingApi.registerCssProperty === "function" && typeof existingApi.currentPreference === "function" ? existingApi : createAelluxApi(root, CONSTANTS);
     var diagnostics = api.diagnostics;
     var bootstrapScript = document.currentScript || document.querySelector("script[src*='aellux.js'],script[src*='aellux.min.js']");
     var aelluxBootstrapSrc = root.__aelluxBootstrapURL || bootstrapScript && bootstrapScript.src;
@@ -752,28 +1115,41 @@
     api.minified = aelluxBootstrapSrc.indexOf(".min.js") !== -1;
     api.coreAssetIntegrity = coreAssetIntegrity;
     root.AelluxJs = api;
+    if (embeddedOfficialManifest) api.extIndex.official = embeddedOfficialManifest;
     root[api.shortJSName] = api;
     api.aelluxBasePath = aelluxBasePath;
     api.init = function(options) {
-      api.options.verboseLevel = diagnostics.update(options);
+      options = options || {};
+      var diagnosticsOptions = options;
+      if (options.environment === "development" && !Object.prototype.hasOwnProperty.call(options, "verboseLevel")) {
+        diagnosticsOptions = mergeOptions({ verboseLevel: "info" }, options);
+      }
+      api.options.verboseLevel = diagnostics.update(diagnosticsOptions);
       if (typeof document === "undefined") {
         diagnostics.warn(diagnostics.WARN_BROWSER_UNSUPPORTED);
         return;
       }
       if (document.querySelector("[" + api.attr("legacy") + "]") || document.querySelector("[" + api.attr("esm") + "]")) return;
-      mergeOptions(api.options, options || {});
+      mergeOptions(api.options, options);
       api.options.verboseLevel = diagnostics.verboseLevel;
       api.options.extensions = normalizeExtensionOptions(api.options.extensions);
       if (api.options.mode !== "basic" && api.options.mode !== "full") {
         throw diagnostics.create(diagnostics.ERROR_INVALID_MODE);
       }
+      if (api.options.environment !== "production" && api.options.environment !== "development") {
+        throw diagnostics.create(diagnostics.ERROR_INVALID_ENVIRONMENT, {
+          environment: api.options.environment
+        });
+      }
       api.aelluxBasePath = api.options.basePath || aelluxBasePath;
       api.diagnostics.notAvailable = [];
       api.updatePreferenceAttributesHTML();
-      updateHardwareAttribute();
-      addWeakStyles();
       updateViewportMeta();
-      loadOrchestrator();
+      if (api.options.mode === "full") loadFullStyle();
+      else {
+        addWeakStyles();
+        loadOrchestrator();
+      }
     };
     if (api.minified) scriptExtension = ".min.js";
     function loadOrchestrator() {
@@ -785,8 +1161,14 @@
           }
         } else {
           option.function.forEach(function(method) {
-            if (!window[option.name] || typeof window[option.name][method] !== "function") {
-              AelluxJs.diagnostics.notAvailable.push(option.name + "." + method);
+            try {
+              var fullname = typeof option.name === "string" ? option.name : option.name.join(".");
+              var obj = typeof option.name === "string" ? window[option.name] : window[option.name[0]] && window[option.name[0]][option.name[1]];
+              if (!obj || typeof obj[method] !== "function") {
+                AelluxJs.diagnostics.notAvailable.push(fullname + "." + method);
+              }
+            } catch (error) {
+              console.error(error);
             }
           });
         }
@@ -858,6 +1240,33 @@
         }
       });
     }
+    function loadFullStyle() {
+      if (loadingFullStyle) return;
+      loadingFullStyle = true;
+      var filename = "aellux.full" + (api.minified ? ".min.css" : ".css");
+      var link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = api.aelluxBasePath + filename;
+      link.setAttribute(api.attr("full-style"), "true");
+      applyCoreIntegrity(link, filename);
+      assetLoadHelper(link, {
+        loadCallback: finish,
+        errorCallback: function() {
+          diagnostics.warn(diagnostics.WARN_EXTENSION_STYLE_LOAD, {
+            extension: "full",
+            element: link,
+            url: link.href,
+            reason: "The Full stylesheet could not be loaded.",
+            suggestion: "Check the Full CSS URL, integrity metadata and CSP style-src policy."
+          });
+          finish();
+        }
+      });
+      function finish() {
+        loadingFullStyle = false;
+        loadOrchestrator();
+      }
+    }
     function addWeakStyles() {
       var attr = AelluxJs.attr("weak-style");
       if (typeof document === "undefined" || document.querySelector("[" + attr + "]"))
@@ -875,13 +1284,6 @@
       meta.name = "viewport";
       meta.content = "width=device-width, initial-scale=1";
       document.head.appendChild(meta);
-    }
-    function updateHardwareAttribute() {
-      var browserNavigator = root.navigator || {};
-      var lowHardware = typeof browserNavigator.hardwareConcurrency === "number" && browserNavigator.hardwareConcurrency > 0 && browserNavigator.hardwareConcurrency <= 4 || typeof browserNavigator.deviceMemory === "number" && browserNavigator.deviceMemory > 0 && browserNavigator.deviceMemory <= 4;
-      if (lowHardware) {
-        document.documentElement.setAttribute(api.attr("low-hardware"), "");
-      }
     }
     function applyCoreIntegrity(asset, filename) {
       var integrity = coreAssetIntegrity[filename];
