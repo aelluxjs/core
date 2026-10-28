@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   test:
-    name: Verify build, unit, browser, and bundle budget
+    name: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
