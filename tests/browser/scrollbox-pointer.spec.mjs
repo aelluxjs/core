@@ -11,6 +11,7 @@ const box = (id, mode = "pointer", extra = "", content = "", momentum = "false")
 async function setup(page, html, { coarse = false } = {}) {
   const usesSnap = html.includes("data-ae-scrollbox-snap");
   await page.goto("/tests/index.htm");
+  await page.mouse.move(-100, -100);
   if (coarse) await page.evaluate(() => {
     const matchMedia = window.matchMedia.bind(window);
     window.matchMedia = query => query.includes("hover: hover")
@@ -1832,6 +1833,16 @@ test("native touch selects one axis across nested scrollboxes", async ({ page, b
     .toBeGreaterThan(0);
   expect(await page.evaluate(() => document.getElementById("outer").scrollLeft)).toBe(0);
 
+  // Native touch inertia must settle before measuring the next gesture's axis.
+  await page.locator("#inner-0").evaluate(element => new Promise(resolve => {
+    let position = element.scrollTop, changed = performance.now();
+    const sample = now => {
+      if (element.scrollTop !== position) { position = element.scrollTop; changed = now; }
+      if (now - changed >= 120) resolve();
+      else requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  }));
   const vertical = await page.evaluate(() => document.getElementById("inner-0").scrollTop);
   await drag(rect.x + 125, rect.y + 110, -75, 8);
   await expect.poll(() => page.evaluate(() => document.getElementById("outer").scrollLeft))
@@ -3011,6 +3022,7 @@ test("pointer mode follows touch emulation changes without reloading", async ({ 
     });
     await session.send("Emulation.setTouchEmulationEnabled", enabled
       ? { enabled: true, maxTouchPoints: 1 } : { enabled: false });
+    if (!enabled) await page.mouse.move(-100, -100);
     return page.evaluate(() => window.scrollboxMediaChanged);
   };
   expect(await emulateTouch(true)).toBe(false);

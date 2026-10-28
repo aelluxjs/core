@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 async function setup(page, markup) {
   const usesSnap = markup.includes("data-ae-scrollbox-snap");
   await page.goto("/tests/index.htm");
+  await page.mouse.move(-100, -100);
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(({ html, usesSnap }) => {
     document.body.innerHTML = html;

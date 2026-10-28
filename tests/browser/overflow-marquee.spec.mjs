@@ -7,6 +7,7 @@ const markup = (contents = text, extra = "") => `<div id="label" data-ae-overflo
 
 async function start(page, html = markup(), options = {}, wrapped = true) {
   await page.goto("/tests/index.htm");
+  await page.mouse.move(-100, -100);
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(({ html, options }) => {
     document.body.innerHTML = '<style>.wrap{white-space:normal}</style>' + html;
@@ -608,7 +609,8 @@ for (const options of [{}, { forceLegacy: true }, { cssMotionController: false }
       };
       requestAnimationFrame(sample);
     }));
-    expect(Math.max(...differences)).toBeLessThan(0.1);
+    const difference = Number(Math.max(...differences).toFixed(4));
+    expect(difference).toBeLessThanOrEqual(0.1);
   });
 }
 

@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 async function openTap(page, forceLegacy, markup = '<button id="control" data-ae-point>Tap</button>', extensions = []) {
   await page.goto("/tests/index.htm");
+  await page.mouse.move(-100, -100);
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(({ forceLegacy, markup, extensions }) => new Promise(resolve => {
     document.body.innerHTML = markup;

@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 async function start(page, markup, options = {}) {
   await page.goto("/tests/index.htm");
+  await page.mouse.move(-100, -100);
   await page.evaluate(markup => { document.body.innerHTML = markup; }, markup);
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(options => {
