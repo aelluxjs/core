@@ -7,8 +7,8 @@ const source = async path => readFile(new URL(`../../${path}`, import.meta.url),
 const stateSource = await source("src/aellux.ext.state-navigation.js");
 const runtimeSource = (await source("src/aellux.orchestrator.js")).replace(/^import .*;\r?\n/gm, "");
 const viewportSource = await source("src/aellux.ext.viewport.js");
-const themeSource = await source("templates/docweaver/js/main.js");
-const tocSource = await source("templates/docweaver/js/toc-init.js");
+const consumerSource = await source("tests/fixtures/documentation-app/main.js");
+const tocSource = await source("tests/fixtures/documentation-app/toc-init.js");
 const settle = () => new Promise(resolve => setImmediate(resolve));
 
 function apiStub() {
@@ -119,7 +119,7 @@ test("Viewport cleanup does not block a pending mount and reports its later reje
   assert.equal(diagnostics[0].cause, error);
 });
 
-test("Docweaver reports initial TOC and BeforeMount enhancement failures", async () => {
+test("A documentation-style consumer reports initial TOC and BeforeMount enhancement failures", async () => {
   const { api, events, handlers } = apiStub();
   const tocError = new Error("TOC failed"), highlightError = new Error("Highlight failed");
   const stylesheet = { removeAttribute() {}, setAttribute() {} };
@@ -132,7 +132,7 @@ test("Docweaver reports initial TOC and BeforeMount enhancement failures", async
   api.init = () => {};
   const initOrRefreshToc = async () => { throw tocError; };
   window.initOrRefreshToc = initOrRefreshToc;
-  runInNewContext(themeSource, { AelluxJs: api, window, document, URL, initOrRefreshToc,
+  runInNewContext(consumerSource, { AelluxJs: api, window, document, URL, initOrRefreshToc,
     console: { error() {} } });
   await settle();
   assert.equal(events.length, 1);

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("Docweaver chooses navigation messages from technical failure details", async ({ page }) => {
+test("A documentation-style consumer chooses navigation messages from technical failure details", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     window.messages = [];
@@ -11,7 +11,7 @@ test("Docweaver chooses navigation messages from technical failure details", asy
     };
     window.$ae = () => ({ feedback: { error: message => window.messages.push(message) } });
   });
-  await page.addScriptTag({ url: "/templates/docweaver/js/main.js" });
+  await page.addScriptTag({ url: "/tests/fixtures/documentation-app/main.js" });
   const messages = await page.evaluate(() => {
     const fail = (status, name, online = true) => {
       Object.defineProperty(navigator, "onLine", { configurable: true, value: online });

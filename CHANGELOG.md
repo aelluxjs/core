@@ -118,6 +118,7 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Fixed
 
+- Made documentation-style integration tests self-contained with frozen menu, navigation and enhancement fixtures, independent of the documentation templates.
 - Anchor now determines target visibility from computed CSS, honoring overrides of `hidden` and inline styles, inherited visibility restored by descendants, and effective ancestor hiding. Present Group targets also respect zero opacity.
 - Anchor takes priority when Present requests transform on the same element; Present keeps opacity and size motion without capturing Anchor placement transitions. Development validation reports warning 2031 with an actionable correction.
 
