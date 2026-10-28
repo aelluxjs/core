@@ -35,8 +35,9 @@ export const bundleBudget = Object.freeze([
   // Startup and State Navigation failure forwarding: +295 raw / +79 gzip bytes.
   // Includes countdown emission, accumulating groups and Feedback preparation;
   // the Progress implementation itself stays external. Measured in the report.
-  { file: "aellux.full.min.js", maxRawBytes: 192 * 1024, maxGzipBytes: 59.5 * 1024 },
-  { file: "aellux.full.legacy.min.js", maxRawBytes: 512.5 * 1024, maxGzipBytes: 152 * 1024 },
+  // Includes numeric Present Group capacity and rollback-safe reservations.
+  { file: "aellux.full.min.js", maxRawBytes: 194 * 1024, maxGzipBytes: 60 * 1024 },
+  { file: "aellux.full.legacy.min.js", maxRawBytes: 515 * 1024, maxGzipBytes: 152 * 1024 },
   { file: "aellux.full.min.css", maxRawBytes: 122 * 1024, maxGzipBytes: 12 * 1024 },
   { file: "aellux.ext.adaptive.min.css", maxRawBytes: 121 * 1024, maxGzipBytes: 11 * 1024 },
   { file: "aellux.ext.adaptive.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
@@ -69,8 +70,9 @@ export const bundleBudget = Object.freeze([
   // arbitration and pending activation cleanup. Costs: core-extensions/present.md.
   // Includes the Popping-time zero reset and reentrant cancellation guards;
   // measured deltas: progress-implementation-report.md.
-  { file: "aellux.ext.present.min.js", maxRawBytes: 22.75 * 1024, maxGzipBytes: 8 * 1024 },
-  { file: "aellux.ext.present.legacy.min.js", maxRawBytes: 30.75 * 1024, maxGzipBytes: 10.5 * 1024 },
+  // Capacity parsing, oldest-member reuse and pending-reservation rollback.
+  { file: "aellux.ext.present.min.js", maxRawBytes: 24.5 * 1024, maxGzipBytes: 8.5 * 1024 },
+  { file: "aellux.ext.present.legacy.min.js", maxRawBytes: 33 * 1024, maxGzipBytes: 11.25 * 1024 },
   { file: "aellux.ext.scrollbox.min.js", maxRawBytes: 46 * 1024, maxGzipBytes: 14 * 1024 },
   // Progressive 2D overflow fade; measured deltas: core-extensions/scrollbox.md.
   { file: "aellux.ext.scrollbox.min.css", maxRawBytes: 6.5 * 1024, maxGzipBytes: 1.5 * 1024 },

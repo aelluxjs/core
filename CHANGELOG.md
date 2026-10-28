@@ -6,6 +6,8 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Added
 
+- Present Group accepts a positive integer capacity (empty defaults to one). `popNext()` allocates closed members while capacity is available, then reuses the oldest active member without dismissing other presentations. Reservations count immediately, invalid capacities warn/fall back to one, and explicit `show()` stays exclusive.
+
 - Optional Progress Extension mounts native progress/meter controls, lazily loads with Full, and includes element-local Legacy fallbacks without external polyfill assets. Generic nonbubbling `AelluxJsProgress` consumers preserve native ranges and restore mount-time values on teardown.
 - Present auto-unpop resets progress to zero at `Popping` without starting the close timer, then publishes elapsed-time progress after opening completes. Present Group `popNext()` rotates a bounded pool with independent visibility/timers, while explicit selection returns to exclusive behavior. Feedback prepares independent pooled messages before opening through the public Present API.
 

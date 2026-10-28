@@ -102,6 +102,7 @@
   let groupsQueued = false;
   let interpolatedProgress = false;
   let autoObserver = null;
+  let presentationSequence = 0;
   const cssProperties = [
     ["pop-progress", "<number>", "0"],
     ["unpop-progress", "<number>", "1"],
@@ -221,6 +222,7 @@
       motionId: AelluxJs.motion ? AelluxJs.motion.id() : fallbackMotionId++,
       transition: null,
       operationRevision: 0,
+      presentationOrder: element.hidden ? 0 : ++presentationSequence,
       autoUnpopTimeout: null,
       autoCountdown: null,
       direction: null,
@@ -484,7 +486,7 @@
     return size;
   }
 
-  async function presentTransition(element, gotoVisible, forceRepop = false, groupOperation = false) {
+  async function presentTransition(element, gotoVisible, forceRepop = false, groupOperation = false, presentationOrder) {
     const controller = presentElements.get(element);
     if (!controller) return;
 
@@ -494,7 +496,9 @@
       gotoVisible = (controller.direction === POP) ? false : true;
 
     const group = element.closest(groupSelector);
-    if (!groupOperation && groups.has(group) && !groups.get(group).accumulating && element !== group) {
+    const groupState = groups.get(group);
+    const groupRevision = groupState?.revision;
+    if (!groupOperation && groupState && !groupState.accumulating && element !== group) {
       if (!element.id) {
         groupDiagnostic(group, "Present Group members must have an ID.");
         return false;
@@ -502,6 +506,10 @@
       if (gotoVisible) return show(group, element.id);
       if (groups.get(group).selected === element) return show(group, "");
     }
+    const hasCapacity = () => groupOperation || element === group || !gotoVisible || !groupState?.accumulating ||
+      groupMemberActive(element, groupState) ||
+      activeGroupMembers(group, groupState).length < groupLimit(group, groupState);
+    if (!hasCapacity()) return false;
     const newDirection = gotoVisible ? POP : UNPOP;
 
     if ((element.hidden && !gotoVisible)
@@ -513,12 +521,20 @@
     let transition = null;
 
     try {
+      const revision = controller.operationRevision;
       const allowEvent = groupOperation || AelluxJs.dispatchFrom(
         element, `${BEFORE}${newDirection}`,
         { bubbles: true, cancelable: true }
       );
-      if (!allowEvent) { return; }
+      if (!allowEvent || controller.operationRevision !== revision ||
+        presentElements.get(element) !== controller || !element.isConnected) return;
+      if (!groupOperation && element !== group && (element.closest(groupSelector) !== group ||
+        (groupState && (groups.get(group) !== groupState || groupState.revision !== groupRevision)))) return;
+      if (!hasCapacity()) return false;
       controller.operationRevision++;
+      if (gotoVisible) controller.presentationOrder = presentationOrder === undefined
+        ? ++presentationSequence : presentationOrder;
+      if (!gotoVisible || !groupOperation) groups.get(group)?.reservations.delete(element);
 
       if (forceRepop && (!element.hidden || controller.transition)) {
         controller.stop();
@@ -963,9 +979,34 @@
     if (!interpolatedProgress) element.style.setProperty(`--ae-${direction}-progress`, value);
   }
 
-  function groupMembers(group) {
+  function groupMembers(group, includeUnidentified = false) {
     return [...presentElements.keys()].filter(element => element.isConnected &&
-      element !== group && element.id && element.closest(groupSelector) === group);
+      element !== group && (includeUnidentified || element.id) && element.closest(groupSelector) === group);
+  }
+
+  function groupLimit(group, state) {
+    const value = group.getAttribute(attr.group);
+    if (state.limitValue === value) return state.limit;
+    state.limitValue = value;
+    const text = (value || "").trim();
+    const limit = text === "" ? 1 : Number(text);
+    const valid = text === "" || (/^\d+$/.test(text) && Number.isSafeInteger(limit) && limit > 0);
+    state.limit = valid ? limit : 1;
+    if (!valid) AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
+      extension: extensionName, element: group, attribute: attr.group, value,
+      reason: "Present Group capacity must be a positive integer.",
+      suggestion: "Use a positive integer, or leave the attribute empty for a capacity of 1."
+    });
+    return state.limit;
+  }
+
+  function groupMemberActive(member, state) {
+    return state.reservations.has(member) ||
+      (!member.hidden && presentElements.get(member)?.direction !== UNPOP);
+  }
+
+  function activeGroupMembers(group, state) {
+    return groupMembers(group, true).filter(member => groupMemberActive(member, state));
   }
 
   function mountGroup(group) {
@@ -977,6 +1018,7 @@
       revision: 0, pending: Promise.resolve(true), jobs: new Map(),
       memory: AelluxJs.persist.element.save(group, [attr.active])
     });
+    groupLimit(group, groups.get(group));
     if (!groupObserver && typeof root.MutationObserver === "function") {
       groupObserver = new root.MutationObserver(records => {
         if (records.some(record => record.type === "childList" ||
@@ -994,6 +1036,7 @@
     state.revision++;
     groups.delete(group);
     state.jobs.clear();
+    state.reservations.clear();
     publishGroup(group, state, null);
     for (const member of groupMembers(group)) {
       const controller = presentElements.get(member);
@@ -1038,6 +1081,7 @@
     if (!group.isConnected || !group.hasAttribute(attr.group)) return;
     const members = groupMembers(group);
     const state = groups.get(group);
+    groupLimit(group, state);
     if (state.accumulating) {
       if (!exclusive && state.accumulationInputs === selectionInputs(group)) return;
     }
@@ -1099,7 +1143,17 @@
     const members = Array.from(group.children).filter(member => member !== group &&
       member.hasAttribute(attr.present) && presentElements.has(member) &&
       member.closest(groupSelector) === group);
-    const member = members[members.length - 1];
+    const limit = groupLimit(group, state);
+    const active = activeGroupMembers(group, state);
+    const inactive = members.filter(member => !groupMemberActive(member, state));
+    const closed = inactive.filter(member => member.hidden);
+    const available = closed.length ? closed : inactive;
+    const candidates = active.length < limit && available.length ? available :
+      members.filter(member => active.includes(member)).sort((left, right) => {
+        const order = member => state.reservations.get(member)?.order || presentElements.get(member).presentationOrder;
+        return order(right) - order(left);
+      });
+    const member = candidates[candidates.length - 1];
     if (!member) return Promise.resolve(null);
     const entering = !state.accumulating;
     if (entering) {
@@ -1110,36 +1164,48 @@
       state.selected = null;
     }
     const controller = presentElements.get(member);
-    const reservation = { revision: controller.operationRevision };
+    const revision = state.revision;
+    const capacity = group.getAttribute(attr.group);
+    const inputs = selectionInputs(group);
+    const previousReservation = state.reservations.get(member);
+    const reservation = { revision: controller.operationRevision, order: ++presentationSequence };
     state.reservations.set(member, reservation);
     group.insertBefore(member, members[0]);
-    const valid = () => groups.get(group) === state && state.accumulating &&
+    const valid = (preflight = false) => groups.get(group) === state && state.revision === revision && state.accumulating &&
       state.reservations.get(member) === reservation && presentElements.get(member) === controller &&
       controller.operationRevision === reservation.revision &&
-      member.isConnected && member.parentElement === group;
+      (!preflight || (group.getAttribute(attr.group) === capacity && selectionInputs(group) === inputs)) &&
+      member.isConnected && member.parentElement === group && member.closest(groupSelector) === group;
+    const release = (restore = false) => {
+      if (state.reservations.get(member) !== reservation) return;
+      if (restore && previousReservation && groups.get(group) === state && state.revision === revision &&
+        state.accumulating && presentElements.get(member) === controller &&
+        previousReservation.revision === controller.operationRevision &&
+        member.isConnected && member.closest(groupSelector) === group) {
+        state.reservations.set(member, previousReservation);
+      } else state.reservations.delete(member);
+    };
     let job;
     try {
       if (entering) publishGroup(group, state, null);
-      if (!valid()) {
-        if (state.reservations.get(member) === reservation) state.reservations.delete(member);
+      if (!valid(true)) {
+        release(true);
         return Promise.resolve(null);
       }
       if (typeof prepare === "function") prepare(member);
-      if (!valid() || !AelluxJs.dispatchFrom(member, "BeforePop", { bubbles: true, cancelable: true }) ||
-        !valid()) {
-        if (state.reservations.get(member) === reservation) state.reservations.delete(member);
+      if (!valid(true) || !AelluxJs.dispatchFrom(member, "BeforePop", { bubbles: true, cancelable: true }) ||
+        !valid(true)) {
+        release(true);
         return Promise.resolve(null);
       }
-      job = presentTransition(member, true, true, true);
       reservation.revision++;
+      job = presentTransition(member, true, true, true, reservation.order);
     } catch (error) {
-      if (state.reservations.get(member) === reservation) state.reservations.delete(member);
+      release(true);
       return Promise.reject(error);
     }
     return job.then(() => valid() && !member.hidden && presentElements.get(member).direction === POP
-      ? member : null).finally(() => {
-        if (state.reservations.get(member) === reservation) state.reservations.delete(member);
-      });
+      ? member : null).finally(() => release());
   }
 
   function selected(group) {
@@ -1166,6 +1232,7 @@
     });
     if (state.selected === selected && !changes.length) {
       state.accumulating = false;
+      state.reservations.clear();
       return state.pending;
     }
     const revision = ++state.revision;
@@ -1201,6 +1268,7 @@
       }
     }
     state.accumulating = false;
+    state.reservations.clear();
     state.selected = selected;
     let complete;
     const pending = new Promise(resolve => { complete = resolve; });

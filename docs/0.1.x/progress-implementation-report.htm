@@ -83,7 +83,7 @@
 
           <div id="toast-present-group"
             class="position-fixed w-100 z-1 pe-none p-4 flex-column d-flex justify-content-center align-items-center"
-            data-ae-present-group>
+            data-ae-present-group="2">
             <div id="toast-1" data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true"
               class="text-bg-danger small rounded-1 p-2 w-100 text-center" style="max-width: 300px;">
               <span id="toast-message">-</span>
@@ -656,7 +656,7 @@
 <li>Optional <code>progress</code> mounts <code>progress, meter</code>, with Full lazy registration and Basic explicit registration. Modern preserves native controls. Legacy embeds independent per-tag fallbacks. No mandatory Present or Feedback dependency is introduced.</li>
 <li><code>data-ae-progress-target</code> belongs only to progress controls and resolves an existing producer ID. Valid generic <code>{ value, max }</code> events scale to the consumer&#39;s native max. Attribute retargeting disconnects the previous listener; teardown restores the original value attribute.</li>
 <li>Generic <code>AelluxJsProgress</code> is nonbubbling and noncancelable. Present resets progress to exact zero before <code>Popping</code> without scheduling closure, then emits running countdown progress from zero after opening, based on <code>performance.now()</code>, and completed progress at one before its existing timeout requests unpop. Frames stop on cancellation, replacement, detach and teardown. A vetoed expiration is not retried.</li>
-<li><code>present.popNext(group, prepare?)</code> and its mounted group controller synchronously reserve/rotate a direct mounted member. Independent members accumulate; explicit <code>show()</code> or changed active/condition inputs reconcile exclusive selection. A veto consumes the rotated slot without opening. A vetoed exclusive selection preserves accumulated visibility. Completion resolves to the member or null; preparation errors reject.</li>
+<li><code>present.popNext(group, prepare?)</code> and its mounted group controller synchronously reserve/rotate a direct mounted member. Capacity defaults to one, accepts positive integers and diagnoses invalid values. Closed members are allocated before the oldest active member is reused, preserving all other presentations; explicit <code>show()</code> or changed active/condition inputs reconcile exclusive selection. A veto consumes the rotated slot without opening. A vetoed exclusive selection preserves accumulated visibility. Completion resolves to the member or null; preparation errors reject.</li>
 <li>Feedback uses the public group API and shared rendering logic to apply content/classes/motion before opening. Children survive message updates. Absolute explicit targets remain shared when configured that way. Empty Present target discovery is preserved.</li>
 </ul>
 <h2>Source files</h2>
@@ -666,6 +666,7 @@
 <li><code>src/internal/has-progress-api.js</code></li>
 <li><code>src/internal/install-progress-fallback.js</code></li>
 <li><code>tests/browser/progress-notifications.spec.mjs</code></li>
+<li><code>tests/browser/present-group-capacity.spec.mjs</code></li>
 <li><code>tests/unit/progress-contract.test.mjs</code></li>
 <li><code>docs-source/0.1.x/core-extensions/optional/progress.md</code></li>
 <li>This report.</li>
@@ -779,6 +780,40 @@
 <h3>Popping-time progress reset</h3>
 <p>On branch <code>release/0.1.0</code>, valid auto-unpop configuration now emits zero on the Present producer immediately before <code>Popping</code>. It resets associated native progress controls during opening. The timer and elapsed-time updates still start only after opening completes. Both reset and countdown share the same event serializer; replacement or teardown during layout/reset dispatch prevents stale transition notifications. A vetoed <code>BeforePop</code> emits no reset.</p>
 <p>Relative to commit <code>93836376</code>, the Present Modern minified artifact increases by 213 raw / 58 gzip bytes; Legacy increases by 321 raw / 100 gzip bytes. Raw limits move from 22.5 to 22.75 KiB and from 30.5 to 30.75 KiB respectively; gzip limits remain unchanged. Core build, 93 unit tests and bundle budgets passed. The 12 new Basic/Full, Modern/Legacy cases passed in Chromium, Firefox and WebKit. The focused Progress/notifications and Present enhancements run completed with 164 passed, one Firefox native-touch capability skip and zero failures across Chromium, Firefox and WebKit. The complete browser matrix was not rerun for this reset change.</p>
+<h3>Numeric capacity and oldest-member reuse</h3>
+<p>Empty <code>data-ae-present-group</code> now defaults to one; positive integer values set the maximum number of active/reserved presentations. Invalid values use diagnostic 2026 once per changed value and fall back to one. <code>popNext()</code> prefers closed direct members while there is capacity, otherwise replays the oldest active direct member without unpopping other members. Reuse age tracks accepted presentations rather than DOM position; a refused reuse restores an earlier reservation. Explicit selection remains exclusive. Lower limits preserve already accepted/opening members and constrain subsequent allocations; closing effects can briefly overlap visually. Direct member opening while a pool is full returns false; individual dismissal remains independent.</p>
+<p>Existing accumulation examples declare capacities explicitly (three for the Feedback example, two for Docweaver&#39;s toast pool). This is an intentional change for empty-valued groups that previously accumulated without a numeric limit. The semantic catalog/editor data describe the new positive-integer grammar. Core build, documentation generation, all 93 unit tests and bundle budgets passed. The final focused browser run covered capacity, Progress notifications, Present enhancements/ARIA, Feedback and Docweaver menus: 476 passed, one Firefox native-touch capability skip, zero failures across Chromium, Firefox and WebKit. This includes all 144 new capacity cases in Basic/Full and Modern/forced Legacy. The entire browser matrix was not rerun for this capacity change.</p>
+<p>Measured minified deltas relative to <code>9c0ffed0</code>, raw and gzip level 9 bytes:</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th align="right">Delta raw</th>
+<th align="right">Delta gzip</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>aellux.ext.present.min.js</td>
+<td align="right">+1710</td>
+<td align="right">+606</td>
+</tr>
+<tr>
+<td>aellux.ext.present.legacy.min.js</td>
+<td align="right">+2149</td>
+<td align="right">+644</td>
+</tr>
+<tr>
+<td>aellux.full.min.js</td>
+<td align="right">+1710</td>
+<td align="right">+583</td>
+</tr>
+<tr>
+<td>aellux.full.legacy.min.js</td>
+<td align="right">+2148</td>
+<td align="right">+692</td>
+</tr>
+</tbody></table>
+<p>Only the affected Present/Full limits increase. Present Modern moves from 22.75/8 to 24.5/8.5 KiB raw/gzip; Present Legacy from 30.75/10.5 to 33/11.25; Full Modern from 192/59.5 to 194/60; Full Legacy raw from 512.5 to 515 with its existing 152 KiB gzip limit unchanged. These increases cover parsing/diagnostics, capacity accounting, presentation age, reentrant preflight and reservation restoration.</p>
 <h2>Distribution costs</h2>
 <p>Final bytes include source-map comments. Gzip uses level 9, matching <code>test:budget</code>. Deltas compare baseline <code>35895693</code>.</p>
 <table>
@@ -794,37 +829,37 @@
 <tbody><tr>
 <td>aellux.min.js</td>
 <td align="right">50157</td>
-<td align="right">17130</td>
+<td align="right">17129</td>
 <td align="right">+1733</td>
-<td align="right">+557</td>
+<td align="right">+556</td>
 </tr>
 <tr>
 <td>aellux.full.min.js</td>
-<td align="right">196237</td>
-<td align="right">60462</td>
-<td align="right">+3529</td>
-<td align="right">+984</td>
+<td align="right">197947</td>
+<td align="right">61045</td>
+<td align="right">+5239</td>
+<td align="right">+1567</td>
 </tr>
 <tr>
 <td>aellux.full.legacy.min.js</td>
-<td align="right">524300</td>
-<td align="right">154332</td>
-<td align="right">+4202</td>
-<td align="right">+1081</td>
+<td align="right">526448</td>
+<td align="right">155024</td>
+<td align="right">+6350</td>
+<td align="right">+1773</td>
 </tr>
 <tr>
 <td>aellux.ext.present.min.js</td>
-<td align="right">23057</td>
-<td align="right">8053</td>
-<td align="right">+3020</td>
-<td align="right">+929</td>
+<td align="right">24767</td>
+<td align="right">8659</td>
+<td align="right">+4730</td>
+<td align="right">+1535</td>
 </tr>
 <tr>
 <td>aellux.ext.present.legacy.min.js</td>
-<td align="right">31288</td>
-<td align="right">10694</td>
-<td align="right">+3463</td>
-<td align="right">+934</td>
+<td align="right">33437</td>
+<td align="right">11338</td>
+<td align="right">+5612</td>
+<td align="right">+1578</td>
 </tr>
 <tr>
 <td>aellux.ext.feedback.min.js</td>
@@ -869,7 +904,7 @@
 <td align="right">new</td>
 </tr>
 </tbody></table>
-<p>Budget changes are limited to affected artifacts: boot 48/16.5 to 50/17 KiB raw/gzip; Full Modern 188.25/58.25 to 192/59.5; Full Legacy 508/150 to 512.5/152; Present Modern 20/7.25 to 22.75/8; Present Legacy 28/9.75 to 30.75/10.5; Feedback Modern raw 4.25 to 4.625 (gzip remains 2). Feedback Legacy limits are unchanged. Four Progress budgets cover the new delivery variants. The measured deltas account for capability probes/registry metadata, countdown publication, group reservations/concurrency and shared Feedback preparation; fallback code remains outside Core/Full.</p>
+<p>Budget changes are limited to affected artifacts: boot 48/16.5 to 50/17 KiB raw/gzip; Full Modern 188.25/58.25 to 194/60; Full Legacy 508/150 to 515/152; Present Modern 20/7.25 to 24.5/8.5; Present Legacy 28/9.75 to 33/11.25; Feedback Modern raw 4.25 to 4.625 (gzip remains 2). Feedback Legacy limits are unchanged. Four Progress budgets cover the new delivery variants. The measured deltas account for capability probes/registry metadata, countdown publication, group reservations/concurrency and shared Feedback preparation; fallback code remains outside Core/Full.</p>
 <h2>Known limits and risks</h2>
 <p>Fallback appearance is functional rather than identical to native controls. Indeterminate fallback progress is striped without claiming native animation equivalence. The fallback requires DOM descriptors and MutationObserver; current-engine missing/partial capability simulation and ES5 output do not prove every historical browser.</p>
 <p>Accessible names, announcement strategy, reading time and screen-reader/device verification remain application responsibilities. Use separate transform owners for Present and Feedback motion. Explicit absolute message targets intentionally share content. Missing producer IDs are retried by update/retarget rather than a permanent document-wide discovery loop. Application changes to a mounted progress value restore to the original snapshot on teardown.</p>

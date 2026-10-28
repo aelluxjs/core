@@ -8,7 +8,7 @@ Implementation date: 2026-10-28. Initial implementation branch: `update/beta.10`
 - Optional `progress` mounts `progress, meter`, with Full lazy registration and Basic explicit registration. Modern preserves native controls. Legacy embeds independent per-tag fallbacks. No mandatory Present or Feedback dependency is introduced.
 - `data-ae-progress-target` belongs only to progress controls and resolves an existing producer ID. Valid generic `{ value, max }` events scale to the consumer's native max. Attribute retargeting disconnects the previous listener; teardown restores the original value attribute.
 - Generic `AelluxJsProgress` is nonbubbling and noncancelable. Present resets progress to exact zero before `Popping` without scheduling closure, then emits running countdown progress from zero after opening, based on `performance.now()`, and completed progress at one before its existing timeout requests unpop. Frames stop on cancellation, replacement, detach and teardown. A vetoed expiration is not retried.
-- `present.popNext(group, prepare?)` and its mounted group controller synchronously reserve/rotate a direct mounted member. Independent members accumulate; explicit `show()` or changed active/condition inputs reconcile exclusive selection. A veto consumes the rotated slot without opening. A vetoed exclusive selection preserves accumulated visibility. Completion resolves to the member or null; preparation errors reject.
+- `present.popNext(group, prepare?)` and its mounted group controller synchronously reserve/rotate a direct mounted member. Capacity defaults to one, accepts positive integers and diagnoses invalid values. Closed members are allocated before the oldest active member is reused, preserving all other presentations; explicit `show()` or changed active/condition inputs reconcile exclusive selection. A veto consumes the rotated slot without opening. A vetoed exclusive selection preserves accumulated visibility. Completion resolves to the member or null; preparation errors reject.
 - Feedback uses the public group API and shared rendering logic to apply content/classes/motion before opening. Children survive message updates. Absolute explicit targets remain shared when configured that way. Empty Present target discovery is preserved.
 
 ## Source files
@@ -19,6 +19,7 @@ Created:
 - `src/internal/has-progress-api.js`
 - `src/internal/install-progress-fallback.js`
 - `tests/browser/progress-notifications.spec.mjs`
+- `tests/browser/present-group-capacity.spec.mjs`
 - `tests/unit/progress-contract.test.mjs`
 - `docs-source/0.1.x/core-extensions/optional/progress.md`
 - This report.
@@ -78,17 +79,34 @@ On branch `release/0.1.0`, valid auto-unpop configuration now emits zero on the 
 
 Relative to commit `93836376`, the Present Modern minified artifact increases by 213 raw / 58 gzip bytes; Legacy increases by 321 raw / 100 gzip bytes. Raw limits move from 22.5 to 22.75 KiB and from 30.5 to 30.75 KiB respectively; gzip limits remain unchanged. Core build, 93 unit tests and bundle budgets passed. The 12 new Basic/Full, Modern/Legacy cases passed in Chromium, Firefox and WebKit. The focused Progress/notifications and Present enhancements run completed with 164 passed, one Firefox native-touch capability skip and zero failures across Chromium, Firefox and WebKit. The complete browser matrix was not rerun for this reset change.
 
+### Numeric capacity and oldest-member reuse
+
+Empty `data-ae-present-group` now defaults to one; positive integer values set the maximum number of active/reserved presentations. Invalid values use diagnostic 2026 once per changed value and fall back to one. `popNext()` prefers closed direct members while there is capacity, otherwise replays the oldest active direct member without unpopping other members. Reuse age tracks accepted presentations rather than DOM position; a refused reuse restores an earlier reservation. Explicit selection remains exclusive. Lower limits preserve already accepted/opening members and constrain subsequent allocations; closing effects can briefly overlap visually. Direct member opening while a pool is full returns false; individual dismissal remains independent.
+
+Existing accumulation examples declare capacities explicitly (three for the Feedback example, two for Docweaver's toast pool). This is an intentional change for empty-valued groups that previously accumulated without a numeric limit. The semantic catalog/editor data describe the new positive-integer grammar. Core build, documentation generation, all 93 unit tests and bundle budgets passed. The final focused browser run covered capacity, Progress notifications, Present enhancements/ARIA, Feedback and Docweaver menus: 476 passed, one Firefox native-touch capability skip, zero failures across Chromium, Firefox and WebKit. This includes all 144 new capacity cases in Basic/Full and Modern/forced Legacy. The entire browser matrix was not rerun for this capacity change.
+
+Measured minified deltas relative to `9c0ffed0`, raw and gzip level 9 bytes:
+
+| Artifact | Delta raw | Delta gzip |
+| --- | ---: | ---: |
+| aellux.ext.present.min.js | +1710 | +606 |
+| aellux.ext.present.legacy.min.js | +2149 | +644 |
+| aellux.full.min.js | +1710 | +583 |
+| aellux.full.legacy.min.js | +2148 | +692 |
+
+Only the affected Present/Full limits increase. Present Modern moves from 22.75/8 to 24.5/8.5 KiB raw/gzip; Present Legacy from 30.75/10.5 to 33/11.25; Full Modern from 192/59.5 to 194/60; Full Legacy raw from 512.5 to 515 with its existing 152 KiB gzip limit unchanged. These increases cover parsing/diagnostics, capacity accounting, presentation age, reentrant preflight and reservation restoration.
+
 ## Distribution costs
 
 Final bytes include source-map comments. Gzip uses level 9, matching `test:budget`. Deltas compare baseline `35895693`.
 
 | Artifact | Raw bytes | Gzip bytes | Delta raw | Delta gzip |
 | --- | ---: | ---: | ---: | ---: |
-| aellux.min.js | 50157 | 17130 | +1733 | +557 |
-| aellux.full.min.js | 196237 | 60462 | +3529 | +984 |
-| aellux.full.legacy.min.js | 524300 | 154332 | +4202 | +1081 |
-| aellux.ext.present.min.js | 23057 | 8053 | +3020 | +929 |
-| aellux.ext.present.legacy.min.js | 31288 | 10694 | +3463 | +934 |
+| aellux.min.js | 50157 | 17129 | +1733 | +556 |
+| aellux.full.min.js | 197947 | 61045 | +5239 | +1567 |
+| aellux.full.legacy.min.js | 526448 | 155024 | +6350 | +1773 |
+| aellux.ext.present.min.js | 24767 | 8659 | +4730 | +1535 |
+| aellux.ext.present.legacy.min.js | 33437 | 11338 | +5612 | +1578 |
 | aellux.ext.feedback.min.js | 4547 | 1990 | +341 | +94 |
 | aellux.ext.feedback.legacy.min.js | 8803 | 3860 | +572 | +140 |
 | aellux.ext.progress.js | 3024 | 1068 | new | new |
@@ -96,7 +114,7 @@ Final bytes include source-map comments. Gzip uses level 9, matching `test:budge
 | aellux.ext.progress.legacy.js | 13007 | 3866 | new | new |
 | aellux.ext.progress.legacy.min.js | 7432 | 2987 | new | new |
 
-Budget changes are limited to affected artifacts: boot 48/16.5 to 50/17 KiB raw/gzip; Full Modern 188.25/58.25 to 192/59.5; Full Legacy 508/150 to 512.5/152; Present Modern 20/7.25 to 22.75/8; Present Legacy 28/9.75 to 30.75/10.5; Feedback Modern raw 4.25 to 4.625 (gzip remains 2). Feedback Legacy limits are unchanged. Four Progress budgets cover the new delivery variants. The measured deltas account for capability probes/registry metadata, countdown publication, group reservations/concurrency and shared Feedback preparation; fallback code remains outside Core/Full.
+Budget changes are limited to affected artifacts: boot 48/16.5 to 50/17 KiB raw/gzip; Full Modern 188.25/58.25 to 194/60; Full Legacy 508/150 to 515/152; Present Modern 20/7.25 to 24.5/8.5; Present Legacy 28/9.75 to 33/11.25; Feedback Modern raw 4.25 to 4.625 (gzip remains 2). Feedback Legacy limits are unchanged. Four Progress budgets cover the new delivery variants. The measured deltas account for capability probes/registry metadata, countdown publication, group reservations/concurrency and shared Feedback preparation; fallback code remains outside Core/Full.
 
 ## Known limits and risks
 

@@ -11,7 +11,7 @@ export const semanticAttributes = [
   attribute("pwa", "pwa", "Explicitly loads the optional external PWA Extension. Install uses native click and never registers a Service Worker automatically.", { syntax: "enum", values: ["install"] }),
   attribute("pwa-guide", "pwa", "Internal marker on the generated installation guide dialog.", { role: "internal", syntax: "presence" }),
   attribute("present", "present", "Present container. Empty disables motion; all expands to opacity transform height width. Property tokens are whitespace-separated.", { syntax: "token-list", values: ["", "all", "opacity", "transform", "height", "width", "opacity transform", "opacity transform height width"], default: "" }),
-  attribute("present-group", "present", "Coordinates nested Present members by their native IDs. Nested groups own their own members.", { syntax: "presence" }),
+  attribute("present-group", "present", "Present Group capacity: empty or 1 allows one active presentation; a positive integer sets the popNext limit. Uses closed members while capacity is available, then reuses the oldest active member without closing others. show() stays exclusive; nested groups are independent. Invalid values warn and use 1.", { syntax: "positive-integer", default: "1", examples: ["", "1", "2", "3"] }),
   attribute("present-active", "present", "Selected member's native ID, without #. An empty value selects no member. Invalid or ambiguous selection preserves the previous selection.", { syntax: "id", default: "", examples: ["details"] }),
   attribute("present-when", "present", "One class token on the Present Group that selects this member when no explicit active attribute is present.", { syntax: "class-token", examples: ["show-details"] }),
   attribute("present-motion", "present", "Direct content child of a Present container; enables grid-based size transitions. Put hidden on the container.", { syntax: "presence" }),
@@ -107,7 +107,7 @@ export const semanticCSSProperties = [
 ];
 
 export const semanticMethods = [
-  { name: "present.popNext", extension: "present", description: "popNext(group, prepare?) synchronously rotates the last eligible direct mounted member and invokes synchronous preparation before BeforePop and opening. Enables accumulation. Returns Promise<Element|null>; rejected preparation propagates. Controller: $ae(group).present.popNext(prepare?). show() returns to exclusive selection." }
+  { name: "present.popNext", extension: "present", description: "popNext(group, prepare?) reserves a closed direct mounted member while data-ae-present-group capacity is available (default 1), otherwise reuses the oldest active eligible member, preserving other members. Rotates synchronously and prepares before BeforePop/opening. Returns Promise<Element|null>; preparation errors reject. Controller: $ae(group).present.popNext(prepare?). show() stays exclusive." }
 ];
 
 export const semanticEvents = [

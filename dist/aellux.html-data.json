@@ -479,14 +479,27 @@
     },
     {
       "name": "data-ae-present-group",
-      "description": "Coordinates nested Present members by their native IDs. Nested groups own their own members.\n\nValue syntax: presence.",
+      "description": "Present Group capacity: empty or 1 allows one active presentation; a positive integer sets the popNext limit. Uses closed members while capacity is available, then reuses the oldest active member without closing others. show() stays exclusive; nested groups are independent. Invalid values warn and use 1.\n\nValue syntax: positive-integer.\n\nDefault behavior: \"1\".\n\nExamples: ``, `1`, `2`, `3`.",
       "references": [
         {
           "name": "AelluxJS present",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
-      "valueSet": "v"
+      "values": [
+        {
+          "name": ""
+        },
+        {
+          "name": "1"
+        },
+        {
+          "name": "2"
+        },
+        {
+          "name": "3"
+        }
+      ]
     },
     {
       "name": "data-ae-present-motion",

@@ -19,7 +19,7 @@ async function start(page, markup, { mode = "full", forceLegacy = false, missing
 }
 
 const notices = `<section id="source" data-ae-feedback data-ae-present-target="group"></section>
-<div id="group" data-ae-present-group>
+<div id="group" data-ae-present-group="3">
 ${[1, 2, 3].map(n => `<article id="n${n}" data-ae-present data-ae-auto-unpop="5000"
 data-ae-unpop-on-outside="false" hidden><b>Keep child</b><progress max="100" value="0"
 data-ae-progress-target="n${n}"></progress></article>`).join("")}
@@ -325,7 +325,7 @@ test("dynamic groups retain accumulation until declarative selection changes", a
 });
 
 test("popNext ignores wrappers, nested groups, unmounted members and handles veto", async ({ page }) => {
-  await start(page, `<div id="group" data-ae-present-group><div id="a" data-ae-present hidden>A</div>
+  await start(page, `<div id="group" data-ae-present-group="2"><div id="a" data-ae-present hidden>A</div>
     <div><div id="wrapped" data-ae-present hidden>W</div></div>
     <div id="nested" data-ae-present-group><div id="inner" data-ae-present hidden>I</div></div>
     <div id="b" data-ae-present hidden>B</div><div id="unmounted" data-ae-present hidden>U</div></div>`);

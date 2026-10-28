@@ -96,7 +96,7 @@ Without explicit message/transform targets, a group uses its reserved member as 
 
 ```html
 <section id="feedback-source" data-ae-feedback data-ae-present-target="notifications"></section>
-<div id="notifications" data-ae-present-group aria-live="polite">
+<div id="notifications" data-ae-present-group="3" aria-live="polite">
   <article id="notice-1" data-ae-present="opacity" data-ae-auto-unpop="5000"
            data-ae-unpop-on-outside="false" hidden>
     <progress max="100" value="0" data-ae-progress-target="notice-1"
@@ -115,7 +115,7 @@ Without explicit message/transform targets, a group uses its reserved member as 
 </div>
 ```
 
-After mounting, publish normally: `$ae("feedback-source").feedback.success("Saved.")`. The HTML sets capacity to three; a fourth message reuses the oldest slot and resets its auto-unpop. No application timer or member-selection code is needed. Basic registers Feedback, Present and [Progress](optional/progress.md) explicitly; Full registers them automatically.
+After mounting, publish normally: `$ae("feedback-source").feedback.success("Saved.")`. The group explicitly sets capacity to three, bounded by the three HTML members; a fourth message reuses the oldest active slot and resets only its auto-unpop. An empty group value defaults to one. No application timer or member-selection code is needed. Basic registers Feedback, Present and [Progress](optional/progress.md) explicitly; Full registers them automatically.
 
 Use opacity-only Present motion when animating Feedback on the same member. To combine transform animations, give Feedback an explicit descendant transform target and keep Present's transform on the outer member; do not have both replace one transform. Explicit descendant IDs are absolute, so configure independent sources/targets if per-member nested motion is required. Live-region announcements and reading time remain application responsibilities.
 

@@ -252,6 +252,7 @@
     var groupsQueued = false;
     var interpolatedProgress = false;
     var autoObserver = null;
+    var presentationSequence = 0;
     var cssProperties = [["pop-progress", "<number>", "0"], ["unpop-progress", "<number>", "1"], ["present-pop-phase", "<number>", "0"], ["present-unpop-phase", "<number>", "1"], ["from-opacity", OPACITY_SYNTAX, "0"], ["pop-opacity", OPACITY_SYNTAX, "1"], ["unpop-opacity", OPACITY_SYNTAX, "0"], ["from-transform", TRANSFORM_SYNTAX, "scale(0.5)"], ["pop-transform", TRANSFORM_SYNTAX, "scale(1)"], ["unpop-transform", TRANSFORM_SYNTAX, "scale(1.2)"], ["from-height", "*", "0fr"], ["pop-height", "*", "1fr"], ["unpop-height", "*", "0fr"], ["from-width", "*", "0fr"], ["pop-width", "*", "1fr"], ["unpop-width", "*", "0fr"], ["pop-ease", "*", "ease-out"], ["unpop-ease", "*", "ease-in"], ["pop-duration", "<time>", "250ms"], ["unpop-duration", "<time>", "250ms"]];
     function init(options) {
       var descriptors = cssProperties.map(function(_ref) {
@@ -415,6 +416,7 @@
         motionId: AelluxJs.motion ? AelluxJs.motion.id() : fallbackMotionId++,
         transition: null,
         operationRevision: 0,
+        presentationOrder: element.hidden ? 0 : ++presentationSequence,
         autoUnpopTimeout: null,
         autoCountdown: null,
         direction: null,
@@ -730,12 +732,13 @@
     }
     function _presentTransition() {
       _presentTransition = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee2(element, gotoVisible) {
-        var forceRepop, groupOperation, controller, group, newDirection, transition, allowEvent, reusePreparation, waitForPreparation, previousSize, computed, interrupted, size, prepared, duration, timeMs, activateTransition, advancedEase, motionOptions, completed, autoUnpopValue, _duration, motionResult, ownsTransition, _args2 = arguments, _t, _t2;
+        var forceRepop, groupOperation, presentationOrder, controller, group, groupState, groupRevision, hasCapacity, newDirection, transition, _groups$get, revision, allowEvent, reusePreparation, waitForPreparation, previousSize, computed, interrupted, size, prepared, duration, timeMs, activateTransition, advancedEase, motionOptions, completed, autoUnpopValue, _duration, motionResult, ownsTransition, _args2 = arguments, _t, _t2;
         return _regenerator().w(function(_context2) {
           while (1) switch (_context2.p = _context2.n) {
             case 0:
               forceRepop = _args2.length > 2 && _args2[2] !== void 0 ? _args2[2] : false;
               groupOperation = _args2.length > 3 && _args2[3] !== void 0 ? _args2[3] : false;
+              presentationOrder = _args2.length > 4 ? _args2[4] : void 0;
               controller = presentElements.get(element);
               if (controller) {
                 _context2.n = 1;
@@ -746,7 +749,9 @@
               if (controller.direction === null) controller.direction = element.hidden ? UNPOP : POP;
               if (typeof gotoVisible === "undefined" || gotoVisible === null) gotoVisible = controller.direction === POP ? false : true;
               group = element.closest(groupSelector);
-              if (!(!groupOperation && groups.has(group) && !groups.get(group).accumulating && element !== group)) {
+              groupState = groups.get(group);
+              groupRevision = groupState === null || groupState === void 0 ? void 0 : groupState.revision;
+              if (!(!groupOperation && groupState && !groupState.accumulating && element !== group)) {
                 _context2.n = 4;
                 break;
               }
@@ -769,27 +774,51 @@
               }
               return _context2.a(2, show(group, ""));
             case 4:
+              hasCapacity = function hasCapacity2() {
+                return groupOperation || element === group || !gotoVisible || !(groupState !== null && groupState !== void 0 && groupState.accumulating) || groupMemberActive(element, groupState) || activeGroupMembers(group, groupState).length < groupLimit(group, groupState);
+              };
+              if (hasCapacity()) {
+                _context2.n = 5;
+                break;
+              }
+              return _context2.a(2, false);
+            case 5:
               newDirection = gotoVisible ? POP : UNPOP;
               if (!(element.hidden && !gotoVisible || newDirection === controller.direction && !forceRepop)) {
-                _context2.n = 5;
+                _context2.n = 6;
                 break;
               }
               if (!controller.transition) syncAriaExpanded(element, controller);
               return _context2.a(2);
-            case 5:
+            case 6:
               transition = null;
-              _context2.p = 6;
+              _context2.p = 7;
+              revision = controller.operationRevision;
               allowEvent = groupOperation || AelluxJs.dispatchFrom(element, "".concat(BEFORE).concat(newDirection), {
                 bubbles: true,
                 cancelable: true
               });
-              if (allowEvent) {
-                _context2.n = 7;
+              if (!(!allowEvent || controller.operationRevision !== revision || presentElements.get(element) !== controller || !element.isConnected)) {
+                _context2.n = 8;
                 break;
               }
               return _context2.a(2);
-            case 7:
+            case 8:
+              if (!(!groupOperation && element !== group && (element.closest(groupSelector) !== group || groupState && (groups.get(group) !== groupState || groupState.revision !== groupRevision)))) {
+                _context2.n = 9;
+                break;
+              }
+              return _context2.a(2);
+            case 9:
+              if (hasCapacity()) {
+                _context2.n = 10;
+                break;
+              }
+              return _context2.a(2, false);
+            case 10:
               controller.operationRevision++;
+              if (gotoVisible) controller.presentationOrder = presentationOrder === void 0 ? ++presentationSequence : presentationOrder;
+              if (!gotoVisible || !groupOperation) (_groups$get = groups.get(group)) === null || _groups$get === void 0 || _groups$get.reservations.delete(element);
               if (forceRepop && (!element.hidden || controller.transition)) {
                 controller.stop();
                 element.hidden = true;
@@ -835,25 +864,25 @@
               openPresentElements.add(element);
               size = null;
               if (!(controller.measuredHeight || controller.measuredWidth)) {
-                _context2.n = 9;
+                _context2.n = 12;
                 break;
               }
-              _context2.n = 8;
+              _context2.n = 11;
               return prepareMeasuredSize(element, controller, gotoVisible, previousSize, waitForPreparation);
-            case 8:
+            case 11:
               size = _context2.v;
-            case 9:
+            case 12:
               if (!(controller.transition !== transition)) {
-                _context2.n = 10;
+                _context2.n = 13;
                 break;
               }
               return _context2.a(2);
-            case 10:
+            case 13:
               if (controller.motionEnabled) {
                 controller.classList.add(className.willChange);
               }
               if (!waitForPreparation) {
-                _context2.n = 11;
+                _context2.n = 14;
                 break;
               }
               prepared = new Promise(function(resolve) {
@@ -862,9 +891,9 @@
                   resolve();
                 }, TRANSITION_PREPARE_TIME);
               });
-              _context2.n = 11;
+              _context2.n = 14;
               return Promise.race([prepared, interrupted]);
-            case 11:
+            case 14:
               transition.className = className["".concat(newDirection).concat(PING).toLowerCase()];
               duration = root.getComputedStyle(element).getPropertyValue("--ae-".concat(newDirection, "-duration").toLowerCase()).trim();
               timeMs = getString2Time(duration);
@@ -907,11 +936,11 @@
                 bubbles: true
               });
               if (!(controller.transition !== transition || !element.isConnected)) {
-                _context2.n = 12;
+                _context2.n = 15;
                 break;
               }
               return _context2.a(2);
-            case 12:
+            case 15:
               autoUnpopValue = gotoVisible && element.getAttribute(attr.autoUnpop);
               if (autoUnpopValue) {
                 _duration = getString2Time(autoUnpopValue);
@@ -920,24 +949,24 @@
                 }
               }
               if (!(controller.transition !== transition || !element.isConnected)) {
-                _context2.n = 13;
+                _context2.n = 16;
                 break;
               }
               return _context2.a(2);
-            case 13:
+            case 16:
               AelluxJs.dispatchFrom(element, "".concat(newDirection).concat(PING), {
                 bubbles: true
               });
-              _context2.n = 14;
+              _context2.n = 17;
               return Promise.race([completed, interrupted]);
-            case 14:
+            case 17:
               motionResult = _context2.v;
               if (!(controller.transition !== transition || motionResult && motionResult.status !== "completed")) {
-                _context2.n = 15;
+                _context2.n = 18;
                 break;
               }
               return _context2.a(2);
-            case 15:
+            case 18:
               finishTransition(element, controller, transition, gotoVisible);
               if (gotoVisible && !element.hidden) {
                 autoUnpopSchedule(element, controller);
@@ -951,10 +980,10 @@
                   bubbles: true
                 });
               }
-              _context2.n = 20;
+              _context2.n = 23;
               break;
-            case 16:
-              _context2.p = 16;
+            case 19:
+              _context2.p = 19;
               _t = _context2.v;
               ownsTransition = transition && controller.transition === transition;
               if (ownsTransition && transition.timeout !== null) {
@@ -966,40 +995,40 @@
               }
               if (ownsTransition) restoreMeasuredStyles(element, controller);
               _t2 = _t && _t.code;
-              _context2.n = _t2 === AelluxJs.diagnostics.WARN_INTERRUPTION.code ? 17 : 19;
+              _context2.n = _t2 === AelluxJs.diagnostics.WARN_INTERRUPTION.code ? 20 : 22;
               break;
-            case 17:
+            case 20:
               if (!(transition && transition.cancelled)) {
-                _context2.n = 18;
+                _context2.n = 21;
                 break;
               }
-              return _context2.a(3, 20);
-            case 18:
+              return _context2.a(3, 23);
+            case 21:
               AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_INTERRUPTION, {
                 cause: _t,
                 extension: extensionName,
                 element: element,
                 replacement: transition && transition.replacement === true
               });
-              return _context2.a(3, 20);
-            case 19:
+              return _context2.a(3, 23);
+            case 22:
               AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION, {
                 cause: _t,
                 extension: extensionName,
                 element: element
               });
-              return _context2.a(3, 20);
-            case 20:
-              _context2.p = 20;
+              return _context2.a(3, 23);
+            case 23:
+              _context2.p = 23;
               if (transition && controller.transition === transition) {
                 controller.transition = null;
                 controller.classList.remove(className.willChange);
               }
-              return _context2.f(20);
-            case 21:
+              return _context2.f(23);
+            case 24:
               return _context2.a(2);
           }
-        }, _callee2, null, [[6, 16, 20, 21]]);
+        }, _callee2, null, [[7, 19, 23, 24]]);
       }));
       return _presentTransition.apply(this, arguments);
     }
@@ -1302,8 +1331,36 @@
       if (!interpolatedProgress) element.style.setProperty("--ae-".concat(direction, "-progress"), value);
     }
     function groupMembers(group) {
+      var includeUnidentified = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
       return _toConsumableArray(presentElements.keys()).filter(function(element) {
-        return element.isConnected && element !== group && element.id && element.closest(groupSelector) === group;
+        return element.isConnected && element !== group && (includeUnidentified || element.id) && element.closest(groupSelector) === group;
+      });
+    }
+    function groupLimit(group, state) {
+      var value = group.getAttribute(attr.group);
+      if (state.limitValue === value) return state.limit;
+      state.limitValue = value;
+      var text = (value || "").trim();
+      var limit = text === "" ? 1 : Number(text);
+      var valid = text === "" || /^\d+$/.test(text) && Number.isSafeInteger(limit) && limit > 0;
+      state.limit = valid ? limit : 1;
+      if (!valid) AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
+        extension: extensionName,
+        element: group,
+        attribute: attr.group,
+        value: value,
+        reason: "Present Group capacity must be a positive integer.",
+        suggestion: "Use a positive integer, or leave the attribute empty for a capacity of 1."
+      });
+      return state.limit;
+    }
+    function groupMemberActive(member, state) {
+      var _presentElements$get5;
+      return state.reservations.has(member) || !member.hidden && ((_presentElements$get5 = presentElements.get(member)) === null || _presentElements$get5 === void 0 ? void 0 : _presentElements$get5.direction) !== UNPOP;
+    }
+    function activeGroupMembers(group, state) {
+      return groupMembers(group, true).filter(function(member) {
+        return groupMemberActive(member, state);
       });
     }
     function mountGroup(group) {
@@ -1320,6 +1377,7 @@
         jobs: /* @__PURE__ */ new Map(),
         memory: AelluxJs.persist.element.save(group, [attr.active])
       });
+      groupLimit(group, groups.get(group));
       if (!groupObserver && typeof root.MutationObserver === "function") {
         groupObserver = new root.MutationObserver(function(records) {
           if (records.some(function(record) {
@@ -1341,6 +1399,7 @@
       state.revision++;
       groups.delete(group);
       state.jobs.clear();
+      state.reservations.clear();
       publishGroup(group, state, null);
       var _iterator12 = _createForOfIteratorHelper(groupMembers(group)), _step12;
       try {
@@ -1395,6 +1454,7 @@
       if (!group.isConnected || !group.hasAttribute(attr.group)) return;
       var members = groupMembers(group);
       var state = groups.get(group);
+      groupLimit(group, state);
       if (state.accumulating) {
         if (!exclusive && state.accumulationInputs === selectionInputs(group)) return;
       }
@@ -1457,7 +1517,25 @@
       var members = Array.from(group.children).filter(function(member2) {
         return member2 !== group && member2.hasAttribute(attr.present) && presentElements.has(member2) && member2.closest(groupSelector) === group;
       });
-      var member = members[members.length - 1];
+      var limit = groupLimit(group, state);
+      var active = activeGroupMembers(group, state);
+      var inactive = members.filter(function(member2) {
+        return !groupMemberActive(member2, state);
+      });
+      var closed = inactive.filter(function(member2) {
+        return member2.hidden;
+      });
+      var available = closed.length ? closed : inactive;
+      var candidates = active.length < limit && available.length ? available : members.filter(function(member2) {
+        return active.includes(member2);
+      }).sort(function(left, right) {
+        var order = function order2(member2) {
+          var _state$reservations$g;
+          return ((_state$reservations$g = state.reservations.get(member2)) === null || _state$reservations$g === void 0 ? void 0 : _state$reservations$g.order) || presentElements.get(member2).presentationOrder;
+        };
+        return order(right) - order(left);
+      });
+      var member = candidates[candidates.length - 1];
       if (!member) return Promise.resolve(null);
       var entering = !state.accumulating;
       if (entering) {
@@ -1468,39 +1546,52 @@
         state.selected = null;
       }
       var controller = presentElements.get(member);
+      var revision = state.revision;
+      var capacity = group.getAttribute(attr.group);
+      var inputs = selectionInputs(group);
+      var previousReservation = state.reservations.get(member);
       var reservation = {
-        revision: controller.operationRevision
+        revision: controller.operationRevision,
+        order: ++presentationSequence
       };
       state.reservations.set(member, reservation);
       group.insertBefore(member, members[0]);
       var valid = function valid2() {
-        return groups.get(group) === state && state.accumulating && state.reservations.get(member) === reservation && presentElements.get(member) === controller && controller.operationRevision === reservation.revision && member.isConnected && member.parentElement === group;
+        var preflight = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : false;
+        return groups.get(group) === state && state.revision === revision && state.accumulating && state.reservations.get(member) === reservation && presentElements.get(member) === controller && controller.operationRevision === reservation.revision && (!preflight || group.getAttribute(attr.group) === capacity && selectionInputs(group) === inputs) && member.isConnected && member.parentElement === group && member.closest(groupSelector) === group;
+      };
+      var release = function release2() {
+        var restore = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : false;
+        if (state.reservations.get(member) !== reservation) return;
+        if (restore && previousReservation && groups.get(group) === state && state.revision === revision && state.accumulating && presentElements.get(member) === controller && previousReservation.revision === controller.operationRevision && member.isConnected && member.closest(groupSelector) === group) {
+          state.reservations.set(member, previousReservation);
+        } else state.reservations.delete(member);
       };
       var job;
       try {
         if (entering) publishGroup(group, state, null);
-        if (!valid()) {
-          if (state.reservations.get(member) === reservation) state.reservations.delete(member);
+        if (!valid(true)) {
+          release(true);
           return Promise.resolve(null);
         }
         if (typeof prepare === "function") prepare(member);
-        if (!valid() || !AelluxJs.dispatchFrom(member, "BeforePop", {
+        if (!valid(true) || !AelluxJs.dispatchFrom(member, "BeforePop", {
           bubbles: true,
           cancelable: true
-        }) || !valid()) {
-          if (state.reservations.get(member) === reservation) state.reservations.delete(member);
+        }) || !valid(true)) {
+          release(true);
           return Promise.resolve(null);
         }
-        job = presentTransition(member, true, true, true);
         reservation.revision++;
+        job = presentTransition(member, true, true, true, reservation.order);
       } catch (error) {
-        if (state.reservations.get(member) === reservation) state.reservations.delete(member);
+        release(true);
         return Promise.reject(error);
       }
       return job.then(function() {
         return valid() && !member.hidden && presentElements.get(member).direction === POP ? member : null;
       }).finally(function() {
-        if (state.reservations.get(member) === reservation) state.reservations.delete(member);
+        return release();
       });
     }
     function selected(group) {
@@ -1530,6 +1621,7 @@
       });
       if (state.selected === selected2 && !changes.length) {
         state.accumulating = false;
+        state.reservations.clear();
         return state.pending;
       }
       var revision = ++state.revision;
@@ -1577,6 +1669,7 @@
         _iterator13.f();
       }
       state.accumulating = false;
+      state.reservations.clear();
       state.selected = selected2;
       var complete;
       var pending = new Promise(function(resolve) {

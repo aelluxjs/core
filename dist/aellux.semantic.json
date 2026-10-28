@@ -2765,8 +2765,15 @@
     {
       "name": "data-ae-present-group",
       "extension": "present",
-      "description": "Coordinates nested Present members by their native IDs. Nested groups own their own members.",
-      "syntax": "presence",
+      "description": "Present Group capacity: empty or 1 allows one active presentation; a positive integer sets the popNext limit. Uses closed members while capacity is available, then reuses the oldest active member without closing others. show() stays exclusive; nested groups are independent. Invalid values warn and use 1.",
+      "syntax": "positive-integer",
+      "default": "1",
+      "examples": [
+        "",
+        "1",
+        "2",
+        "3"
+      ],
       "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     },
@@ -14838,7 +14845,7 @@
     {
       "name": "present.popNext",
       "extension": "present",
-      "description": "popNext(group, prepare?) synchronously rotates the last eligible direct mounted member and invokes synchronous preparation before BeforePop and opening. Enables accumulation. Returns Promise<Element|null>; rejected preparation propagates. Controller: $ae(group).present.popNext(prepare?). show() returns to exclusive selection.",
+      "description": "popNext(group, prepare?) reserves a closed direct mounted member while data-ae-present-group capacity is available (default 1), otherwise reuses the oldest active eligible member, preserving other members. Rotates synchronously and prepares before BeforePop/opening. Returns Promise<Element|null>; preparation errors reject. Controller: $ae(group).present.popNext(prepare?). show() stays exclusive.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     }
   ],

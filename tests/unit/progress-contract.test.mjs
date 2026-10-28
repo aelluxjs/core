@@ -22,6 +22,9 @@ test("Progress catalog keeps the generic event independent and the consumer prog
   assert.equal(event.cancelable, false);
   assert.deepEqual(semanticAttributes.find(a => a.name === "progress-target").tags, ["progress"]);
   assert.ok(semanticMethods.some(m => m.name === "present.popNext"));
+  const group = semanticAttributes.find(a => a.name === "present-group");
+  assert.equal(group.syntax, "positive-integer");
+  assert.equal(group.default, "1");
 });
 
 test("capability detection tolerates missing/throwing constructors and incomplete numeric APIs", () => {
