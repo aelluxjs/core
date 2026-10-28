@@ -531,6 +531,23 @@ for (const forceLegacy of [false, true]) for (const direction of ["ltr", "rtl"])
 }
 
 for (const forceLegacy of [false, true]) {
+  test(`replacing viewport content and then host content discards detached nodes (${forceLegacy})`, async ({ page }) => {
+    await start(page, markup(), { forceLegacy });
+    const host = page.locator("#label");
+    await host.evaluate(element => {
+      element.querySelector("[data-ae-overflow-marquee-viewport]").textContent = "Discarded";
+      window.marqueeReplacement = document.createElement("strong");
+      window.marqueeReplacement.textContent = "Short";
+      element.replaceChildren(window.marqueeReplacement);
+    });
+    await page.evaluate(() => AelluxJs.mountManager.update(document.getElementById("label"), "overflow-marquee"));
+    expect(await host.textContent()).toBe("Short");
+    await page.evaluate(() => AelluxJs.unmount(document.getElementById("label"), "overflow-marquee"));
+    expect(await host.textContent()).toBe("Short");
+    expect(await host.evaluate(element => element.childNodes.length === 1 &&
+      element.firstChild === window.marqueeReplacement)).toBe(true);
+  });
+
   test(`fade reconfigures without restarting and survives reduced motion and geometry changes (${forceLegacy})`, async ({ page }) => {
     await start(page, markup(text, 'tabindex="0"').replace("900", "100"), { forceLegacy });
     const host = page.locator("#label"), viewport = host.locator("[data-ae-overflow-marquee-viewport]");

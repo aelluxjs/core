@@ -2124,6 +2124,7 @@
     }
     function reconcile(state) {
       const { element, wrapper, viewport } = state;
+      if (viewport.parentNode !== element) viewport.textContent = "";
       if (viewport.parentNode !== element || wrapper.parentNode !== viewport) wrapper.textContent = "";
       if (viewport.parentNode === element && wrapper.parentNode === viewport && element.childNodes.length === 1 && viewport.childNodes.length === 1) return;
       const contents = root2.document.createDocumentFragment();

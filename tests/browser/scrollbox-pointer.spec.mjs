@@ -3006,31 +3006,28 @@ test("pointer mode keeps native behavior on a coarse-pointer device", async ({ p
   ])).toEqual(["0.25", "0.2"]);
 });
 
-test("pointer mode follows touch emulation changes without reloading", async ({ page, browserName }) => {
-  test.skip(browserName !== "chromium", "CDP touch emulation is Chromium-only");
+test("pointer mode follows live media capability changes without reloading", async ({ page }) => {
+  // Clone the capability boundary rather than relying on CDP to restore the
+  // operating system's desktop media features after touch emulation ends.
+  await page.addInitScript(() => {
+    const query = "(hover: hover) and (pointer: fine)";
+    const nativeMatchMedia = window.matchMedia.bind(window);
+    const media = Object.assign(new EventTarget(), { media: query, matches: true });
+    window.matchMedia = value => value === query ? media : nativeMatchMedia(value);
+    window.setScrollboxDesktop = matches => {
+      media.matches = matches;
+      media.dispatchEvent(Object.assign(new Event("change"), { matches, media: query }));
+    };
+  });
   await setup(page, box("box"));
   expect(await drag(page, "box")).toMatchObject({ x: 50, y: 0 });
 
-  const session = await page.context().newCDPSession(page);
-  const emulateTouch = async enabled => {
-    // matches changes before the change event reconfigures Scrollbox listeners.
-    // Observe the event before CDP toggles the media feature.
-    await page.evaluate(() => {
-      const media = matchMedia("(hover: hover) and (pointer: fine)");
-      window.scrollboxMediaChanged = new Promise(resolve =>
-        media.addEventListener("change", () => resolve(media.matches), { once: true }));
-    });
-    await session.send("Emulation.setTouchEmulationEnabled", enabled
-      ? { enabled: true, maxTouchPoints: 1 } : { enabled: false });
-    if (!enabled) await page.mouse.move(-100, -100);
-    return page.evaluate(() => window.scrollboxMediaChanged);
-  };
-  expect(await emulateTouch(true)).toBe(false);
+  await page.evaluate(() => window.setScrollboxDesktop(false));
   await page.evaluate(() => document.getElementById("box")
     .scrollTo({ left: 0, top: 0, behavior: "instant" }));
   expect(await drag(page, "box")).toMatchObject({ x: 0, y: 0 });
 
-  expect(await emulateTouch(false)).toBe(true);
+  await page.evaluate(() => window.setScrollboxDesktop(true));
   expect(await drag(page, "box")).toMatchObject({ x: 50, y: 0 });
 });
 

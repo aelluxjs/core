@@ -169,6 +169,9 @@ export function createOverflowMarquee(root, api, anchor) {
 
   function reconcile(state) {
     const { element, wrapper, viewport } = state;
+    // The application replaced this viewport; discard its detached contents
+    // before reusing it so removed text cannot reappear beside the replacement.
+    if (viewport.parentNode !== element) viewport.textContent = "";
     if (viewport.parentNode !== element || wrapper.parentNode !== viewport) wrapper.textContent = "";
     if (viewport.parentNode === element && wrapper.parentNode === viewport &&
       element.childNodes.length === 1 && viewport.childNodes.length === 1) return;
