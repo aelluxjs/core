@@ -1,13 +1,13 @@
 # Progress and accumulated notifications implementation report
 
-Implementation date: 2026-10-28. Working branch: `update/beta.10`. Baseline: `35895693` (the current checkout, later than the requested reference `19cddeef`). Version remains `0.1.0-beta.10`.
+Implementation date: 2026-10-28. Initial implementation branch: `update/beta.10`. Baseline: `35895693` (the current checkout, later than the requested reference `19cddeef`). Version remains `0.1.0-beta.10`.
 
 ## Contracts and architecture
 
 - The Progress body lives in `src/aellux.ext.progress.js` as the same root IIFE used by the other Extensions, with `init`, `destroy`, mount/update/unmount and direct `extAttach`. The Legacy build enables only the fallback branch at build time; Modern tree-shakes that implementation out.
 - Optional `progress` mounts `progress, meter`, with Full lazy registration and Basic explicit registration. Modern preserves native controls. Legacy embeds independent per-tag fallbacks. No mandatory Present or Feedback dependency is introduced.
 - `data-ae-progress-target` belongs only to progress controls and resolves an existing producer ID. Valid generic `{ value, max }` events scale to the consumer's native max. Attribute retargeting disconnects the previous listener; teardown restores the original value attribute.
-- Generic `AelluxJsProgress` is nonbubbling and noncancelable. Present emits running progress from exact zero after opening, based on `performance.now()`, and completed progress at one before its existing timeout requests unpop. Frames stop on cancellation, replacement, detach and teardown. A vetoed expiration is not retried.
+- Generic `AelluxJsProgress` is nonbubbling and noncancelable. Present resets progress to exact zero before `Popping` without scheduling closure, then emits running countdown progress from zero after opening, based on `performance.now()`, and completed progress at one before its existing timeout requests unpop. Frames stop on cancellation, replacement, detach and teardown. A vetoed expiration is not retried.
 - `present.popNext(group, prepare?)` and its mounted group controller synchronously reserve/rotate a direct mounted member. Independent members accumulate; explicit `show()` or changed active/condition inputs reconcile exclusive selection. A veto consumes the rotated slot without opening. A vetoed exclusive selection preserves accumulated visibility. Completion resolves to the member or null; preparation errors reject.
 - Feedback uses the public group API and shared rendering logic to apply content/classes/motion before opening. Children survive message updates. Absolute explicit targets remain shared when configured that way. Empty Present target discovery is preserved.
 
@@ -72,17 +72,23 @@ After moving the Progress body into its own main source file: Core build passed;
 
 The target listener, validation, scaling, retargeting and value restoration stay in the main IIFE. No attach factory or separate Progress Legacy entry remains. Modern and Legacy use the same Extension body, with build-time selection of the unsupported-control fallback. All distributions retain their license notice.
 
+### Popping-time progress reset
+
+On branch `release/0.1.0`, valid auto-unpop configuration now emits zero on the Present producer immediately before `Popping`. It resets associated native progress controls during opening. The timer and elapsed-time updates still start only after opening completes. Both reset and countdown share the same event serializer; replacement or teardown during layout/reset dispatch prevents stale transition notifications. A vetoed `BeforePop` emits no reset.
+
+Relative to commit `93836376`, the Present Modern minified artifact increases by 213 raw / 58 gzip bytes; Legacy increases by 321 raw / 100 gzip bytes. Raw limits move from 22.5 to 22.75 KiB and from 30.5 to 30.75 KiB respectively; gzip limits remain unchanged. Core build, 93 unit tests and bundle budgets passed. The 12 new Basic/Full, Modern/Legacy cases passed in Chromium, Firefox and WebKit. The focused Progress/notifications and Present enhancements run completed with 164 passed, one Firefox native-touch capability skip and zero failures across Chromium, Firefox and WebKit. The complete browser matrix was not rerun for this reset change.
+
 ## Distribution costs
 
 Final bytes include source-map comments. Gzip uses level 9, matching `test:budget`. Deltas compare baseline `35895693`.
 
 | Artifact | Raw bytes | Gzip bytes | Delta raw | Delta gzip |
 | --- | ---: | ---: | ---: | ---: |
-| aellux.min.js | 50157 | 17128 | +1733 | +555 |
-| aellux.full.min.js | 196024 | 60406 | +3316 | +928 |
-| aellux.full.legacy.min.js | 523979 | 154240 | +3881 | +989 |
-| aellux.ext.present.min.js | 22844 | 7995 | +2807 | +871 |
-| aellux.ext.present.legacy.min.js | 30967 | 10594 | +3142 | +834 |
+| aellux.min.js | 50157 | 17130 | +1733 | +557 |
+| aellux.full.min.js | 196237 | 60462 | +3529 | +984 |
+| aellux.full.legacy.min.js | 524300 | 154332 | +4202 | +1081 |
+| aellux.ext.present.min.js | 23057 | 8053 | +3020 | +929 |
+| aellux.ext.present.legacy.min.js | 31288 | 10694 | +3463 | +934 |
 | aellux.ext.feedback.min.js | 4547 | 1990 | +341 | +94 |
 | aellux.ext.feedback.legacy.min.js | 8803 | 3860 | +572 | +140 |
 | aellux.ext.progress.js | 3024 | 1068 | new | new |
@@ -90,7 +96,7 @@ Final bytes include source-map comments. Gzip uses level 9, matching `test:budge
 | aellux.ext.progress.legacy.js | 13007 | 3866 | new | new |
 | aellux.ext.progress.legacy.min.js | 7432 | 2987 | new | new |
 
-Budget changes are limited to affected artifacts: boot 48/16.5 to 50/17 KiB raw/gzip; Full Modern 188.25/58.25 to 192/59.5; Full Legacy 508/150 to 512.5/152; Present Modern 20/7.25 to 22.5/8; Present Legacy 28/9.75 to 30.5/10.5; Feedback Modern raw 4.25 to 4.625 (gzip remains 2). Feedback Legacy limits are unchanged. Four Progress budgets cover the new delivery variants. The measured deltas account for capability probes/registry metadata, countdown publication, group reservations/concurrency and shared Feedback preparation; fallback code remains outside Core/Full.
+Budget changes are limited to affected artifacts: boot 48/16.5 to 50/17 KiB raw/gzip; Full Modern 188.25/58.25 to 192/59.5; Full Legacy 508/150 to 512.5/152; Present Modern 20/7.25 to 22.75/8; Present Legacy 28/9.75 to 30.75/10.5; Feedback Modern raw 4.25 to 4.625 (gzip remains 2). Feedback Legacy limits are unchanged. Four Progress budgets cover the new delivery variants. The measured deltas account for capability probes/registry metadata, countdown publication, group reservations/concurrency and shared Feedback preparation; fallback code remains outside Core/Full.
 
 ## Known limits and risks
 

@@ -5999,6 +5999,15 @@
               },
               bubbles: true
             });
+            if (controller.transition !== transition || !element.isConnected) return;
+            const autoUnpopValue = gotoVisible && element.getAttribute(attr.autoUnpop);
+            if (autoUnpopValue) {
+              const duration2 = getString2Time(autoUnpopValue);
+              if (Number.isFinite(duration2) && duration2 >= 0) {
+                emitAutoUnpopProgress(element, 0, duration2);
+              }
+            }
+            if (controller.transition !== transition || !element.isConnected) return;
             AelluxJs2.dispatchFrom(element, `${newDirection}${PING}`, { bubbles: true });
             const motionResult = await Promise.race([completed, interrupted]);
             if (controller.transition !== transition || motionResult && motionResult.status !== "completed") return;
@@ -6088,18 +6097,7 @@
           const valid = () => controller.autoCountdown === countdown && presentElements.get(element) === controller && element.isConnected;
           const emit = (completed, initial = false) => {
             const elapsedMs = initial ? 0 : Math.min(duration, Math.max(0, root2.performance.now() - countdown.start));
-            AelluxJs2.dispatchFrom(element, "Progress", {
-              bubbles: false,
-              cancelable: false,
-              detail: {
-                value: completed ? 1 : duration ? elapsedMs / duration : 0,
-                max: 1,
-                status: completed ? "completed" : "running",
-                elapsedMs,
-                durationMs: duration,
-                remainingMs: Math.max(0, duration - elapsedMs)
-              }
-            });
+            emitAutoUnpopProgress(element, elapsedMs, duration, completed);
           };
           const tick = () => {
             var _a;
@@ -6130,6 +6128,20 @@
           }, duration);
           emit(false, true);
           if (valid()) countdown.frame = root2.requestAnimationFrame(tick);
+        }
+        function emitAutoUnpopProgress(element, elapsedMs, duration, completed = false) {
+          AelluxJs2.dispatchFrom(element, "Progress", {
+            bubbles: false,
+            cancelable: false,
+            detail: {
+              value: completed ? 1 : duration ? elapsedMs / duration : 0,
+              max: 1,
+              status: completed ? "completed" : "running",
+              elapsedMs,
+              durationMs: duration,
+              remainingMs: Math.max(0, duration - elapsedMs)
+            }
+          });
         }
         function cancelAutoUnpop(controller) {
           if (controller.autoUnpopTimeout !== null) clearTimeout(controller.autoUnpopTimeout);

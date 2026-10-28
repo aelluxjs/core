@@ -51,7 +51,7 @@ $ae.dispatchFrom(document.getElementById("operation"), "Progress", {
 </section>
 ```
 
-Present emits zero after opening completes, monotonically elapsed progress while waiting, and one before requesting closure. Detail includes `status: "running"` or `"completed"`, `elapsedMs`, `durationMs`, and `remainingMs`. The timer remains independent of motion duration/easing. A canceled `BeforeUnpop` leaves completed progress at one without retrying. See [Present](../present.md) and the [stacked Feedback example](../feedback.md#stacked-notifications).
+Present first emits zero at the start of `Popping` to reset the bar. This does not start the close timer: after opening completes, the countdown emits zero again, publishes monotonically elapsed progress while waiting, and emits one before requesting closure. Detail includes `status: "running"` or `"completed"`, `elapsedMs`, `durationMs`, and `remainingMs`. The timer remains independent of motion duration/easing. A canceled `BeforeUnpop` leaves completed progress at one without retrying. See [Present](../present.md) and the [stacked Feedback example](../feedback.md#stacked-notifications).
 
 ## Modern and Legacy compatibility
 

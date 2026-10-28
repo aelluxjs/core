@@ -26,6 +26,49 @@ data-ae-progress-target="n${n}"></progress></article>`).join("")}
 </div>`;
 
 for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
+  test(`Popping resets progress without starting the close timer (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
+    await start(page, '<article id="notice" data-ae-present="opacity" data-ae-auto-unpop="1000" hidden>' +
+      '<progress max="100" value="77" data-ae-progress-target="notice"></progress></article>', { mode, forceLegacy });
+    await page.clock.install();
+    expect(await page.evaluate(async () => {
+      window.resetSamples = [];
+      const notice = document.getElementById("notice");
+      notice.addEventListener("AelluxJsProgress", e => window.resetSamples.push(e.detail));
+      notice.addEventListener("AelluxJsBeforePop", e => e.preventDefault(), { once: true });
+      await $ae(notice).present.pop();
+      return { samples: window.resetSamples, value: notice.querySelector("progress").value };
+    })).toEqual({ samples: [], value: 77 });
+    await page.evaluate(() => {
+      const notice = document.getElementById("notice");
+      notice.addEventListener("AelluxJsPopping", () => {
+        window.valueAtPopping = notice.querySelector("progress").value;
+      });
+      // Hold opening completion independently of browser animation clocks.
+      AelluxJs.motion = { ...AelluxJs.motion, run(element, options) {
+        options.apply();
+        return new Promise(resolve => {
+          window.finishOpening = () => resolve({ status: "completed" });
+        });
+      } };
+      window.openNotice = $ae(notice).present.pop();
+    });
+    await page.clock.runFor(150);
+    expect(await page.evaluate(() => ({ value: window.valueAtPopping, samples: window.resetSamples })))
+      .toMatchObject({ value: 0, samples: [{ value: 0, max: 1, status: "running", elapsedMs: 0, durationMs: 1000 }] });
+    await page.clock.runFor(1500);
+    expect(await page.locator("#notice progress").evaluate(p => p.value)).toBe(0);
+    expect(await page.locator("#notice").evaluate(n => n.hidden)).toBe(false);
+    const zeros = await page.evaluate(async () => {
+      window.finishOpening();
+      await window.openNotice;
+      return window.resetSamples.map(s => s.value);
+    });
+    expect(zeros).toEqual([0, 0]);
+    await page.clock.runFor(400);
+    expect(await page.locator("#notice progress").evaluate(p => p.value)).toBeGreaterThan(35);
+    await page.evaluate(() => AelluxJs.unmount(document.getElementById("notice")));
+  });
+
   test(`native controls, generic producer and lifecycle (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
     await start(page, `<div id="producer"></div><div id="other"></div>
       <progress id="p" max="40" data-ae-progress-target="#producer"></progress>
@@ -104,10 +147,16 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
     const count = await page.evaluate(() => window.samples.length);
     await page.clock.runFor(6000);
     expect(await page.evaluate(() => window.samples.length)).toBe(count);
-    await page.evaluate(() => { window.reopening = $ae("n3").present.pop(); });
+    await page.evaluate(() => {
+      window.restartSampleIndex = window.samples.length;
+      window.reopening = $ae("n3").present.pop();
+    });
     await page.clock.runFor(50);
-    await page.evaluate(() => window.reopening);
-    expect(await page.evaluate(() => window.samples.at(-1).value)).toBeLessThan(.02);
+    const restarted = await page.evaluate(async () => {
+      await window.reopening;
+      return window.samples.slice(window.restartSampleIndex);
+    });
+    expect(restarted.slice(0, 2).map(sample => sample.value)).toEqual([0, 0]);
     await page.evaluate(() => document.getElementById("n3").addEventListener("AelluxJsBeforeUnpop", e => e.preventDefault()));
     await page.clock.runFor(5100);
     expect(await page.evaluate(() => ({ last: window.samples.at(-1), ancestor: window.ancestorProgress,

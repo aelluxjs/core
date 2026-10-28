@@ -67,8 +67,10 @@ export const bundleBudget = Object.freeze([
   // Present now reports invalid actions, missing/incompatible targets and
   // corrective context for group selections, plus consumer-local tap/click
   // arbitration and pending activation cleanup. Costs: core-extensions/present.md.
-  { file: "aellux.ext.present.min.js", maxRawBytes: 22.5 * 1024, maxGzipBytes: 8 * 1024 },
-  { file: "aellux.ext.present.legacy.min.js", maxRawBytes: 30.5 * 1024, maxGzipBytes: 10.5 * 1024 },
+  // Includes the Popping-time zero reset and reentrant cancellation guards;
+  // measured deltas: progress-implementation-report.md.
+  { file: "aellux.ext.present.min.js", maxRawBytes: 22.75 * 1024, maxGzipBytes: 8 * 1024 },
+  { file: "aellux.ext.present.legacy.min.js", maxRawBytes: 30.75 * 1024, maxGzipBytes: 10.5 * 1024 },
   { file: "aellux.ext.scrollbox.min.js", maxRawBytes: 46 * 1024, maxGzipBytes: 14 * 1024 },
   // Progressive 2D overflow fade; measured deltas: core-extensions/scrollbox.md.
   { file: "aellux.ext.scrollbox.min.css", maxRawBytes: 6.5 * 1024, maxGzipBytes: 1.5 * 1024 },

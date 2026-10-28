@@ -730,7 +730,7 @@
     }
     function _presentTransition() {
       _presentTransition = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee2(element, gotoVisible) {
-        var forceRepop, groupOperation, controller, group, newDirection, transition, allowEvent, reusePreparation, waitForPreparation, previousSize, computed, interrupted, size, prepared, duration, timeMs, activateTransition, advancedEase, motionOptions, completed, motionResult, ownsTransition, _args2 = arguments, _t, _t2;
+        var forceRepop, groupOperation, controller, group, newDirection, transition, allowEvent, reusePreparation, waitForPreparation, previousSize, computed, interrupted, size, prepared, duration, timeMs, activateTransition, advancedEase, motionOptions, completed, autoUnpopValue, _duration, motionResult, ownsTransition, _args2 = arguments, _t, _t2;
         return _regenerator().w(function(_context2) {
           while (1) switch (_context2.p = _context2.n) {
             case 0:
@@ -906,19 +906,38 @@
                 },
                 bubbles: true
               });
-              AelluxJs.dispatchFrom(element, "".concat(newDirection).concat(PING), {
-                bubbles: true
-              });
-              _context2.n = 12;
-              return Promise.race([completed, interrupted]);
+              if (!(controller.transition !== transition || !element.isConnected)) {
+                _context2.n = 12;
+                break;
+              }
+              return _context2.a(2);
             case 12:
-              motionResult = _context2.v;
-              if (!(controller.transition !== transition || motionResult && motionResult.status !== "completed")) {
+              autoUnpopValue = gotoVisible && element.getAttribute(attr.autoUnpop);
+              if (autoUnpopValue) {
+                _duration = getString2Time(autoUnpopValue);
+                if (Number.isFinite(_duration) && _duration >= 0) {
+                  emitAutoUnpopProgress(element, 0, _duration);
+                }
+              }
+              if (!(controller.transition !== transition || !element.isConnected)) {
                 _context2.n = 13;
                 break;
               }
               return _context2.a(2);
             case 13:
+              AelluxJs.dispatchFrom(element, "".concat(newDirection).concat(PING), {
+                bubbles: true
+              });
+              _context2.n = 14;
+              return Promise.race([completed, interrupted]);
+            case 14:
+              motionResult = _context2.v;
+              if (!(controller.transition !== transition || motionResult && motionResult.status !== "completed")) {
+                _context2.n = 15;
+                break;
+              }
+              return _context2.a(2);
+            case 15:
               finishTransition(element, controller, transition, gotoVisible);
               if (gotoVisible && !element.hidden) {
                 autoUnpopSchedule(element, controller);
@@ -932,10 +951,10 @@
                   bubbles: true
                 });
               }
-              _context2.n = 18;
+              _context2.n = 20;
               break;
-            case 14:
-              _context2.p = 14;
+            case 16:
+              _context2.p = 16;
               _t = _context2.v;
               ownsTransition = transition && controller.transition === transition;
               if (ownsTransition && transition.timeout !== null) {
@@ -947,40 +966,40 @@
               }
               if (ownsTransition) restoreMeasuredStyles(element, controller);
               _t2 = _t && _t.code;
-              _context2.n = _t2 === AelluxJs.diagnostics.WARN_INTERRUPTION.code ? 15 : 17;
+              _context2.n = _t2 === AelluxJs.diagnostics.WARN_INTERRUPTION.code ? 17 : 19;
               break;
-            case 15:
+            case 17:
               if (!(transition && transition.cancelled)) {
-                _context2.n = 16;
+                _context2.n = 18;
                 break;
               }
-              return _context2.a(3, 18);
-            case 16:
+              return _context2.a(3, 20);
+            case 18:
               AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_INTERRUPTION, {
                 cause: _t,
                 extension: extensionName,
                 element: element,
                 replacement: transition && transition.replacement === true
               });
-              return _context2.a(3, 18);
-            case 17:
+              return _context2.a(3, 20);
+            case 19:
               AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION, {
                 cause: _t,
                 extension: extensionName,
                 element: element
               });
-              return _context2.a(3, 18);
-            case 18:
-              _context2.p = 18;
+              return _context2.a(3, 20);
+            case 20:
+              _context2.p = 20;
               if (transition && controller.transition === transition) {
                 controller.transition = null;
                 controller.classList.remove(className.willChange);
               }
-              return _context2.f(18);
-            case 19:
+              return _context2.f(20);
+            case 21:
               return _context2.a(2);
           }
-        }, _callee2, null, [[6, 14, 18, 19]]);
+        }, _callee2, null, [[6, 16, 20, 21]]);
       }));
       return _presentTransition.apply(this, arguments);
     }
@@ -1039,18 +1058,7 @@
       var emit = function emit2(completed) {
         var initial = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
         var elapsedMs = initial ? 0 : Math.min(duration, Math.max(0, root.performance.now() - countdown.start));
-        AelluxJs.dispatchFrom(element, "Progress", {
-          bubbles: false,
-          cancelable: false,
-          detail: {
-            value: completed ? 1 : duration ? elapsedMs / duration : 0,
-            max: 1,
-            status: completed ? "completed" : "running",
-            elapsedMs: elapsedMs,
-            durationMs: duration,
-            remainingMs: Math.max(0, duration - elapsedMs)
-          }
-        });
+        emitAutoUnpopProgress(element, elapsedMs, duration, completed);
       };
       var _tick = function tick() {
         var _AelluxJs$layoutMaxFP;
@@ -1081,6 +1089,21 @@
       }, duration);
       emit(false, true);
       if (valid()) countdown.frame = root.requestAnimationFrame(_tick);
+    }
+    function emitAutoUnpopProgress(element, elapsedMs, duration) {
+      var completed = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : false;
+      AelluxJs.dispatchFrom(element, "Progress", {
+        bubbles: false,
+        cancelable: false,
+        detail: {
+          value: completed ? 1 : duration ? elapsedMs / duration : 0,
+          max: 1,
+          status: completed ? "completed" : "running",
+          elapsedMs: elapsedMs,
+          durationMs: duration,
+          remainingMs: Math.max(0, duration - elapsedMs)
+        }
+      });
     }
     function cancelAutoUnpop(controller) {
       if (controller.autoUnpopTimeout !== null) clearTimeout(controller.autoUnpopTimeout);
