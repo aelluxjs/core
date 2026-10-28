@@ -13,14 +13,17 @@ const find = (entries, name) => entries.find(entry => entry.name === name);
 
 for (const [name, schemaName] of [["aellux.html-data.json", "html"], ["aellux.css-data.json", "css"], ["aellux.web-types.json", "web-types"]]) {
   test(`${name} validates against the official ${schemaName} schema`, async () => {
-    const schema = JSON.parse(await readFile(new URL(`tests/fixtures/editor-schemas/${schemaName}.schema.json`, root), "utf8"));
-    const result = new Validator().validate(output[name], schema);
+    const schemaUrl = new URL(`tests/fixtures/editor-schemas/${schemaName}.schema.json`, root);
+    const schema = JSON.parse(await readFile(schemaUrl, "utf8"));
+    // Resolve relative or missing schema IDs against an absolute URI before following $ref.
+    const options = { base: schemaUrl.href };
+    const result = new Validator().validate(output[name], schema, options);
     assert.equal(result.valid, true, result.errors.map(error => error.stack).join("\n"));
     // Demonstrate that schema validation is meaningful, not only JSON parsing.
     const invalid = structuredClone(output[name]);
     if (schemaName === "web-types") delete invalid.name;
     else invalid.version = "1.1";
-    assert.equal(new Validator().validate(invalid, schema).valid, false);
+    assert.equal(new Validator().validate(invalid, schema, options).valid, false);
   });
 }
 
