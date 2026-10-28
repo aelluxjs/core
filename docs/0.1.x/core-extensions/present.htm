@@ -41,8 +41,7 @@
   integrity="sha384-/EgOix3QlZtjoeNxjR0v0jee1G/Pa/iAOPWX5MjHn9BLMWc2sgSBv3Tnpbyv9wxo" crossorigin="anonymous">
 </head>
 
-<body data-ae-feedback="error" data-ae-transform-target="#toast-message" data-ae-message-target="#toast-message"
-  data-ae-present-target="#toast-present-group">
+<body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
 
   <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
   <symbol id="bi-circle-half" fill="currentColor"
@@ -84,14 +83,12 @@
           <div id="toast-present-group"
             class="position-fixed w-100 z-1 pe-none p-4 flex-column d-flex justify-content-center align-items-center"
             data-ae-present-group="2">
-            <div id="toast-1" data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true"
+            <div id="toast-1" data-ae-present="opacity" data-ae-auto-unpop="1s" data-ae-unpop-on-outside="false" hidden="true"
               class="text-bg-danger small rounded-1 p-2 w-100 text-center" style="max-width: 300px;">
-              <span id="toast-message">-</span>
               <progress data-ae-progress-target="toast-1"></progress>
             </div>
-            <div id="toast-2" data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true"
+            <div id="toast-2" data-ae-present="opacity" data-ae-auto-unpop="1s" data-ae-unpop-on-outside="false" hidden="true"
               class="text-bg-danger small rounded-1 p-2 w-100 text-center" style="max-width: 300px;">
-              <span id="toast-message">-</span>
               <progress data-ae-progress-target="toast-2"></progress>
             </div>
           </div>
