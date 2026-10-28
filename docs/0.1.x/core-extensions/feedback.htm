@@ -42,7 +42,7 @@
 </head>
 
 <body data-ae-feedback="error" data-ae-transform-target="#toast-message" data-ae-message-target="#toast-message"
-  data-ae-present-target>
+  data-ae-present-target="#toast-present-group">
 
   <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
   <symbol id="bi-circle-half" fill="currentColor"
@@ -81,11 +81,18 @@
         style=" --bar-color:#55606F; --bar-color2:var(--bs-link-color); --bar-bg:#F0F5F5;">
         <div class="container-fluid gap-2" style='z-index: 1;'>
 
-          <div id="toast-present" class="position-fixed w-100 z-1 pe-none p-4 justify-content-center align-items-center"
-            data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true" style="display: flex;">
-            <div id="toast-message" class="text-bg-danger small rounded-1 p-2 w-100 text-center"
-              style="max-width: 300px;">
-              -
+          <div id="toast-present-group"
+            class="position-fixed w-100 z-1 pe-none p-4 flex-column d-flex justify-content-center align-items-center"
+            data-ae-present-group>
+            <div id="toast-1" data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true"
+              class="text-bg-danger small rounded-1 p-2 w-100 text-center" style="max-width: 300px;">
+              <span id="toast-message">-</span>
+              <progress data-ae-progress-target="toast-1"></progress>
+            </div>
+            <div id="toast-2" data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true"
+              class="text-bg-danger small rounded-1 p-2 w-100 text-center" style="max-width: 300px;">
+              <span id="toast-message">-</span>
+              <progress data-ae-progress-target="toast-2"></progress>
             </div>
           </div>
 
@@ -524,6 +531,13 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/progress.htm" data-ae-overflow-marquee="190px">
+                                              Progress                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/optional/pwa.htm" data-ae-overflow-marquee="190px">
                                               PWA                                            </a>
                                           </div>
@@ -734,6 +748,29 @@ controller.feedback.send({ type: &quot;progress&quot;, message: &quot;Uploading&
 <li><strong>Consumer responsibility:</strong> choose suitable semantics, live region priority, and focus behavior. <code>announce()</code> publishes an event but does not create a live region.</li>
 <li><strong>Motion:</strong> the generated styles respect the AelluxJs reduced-motion attribute. Application supplied motion styles must handle reduced motion themselves.</li>
 </ul>
+<h2 id="stacked-notifications">Stacked notifications</h2><p>A nonempty <code>data-ae-present-target</code> can identify a mounted Present Group. Feedback calls public <code>present.popNext()</code> and prepares the reserved member before <code>BeforePop</code> and opening motion. An ordinary Present target continues using <code>present.pop()</code>. Empty target discovery retains the closest message Present, then the transform Present fallback. Missing/uninitialized Present leaves Feedback usable.</p>
+<p>Without explicit message/transform targets, a group uses its reserved member as both logical destinations. Feedback replaces the first direct text node or appends one, preserving children such as buttons and progress controls. Each member keeps an independent message and current feedback type class; reuse replaces its prior type. Explicit message and transform IDs remain absolute destinations, so sharing one across notifications shares that content/motion instead of isolating it.</p>
+<pre><code class="language-html">&lt;section id=&quot;feedback-source&quot; data-ae-feedback data-ae-present-target=&quot;notifications&quot;&gt;&lt;/section&gt;
+&lt;div id=&quot;notifications&quot; data-ae-present-group aria-live=&quot;polite&quot;&gt;
+  &lt;article id=&quot;notice-1&quot; data-ae-present=&quot;opacity&quot; data-ae-auto-unpop=&quot;5000&quot;
+           data-ae-unpop-on-outside=&quot;false&quot; hidden&gt;
+    &lt;progress max=&quot;100&quot; value=&quot;0&quot; data-ae-progress-target=&quot;notice-1&quot;
+              aria-label=&quot;Time until notification closes&quot;&gt;&lt;/progress&gt;
+  &lt;/article&gt;
+  &lt;article id=&quot;notice-2&quot; data-ae-present=&quot;opacity&quot; data-ae-auto-unpop=&quot;5000&quot;
+           data-ae-unpop-on-outside=&quot;false&quot; hidden&gt;
+    &lt;progress max=&quot;100&quot; value=&quot;0&quot; data-ae-progress-target=&quot;notice-2&quot;
+              aria-label=&quot;Time until notification closes&quot;&gt;&lt;/progress&gt;
+  &lt;/article&gt;
+  &lt;article id=&quot;notice-3&quot; data-ae-present=&quot;opacity&quot; data-ae-auto-unpop=&quot;5000&quot;
+           data-ae-unpop-on-outside=&quot;false&quot; hidden&gt;
+    &lt;progress max=&quot;100&quot; value=&quot;0&quot; data-ae-progress-target=&quot;notice-3&quot;
+              aria-label=&quot;Time until notification closes&quot;&gt;&lt;/progress&gt;
+  &lt;/article&gt;
+&lt;/div&gt;
+</code></pre>
+<p>After mounting, publish normally: <code>$ae(&quot;feedback-source&quot;).feedback.success(&quot;Saved.&quot;)</code>. The HTML sets capacity to three; a fourth message reuses the oldest slot and resets its auto-unpop. No application timer or member-selection code is needed. Basic registers Feedback, Present and <a href="optional/progress.htm">Progress</a> explicitly; Full registers them automatically.</p>
+<p>Use opacity-only Present motion when animating Feedback on the same member. To combine transform animations, give Feedback an explicit descendant transform target and keep Present&#39;s transform on the outer member; do not have both replace one transform. Explicit descendant IDs are absolute, so configure independent sources/targets if per-member nested motion is required. Live-region announcements and reading time remain application responsibilities.</p>
 <h2>Known Limits &amp; Risks</h2>
 <p>See <a href="../runtime/known-limits-and-risks.htm">Core Known Limits &amp; Risks</a> for classifications and shared architecture, loading and lifecycle boundaries.</p>
 <table>

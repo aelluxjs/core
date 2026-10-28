@@ -7,7 +7,13 @@ export const bundleBudget = Object.freeze([
   // Includes the official entry for the dedicated Overflow Marquee Extension.
   // Viewport's signed Modern/Legacy registry entries: +803 raw / +274 gzip bytes.
   // Public selector helpers are available before init; measurements: runtime/performance.md.
-  { file: "aellux.min.js", maxRawBytes: 48 * 1024, maxGzipBytes: 16.5 * 1024 },
+  // Progress registry/SRI and detached capability probes; measured deltas:
+  // docs-source/0.1.x/progress-implementation-report.md.
+  { file: "aellux.min.js", maxRawBytes: 50 * 1024, maxGzipBytes: 17 * 1024 },
+  { file: "aellux.ext.progress.js", maxRawBytes: 3.25 * 1024, maxGzipBytes: 1.125 * 1024 },
+  { file: "aellux.ext.progress.min.js", maxRawBytes: 1.75 * 1024, maxGzipBytes: 0.875 * 1024 },
+  { file: "aellux.ext.progress.legacy.js", maxRawBytes: 15 * 1024, maxGzipBytes: 4.5 * 1024 },
+  { file: "aellux.ext.progress.legacy.min.js", maxRawBytes: 8 * 1024, maxGzipBytes: 3.125 * 1024 },
   // Viewport error events and observed automatic work; bounded independent
   // cleanup also preserves completion of an initial mount.
   { file: "aellux.ext.viewport.js", maxRawBytes: 21.75 * 1024, maxGzipBytes: 5.75 * 1024 },
@@ -27,8 +33,10 @@ export const bundleBudget = Object.freeze([
   // Bundled Extensions ship inside Full; Optional Extensions stay external.
   // Delivery changes and measured sizes: runtime/performance.md.
   // Startup and State Navigation failure forwarding: +295 raw / +79 gzip bytes.
-  { file: "aellux.full.min.js", maxRawBytes: 188.25 * 1024, maxGzipBytes: 58.25 * 1024 },
-  { file: "aellux.full.legacy.min.js", maxRawBytes: 508 * 1024, maxGzipBytes: 150 * 1024 },
+  // Includes countdown emission, accumulating groups and Feedback preparation;
+  // the Progress implementation itself stays external. Measured in the report.
+  { file: "aellux.full.min.js", maxRawBytes: 192 * 1024, maxGzipBytes: 59.5 * 1024 },
+  { file: "aellux.full.legacy.min.js", maxRawBytes: 512.5 * 1024, maxGzipBytes: 152 * 1024 },
   { file: "aellux.full.min.css", maxRawBytes: 122 * 1024, maxGzipBytes: 12 * 1024 },
   { file: "aellux.ext.adaptive.min.css", maxRawBytes: 121 * 1024, maxGzipBytes: 11 * 1024 },
   { file: "aellux.ext.adaptive.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
@@ -47,7 +55,7 @@ export const bundleBudget = Object.freeze([
   { file: "aellux.ext.ajax-href.legacy.min.js", maxRawBytes: 14.5 * 1024, maxGzipBytes: 5.5 * 1024 },
   { file: "aellux.ext.feedback.min.css", maxRawBytes: 3 * 1024, maxGzipBytes: 2 * 1024 },
   // Explicit Present target integration; measured bytes: core-extensions/feedback.md.
-  { file: "aellux.ext.feedback.min.js", maxRawBytes: 4.25 * 1024, maxGzipBytes: 2 * 1024 },
+  { file: "aellux.ext.feedback.min.js", maxRawBytes: 4.625 * 1024, maxGzipBytes: 2 * 1024 },
   { file: "aellux.ext.feedback.legacy.min.js", maxRawBytes: 9 * 1024, maxGzipBytes: 4 * 1024 },
   { file: "aellux.ext.focus.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
   { file: "aellux.ext.focus.legacy.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
@@ -59,8 +67,8 @@ export const bundleBudget = Object.freeze([
   // Present now reports invalid actions, missing/incompatible targets and
   // corrective context for group selections, plus consumer-local tap/click
   // arbitration and pending activation cleanup. Costs: core-extensions/present.md.
-  { file: "aellux.ext.present.min.js", maxRawBytes: 20 * 1024, maxGzipBytes: 7.25 * 1024 },
-  { file: "aellux.ext.present.legacy.min.js", maxRawBytes: 28 * 1024, maxGzipBytes: 9.75 * 1024 },
+  { file: "aellux.ext.present.min.js", maxRawBytes: 22.5 * 1024, maxGzipBytes: 8 * 1024 },
+  { file: "aellux.ext.present.legacy.min.js", maxRawBytes: 30.5 * 1024, maxGzipBytes: 10.5 * 1024 },
   { file: "aellux.ext.scrollbox.min.js", maxRawBytes: 46 * 1024, maxGzipBytes: 14 * 1024 },
   // Progressive 2D overflow fade; measured deltas: core-extensions/scrollbox.md.
   { file: "aellux.ext.scrollbox.min.css", maxRawBytes: 6.5 * 1024, maxGzipBytes: 1.5 * 1024 },

@@ -79,20 +79,20 @@ h2::before,
 h3::before {
   display: block;
   content: " ";
-  height: 100px;
+  height: 190px;
   pointer-events: none;
-  margin-top: -100px;
+  margin-top: -190px;
   visibility: hidden;
 }
 
 h2::before {
-  height: 90px;
-  margin-top: -90px;
+  height: 140px;
+  margin-top: -140px;
 }
 
 h3::before {
-  height: 80px;
-  margin-top: -80px;
+  height: 100px;
+  margin-top: -100px;
 }
 
 html,

@@ -8,6 +8,7 @@ export const officialExtensionDefinitions = Object.freeze([
   Object.freeze({ name: "feedback", style: true, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "focus", style: false, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "dialog", optional: true, style: false, dependencies: Object.freeze([]) }),
+  Object.freeze({ name: "progress", optional: true, style: false, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "pwa", optional: true, style: false, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "viewport", optional: true, style: false, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "point", style: false, dependencies: Object.freeze([]) }),

@@ -1,5 +1,7 @@
 # Modern and Legacy Runtimes
 
+Bootstrap also probes the numeric/reflection APIs of `HTMLProgressElement` and `HTMLMeterElement` independently. Missing or partial support selects Legacy. Only the Optional [Progress Extension](../core-extensions/optional/progress.md) Legacy files contain the element-local fallbacks and visual styles; complete native controls are preserved even with forced Legacy. The bootstrap probe contains no fallback implementation.
+
 The aellux.js boot script is responsible for capability detection and runtime selection.
 
 ## Modern Runtime

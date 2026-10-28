@@ -2,7 +2,7 @@
 
 Lazy loading delays an Extension until a matching element is found during `$ae.mount(root)`.
 
-Basic starts with no Extension registrations. Declare each desired Extension explicitly and supply `loadWhen` to select the markup that activates it. Full registers the official Extensions automatically, includes the Bundled implementations and loads Optional Extensions (Ajax Href, Dialog, PWA and Viewport) from separate signed files when their selectors match. Full initializes Preference and State Navigation at startup. Explicit host registrations can replace unused Full defaults. Basic styles remain opt-in through `loadStyle: true`.
+Basic starts with no Extension registrations. Declare each desired Extension explicitly and supply `loadWhen` to select the markup that activates it. Full registers the official Extensions automatically, includes the Bundled implementations and loads Optional Extensions (Ajax Href, Dialog, Progress, PWA and Viewport) from separate signed files when their selectors match. Full initializes Preference and State Navigation at startup. Explicit host registrations can replace unused Full defaults. Basic styles remain opt-in through `loadStyle: true`.
 
 ```js
 $ae.ext("preference", {

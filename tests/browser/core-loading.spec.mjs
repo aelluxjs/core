@@ -35,11 +35,11 @@ for (const boot of ["aellux.js", "aellux.min.js"]) for (const forceLegacy of [fa
           <button data-ae-trigger="toggle" data-ae-target="#later">Present</button>
           <div data-ae-scrollbox data-ae-scrollbox-snap style="width:100px;height:50px;overflow:auto"><div style="width:300px;height:100px" data-ae-snap-item></div></div>
           <a data-ae-ajax-href="#scope" href="/next">Next</a>
-          <dialog></dialog><button data-ae-pwa="install">Install</button><div data-ae-viewport></div>
+          <dialog></dialog><progress></progress><meter value=".5"></meter><button data-ae-pwa="install">Install</button><div data-ae-viewport></div>
         </div>`;
         await AelluxJs.mount(document.getElementById("scope"));
       });
-      const loaded = ["point", "preference", "present", "scrollbox", "scrollboxSnap", "ajaxHref", "dialog", "pwa", "viewport"];
+      const loaded = ["point", "preference", "present", "scrollbox", "scrollboxSnap", "ajaxHref", "dialog", "progress", "pwa", "viewport"];
       if (mode === "basic") {
         expect(scripts).toEqual([]);
         expect(await page.evaluate(() => Object.keys(AelluxJs.registry.ext))).toEqual([]);
@@ -50,7 +50,7 @@ for (const boot of ["aellux.js", "aellux.min.js"]) for (const forceLegacy of [fa
             ["point", "[data-ae-point]"], ["preference", "[data-ae-preference]"],
             ["present", "[data-ae-trigger]"], ["scrollbox", "[data-ae-scrollbox]"],
             ["scrollbox-snap", "[data-ae-scrollbox-snap]"], ["ajax-href", "a[data-ae-ajax-href]"],
-            ["dialog", "dialog"], ["pwa", "[data-ae-pwa]"], ["viewport", "[data-ae-viewport]"]
+            ["dialog", "dialog"], ["progress", "progress, meter"], ["pwa", "[data-ae-pwa]"], ["viewport", "[data-ae-viewport]"]
           ]) AelluxJs.ext(name, { loadWhen });
           await AelluxJs.mount(document.getElementById("scope"));
         });
@@ -58,8 +58,8 @@ for (const boot of ["aellux.js", "aellux.min.js"]) for (const forceLegacy of [fa
       }
       expect(await page.evaluate(loaded => loaded.filter(key => !AelluxJs.ext[key]?.initialized), loaded)).toEqual([]);
       const suffix = `${forceLegacy ? ".legacy" : ""}${boot.includes(".min.") ? ".min" : ""}.js`;
-      const external = mode === "full" ? ["ajax-href", "dialog", "pwa", "viewport"] :
-        ["point", "preference", "present", "scrollbox", "scrollbox-snap", "ajax-href", "dialog", "pwa", "viewport"];
+      const external = mode === "full" ? ["ajax-href", "dialog", "progress", "pwa", "viewport"] :
+        ["point", "preference", "present", "scrollbox", "scrollbox-snap", "ajax-href", "dialog", "progress", "pwa", "viewport"];
       expect(scripts.sort()).toEqual(external.map(name => `aellux.ext.${name}${suffix}`).sort());
       await page.evaluate(() => AelluxJs.mount(document.getElementById("scope")));
       expect(scripts).toHaveLength(external.length);

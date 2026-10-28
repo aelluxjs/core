@@ -88,6 +88,37 @@ The Present integration, including empty-target discovery, and target rename cha
 - **Consumer responsibility:** choose suitable semantics, live region priority, and focus behavior. `announce()` publishes an event but does not create a live region.
 - **Motion:** the generated styles respect the AelluxJs reduced-motion attribute. Application supplied motion styles must handle reduced motion themselves.
 
+<h2 id="stacked-notifications">Stacked notifications</h2>
+
+A nonempty `data-ae-present-target` can identify a mounted Present Group. Feedback calls public `present.popNext()` and prepares the reserved member before `BeforePop` and opening motion. An ordinary Present target continues using `present.pop()`. Empty target discovery retains the closest message Present, then the transform Present fallback. Missing/uninitialized Present leaves Feedback usable.
+
+Without explicit message/transform targets, a group uses its reserved member as both logical destinations. Feedback replaces the first direct text node or appends one, preserving children such as buttons and progress controls. Each member keeps an independent message and current feedback type class; reuse replaces its prior type. Explicit message and transform IDs remain absolute destinations, so sharing one across notifications shares that content/motion instead of isolating it.
+
+```html
+<section id="feedback-source" data-ae-feedback data-ae-present-target="notifications"></section>
+<div id="notifications" data-ae-present-group aria-live="polite">
+  <article id="notice-1" data-ae-present="opacity" data-ae-auto-unpop="5000"
+           data-ae-unpop-on-outside="false" hidden>
+    <progress max="100" value="0" data-ae-progress-target="notice-1"
+              aria-label="Time until notification closes"></progress>
+  </article>
+  <article id="notice-2" data-ae-present="opacity" data-ae-auto-unpop="5000"
+           data-ae-unpop-on-outside="false" hidden>
+    <progress max="100" value="0" data-ae-progress-target="notice-2"
+              aria-label="Time until notification closes"></progress>
+  </article>
+  <article id="notice-3" data-ae-present="opacity" data-ae-auto-unpop="5000"
+           data-ae-unpop-on-outside="false" hidden>
+    <progress max="100" value="0" data-ae-progress-target="notice-3"
+              aria-label="Time until notification closes"></progress>
+  </article>
+</div>
+```
+
+After mounting, publish normally: `$ae("feedback-source").feedback.success("Saved.")`. The HTML sets capacity to three; a fourth message reuses the oldest slot and resets its auto-unpop. No application timer or member-selection code is needed. Basic registers Feedback, Present and [Progress](optional/progress.md) explicitly; Full registers them automatically.
+
+Use opacity-only Present motion when animating Feedback on the same member. To combine transform animations, give Feedback an explicit descendant transform target and keep Present's transform on the outer member; do not have both replace one transform. Explicit descendant IDs are absolute, so configure independent sources/targets if per-member nested motion is required. Live-region announcements and reading time remain application responsibilities.
+
 ## Known Limits & Risks
 
 See [Core Known Limits & Risks](../runtime/known-limits-and-risks.md) for classifications and shared architecture, loading and lifecycle boundaries.

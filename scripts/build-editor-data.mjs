@@ -14,7 +14,7 @@ import { generateScrollboxCSS } from "../src/aellux.ext.scrollbox.css.js";
 import { generateAnchorCSS } from "../src/aellux.ext.anchor.css.js";
 import { generateOverflowMarqueeCSS } from "../src/aellux.ext.overflow-marquee.css.js";
 import { officialExtensionDefinitions } from "../src/official-extension-definitions.js";
-import { semanticAttributes, semanticCSSProperties, semanticEvents } from "./semantic-definitions.mjs";
+import { semanticAttributes, semanticCSSProperties, semanticEvents, semanticMethods } from "./semantic-definitions.mjs";
 
 const projectRoot = fileURLToPath(new URL("../", import.meta.url));
 export const editorDataFiles = ["aellux.semantic.json", "aellux.html-data.json", "aellux.css-data.json", "aellux.web-types.json"];
@@ -77,6 +77,7 @@ export async function createSemanticCatalog(metadata, constants = createAelluxCo
     extensions: officialExtensionDefinitions.map(entry => entry.name),
     api: JSON.parse(JSON.stringify(apiContext.aelluxApiContract)),
     attributes, cssProperties, classes: sorted([...classes.values()]),
+    methods: semanticMethods.map(entry => ({ ...entry, docURL: docURL(entry) })),
     events: sorted(semanticEvents.map(entry => ({ bubbles: true, cancelable: false, ...entry,
       name: api.eventName(entry.name), docURL: `${docsBase}runtime/events.htm` })))
   };

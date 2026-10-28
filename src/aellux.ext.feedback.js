@@ -86,11 +86,30 @@
     }
     event.stopPropagation();
     if (!event.detail) return;
-    const { message, type, motion } = event.detail;
+    const presentTarget = element.getAttribute(presentTargetAttribute);
+    const present = AelluxJs.ext.present;
+    const presentElement = presentTarget !== null && presentTarget.trim() && present?.initialized
+      ? AelluxJs.elementOrId(presentTarget) : null;
+    if (presentElement?.hasAttribute(AelluxJs.attr("present-group"))) {
+      present.popNext(presentElement, member => applyFeedback(element, event.detail, member))
+        .catch(cause => AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION,
+          { cause, extension: extensionName, element: presentElement }));
+      return;
+    }
+    applyFeedback(element, event.detail, element, (messageElement, transformElement) => {
+      if (presentTarget !== null && present?.initialized) {
+        const target = presentElement || (!presentTarget.trim() &&
+          (messageElement?.closest(presentSelector) || transformElement?.closest(presentSelector)));
+        if (target) present.pop(target);
+      }
+    });
+  }
+
+  function applyFeedback(element, { message, type, motion }, defaultElement = element, presentRequest) {
     const messageTarget = element.getAttribute(messageTargetAttribute);
     const transformTarget = element.getAttribute(transformTargetAttribute);
-    const messageElement = AelluxJs.elementOrId(messageTarget, { defaultElement: element });
-    const transformElement = AelluxJs.elementOrId(transformTarget, { defaultElement: element });
+    const messageElement = AelluxJs.elementOrId(messageTarget, { defaultElement });
+    const transformElement = AelluxJs.elementOrId(transformTarget, { defaultElement });
 
     if (messageElement && typeof message === "string") {
       let textNode = null;
@@ -107,23 +126,16 @@
     if (feedbackTypes.includes(type)) {
       const typeClass = AelluxJs.className(`feedback-${type}`);
       for (const target of [element, messageElement, transformElement]) {
-        if (target) target.classList.add(typeClass);
+        if (target) {
+          if (defaultElement !== element) {
+            for (const previous of feedbackTypes) target.classList.remove(AelluxJs.className(`feedback-${previous}`));
+          }
+          target.classList.add(typeClass);
+        }
       }
     }
 
-    const presentTarget = element.getAttribute(presentTargetAttribute);
-    const present = AelluxJs.ext.present;
-    if (presentTarget !== null && present?.initialized) {
-      if (presentTarget.trim()) {
-        const presentElement = AelluxJs.elementOrId(presentTarget);
-        if (presentElement) present.pop(presentElement);
-      } else {
-        const target = messageElement?.closest(presentSelector) ||
-          transformElement?.closest(presentSelector);
-        if (target) present.pop(target);
-      }
-    }
-
+    if (presentRequest) presentRequest(messageElement, transformElement);
     if (transformElement) {
       const motionPrefix = AelluxJs.className("feedback-motion-");
       for (const className of Array.from(transformElement.classList)) {

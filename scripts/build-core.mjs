@@ -161,8 +161,9 @@ for (const sourceFile of sourceFiles) {
       target: classic ? "es5" : "es2017",
       minify,
       sourcemap: true,
-      legalComments: "inline"
-      ,define: versionDefine
+      // Deduplicate notices retained from Progress's removed fallback imports.
+      legalComments: filename === "aellux.ext.progress.js" ? "eof" : "inline"
+      ,define: { ...versionDefine, __AELLUX_PROGRESS_LEGACY__: "false" }
     });
     generatedFiles.add(outputFilename);
     generatedFiles.add(outputFilename + ".map");
@@ -175,6 +176,7 @@ for (const sourceFile of legacySourceFiles) {
   const sourceFileName = relative(projectRoot, sourceFile).replace(/\\/g, "/");
   const isOrchestrator = filename === "aellux.orchestrator.js";
   const isDialog = filename === "aellux.ext.dialog.js";
+  const isProgress = filename === "aellux.ext.progress.js";
   const transformed = isOrchestrator || isDialog
     ? null
     : await transpileLegacySource(sourceFile, sourceFileName);
@@ -205,7 +207,7 @@ for (const sourceFile of legacySourceFiles) {
       ...(isOrchestrator ? { banner: { js: legacyThirdPartyBanner } } : {}),
       ...(isDialog ? { banner: { js: dialogThirdPartyBanner }, loader: { ".css": "text" } } : {}),
       plugins: [legacyBundlePlugin()]
-      ,define: versionDefine
+      ,define: { ...versionDefine, __AELLUX_PROGRESS_LEGACY__: isProgress ? "true" : "false" }
     });
     generatedFiles.add(outputFilename);
     generatedFiles.add(outputFilename + ".map");

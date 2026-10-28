@@ -42,7 +42,7 @@
 </head>
 
 <body data-ae-feedback="error" data-ae-transform-target="#toast-message" data-ae-message-target="#toast-message"
-  data-ae-present-target>
+  data-ae-present-target="#toast-present-group">
 
   <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
   <symbol id="bi-circle-half" fill="currentColor"
@@ -81,11 +81,18 @@
         style=" --bar-color:#55606F; --bar-color2:var(--bs-link-color); --bar-bg:#F0F5F5;">
         <div class="container-fluid gap-2" style='z-index: 1;'>
 
-          <div id="toast-present" class="position-fixed w-100 z-1 pe-none p-4 justify-content-center align-items-center"
-            data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true" style="display: flex;">
-            <div id="toast-message" class="text-bg-danger small rounded-1 p-2 w-100 text-center"
-              style="max-width: 300px;">
-              -
+          <div id="toast-present-group"
+            class="position-fixed w-100 z-1 pe-none p-4 flex-column d-flex justify-content-center align-items-center"
+            data-ae-present-group>
+            <div id="toast-1" data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true"
+              class="text-bg-danger small rounded-1 p-2 w-100 text-center" style="max-width: 300px;">
+              <span id="toast-message">-</span>
+              <progress data-ae-progress-target="toast-1"></progress>
+            </div>
+            <div id="toast-2" data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true"
+              class="text-bg-danger small rounded-1 p-2 w-100 text-center" style="max-width: 300px;">
+              <span id="toast-message">-</span>
+              <progress data-ae-progress-target="toast-2"></progress>
             </div>
           </div>
 
@@ -524,6 +531,13 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/progress.htm" data-ae-overflow-marquee="190px">
+                                              Progress                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/optional/pwa.htm" data-ae-overflow-marquee="190px">
                                               PWA                                            </a>
                                           </div>
@@ -721,7 +735,7 @@ $ae.mountManager.remove({ extensionName: &quot;example&quot; });
 await $ae(&quot;#panel&quot;).present.toggle(false);
 </code></pre>
 <p>Unmounting removes the corresponding methods from the element controller.</p>
-<p>Every mounted element controller offers <code>mount(extensionNames)</code>, <code>unmount(extensionNames)</code>, and <code>update(extensionNames)</code>. These methods use that element as the root, including matching descendants, and return promises. <code>mount</code> is idempotent; <code>update</code> tries every declared <code>update</code> callback for mounted elements and leaves mount registrations intact. A mounted Extension namespace also has an <code>update</code> property: <code>$ae(element).present.update</code> is <code>null</code> when no mounted <code>present</code> map declares an <code>update</code> callback; otherwise it is a function that updates that Extension&#39;s mounted elements under the root. After <code>unmount</code> removes every registration, a new controller is created on a later mount.</p>
+<p>Every mounted element controller offers <code>mount(extensionNames)</code>, <code>unmount(extensionNames)</code>, and <code>update(extensionNames)</code>. These methods use that element as the root, including matching descendants, and return promises. <code>mount</code> is idempotent; <code>update</code> tries every declared <code>update</code> callback for mounted elements and leaves mount registrations intact. A mounted Extension namespace also has an <code>update</code> property: <code>$ae(element).present.update</code> refreshes auto-unpop configuration for mounted Present regions. A namespace with no mounted update callback exposes <code>update: null</code>; otherwise it updates that Extension&#39;s mounted elements under the root. After <code>unmount</code> removes every registration, a new controller is created on a later mount.</p>
 <p>The controller also offers <code>on(event, handler, options)</code>, <code>off(event, handler, options)</code>, and <code>dispatch(event, options)</code>. These use the same event names and options as the main API, but <code>on</code> and <code>off</code> register on the mounted element, and <code>dispatch</code> calls <code>dispatchFrom</code> with that element as the target:</p>
 <pre><code class="language-js">const panel = $ae(&quot;panel&quot;);
 const onLayout = event =&gt; console.log(event.target);

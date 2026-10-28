@@ -64,7 +64,7 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 
 ## Core Extensions
 
-The [Core Extensions overview](core-extensions/README.md) explains distribution and stability and links to all fifteen official Extensions.
+The [Core Extensions overview](core-extensions/README.md) explains distribution and stability and links to all sixteen official Extensions.
 
 - [Bundled Extensions](core-extensions/README.md#bundled-extensions)
 - [Optional Extensions](core-extensions/README.md#optional-extensions)

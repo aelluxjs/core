@@ -8,6 +8,8 @@ The generated `dist/aellux.js` boot script avoids modern runtime syntax so it ca
 
 ## APIs and Polyfills
 
+The Optional [Progress Extension](../core-extensions/optional/progress.md) checks `progress` and `meter` independently. Missing or partial numeric APIs select Legacy; only that Extension's Legacy artifacts contain their element-local fallbacks and required visual styles. Supported native controls remain unchanged. The fallback requires DOM property descriptors and MutationObserver; ES5 output does not establish historical-browser or assistive-technology equivalence.
+
 Syntax compatibility alone does not provide missing browser APIs. For this reason, the selected Legacy runtime, `aellux.orchestrator.legacy.js` or `aellux.full.legacy.js`, includes compatibility layers for:
 
 - ES language APIs supplied by `core-js`, including `Promise`, collections, symbols, `Object` helpers, `Array` helpers and `URLSearchParams`;

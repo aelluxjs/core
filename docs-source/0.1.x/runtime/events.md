@@ -1,5 +1,7 @@
 # Events
 
+`AelluxJsProgress` is a generic numeric notification emitted on the producer with `bubbles: false` and `cancelable: false`. Detail contains finite numbers `{ value, max }`, with `max > 0` and `0 <= value <= max`. Listen directly with `$ae.onEvent(producer, "Progress", handler)`. It is independent of Feedback; `feedback.progress()` still emits `AelluxJsFeedback`. Present auto-unpop adds `status`, `elapsedMs`, `durationMs` and `remainingMs`; see [Progress](../core-extensions/optional/progress.md).
+
 AelluxJs uses the `AelluxJs` prefix for its DOM events by default. Its event helpers also accept exact names without this prefix. The main API listens on `document`; `onEvent` and `offEvent` listen on an explicit target; a mounted element controller listens on its element. A document listener also receives bubbling events from elements:
 
 ```js

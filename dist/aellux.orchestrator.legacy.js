@@ -22507,6 +22507,7 @@
         adaptive: "adaptive",
         "ajax-href": "ajax-href",
         viewport: "viewport viewport-target",
+        progress: "progress-target progress-fallback",
         preference: "preference option label next prev ready",
         feedback: "feedback message-target transform-target present-target"
       };
@@ -25144,6 +25145,11 @@
         style: false,
         dependencies: Object.freeze([])
       }), Object.freeze({
+        name: "progress",
+        optional: true,
+        style: false,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
         name: "pwa",
         optional: true,
         style: false,
@@ -25591,6 +25597,7 @@
               var key = toCamelCase2(name);
               if (key in api.registry.ext) continue;
               var loadWhen = name === "dialog" ? "dialog" : attr(name);
+              if (name === "progress") loadWhen = "progress, meter";
               if (name === "ajax-href") loadWhen = "a" + loadWhen;
               if (name === "present") {
                 loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");

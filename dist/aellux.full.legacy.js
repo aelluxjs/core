@@ -22507,6 +22507,7 @@
         adaptive: "adaptive",
         "ajax-href": "ajax-href",
         viewport: "viewport viewport-target",
+        progress: "progress-target progress-fallback",
         preference: "preference option label next prev ready",
         feedback: "feedback message-target transform-target present-target"
       };
@@ -25144,6 +25145,11 @@
         style: false,
         dependencies: Object.freeze([])
       }), Object.freeze({
+        name: "progress",
+        optional: true,
+        style: false,
+        dependencies: Object.freeze([])
+      }), Object.freeze({
         name: "pwa",
         optional: true,
         style: false,
@@ -25590,6 +25596,7 @@
               var key = toCamelCase2(name);
               if (key in api.registry.ext) continue;
               var loadWhen = name === "dialog" ? "dialog" : attr(name);
+              if (name === "progress") loadWhen = "progress, meter";
               if (name === "ajax-href") loadWhen = "a" + loadWhen;
               if (name === "present") {
                 loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
@@ -27263,23 +27270,23 @@
         }
         function _destroy() {
           _destroy = _asyncToGenerator4(/* @__PURE__ */ _regenerator4().m(function _callee() {
-            var _iterator2, _step2, operation;
+            var _iterator3, _step3, operation;
             return _regenerator4().w(function(_context) {
               while (1) switch (_context.n) {
                 case 0:
                   AelluxJs2.mountManager.remove({
                     extensionName: extensionName
                   });
-                  _iterator2 = _createForOfIteratorHelper13(motionOperations.values());
+                  _iterator3 = _createForOfIteratorHelper13(motionOperations.values());
                   try {
-                    for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-                      operation = _step2.value;
+                    for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+                      operation = _step3.value;
                       AelluxJs2.motion.cancel(operation.id);
                     }
                   } catch (err) {
-                    _iterator2.e(err);
+                    _iterator3.e(err);
                   } finally {
-                    _iterator2.f();
+                    _iterator3.f();
                   }
                   motionOperations.clear();
                   handlers.clear();
@@ -27302,22 +27309,47 @@
           if (value === null) return;
           var list = value.trim();
           if (list) {
-            var _type = event.detail && event.detail.type;
+            var type = event.detail && event.detail.type;
             var names = list.split(/\s+/);
-            if (!names.includes(_type)) {
+            if (!names.includes(type)) {
               return;
             }
           }
           event.stopPropagation();
           if (!event.detail) return;
-          var _event$detail = event.detail, message = _event$detail.message, type = _event$detail.type, motion = _event$detail.motion;
+          var presentTarget = element.getAttribute(presentTargetAttribute);
+          var present2 = AelluxJs2.ext.present;
+          var presentElement = presentTarget !== null && presentTarget.trim() && present2 !== null && present2 !== void 0 && present2.initialized ? AelluxJs2.elementOrId(presentTarget) : null;
+          if (presentElement !== null && presentElement !== void 0 && presentElement.hasAttribute(AelluxJs2.attr("present-group"))) {
+            present2.popNext(presentElement, function(member) {
+              return applyFeedback(element, event.detail, member);
+            }).catch(function(cause) {
+              return AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_TRANSITION, {
+                cause: cause,
+                extension: extensionName,
+                element: presentElement
+              });
+            });
+            return;
+          }
+          applyFeedback(element, event.detail, element, function(messageElement, transformElement) {
+            if (presentTarget !== null && present2 !== null && present2 !== void 0 && present2.initialized) {
+              var target = presentElement || !presentTarget.trim() && ((messageElement === null || messageElement === void 0 ? void 0 : messageElement.closest(presentSelector)) || (transformElement === null || transformElement === void 0 ? void 0 : transformElement.closest(presentSelector)));
+              if (target) present2.pop(target);
+            }
+          });
+        }
+        function applyFeedback(element, _ref) {
+          var message = _ref.message, type = _ref.type, motion = _ref.motion;
+          var defaultElement = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : element;
+          var presentRequest = arguments.length > 3 ? arguments[3] : void 0;
           var messageTarget = element.getAttribute(messageTargetAttribute);
           var transformTarget = element.getAttribute(transformTargetAttribute);
           var messageElement = AelluxJs2.elementOrId(messageTarget, {
-            defaultElement: element
+            defaultElement: defaultElement
           });
           var transformElement = AelluxJs2.elementOrId(transformTarget, {
-            defaultElement: element
+            defaultElement: defaultElement
           });
           if (messageElement && typeof message === "string") {
             var textNode = null;
@@ -27342,28 +27374,33 @@
             var typeClass = AelluxJs2.className("feedback-".concat(type));
             for (var _i = 0, _arr = [element, messageElement, transformElement]; _i < _arr.length; _i++) {
               var target = _arr[_i];
-              if (target) target.classList.add(typeClass);
+              if (target) {
+                if (defaultElement !== element) {
+                  var _iterator2 = _createForOfIteratorHelper13(feedbackTypes), _step2;
+                  try {
+                    for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+                      var previous = _step2.value;
+                      target.classList.remove(AelluxJs2.className("feedback-".concat(previous)));
+                    }
+                  } catch (err) {
+                    _iterator2.e(err);
+                  } finally {
+                    _iterator2.f();
+                  }
+                }
+                target.classList.add(typeClass);
+              }
             }
           }
-          var presentTarget = element.getAttribute(presentTargetAttribute);
-          var present2 = AelluxJs2.ext.present;
-          if (presentTarget !== null && present2 !== null && present2 !== void 0 && present2.initialized) {
-            if (presentTarget.trim()) {
-              var presentElement = AelluxJs2.elementOrId(presentTarget);
-              if (presentElement) present2.pop(presentElement);
-            } else {
-              var _target = (messageElement === null || messageElement === void 0 ? void 0 : messageElement.closest(presentSelector)) || (transformElement === null || transformElement === void 0 ? void 0 : transformElement.closest(presentSelector));
-              if (_target) present2.pop(_target);
-            }
-          }
+          if (presentRequest) presentRequest(messageElement, transformElement);
           if (transformElement) {
             var motionPrefix = AelluxJs2.className("feedback-motion-");
             for (var _i2 = 0, _Array$from = Array.from(transformElement.classList); _i2 < _Array$from.length; _i2++) {
               var className = _Array$from[_i2];
               if (className.startsWith(motionPrefix)) transformElement.classList.remove(className);
             }
-            var previous = motionOperations.get(transformElement);
-            if (previous) AelluxJs2.motion.cancel(previous.id);
+            var _previous = motionOperations.get(transformElement);
+            if (_previous) AelluxJs2.motion.cancel(_previous.id);
             motionOperations.delete(transformElement);
             if (typeof motion === "string") {
               var motionClass = AelluxJs2.className("feedback-motion-".concat(motion));
@@ -27452,7 +27489,7 @@
           });
         }
         function send(input, payload) {
-          var _ref = payload || input, type = _ref.type, message = _ref.message, value = _ref.value, target = _ref.target, motion = _ref.motion;
+          var _ref2 = payload || input, type = _ref2.type, message = _ref2.message, value = _ref2.value, target = _ref2.target, motion = _ref2.motion;
           if (input && input.nodeType === 1) target = input;
           if (typeof message !== "string") {
             reportInvalidArgument("message", message);
@@ -34495,7 +34532,8 @@
           toggle: toggle,
           trigger: trigger,
           show: show,
-          selected: selected
+          selected: selected,
+          popNext: popNext
         });
         var POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", DEFAULT_PRESENT = "opacity transform height width", OPACITY_SYNTAX = "<number> | <percentage>", TRANSFORM_SYNTAX = "<transform-list> | none";
         var TRANSITION_PREPARE_TIME = 100;
@@ -34518,6 +34556,7 @@
         var groupObserver = null;
         var groupsQueued = false;
         var interpolatedProgress = false;
+        var autoObserver = null;
         var cssProperties = [["pop-progress", "<number>", "0"], ["unpop-progress", "<number>", "1"], ["present-pop-phase", "<number>", "0"], ["present-unpop-phase", "<number>", "1"], ["from-opacity", OPACITY_SYNTAX, "0"], ["pop-opacity", OPACITY_SYNTAX, "1"], ["unpop-opacity", OPACITY_SYNTAX, "0"], ["from-transform", TRANSFORM_SYNTAX, "scale(0.5)"], ["pop-transform", TRANSFORM_SYNTAX, "scale(1)"], ["unpop-transform", TRANSFORM_SYNTAX, "scale(1.2)"], ["from-height", "*", "0fr"], ["pop-height", "*", "1fr"], ["unpop-height", "*", "0fr"], ["from-width", "*", "0fr"], ["pop-width", "*", "1fr"], ["unpop-width", "*", "0fr"], ["pop-ease", "*", "ease-out"], ["unpop-ease", "*", "ease-in"], ["pop-duration", "<time>", "250ms"], ["unpop-duration", "<time>", "250ms"]];
         function init(options) {
           var descriptors = cssProperties.map(function(_ref) {
@@ -34537,6 +34576,9 @@
             priority: 0,
             mount: mountPresentContainer,
             unmount: unmountPresentContainer,
+            update: function update(element) {
+              return autoUnpopSchedule(element, presentElements.get(element));
+            },
             controllers: ["pop", "unpop", "trigger", "toggle"]
           });
           AelluxJs2.mountManager.add({
@@ -34552,7 +34594,26 @@
             priority: 1,
             mount: mountGroup,
             unmount: unmountGroup,
-            controllers: ["show", "selected"]
+            controllers: ["show", "selected", "popNext"]
+          });
+          autoObserver = new root2.MutationObserver(function(records) {
+            var _iterator = _createForOfIteratorHelper21(records), _step;
+            try {
+              for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+                var record = _step.value;
+                var controller = presentElements.get(record.target);
+                if (controller) autoUnpopSchedule(record.target, controller);
+              }
+            } catch (err) {
+              _iterator.e(err);
+            } finally {
+              _iterator.f();
+            }
+          });
+          autoObserver.observe(document, {
+            subtree: true,
+            attributes: true,
+            attributeFilter: [attr.autoUnpop]
           });
           document.addEventListener("pointerover", onHover);
           document.addEventListener("pointerout", onHover);
@@ -34561,69 +34622,72 @@
           AelluxJs2.onEvent(root2, "$resize", refreshExpandedStates);
         }
         function destroy() {
+          var _autoObserver;
+          (_autoObserver = autoObserver) === null || _autoObserver === void 0 || _autoObserver.disconnect();
+          autoObserver = null;
           AelluxJs2.mountManager.remove({
             extensionName: extensionName
           });
           AelluxJs2.off("$click", OnClick);
           AelluxJs2.off("tap", onTap);
-          var _iterator = _createForOfIteratorHelper21(pendingTaps), _step;
-          try {
-            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var pending = _step.value;
-              cancelPendingTap(pending);
-            }
-          } catch (err) {
-            _iterator.e(err);
-          } finally {
-            _iterator.f();
-          }
-          AelluxJs2.offEvent(root2, "$resize", refreshExpandedStates);
-          document.removeEventListener("pointerover", onHover);
-          document.removeEventListener("pointerout", onHover);
-          var _iterator2 = _createForOfIteratorHelper21(groups.keys()), _step2;
+          var _iterator2 = _createForOfIteratorHelper21(pendingTaps), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-              var group = _step2.value;
-              unmountGroup(group);
+              var pending = _step2.value;
+              cancelPendingTap(pending);
             }
           } catch (err) {
             _iterator2.e(err);
           } finally {
             _iterator2.f();
           }
-          var _iterator3 = _createForOfIteratorHelper21(hoverTimers.keys()), _step3;
+          AelluxJs2.offEvent(root2, "$resize", refreshExpandedStates);
+          document.removeEventListener("pointerover", onHover);
+          document.removeEventListener("pointerout", onHover);
+          var _iterator3 = _createForOfIteratorHelper21(groups.keys()), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-              var target = _step3.value;
-              cancelHoverClose(target);
+              var group = _step3.value;
+              unmountGroup(group);
             }
           } catch (err) {
             _iterator3.e(err);
           } finally {
             _iterator3.f();
           }
-          hoveredTriggers.clear();
-          var _iterator4 = _createForOfIteratorHelper21(triggerElementsSet), _step4;
+          var _iterator4 = _createForOfIteratorHelper21(hoverTimers.keys()), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-              var triggerElement = _step4.value;
-              unmountTriggerElement(triggerElement);
+              var target = _step4.value;
+              cancelHoverClose(target);
             }
           } catch (err) {
             _iterator4.e(err);
           } finally {
             _iterator4.f();
           }
-          var _iterator5 = _createForOfIteratorHelper21(presentElements.keys()), _step5;
+          hoveredTriggers.clear();
+          var _iterator5 = _createForOfIteratorHelper21(triggerElementsSet), _step5;
           try {
             for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-              var element = _step5.value;
-              unmountPresentContainer(element);
+              var triggerElement = _step5.value;
+              unmountTriggerElement(triggerElement);
             }
           } catch (err) {
             _iterator5.e(err);
           } finally {
             _iterator5.f();
+          }
+          var _iterator6 = _createForOfIteratorHelper21(presentElements.keys()), _step6;
+          try {
+            for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+              var element = _step6.value;
+              unmountPresentContainer(element);
+            }
+          } catch (err) {
+            _iterator6.e(err);
+          } finally {
+            _iterator6.f();
           }
           openPresentElements.clear();
         }
@@ -34655,7 +34719,9 @@
             motionEnabled: (element.getAttribute(attr.present) || "").trim() !== "",
             motionId: AelluxJs2.motion ? AelluxJs2.motion.id() : fallbackMotionId++,
             transition: null,
+            operationRevision: 0,
             autoUnpopTimeout: null,
+            autoCountdown: null,
             direction: null,
             classList: element.classList,
             triggers: /* @__PURE__ */ new Set(),
@@ -34692,10 +34758,7 @@
                   replacement: replacement
                 }));
               }
-              if (this.autoUnpopTimeout !== null) {
-                clearTimeout(this.autoUnpopTimeout);
-                this.autoUnpopTimeout = null;
-              }
+              cancelAutoUnpop(this);
               if (transitionStart) {
                 this.classList.remove(className.unpopping);
               } else {
@@ -34709,32 +34772,32 @@
             openPresentElements.add(element);
           }
           presentElements.set(element, presentController);
-          var _iterator6 = _createForOfIteratorHelper21(element.querySelectorAll("[".concat(attr.trigger, "],[").concat(attr.dismiss, "],[").concat(attr.target, "]"))), _step6;
+          var _iterator7 = _createForOfIteratorHelper21(element.querySelectorAll("[".concat(attr.trigger, "],[").concat(attr.dismiss, "],[").concat(attr.target, "]"))), _step7;
           try {
-            for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-              var _triggerElement = _step6.value;
+            for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+              var _triggerElement = _step7.value;
               if (triggerTargets.get(_triggerElement) === element) {
                 presentController.triggers.add(_triggerElement);
                 updateTriggerAriaExpanded(_triggerElement);
               }
             }
           } catch (err) {
-            _iterator6.e(err);
+            _iterator7.e(err);
           } finally {
-            _iterator6.f();
+            _iterator7.f();
           }
           var idTriggers = triggersByTargetId.get(element.id);
           if (idTriggers) {
-            var _iterator7 = _createForOfIteratorHelper21(idTriggers), _step7;
+            var _iterator8 = _createForOfIteratorHelper21(idTriggers), _step8;
             try {
-              for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-                var triggerElement = _step7.value;
+              for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+                var triggerElement = _step8.value;
                 refreshTriggerTargets(triggerElement);
               }
             } catch (err) {
-              _iterator7.e(err);
+              _iterator8.e(err);
             } finally {
-              _iterator7.f();
+              _iterator8.f();
             }
           }
           setProgress(element, !element.hidden);
@@ -34748,16 +34811,16 @@
           cancelElementTaps(element);
           var controller = presentElements.get(element);
           cancelHoverClose(element);
-          var _iterator8 = _createForOfIteratorHelper21(controller.triggers), _step8;
+          var _iterator9 = _createForOfIteratorHelper21(controller.triggers), _step9;
           try {
-            for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
-              var button = _step8.value;
+            for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+              var button = _step9.value;
               hoveredTriggers.delete(button);
             }
           } catch (err) {
-            _iterator8.e(err);
+            _iterator9.e(err);
           } finally {
-            _iterator8.f();
+            _iterator9.f();
           }
           controller.stop();
           (_AelluxJs$waitLayout = AelluxJs2.waitLayout) === null || _AelluxJs$waitLayout === void 0 || _AelluxJs$waitLayout.cancel(controller.motionId);
@@ -34988,7 +35051,7 @@
                   if (controller.direction === null) controller.direction = element.hidden ? UNPOP : POP;
                   if (typeof gotoVisible === "undefined" || gotoVisible === null) gotoVisible = controller.direction === POP ? false : true;
                   group = element.closest(groupSelector);
-                  if (!(!groupOperation && groups.has(group) && element !== group)) {
+                  if (!(!groupOperation && groups.has(group) && !groups.get(group).accumulating && element !== group)) {
                     _context2.n = 4;
                     break;
                   }
@@ -35031,6 +35094,7 @@
                   }
                   return _context2.a(2);
                 case 7:
+                  controller.operationRevision++;
                   if (forceRepop && (!element.hidden || controller.transition)) {
                     controller.stop();
                     element.hidden = true;
@@ -35261,21 +35325,80 @@
           transition.timeout = null;
         }
         function autoUnpopSchedule(element, controller) {
+          if (!controller) return;
+          cancelAutoUnpop(controller);
           var autoUnpopValue = element.getAttribute(attr.autoUnpop);
-          if (!element.hidden && autoUnpopValue) {
-            var autoTime = getString2Time(autoUnpopValue);
-            controller.autoUnpopTimeout = setTimeout(autoUnpop, autoTime, element, controller);
-          }
+          if (element.hidden || controller.transition && !controller.classList.contains(className.pop) || !element.isConnected || !autoUnpopValue) return;
+          var duration = getString2Time(autoUnpopValue);
+          if (!Number.isFinite(duration) || duration < 0) return;
+          var countdown = {
+            start: root2.performance.now(),
+            duration: duration,
+            frame: null,
+            last: 0
+          };
+          controller.autoCountdown = countdown;
+          var valid = function valid2() {
+            return controller.autoCountdown === countdown && presentElements.get(element) === controller && element.isConnected;
+          };
+          var emit = function emit2(completed) {
+            var initial = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
+            var elapsedMs = initial ? 0 : Math.min(duration, Math.max(0, root2.performance.now() - countdown.start));
+            AelluxJs2.dispatchFrom(element, "Progress", {
+              bubbles: false,
+              cancelable: false,
+              detail: {
+                value: completed ? 1 : duration ? elapsedMs / duration : 0,
+                max: 1,
+                status: completed ? "completed" : "running",
+                elapsedMs: elapsedMs,
+                durationMs: duration,
+                remainingMs: Math.max(0, duration - elapsedMs)
+              }
+            });
+          };
+          var _tick = function tick() {
+            var _AelluxJs$layoutMaxFP;
+            if (!valid()) {
+              if (controller.autoCountdown === countdown) cancelAutoUnpop(controller);
+              return;
+            }
+            var now = root2.performance.now();
+            var fps = ((_AelluxJs$layoutMaxFP = AelluxJs2.layoutMaxFPS) === null || _AelluxJs$layoutMaxFP === void 0 ? void 0 : _AelluxJs$layoutMaxFP.call(AelluxJs2, element)) || AelluxJs2.options.cssMotionPropertyMaxFPS || 55;
+            if (now - countdown.last >= 1e3 / fps) {
+              countdown.last = now;
+              emit(false);
+            }
+            if (valid()) countdown.frame = root2.requestAnimationFrame(_tick);
+          };
+          controller.autoUnpopTimeout = setTimeout(function() {
+            if (!valid()) {
+              if (controller.autoCountdown === countdown) cancelAutoUnpop(controller);
+              return;
+            }
+            if (countdown.frame !== null) root2.cancelAnimationFrame(countdown.frame);
+            countdown.frame = null;
+            controller.autoUnpopTimeout = null;
+            emit(true);
+            if (!valid()) return;
+            controller.autoCountdown = null;
+            unpop(element);
+          }, duration);
+          emit(false, true);
+          if (valid()) countdown.frame = root2.requestAnimationFrame(_tick);
         }
-        function autoUnpop(element, controller) {
+        function cancelAutoUnpop(controller) {
+          if (controller.autoUnpopTimeout !== null) clearTimeout(controller.autoUnpopTimeout);
+          var countdown = controller.autoCountdown;
+          if (countdown && countdown.frame !== null) root2.cancelAnimationFrame(countdown.frame);
           controller.autoUnpopTimeout = null;
-          unpop(element);
+          controller.autoCountdown = null;
         }
         function outsideClickAutoUnpop(currentExceptions) {
-          var _iterator9 = _createForOfIteratorHelper21(openPresentElements), _step9;
+          var _iterator0 = _createForOfIteratorHelper21(openPresentElements), _step0;
           try {
             var _loop = function _loop2() {
-              var pContainer = _step9.value;
+              var pContainer = _step0.value;
               if (pContainer.hidden === true || pContainer.getAttribute(attr.unpopOnOutside) === "false" || currentExceptions.some(function(e) {
                 return pContainer.contains(e);
               })) {
@@ -35283,13 +35406,13 @@
               }
               unpop(pContainer);
             };
-            for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+            for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
               if (_loop()) continue;
             }
           } catch (err) {
-            _iterator9.e(err);
+            _iterator0.e(err);
           } finally {
-            _iterator9.f();
+            _iterator0.f();
           }
         }
         function refreshChangedTrigger(button) {
@@ -35301,20 +35424,20 @@
           var target = activationTarget(event);
           if (!target) return;
           var matched;
-          var _iterator0 = _createForOfIteratorHelper21(pendingTaps), _step0;
+          var _iterator1 = _createForOfIteratorHelper21(pendingTaps), _step1;
           try {
-            for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+            for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
               var _pending$event$detail, _pending$event$detail2;
-              var pending = _step0.value;
+              var pending = _step1.value;
               var pointerId = event.pointerId;
               var compatibilityClick = event.pointerType === "mouse" && ["touch", "pen"].includes((_pending$event$detail = pending.event.detail) === null || _pending$event$detail === void 0 ? void 0 : _pending$event$detail.pointerType);
               if (!compatibilityClick && typeof pointerId === "number" && typeof ((_pending$event$detail2 = pending.event.detail) === null || _pending$event$detail2 === void 0 ? void 0 : _pending$event$detail2.pointerId) === "number" && pointerId !== pending.event.detail.pointerId) continue;
               if (pending.target === target || pending.target.contains(target) || target.contains(pending.target)) matched = pending;
             }
           } catch (err) {
-            _iterator0.e(err);
+            _iterator1.e(err);
           } finally {
-            _iterator0.f();
+            _iterator1.f();
           }
           if (matched) cancelPendingTap(matched);
           activate(event, target);
@@ -35351,16 +35474,16 @@
           pendingTaps.delete(pending);
         }
         function cancelElementTaps(element) {
-          var _iterator1 = _createForOfIteratorHelper21(pendingTaps), _step1;
+          var _iterator10 = _createForOfIteratorHelper21(pendingTaps), _step10;
           try {
-            for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
-              var pending = _step1.value;
+            for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
+              var pending = _step10.value;
               if (element.contains(pending.target) || pending.present === element) cancelPendingTap(pending);
             }
           } catch (err) {
-            _iterator1.e(err);
+            _iterator10.e(err);
           } finally {
-            _iterator1.f();
+            _iterator10.f();
           }
         }
         function activate(event, eventTarget, hoverSuppressed) {
@@ -35438,16 +35561,16 @@
           if (controller.expanded !== visible) controller.setAriaExpanded(String(visible));
         }
         function refreshExpandedStates() {
-          var _iterator10 = _createForOfIteratorHelper21(presentElements), _step10;
+          var _iterator11 = _createForOfIteratorHelper21(presentElements), _step11;
           try {
-            for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
-              var _step10$value = _slicedToArray11(_step10.value, 2), element = _step10$value[0], controller = _step10$value[1];
+            for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
+              var _step11$value = _slicedToArray11(_step11.value, 2), element = _step11$value[0], controller = _step11$value[1];
               if (!controller.transition) syncAriaExpanded(element, controller);
             }
           } catch (err) {
-            _iterator10.e(err);
+            _iterator11.e(err);
           } finally {
-            _iterator10.f();
+            _iterator11.f();
           }
         }
         function setProgress(element, visible) {
@@ -35472,6 +35595,8 @@
           });
           groups.set(group, {
             selected: visible.length === 1 ? visible[0] : null,
+            accumulating: false,
+            reservations: /* @__PURE__ */ new Map(),
             revision: 0,
             pending: Promise.resolve(true),
             jobs: /* @__PURE__ */ new Map(),
@@ -35499,10 +35624,10 @@
           groups.delete(group);
           state.jobs.clear();
           publishGroup(group, state, null);
-          var _iterator11 = _createForOfIteratorHelper21(groupMembers(group)), _step11;
+          var _iterator12 = _createForOfIteratorHelper21(groupMembers(group)), _step12;
           try {
-            for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
-              var member = _step11.value;
+            for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
+              var member = _step12.value;
               var controller = presentElements.get(member);
               if (controller.transition) {
                 var visible = controller.direction === POP;
@@ -35516,9 +35641,9 @@
               }
             }
           } catch (err) {
-            _iterator11.e(err);
+            _iterator12.e(err);
           } finally {
-            _iterator11.f();
+            _iterator12.f();
           }
           state.memory.restore();
           if (!groups.size && groupObserver) {
@@ -35548,9 +35673,13 @@
           });
         }
         function reconcileGroup(group) {
+          var exclusive = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
           if (!group.isConnected || !group.hasAttribute(attr.group)) return;
           var members = groupMembers(group);
           var state = groups.get(group);
+          if (state.accumulating) {
+            if (!exclusive && state.accumulationInputs === selectionInputs(group)) return;
+          }
           if (!members.includes(state.selected)) state.selected = null;
           var matches;
           if (group.hasAttribute(attr.active)) {
@@ -35593,8 +35722,68 @@
             return Promise.resolve(false);
           }
           if (group.getAttribute(attr.active) !== id) group.setAttribute(attr.active, id);
-          var result = reconcileGroup(group);
+          var result = reconcileGroup(group, true);
           return Promise.resolve(result === void 0 ? state.pending : result);
+        }
+        function selectionInputs(group) {
+          return JSON.stringify([group.getAttribute(attr.active), groupMembers(group).filter(function(member) {
+            var token = member.getAttribute(attr.when);
+            return token && !/\s/.test(token) && group.classList.contains(token);
+          }).map(function(member) {
+            return member.id;
+          }).sort()]);
+        }
+        function popNext(group, prepare) {
+          var state = groups.get(group);
+          if (!state || !group.isConnected || !group.hasAttribute(attr.group)) return Promise.resolve(null);
+          var members = Array.from(group.children).filter(function(member2) {
+            return member2 !== group && member2.hasAttribute(attr.present) && presentElements.has(member2) && member2.closest(groupSelector) === group;
+          });
+          var member = members[members.length - 1];
+          if (!member) return Promise.resolve(null);
+          var entering = !state.accumulating;
+          if (entering) {
+            state.revision++;
+            state.jobs.clear();
+            state.accumulating = true;
+            state.accumulationInputs = selectionInputs(group);
+            state.selected = null;
+          }
+          var controller = presentElements.get(member);
+          var reservation = {
+            revision: controller.operationRevision
+          };
+          state.reservations.set(member, reservation);
+          group.insertBefore(member, members[0]);
+          var valid = function valid2() {
+            return groups.get(group) === state && state.accumulating && state.reservations.get(member) === reservation && presentElements.get(member) === controller && controller.operationRevision === reservation.revision && member.isConnected && member.parentElement === group;
+          };
+          var job;
+          try {
+            if (entering) publishGroup(group, state, null);
+            if (!valid()) {
+              if (state.reservations.get(member) === reservation) state.reservations.delete(member);
+              return Promise.resolve(null);
+            }
+            if (typeof prepare === "function") prepare(member);
+            if (!valid() || !AelluxJs2.dispatchFrom(member, "BeforePop", {
+              bubbles: true,
+              cancelable: true
+            }) || !valid()) {
+              if (state.reservations.get(member) === reservation) state.reservations.delete(member);
+              return Promise.resolve(null);
+            }
+            job = presentTransition(member, true, true, true);
+            reservation.revision++;
+          } catch (error) {
+            if (state.reservations.get(member) === reservation) state.reservations.delete(member);
+            return Promise.reject(error);
+          }
+          return job.then(function() {
+            return valid() && !member.hidden && presentElements.get(member).direction === POP ? member : null;
+          }).finally(function() {
+            if (state.reservations.get(member) === reservation) state.reservations.delete(member);
+          });
         }
         function selected(group) {
           var state = groups.get(group);
@@ -35621,7 +35810,10 @@
             var controller = presentElements.get(member2);
             return member2 === selected2 ? member2.hidden || controller.direction === UNPOP : !member2.hidden && controller.direction !== UNPOP;
           });
-          if (state.selected === selected2 && !changes.length) return state.pending;
+          if (state.selected === selected2 && !changes.length) {
+            state.accumulating = false;
+            return state.pending;
+          }
           var revision = ++state.revision;
           var active = group.getAttribute(attr.active);
           var classes = group.getAttribute("class");
@@ -35636,10 +35828,10 @@
               return presentElements.has(member2) && member2.isConnected && member2.closest(groupSelector) === group && member2.id === ids[index] && member2.getAttribute(attr.when) === conditions[index];
             });
           };
-          var _iterator12 = _createForOfIteratorHelper21(changes), _step12;
+          var _iterator13 = _createForOfIteratorHelper21(changes), _step13;
           try {
-            for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
-              var member = _step12.value;
+            for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
+              var member = _step13.value;
               var allowed = AelluxJs2.dispatchFrom(member, member === selected2 ? "BeforePop" : "BeforeUnpop", {
                 bubbles: true,
                 cancelable: true
@@ -35649,6 +35841,10 @@
                 return false;
               }
               if (!allowed) {
+                if (state.accumulating) {
+                  state.accumulationInputs = selectionInputs(group);
+                  return false;
+                }
                 if (state.revision === revision) {
                   var _state$selected;
                   var id = ((_state$selected = state.selected) === null || _state$selected === void 0 ? void 0 : _state$selected.id) || "";
@@ -35658,20 +35854,21 @@
               }
             }
           } catch (err) {
-            _iterator12.e(err);
+            _iterator13.e(err);
           } finally {
-            _iterator12.f();
+            _iterator13.f();
           }
+          state.accumulating = false;
           state.selected = selected2;
           var complete;
           var pending = new Promise(function(resolve) {
             complete = resolve;
           });
           state.pending = pending;
-          var _iterator13 = _createForOfIteratorHelper21(changes), _step13;
+          var _iterator14 = _createForOfIteratorHelper21(changes), _step14;
           try {
             var _loop2 = function _loop22() {
-              var member2 = _step13.value;
+              var member2 = _step14.value;
               var job = presentTransition(member2, member2 === selected2, false, true);
               if (groups.get(group) !== state || state.revision !== revision) {
                 complete(false);
@@ -35684,14 +35881,14 @@
                 if (state.jobs.get(member2) === job) state.jobs.delete(member2);
               });
             }, _ret;
-            for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
+            for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
               _ret = _loop2();
               if (_ret) return _ret.v;
             }
           } catch (err) {
-            _iterator13.e(err);
+            _iterator14.e(err);
           } finally {
-            _iterator13.f();
+            _iterator14.f();
           }
           publishGroup(group, state, selected2);
           Promise.all(members.map(function(member2) {
@@ -35711,16 +35908,16 @@
         function inHoverRegion(target, node) {
           if (!node || !node.nodeType) return false;
           if (target.contains(node)) return true;
-          var _iterator14 = _createForOfIteratorHelper21(triggerElementsSet), _step14;
+          var _iterator15 = _createForOfIteratorHelper21(triggerElementsSet), _step15;
           try {
-            for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
-              var button = _step14.value;
+            for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
+              var button = _step15.value;
               if (button.getAttribute(attr.triggerOn) === "hover" && triggerTargets.get(button) === target && button.contains(node)) return true;
             }
           } catch (err) {
-            _iterator14.e(err);
+            _iterator15.e(err);
           } finally {
-            _iterator14.f();
+            _iterator15.f();
           }
           return false;
         }
@@ -35748,10 +35945,10 @@
               } else hoveredTriggers.delete(button);
             }
           }
-          var _iterator15 = _createForOfIteratorHelper21(openPresentElements), _step15;
+          var _iterator16 = _createForOfIteratorHelper21(openPresentElements), _step16;
           try {
             var _loop3 = function _loop32() {
-              var target2 = _step15.value;
+              var target2 = _step16.value;
               if (!inHoverRegion(target2, event.target)) return 1;
               if (entering || inHoverRegion(target2, event.relatedTarget)) cancelHoverClose(target2);
               else if (_toConsumableArray10(triggerElementsSet).some(function(control) {
@@ -35764,13 +35961,13 @@
                 }, 120));
               }
             };
-            for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
+            for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
               if (_loop3()) continue;
             }
           } catch (err) {
-            _iterator15.e(err);
+            _iterator16.e(err);
           } finally {
-            _iterator15.f();
+            _iterator16.f();
           }
         }
         function getString2Time(string) {

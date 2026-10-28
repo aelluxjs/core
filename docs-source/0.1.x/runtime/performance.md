@@ -1,5 +1,7 @@
 # Performance and Bundle Budget
 
+The [Progress implementation report](../progress-implementation-report.md#distribution-costs) records current Progress variant sizes and the measured Present, Feedback, Full and boot deltas for accumulated notifications. Progress and its Legacy fallback remain external Optional artifacts.
+
 The release build checks the byte size of each shipped minified runtime, Core Extension, and generated Extension stylesheet. The check measures raw bytes and gzip bytes at compression level 9. It excludes source maps because browsers do not request them as part of a normal production load.
 
 Run the check after a build:
@@ -13,7 +15,7 @@ The CI workflow runs the same command after `npm run build`. A pull request fail
 
 ## Limits
 
-[`scripts/bundle-budget.config.mjs`](https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs) is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The `test:budget` command prints each artifact's measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates eleven Bundled Extensions. Only the Optional Extensions (Ajax Href, Dialog, PWA and Viewport) use separate on-demand scripts in Full. Basic loads separately the Extensions explicitly registered by the developer and their declared dependencies.
+[`scripts/bundle-budget.config.mjs`](https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs) is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The `test:budget` command prints each artifact's measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates eleven Bundled Extensions. Only the Optional Extensions (Ajax Href, Dialog, Progress, PWA and Viewport) use separate on-demand scripts in Full. Basic loads separately the Extensions explicitly registered by the developer and their declared dependencies.
 
 ## Shared selector helpers
 
@@ -30,7 +32,7 @@ The boot measurements include the current signed Viewport registry entries. The 
 
 ## Core delivery split
 
-Bundled Extensions ship inside Full, while Optional Extensions (Ajax Href, Dialog, PWA and Viewport) remain external. Basic embeds no Extension implementations and starts with no registrations. The following measurements record the earlier Full delivery split; they are not updated measurements for later registration changes. Measured minified raw/gzip level 9 bytes and revised limits:
+Bundled Extensions ship inside Full, while Optional Extensions (Ajax Href, Dialog, Progress, PWA and Viewport) remain external. Basic embeds no Extension implementations and starts with no registrations. The following measurements record the earlier Full delivery split; they are not updated measurements for later registration changes. Measured minified raw/gzip level 9 bytes and revised limits:
 
 | Artifact | Before raw / gzip bytes | After raw / gzip bytes | Limits raw / gzip KiB |
 | --- | --- | --- | --- |

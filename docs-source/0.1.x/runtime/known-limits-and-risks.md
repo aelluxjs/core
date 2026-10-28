@@ -19,7 +19,7 @@ Feature detection establishes that a checked surface exists, not that every impl
 
 ### Modular loading
 
-**Known Limit.** Full incorporates the eleven Bundled Extensions and registers all official Extensions. Optional Extensions (Ajax Href, Dialog, PWA and Viewport) remain separate lazy scripts. Basic starts with no Extension registrations; the host must declare each desired Extension and its loading policy. `$ae.wait(name)` requires an existing registration. Selected Extensions may declare required Extension dependencies during initialization. Bundled availability and initialization are separate: matching markup or an explicit request still determines when lazy behavior initializes.
+**Known Limit.** Full incorporates the eleven Bundled Extensions and registers all official Extensions. Optional Extensions (Ajax Href, Dialog, Progress, PWA and Viewport) remain separate lazy scripts. Basic starts with no Extension registrations; the host must declare each desired Extension and its loading policy. `$ae.wait(name)` requires an existing registration. Selected Extensions may declare required Extension dependencies during initialization. Bundled availability and initialization are separate: matching markup or an explicit request still determines when lazy behavior initializes.
 
 **Potential Risk.** On-demand loading adds first-use network and initialization latency. Missing files, incorrect base URLs, unavailable registry metadata for a requested version, incompatible build declarations, unavailable third-party dependencies, CSP blocks or an SRI mismatch can prevent loading. The current version can reuse the boot's signed registry without fetching a manifest; custom/version-specific delivery must provide the resources its registration requires. Concurrent loads and supported retries do not guarantee eventual success while the delivery problem remains.
 
@@ -99,7 +99,7 @@ The unestablished scenarios above are **Validation Gaps**, not browser-specific 
 
 ## Official Extension Reference
 
-The [official catalog](https://github.com/aelluxjs/core/blob/update/beta.10/src/official-extension-definitions.js) defines these fifteen Extensions. Optional distribution status does not remove an Extension from this documentation contract.
+The [official catalog](https://github.com/aelluxjs/core/blob/update/beta.10/src/official-extension-definitions.js) defines these sixteen Extensions. Optional distribution status does not remove an Extension from this documentation contract.
 
 | Bundled Extensions | Optional Extensions |
 | --- | --- |
@@ -107,7 +107,7 @@ The [official catalog](https://github.com/aelluxjs/core/blob/update/beta.10/src/
 | [Anchor](../core-extensions/anchor.md#known-limits-risks) | [Dialog](../core-extensions/optional/dialog.md#known-limits-risks) |
 | [Feedback](../core-extensions/feedback.md#known-limits-risks) | [PWA](../core-extensions/optional/pwa.md#known-limits-risks) |
 | [Focus](../core-extensions/focus.md#known-limits-risks) | [Viewport](../core-extensions/optional/viewport.md#known-limits-risks) |
-| [Overflow Marquee](../core-extensions/overflow-marquee.md#known-limits-risks) | |
+| [Overflow Marquee](../core-extensions/overflow-marquee.md#known-limits-risks) | [Progress](../core-extensions/optional/progress.md#known-limits-risks) |
 | [Point](../core-extensions/point.md#known-limits-risks) | |
 | [Preference](../core-extensions/preference.md#known-limits-risks) | |
 | [Present](../core-extensions/present.md#known-limits-risks) | |

@@ -251,7 +251,7 @@ test("mounted present controller binds public methods to its element", async ({ 
       methods: Object.keys(byElement.present).sort(),
       update: typeof byElement.update,
       returnsPromise,
-      presentUpdate: byElement.present.update,
+      presentUpdate: typeof byElement.present.update,
       missing: AelluxJs("#missing")
     };
   });
@@ -260,7 +260,7 @@ test("mounted present controller binds public methods to its element", async ({ 
     methods: ["pop", "toggle", "trigger", "unpop", "update"],
     update: "function",
     returnsPromise: true,
-    presentUpdate: null,
+    presentUpdate: "function",
     missing: null
   });
   await expect(page.locator("#panel")).toHaveJSProperty("hidden", false);

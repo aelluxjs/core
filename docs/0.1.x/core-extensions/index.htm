@@ -42,7 +42,7 @@
 </head>
 
 <body data-ae-feedback="error" data-ae-transform-target="#toast-message" data-ae-message-target="#toast-message"
-  data-ae-present-target>
+  data-ae-present-target="#toast-present-group">
 
   <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
   <symbol id="bi-circle-half" fill="currentColor"
@@ -81,11 +81,18 @@
         style=" --bar-color:#55606F; --bar-color2:var(--bs-link-color); --bar-bg:#F0F5F5;">
         <div class="container-fluid gap-2" style='z-index: 1;'>
 
-          <div id="toast-present" class="position-fixed w-100 z-1 pe-none p-4 justify-content-center align-items-center"
-            data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true" style="display: flex;">
-            <div id="toast-message" class="text-bg-danger small rounded-1 p-2 w-100 text-center"
-              style="max-width: 300px;">
-              -
+          <div id="toast-present-group"
+            class="position-fixed w-100 z-1 pe-none p-4 flex-column d-flex justify-content-center align-items-center"
+            data-ae-present-group>
+            <div id="toast-1" data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true"
+              class="text-bg-danger small rounded-1 p-2 w-100 text-center" style="max-width: 300px;">
+              <span id="toast-message">-</span>
+              <progress data-ae-progress-target="toast-1"></progress>
+            </div>
+            <div id="toast-2" data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true"
+              class="text-bg-danger small rounded-1 p-2 w-100 text-center" style="max-width: 300px;">
+              <span id="toast-message">-</span>
+              <progress data-ae-progress-target="toast-2"></progress>
             </div>
           </div>
 
@@ -524,6 +531,13 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/progress.htm" data-ae-overflow-marquee="190px">
+                                              Progress                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/optional/pwa.htm" data-ae-overflow-marquee="190px">
                                               PWA                                            </a>
                                           </div>
@@ -649,7 +663,7 @@
           <main id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content"
             ajax-load="doc-content">
             <h1>Core Extensions</h1>
-<p>Core Extensions are the fifteen official Extensions distributed with aellux.js. Each owns a focused behavior and follows the shared registration, mounting and lifecycle contract.</p>
+<p>Core Extensions are the sixteen official Extensions distributed with aellux.js. Each owns a focused behavior and follows the shared registration, mounting and lifecycle contract.</p>
 <p>This index groups Extensions by how their implementation is delivered in Full. Each page also declares its stability.</p>
 <h2>Extension index</h2>
 <ul>
@@ -676,7 +690,7 @@
 <td>Explicit registration; separate script.</td>
 </tr>
 </tbody></table>
-<p>Full automatically registers all fifteen official Extensions. Preference and State Navigation initialize at startup; the other Bundled Extensions initialize when matching markup is mounted or the Extension is explicitly requested. Optional Extensions load their own compatible scripts when needed.</p>
+<p>Full automatically registers all sixteen official Extensions. Preference and State Navigation initialize at startup; the other Bundled Extensions initialize when matching markup is mounted or the Extension is explicitly requested. Optional Extensions load their own compatible scripts when needed.</p>
 <p>Basic starts with no Extension registrations. The developer declares each desired Extension through <code>$ae.ext(...)</code> or <code>&lt;link rel=&quot;aelluxjs-ext&quot;&gt;</code> and chooses eager loading, a <code>loadWhen</code> selector, or <code>load: false</code> followed by <code>$ae.wait(name)</code>. Markup attributes alone do not register Extensions. Selected Extensions may declare their own required dependencies.</p>
 <pre><code class="language-js">$ae.ext(&quot;scrollbox&quot;, { loadWhen: &quot;[data-ae-scrollbox]&quot;, loadStyle: true });
 $ae.init({ mode: &quot;basic&quot; });
@@ -699,7 +713,7 @@ $ae.init({ mode: &quot;basic&quot; });
 <td>Public API and behavior may change during stabilization.</td>
 </tr>
 </tbody></table>
-<p>Distribution and stability are independent. Focus and Point are included in Full and remain <strong>Not stable</strong>. Ajax Href, Dialog, PWA and Viewport are also <strong>Not stable</strong> and load separately. The other nine official Extensions are <strong>Stable</strong>.</p>
+<p>Distribution and stability are independent. Focus and Point are included in Full and remain <strong>Not stable</strong>. Ajax Href, Dialog, Progress, PWA and Viewport are also <strong>Not stable</strong> and load separately. The other nine official Extensions are <strong>Stable</strong>.</p>
 <p>Stability appears on each Extension page and in the index below. Navigation groups follow distribution. Documented limits and compatibility requirements apply to both statuses. Each Extension&#39;s Known Limits &amp; Risks section describes its boundaries; see also the <a href="../runtime/known-limits-and-risks.htm">shared Core limits</a>.</p>
 <h2 id="bundled-extensions">Bundled Extensions</h2><p>These eleven Extensions are included in the Full JavaScript bundle.</p>
 <table>
@@ -754,7 +768,7 @@ $ae.init({ mode: &quot;basic&quot; });
 <td>Stable</td>
 </tr>
 </tbody></table>
-<h2 id="optional-extensions">Optional Extensions</h2><p>These four Extensions load separate signed scripts. Full registers them automatically; Basic requires an explicit declaration.</p>
+<h2 id="optional-extensions">Optional Extensions</h2><p>These five Extensions load separate signed scripts. Full registers them automatically; Basic requires an explicit declaration.</p>
 <table>
 <thead>
 <tr>
@@ -768,6 +782,10 @@ $ae.init({ mode: &quot;basic&quot; });
 </tr>
 <tr>
 <td><a href="optional/dialog.htm">Dialog</a></td>
+<td>Not stable</td>
+</tr>
+<tr>
+<td><a href="optional/progress.htm">Progress</a></td>
 <td>Not stable</td>
 </tr>
 <tr>

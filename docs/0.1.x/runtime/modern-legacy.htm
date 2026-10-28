@@ -42,7 +42,7 @@
 </head>
 
 <body data-ae-feedback="error" data-ae-transform-target="#toast-message" data-ae-message-target="#toast-message"
-  data-ae-present-target>
+  data-ae-present-target="#toast-present-group">
 
   <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
   <symbol id="bi-circle-half" fill="currentColor"
@@ -81,11 +81,18 @@
         style=" --bar-color:#55606F; --bar-color2:var(--bs-link-color); --bar-bg:#F0F5F5;">
         <div class="container-fluid gap-2" style='z-index: 1;'>
 
-          <div id="toast-present" class="position-fixed w-100 z-1 pe-none p-4 justify-content-center align-items-center"
-            data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true" style="display: flex;">
-            <div id="toast-message" class="text-bg-danger small rounded-1 p-2 w-100 text-center"
-              style="max-width: 300px;">
-              -
+          <div id="toast-present-group"
+            class="position-fixed w-100 z-1 pe-none p-4 flex-column d-flex justify-content-center align-items-center"
+            data-ae-present-group>
+            <div id="toast-1" data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true"
+              class="text-bg-danger small rounded-1 p-2 w-100 text-center" style="max-width: 300px;">
+              <span id="toast-message">-</span>
+              <progress data-ae-progress-target="toast-1"></progress>
+            </div>
+            <div id="toast-2" data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true"
+              class="text-bg-danger small rounded-1 p-2 w-100 text-center" style="max-width: 300px;">
+              <span id="toast-message">-</span>
+              <progress data-ae-progress-target="toast-2"></progress>
             </div>
           </div>
 
@@ -524,6 +531,13 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/progress.htm" data-ae-overflow-marquee="190px">
+                                              Progress                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/optional/pwa.htm" data-ae-overflow-marquee="190px">
                                               PWA                                            </a>
                                           </div>
@@ -653,6 +667,7 @@
           <main id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content"
             ajax-load="doc-content">
             <h1>Modern and Legacy Runtimes</h1>
+<p>Bootstrap also probes the numeric/reflection APIs of <code>HTMLProgressElement</code> and <code>HTMLMeterElement</code> independently. Missing or partial support selects Legacy. Only the Optional <a href="../core-extensions/optional/progress.htm">Progress Extension</a> Legacy files contain the element-local fallbacks and visual styles; complete native controls are preserved even with forced Legacy. The bootstrap probe contains no fallback implementation.</p>
 <p>The aellux.js boot script is responsible for capability detection and runtime selection.</p>
 <h2>Modern Runtime</h2>
 <p>When the required syntax and browser APIs are available, the boot script loads either:</p>

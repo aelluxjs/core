@@ -4,6 +4,8 @@
 // Values on open grammars are suggestions, not a closed enum.
 const attribute = (name, extension, description, options = {}) => ({ name, extension, description, ...options });
 export const semanticAttributes = [
+  attribute("progress-target", "progress", "Existing progress producer ID, optionally prefixed with #. Consumes nonbubbling AelluxJsProgress { value, max } and scales value to the control's own max. Meter is not a temporal consumer.", { syntax: "id", tags: ["progress"] }),
+  attribute("progress-fallback", "progress", "Internal Legacy fallback marker.", { role: "internal", syntax: "enum", values: ["progress", "meter"] }),
   attribute("viewport", "viewport", "Observes the nearest native scroll container, or the document. Publishes normalized position on the selected axes and a geometric visible area fraction. Empty and both select both axes; invalid values warn and fall back to both.", { syntax: "enum", values: ["", "both", "x", "y"], default: "both", doc: "core-extensions/viewport" }),
   attribute("viewport-target", "viewport", "Publishes CSS outputs on one existing element ID, optionally prefixed with #, instead of the observed element. Geometry and events remain on the observer. Retargeting restores previous inline styles; conflicting Viewport writers are rejected.", { syntax: "id", examples: ["indicator", "#indicator"], doc: "core-extensions/viewport" }),
   attribute("pwa", "pwa", "Explicitly loads the optional external PWA Extension. Install uses native click and never registers a Service Worker automatically.", { syntax: "enum", values: ["install"] }),
@@ -49,7 +51,7 @@ export const semanticAttributes = [
   attribute("feedback", "feedback", "Feedback boundary. Empty accepts all types; whitespace-separated types filter handled feedback and stop matching events from bubbling further.", { syntax: "token-list", values: ["", "warning", "error", "success", "announce", "busy", "progress", "validate", "warning error success"] }),
   attribute("message-target", "feedback", "One element ID, optionally prefixed with #, receiving message text. Omitted uses the boundary itself.", { syntax: "id", examples: ["status-message"] }),
   attribute("transform-target", "feedback", "One element ID, optionally prefixed with #, receiving feedback classes and motion. Omitted uses the boundary itself.", { syntax: "id", examples: ["status-icon"] }),
-  attribute("present-target", "feedback", "One mounted Present element ID, optionally prefixed with #. Empty requests pop on the closest Present of each resolved message/transform target, once per distinct element. Omitted makes no Present request. Requires initialized Present.", { syntax: "id", examples: ["", "status-panel", "#status-panel"] }),
+  attribute("present-target", "feedback", "One mounted Present or Present Group ID, optionally prefixed with #. Groups use popNext and prepare the reserved member before opening; without explicit message/transform targets, that member receives the content and classes. Empty uses the nearest message Present, then transform Present fallback. Omitted makes no Present request. Requires initialized Present.", { syntax: "id", examples: ["", "status-panel", "#status-panel", "notifications"] }),
   attribute("maxfps", "core", "Optional layout update ceiling on this element. Must be a finite number greater than zero; no attribute means the shared scheduler cadence.", { syntax: "number", examples: ["20", "40", "60"], doc: "runtime/wait-layout" }),
   attribute("wait-mounted", "core", "Keeps the element hidden until mounting completes and exposes aria-busy during the attempt.", { syntax: "presence", doc: "runtime/visual-mounting" }),
   attribute("builds", "core", "Available Extension builds on a declarative link; space/comma-separated modern and legacy tokens. Omitted promises both.", { syntax: "token-list", values: ["modern", "legacy", "modern legacy"], tags: ["link"], doc: "extensions/declarative-loading" }),
@@ -104,7 +106,12 @@ export const semanticCSSProperties = [
   property("--anchor-opacity", "anchor", "<number>", "Opacity copied from the target's nearest Present region, or 1. This property intentionally has no ae prefix.", { role: "output", literal: true })
 ];
 
+export const semanticMethods = [
+  { name: "present.popNext", extension: "present", description: "popNext(group, prepare?) synchronously rotates the last eligible direct mounted member and invokes synchronous preparation before BeforePop and opening. Enables accumulation. Returns Promise<Element|null>; rejected preparation propagates. Controller: $ae(group).present.popNext(prepare?). show() returns to exclusive selection." }
+];
+
 export const semanticEvents = [
+  { name: "Progress", extension: "core", bubbles: false, cancelable: false, description: "Numeric progress on the producing element. detail: { value, max }, finite numbers with 0 <= value <= max and max > 0. Independent of Progress and Feedback. Present auto-unpop includes status (running/completed), elapsedMs, durationMs and remainingMs." },
   { name: "RuntimeStartError", extension: "core", description: "Initial mount failure on document. detail: { operation: 'mount', error }. startAelluxJs also rejects with the original error." },
   { name: "StateNavigationError", extension: "state-navigation", description: "Failed state change on document. detail: { operation: 'setState', key, value, title, silent, error }. setState also rejects with the original error." },
   { name: "ViewportError", extension: "viewport", description: "Scheduled failure on document. detail: { operation: 'refresh' or 'unmount', reference, elements, error }. Automatic work is observed; direct refresh callers retain rejection." },

@@ -5,6 +5,7 @@ import { createAelluxApi } from "./internal/aellux-api-integration.js";
 import { createAelluxConstants } from "./internal/create-aellux-constants.js";
 import utilsNameCase from "./internal/utils-name-case.js";
 import createWeakCss from "./internal/create-weak-css.js";
+import { hasProgressAPI } from "./internal/has-progress-api.js";
 
 // aellux.js boot script: intentionally minimal. Apart from build-time imports, its runtime body and
 // internal helpers must remain ES5-compatible; keep feature logic out and use conservative JavaScript.
@@ -104,6 +105,11 @@ import createWeakCss from "./internal/create-weak-css.js";
 
   function loadOrchestrator() {
     var attr = AelluxJs.attr("esm");
+
+    ["progress", "meter"].forEach(function (tag) {
+      if (!hasProgressAPI(root, tag)) api.diagnostics.notAvailable.push(
+        tag === "progress" ? "HTMLProgressElement" : "HTMLMeterElement");
+    });
 
     CONSTANTS.AELLUXJS_MODERN_API_DEPENDENCIES
       .forEach(function (option) {

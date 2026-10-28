@@ -14,6 +14,7 @@ const attributesByExtension = {
   "scrollbox-snap": "scrollbox-snap snap-item",
   focus: "focus", point: "point", adaptive: "adaptive", "ajax-href": "ajax-href",
   viewport: "viewport viewport-target",
+  progress: "progress-target progress-fallback",
   preference: "preference option label next prev ready",
   feedback: "feedback message-target transform-target present-target"
 };

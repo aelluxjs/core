@@ -136,6 +136,7 @@ import { officialExtensionDefinitions } from "./official-extension-definitions.j
       const key = toCamelCase(name);
       if (key in api.registry.ext) continue;
       let loadWhen = name === "dialog" ? "dialog" : attr(name);
+      if (name === "progress") loadWhen = "progress, meter";
       if (name === "ajax-href") loadWhen = "a" + loadWhen;
       if (name === "present") {
         loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");

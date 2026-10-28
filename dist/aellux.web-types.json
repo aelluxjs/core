@@ -201,7 +201,7 @@
         },
         {
           "name": "data-ae-present-target",
-          "description": "One mounted Present element ID, optionally prefixed with #. Empty requests pop on the closest Present of each resolved message/transform target, once per distinct element. Omitted makes no Present request. Requires initialized Present.\n\nValue syntax: id.\n\nExamples: ``, `status-panel`, `#status-panel`.",
+          "description": "One mounted Present or Present Group ID, optionally prefixed with #. Groups use popNext and prepare the reserved member before opening; without explicit message/transform targets, that member receives the content and classes. Empty uses the nearest message Present, then transform Present fallback. Omitted makes no Present request. Requires initialized Present.\n\nValue syntax: id.\n\nExamples: ``, `status-panel`, `#status-panel`, `notifications`.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm",
           "value": {
             "kind": "plain",
@@ -524,6 +524,21 @@
               "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/api.htm",
               "value": {
                 "kind": "no-value"
+              }
+            }
+          ]
+        },
+        {
+          "name": "progress",
+          "extension": true,
+          "attributes": [
+            {
+              "name": "data-ae-progress-target",
+              "description": "Existing progress producer ID, optionally prefixed with #. Consumes nonbubbling AelluxJsProgress { value, max } and scales value to the control's own max. Meter is not a temporal consumer.\n\nValue syntax: id.",
+              "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/progress.htm",
+              "value": {
+                "kind": "plain",
+                "type": "string"
               }
             }
           ]
@@ -8785,6 +8800,11 @@
         {
           "name": "AelluxJsPreferencesChange",
           "description": "Preference update on document. detail: { changed, preferences }; changed may be empty. Bubbles: true. Cancelable: false.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsProgress",
+          "description": "Numeric progress on the producing element. detail: { value, max }, finite numbers with 0 <= value <= max and max > 0. Independent of Progress and Feedback. Present auto-unpop includes status (running/completed), elapsedMs, durationMs and remainingMs. Bubbles: false. Cancelable: false.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
         },
         {

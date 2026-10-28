@@ -42,7 +42,7 @@
 </head>
 
 <body data-ae-feedback="error" data-ae-transform-target="#toast-message" data-ae-message-target="#toast-message"
-  data-ae-present-target>
+  data-ae-present-target="#toast-present-group">
 
   <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
   <symbol id="bi-circle-half" fill="currentColor"
@@ -81,11 +81,18 @@
         style=" --bar-color:#55606F; --bar-color2:var(--bs-link-color); --bar-bg:#F0F5F5;">
         <div class="container-fluid gap-2" style='z-index: 1;'>
 
-          <div id="toast-present" class="position-fixed w-100 z-1 pe-none p-4 justify-content-center align-items-center"
-            data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true" style="display: flex;">
-            <div id="toast-message" class="text-bg-danger small rounded-1 p-2 w-100 text-center"
-              style="max-width: 300px;">
-              -
+          <div id="toast-present-group"
+            class="position-fixed w-100 z-1 pe-none p-4 flex-column d-flex justify-content-center align-items-center"
+            data-ae-present-group>
+            <div id="toast-1" data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true"
+              class="text-bg-danger small rounded-1 p-2 w-100 text-center" style="max-width: 300px;">
+              <span id="toast-message">-</span>
+              <progress data-ae-progress-target="toast-1"></progress>
+            </div>
+            <div id="toast-2" data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true"
+              class="text-bg-danger small rounded-1 p-2 w-100 text-center" style="max-width: 300px;">
+              <span id="toast-message">-</span>
+              <progress data-ae-progress-target="toast-2"></progress>
             </div>
           </div>
 
@@ -524,6 +531,13 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/progress.htm" data-ae-overflow-marquee="190px">
+                                              Progress                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/optional/pwa.htm" data-ae-overflow-marquee="190px">
                                               PWA                                            </a>
                                           </div>
@@ -653,6 +667,7 @@
           <main id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content"
             ajax-load="doc-content">
             <h1>Performance and Bundle Budget</h1>
+<p>The <a href="../progress-implementation-report.htm#distribution-costs">Progress implementation report</a> records current Progress variant sizes and the measured Present, Feedback, Full and boot deltas for accumulated notifications. Progress and its Legacy fallback remain external Optional artifacts.</p>
 <p>The release build checks the byte size of each shipped minified runtime, Core Extension, and generated Extension stylesheet. The check measures raw bytes and gzip bytes at compression level 9. It excludes source maps because browsers do not request them as part of a normal production load.</p>
 <p>Run the check after a build:</p>
 <pre><code class="language-sh">npm run build:core
@@ -660,7 +675,7 @@ npm run test:budget
 </code></pre>
 <p>The CI workflow runs the same command after <code>npm run build</code>. A pull request fails if an artifact exceeds either limit. Review the generated artifact and its delivery cost before changing a limit.</p>
 <h2>Limits</h2>
-<p><a href="https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs"><code>scripts/bundle-budget.config.mjs</code></a> is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The <code>test:budget</code> command prints each artifact&#39;s measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates eleven Bundled Extensions. Only the Optional Extensions (Ajax Href, Dialog, PWA and Viewport) use separate on-demand scripts in Full. Basic loads separately the Extensions explicitly registered by the developer and their declared dependencies.</p>
+<p><a href="https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs"><code>scripts/bundle-budget.config.mjs</code></a> is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The <code>test:budget</code> command prints each artifact&#39;s measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates eleven Bundled Extensions. Only the Optional Extensions (Ajax Href, Dialog, Progress, PWA and Viewport) use separate on-demand scripts in Full. Basic loads separately the Extensions explicitly registered by the developer and their declared dependencies.</p>
 <h2>Shared selector helpers</h2>
 <p>The public <code>isValidSelector()</code> and <code>parseSelectors()</code> helpers ship in the boot and ESM entries so they are available before initialization. Ajax Href delegates selector parsing to the global API, while Extension registration and mount-map validation reuse the internal validator. Compared with the preceding checked-in artifacts, measured minified raw/gzip level 9 bytes are:</p>
 <table>
@@ -699,7 +714,7 @@ npm run test:budget
 </tbody></table>
 <p>The boot measurements include the current signed Viewport registry entries. The boot gzip limit increases from 16 to 16.5 KiB, and the ESM limits increase from 25/8.5 to 26.5/9.25 KiB. Ajax Href&#39;s limits remain unchanged. Sharing the parser reduces the separate Ajax Href scripts while adding the public capability to every core entry.</p>
 <h2>Core delivery split</h2>
-<p>Bundled Extensions ship inside Full, while Optional Extensions (Ajax Href, Dialog, PWA and Viewport) remain external. Basic embeds no Extension implementations and starts with no registrations. The following measurements record the earlier Full delivery split; they are not updated measurements for later registration changes. Measured minified raw/gzip level 9 bytes and revised limits:</p>
+<p>Bundled Extensions ship inside Full, while Optional Extensions (Ajax Href, Dialog, Progress, PWA and Viewport) remain external. Basic embeds no Extension implementations and starts with no registrations. The following measurements record the earlier Full delivery split; they are not updated measurements for later registration changes. Measured minified raw/gzip level 9 bytes and revised limits:</p>
 <table>
 <thead>
 <tr>

@@ -70,6 +70,7 @@
           "children": [
             { "label": "Ajax Href", "href": "core-extensions/optional/ajax-href.md" },
             { "label": "Dialog", "href": "core-extensions/optional/dialog.md" },
+            { "label": "Progress", "href": "core-extensions/optional/progress.md" },
             { "label": "PWA", "href": "core-extensions/optional/pwa.md" },
             { "label": "Viewport", "href": "core-extensions/optional/viewport.md" }
           ]

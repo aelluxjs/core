@@ -41,7 +41,8 @@
       toggle,
       trigger,
       show,
-      selected
+      selected,
+      popNext
     });
     const POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", DEFAULT_PRESENT = "opacity transform height width", OPACITY_SYNTAX = "<number> | <percentage>", TRANSFORM_SYNTAX = "<transform-list> | none";
     const TRANSITION_PREPARE_TIME = 100;
@@ -64,6 +65,7 @@
     let groupObserver = null;
     let groupsQueued = false;
     let interpolatedProgress = false;
+    let autoObserver = null;
     const cssProperties = [
       ["pop-progress", "<number>", "0"],
       ["unpop-progress", "<number>", "1"],
@@ -97,6 +99,7 @@
         priority: 0,
         mount: mountPresentContainer,
         unmount: unmountPresentContainer,
+        update: (element) => autoUnpopSchedule(element, presentElements.get(element)),
         controllers: ["pop", "unpop", "trigger", "toggle"]
       });
       AelluxJs.mountManager.add({
@@ -116,8 +119,15 @@
         priority: 1,
         mount: mountGroup,
         unmount: unmountGroup,
-        controllers: ["show", "selected"]
+        controllers: ["show", "selected", "popNext"]
       });
+      autoObserver = new root.MutationObserver((records) => {
+        for (const record of records) {
+          const controller = presentElements.get(record.target);
+          if (controller) autoUnpopSchedule(record.target, controller);
+        }
+      });
+      autoObserver.observe(document, { subtree: true, attributes: true, attributeFilter: [attr.autoUnpop] });
       document.addEventListener("pointerover", onHover);
       document.addEventListener("pointerout", onHover);
       AelluxJs.on("$click", OnClick);
@@ -125,6 +135,8 @@
       AelluxJs.onEvent(root, "$resize", refreshExpandedStates);
     }
     function destroy() {
+      autoObserver == null ? void 0 : autoObserver.disconnect();
+      autoObserver = null;
       AelluxJs.mountManager.remove({ extensionName });
       AelluxJs.off("$click", OnClick);
       AelluxJs.off("tap", onTap);
@@ -180,7 +192,9 @@
         motionEnabled: (element.getAttribute(attr.present) || "").trim() !== "",
         motionId: AelluxJs.motion ? AelluxJs.motion.id() : fallbackMotionId++,
         transition: null,
+        operationRevision: 0,
         autoUnpopTimeout: null,
+        autoCountdown: null,
         direction: null,
         classList: element.classList,
         triggers: /* @__PURE__ */ new Set(),
@@ -216,10 +230,7 @@
               )
             );
           }
-          if (this.autoUnpopTimeout !== null) {
-            clearTimeout(this.autoUnpopTimeout);
-            this.autoUnpopTimeout = null;
-          }
+          cancelAutoUnpop(this);
           if (transitionStart) {
             this.classList.remove(className.unpopping);
           } else {
@@ -454,7 +465,7 @@
       if (typeof gotoVisible === "undefined" || gotoVisible === null)
         gotoVisible = controller.direction === POP ? false : true;
       const group = element.closest(groupSelector);
-      if (!groupOperation && groups.has(group) && element !== group) {
+      if (!groupOperation && groups.has(group) && !groups.get(group).accumulating && element !== group) {
         if (!element.id) {
           groupDiagnostic(group, "Present Group members must have an ID.");
           return false;
@@ -477,6 +488,7 @@
         if (!allowEvent) {
           return;
         }
+        controller.operationRevision++;
         if (forceRepop && (!element.hidden || controller.transition)) {
           controller.stop();
           element.hidden = true;
@@ -660,20 +672,66 @@
       transition.timeout = null;
     }
     function autoUnpopSchedule(element, controller) {
+      if (!controller) return;
+      cancelAutoUnpop(controller);
       const autoUnpopValue = element.getAttribute(attr.autoUnpop);
-      if (!element.hidden && autoUnpopValue) {
-        const autoTime = getString2Time(autoUnpopValue);
-        controller.autoUnpopTimeout = setTimeout(
-          autoUnpop,
-          autoTime,
-          element,
-          controller
-        );
-      }
+      if (element.hidden || controller.transition && !controller.classList.contains(className.pop) || !element.isConnected || !autoUnpopValue) return;
+      const duration = getString2Time(autoUnpopValue);
+      if (!Number.isFinite(duration) || duration < 0) return;
+      const countdown = { start: root.performance.now(), duration, frame: null, last: 0 };
+      controller.autoCountdown = countdown;
+      const valid = () => controller.autoCountdown === countdown && presentElements.get(element) === controller && element.isConnected;
+      const emit = (completed, initial = false) => {
+        const elapsedMs = initial ? 0 : Math.min(duration, Math.max(0, root.performance.now() - countdown.start));
+        AelluxJs.dispatchFrom(element, "Progress", {
+          bubbles: false,
+          cancelable: false,
+          detail: {
+            value: completed ? 1 : duration ? elapsedMs / duration : 0,
+            max: 1,
+            status: completed ? "completed" : "running",
+            elapsedMs,
+            durationMs: duration,
+            remainingMs: Math.max(0, duration - elapsedMs)
+          }
+        });
+      };
+      const tick = () => {
+        var _a;
+        if (!valid()) {
+          if (controller.autoCountdown === countdown) cancelAutoUnpop(controller);
+          return;
+        }
+        const now = root.performance.now();
+        const fps = ((_a = AelluxJs.layoutMaxFPS) == null ? void 0 : _a.call(AelluxJs, element)) || AelluxJs.options.cssMotionPropertyMaxFPS || 55;
+        if (now - countdown.last >= 1e3 / fps) {
+          countdown.last = now;
+          emit(false);
+        }
+        if (valid()) countdown.frame = root.requestAnimationFrame(tick);
+      };
+      controller.autoUnpopTimeout = setTimeout(() => {
+        if (!valid()) {
+          if (controller.autoCountdown === countdown) cancelAutoUnpop(controller);
+          return;
+        }
+        if (countdown.frame !== null) root.cancelAnimationFrame(countdown.frame);
+        countdown.frame = null;
+        controller.autoUnpopTimeout = null;
+        emit(true);
+        if (!valid()) return;
+        controller.autoCountdown = null;
+        unpop(element);
+      }, duration);
+      emit(false, true);
+      if (valid()) countdown.frame = root.requestAnimationFrame(tick);
     }
-    function autoUnpop(element, controller) {
+    function cancelAutoUnpop(controller) {
+      if (controller.autoUnpopTimeout !== null) clearTimeout(controller.autoUnpopTimeout);
+      const countdown = controller.autoCountdown;
+      if (countdown && countdown.frame !== null) root.cancelAnimationFrame(countdown.frame);
       controller.autoUnpopTimeout = null;
-      unpop(element);
+      controller.autoCountdown = null;
     }
     function outsideClickAutoUnpop(currentExceptions) {
       for (const pContainer of openPresentElements) {
@@ -835,6 +893,8 @@
       const visible = groupMembers(group).filter((member) => !member.hidden);
       groups.set(group, {
         selected: visible.length === 1 ? visible[0] : null,
+        accumulating: false,
+        reservations: /* @__PURE__ */ new Map(),
         revision: 0,
         pending: Promise.resolve(true),
         jobs: /* @__PURE__ */ new Map(),
@@ -903,10 +963,13 @@
         }
       );
     }
-    function reconcileGroup(group) {
+    function reconcileGroup(group, exclusive = false) {
       if (!group.isConnected || !group.hasAttribute(attr.group)) return;
       const members = groupMembers(group);
       const state = groups.get(group);
+      if (state.accumulating) {
+        if (!exclusive && state.accumulationInputs === selectionInputs(group)) return;
+      }
       if (!members.includes(state.selected)) state.selected = null;
       let matches;
       if (group.hasAttribute(attr.active)) {
@@ -943,8 +1006,55 @@
         return Promise.resolve(false);
       }
       if (group.getAttribute(attr.active) !== id) group.setAttribute(attr.active, id);
-      const result = reconcileGroup(group);
+      const result = reconcileGroup(group, true);
       return Promise.resolve(result === void 0 ? state.pending : result);
+    }
+    function selectionInputs(group) {
+      return JSON.stringify([group.getAttribute(attr.active), groupMembers(group).filter((member) => {
+        const token = member.getAttribute(attr.when);
+        return token && !/\s/.test(token) && group.classList.contains(token);
+      }).map((member) => member.id).sort()]);
+    }
+    function popNext(group, prepare) {
+      const state = groups.get(group);
+      if (!state || !group.isConnected || !group.hasAttribute(attr.group)) return Promise.resolve(null);
+      const members = Array.from(group.children).filter((member2) => member2 !== group && member2.hasAttribute(attr.present) && presentElements.has(member2) && member2.closest(groupSelector) === group);
+      const member = members[members.length - 1];
+      if (!member) return Promise.resolve(null);
+      const entering = !state.accumulating;
+      if (entering) {
+        state.revision++;
+        state.jobs.clear();
+        state.accumulating = true;
+        state.accumulationInputs = selectionInputs(group);
+        state.selected = null;
+      }
+      const controller = presentElements.get(member);
+      const reservation = { revision: controller.operationRevision };
+      state.reservations.set(member, reservation);
+      group.insertBefore(member, members[0]);
+      const valid = () => groups.get(group) === state && state.accumulating && state.reservations.get(member) === reservation && presentElements.get(member) === controller && controller.operationRevision === reservation.revision && member.isConnected && member.parentElement === group;
+      let job;
+      try {
+        if (entering) publishGroup(group, state, null);
+        if (!valid()) {
+          if (state.reservations.get(member) === reservation) state.reservations.delete(member);
+          return Promise.resolve(null);
+        }
+        if (typeof prepare === "function") prepare(member);
+        if (!valid() || !AelluxJs.dispatchFrom(member, "BeforePop", { bubbles: true, cancelable: true }) || !valid()) {
+          if (state.reservations.get(member) === reservation) state.reservations.delete(member);
+          return Promise.resolve(null);
+        }
+        job = presentTransition(member, true, true, true);
+        reservation.revision++;
+      } catch (error) {
+        if (state.reservations.get(member) === reservation) state.reservations.delete(member);
+        return Promise.reject(error);
+      }
+      return job.then(() => valid() && !member.hidden && presentElements.get(member).direction === POP ? member : null).finally(() => {
+        if (state.reservations.get(member) === reservation) state.reservations.delete(member);
+      });
     }
     function selected(group) {
       const state = groups.get(group);
@@ -967,7 +1077,10 @@
         const controller = presentElements.get(member);
         return member === selected2 ? member.hidden || controller.direction === UNPOP : !member.hidden && controller.direction !== UNPOP;
       });
-      if (state.selected === selected2 && !changes.length) return state.pending;
+      if (state.selected === selected2 && !changes.length) {
+        state.accumulating = false;
+        return state.pending;
+      }
       const revision = ++state.revision;
       const active = group.getAttribute(attr.active);
       const classes = group.getAttribute("class");
@@ -985,6 +1098,10 @@
           return false;
         }
         if (!allowed) {
+          if (state.accumulating) {
+            state.accumulationInputs = selectionInputs(group);
+            return false;
+          }
           if (state.revision === revision) {
             const id = ((_a = state.selected) == null ? void 0 : _a.id) || "";
             if (group.getAttribute(attr.active) !== id) group.setAttribute(attr.active, id);
@@ -992,6 +1109,7 @@
           return false;
         }
       }
+      state.accumulating = false;
       state.selected = selected2;
       let complete;
       const pending = new Promise((resolve) => {

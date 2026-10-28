@@ -42,7 +42,7 @@
 </head>
 
 <body data-ae-feedback="error" data-ae-transform-target="#toast-message" data-ae-message-target="#toast-message"
-  data-ae-present-target>
+  data-ae-present-target="#toast-present-group">
 
   <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
   <symbol id="bi-circle-half" fill="currentColor"
@@ -81,11 +81,18 @@
         style=" --bar-color:#55606F; --bar-color2:var(--bs-link-color); --bar-bg:#F0F5F5;">
         <div class="container-fluid gap-2" style='z-index: 1;'>
 
-          <div id="toast-present" class="position-fixed w-100 z-1 pe-none p-4 justify-content-center align-items-center"
-            data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true" style="display: flex;">
-            <div id="toast-message" class="text-bg-danger small rounded-1 p-2 w-100 text-center"
-              style="max-width: 300px;">
-              -
+          <div id="toast-present-group"
+            class="position-fixed w-100 z-1 pe-none p-4 flex-column d-flex justify-content-center align-items-center"
+            data-ae-present-group>
+            <div id="toast-1" data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true"
+              class="text-bg-danger small rounded-1 p-2 w-100 text-center" style="max-width: 300px;">
+              <span id="toast-message">-</span>
+              <progress data-ae-progress-target="toast-1"></progress>
+            </div>
+            <div id="toast-2" data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true"
+              class="text-bg-danger small rounded-1 p-2 w-100 text-center" style="max-width: 300px;">
+              <span id="toast-message">-</span>
+              <progress data-ae-progress-target="toast-2"></progress>
             </div>
           </div>
 
@@ -524,6 +531,13 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/progress.htm" data-ae-overflow-marquee="190px">
+                                              Progress                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/optional/pwa.htm" data-ae-overflow-marquee="190px">
                                               PWA                                            </a>
                                           </div>
@@ -706,7 +720,7 @@ await panel.unpop();
 }
 </code></pre>
 <p>Put <code>.panel-content</code> inside a <code>data-ae-present=&quot;opacity&quot;</code> region to consume its inherited progress. The properties use the region&#39;s existing duration and CSS easing. Registered properties interpolate natively; captured transitions use the same CSS Motion Controller timeline as the other visual properties, including advanced Aellux easing and adaptive WaitLayout scheduling. Present&#39;s four progress/phase properties share the lightweight classification of <code>transform</code> and <code>opacity</code>, so they do not impose the conservative property ceiling by themselves. Height and width transitions still use <code>cssMotionPropertyMaxFPS</code> (55 by default), further limited by <code>data-ae-maxfps</code> and adaptive FPS. Elapsed time determines duration, independently of the number of updates. Private registered phase properties carry interpolation; the public properties clamp those phases to 0–1, including with overshooting CSS and advanced Aellux easings. Only the active phase is transitioned, so resetting the opposite channel does not animate backwards.</p>
-<p>Interpolation is enabled only when all four progress/phase registrations succeed and CSS <code>clamp()</code> is supported. A missing API, a thrown registration error, or an already registered name (including a conflicting definition) selects the conservative discrete fallback. The registration API cannot inspect an existing descriptor, so even compatible duplicate registrations do not establish interpolation support. Progress remains numeric and bounded, stable endpoints remain available, and the existing visual transitions continue. Web Animations is optional: disabling the controller or missing its APIs keeps native CSS motion. Reduced motion disables transitions. There is no progress polyfill or independent animation loop.</p>
+<p>Interpolation is enabled only when all four progress/phase registrations succeed and CSS <code>clamp()</code> is supported. A missing API, a thrown registration error, or an already registered name (including a conflicting definition) selects the conservative discrete fallback. The registration API cannot inspect an existing descriptor, so even compatible duplicate registrations do not establish interpolation support. Progress remains numeric and bounded, stable endpoints remain available, and the existing visual transitions continue. Web Animations is optional: disabling the controller or missing its APIs keeps native CSS motion. Reduced motion disables transitions. CSS transition progress has no polyfill or independent animation loop. Auto-unpop temporal progress is a separate event channel described below.</p>
 <h2>Present Group</h2>
 <p>A <code>data-ae-present-group</code> container coordinates mounted Present descendants by their own HTML <code>id</code>. Membership belongs to the nearest group, so nested groups are independent. Each member needs a unique ID; <code>data-ae-present-active</code> and <code>show(id)</code> use that exact ID, without a leading <code>#</code>.</p>
 <pre><code class="language-html">&lt;div id=&quot;views&quot; data-ae-present-group data-ae-present-active=&quot;home&quot;&gt;
@@ -732,14 +746,20 @@ await panel.unpop();
 // The mounted controller binds the same operation to its container:
 await $ae(&quot;views&quot;).present.show(&quot;home&quot;);
 </code></pre>
-<p><code>show()</code> sets <code>data-ae-present-active</code> and uses the same reconciliation as direct attribute changes. Its Promise resolves to <code>true</code> for a completed current selection and <code>false</code> for invalid, refused or superseded requests. Member <code>pop()</code>, <code>toggle()</code>, triggers and dismissals also respect the group selection; opening an already selected member is idempotent in a group. Standalone <code>pop()</code> retains its restart behavior.</p>
+<p><code>show()</code> sets <code>data-ae-present-active</code> and uses the same reconciliation as direct attribute changes. Its Promise resolves to <code>true</code> for a completed current selection and <code>false</code> for invalid, refused or superseded requests. In exclusive mode, member <code>pop()</code>, <code>toggle()</code>, triggers and dismissals also respect the group selection; opening an already selected member is idempotent in a group. Standalone <code>pop()</code> retains its restart behavior.</p>
 <p>Unmount during a pending selection resolves that request to <code>false</code>; a completed request keeps its result. Before listeners that change the active attribute, class selection, membership or member IDs invalidate the current preflight before any visual change. The observer reconciles the new declaration independently. Calling <code>show()</code> from a Before listener likewise supersedes the outer request. A veto without such a replacement preserves the accepted selection, including when it establishes explicit attribute precedence over classes.</p>
 <p>All required <code>BeforePop</code>/<code>BeforeUnpop</code> events are checked before a group swap starts. Canceling either refuses the swap, preserves the accepted selection and updates the active attribute to that selection. This also establishes explicit attribute precedence if a class-based swap is refused. Individual transition and completion events, focus release, <code>hidden</code> and trigger ARIA continue to belong to Present. The group adds no tabs, dialog or other ARIA roles. Rapid changes replace obsolete transitions; old completion Promises cannot select an earlier member. Dynamically inserted members join after <code>AelluxJs.mount()</code>, and removed or moved members no longer participate in the former group. Unmount releases shared observation when the last group leaves and restores the group&#39;s original active attribute.</p>
+<h2>Accumulating Present Groups and progress</h2>
+<p><code>$ae.ext.present.popNext(group, prepare?)</code> and <code>$ae(group).present.popNext(prepare?)</code> synchronously reserve the last directly contained mounted <code>[data-ae-present]</code> member in DOM order, move it before the first eligible member, call the optional synchronous <code>prepare(member)</code> callback, and request <code>pop()</code>. Wrapped descendants, unmounted nodes and nested groups&#39; members are excluded. No elements or IDs are created. The Promise resolves to the presented member, or <code>null</code> for an empty/ineligible group, veto, teardown or superseded operation. Preparation exceptions reject the Promise. A canceled <code>BeforePop</code> consumes that rotation slot but does not open the member.</p>
+<p>Using <code>popNext()</code> activates accumulation (publishing a logical selection change to null, if needed, after reserving/rotating the member): several members can stay open with independent auto-unpop timers. Reusing a visible member restarts its presentation and timer. <code>selected()</code> returns <code>null</code> in this mode because no exclusive member is selected. Ordinary member <code>pop()</code>/<code>unpop()</code> operate independently while accumulating. Reservation/order changes occur synchronously even for consecutive calls before prior animations finish; a callback must finish synchronously.</p>
+<p>An accepted explicit <code>show(group, id)</code> ends accumulation and reconciles all members using the existing exclusive selection rules. Changing <code>data-ae-present-active</code>, or changing which <code>data-ae-present-when</code> conditions match container classes, also returns to exclusive selection. Existing active/condition declarations are suspended during accumulation until changed. <code>show()</code> retains its boolean Promise result. A vetoed exclusive request keeps the accumulated members open and does not automatically retry the same declaration. Groups that never use <code>popNext()</code> retain their previous behavior.</p>
+<p>Present emits the generic nonbubbling, noncancelable <code>AelluxJsProgress</code> on the Present element while waiting for auto-unpop. It needs neither Progress nor Feedback. The first payload is <code>{ value: 0, max: 1, status: &quot;running&quot; }</code>; intermediate fractions use monotonic elapsed time; the final payload is <code>{ value: 1, max: 1, status: &quot;completed&quot; }</code>, emitted before requesting <code>unpop()</code>. Additional fields are <code>elapsedMs</code>, <code>durationMs</code> and <code>remainingMs</code>.</p>
+<p>Counting starts after opening completes, or when an initially visible element is mounted. It is independent of motion easing/duration. The original timeout determines closure; animation frames publish progress subject to the existing element/global FPS limits and require no layout reads. Background-frame throttling does not extend the timeout. No progress loop remains after cancellation, unmount, destroy or removal. A new accepted pop restarts at zero; changing/removing the auto-unpop attribute restarts/cancels the timer. A zero duration emits zero followed by completed progress on the timeout. If <code>BeforeUnpop</code> vetoes expiration, the completed countdown does not retry. See <a href="optional/progress.htm">Progress</a> for native bars and <a href="feedback.htm#stacked-notifications">Feedback</a> for bounded notification pools.</p>
 <h2>Hover Triggers</h2>
 <pre><code class="language-html">&lt;button type=&quot;button&quot; data-ae-trigger=&quot;pop&quot; data-ae-trigger-on=&quot;hover&quot;
   data-ae-target=&quot;settings&quot;&gt;Settings&lt;/button&gt;
 </code></pre>
-<p><code>data-ae-trigger-on=&quot;click&quot;</code> is the default. <code>hover</code> changes how <code>pop</code>, <code>unpop</code> or <code>toggle</code> is invoked. Pointer entry activates the trigger once, ignoring movements between its descendants and touch pointer events. Hover <code>pop</code> keeps an already open region open. Triggers targeting group members select those members through the group.</p>
+<p><code>data-ae-trigger-on=&quot;click&quot;</code> is the default. <code>hover</code> changes how <code>pop</code>, <code>unpop</code> or <code>toggle</code> is invoked. Pointer entry activates the trigger once, ignoring movements between its descendants and touch pointer events. Hover <code>pop</code> keeps an already open region open. In exclusive mode, triggers targeting group members select those members through the group.</p>
 <p>Opening controls and their target form one shared hover region, including multiple triggers for the same target. Moving into the target keeps it open. Leaving the region schedules close after 120 ms; returning cancels it. Focus inside the shared region prevents hover dismissal. Outside clicks still close according to <code>data-ae-unpop-on-outside</code>; hover close is independent of that outside-click option. Dismiss and auto-unpop retain their normal behavior.</p>
 <p>Keep native buttons or links: keyboard activation continues to invoke the configured action, and ordinary click/tap remains available on devices without hover. A mouse click on a currently hovered trigger does not invoke its action a second time. Touch pointer entry is ignored so a tap is handled once by conventional activation. Listeners are delegated and removed on extension destruction; pending target close timers are canceled when the target is unmounted.</p>
 <h2>Group selection notifications and Anchor</h2>

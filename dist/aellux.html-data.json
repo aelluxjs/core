@@ -501,7 +501,7 @@
     },
     {
       "name": "data-ae-present-target",
-      "description": "One mounted Present element ID, optionally prefixed with #. Empty requests pop on the closest Present of each resolved message/transform target, once per distinct element. Omitted makes no Present request. Requires initialized Present.\n\nValue syntax: id.\n\nExamples: ``, `status-panel`, `#status-panel`.",
+      "description": "One mounted Present or Present Group ID, optionally prefixed with #. Groups use popNext and prepare the reserved member before opening; without explicit message/transform targets, that member receives the content and classes. Empty uses the nearest message Present, then transform Present fallback. Omitted makes no Present request. Requires initialized Present.\n\nValue syntax: id.\n\nExamples: ``, `status-panel`, `#status-panel`, `notifications`.",
       "references": [
         {
           "name": "AelluxJS feedback",
@@ -517,6 +517,9 @@
         },
         {
           "name": "#status-panel"
+        },
+        {
+          "name": "notifications"
         }
       ]
     },
@@ -1143,6 +1146,21 @@
             }
           ],
           "valueSet": "v"
+        }
+      ]
+    },
+    {
+      "name": "progress",
+      "attributes": [
+        {
+          "name": "data-ae-progress-target",
+          "description": "Existing progress producer ID, optionally prefixed with #. Consumes nonbubbling AelluxJsProgress { value, max } and scales value to the control's own max. Meter is not a temporal consumer.\n\nValue syntax: id.",
+          "references": [
+            {
+              "name": "AelluxJS progress",
+              "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/progress.htm"
+            }
+          ]
         }
       ]
     }

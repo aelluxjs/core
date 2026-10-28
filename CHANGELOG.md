@@ -6,6 +6,9 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Added
 
+- Optional Progress Extension mounts native progress/meter controls, lazily loads with Full, and includes element-local Legacy fallbacks without external polyfill assets. Generic nonbubbling `AelluxJsProgress` consumers preserve native ranges and restore mount-time values on teardown.
+- Present auto-unpop publishes elapsed-time progress after opening completes. Present Group `popNext()` rotates a bounded pool with independent visibility/timers, while explicit selection returns to exclusive behavior. Feedback prepares independent pooled messages before opening through the public Present API.
+
 - Independent Optional Viewport Extension: lazy `[data-ae-viewport]` geometry observation, normalized X/Y position and visible area, grouped scheduler work, native scroll container discovery and inline-style restoration in Modern and Legacy builds. No implementation is bundled into Full.
 
 - Optional external PWA Extension with lazy declarative install controls, native prompt handling, replaceable English/Portuguese manual guidance, semantic state events, explicit worker registration and application-controlled updates. Its independent classic worker provides scoped, versioned precache and configurable network/cache strategies with conservative privacy defaults; neither implementation nor PWA styles enter Full/Core bundles.

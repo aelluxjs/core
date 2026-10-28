@@ -14,6 +14,7 @@
     "feedback",
     "focus",
     "dialog",
+    "progress",
     "pwa",
     "viewport",
     "point",
@@ -2780,12 +2781,13 @@
     {
       "name": "data-ae-present-target",
       "extension": "feedback",
-      "description": "One mounted Present element ID, optionally prefixed with #. Empty requests pop on the closest Present of each resolved message/transform target, once per distinct element. Omitted makes no Present request. Requires initialized Present.",
+      "description": "One mounted Present or Present Group ID, optionally prefixed with #. Groups use popNext and prepare the reserved member before opening; without explicit message/transform targets, that member receives the content and classes. Empty uses the nearest message Present, then transform Present fallback. Omitted makes no Present request. Requires initialized Present.",
       "syntax": "id",
       "examples": [
         "",
         "status-panel",
-        "#status-panel"
+        "#status-panel",
+        "notifications"
       ],
       "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
@@ -2808,6 +2810,29 @@
       "syntax": "presence",
       "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/preference.htm"
+    },
+    {
+      "name": "data-ae-progress-fallback",
+      "extension": "progress",
+      "description": "Internal Legacy fallback marker.",
+      "role": "internal",
+      "syntax": "enum",
+      "values": [
+        "progress",
+        "meter"
+      ],
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/progress.htm"
+    },
+    {
+      "name": "data-ae-progress-target",
+      "extension": "progress",
+      "description": "Existing progress producer ID, optionally prefixed with #. Consumes nonbubbling AelluxJsProgress { value, max } and scales value to the control's own max. Meter is not a temporal consumer.",
+      "syntax": "id",
+      "tags": [
+        "progress"
+      ],
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/progress.htm"
     },
     {
       "name": "data-ae-pwa",
@@ -14809,6 +14834,14 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/adaptive.htm"
     }
   ],
+  "methods": [
+    {
+      "name": "present.popNext",
+      "extension": "present",
+      "description": "popNext(group, prepare?) synchronously rotates the last eligible direct mounted member and invokes synchronous preparation before BeforePop and opening. Enables accumulation. Returns Promise<Element|null>; rejected preparation propagates. Controller: $ae(group).present.popNext(prepare?). show() returns to exclusive selection.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    }
+  ],
   "events": [
     {
       "bubbles": true,
@@ -15008,6 +15041,14 @@
       "name": "AelluxJsPreferencesChange",
       "extension": "preference",
       "description": "Preference update on document. detail: { changed, preferences }; changed may be empty.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": false,
+      "cancelable": false,
+      "name": "AelluxJsProgress",
+      "extension": "core",
+      "description": "Numeric progress on the producing element. detail: { value, max }, finite numbers with 0 <= value <= max and max > 0. Independent of Progress and Feedback. Present auto-unpop includes status (running/completed), elapsedMs, durationMs and remainingMs.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
     },
     {

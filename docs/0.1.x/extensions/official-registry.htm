@@ -42,7 +42,7 @@
 </head>
 
 <body data-ae-feedback="error" data-ae-transform-target="#toast-message" data-ae-message-target="#toast-message"
-  data-ae-present-target>
+  data-ae-present-target="#toast-present-group">
 
   <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
   <symbol id="bi-circle-half" fill="currentColor"
@@ -81,11 +81,18 @@
         style=" --bar-color:#55606F; --bar-color2:var(--bs-link-color); --bar-bg:#F0F5F5;">
         <div class="container-fluid gap-2" style='z-index: 1;'>
 
-          <div id="toast-present" class="position-fixed w-100 z-1 pe-none p-4 justify-content-center align-items-center"
-            data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true" style="display: flex;">
-            <div id="toast-message" class="text-bg-danger small rounded-1 p-2 w-100 text-center"
-              style="max-width: 300px;">
-              -
+          <div id="toast-present-group"
+            class="position-fixed w-100 z-1 pe-none p-4 flex-column d-flex justify-content-center align-items-center"
+            data-ae-present-group>
+            <div id="toast-1" data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true"
+              class="text-bg-danger small rounded-1 p-2 w-100 text-center" style="max-width: 300px;">
+              <span id="toast-message">-</span>
+              <progress data-ae-progress-target="toast-1"></progress>
+            </div>
+            <div id="toast-2" data-ae-present="opacity" data-ae-auto-unpop="1s" hidden="true"
+              class="text-bg-danger small rounded-1 p-2 w-100 text-center" style="max-width: 300px;">
+              <span id="toast-message">-</span>
+              <progress data-ae-progress-target="toast-2"></progress>
             </div>
           </div>
 
@@ -524,6 +531,13 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/progress.htm" data-ae-overflow-marquee="190px">
+                                              Progress                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/optional/pwa.htm" data-ae-overflow-marquee="190px">
                                               PWA                                            </a>
                                           </div>
@@ -656,7 +670,7 @@
 <p>The build publishes <code>dist/aellux.extensions.min.json</code> with schema version <code>1</code>. Its <code>coreVersion</code> comes from <code>package.json</code>; every approved entry has an exact <code>coreCompatibility</code>, Modern and Legacy URLs with SHA-384 integrity, optional stylesheet metadata, and a dependency list. Approval is controlled by the explicit list in <code>src/official-extension-definitions.js</code>: the presence of an Extension source file alone never makes it official.</p>
 <p>Set <code>AELLUX_OFFICIAL_CDN_BASE</code> to an immutable HTTPS distribution base while building release artifacts. The build appends the encoded package version and filename. Without that release setting, package builds use <code>./</code> URLs so the registry remains usable beside the files in <code>dist</code>. The build validates all required local artifacts and final-byte hashes and writes <code>aellux.extensions.report.json</code>; invalid or incomplete official metadata fails the build.</p>
 <h2>Resolution and caching</h2>
-<p>Both modes reuse the signed official metadata embedded by the version-matched boot script, avoiding an index request for the current Core version. This metadata resolves explicitly registered names; it does not register Extensions in Basic. Basic requires <code>$ae.ext(...)</code> or a link declaration for each desired Extension and loads its separate compatible script according to the supplied options. Full automatically registers all official Extensions and bundles Adaptive, Anchor, Overflow Marquee, Feedback, Focus, Point, Preference, Present, Scrollbox, Scrollbox Snap and State Navigation. Optional Extensions (Ajax Href, Dialog, PWA and Viewport) remain external; Full supplies their activation selectors. Full initializes Preference and State Navigation at startup. In Basic, choose their loading policy explicitly, registering a name before calling <code>$ae.wait(name)</code>.</p>
+<p>Both modes reuse the signed official metadata embedded by the version-matched boot script, avoiding an index request for the current Core version. This metadata resolves explicitly registered names; it does not register Extensions in Basic. Basic requires <code>$ae.ext(...)</code> or a link declaration for each desired Extension and loads its separate compatible script according to the supplied options. Full automatically registers all official Extensions and bundles Adaptive, Anchor, Overflow Marquee, Feedback, Focus, Point, Preference, Present, Scrollbox, Scrollbox Snap and State Navigation. Optional Extensions (Ajax Href, Dialog, Progress, PWA and Viewport) remain external; Full supplies their activation selectors. Full initializes Preference and State Navigation at startup. In Basic, choose their loading policy explicitly, registering a name before calling <code>$ae.wait(name)</code>.</p>
 <p>Resolution order is: an explicit URL/registration, a bundled implementation, official metadata, the configured custom fallback, and finally the historical local filename convention. A custom index cannot silently replace an official entry.</p>
 <pre><code class="language-js">$ae.extIndex.setFallback(&quot;https://example.org/my-extensions.json&quot;);
 $ae.ext(&quot;my-extension&quot;);
