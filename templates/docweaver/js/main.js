@@ -148,7 +148,7 @@ AelluxJs.on("AjaxHrefError", (e) => {
       ? "Please check your internet connection."
       : "Unable to connect to the server.";
   }
-  $ae(document.body).feedback.error(message, null, "no");
+  $ae(document.body).feedback.error(message, null, "shake");
   setNavActiveByUrl(window.location.href);
 });
 

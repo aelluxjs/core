@@ -19,9 +19,11 @@
   animation-iteration-count: 1;
 }
 @keyframes ae--feedback-motion-yes {
-  0%, 100% { transform: translateY(0) rotate(0); }
-  30%, 70% { transform: translateY(5px) rotate(2deg); }
-  50% { transform: translateY(-2px) rotate(-1deg); }
+  0%, 100% { transform: translateY(0) rotateX(0); }
+  20% { transform: translateY(4px) rotateX(9deg); }
+  40% { transform: translateY(-2px) rotateX(-4deg); }
+  60% { transform: translateY(3px) rotateX(6deg); }
+  80% { transform: translateY(-1px) rotateX(-2deg); }
 }
 
 .ae--feedback-motion-no {
@@ -32,8 +34,10 @@
 }
 @keyframes ae--feedback-motion-no {
   0%, 100% { transform: translateX(0) rotate(0); }
-  25%, 75% { transform: translateX(-10px) rotate(-0.5deg); }
-  50% { transform: translateX(10px) rotate(0.5deg); }
+  20% { transform: translateX(-3px) rotate(-5deg); }
+  40% { transform: translateX(3px) rotate(5deg); }
+  60% { transform: translateX(-2px) rotate(-3deg); }
+  80% { transform: translateX(1px) rotate(2deg); }
 }
 
 .ae--feedback-motion-breathe {
