@@ -788,8 +788,8 @@ controller.feedback.send({ type: &quot;progress&quot;, message: &quot;Uploading&
 <tr>
 <td>Rendering</td>
 <td>Known Limit</td>
-<td><span class="large">Boundaries update the first direct text node and retain child markup. Type classes accumulate until application code removes them; announce() creates no live region.</span></td>
-<td><span class="large">Choose message targets, reset obsolete type styling and supply appropriate announcement semantics.</span></td>
+<td><span class="large">Boundaries update the first direct text node and retain child markup. Ordinary boundaries retain accumulated type classes until application code removes them; grouped notifications replace the previous type on their resolved targets. announce() creates no live region.</span></td>
+<td><span class="large">Choose message targets, reset obsolete type styling for ordinary boundaries and supply appropriate announcement semantics.</span></td>
 </tr>
 <tr>
 <td>Motion</td>

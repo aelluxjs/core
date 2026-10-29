@@ -2,6 +2,19 @@
 
 All notable changes to aellux.js will be documented in this file.
 
+## [Unreleased]
+
+### Changed
+
+- Centralized development-only HTML, Extension declaration, CSS Motion resource and PWA manifest diagnostics in `src/internal/development-helpers.js`. Duplicate-attribute validation now uses `validateDoubleAttributeHTML()`, preserving the initial document's independent one-shot source inspection and production guards.
+- Positioned Docweaver notifications at the top of the viewport with spacing between pooled messages and reduced vertical padding.
+
+### Fixed
+
+- Docweaver notifications now disable outside-click dismissal, so the click that starts a subsequent request preserves existing notifications until their own timers expire or their pool slot is reused.
+- Removed duplicate toast message IDs and shared message/motion targets; Feedback now updates the selected notification independently while preserving its native progress control.
+- Updated the documentation's Full bundle preload integrity to match the generated artifact.
+
 ## [0.1.0-beta.10] - 2026-10-28
 
 ### Added

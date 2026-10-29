@@ -812,7 +812,7 @@
 </tbody></table>
 <p>Only the affected Present/Full limits increase. Present Modern moves from 22.75/8 to 24.5/8.5 KiB raw/gzip; Present Legacy from 30.75/10.5 to 33/11.25; Full Modern from 192/59.5 to 194/60; Full Legacy raw from 512.5 to 515 with its existing 152 KiB gzip limit unchanged. These increases cover parsing/diagnostics, capacity accounting, presentation age, reentrant preflight and reservation restoration.</p>
 <h2>Distribution costs</h2>
-<p>Final bytes include source-map comments. Gzip uses level 9, matching <code>test:budget</code>. Deltas compare baseline <code>35895693</code>.</p>
+<p>This snapshot measures the checked-in artifacts at <code>315ab386</code>, after the development-helper consolidation. Raw bytes include source-map comments. Gzip uses level 9, matching <code>test:budget</code>. Deltas compare baseline <code>35895693</code> and include subsequent integration and refactoring changes.</p>
 <table>
 <thead>
 <tr>
@@ -826,23 +826,23 @@
 <tbody><tr>
 <td>aellux.min.js</td>
 <td align="right">50157</td>
-<td align="right">17129</td>
+<td align="right">17123</td>
 <td align="right">+1733</td>
-<td align="right">+556</td>
+<td align="right">+550</td>
 </tr>
 <tr>
 <td>aellux.full.min.js</td>
-<td align="right">197947</td>
-<td align="right">61045</td>
-<td align="right">+5239</td>
-<td align="right">+1567</td>
+<td align="right">197661</td>
+<td align="right">61156</td>
+<td align="right">+4953</td>
+<td align="right">+1678</td>
 </tr>
 <tr>
 <td>aellux.full.legacy.min.js</td>
-<td align="right">526448</td>
-<td align="right">155024</td>
-<td align="right">+6350</td>
-<td align="right">+1773</td>
+<td align="right">521470</td>
+<td align="right">154777</td>
+<td align="right">+1372</td>
+<td align="right">+1526</td>
 </tr>
 <tr>
 <td>aellux.ext.present.min.js</td>
@@ -901,7 +901,7 @@
 <td align="right">new</td>
 </tr>
 </tbody></table>
-<p>Budget changes are limited to affected artifacts: boot 48/16.5 to 50/17 KiB raw/gzip; Full Modern 188.25/58.25 to 194/60; Full Legacy 508/150 to 515/152; Present Modern 20/7.25 to 24.5/8.5; Present Legacy 28/9.75 to 33/11.25; Feedback Modern raw 4.25 to 4.625 (gzip remains 2). Feedback Legacy limits are unchanged. Four Progress budgets cover the new delivery variants. The measured deltas account for capability probes/registry metadata, countdown publication, group reservations/concurrency and shared Feedback preparation; fallback code remains outside Core/Full.</p>
+<p>Budget changes are limited to affected artifacts: boot 48/16.5 to 50/17 KiB raw/gzip; Full Modern 188.25/58.25 to 194/60; Full Legacy 508/150 to 515/152; Present Modern 20/7.25 to 24.5/8.5; Present Legacy 28/9.75 to 33/11.25; Feedback Modern raw 4.25 to 4.625 (gzip remains 2). Feedback Legacy limits are unchanged. Four Progress budgets cover the new delivery variants. The measured deltas account for capability probes/registry metadata, countdown publication, group reservations/concurrency, shared Feedback preparation and the subsequent development-helper consolidation; fallback code remains outside Core/Full.</p>
 <h2>Known limits and risks</h2>
 <p>Fallback appearance is functional rather than identical to native controls. Indeterminate fallback progress is striped without claiming native animation equivalence. The fallback requires DOM descriptors and MutationObserver; current-engine missing/partial capability simulation and ES5 output do not prove every historical browser.</p>
 <p>Accessible names, announcement strategy, reading time and screen-reader/device verification remain application responsibilities. Use separate transform owners for Present and Feedback motion. Explicit absolute message targets intentionally share content. Missing producer IDs are retried by update/retarget rather than a permanent document-wide discovery loop. Application changes to a mounted progress value restore to the original snapshot on teardown.</p>

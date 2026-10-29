@@ -98,13 +98,13 @@ Only the affected Present/Full limits increase. Present Modern moves from 22.75/
 
 ## Distribution costs
 
-Final bytes include source-map comments. Gzip uses level 9, matching `test:budget`. Deltas compare baseline `35895693`.
+This snapshot measures the checked-in artifacts at `315ab386`, after the development-helper consolidation. Raw bytes include source-map comments. Gzip uses level 9, matching `test:budget`. Deltas compare baseline `35895693` and include subsequent integration and refactoring changes.
 
 | Artifact | Raw bytes | Gzip bytes | Delta raw | Delta gzip |
 | --- | ---: | ---: | ---: | ---: |
-| aellux.min.js | 50157 | 17129 | +1733 | +556 |
-| aellux.full.min.js | 197947 | 61045 | +5239 | +1567 |
-| aellux.full.legacy.min.js | 526448 | 155024 | +6350 | +1773 |
+| aellux.min.js | 50157 | 17123 | +1733 | +550 |
+| aellux.full.min.js | 197661 | 61156 | +4953 | +1678 |
+| aellux.full.legacy.min.js | 521470 | 154777 | +1372 | +1526 |
 | aellux.ext.present.min.js | 24767 | 8659 | +4730 | +1535 |
 | aellux.ext.present.legacy.min.js | 33437 | 11338 | +5612 | +1578 |
 | aellux.ext.feedback.min.js | 4547 | 1990 | +341 | +94 |
@@ -114,7 +114,7 @@ Final bytes include source-map comments. Gzip uses level 9, matching `test:budge
 | aellux.ext.progress.legacy.js | 13007 | 3866 | new | new |
 | aellux.ext.progress.legacy.min.js | 7432 | 2987 | new | new |
 
-Budget changes are limited to affected artifacts: boot 48/16.5 to 50/17 KiB raw/gzip; Full Modern 188.25/58.25 to 194/60; Full Legacy 508/150 to 515/152; Present Modern 20/7.25 to 24.5/8.5; Present Legacy 28/9.75 to 33/11.25; Feedback Modern raw 4.25 to 4.625 (gzip remains 2). Feedback Legacy limits are unchanged. Four Progress budgets cover the new delivery variants. The measured deltas account for capability probes/registry metadata, countdown publication, group reservations/concurrency and shared Feedback preparation; fallback code remains outside Core/Full.
+Budget changes are limited to affected artifacts: boot 48/16.5 to 50/17 KiB raw/gzip; Full Modern 188.25/58.25 to 194/60; Full Legacy 508/150 to 515/152; Present Modern 20/7.25 to 24.5/8.5; Present Legacy 28/9.75 to 33/11.25; Feedback Modern raw 4.25 to 4.625 (gzip remains 2). Feedback Legacy limits are unchanged. Four Progress budgets cover the new delivery variants. The measured deltas account for capability probes/registry metadata, countdown publication, group reservations/concurrency, shared Feedback preparation and the subsequent development-helper consolidation; fallback code remains outside Core/Full.
 
 ## Known limits and risks
 
