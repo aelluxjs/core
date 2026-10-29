@@ -582,6 +582,8 @@ p {
 progress.toast-progress {
   position: absolute;
   bottom: 0;
+  left: 0;
+  right: 0;
 
   /* Reseta a aparência padrão do navegador */
   -webkit-appearance: none;
@@ -590,7 +592,6 @@ progress.toast-progress {
   border: none;
 
   /* Dimensões da barra */
-  width: 100%;
   height: 2px;
   border-radius: 0;
 
