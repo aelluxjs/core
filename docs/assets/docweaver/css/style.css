@@ -578,3 +578,43 @@ p {
   min-width: 250px;
   max-width: 400px;
 }
+
+progress.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  /* Reseta a aparência padrão do navegador */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border: none;
+
+  /* Dimensões da barra */
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+
+  /* Cor de fundo do canal (Fundo para o Firefox) */
+  background-color: #e1e1e4;
+  /* 2. COMPATIBILIDADE (IE 10-11): Define a cor do preenchimento ativo */
+  color: #3d4ca6;
+}
+
+/* --- Estilização para Chrome, Safari e Edge --- */
+progress.toast-progress::-webkit-progress-bar {
+  background-color: #e1e1e4;
+  border-radius: 4px;
+}
+
+progress.toast-progress::-webkit-progress-value {
+  background-color: #3d4ca6;
+  border-radius: 4px;
+}
+
+/* --- Estilização para Firefox --- */
+progress.toast-progress::-moz-progress-bar {
+  background-color: #3d4ca6;
+  border-radius: 4px;
+}
