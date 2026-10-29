@@ -583,7 +583,7 @@ progress.toast-progress {
   position: absolute;
   bottom: 0;
   left: 0;
-  right: 0;
+  width: 100%;
 
   /* Reseta a aparência padrão do navegador */
   -webkit-appearance: none;
