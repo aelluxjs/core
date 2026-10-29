@@ -3114,15 +3114,19 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     },
     {
-      "name": "data-ae-unpop-on-outside",
+      "name": "data-ae-unpop-on-click",
       "extension": "present",
-      "description": "Set false to keep a Present region open when clicking outside it.",
+      "description": "Close on outside/out clicks (default), inside/in clicks, or disable click dismissal with false/none.",
       "syntax": "enum",
       "values": [
-        "true",
-        "false"
+        "outside",
+        "inside",
+        "out",
+        "in",
+        "false",
+        "none"
       ],
-      "default": "true",
+      "default": "outside",
       "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     },

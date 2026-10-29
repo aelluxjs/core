@@ -98,17 +98,17 @@ Without explicit message/transform targets, a group uses its reserved member as 
 <section id="feedback-source" data-ae-feedback data-ae-present-target="notifications"></section>
 <div id="notifications" data-ae-present-group="3" aria-live="polite">
   <article id="notice-1" data-ae-present="opacity" data-ae-auto-unpop="5000"
-           data-ae-unpop-on-outside="false" hidden>
+           data-ae-unpop-on-click="false" hidden>
     <progress max="100" value="0" data-ae-progress-target="notice-1"
               aria-label="Time until notification closes"></progress>
   </article>
   <article id="notice-2" data-ae-present="opacity" data-ae-auto-unpop="5000"
-           data-ae-unpop-on-outside="false" hidden>
+           data-ae-unpop-on-click="false" hidden>
     <progress max="100" value="0" data-ae-progress-target="notice-2"
               aria-label="Time until notification closes"></progress>
   </article>
   <article id="notice-3" data-ae-present="opacity" data-ae-auto-unpop="5000"
-           data-ae-unpop-on-outside="false" hidden>
+           data-ae-unpop-on-click="false" hidden>
     <progress max="100" value="0" data-ae-progress-target="notice-3"
               aria-label="Time until notification closes"></progress>
   </article>

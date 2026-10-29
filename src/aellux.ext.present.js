@@ -50,7 +50,7 @@
     triggerOn: AelluxJs.attr("trigger-on"),
     autoUnpop: AelluxJs.attr("auto-unpop"),
     presentMotion: AelluxJs.attr("present-motion"),
-    unpopOnOutside: AelluxJs.attr("unpop-on-outside"),
+    unpopOnClick: AelluxJs.attr("unpop-on-click"),
     trigger: AelluxJs.attr("trigger"), //toggle,pop,unpop
     dismiss: AelluxJs.attr("dismiss"), //target ID
     target: AelluxJs.attr("target"), //target ID
@@ -805,16 +805,14 @@
     controller.autoCountdown = null;
   }
 
-  function outsideClickAutoUnpop(currentExceptions) {
-    //unpop all not parenting except
-    //or with proprerty explicit to keep open when click outside
+  function clickAutoUnpop(eventTarget, currentExceptions) {
     for (const pContainer of openPresentElements) {
       if (pContainer.hidden === true
-        || pContainer.getAttribute(attr.unpopOnOutside) === "false"
-        || currentExceptions.some((e) => pContainer.contains(e))) {
-        continue;
-      }
-      unpop(pContainer);
+        || currentExceptions.some((e) => pContainer.contains(e))) continue;
+      const mode = (pContainer.getAttribute(attr.unpopOnClick) || "outside").trim().toLowerCase();
+      if (mode === "false" || mode === "none") continue;
+      const inside = pContainer.contains(eventTarget);
+      if (inside === (mode === "inside" || mode === "in")) unpop(pContainer);
     }
   }
 
@@ -885,7 +883,7 @@
 
   function activate(event, eventTarget, hoverSuppressed) {
     const container = eventTarget.closest(presentSelector);
-    const exceptions = [eventTarget];
+    const exceptions = [];
 
     var button;
     button = eventTarget.closest(`[${attr.trigger}]`);
@@ -933,7 +931,7 @@
       }
     }
 
-    outsideClickAutoUnpop(exceptions);
+    clickAutoUnpop(eventTarget, exceptions);
   }
 
   function diagnoseTarget(element, target, attribute, value) {

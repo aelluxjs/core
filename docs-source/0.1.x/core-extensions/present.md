@@ -65,7 +65,30 @@ The `--ae-from-height`, `--ae-pop-height`, and `--ae-unpop-height` properties de
 
 When an `unpop` hides a region containing the active element, Present releases focus if the browser has not already done so, then dispatches `UnpopFocusLost` through `AelluxJs.dispatch`. If the active element is outside the region at the time it becomes hidden, no focus event is dispatched.
 
-`data-ae-auto-unpop` specifies a delay before closing an open container. Outside clicks also close open containers unless `data-ae-unpop-on-outside="false"` is set. On unmount, Present restores the attributes it changes on each container and trigger control, including `data-ae-present`, `data-ae-present-motion`, `aria-expanded`, `aria-controls`, and `hidden` where applicable.
+`data-ae-auto-unpop` specifies a delay before closing an open container. `data-ae-unpop-on-click` controls click dismissal: `outside` (default) or `out` closes on outside clicks; `inside` or `in` closes on clicks within the container; `false` or `none` disables click dismissal. Trigger and dismiss controls retain their explicit action without a second automatic action on the same target. This option also applies to Point tap activation. On unmount, Present restores the attributes it changes on each container and trigger control, including `data-ae-present`, `data-ae-present-motion`, `aria-expanded`, `aria-controls`, and `hidden` where applicable.
+
+### Click dismissal
+
+Set `data-ae-unpop-on-click` on the Present container:
+
+| Value | Behavior |
+| --- | --- |
+| Omitted, empty, `outside`, or `out` | Close when a click occurs outside the container. |
+| `inside` or `in` | Close when a click occurs inside the container. |
+| `false` or `none` | Disable automatic click dismissal. Explicit controls and auto-unpop still work. |
+
+```html
+<div data-ae-present="opacity" data-ae-unpop-on-click="inside" hidden>
+  Click this notification to dismiss it.
+</div>
+
+<div data-ae-present="opacity" data-ae-unpop-on-click="false"
+     data-ae-auto-unpop="3s" hidden>
+  This notification closes after three seconds, independently of clicks.
+</div>
+```
+
+This replaces `data-ae-unpop-on-outside`; the old attribute is no longer read. Replace `data-ae-unpop-on-outside="false"` with `data-ae-unpop-on-click="false"`. For the previous default behavior, omit the new attribute or use `outside`. Point taps use the same policy, and explicit trigger/dismiss actions are not followed by a second automatic dismissal on the same target. The setting does not change hover dismissal.
 
 ## Present Progress
 
@@ -154,7 +177,7 @@ The `Popping` reset starts no timer. Counting starts after opening completes, or
 
 `data-ae-trigger-on="click"` is the default. `hover` changes how `pop`, `unpop` or `toggle` is invoked. Pointer entry activates the trigger once, ignoring movements between its descendants and touch pointer events. Hover `pop` keeps an already open region open. In exclusive mode, triggers targeting group members select those members through the group.
 
-Opening controls and their target form one shared hover region, including multiple triggers for the same target. Moving into the target keeps it open. Leaving the region schedules close after 120 ms; returning cancels it. Focus inside the shared region prevents hover dismissal. Outside clicks still close according to `data-ae-unpop-on-outside`; hover close is independent of that outside-click option. Dismiss and auto-unpop retain their normal behavior.
+Opening controls and their target form one shared hover region, including multiple triggers for the same target. Moving into the target keeps it open. Leaving the region schedules close after 120 ms; returning cancels it. Focus inside the shared region prevents hover dismissal. Click dismissal follows `data-ae-unpop-on-click`; hover close is independent of that click option. Dismiss and auto-unpop retain their normal behavior.
 
 Keep native buttons or links: keyboard activation continues to invoke the configured action, and ordinary click/tap remains available on devices without hover. A mouse click on a currently hovered trigger does not invoke its action a second time. Touch pointer entry is ignored so a tap is handled once by conventional activation. Listeners are delegated and removed on extension destruction; pending target close timers are canceled when the target is unmounted.
 

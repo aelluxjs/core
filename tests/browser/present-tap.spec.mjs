@@ -6,11 +6,12 @@ async function start(page, mode, forceLegacy) {
   await page.evaluate(({ mode, forceLegacy }) => new Promise(resolve => {
     document.body.innerHTML = `<button id="control" data-ae-point="2" data-ae-trigger="toggle" data-ae-target="panel">
       <span id="child">Toggle</span></button>
-      <section id="panel" data-ae-present="" data-ae-unpop-on-outside="false" hidden>
+      <section id="panel" data-ae-present="" data-ae-unpop-on-click="false" hidden>
         <button id="dismiss" data-ae-point data-ae-dismiss>Dismiss</button>
+        <button id="inside-child" data-ae-point><span>Inside</span></button>
       </section><button id="outside" data-ae-point>Outside</button>
       <button id="other" data-ae-point data-ae-trigger="toggle" data-ae-target="other-panel">Other</button>
-      <section id="other-panel" data-ae-present="" data-ae-unpop-on-outside="false" hidden>Other panel</section>`;
+      <section id="other-panel" data-ae-present="" data-ae-unpop-on-click="false" hidden>Other panel</section>`;
     if (mode === "basic") {
       AelluxJs.ext("point");
       AelluxJs.ext("present", { loadStyle: true });
@@ -45,6 +46,39 @@ async function start(page, mode, forceLegacy) {
 
 for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
   test.describe(`Present tap (${mode}, ${forceLegacy ? "Legacy" : "Modern"})`, () => {
+    test("click dismissal modes and aliases preserve explicit controls", async ({ page }) => {
+      await start(page, mode, forceLegacy);
+      for (const value of [null, "outside", "out", "inside", "in", "false", "none"]) {
+        for (const gesture of ["click", "tap"]) {
+          await page.evaluate(async value => {
+            await $ae("panel").present.unpop();
+            const panel = document.getElementById("panel");
+            if (value === null) panel.removeAttribute("data-ae-unpop-on-click");
+            else panel.setAttribute("data-ae-unpop-on-click", value);
+          }, value);
+          const activate = async id => {
+            await page.evaluate(({ id, gesture }) => {
+              if (gesture === "tap") tapGesture(id);
+              else document.getElementById(id).click();
+            }, { id, gesture });
+            if (gesture === "tap") await page.waitForTimeout(64);
+          };
+          await activate("child");
+          await expect(page.locator("#panel")).toHaveJSProperty("hidden", false);
+          await activate("outside");
+          const outside = value === null || value === "outside" || value === "out";
+          await expect(page.locator("#panel")).toHaveJSProperty("hidden", outside);
+          await page.evaluate(() => $ae("panel").present.pop());
+          // A plain descendant is inside; the dismiss control has its own action.
+          await activate("inside-child");
+          await expect(page.locator("#panel")).toHaveJSProperty("hidden", value === "inside" || value === "in");
+          await page.evaluate(() => $ae("panel").present.pop());
+          await activate("dismiss");
+          await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
+        }
+      }
+    });
+
     test("tap alone opens, toggles, dismisses and closes from outside", async ({ page }) => {
       await start(page, mode, forceLegacy);
       await page.evaluate(() => tapGesture("child"));
@@ -57,7 +91,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
       await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
       await page.evaluate(async () => {
         await $ae("panel").present.pop();
-        document.getElementById("panel").removeAttribute("data-ae-unpop-on-outside");
+        document.getElementById("panel").removeAttribute("data-ae-unpop-on-click");
         tapGesture("outside");
       });
       await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);

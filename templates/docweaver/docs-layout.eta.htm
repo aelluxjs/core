@@ -38,14 +38,14 @@
           <div id="toast-present-group"
             class="position-fixed w-100 top-0 gap-1 z-1 pe-none p-4 pt-1 flex-column d-flex justify-content-center align-items-center"
             data-ae-present-group="2">
-            <div id="toast-1" data-ae-present="opacity transform" data-ae-auto-unpop="1s"
-              data-ae-unpop-on-outside="false" hidden="true"
+            <div id="toast-1" data-ae-present="opacity" data-ae-auto-unpop="1s" data-ae-unpop-on-click="false"
+              hidden="true"
               class="position-relative overflow-hidden text-bg-danger small rounded-1 p-2 py-1 w-100 text-center"
               style="max-width: 300px;">
               <progress data-ae-progress-target="toast-1" class="toast-progress"></progress>
             </div>
-            <div id="toast-2" data-ae-present="opacity transform" data-ae-auto-unpop="1s"
-              data-ae-unpop-on-outside="false" hidden="true"
+            <div id="toast-2" data-ae-present="opacity" data-ae-auto-unpop="1s" data-ae-unpop-on-click="false"
+              hidden="true"
               class="position-relative overflow-hidden text-bg-danger small rounded-1 p-2 py-1 w-100 text-center"
               style="max-width: 300px;">
               <progress data-ae-progress-target="toast-2" class="toast-progress"></progress>
@@ -100,7 +100,7 @@
 
                     <% if (item.children !==undefined && item.children.length) { %>
                       <div id="children-<%= item.slug %>" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-outside="false" <% if (!item.active) { %>
+                        data-ae-present="height opacity" data-ae-unpop-on-click="false" <% if (!item.active) { %>
                         hidden
                         <% } %>>
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion<% if
@@ -124,7 +124,7 @@
                                   </div>
 
                                   <div id="children2-<%= child.slug %>" class="docs-menu-panel border-start ms-2"
-                                    data-ae-present="height opacity" data-ae-unpop-on-outside="false" <% if
+                                    data-ae-present="height opacity" data-ae-unpop-on-click="false" <% if
                                     (!child.active) { %>
                                     hidden<% } %>>
                                       <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>

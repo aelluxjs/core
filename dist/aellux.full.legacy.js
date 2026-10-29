@@ -22572,7 +22572,7 @@
       init_utils_name_case();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       attributesByExtension = {
-        present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside",
+        present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-click",
         anchor: "anchor anchor-target anchor-match",
         "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
         scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
@@ -34290,7 +34290,7 @@
           triggerOn: AelluxJs2.attr("trigger-on"),
           autoUnpop: AelluxJs2.attr("auto-unpop"),
           presentMotion: AelluxJs2.attr("present-motion"),
-          unpopOnOutside: AelluxJs2.attr("unpop-on-outside"),
+          unpopOnClick: AelluxJs2.attr("unpop-on-click"),
           trigger: AelluxJs2.attr("trigger"),
           //toggle,pop,unpop
           dismiss: AelluxJs2.attr("dismiss"),
@@ -35229,20 +35229,22 @@
           controller.autoUnpopTimeout = null;
           controller.autoCountdown = null;
         }
-        function outsideClickAutoUnpop(currentExceptions) {
+        function clickAutoUnpop(eventTarget, currentExceptions) {
           var _iterator0 = _createForOfIteratorHelper18(openPresentElements), _step0;
           try {
             var _loop = function _loop2() {
               var pContainer = _step0.value;
-              if (pContainer.hidden === true || pContainer.getAttribute(attr.unpopOnOutside) === "false" || currentExceptions.some(function(e) {
+              if (pContainer.hidden === true || currentExceptions.some(function(e) {
                 return pContainer.contains(e);
-              })) {
-                return 1;
-              }
-              unpop(pContainer);
-            };
+              })) return 0;
+              var mode = (pContainer.getAttribute(attr.unpopOnClick) || "outside").trim().toLowerCase();
+              if (mode === "false" || mode === "none") return 0;
+              var inside = pContainer.contains(eventTarget);
+              if (inside === (mode === "inside" || mode === "in")) unpop(pContainer);
+            }, _ret;
             for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
-              if (_loop()) continue;
+              _ret = _loop();
+              if (_ret === 0) continue;
             }
           } catch (err) {
             _iterator0.e(err);
@@ -35323,7 +35325,7 @@
         }
         function activate(event, eventTarget, hoverSuppressed) {
           var container = eventTarget.closest(presentSelector);
-          var exceptions = [eventTarget];
+          var exceptions = [];
           var button;
           button = eventTarget.closest("[".concat(attr.trigger, "]"));
           if (button) {
@@ -35371,7 +35373,7 @@
               });
             }
           }
-          outsideClickAutoUnpop(exceptions);
+          clickAutoUnpop(eventTarget, exceptions);
         }
         function diagnoseTarget(element, target, attribute, value) {
           if (!targetIdFor(value)) return;
@@ -35779,10 +35781,10 @@
               job.then(function() {
                 if (state.jobs.get(member2) === job) state.jobs.delete(member2);
               });
-            }, _ret;
+            }, _ret2;
             for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
-              _ret = _loop2();
-              if (_ret) return _ret.v;
+              _ret2 = _loop2();
+              if (_ret2) return _ret2.v;
             }
           } catch (err) {
             _iterator14.e(err);

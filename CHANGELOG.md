@@ -6,6 +6,9 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Changed
 
+- Replaced Present `data-ae-unpop-on-outside` with `data-ae-unpop-on-click`: `outside`/`out` (default), `inside`/`in`, or `false`/`none`. Explicit controls retain one action per interaction.
+- The old click-dismissal attribute is no longer read. Migrate `data-ae-unpop-on-outside="false"` to `data-ae-unpop-on-click="false"`; omission or an empty value preserves outside-click dismissal. Point taps share the policy; hover dismissal and auto-unpop remain independent. The Present guide includes the value reference and migration examples.
+
 - Centralized development-only HTML, Extension declaration, CSS Motion resource and PWA manifest diagnostics in `src/internal/development-helpers.js`. Duplicate-attribute validation now uses `validateDoubleAttributeHTML()`, preserving the initial document's independent one-shot source inspection and production guards.
 - Positioned Docweaver notifications at the top of the viewport with spacing between pooled messages and reduced vertical padding.
 

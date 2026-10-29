@@ -21,7 +21,7 @@ async function start(page, markup, { mode = "full", forceLegacy = false, missing
 const notices = `<section id="source" data-ae-feedback data-ae-present-target="group"></section>
 <div id="group" data-ae-present-group="3">
 ${[1, 2, 3].map(n => `<article id="n${n}" data-ae-present data-ae-auto-unpop="5000"
-data-ae-unpop-on-outside="false" hidden><b>Keep child</b><progress max="100" value="0"
+data-ae-unpop-on-click="false" hidden><b>Keep child</b><progress max="100" value="0"
 data-ae-progress-target="n${n}"></progress></article>`).join("")}
 </div>`;
 

@@ -83,14 +83,14 @@
           <div id="toast-present-group"
             class="position-fixed w-100 top-0 gap-1 z-1 pe-none p-4 pt-1 flex-column d-flex justify-content-center align-items-center"
             data-ae-present-group="2">
-            <div id="toast-1" data-ae-present="opacity transform" data-ae-auto-unpop="1s"
-              data-ae-unpop-on-outside="false" hidden="true"
+            <div id="toast-1" data-ae-present="opacity" data-ae-auto-unpop="1s" data-ae-unpop-on-click="false"
+              hidden="true"
               class="position-relative overflow-hidden text-bg-danger small rounded-1 p-2 py-1 w-100 text-center"
               style="max-width: 300px;">
               <progress data-ae-progress-target="toast-1" class="toast-progress"></progress>
             </div>
-            <div id="toast-2" data-ae-present="opacity transform" data-ae-auto-unpop="1s"
-              data-ae-unpop-on-outside="false" hidden="true"
+            <div id="toast-2" data-ae-present="opacity" data-ae-auto-unpop="1s" data-ae-unpop-on-click="false"
+              hidden="true"
               class="position-relative overflow-hidden text-bg-danger small rounded-1 p-2 py-1 w-100 text-center"
               style="max-width: 300px;">
               <progress data-ae-progress-target="toast-2" class="toast-progress"></progress>
@@ -182,7 +182,7 @@
                     </div>
 
                                           <div id="children-overview" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-outside="false"                         hidden
+                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -227,7 +227,7 @@
                     </div>
 
                                           <div id="children-runtime" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-outside="false"                         hidden
+                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -314,7 +314,7 @@
                     </div>
 
                                           <div id="children-extensions" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-outside="false"                         hidden
+                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -394,7 +394,7 @@
                     </div>
 
                                           <div id="children-core-extensions" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-outside="false" >
+                        data-ae-present="height opacity" data-ae-unpop-on-click="false" >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion                            data-ae-present-group>
                                                                                                   <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -417,7 +417,7 @@
                                   </div>
 
                                   <div id="children2-bundled" class="docs-menu-panel border-start ms-2"
-                                    data-ae-present="height opacity" data-ae-unpop-on-outside="false" >
+                                    data-ae-present="height opacity" data-ae-unpop-on-click="false" >
                                       <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                   <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -512,7 +512,7 @@
                                   </div>
 
                                   <div id="children2-optional" class="docs-menu-panel border-start ms-2"
-                                    data-ae-present="height opacity" data-ae-unpop-on-outside="false"                                     hidden>
+                                    data-ae-present="height opacity" data-ae-unpop-on-click="false"                                     hidden>
                                       <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                   <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -565,7 +565,7 @@
                     </div>
 
                                           <div id="children-integrations" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-outside="false"                         hidden
+                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -712,7 +712,39 @@ await panel.unpop();
 <p>The generated <code>aellux.ext.present.css</code> stylesheet treats the whitespace-separated <code>data-ae-present</code> value as a list of transition instructions. <code>opacity</code> controls opacity and <code>transform</code> controls transform. <code>height</code> and <code>width</code> control <code>grid-template-rows</code> and <code>grid-template-columns</code> when a direct motion child exists, or measured <code>max-height</code> and <code>max-width</code> when it does not. Values can be used alone or in any combination, such as <code>data-ae-present=&quot;opacity height&quot;</code>. When the same container also declares <code>data-ae-anchor</code>, Anchor owns <code>transform</code>: Present ignores its transform token and excludes transform from its transition properties, while opacity and size motion remain available. Development validation reports <code>WARN_PRESENT_ANCHOR_TRANSFORM</code> (<code>2031</code>); remove the transform token or animate a child to keep a separate visual transform. The original Present declaration is preserved. An empty attribute remains empty and disables the transition with zero duration. The value <code>all</code> expands to <code>opacity transform height width</code> during mount and is restored to its original value on unmount.</p>
 <p>The <code>--ae-from-height</code>, <code>--ae-pop-height</code>, and <code>--ae-unpop-height</code> properties define the height keyframes, while <code>--ae-from-width</code>, <code>--ae-pop-width</code>, and <code>--ae-unpop-width</code> define the width keyframes. Its minified counterpart is <code>aellux.ext.present.min.css</code>; the boot runtime selects the variant that matches the loaded Aellux script. CSS custom properties <code>--ae-pop-duration</code> and <code>--ae-unpop-duration</code> on the container set the corresponding duration. Present delegates compatible transitions to the shared <a href="../runtime/css-motion.htm">CSS Motion Controller</a>, so <code>waitLayout</code> controls their update frequency while CSS remains their definition. Optional <code>--ae-pop-aellux-ease</code> and <code>--ae-unpop-aellux-ease</code> values select an advanced <code>$ae.ease()</code> curve in controlled mode; the existing valid CSS easing remains the native fallback. When the document root has <code>data-ae-reduced-motion=&quot;reduced&quot;</code>, the generated stylesheet disables transitions. Present preserves the configured easing regardless of hardware; it does not derive step counts or override timing functions for low-hardware markers. The Extension emits cancelable <code>AelluxJsBeforePop</code> and <code>AelluxJsBeforeUnpop</code> events immediately, waits through the preparation period, then emits <code>AelluxJsPopping</code>/<code>AelluxJsUnpopping</code> and finally <code>AelluxJsPop</code>/<code>AelluxJsUnpop</code> as transitions progress. It emits a bubbling <code>AelluxJsLayout</code> event from the Present element when the transition starts, notifying layout observers such as Anchor. The event carries <code>detail.origin</code> as <code>&quot;present.pop&quot;</code> or <code>&quot;present.unpop&quot;</code> and <code>detail.durationMs</code> as the transition time in milliseconds.</p>
 <p>When an <code>unpop</code> hides a region containing the active element, Present releases focus if the browser has not already done so, then dispatches <code>UnpopFocusLost</code> through <code>AelluxJs.dispatch</code>. If the active element is outside the region at the time it becomes hidden, no focus event is dispatched.</p>
-<p><code>data-ae-auto-unpop</code> specifies a delay before closing an open container. Outside clicks also close open containers unless <code>data-ae-unpop-on-outside=&quot;false&quot;</code> is set. On unmount, Present restores the attributes it changes on each container and trigger control, including <code>data-ae-present</code>, <code>data-ae-present-motion</code>, <code>aria-expanded</code>, <code>aria-controls</code>, and <code>hidden</code> where applicable.</p>
+<p><code>data-ae-auto-unpop</code> specifies a delay before closing an open container. <code>data-ae-unpop-on-click</code> controls click dismissal: <code>outside</code> (default) or <code>out</code> closes on outside clicks; <code>inside</code> or <code>in</code> closes on clicks within the container; <code>false</code> or <code>none</code> disables click dismissal. Trigger and dismiss controls retain their explicit action without a second automatic action on the same target. This option also applies to Point tap activation. On unmount, Present restores the attributes it changes on each container and trigger control, including <code>data-ae-present</code>, <code>data-ae-present-motion</code>, <code>aria-expanded</code>, <code>aria-controls</code>, and <code>hidden</code> where applicable.</p>
+<h3>Click dismissal</h3>
+<p>Set <code>data-ae-unpop-on-click</code> on the Present container:</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Omitted, empty, <code>outside</code>, or <code>out</code></td>
+<td>Close when a click occurs outside the container.</td>
+</tr>
+<tr>
+<td><code>inside</code> or <code>in</code></td>
+<td>Close when a click occurs inside the container.</td>
+</tr>
+<tr>
+<td><code>false</code> or <code>none</code></td>
+<td>Disable automatic click dismissal. Explicit controls and auto-unpop still work.</td>
+</tr>
+</tbody></table>
+<pre><code class="language-html">&lt;div data-ae-present=&quot;opacity&quot; data-ae-unpop-on-click=&quot;inside&quot; hidden&gt;
+  Click this notification to dismiss it.
+&lt;/div&gt;
+
+&lt;div data-ae-present=&quot;opacity&quot; data-ae-unpop-on-click=&quot;false&quot;
+     data-ae-auto-unpop=&quot;3s&quot; hidden&gt;
+  This notification closes after three seconds, independently of clicks.
+&lt;/div&gt;
+</code></pre>
+<p>This replaces <code>data-ae-unpop-on-outside</code>; the old attribute is no longer read. Replace <code>data-ae-unpop-on-outside=&quot;false&quot;</code> with <code>data-ae-unpop-on-click=&quot;false&quot;</code>. For the previous default behavior, omit the new attribute or use <code>outside</code>. Point taps use the same policy, and explicit trigger/dismiss actions are not followed by a second automatic dismissal on the same target. The setting does not change hover dismissal.</p>
 <h2>Present Progress</h2>
 <p>Present registers two inheritable numeric CSS properties on each mounted region. <code>--ae-pop-progress</code> advances from 0 to 1 during opening; <code>--ae-unpop-progress</code> advances from 0 to 1 during closing. Initially hidden regions have values <code>0, 1</code>; initially visible regions have <code>1, 0</code>. Both channels reset to zero when a transition starts. Opening finishes at <code>1, 0</code>, and closing finishes at <code>0, 1</code>. Repeated standalone <code>pop()</code> calls restart progress along with the existing visual transition. Reversals reset the previous channel immediately rather than animating it backwards. Unmount restores the original inline values and priorities.</p>
 <pre><code class="language-css">.panel-content {
@@ -765,7 +797,7 @@ await $ae(&quot;views&quot;).present.show(&quot;home&quot;);
   data-ae-target=&quot;settings&quot;&gt;Settings&lt;/button&gt;
 </code></pre>
 <p><code>data-ae-trigger-on=&quot;click&quot;</code> is the default. <code>hover</code> changes how <code>pop</code>, <code>unpop</code> or <code>toggle</code> is invoked. Pointer entry activates the trigger once, ignoring movements between its descendants and touch pointer events. Hover <code>pop</code> keeps an already open region open. In exclusive mode, triggers targeting group members select those members through the group.</p>
-<p>Opening controls and their target form one shared hover region, including multiple triggers for the same target. Moving into the target keeps it open. Leaving the region schedules close after 120 ms; returning cancels it. Focus inside the shared region prevents hover dismissal. Outside clicks still close according to <code>data-ae-unpop-on-outside</code>; hover close is independent of that outside-click option. Dismiss and auto-unpop retain their normal behavior.</p>
+<p>Opening controls and their target form one shared hover region, including multiple triggers for the same target. Moving into the target keeps it open. Leaving the region schedules close after 120 ms; returning cancels it. Focus inside the shared region prevents hover dismissal. Click dismissal follows <code>data-ae-unpop-on-click</code>; hover close is independent of that click option. Dismiss and auto-unpop retain their normal behavior.</p>
 <p>Keep native buttons or links: keyboard activation continues to invoke the configured action, and ordinary click/tap remains available on devices without hover. A mouse click on a currently hovered trigger does not invoke its action a second time. Touch pointer entry is ignored so a tap is handled once by conventional activation. Listeners are delegated and removed on extension destruction; pending target close timers are canceled when the target is unmounted.</p>
 <h2>Group selection notifications and Anchor</h2>
 <p><code>$ae.ext.present.selected(groupElement)</code> and <code>$ae(&quot;views&quot;).present.selected()</code> return the accepted mounted member, or <code>null</code>. This is a read-only query of the same selection used by <code>show()</code>; it does not select an ID or wait for the opening animation. Existing <code>show()</code>, trigger and transition contracts are preserved.</p>

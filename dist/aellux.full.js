@@ -5421,7 +5421,7 @@
           triggerOn: AelluxJs2.attr("trigger-on"),
           autoUnpop: AelluxJs2.attr("auto-unpop"),
           presentMotion: AelluxJs2.attr("present-motion"),
-          unpopOnOutside: AelluxJs2.attr("unpop-on-outside"),
+          unpopOnClick: AelluxJs2.attr("unpop-on-click"),
           trigger: AelluxJs2.attr("trigger"),
           //toggle,pop,unpop
           dismiss: AelluxJs2.attr("dismiss"),
@@ -6160,12 +6160,13 @@
           controller.autoUnpopTimeout = null;
           controller.autoCountdown = null;
         }
-        function outsideClickAutoUnpop(currentExceptions) {
+        function clickAutoUnpop(eventTarget, currentExceptions) {
           for (const pContainer of openPresentElements) {
-            if (pContainer.hidden === true || pContainer.getAttribute(attr.unpopOnOutside) === "false" || currentExceptions.some((e) => pContainer.contains(e))) {
-              continue;
-            }
-            unpop(pContainer);
+            if (pContainer.hidden === true || currentExceptions.some((e) => pContainer.contains(e))) continue;
+            const mode = (pContainer.getAttribute(attr.unpopOnClick) || "outside").trim().toLowerCase();
+            if (mode === "false" || mode === "none") continue;
+            const inside = pContainer.contains(eventTarget);
+            if (inside === (mode === "inside" || mode === "in")) unpop(pContainer);
           }
         }
         function refreshChangedTrigger(button) {
@@ -6227,7 +6228,7 @@
         }
         function activate(event, eventTarget, hoverSuppressed) {
           const container = eventTarget.closest(presentSelector);
-          const exceptions = [eventTarget];
+          const exceptions = [];
           var button;
           button = eventTarget.closest(`[${attr.trigger}]`);
           if (button) {
@@ -6273,7 +6274,7 @@
               );
             }
           }
-          outsideClickAutoUnpop(exceptions);
+          clickAutoUnpop(eventTarget, exceptions);
         }
         function diagnoseTarget(element, target, attribute, value) {
           if (!targetIdFor(value)) return;
@@ -7406,7 +7407,7 @@
     }
   }
   var attributesByExtension = {
-    present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside",
+    present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-click",
     anchor: "anchor anchor-target anchor-match",
     "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
     scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
