@@ -27,7 +27,7 @@
  * and manage focus and announcements after content replacement.
  */
 
-import { validateHTMLSource } from "./internal/validate-html-source.js";
+import { validateDoubleAttributeHTML } from "./internal/development-helpers.js";
 
 (function (root) {
   "use strict";
@@ -79,7 +79,7 @@ import { validateHTMLSource } from "./internal/validate-html-source.js";
       const response = await AelluxJs.request(url, { signal: controller.signal });
       const html = await response.text();
       if (previousController !== controller) return null;
-      validateHTMLSource(AelluxJs, html, response.url || String(url));
+      validateDoubleAttributeHTML(AelluxJs, html, response.url || String(url));
       const loadedDocument = new DOMParser().parseFromString(html, "text/html");
       let historyRequested = false;
 

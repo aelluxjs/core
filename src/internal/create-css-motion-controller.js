@@ -1,6 +1,6 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
-import { diagnoseMotionResources } from "./diagnose-resources.js";
+import { validateMotionResourceConflicts } from "./development-helpers.js";
 
 // CSS remains the motion definition. This service only owns time progression
 // when the browser exposes enough of Web Animations to do that safely.
@@ -128,7 +128,7 @@ export function createCssMotionController(root, getAelluxJs) {
     operation.element.getBoundingClientRect();
     const animations = animationsFor(operation).filter(animation =>
       !operation.before.has(animation) && controllable(animation));
-    diagnoseMotionResources(getAelluxJs(), operation.element, animations, operation.options.extension || "css-motion");
+    validateMotionResourceConflicts(getAelluxJs(), operation.element, animations, operation.options.extension || "css-motion");
     return animations;
   }
 
@@ -269,7 +269,7 @@ export function createCssMotionController(root, getAelluxJs) {
   function nativeWait(operation, before = operation.before) {
     const animations = typeof operation.element.getAnimations === "function"
       ? animationsFor(operation).filter(animation => !operation.before.has(animation)) : [];
-    diagnoseMotionResources(getAelluxJs(), operation.element,
+    validateMotionResourceConflicts(getAelluxJs(), operation.element,
       before === operation.before ? animations : animations.filter(animation => !before.has(animation)),
       operation.options.extension || "css-motion");
     return new Promise(resolve => {

@@ -11,6 +11,8 @@
  * Limitations: early beforeinstallprompt events cannot be recovered by lazy code;
  * manual Safari instructions are heuristics, not evidence of installation.
  */
+import { validatePWAManifest } from "./internal/development-helpers.js";
+
 (function (root) {
   "use strict";
   const api = root.AelluxJs;
@@ -43,7 +45,7 @@
     else if (media?.addListener) media.addListener(onDisplayChange);
     api.mountManager.add({ extensionName, selector: `[${attribute}]`, mount, unmount,
       controllers: ["install", "register", "checkUpdate", "applyUpdate", "status"] });
-    diagnoseManifest();
+    validatePWAManifest(root, manifestLink);
   }
 
   function destroy() {
@@ -131,22 +133,11 @@
     return Array.from(root.document.querySelectorAll("link[rel]")).find(link =>
       /(?:^|\s)manifest(?:\s|$)/i.test(link.getAttribute("rel") || ""));
   }
-  function diagnoseManifest() {
-    if (api.options.environment !== "development") return;
-    const link = manifestLink();
-    if (link?.getAttribute("href")?.trim()) return;
-    api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_STRUCTURE, {
-      extension: extensionName, element: link || root.document.documentElement,
-      attribute: link ? "href" : "rel", value: link?.getAttribute("href") ?? null,
-      reason: link ? "The Web App Manifest link has no nonempty href." : "The page has no Web App Manifest link.",
-      suggestion: 'Add <link rel="manifest" href="./manifest.webmanifest"> in the document head and provide an application manifest. See the PWA documentation; registering a Service Worker does not supply a manifest.'
-    });
-  }
   function install(first, second) {
     const { element, options } = argumentsFor(first, second);
     if (!active) return Promise.reject(new Error("PWA is not initialized."));
     if (promptTask) return promptTask;
-    diagnoseManifest();
+    validatePWAManifest(root, manifestLink);
     const current = status(), token = revision;
     if (current.installMethod === "unavailable") return Promise.resolve({ outcome: "unavailable", status: current });
     if (current.canPrompt) {

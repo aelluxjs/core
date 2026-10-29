@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createCssMotionController } from "../../src/internal/create-css-motion-controller.js";
-import { diagnoseMotionResources } from "../../src/internal/diagnose-resources.js";
+import { validateMotionResourceConflicts } from "../../src/internal/development-helpers.js";
 
 async function propertyPolicy(properties, options = {}, transition = true, requestedFPS) {
   class Animation {
@@ -124,9 +124,9 @@ test("per-keyframe replacement overrides additive effect composition for resourc
     diagnostics: { warn: (_definition, context) => warnings.push(context) } };
   const effect = composite => ({ target: element, composite: "add",
     getKeyframes: () => [{ transform: "translateX(2px)", composite }] });
-  diagnoseMotionResources(api, element, [{ effect: effect("auto") }], "feedback");
+  validateMotionResourceConflicts(api, element, [{ effect: effect("auto") }], "feedback");
   assert.equal(warnings.length, 0);
-  diagnoseMotionResources(api, element, [{ effect: effect("replace") }], "feedback");
+  validateMotionResourceConflicts(api, element, [{ effect: effect("replace") }], "feedback");
   assert.deepEqual(warnings.map(context => context.writers), [["anchor", "feedback"]]);
 });
 

@@ -1,4 +1,25 @@
 (function() {
+  // src/internal/utils-name-case.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+
+  // src/internal/development-helpers.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function validatePWAManifest(root, getManifestLink) {
+    var _link$getAttribute, _link$getAttribute2;
+    var api = root.AelluxJs;
+    if (api.options.environment !== "development") return;
+    var link = getManifestLink();
+    if (link !== null && link !== void 0 && (_link$getAttribute = link.getAttribute("href")) !== null && _link$getAttribute !== void 0 && _link$getAttribute.trim()) return;
+    api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_STRUCTURE, {
+      extension: "pwa",
+      element: link || root.document.documentElement,
+      attribute: link ? "href" : "rel",
+      value: (_link$getAttribute2 = link === null || link === void 0 ? void 0 : link.getAttribute("href")) !== null && _link$getAttribute2 !== void 0 ? _link$getAttribute2 : null,
+      reason: link ? "The Web App Manifest link has no nonempty href." : "The page has no Web App Manifest link.",
+      suggestion: 'Add <link rel="manifest" href="./manifest.webmanifest"> in the document head and provide an application manifest. See the PWA documentation; registering a Service Worker does not supply a manifest.'
+    });
+  }
+
   // src/src/aellux.ext.pwa.js
   function _typeof(o) {
     "@babel/helpers - typeof";
@@ -243,7 +264,7 @@
         unmount: unmount,
         controllers: ["install", "register", "checkUpdate", "applyUpdate", "status"]
       });
-      diagnoseManifest();
+      validatePWAManifest(root, manifestLink);
     }
     function destroy() {
       var _media3, _media4;
@@ -360,26 +381,12 @@
         return /(?:^|\s)manifest(?:\s|$)/i.test(link.getAttribute("rel") || "");
       });
     }
-    function diagnoseManifest() {
-      var _link$getAttribute, _link$getAttribute2;
-      if (api.options.environment !== "development") return;
-      var link = manifestLink();
-      if (link !== null && link !== void 0 && (_link$getAttribute = link.getAttribute("href")) !== null && _link$getAttribute !== void 0 && _link$getAttribute.trim()) return;
-      api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_STRUCTURE, {
-        extension: extensionName,
-        element: link || root.document.documentElement,
-        attribute: link ? "href" : "rel",
-        value: (_link$getAttribute2 = link === null || link === void 0 ? void 0 : link.getAttribute("href")) !== null && _link$getAttribute2 !== void 0 ? _link$getAttribute2 : null,
-        reason: link ? "The Web App Manifest link has no nonempty href." : "The page has no Web App Manifest link.",
-        suggestion: 'Add <link rel="manifest" href="./manifest.webmanifest"> in the document head and provide an application manifest. See the PWA documentation; registering a Service Worker does not supply a manifest.'
-      });
-    }
     function install(first, second) {
-      var _ref, _options$fallback, _link$getAttribute3;
+      var _ref, _options$fallback, _link$getAttribute;
       var _argumentsFor = argumentsFor(first, second), element = _argumentsFor.element, options = _argumentsFor.options;
       if (!active) return Promise.reject(new Error("PWA is not initialized."));
       if (promptTask) return promptTask;
-      diagnoseManifest();
+      validatePWAManifest(root, manifestLink);
       var current = status(), token = revision;
       if (current.installMethod === "unavailable") return Promise.resolve({
         outcome: "unavailable",
@@ -429,7 +436,7 @@
         status: current,
         element: element,
         manifest: options.manifest || settings.manifest || null,
-        manifestURL: link !== null && link !== void 0 && (_link$getAttribute3 = link.getAttribute("href")) !== null && _link$getAttribute3 !== void 0 && _link$getAttribute3.trim() ? link.href : null
+        manifestURL: link !== null && link !== void 0 && (_link$getAttribute = link.getAttribute("href")) !== null && _link$getAttribute !== void 0 && _link$getAttribute.trim() ? link.href : null
       };
       var task = Promise.resolve().then(function() {
         if (!active || token !== revision) return {

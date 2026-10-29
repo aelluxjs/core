@@ -3,8 +3,7 @@
 import utilsNameCase from "./utils-name-case.js";
 import { createControllerHelper } from "./create-controller-helper.js";
 import { resolveElementOrId } from "./resolve-element-or-id.js";
-import { validateDeclarations } from "./validate-declarations.js";
-import { validateHTMLSource } from "./validate-html-source.js";
+import { createDocumentHTMLValidator, validateExtensionDeclarations } from "./development-helpers.js";
 
 export function createMountHelper(root, mountMaps, mountedElements, elementControllers) {
   const UNMOUNT = "unmount";
@@ -15,8 +14,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
   const mountRecords = new WeakMap();
   let mountOrder = 0;
   const classPrefix = root.AelluxJs.className("");
-  const sourceURL = root.document.URL;
-  let sourceChecked = false;
+  const validateDocumentDoubleAttributeHTML = createDocumentHTMLValidator(root);
 
   return { mount, unmount, unmountDetached, update };
 
@@ -24,7 +22,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
     const rootElement = resolveMountElement(elementOrId, "update");
     if (!rootElement) return false;
     await AelluxJsMounted(rootElement, "update", extensionNames);
-    validateDeclarations(root, rootElement, extensionNames, "update");
+    validateExtensionDeclarations(root, rootElement, extensionNames, "update");
     return true;
   }
 
@@ -86,8 +84,8 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
       await Promise.all(waitExtensions);
 
       await AelluxJsMount(rootElement, extensionNames, newlyMounted);
-      validateDeclarations(root, rootElement, extensionNames);
-      if (rootElement === root.document && extensionNames == null) validateDocumentSource();
+      validateExtensionDeclarations(root, rootElement, extensionNames);
+      if (rootElement === root.document && extensionNames == null) validateDocumentDoubleAttributeHTML();
 
     } catch (error) {
       AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_MOUNT, {
@@ -97,19 +95,6 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
       allWaiters.forEach(waiter => waiter.setAttribute("aria-busy", "false"));
     }
     return Array.from(newlyMounted);
-  }
-
-  function validateDocumentSource() {
-    const api = root.AelluxJs;
-    if (api.options.environment !== "development" || sourceChecked ||
-        root.document.contentType !== "text/html" || !/^https?:/i.test(sourceURL)) return;
-    sourceChecked = true;
-    // Browsers discard duplicate attributes before mounting. Read the original
-    // source once, preferring the HTTP cache, without delaying mount/Ready.
-    Promise.resolve().then(() => api.request(sourceURL, { cache: "force-cache" }))
-      .then(response => response.text())
-      .then(html => validateHTMLSource(api, html, sourceURL))
-      .catch(() => { /* Source inspection is optional and must not fail mounting. */ });
   }
 
   async function AelluxJsMount(rootElement, extensionNames, newlyMounted) {

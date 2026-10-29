@@ -731,53 +731,33 @@
     return null;
   }
 
-  // src/internal/report-configuration.js
+  // src/internal/development-helpers.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  function reportConfiguration(api, name, context) {
-    if (context.element && context.attribute && !("value" in context))
-      context.value = context.element.getAttribute(context.attribute);
-    return api.diagnostics.warn(api.diagnostics[name], context);
+  function createDocumentHTMLValidator(root) {
+    const sourceURL = root.document.URL;
+    let sourceChecked = false;
+    return function validateDocumentDoubleAttributeHTML() {
+      const api = root.AelluxJs;
+      if (api.options.environment !== "development" || sourceChecked || root.document.contentType !== "text/html" || !/^https?:/i.test(sourceURL)) return;
+      sourceChecked = true;
+      Promise.resolve().then(() => api.request(sourceURL, { cache: "force-cache" })).then((response) => response.text()).then((html) => validateDoubleAttributeHTML(api, html, sourceURL)).catch(() => {
+      });
+    };
   }
-  function diagnosePresentTarget(api, element, target, attribute, value) {
-    if (!value || /[\s#]/.test(value.replace(/^#/, ""))) return false;
-    if (target && target.hasAttribute(api.attr("present"))) return true;
-    reportConfiguration(api, "WARN_CONFIGURATION_TARGET", {
-      extension: "present",
-      element,
-      attribute,
-      value,
-      reason: target ? "Target is not a Present container." : "Target element was not found.",
-      suggestion: "Use one existing Present element ID, optionally prefixed with #, and mount it before interacting."
-    });
-    return false;
-  }
-
-  // src/internal/diagnose-resources.js
-  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  function transformOwners(api, element) {
-    var _a, _b, _c, _d;
-    const owners = [];
-    if (((_a = api.ext.anchor) == null ? void 0 : _a.initialized) && element.classList.contains(api.className("anchored"))) owners.push("anchor");
-    const parent = element.parentElement;
-    if (((_b = api.ext.scrollbox) == null ? void 0 : _b.initialized) && element.hasAttribute(api.attr("scrollbox-elastic")) && element.getAttribute(api.attr("scrollbox-elastic")) !== "false" && (parent == null ? void 0 : parent.hasAttribute(api.attr("scrollbox")))) {
-      const children = [...parent.children].filter((child) => !child.hasAttribute(api.attr("scrollbar-vertical")) && !child.hasAttribute(api.attr("scrollbar-horizontal")));
-      if (children.length === 1) owners.push("scrollbox-elastic");
+  function validateDoubleAttributeHTML(api, html, source) {
+    if (api.options.environment !== "development") return;
+    for (const duplicate of findDuplicateAttributes(html)) {
+      const { attribute } = duplicate;
+      reportConfiguration(api, "WARN_ATTRIBUTE_DUPLICATE", __spreadProps(__spreadValues({
+        extension: "core",
+        source
+      }, duplicate), {
+        reason: `The ${attribute} attribute occurs more than once on the same start tag; the HTML parser keeps the first value and discards the others.`,
+        suggestion: attribute === "class" ? "Combine all class names in one class attribute, separated by spaces." : attribute === "style" ? "Combine the intended CSS declarations in one style attribute, separated by semicolons." : `Keep one ${attribute} attribute with the intended value.`
+      }));
     }
-    if (((_c = api.ext.present) == null ? void 0 : _c.initialized) && !element.hasAttribute(api.attr("anchor")) && ((_d = element.getAttribute(api.attr("present"))) == null ? void 0 : _d.split(/\s+/).includes("transform"))) owners.push("present");
-    return owners;
   }
-  function diagnoseResource(api, element, property, writers) {
-    api.diagnostics.warn(api.diagnostics.WARN_RESOURCE_CONFLICT, {
-      extension: writers[writers.length - 1],
-      element,
-      attribute: "style",
-      property,
-      writers,
-      reason: `${writers.join(" and ")} replace the same ${property} on this element.`,
-      suggestion: "Keep positioning and elastic transforms on the outer element; animate a child element instead."
-    });
-  }
-  function diagnoseMotionResources(api, element, animations, extension) {
+  function validateMotionResourceConflicts(api, element, animations, extension) {
     if (api.options.environment !== "development") return;
     for (const animation of animations) {
       try {
@@ -791,9 +771,6 @@
       }
     }
   }
-
-  // src/internal/validate-declarations.js
-  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   var attributesByExtension = {
     present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-outside",
     anchor: "anchor anchor-target anchor-match",
@@ -824,7 +801,7 @@
     preference: "preference",
     feedback: "feedback"
   };
-  function validateDeclarations(root, scope, extensionNames = null, method = "mount") {
+  function validateExtensionDeclarations(root, scope, extensionNames = null, method = "mount") {
     var _a, _b;
     const api = root.AelluxJs;
     if (api.options.environment !== "development") return;
@@ -1102,9 +1079,47 @@
     }
     return edits + Number(i < left.length || j < right.length) === 1;
   }
-
-  // src/internal/find-duplicate-attributes.js
-  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function reportConfiguration(api, name, context) {
+    if (context.element && context.attribute && !("value" in context))
+      context.value = context.element.getAttribute(context.attribute);
+    return api.diagnostics.warn(api.diagnostics[name], context);
+  }
+  function diagnosePresentTarget(api, element, target, attribute, value) {
+    if (!value || /[\s#]/.test(value.replace(/^#/, ""))) return false;
+    if (target && target.hasAttribute(api.attr("present"))) return true;
+    reportConfiguration(api, "WARN_CONFIGURATION_TARGET", {
+      extension: "present",
+      element,
+      attribute,
+      value,
+      reason: target ? "Target is not a Present container." : "Target element was not found.",
+      suggestion: "Use one existing Present element ID, optionally prefixed with #, and mount it before interacting."
+    });
+    return false;
+  }
+  function transformOwners(api, element) {
+    var _a, _b, _c, _d;
+    const owners = [];
+    if (((_a = api.ext.anchor) == null ? void 0 : _a.initialized) && element.classList.contains(api.className("anchored"))) owners.push("anchor");
+    const parent = element.parentElement;
+    if (((_b = api.ext.scrollbox) == null ? void 0 : _b.initialized) && element.hasAttribute(api.attr("scrollbox-elastic")) && element.getAttribute(api.attr("scrollbox-elastic")) !== "false" && (parent == null ? void 0 : parent.hasAttribute(api.attr("scrollbox")))) {
+      const children = [...parent.children].filter((child) => !child.hasAttribute(api.attr("scrollbar-vertical")) && !child.hasAttribute(api.attr("scrollbar-horizontal")));
+      if (children.length === 1) owners.push("scrollbox-elastic");
+    }
+    if (((_c = api.ext.present) == null ? void 0 : _c.initialized) && !element.hasAttribute(api.attr("anchor")) && ((_d = element.getAttribute(api.attr("present"))) == null ? void 0 : _d.split(/\s+/).includes("transform"))) owners.push("present");
+    return owners;
+  }
+  function diagnoseResource(api, element, property, writers) {
+    api.diagnostics.warn(api.diagnostics.WARN_RESOURCE_CONFLICT, {
+      extension: writers[writers.length - 1],
+      element,
+      attribute: "style",
+      property,
+      writers,
+      reason: `${writers.join(" and ")} replace the same ${property} on this element.`,
+      suggestion: "Keep positioning and elastic transforms on the outer element; animate a child element instead."
+    });
+  }
   function findDuplicateAttributes(html) {
     const duplicates = [];
     const space = /[\t\n\f\r ]/;
@@ -1189,22 +1204,6 @@
     return duplicates;
   }
 
-  // src/internal/validate-html-source.js
-  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  function validateHTMLSource(api, html, source) {
-    if (api.options.environment !== "development") return;
-    for (const duplicate of findDuplicateAttributes(html)) {
-      const { attribute } = duplicate;
-      reportConfiguration(api, "WARN_ATTRIBUTE_DUPLICATE", __spreadProps(__spreadValues({
-        extension: "core",
-        source
-      }, duplicate), {
-        reason: `The ${attribute} attribute occurs more than once on the same start tag; the HTML parser keeps the first value and discards the others.`,
-        suggestion: attribute === "class" ? "Combine all class names in one class attribute, separated by spaces." : attribute === "style" ? "Combine the intended CSS declarations in one style attribute, separated by semicolons." : `Keep one ${attribute} attribute with the intended value.`
-      }));
-    }
-  }
-
   // src/internal/create-mount-helper.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createMountHelper(root, mountMaps, mountedElements, elementControllers) {
@@ -1215,14 +1214,13 @@
     const mountRecords = /* @__PURE__ */ new WeakMap();
     let mountOrder = 0;
     const classPrefix = root.AelluxJs.className("");
-    const sourceURL = root.document.URL;
-    let sourceChecked = false;
+    const validateDocumentDoubleAttributeHTML = createDocumentHTMLValidator(root);
     return { mount, unmount, unmountDetached, update };
     async function update(elementOrId, extensionNames = null) {
       const rootElement = resolveMountElement(elementOrId, "update");
       if (!rootElement) return false;
       await AelluxJsMounted(rootElement, "update", extensionNames);
-      validateDeclarations(root, rootElement, extensionNames, "update");
+      validateExtensionDeclarations(root, rootElement, extensionNames, "update");
       return true;
     }
     async function unmount(elementOrId, extensionNames = null) {
@@ -1274,8 +1272,8 @@
         }
         await Promise.all(waitExtensions);
         await AelluxJsMount(rootElement, extensionNames, newlyMounted);
-        validateDeclarations(root, rootElement, extensionNames);
-        if (rootElement === root.document && extensionNames == null) validateDocumentSource();
+        validateExtensionDeclarations(root, rootElement, extensionNames);
+        if (rootElement === root.document && extensionNames == null) validateDocumentDoubleAttributeHTML();
       } catch (error) {
         AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_MOUNT, {
           cause: error,
@@ -1286,13 +1284,6 @@
         allWaiters.forEach((waiter) => waiter.setAttribute("aria-busy", "false"));
       }
       return Array.from(newlyMounted);
-    }
-    function validateDocumentSource() {
-      const api = root.AelluxJs;
-      if (api.options.environment !== "development" || sourceChecked || root.document.contentType !== "text/html" || !/^https?:/i.test(sourceURL)) return;
-      sourceChecked = true;
-      Promise.resolve().then(() => api.request(sourceURL, { cache: "force-cache" })).then((response) => response.text()).then((html) => validateHTMLSource(api, html, sourceURL)).catch(() => {
-      });
     }
     async function AelluxJsMount(rootElement, extensionNames, newlyMounted) {
       const AelluxJs2 = root.AelluxJs;
@@ -2073,7 +2064,7 @@
     function capture(operation) {
       operation.element.getBoundingClientRect();
       const animations = animationsFor(operation).filter((animation) => !operation.before.has(animation) && controllable(animation));
-      diagnoseMotionResources(getAelluxJs(), operation.element, animations, operation.options.extension || "css-motion");
+      validateMotionResourceConflicts(getAelluxJs(), operation.element, animations, operation.options.extension || "css-motion");
       return animations;
     }
     function controllable(animation) {
@@ -2199,7 +2190,7 @@
     }
     function nativeWait(operation, before = operation.before) {
       const animations = typeof operation.element.getAnimations === "function" ? animationsFor(operation).filter((animation) => !operation.before.has(animation)) : [];
-      diagnoseMotionResources(
+      validateMotionResourceConflicts(
         getAelluxJs(),
         operation.element,
         before === operation.before ? animations : animations.filter((animation) => !before.has(animation)),

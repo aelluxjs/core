@@ -2,8 +2,10 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { readFile } from "node:fs/promises";
 import { runInNewContext } from "node:vm";
+import { validatePWAManifest } from "../../src/internal/development-helpers.js";
 
-const source = await readFile(new URL("../../src/aellux.ext.pwa.js", import.meta.url), "utf8");
+const source = (await readFile(new URL("../../src/aellux.ext.pwa.js", import.meta.url), "utf8"))
+  .replace(/^import .*;\r?\n/gm, "");
 function setup({ navigator = {}, secure = true, environment = "production", manifestLinks = [] } = {}) {
   const root = new EventTarget(), events = [], warnings = [], maps = new Map();
   let extension;
@@ -17,7 +19,7 @@ function setup({ navigator = {}, secure = true, environment = "production", mani
       dispatchFrom: (element, name, options) => events.push({ element, name, ...options }),
       mountManager: { add: value => maps.set(value.extensionName, value), remove: ({ extensionName }) => maps.delete(extensionName) }
     } });
-  runInNewContext(source, { globalThis: root, URL, Promise, Set, Map, Error, TypeError });
+  runInNewContext(source, { globalThis: root, URL, Promise, Set, Map, Error, TypeError, validatePWAManifest });
   extension.init();
   return { root, extension, events, warnings, maps };
 }

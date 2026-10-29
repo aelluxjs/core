@@ -1,9 +1,36 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { findDuplicateAttributes } from "../../src/internal/find-duplicate-attributes.js";
-import { validateHTMLSource } from "../../src/internal/validate-html-source.js";
+import { createDocumentHTMLValidator, findDuplicateAttributes, validateDoubleAttributeHTML } from "../../src/internal/development-helpers.js";
 import { buildDiagnostics } from "../../src/internal/build-diagnostics.js";
 import { createAelluxConstants } from "../../src/internal/create-aellux-constants.js";
+
+test("document validators retain their initial URL and independent one-shot state", async () => {
+  const requests = [];
+  const root = {
+    document: { URL: "https://example.test/initial", contentType: "text/html" },
+    AelluxJs: {
+      options: { environment: "production" },
+      request: async (url, options) => {
+        requests.push({ url, options });
+        return { text: async () => "<div></div>" };
+      }
+    }
+  };
+  const first = createDocumentHTMLValidator(root);
+  first();
+  root.AelluxJs.options.environment = "development";
+  root.document.URL = "https://example.test/next";
+  const second = createDocumentHTMLValidator(root);
+  first();
+  first();
+  second();
+  second();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(requests, [
+    { url: "https://example.test/initial", options: { cache: "force-cache" } },
+    { url: "https://example.test/next", options: { cache: "force-cache" } }
+  ]);
+});
 
 test("duplicate attributes retain first and discarded values, including mixed case and booleans", () => {
   const found = findDuplicateAttributes(`<div CLASS="first" class='second' Class=third style="color:red" STYLE='display:none' hidden HIDDEN data-ae-present data-ae-present="opacity"></div>`);
@@ -53,8 +80,8 @@ test("template contents and text element start tags still report real duplicates
 test("HTML source warnings use the shared history, actionable context and development guard", () => {
   const api = { options: { environment: "development" }, diagnostics: buildDiagnostics(createAelluxConstants().AELLUXJS_DIAGNOSTICS) };
   const html = '<div class="a" class="b" style="color:red" style="display:none"></div><input disabled disabled>';
-  validateHTMLSource(api, html, "/page");
-  validateHTMLSource(api, html, "/page");
+  validateDoubleAttributeHTML(api, html, "/page");
+  validateDoubleAttributeHTML(api, html, "/page");
   const entries = api.diagnostics.showHistory(3);
   assert.equal(entries.length, 3);
   for (const entry of entries) {
@@ -65,6 +92,6 @@ test("HTML source warnings use the shared history, actionable context and develo
     assert.ok(entry.context.suggestion);
   }
   api.options.environment = "production";
-  validateHTMLSource(api, html, "/another-page");
+  validateDoubleAttributeHTML(api, html, "/another-page");
   assert.equal(api.diagnostics.showHistory().length, 3);
 });

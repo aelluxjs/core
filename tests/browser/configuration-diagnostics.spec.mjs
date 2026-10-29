@@ -372,12 +372,12 @@ test("explicit updates diagnose changed declarations and respect CSS ownership",
 test("spelling checks use the configured attribute prefix", async ({ page }) => {
   await start(page, "");
   await page.evaluate(async () => {
-    const { validateDeclarations } = await import("/src/internal/validate-declarations.js");
+    const { validateExtensionDeclarations } = await import("/src/internal/development-helpers.js");
     const original = AelluxJs.attr;
     AelluxJs.attr = name => original(name).replace("data-ae-", "data-ui-");
     try {
       document.body.innerHTML = '<div id="typo" data-ui-presnt></div>';
-      validateDeclarations(window, document.body);
+      validateExtensionDeclarations(window, document.body);
     } finally { AelluxJs.attr = original; }
   });
   expect(await diagnostics(page)).toEqual(expect.arrayContaining([

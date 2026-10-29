@@ -19,8 +19,29 @@
   };
   var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
 
-  // src/internal/find-duplicate-attributes.js
+  // src/internal/utils-name-case.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+
+  // src/internal/development-helpers.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function validateDoubleAttributeHTML(api, html, source) {
+    if (api.options.environment !== "development") return;
+    for (const duplicate of findDuplicateAttributes(html)) {
+      const { attribute } = duplicate;
+      reportConfiguration(api, "WARN_ATTRIBUTE_DUPLICATE", __spreadProps(__spreadValues({
+        extension: "core",
+        source
+      }, duplicate), {
+        reason: `The ${attribute} attribute occurs more than once on the same start tag; the HTML parser keeps the first value and discards the others.`,
+        suggestion: attribute === "class" ? "Combine all class names in one class attribute, separated by spaces." : attribute === "style" ? "Combine the intended CSS declarations in one style attribute, separated by semicolons." : `Keep one ${attribute} attribute with the intended value.`
+      }));
+    }
+  }
+  function reportConfiguration(api, name, context) {
+    if (context.element && context.attribute && !("value" in context))
+      context.value = context.element.getAttribute(context.attribute);
+    return api.diagnostics.warn(api.diagnostics[name], context);
+  }
   function findDuplicateAttributes(html) {
     const duplicates = [];
     const space = /[\t\n\f\r ]/;
@@ -105,30 +126,6 @@
     return duplicates;
   }
 
-  // src/internal/report-configuration.js
-  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  function reportConfiguration(api, name, context) {
-    if (context.element && context.attribute && !("value" in context))
-      context.value = context.element.getAttribute(context.attribute);
-    return api.diagnostics.warn(api.diagnostics[name], context);
-  }
-
-  // src/internal/validate-html-source.js
-  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  function validateHTMLSource(api, html, source) {
-    if (api.options.environment !== "development") return;
-    for (const duplicate of findDuplicateAttributes(html)) {
-      const { attribute } = duplicate;
-      reportConfiguration(api, "WARN_ATTRIBUTE_DUPLICATE", __spreadProps(__spreadValues({
-        extension: "core",
-        source
-      }, duplicate), {
-        reason: `The ${attribute} attribute occurs more than once on the same start tag; the HTML parser keeps the first value and discards the others.`,
-        suggestion: attribute === "class" ? "Combine all class names in one class attribute, separated by spaces." : attribute === "style" ? "Combine the intended CSS declarations in one style attribute, separated by semicolons." : `Keep one ${attribute} attribute with the intended value.`
-      }));
-    }
-  }
-
   // src/aellux.ext.ajax-href.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
@@ -175,7 +172,7 @@
         const response = await AelluxJs.request(url, { signal: controller.signal });
         const html = await response.text();
         if (previousController !== controller) return null;
-        validateHTMLSource(AelluxJs, html, response.url || String(url));
+        validateDoubleAttributeHTML(AelluxJs, html, response.url || String(url));
         const loadedDocument = new DOMParser().parseFromString(html, "text/html");
         let historyRequested = false;
         for (const selector of selectorList) {

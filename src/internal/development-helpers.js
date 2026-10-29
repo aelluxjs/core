@@ -1,8 +1,72 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
-import { reportConfiguration, diagnosePresentTarget } from "./report-configuration.js";
 import utilsNameCase from "./utils-name-case.js";
-import { transformOwners, diagnoseResource } from "./diagnose-resources.js";
+
+// Development-only inspections with guarded entry points and pure utilities.
+
+// Each mount helper retains its own initial URL and one-shot inspection state.
+export function createDocumentHTMLValidator(root) {
+  const sourceURL = root.document.URL;
+  let sourceChecked = false;
+  return function validateDocumentDoubleAttributeHTML() {
+    const api = root.AelluxJs;
+    if (api.options.environment !== "development" || sourceChecked ||
+        root.document.contentType !== "text/html" || !/^https?:/i.test(sourceURL)) return;
+    sourceChecked = true;
+    // Read original source: parsing has already discarded duplicate attributes.
+    // Prefer the HTTP cache without delaying mount/Ready or failing mounting.
+    Promise.resolve().then(() => api.request(sourceURL, { cache: "force-cache" }))
+      .then(response => response.text())
+      .then(html => validateDoubleAttributeHTML(api, html, sourceURL))
+      .catch(() => { /* Source inspection is optional. */ });
+  };
+}
+
+export function validateDoubleAttributeHTML(api, html, source) {
+  if (api.options.environment !== "development") return;
+  for (const duplicate of findDuplicateAttributes(html)) {
+    const { attribute } = duplicate;
+    reportConfiguration(api, "WARN_ATTRIBUTE_DUPLICATE", {
+      extension: "core", source, ...duplicate,
+      reason: `The ${attribute} attribute occurs more than once on the same start tag; the HTML parser keeps the first value and discards the others.`,
+      suggestion: attribute === "class"
+        ? "Combine all class names in one class attribute, separated by spaces."
+        : attribute === "style"
+          ? "Combine the intended CSS declarations in one style attribute, separated by semicolons."
+          : `Keep one ${attribute} attribute with the intended value.`
+    });
+  }
+}
+
+export function validatePWAManifest(root, getManifestLink) {
+  const api = root.AelluxJs;
+  if (api.options.environment !== "development") return;
+  const link = getManifestLink();
+  if (link?.getAttribute("href")?.trim()) return;
+  api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_STRUCTURE, {
+    extension: "pwa", element: link || root.document.documentElement,
+    attribute: link ? "href" : "rel", value: link?.getAttribute("href") ?? null,
+    reason: link ? "The Web App Manifest link has no nonempty href." : "The page has no Web App Manifest link.",
+    suggestion: 'Add <link rel="manifest" href="./manifest.webmanifest"> in the document head and provide an application manifest. See the PWA documentation; registering a Service Worker does not supply a manifest.'
+  });
+}
+
+export function validateMotionResourceConflicts(api, element, animations, extension) {
+  if (api.options.environment !== "development") return;
+  for (const animation of animations) {
+    try {
+      // Additive effects intentionally compose with the underlying value.
+      const effect = animation.effect;
+      if (effect?.target !== element || effect.pseudoElement) continue;
+      const frames = effect.getKeyframes();
+      if (!frames.some(frame => "transform" in frame &&
+          (frame.composite === "replace" || ((!frame.composite || frame.composite === "auto") &&
+            (!effect.composite || effect.composite === "replace"))))) continue;
+      const owners = transformOwners(api, element).filter(owner => owner !== extension);
+      for (const owner of owners) diagnoseResource(api, element, "transform", [owner, extension]);
+    } catch (_) { /* A browser without inspectable keyframes cannot confirm a conflict. */ }
+  }
+}
 
 // Only declarative, development-time checks belong here. Runtime failures remain
 // the responsibility of each Extension. No observers or production DOM scans.
@@ -27,7 +91,7 @@ const activation = {
   preference: "preference", feedback: "feedback"
 };
 
-export function validateDeclarations(root, scope, extensionNames = null, method = "mount") {
+export function validateExtensionDeclarations(root, scope, extensionNames = null, method = "mount") {
   const api = root.AelluxJs;
   if (api.options.environment !== "development") return;
   const selected = extensionNames === null ? null : new Set(
@@ -256,4 +320,127 @@ function oneEditApart(left, right) {
     else { i++; j++; }
   }
   return edits + Number(i < left.length || j < right.length) === 1;
+}
+
+// Keep the existing diagnostic envelope: actionable details live in context.
+function reportConfiguration(api, name, context) {
+  if (context.element && context.attribute && !("value" in context))
+    context.value = context.element.getAttribute(context.attribute);
+  return api.diagnostics.warn(api.diagnostics[name], context);
+}
+
+function diagnosePresentTarget(api, element, target, attribute, value) {
+  if (!value || /[\s#]/.test(value.replace(/^#/, ""))) return false;
+  if (target && target.hasAttribute(api.attr("present"))) return true;
+  reportConfiguration(api, "WARN_CONFIGURATION_TARGET", {
+    extension: "present", element, attribute, value,
+    reason: target ? "Target is not a Present container." : "Target element was not found.",
+    suggestion: "Use one existing Present element ID, optionally prefixed with #, and mount it before interacting."
+  });
+  return false;
+}
+
+// Describe persistent writers, rather than maintaining a second mount registry.
+// Callers inspect actual effects before comparing their resources with these.
+function transformOwners(api, element) {
+  const owners = [];
+  if (api.ext.anchor?.initialized && element.classList.contains(api.className("anchored"))) owners.push("anchor");
+  const parent = element.parentElement;
+  if (api.ext.scrollbox?.initialized && element.hasAttribute(api.attr("scrollbox-elastic")) &&
+      element.getAttribute(api.attr("scrollbox-elastic")) !== "false" && parent?.hasAttribute(api.attr("scrollbox"))) {
+    const children = [...parent.children].filter(child =>
+      !child.hasAttribute(api.attr("scrollbar-vertical")) && !child.hasAttribute(api.attr("scrollbar-horizontal")));
+    if (children.length === 1) owners.push("scrollbox-elastic");
+  }
+  if (api.ext.present?.initialized && !element.hasAttribute(api.attr("anchor")) &&
+      element.getAttribute(api.attr("present"))?.split(/\s+/).includes("transform")) owners.push("present");
+  return owners;
+}
+
+function diagnoseResource(api, element, property, writers) {
+  api.diagnostics.warn(api.diagnostics.WARN_RESOURCE_CONFLICT, {
+    extension: writers[writers.length - 1], element, attribute: "style", property, writers,
+    reason: `${writers.join(" and ")} replace the same ${property} on this element.`,
+    suggestion: "Keep positioning and elastic transforms on the outer element; animate a child element instead."
+  });
+}
+
+// Inspect source text: the DOM has already discarded duplicate attributes.
+// This is a start-tag scanner, not an HTML conformance validator.
+export function findDuplicateAttributes(html) {
+  const duplicates = [];
+  const space = /[\t\n\f\r ]/;
+  const lower = text => text.replace(/[A-Z]/g, char => char.toLowerCase());
+  let index = 0, lineIndex = 0, line = 1, column = 1;
+  while ((index = html.indexOf("<", index)) !== -1) {
+    if (html.startsWith("<!--", index)) {
+      const end = /--!?>/.exec(html.slice(index + 4));
+      index = end ? index + 4 + end.index + end[0].length : html.length;
+      continue;
+    }
+    if (html.startsWith("<![CDATA[", index)) {
+      const end = html.indexOf("]]>", index + 9);
+      index = end < 0 ? html.length : end + 3;
+      continue;
+    }
+    if (/[!?/]/.test(html[index + 1] || "")) {
+      const end = html.indexOf(">", index + 2);
+      index = end < 0 ? html.length : end + 1;
+      continue;
+    }
+    if (!/[a-z]/i.test(html[index + 1] || "")) { index++; continue; }
+    const tagStart = ++index;
+    while (index < html.length && !space.test(html[index]) && !/[/>]/.test(html[index])) index++;
+    const tagName = lower(html.slice(tagStart, index));
+    const attributes = new Map();
+    while (index < html.length && html[index] !== ">") {
+      if (space.test(html[index]) || html[index] === "/") { index++; continue; }
+      const offset = index++;
+      while (index < html.length && !space.test(html[index]) && !/[=/>]/.test(html[index])) index++;
+      const attribute = lower(html.slice(offset, index).replace(/\0/g, "\uFFFD"));
+      while (space.test(html[index] || "")) index++;
+      let value = "";
+      if (html[index] === "=") {
+        index++;
+        while (space.test(html[index] || "")) index++;
+        const quote = html[index];
+        if (quote === '"' || quote === "'") {
+          const start = ++index;
+          while (index < html.length && html[index] !== quote) index++;
+          value = html.slice(start, index);
+          if (index < html.length) index++;
+        } else {
+          const start = index;
+          while (index < html.length && !space.test(html[index]) && html[index] !== ">") index++;
+          value = html.slice(start, index);
+        }
+      }
+      const previous = attributes.get(attribute);
+      if (previous) {
+        previous.values.push(value);
+        if (!previous.duplicate) {
+          while (lineIndex < offset) {
+            const char = html[lineIndex++];
+            if (char === "\r" || char === "\n" && html[lineIndex - 2] !== "\r") { line++; column = 1; }
+            else if (char !== "\n") column++;
+          }
+          previous.duplicate = { tagName, attribute, value: previous.values[0], values: previous.values, offset, line, column };
+        }
+      } else attributes.set(attribute, { values: [value] });
+    }
+    // An incomplete tag is never emitted by the HTML parser.
+    if (index >= html.length) break;
+    for (const attribute of attributes.values())
+      if (attribute.duplicate) duplicates.push(attribute.duplicate);
+    index++;
+    if (tagName === "plaintext") break;
+    // Markup-like text inside these HTML elements is not a start tag.
+    if (/^(script|style|textarea|title|xmp|iframe|noembed|noframes|noscript)$/.test(tagName)) {
+      const closing = new RegExp(`</${tagName}(?=[\\t\\n\\f\\r />])`, "ig");
+      closing.lastIndex = index;
+      const end = closing.exec(html);
+      index = end ? end.index : html.length;
+    }
+  }
+  return duplicates;
 }
