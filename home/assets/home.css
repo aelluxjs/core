@@ -8,7 +8,7 @@
 
 [data-bs-theme="dark"] {
   --bs-tertiary-bg: #0f1314!important;
-  --bs-tertiary-bg-rgb: 15, 19, 20;
+  --bs-tertiary-bg-rgb: 15, 19, 20!important;
   --bs-link-color: #ffc107;
   --bs-link-color-rgb: 255, 193, 7;
   --bs-link-hover-color: #ffda6a;
