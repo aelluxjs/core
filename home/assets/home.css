@@ -36,8 +36,7 @@ a { text-underline-offset: .22em; }
 .hero-description { max-width: 29rem; font-size: 1.12rem; line-height: 1.65; }
 .hero-code { background: var(--bs-body-bg); }
 .hero-code pre { color: var(--bs-body-color); font-size: .82rem; line-height: 1.8; }
-.code-comment { color: var(--bs-secondary-color); }
-.code-attribute { color: var(--bs-warning-text-emphasis); }
+.hero-code pre code.hljs { padding: 0; }
 .hero-principles { border-color: var(--bs-border-color) !important; }
 .section-space { padding-block: clamp(3.5rem, 7vw, 6rem); }
 .section-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 550; letter-spacing: -.045em; line-height: 1.15; }
@@ -54,7 +53,8 @@ a { text-underline-offset: .22em; }
 .source-file [role="status"] { min-height: 1.5em; }
 .example-footer a { white-space: nowrap; }
 .code-block { font-size: .82rem; line-height: 1.8; }
-pre { max-width: 100%; overflow-x: auto; tab-size: 2; }
+pre { max-width: 100%; overflow-x: auto; tab-size: 2; background: var(--bs-tertiary-bg); }
+pre code.hljs { background: var(--bs-tertiary-bg) !important; }
 code { overflow-wrap: anywhere; }
 pre code { overflow-wrap: normal; }
 .extension-link { display: flex; flex-direction: column; color: var(--bs-body-color); text-decoration: none; }

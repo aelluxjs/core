@@ -13,7 +13,6 @@
   <script src="../dist/aellux.min.js"></script>
   <script>
     $ae.ext("preference");
-    $ae.ext("viewport", { loadWhen: "[data-ae-viewport]" });
     $ae.init({
       mode: "basic",
       syncBootstrapThemeTag: true
@@ -61,7 +60,7 @@
           <div class="col-lg-7">
             <p class="eyebrow text-warning-emphasis mb-4"><span class="status-dot bg-warning" aria-hidden="true"></span>
               JavaScript, with behavior.</p>
-            <h1 id="hero-title" class="hero-wordmark mb-3 brand">aellux<span class="text-warning-emphasis">.js</span>
+            <h1 id="hero-title" class="hero-wordmark mb-3 brand">aellux<span class="text-warning">.js</span>
             </h1>
             <h2 class="hero-tagline mb-4">UX Made Easy.</h2>
             <p class="hero-description text-body-secondary mb-4">A lightweight JavaScript library for declarative,
@@ -82,15 +81,15 @@
                 class="d-flex justify-content-between align-items-center border-bottom px-4 py-3 small text-body-secondary">
                 <span class="font-monospace">index.html</span><span class="text-warning-emphasis">HTML → UX</span>
               </div>
-              <pre class="p-4 mb-0"><code><span class="code-comment">&lt;!-- Describe the behavior. --&gt;</span>
+              <pre class="p-4 mb-0"><code class="language-xml">&lt;!-- Describe the behavior. --&gt;
 &lt;button
-  <span class="code-attribute">data-ae-trigger</span>="toggle"
-  <span class="code-attribute">data-ae-target</span>="#panel"&gt;
+  data-ae-trigger="toggle"
+  data-ae-target="#panel"&gt;
   Show details
 &lt;/button&gt;
 
 &lt;div id="panel"
-  <span class="code-attribute">data-ae-present</span>="opacity"
+  data-ae-present="opacity"
   hidden&gt;
   Hello, aellux.js.
 &lt;/div&gt;</code></pre>
@@ -242,8 +241,7 @@
       </div>
     </section>
 
-    <section id="getting-started" class="section-space border-bottom" aria-labelledby="getting-started-title"
-      data-ae-viewport="y">
+    <section id="getting-started" class="section-space border-bottom" aria-labelledby="getting-started-title">
       <div class="container">
         <p class="eyebrow text-body-secondary">03 / Your first behavior</p>
         <h2 id="getting-started-title" class="section-title">Start with HTML.</h2>

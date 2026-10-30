@@ -30,7 +30,7 @@ function syncHighlightTheme() {
 
 function getHighlighter() {
   if (!highlightReady) {
-    // Same CDN and dependency loader as Docweaver, requested on first source use.
+    // Shared dependencies for the hero, setup snippets and example sources.
     const baseUrl = "https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/";
     highlightReady = (async () => {
       await Promise.all([
@@ -53,24 +53,13 @@ function getHighlighter() {
 
 $ae.on("PreferencesChange", syncHighlightTheme);
 
-const startSection = document.getElementById("getting-started");
-let startHighlightPending = false;
-async function highlightStartOnEnter(event) {
-  if (event.target !== startSection || !event.detail.measurable ||
-      event.detail.visible <= 0 || startHighlightPending) return;
-  startHighlightPending = true;
-  try {
-    const highlighter = await getHighlighter();
-    startSection.querySelectorAll("pre code:not([data-highlighted])").forEach(code => {
-      highlighter.highlightElement(code);
-    });
-    startSection.removeEventListener($ae.eventName("ViewportChange"), highlightStartOnEnter);
-  } catch (error) {
-    startHighlightPending = false;
-    console.error("Failed to highlight the getting started section.", error);
-  }
-}
-startSection?.addEventListener($ae.eventName("ViewportChange"), highlightStartOnEnter);
+getHighlighter().then(highlighter => {
+  document.querySelectorAll(".hero pre code, #getting-started pre code").forEach(code => {
+    if (!code.dataset.highlighted) highlighter.highlightElement(code);
+  });
+}).catch(error => {
+  console.error("Failed to highlight the homepage code.", error);
+});
 
 // Source is fetched from the same files executed by each standalone example.
 document.querySelectorAll("[data-example-source]").forEach(details => {
