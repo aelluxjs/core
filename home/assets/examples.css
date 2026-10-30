@@ -1,4 +1,5 @@
 /* Presentation only. AelluxJS owns dragging, snapping, geometry and visibility. */
+:root { --bs-heading-font-family: "Geist", var(--bs-font-sans-serif); }
 body { margin: 0; padding: 1rem; font-size: .875rem; }
 main, .card, .d-flex > * { min-width: 0; }
 :focus-visible { outline: 3px solid #9b7300 !important; outline-offset: 3px; }

@@ -20,11 +20,3 @@ document.addEventListener("keydown", event => {
   event.preventDefault();
   $ae("floating-panel").present.unpop().catch(error => console.error("Unable to close the panel.", error));
 });
-
-$ae.ext("preference");
-$ae.ext("anchor", { loadStyle: true });
-$ae.ext("present", { loadStyle: true });
-$ae.init({
-  mode: "basic",
-  extensions: { preference: { syncBootstrapThemeTag: true } }
-});

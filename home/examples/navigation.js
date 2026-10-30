@@ -49,13 +49,3 @@ document.getElementById("navigation-error").addEventListener("click", () => {
     // AjaxHrefError already forwards the original cause to the presentation above.
   });
 });
-
-$ae.ext("preference");
-$ae.ext("feedback");
-$ae.ext("state-navigation");
-$ae.ext("ajax-href");
-$ae.init({
-  mode: "basic",
-  useHash: false,
-  extensions: { preference: { syncBootstrapThemeTag: true } }
-});

@@ -11,6 +11,14 @@ test.beforeEach(async ({ page, context }) => {
   // Use the existing versioned Bootstrap fixture; the examples still load their public dist scripts.
   await context.route("https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css", route =>
     route.fulfill({ path: "tests/fixtures/bootstrap-5.3.8.min.css", contentType: "text/css" }));
+  // Behavior tests use system font fallbacks to stay independent of Google Fonts.
+  await context.route("https://fonts.googleapis.com/**", route =>
+    route.fulfill({ body: "", contentType: "text/css" }));
+  await context.route("https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/**", route => {
+    const file = new URL(route.request().url()).pathname.split("/").pop();
+    return route.fulfill({ path: `tests/fixtures/highlightjs-11.12.0/${file}`,
+      contentType: file.endsWith(".css") ? "text/css" : "text/javascript" });
+  });
 });
 test.afterEach(async ({ page }) => expect(logs.get(page).errors).toEqual([]));
 
@@ -18,6 +26,42 @@ async function openExample(page, name, extension) {
   await page.goto(`/home/examples/${name}.htm`);
   await expect.poll(() => page.evaluate(name => !!window.$ae?.ext[name]?.initialized, extension)).toBe(true);
 }
+
+test("inline head initialization publishes preferences before styles and deferred handlers", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("AelluxJsPreferences", "colorScheme=dark"));
+  const documents = ["index", "examples/carousel", "examples/viewport", "examples/floating",
+    "examples/navigation", "examples/navigation-details", "examples/navigation-activity"];
+  const stylesheet = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css";
+  for (const document of documents) {
+    let release, requested;
+    const gate = new Promise(resolve => { release = resolve; });
+    const request = new Promise(resolve => { requested = resolve; });
+    await page.route(stylesheet, async route => {
+      requested();
+      await gate;
+      await route.fulfill({ path: "tests/fixtures/bootstrap-5.3.8.min.css", contentType: "text/css" });
+    });
+    const navigation = page.goto(`/home/${document}.htm`);
+    let earlyState;
+    try {
+      await request;
+      earlyState = await page.evaluate(() => ({
+        mode: $ae.options.mode,
+        preferenceRegistered: !!$ae.registry.ext.preference,
+        syncBootstrapThemeTag: $ae.options.extensions.preference.syncBootstrapThemeTag,
+        colorScheme: $ae.currentPreference("color-scheme"),
+        stylesheetLoaded: !!window.document.querySelector('link[href*="bootstrap@"]')?.sheet
+      }));
+    } finally {
+      release();
+      await navigation;
+    }
+    expect(earlyState).toEqual({ mode: "basic", preferenceRegistered: true, syncBootstrapThemeTag: true,
+      colorScheme: "dark", stylesheetLoaded: false });
+    await expect(page.locator("html")).toHaveAttribute("data-bs-theme", "dark");
+    await page.unroute(stylesheet);
+  }
+});
 
 test("carousel uses real snap navigation and pointer dragging", async ({ page }) => {
   await page.setViewportSize({ width: 520, height: 432 });
@@ -159,6 +203,8 @@ test("superseded Ajax navigation does not show an error or clear active loading"
 
 test("homepage embeds four themed demos and displays the exact runnable source", async ({ page }) => {
   await page.goto("/home/index.htm");
+  await expect(page.locator(".hero-tagline")).toHaveText("UX Made Easy.");
+  await expect(page.locator(".brand-mark")).toHaveCSS("font-family", /Geist/);
   await expect(page.locator("iframe.example-frame")).toHaveCount(4);
   await page.locator("iframe").evaluateAll(frames => frames.forEach(frame => { frame.loading = "eager"; }));
   for (const frameElement of await page.locator("iframe").all()) {
@@ -172,13 +218,23 @@ test("homepage embeds four themed demos and displays the exact runnable source",
     await expect(frame.locator("html")).toHaveAttribute("data-bs-theme", "dark");
   }
   const source = page.locator('[data-example-source="carousel"]');
+  await expect(page.locator('[data-ae-dep^="highlightjs"]')).toHaveCount(0);
   await source.locator(":scope > summary").click();
+  await expect(page.locator('[data-ae-dep^="highlightjs"]')).toHaveCount(0);
   for (const file of await source.locator(".source-file").all()) {
     const path = await file.locator("summary").textContent();
     await file.locator("summary").click();
     await expect(file.locator("button")).toBeEnabled();
+    await expect(file.locator("code")).toHaveAttribute("data-highlighted", "yes");
+    expect(await file.locator('code [class^="hljs-"]').count()).toBeGreaterThan(0);
     expect(await file.locator("code").textContent()).toBe(await (await page.request.get(`/home/${path}`)).text());
   }
+  await expect(page.locator('script[data-ae-dep="highlightjs"]')).toHaveCount(1);
+  await expect(page.locator('link[data-ae-dep^="highlightjs-css"]')).toHaveCount(2);
+  await expect(page.locator('link[data-ae-dep="highlightjs-css-dark"]')).toHaveJSProperty("disabled", false);
+  await page.getByRole("button", { name: "Light", exact: true }).click();
+  await expect(page.locator('link[data-ae-dep="highlightjs-css-dark"]')).toHaveJSProperty("disabled", true);
+  await expect(page.locator('link[data-ae-dep="highlightjs-css"]')).toHaveJSProperty("disabled", false);
   for (const width of [320, 375, 768, 1440]) {
     await page.setViewportSize({ width, height: 960 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

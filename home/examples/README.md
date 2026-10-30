@@ -33,8 +33,21 @@ only their required Extensions and Preference. Preference's
 storage events synchronize separate windows on the same origin. Bootstrap 5.3.8
 CSS provides presentation. Bootstrap JavaScript is not loaded.
 
+Extension registration and `$ae.init()` are explicit inline scripts in each
+document's `<head>`, immediately after the boot script and before stylesheets.
+They do not depend on `defer` or a DOM-ready callback. Deferred scripts only
+install DOM interaction handlers before the runtime's initial mount; Viewport
+needs no separate JavaScript file. Source viewing includes each document's
+complete inline configuration.
+
 The homepage's native source disclosures fetch these exact HTML, JavaScript and
-CSS files; no separately maintained code excerpts are used. Preserve the relative
+CSS files; no separately maintained code excerpts are used. The first opened file
+lazily loads Highlight.js through `$ae.dep()`, using the same 11.12 CDN series and
+GitHub light/dark styles as Docweaver. Later files share the cached dependencies;
+Preference changes switch the active stylesheet. Highlighted markup preserves the
+original text for copying. Source remains readable if highlighting is unavailable.
+Brands and headings use Geist from Google Fonts, with system font fallbacks;
+code remains monospaced. Preserve the relative
 `home/` and `dist/` structure when deploying under a repository prefix such as
 `/core/`. Viewport and Ajax Href remain unstable Extensions. Touch emulation does
 not replace checks on physical devices.

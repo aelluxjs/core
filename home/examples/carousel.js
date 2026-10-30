@@ -11,11 +11,3 @@ gallery.addEventListener($ae.eventName("ScrollboxSnapChange"), event => {
 });
 previous.addEventListener("click", () => $ae("gallery").scrollbox.previous());
 next.addEventListener("click", () => $ae("gallery").scrollbox.next());
-
-$ae.ext("preference");
-$ae.ext("scrollbox", { loadStyle: true });
-$ae.ext("scrollbox-snap");
-$ae.init({
-  mode: "basic",
-  extensions: { preference: { syncBootstrapThemeTag: true } }
-});
