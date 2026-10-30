@@ -13,6 +13,7 @@
   <script src="../dist/aellux.min.js"></script>
   <script>
     $ae.ext("preference");
+    $ae.ext("viewport", { loadWhen: "[data-ae-viewport]" });
     $ae.init({
       mode: "basic",
       syncBootstrapThemeTag: true
@@ -54,31 +55,32 @@
   </header>
 
   <main id="main" tabindex="-1">
-    <section class="hero bg-dark text-light" aria-labelledby="hero-title" data-bs-theme="dark">
+    <section class="hero bg-body-tertiary text-body" aria-labelledby="hero-title">
       <div class="container">
         <div class="row align-items-center g-4 g-lg-5">
           <div class="col-lg-7">
-            <p class="eyebrow text-warning mb-4"><span class="status-dot bg-warning" aria-hidden="true"></span>
+            <p class="eyebrow text-warning-emphasis mb-4"><span class="status-dot bg-warning" aria-hidden="true"></span>
               JavaScript, with behavior.</p>
-            <h1 id="hero-title" class="hero-wordmark mb-3">aellux<span class="text-warning">.js</span></h1>
+            <h1 id="hero-title" class="hero-wordmark mb-3 brand">aellux<span class="text-warning-emphasis">.js</span>
+            </h1>
             <h2 class="hero-tagline mb-4">UX Made Easy.</h2>
-            <p class="hero-description text-light-emphasis mb-4">A lightweight JavaScript library for declarative,
+            <p class="hero-description text-body-secondary mb-4">A lightweight JavaScript library for declarative,
               reusable UX behaviors.</p>
             <div class="d-flex flex-wrap gap-2">
               <a class="btn btn-warning px-4 py-2 fw-semibold" href="#getting-started">Get Started <span class="ms-2"
                   aria-hidden="true">→</span></a>
-              <a class="btn btn-outline-light px-4 py-2" href="../docs/0.1.x/index.htm">Documentation</a>
-              <a class="btn btn-link text-light px-3 py-2" href="https://github.com/aelluxjs/core">GitHub <span
+              <a class="btn btn-outline-secondary px-4 py-2" href="../docs/0.1.x/index.htm">Documentation</a>
+              <a class="btn btn-link text-body px-3 py-2" href="https://github.com/aelluxjs/core">GitHub <span
                   aria-hidden="true">↗</span></a>
             </div>
-            <p class="small text-light-emphasis mt-4 mb-0">v0.1.0-beta.10 <span class="mx-2" aria-hidden="true">/</span>
+            <p class="small text-body-secondary mt-4 mb-0">v0.1.0-beta.10 <span class="mx-2" aria-hidden="true">/</span>
               Open source <span class="mx-2" aria-hidden="true">/</span> Apache 2.0</p>
           </div>
           <div class="col-lg-5">
             <div class="hero-code border rounded-3 overflow-hidden">
               <div
-                class="d-flex justify-content-between align-items-center border-bottom px-4 py-3 small text-light-emphasis">
-                <span class="font-monospace">index.html</span><span class="text-warning">HTML → UX</span>
+                class="d-flex justify-content-between align-items-center border-bottom px-4 py-3 small text-body-secondary">
+                <span class="font-monospace">index.html</span><span class="text-warning-emphasis">HTML → UX</span>
               </div>
               <pre class="p-4 mb-0"><code><span class="code-comment">&lt;!-- Describe the behavior. --&gt;</span>
 &lt;button
@@ -92,13 +94,13 @@
   hidden&gt;
   Hello, aellux.js.
 &lt;/div&gt;</code></pre>
-              <p class="border-top px-4 py-3 mb-0 small text-light-emphasis">With the Full runtime initialized. <a
-                  class="text-warning" href="../docs/0.1.x/core-extensions/present.htm">Meet Present <span
+              <p class="border-top px-4 py-3 mb-0 small text-body-secondary">With the Full runtime initialized. <a
+                  class="text-warning-emphasis" href="../docs/0.1.x/core-extensions/present.htm">Meet Present <span
                     aria-hidden="true">↗</span></a></p>
             </div>
           </div>
         </div>
-        <div class="hero-principles d-flex flex-wrap gap-2 gap-md-4 border-top mt-5 pt-4 small text-light-emphasis">
+        <div class="hero-principles d-flex flex-wrap gap-2 gap-md-4 border-top mt-5 pt-4 small text-body-secondary">
           <span>Simple to use.</span><span>Powerful behaviors.</span><span>Visually independent.</span>
         </div>
       </div>
@@ -240,7 +242,8 @@
       </div>
     </section>
 
-    <section id="getting-started" class="section-space border-bottom" aria-labelledby="getting-started-title">
+    <section id="getting-started" class="section-space border-bottom" aria-labelledby="getting-started-title"
+      data-ae-viewport="y">
       <div class="container">
         <p class="eyebrow text-body-secondary">03 / Your first behavior</p>
         <h2 id="getting-started-title" class="section-title">Start with HTML.</h2>
@@ -252,7 +255,7 @@
                 <h3 class="h5 mb-0">Browser</h3><button class="btn btn-sm btn-outline-secondary" type="button"
                   data-copy="browser-code" aria-label="Copy browser setup">Copy</button>
               </div>
-              <pre class="code-block bg-body-tertiary border rounded-2 p-3"><code id="browser-code">&lt;script src="../dist/aellux.min.js"&gt;&lt;/script&gt;
+              <pre class="code-block bg-body-tertiary border rounded-2 p-3"><code id="browser-code" class="language-xml">&lt;script src="../dist/aellux.min.js"&gt;&lt;/script&gt;
 &lt;script&gt;
   $ae.init({ mode: "full" });
 &lt;/script&gt;</code></pre>
@@ -268,10 +271,10 @@
                   data-copy="npm-code" aria-label="Copy npm install command">Copy</button>
               </div>
               <pre
-                class="code-block bg-body-tertiary border rounded-2 p-3"><code id="npm-code">npm install @aelluxjs/core</code></pre>
+                class="code-block bg-body-tertiary border rounded-2 p-3"><code id="npm-code" class="language-bash">npm install @aelluxjs/core</code></pre>
               <p class="small text-body-secondary">Serve the package’s <code>dist/</code> directory as public assets and
                 use the browser boot script to initialize the runtime. Modules can also import the shared API:</p>
-              <pre class="code-block bg-body-tertiary border rounded-2 p-3 mb-0"><code>import AelluxJs from "@aelluxjs/core";
+              <pre class="code-block bg-body-tertiary border rounded-2 p-3 mb-0"><code class="language-javascript">import AelluxJs from "@aelluxjs/core";
 
 AelluxJs.attr("preference");</code></pre>
             </div>

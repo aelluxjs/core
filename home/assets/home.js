@@ -39,7 +39,7 @@ function getHighlighter() {
         $ae.dep("highlightjs-css-dark", `${baseUrl}styles/github-dark.min.css`)
       ]);
       highlightStylesReady = true;
-      await Promise.all(["xml", "javascript", "css"].filter(language => !window.hljs.getLanguage(language))
+      await Promise.all(["xml", "javascript", "css", "bash"].filter(language => !window.hljs.getLanguage(language))
         .map(language => $ae.dep(`highlightjs-${language}`, `${baseUrl}languages/${language}.min.js`)));
       syncHighlightTheme();
       return window.hljs;
@@ -52,6 +52,25 @@ function getHighlighter() {
 }
 
 $ae.on("PreferencesChange", syncHighlightTheme);
+
+const startSection = document.getElementById("getting-started");
+let startHighlightPending = false;
+async function highlightStartOnEnter(event) {
+  if (event.target !== startSection || !event.detail.measurable ||
+      event.detail.visible <= 0 || startHighlightPending) return;
+  startHighlightPending = true;
+  try {
+    const highlighter = await getHighlighter();
+    startSection.querySelectorAll("pre code:not([data-highlighted])").forEach(code => {
+      highlighter.highlightElement(code);
+    });
+    startSection.removeEventListener($ae.eventName("ViewportChange"), highlightStartOnEnter);
+  } catch (error) {
+    startHighlightPending = false;
+    console.error("Failed to highlight the getting started section.", error);
+  }
+}
+startSection?.addEventListener($ae.eventName("ViewportChange"), highlightStartOnEnter);
 
 // Source is fetched from the same files executed by each standalone example.
 document.querySelectorAll("[data-example-source]").forEach(details => {

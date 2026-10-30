@@ -34,11 +34,11 @@ a { text-underline-offset: .22em; }
 .hero-wordmark { font-size: clamp(3.7rem, 9vw, 7.5rem); font-weight: 650; line-height: 1; letter-spacing: -.075em; }
 .hero-tagline { font-size: clamp(1.9rem, 4vw, 3rem); font-weight: 450; letter-spacing: -.04em; line-height: 1.13; }
 .hero-description { max-width: 29rem; font-size: 1.12rem; line-height: 1.65; }
-.hero-code { background: #17191c; }
-.hero-code pre { color: #e9ecef; font-size: .82rem; line-height: 1.8; }
-.code-comment { color: #a6adb5; }
-.code-attribute { color: #ffda6a; }
-.hero-principles { border-color: #495057 !important; }
+.hero-code { background: var(--bs-body-bg); }
+.hero-code pre { color: var(--bs-body-color); font-size: .82rem; line-height: 1.8; }
+.code-comment { color: var(--bs-secondary-color); }
+.code-attribute { color: var(--bs-warning-text-emphasis); }
+.hero-principles { border-color: var(--bs-border-color) !important; }
 .section-space { padding-block: clamp(3.5rem, 7vw, 6rem); }
 .section-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 550; letter-spacing: -.045em; line-height: 1.15; }
 .feature-symbol { display: inline-flex; align-items: center; justify-content: center; min-width: 2.5rem; height: 2rem; border-bottom: 3px solid var(--bs-warning); font-size: 1.2rem; }
