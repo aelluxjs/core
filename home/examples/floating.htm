@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart Floating UI — aellux.js</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link rel="stylesheet" href="../assets/examples.css">
+  <script src="../../dist/aellux.min.js"></script>
+  <script src="floating.js" defer></script>
+</head>
+<body>
+  <main aria-label="Smart Floating UI example">
+    <h1 class="visually-hidden">Smart Floating UI</h1>
+    <label for="trigger-position" class="demo-hint">Trigger position — move it while the panel is open</label>
+    <input id="trigger-position" class="form-range mt-1" type="range" min="0" max="180" value="20">
+    <div class="floating-stage border rounded-2 bg-body-tertiary">
+      <button id="floating-trigger" class="floating-trigger btn btn-warning" type="button" data-ae-trigger="toggle" data-ae-target="#floating-panel" aria-expanded="false" aria-controls="floating-panel">Toggle panel</button>
+      <div class="floating-panel" data-ae-anchor-target="floating-trigger" data-ae-anchor="bottom-center:top-center, top-center:bottom-center">
+        <aside id="floating-panel" data-ae-present="opacity" data-ae-unpop-on-click="false" aria-labelledby="floating-panel-title" hidden>
+          <div class="card p-3">
+            <h2 id="floating-panel-title" class="h6">Right where it belongs.</h2>
+            <p class="small text-body-secondary">Anchor chooses a placement that fits this viewport. Present handles visibility.</p>
+            <button class="btn btn-sm btn-outline-secondary align-self-start" type="button" data-ae-dismiss>Close panel</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <p class="demo-hint mt-2 mb-0">Near the bottom, the panel can flip above its trigger. Press Escape to close.</p>
+  </main>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Seamless Navigation — aellux.js</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link rel="stylesheet" href="../assets/examples.css">
+  <script src="../../dist/aellux.min.js"></script>
+  <script src="navigation.js" defer></script>
+</head>
+<body>
+  <main id="navigation-demo" data-ae-feedback="busy success error" data-ae-message-target="navigation-status" aria-label="Seamless Navigation example" aria-busy="false">
+    <h1 class="visually-hidden">Seamless Navigation</h1>
+    <nav class="navigation-tabs d-flex flex-wrap mb-3" aria-label="Example pages">
+      <a class="btn btn-sm btn-outline-secondary" href="navigation.htm" data-ae-ajax-href="#navigation-content">Overview</a>
+      <a class="btn btn-sm btn-outline-secondary" href="navigation-details.htm" data-ae-ajax-href="#navigation-content">Details</a>
+      <a class="btn btn-sm btn-outline-secondary" href="navigation-activity.htm" data-ae-ajax-href="#navigation-content" aria-current="page">Activity</a>
+    </nav>
+    <section id="navigation-content" class="navigation-content card bg-body-tertiary p-4" tabindex="-1" aria-labelledby="navigation-heading">
+      <span class="font-monospace small text-body-secondary">03 / ACTIVITY</span>
+      <h2 id="navigation-heading" class="h4 mt-3">Activity</h2>
+      <p class="text-body-secondary">State Navigation records accepted replacements in browser history. Back and Forward fetch the right panel again.</p>
+      <p class="small mb-0">Feedback announces loading, success and failures through the example’s live region.</p>
+    </section>
+    <p id="navigation-status" class="navigation-status small mt-3 mb-2" role="status" aria-live="polite">Ready. Choose a page.</p>
+    <div class="d-flex flex-wrap align-items-center gap-2"><button id="navigation-error" class="btn btn-sm btn-outline-secondary" type="button" disabled>Try a 404</button><span class="demo-hint">Browser Back and Forward restore loaded panels.</span></div>
+  </main>
+</body>
+</html>
