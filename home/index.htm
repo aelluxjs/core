@@ -12,20 +12,10 @@
   <title>aellux.js — UX Made Easy.</title>
   <script src="../dist/aellux.min.js"></script>
   <script>
-    function syncThemeControls() {
-      document.querySelectorAll('[data-ae-preference="color-scheme"] [data-ae-option]').forEach(button => {
-        button.setAttribute("aria-pressed", String(button.classList.contains("ae--active")));
-      });
-    }
-
-    $ae.on("PreferencesChange", syncThemeControls);
-    $ae.on("Ready", syncThemeControls);
     $ae.ext("preference");
     $ae.init({
       mode: "basic",
-      extensions: {
-        preference: { syncBootstrapThemeTag: true }
-      }
+      syncBootstrapThemeTag: true
     });
   </script>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -56,11 +46,9 @@
       </nav>
       <div class="theme-controls btn-group btn-group-sm" role="group" aria-label="Color theme"
         data-ae-preference="color-scheme">
-        <button class="btn btn-outline-secondary" type="button" data-ae-option="light"
-          aria-pressed="false">Light</button>
-        <button class="btn btn-outline-secondary" type="button" data-ae-option="dark" aria-pressed="false">Dark</button>
-        <button class="btn btn-outline-secondary" type="button" data-ae-option="auto"
-          aria-pressed="false">System</button>
+        <button class="btn btn-outline-secondary" type="button" data-ae-option="light">Light</button>
+        <button class="btn btn-outline-secondary" type="button" data-ae-option="dark">Dark</button>
+        <button class="btn btn-outline-secondary" type="button" data-ae-option="auto">System</button>
       </div>
     </div>
   </header>

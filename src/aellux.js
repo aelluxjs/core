@@ -93,7 +93,7 @@ import { hasProgressAPI } from "./internal/has-progress-api.js";
     api.aelluxBasePath = api.options.basePath || aelluxBasePath;
     api.diagnostics.notAvailable = [];
 
-    api.updatePreferenceAttributesHTML(); // Set HTML to persisted preferences.
+    api.updatePreferenceAttributesHTML(); // Publish preferences and opt-in Bootstrap color mode synchronously.
     updateViewportMeta();
     if (api.options.mode === "full") loadFullStyle();
     else {

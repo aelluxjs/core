@@ -39,6 +39,10 @@ export function createPreferenceHtmlHelper(root, getApi) {
     if (preferences && "colorScheme" in preferences) {
       updateColorSchemeMeta(preferences.colorScheme);
     }
+    if (api.options.syncBootstrapThemeTag === true) {
+      document.documentElement.setAttribute("data-bs-theme",
+        currentPreference("color-scheme") === "dark" ? "dark" : "light");
+    }
   }
 
   function updateColorSchemeMeta(preferenceColorScheme) {

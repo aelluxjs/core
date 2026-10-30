@@ -9,7 +9,23 @@ const variants = [
 
 for (const variant of variants) {
   const label = `${variant.mode}, legacy=${variant.forceLegacy}, minified=${variant.minified}`;
-  test(`syncBootstrapThemeTag follows resolved preferences and restores ownership (${label})`, async ({ page }) => {
+  test(`boot synchronizes Bootstrap theme synchronously without Preference (${label})`, async ({ page }) => {
+    await page.goto("/tests/index.htm");
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.addScriptTag({ url: variant.minified ? "/dist/aellux.min.js" : "/dist/aellux.js" });
+    const result = await page.evaluate(variant => {
+      $ae.persist.preferences.set("colorScheme", "dark");
+      $ae.init({ mode: variant.mode, forceLegacy: variant.forceLegacy, syncBootstrapThemeTag: true });
+      const initial = document.documentElement.getAttribute("data-bs-theme");
+      const runtime = $ae.orchestratorVersion;
+      const preference = !!$ae.ext.preference;
+      $ae.updatePreferenceAttributesHTML({ colorScheme: "light" });
+      return { initial, updated: document.documentElement.getAttribute("data-bs-theme"), runtime, preference };
+    }, variant);
+    expect(result).toEqual({ initial: "dark", updated: "light", runtime: null, preference: false });
+  });
+
+  test(`boot-owned Bootstrap theme follows resolved Preference updates (${label})`, async ({ page }) => {
     await page.goto("/tests/index.htm");
     await page.emulateMedia({ colorScheme: "light" });
     await page.addStyleTag({ url: "/tests/fixtures/bootstrap-5.3.8.min.css" });
@@ -32,7 +48,7 @@ for (const variant of variants) {
       $ae.init({
         mode: variant.mode,
         forceLegacy: variant.forceLegacy,
-        extensions: { preference: { syncBootstrapThemeTag: true } }
+        syncBootstrapThemeTag: true
       });
     }, { variant, previousTheme });
 
@@ -69,9 +85,9 @@ for (const variant of variants) {
     expect(await page.evaluate(() => window.themeNotifications.every(event => event.theme === event.resolved))).toBe(true);
 
     await page.evaluate(() => $ae.destroyExtensions("preference"));
-    expect(await root.getAttribute("data-bs-theme")).toBe(previousTheme);
-    await page.emulateMedia({ colorScheme: "light" });
-    expect(await root.getAttribute("data-bs-theme")).toBe(previousTheme);
+    await expect(root).toHaveAttribute("data-bs-theme", "light");
+    await page.evaluate(() => $ae.updatePreferenceAttributesHTML({ colorScheme: "dark" }));
+    await expect(root).toHaveAttribute("data-bs-theme", "dark");
   });
 }
 
@@ -84,7 +100,9 @@ for (const mode of ["basic", "full"]) {
         document.documentElement.setAttribute("data-bs-theme", "application-theme");
         $ae.persist.preferences.set("colorScheme", "dark");
         if (mode === "basic") $ae.ext("preference");
-        $ae.init({ mode, extensions: { preference: { syncBootstrapThemeTag: enabled } } });
+        const options = { mode, extensions: { preference: { syncBootstrapThemeTag: true } } };
+        if (enabled !== undefined) options.syncBootstrapThemeTag = enabled;
+        $ae.init(options);
       }, { mode, enabled });
       await expect.poll(() => page.evaluate(() => !!$ae.ext.preference?.initialized)).toBe(true);
       await expect(page.locator("html")).toHaveAttribute("data-bs-theme", "application-theme");

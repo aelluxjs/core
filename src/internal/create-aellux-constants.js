@@ -108,6 +108,7 @@ export function createAelluxConstants() {
       cssMotionController: true,
       cssMotionPropertyMaxFPS: 55,
       autoViewportMeta: true,
+      syncBootstrapThemeTag: false,
       basePath: null,
       crossOrigin: null,
       extensions: {}

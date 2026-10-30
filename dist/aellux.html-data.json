@@ -239,7 +239,7 @@
     },
     {
       "name": "data-ae-option",
-      "description": "Sets a value of the enclosing preference. Values depend on that preference; application-defined values remain possible.\n\nValue syntax: string.\n\nSuggested values: `auto`, `light`, `dark`, `no-preference`, `more`, `less`, `reduced`, `active`, `on`, `off`, `low`, `1`, `1.5`, `0.8`. This is an open grammar, not a closed enumeration.",
+      "description": "Sets a value of the enclosing preference. Button options receive synchronized aria-pressed, restored on unmount; labels and checked inputs retain their own semantics. Values depend on that preference; application-defined values remain possible.\n\nValue syntax: string.\n\nSuggested values: `auto`, `light`, `dark`, `no-preference`, `more`, `less`, `reduced`, `active`, `on`, `off`, `low`, `1`, `1.5`, `0.8`. This is an open grammar, not a closed enumeration.",
       "references": [
         {
           "name": "AelluxJS preference",

@@ -28,9 +28,10 @@ HTTP error may appear in browser network/console tools for this deliberate actio
 Aborted and superseded requests do not produce error presentation.
 
 All examples use public `dist/` artifacts in Basic mode, explicitly registering
-only their required Extensions and Preference. Preference's
-`syncBootstrapThemeTag` keeps each preview aligned with the saved homepage theme;
-storage events synchronize separate windows on the same origin. Bootstrap 5.3.8
+only their required Extensions and Preference. The top-level boot option
+`syncBootstrapThemeTag` synchronizes each preview immediately at initialization;
+Preference publishes later changes and manages option-button `aria-pressed`.
+Storage events synchronize separate windows on the same origin. Bootstrap 5.3.8
 CSS provides presentation. Bootstrap JavaScript is not loaded.
 
 Extension registration and `$ae.init()` are explicit inline scripts in each
@@ -46,8 +47,9 @@ lazily loads Highlight.js through `$ae.dep()`, using the same 11.12 CDN series a
 GitHub light/dark styles as Docweaver. Later files share the cached dependencies;
 Preference changes switch the active stylesheet. Highlighted markup preserves the
 original text for copying. Source remains readable if highlighting is unavailable.
-Brands and headings use Geist from Google Fonts, with system font fallbacks;
-code remains monospaced. Preserve the relative
+The homepage's branding and headings use Geist from Google Fonts. Standalone
+examples use Bootstrap's default system fonts and minimal presentation, without
+loading Google Fonts. Code remains monospaced. Preserve the relative
 `home/` and `dist/` structure when deploying under a repository prefix such as
 `/core/`. Viewport and Ajax Href remain unstable Extensions. Touch emulation does
 not replace checks on physical devices.

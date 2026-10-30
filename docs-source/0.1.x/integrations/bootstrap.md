@@ -26,18 +26,16 @@ When adding motion or accessibility rules alongside [Bootstrap](https://getboots
 
 ## Color Modes
 
-Preference can synchronize Bootstrap 5.3's `data-bs-theme` attribute on `<html>` without Bootstrap JavaScript:
+The boot script can synchronize Bootstrap 5.3's `data-bs-theme` attribute on `<html>` without Bootstrap JavaScript or the Preference Extension:
 
 ```js
 $ae.init({
   mode: "full",
-  extensions: {
-    preference: { syncBootstrapThemeTag: true }
-  }
+  syncBootstrapThemeTag: true
 });
 ```
 
-The option defaults to `false`. When enabled, Preference writes the resolved `light` or `dark` theme at initialization and on subsequent updates, including device changes while the choice is `auto`. It updates the attribute before `PreferencesChange` and restores the previous attribute on destruction. In Basic, register `$ae.ext("preference")` explicitly and pass the same Extension options with `mode: "basic"`. Bootstrap CSS remains an application dependency; synchronization starts after Preference loads. See [Preference](../core-extensions/preference.md#bootstrap-color-mode) for the full contract.
+The top-level option defaults to `false`. When enabled, `$ae.init()` synchronously writes the resolved `light` or `dark` theme before downloading or mounting the runtime and Extensions. Every later `$ae.updatePreferenceAttributesHTML()` call uses the same boot publisher. Preference calls that publisher for control, storage and device updates, so the theme is current before `PreferencesChange`; destroying Preference does not restore the boot-owned attribute. In Basic, register Preference only when its controls or automatic updates are needed. Bootstrap CSS remains an application dependency. See [Preference](../core-extensions/preference.md#bootstrap-color-mode) and [Runtime API](../runtime/api.md) for the full contract.
 
 ## JavaScript Coexistence
 

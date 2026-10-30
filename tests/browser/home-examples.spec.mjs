@@ -45,11 +45,14 @@ test("inline head initialization publishes preferences before styles and deferre
     let earlyState;
     try {
       await request;
+      // Speculative CSS requests can precede execution of the blocking boot script.
+      await expect.poll(() => page.evaluate(() => window.$ae?.options.syncBootstrapThemeTag), { timeout: 5000 }).toBe(true);
       earlyState = await page.evaluate(() => ({
         mode: $ae.options.mode,
         preferenceRegistered: !!$ae.registry.ext.preference,
-        syncBootstrapThemeTag: $ae.options.extensions.preference.syncBootstrapThemeTag,
+        syncBootstrapThemeTag: $ae.options.syncBootstrapThemeTag,
         colorScheme: $ae.currentPreference("color-scheme"),
+        bootstrapTheme: window.document.documentElement.getAttribute("data-bs-theme"),
         stylesheetLoaded: !!window.document.querySelector('link[href*="bootstrap@"]')?.sheet
       }));
     } finally {
@@ -57,7 +60,7 @@ test("inline head initialization publishes preferences before styles and deferre
       await navigation;
     }
     expect(earlyState).toEqual({ mode: "basic", preferenceRegistered: true, syncBootstrapThemeTag: true,
-      colorScheme: "dark", stylesheetLoaded: false });
+      colorScheme: "dark", bootstrapTheme: "dark", stylesheetLoaded: false });
     await expect(page.locator("html")).toHaveAttribute("data-bs-theme", "dark");
     await page.unroute(stylesheet);
   }
@@ -205,14 +208,17 @@ test("homepage embeds four themed demos and displays the exact runnable source",
   await page.goto("/home/index.htm");
   await expect(page.locator(".hero-tagline")).toHaveText("UX Made Easy.");
   await expect(page.locator(".brand-mark")).toHaveCSS("font-family", /Geist/);
+  await expect(page.getByRole("button", { name: "System", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator("iframe.example-frame")).toHaveCount(4);
   await page.locator("iframe").evaluateAll(frames => frames.forEach(frame => { frame.loading = "eager"; }));
   for (const frameElement of await page.locator("iframe").all()) {
     const frame = await frameElement.contentFrame();
     await expect.poll(() => frame.locator("html").getAttribute("data-ae-color-scheme")).not.toBeNull();
+    await expect(frame.locator("h1")).not.toHaveCSS("font-family", /Geist/);
   }
   await page.getByRole("button", { name: "Dark", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-bs-theme", "dark");
+  await expect(page.getByRole("button", { name: "Dark", exact: true })).toHaveAttribute("aria-pressed", "true");
   for (const frameElement of await page.locator("iframe").all()) {
     const frame = await frameElement.contentFrame();
     await expect(frame.locator("html")).toHaveAttribute("data-bs-theme", "dark");

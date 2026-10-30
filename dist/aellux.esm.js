@@ -433,6 +433,12 @@ function createPreferenceHtmlHelper(root2, getApi) {
     if (preferences && "colorScheme" in preferences) {
       updateColorSchemeMeta(preferences.colorScheme);
     }
+    if (api.options.syncBootstrapThemeTag === true) {
+      document2.documentElement.setAttribute(
+        "data-bs-theme",
+        currentPreference("color-scheme") === "dark" ? "dark" : "light"
+      );
+    }
   }
   function updateColorSchemeMeta(preferenceColorScheme) {
     var api = getApi();
@@ -1058,6 +1064,7 @@ function createAelluxConstants() {
       cssMotionController: true,
       cssMotionPropertyMaxFPS: 55,
       autoViewportMeta: true,
+      syncBootstrapThemeTag: false,
       basePath: null,
       crossOrigin: null,
       extensions: {}

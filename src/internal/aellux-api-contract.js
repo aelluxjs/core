@@ -180,6 +180,7 @@ var bootstrapProperties = Object.freeze({
       cssMotionController: flag,
       cssMotionPropertyMaxFPS: number,
       autoViewportMeta: flag,
+      syncBootstrapThemeTag: flag,
       basePath: Object.freeze({ type: ["string", "null"] }),
       crossOrigin: Object.freeze({ type: ["string", "null"] }),
       extensions: record

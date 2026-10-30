@@ -817,6 +817,9 @@
             "autoViewportMeta": {
               "type": "boolean"
             },
+            "syncBootstrapThemeTag": {
+              "type": "boolean"
+            },
             "basePath": {
               "type": [
                 "string",
@@ -1912,6 +1915,9 @@
             "autoViewportMeta": {
               "type": "boolean"
             },
+            "syncBootstrapThemeTag": {
+              "type": "boolean"
+            },
             "basePath": {
               "type": [
                 "string",
@@ -2606,7 +2612,7 @@
     {
       "name": "data-ae-option",
       "extension": "preference",
-      "description": "Sets a value of the enclosing preference. Values depend on that preference; application-defined values remain possible.",
+      "description": "Sets a value of the enclosing preference. Button options receive synchronized aria-pressed, restored on unmount; labels and checked inputs retain their own semantics. Values depend on that preference; application-defined values remain possible.",
       "syntax": "string",
       "values": [
         "auto",
@@ -15051,7 +15057,7 @@
       "cancelable": false,
       "name": "AelluxJsPreferencesChange",
       "extension": "preference",
-      "description": "Preference update on document. detail: { changed, preferences }; changed may be empty. With syncBootstrapThemeTag enabled, root data-bs-theme is synchronized before dispatch.",
+      "description": "Preference update on document. detail: { changed, preferences }; changed may be empty. Option-button aria-pressed is synchronized before dispatch. The boot preference publisher synchronizes root data-bs-theme when the top-level syncBootstrapThemeTag option is enabled.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
     },
     {

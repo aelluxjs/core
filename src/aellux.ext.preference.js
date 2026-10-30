@@ -11,8 +11,8 @@
  *
  * Inputs and activation: mounts `[data-ae-preference]`; option, next and previous
  * controls use their matching data attributes. Init options define values,
- * defaults and storage behavior. `syncBootstrapThemeTag: true` also reflects the
- * resolved color scheme in the root `data-bs-theme` attribute.
+ * defaults and storage behavior. Bootstrap color-mode synchronization belongs
+ * to the boot's preference publisher, not this Extension.
  *
  * Outputs and owned state: updates preference attributes on the root HTML
  * element, synchronizes options, value labels and associated inputs, persists
@@ -23,7 +23,8 @@
  *
  * Accessibility: control markup must provide native keyboard behavior,
  * accessible names and semantic state. The extension synchronizes values and
- * checked state but does not turn a generic element into an accessible control.
+ * checked state and option buttons' pressed state, but does not turn a generic
+ * element into an accessible control.
  */
 
 import utilsNameCase from "./internal/utils-name-case.js";
@@ -48,7 +49,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
   const containerPreferences = new Map();
   const containerLabels = new Map();
   const labelMemories = new WeakMap();
-  let bootstrapThemeMemory = null;
+  const containerOptionAria = new Map();
 
   AelluxJs.extAttach(extensionName, { init, destroy, update, get, set });
 
@@ -79,11 +80,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
     sound: ["off", "on", "low"],
   };
 
-  function init(options = {}) {
-    if (options.syncBootstrapThemeTag === true) {
-      bootstrapThemeMemory = AelluxJs.persist.element.save(document.documentElement, ["data-bs-theme"], []);
-    }
-
+  function init(options) {
     AelluxJs.mountManager.add({
       extensionName, selector: `[${attr.preference}]`,
       priority: 0,
@@ -117,8 +114,6 @@ import utilsNameCase from "./internal/utils-name-case.js";
   }
 
   function destroy() {
-    bootstrapThemeMemory?.restore();
-    bootstrapThemeMemory = null;
     for (const container of containerPreferences.keys()) unmountPreferenceContainer(container);
     AelluxJs.mountManager.remove({ extensionName });
     containersByPreference.clear();
@@ -176,10 +171,6 @@ import utilsNameCase from "./internal/utils-name-case.js";
       computedPreferences[key] = nextPreferences[key];
     }
     AelluxJs.updatePreferenceAttributesHTML(computedPreferences);
-    if (bootstrapThemeMemory) {
-      const colorScheme = AelluxJs.currentPreference("color-scheme");
-      document.documentElement.setAttribute("data-bs-theme", colorScheme === "dark" ? "dark" : "light");
-    }
     for (const container of containerPreferences.keys()) {
       if (indexContainer(container)) updateContainer(container);
     }
@@ -214,11 +205,26 @@ import utilsNameCase from "./internal/utils-name-case.js";
     return true;
   }
 
+  function isOptionButton(element) {
+    const role = element.getAttribute("role");
+    if (role) return role === "button";
+    return element.tagName === "BUTTON" ||
+      (element.tagName === "INPUT" && /^(button|submit|reset)$/.test(element.type));
+  }
+
   function updateContainer(container) {
     const preference = container.getAttribute(attr.preference);
     const elements = container.querySelectorAll(`[${attr.option}]`);
     const labels = container.querySelectorAll(`[${attr.label}]`);
     const currentValue = get(preference || "");
+    let optionAria = containerOptionAria.get(container);
+    if (!optionAria) containerOptionAria.set(container, optionAria = new Map());
+    for (const [element, handler] of optionAria) {
+      if (!container.contains(element) || !element.hasAttribute(attr.option) || !isOptionButton(element)) {
+        handler.release();
+        optionAria.delete(element);
+      }
+    }
     labels.forEach(label => {
       let ownedLabels = containerLabels.get(container);
       if (!ownedLabels) {
@@ -235,8 +241,12 @@ import utilsNameCase from "./internal/utils-name-case.js";
     });
     elements.forEach(element => {
       const value = element.getAttribute(attr.option);
-      const selected = value === currentValue;
+      const selected = String(value) === String(currentValue);
       element.classList.toggle(className.active, selected);
+      if (isOptionButton(element)) {
+        if (!optionAria.has(element)) optionAria.set(element, AelluxJs.aria.register(element));
+        optionAria.get(element).set({ pressed: selected });
+      }
       const labelFor = element.getAttribute("for");
       if (labelFor) {
         const forTarget = document.getElementById(labelFor);
@@ -264,6 +274,9 @@ import utilsNameCase from "./internal/utils-name-case.js";
 
   function unmountPreferenceContainer(container) {
     AelluxJs.offEvent(container, "$click", onContainerClick);
+    const optionAria = containerOptionAria.get(container);
+    if (optionAria) for (const handler of optionAria.values()) handler.release();
+    containerOptionAria.delete(container);
     const labels = containerLabels.get(container);
     if (labels) for (const label of labels) {
       labelMemories.get(label)?.restore();

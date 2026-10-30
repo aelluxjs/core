@@ -26179,7 +26179,7 @@
         var containerPreferences = /* @__PURE__ */ new Map();
         var containerLabels = /* @__PURE__ */ new Map();
         var labelMemories = /* @__PURE__ */ new WeakMap();
-        var bootstrapThemeMemory = null;
+        var containerOptionAria = /* @__PURE__ */ new Map();
         AelluxJs2.extAttach(extensionName, {
           init: init,
           destroy: destroy,
@@ -26211,11 +26211,7 @@
           haptics: ["on", "off"],
           sound: ["off", "on", "low"]
         };
-        function init() {
-          var options = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
-          if (options.syncBootstrapThemeTag === true) {
-            bootstrapThemeMemory = AelluxJs2.persist.element.save(document.documentElement, ["data-bs-theme"], []);
-          }
+        function init(options) {
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
             selector: "[".concat(attr.preference, "]"),
@@ -26243,9 +26239,6 @@
           update();
         }
         function destroy() {
-          var _bootstrapThemeMemory;
-          (_bootstrapThemeMemory = bootstrapThemeMemory) === null || _bootstrapThemeMemory === void 0 || _bootstrapThemeMemory.restore();
-          bootstrapThemeMemory = null;
           var _iterator = _createForOfIteratorHelper9(containerPreferences.keys()), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
@@ -26311,10 +26304,6 @@
             computedPreferences[_key] = nextPreferences[_key];
           }
           AelluxJs2.updatePreferenceAttributesHTML(computedPreferences);
-          if (bootstrapThemeMemory) {
-            var colorScheme = AelluxJs2.currentPreference("color-scheme");
-            document.documentElement.setAttribute("data-bs-theme", colorScheme === "dark" ? "dark" : "light");
-          }
           var _iterator2 = _createForOfIteratorHelper9(containerPreferences.keys()), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
@@ -26375,11 +26364,32 @@
           containerPreferences.set(container, key);
           return true;
         }
+        function isOptionButton(element) {
+          var role = element.getAttribute("role");
+          if (role) return role === "button";
+          return element.tagName === "BUTTON" || element.tagName === "INPUT" && /^(button|submit|reset)$/.test(element.type);
+        }
         function updateContainer(container) {
           var preference2 = container.getAttribute(attr.preference);
           var elements = container.querySelectorAll("[".concat(attr.option, "]"));
           var labels = container.querySelectorAll("[".concat(attr.label, "]"));
           var currentValue = get(preference2 || "");
+          var optionAria = containerOptionAria.get(container);
+          if (!optionAria) containerOptionAria.set(container, optionAria = /* @__PURE__ */ new Map());
+          var _iterator5 = _createForOfIteratorHelper9(optionAria), _step5;
+          try {
+            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+              var _step5$value = _slicedToArray5(_step5.value, 2), element = _step5$value[0], handler = _step5$value[1];
+              if (!container.contains(element) || !element.hasAttribute(attr.option) || !isOptionButton(element)) {
+                handler.release();
+                optionAria.delete(element);
+              }
+            }
+          } catch (err) {
+            _iterator5.e(err);
+          } finally {
+            _iterator5.f();
+          }
           labels.forEach(function(label) {
             var ownedLabels = containerLabels.get(container);
             if (!ownedLabels) {
@@ -26394,11 +26404,17 @@
             var selected = String(value) === String(currentValue);
             label.hidden = !selected;
           });
-          elements.forEach(function(element) {
-            var value = element.getAttribute(attr.option);
-            var selected = value === currentValue;
-            element.classList.toggle(className.active, selected);
-            var labelFor = element.getAttribute("for");
+          elements.forEach(function(element2) {
+            var value = element2.getAttribute(attr.option);
+            var selected = String(value) === String(currentValue);
+            element2.classList.toggle(className.active, selected);
+            if (isOptionButton(element2)) {
+              if (!optionAria.has(element2)) optionAria.set(element2, AelluxJs2.aria.register(element2));
+              optionAria.get(element2).set({
+                pressed: selected
+              });
+            }
+            var labelFor = element2.getAttribute("for");
             if (labelFor) {
               var forTarget = document.getElementById(labelFor);
               if (forTarget) {
@@ -26421,20 +26437,35 @@
         }
         function unmountPreferenceContainer(container) {
           AelluxJs2.offEvent(container, "$click", onContainerClick);
+          var optionAria = containerOptionAria.get(container);
+          if (optionAria) {
+            var _iterator6 = _createForOfIteratorHelper9(optionAria.values()), _step6;
+            try {
+              for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+                var handler = _step6.value;
+                handler.release();
+              }
+            } catch (err) {
+              _iterator6.e(err);
+            } finally {
+              _iterator6.f();
+            }
+          }
+          containerOptionAria.delete(container);
           var labels = containerLabels.get(container);
           if (labels) {
-            var _iterator5 = _createForOfIteratorHelper9(labels), _step5;
+            var _iterator7 = _createForOfIteratorHelper9(labels), _step7;
             try {
-              for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+              for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
                 var _labelMemories$get;
-                var label = _step5.value;
+                var label = _step7.value;
                 (_labelMemories$get = labelMemories.get(label)) === null || _labelMemories$get === void 0 || _labelMemories$get.restore();
                 labelMemories.delete(label);
               }
             } catch (err) {
-              _iterator5.e(err);
+              _iterator7.e(err);
             } finally {
-              _iterator5.f();
+              _iterator7.f();
             }
           }
           containerLabels.delete(container);

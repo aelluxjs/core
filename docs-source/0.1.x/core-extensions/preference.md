@@ -7,7 +7,7 @@
 ## Accessibility profile
 
 - **Capabilities:** interaction and input; structure and state; visual preference policy; storage and media-query integration.
-- **Owned state:** computed preference values, root preference attributes, option active classes, value-label visibility and associated input values or checked state. With `syncBootstrapThemeTag: true`, also owns the root `data-bs-theme` attribute until destruction.
+- **Owned state:** computed preference values, root preference attributes, option active classes, option-button `aria-pressed`, value-label visibility and associated input values or checked state. Bootstrap's root `data-bs-theme` belongs to the boot preference publisher.
 - **Consumer responsibility:** use native keyboard-operable controls with accessible names and provide meaningful text for every value label.
 - **Limitation:** generic elements marked as options, next or previous controls do not receive button semantics or keyboard behavior automatically.
 
@@ -42,30 +42,32 @@ $ae.on("PreferencesChange", event => {
 
 ## Bootstrap color mode
 
-Set the initialization option `extensions.preference.syncBootstrapThemeTag` to `true` to synchronize Bootstrap's root color-mode attribute with the resolved AelluxJS color scheme:
+Set the top-level boot initialization option `syncBootstrapThemeTag` to `true` to synchronize Bootstrap's root color-mode attribute with the resolved AelluxJS color scheme:
 
 ```js
 $ae.init({
   mode: "full",
-  extensions: {
-    preference: { syncBootstrapThemeTag: true }
-  }
+  syncBootstrapThemeTag: true
 });
 ```
 
-In Basic mode, register Preference explicitly with `$ae.ext("preference")` before calling `$ae.init()` with the same `extensions.preference` options and `mode: "basic"`.
+The boot publishes the initial theme synchronously inside `$ae.init()`, before downloading or mounting the runtime and Extensions. This works in Basic without registering Preference. Register `$ae.ext("preference")` when using preference controls and its automatic storage/device updates.
 
 | Option | Type | Default | Behavior |
 | --- | --- | --- | --- |
-| `syncBootstrapThemeTag` | boolean | `false` | When `true`, writes `data-bs-theme="light"` or `data-bs-theme="dark"` on `<html>` during Preference updates. |
+| `syncBootstrapThemeTag` | boolean | `false` | Top-level boot option. When `true`, writes `data-bs-theme="light"` or `data-bs-theme="dark"` on `<html>` when the boot preference publisher runs. |
 
-Synchronization starts when Preference initializes and occurs before `PreferencesChange` dispatch. Persisted choices, declared controls, programmatic `set()` followed by `update()`, device changes in `auto` mode, and storage events all use the same update path. `auto` publishes the resolved `light` or `dark` value; an unresolved color scheme falls back to `light`. `set()` alone still only saves the choice.
+Initial synchronization reads persisted/device preferences. Later calls to the public `$ae.updatePreferenceAttributesHTML()` publisher also synchronize the attribute, including the ordinary publication performed by Preference before `PreferencesChange`. Declared controls, programmatic `set()` followed by `update()`, device changes in `auto` mode, and storage events retain their existing Preference update path. `auto` publishes the resolved `light` or `dark` value; an unresolved color scheme falls back to `light`. `set()` alone still only saves the choice.
 
-When the option is omitted or `false`, Preference leaves `data-bs-theme` untouched. When enabled, destroying Preference restores the attribute's previous value, or removes it if it was originally absent. This option only writes the root attribute; it does not load Bootstrap CSS or JavaScript, change nested Bootstrap color-mode overrides, or synchronize the attribute during boot before Preference loads. Load Bootstrap 5.3 CSS separately to apply its color modes.
+When the option is omitted or `false`, the boot publisher leaves `data-bs-theme` untouched. Destroying or unmounting Preference does not restore or remove this boot-owned attribute. Without Preference, call the publisher explicitly to reflect later saved/device changes. This option does not load Bootstrap CSS or JavaScript or change nested Bootstrap color-mode overrides. Load Bootstrap 5.3 CSS separately to apply its color modes.
+
+Migration: replace the previous `extensions.preference.syncBootstrapThemeTag` setting with the top-level `syncBootstrapThemeTag`. Theme synchronization is no longer an Extension initialization option.
 
 ## Preference controls
 
-An element marked with `data-ae-preference` is a clickable preference container. Descendants with `data-ae-option` set a value for that preference and receive the `ae--active` class when selected.
+An element marked with `data-ae-preference` is a clickable preference container. Descendants with `data-ae-option` set a value for that preference and receive the `ae--active` class when selected. Option values and current values are compared as strings, including numeric preferences such as text scale.
+
+Options with button semantics also receive `aria-pressed="true"` or `"false"`, synchronized on mount and preference changes before `PreferencesChange`. This covers native buttons, button/submit/reset inputs and elements explicitly authored with `role="button"`. The shared ARIA helper preserves the original attribute and restores it when the option is released or its container unmounts. Labels, radio/checkbox inputs, generic elements and controls with other explicit roles do not acquire pressed semantics. Preference does not add roles or keyboard support; associated inputs continue using their existing value/checked synchronization. Next/previous controls do not represent a selected option and do not receive `aria-pressed` automatically.
 
 ```html
 <div data-ae-preference="colorScheme">
@@ -99,7 +101,7 @@ See [Core Known Limits & Risks](../runtime/known-limits-and-risks.md) for classi
 | Area | Type | Description | Recommendation |
 | --- | --- | --- | --- |
 | Publication | Known Limit | <span class="large">set() saves the choice without publishing it; update() reflects values and emits PreferencesChange, including an empty changed list.</span> | <span class="large">Call update() after programmatic set() and inspect changed before expensive subscriber work.</span> |
-| System choices | Known Limit | <span class="large">Explicit local values can override device preferences; auto uses available media queries. Reflected attributes do not supply theme styles, sound or haptics. Bootstrap root synchronization is opt-in and begins at Preference initialization.</span> | <span class="large">Consume resolved HTML attributes/currentPreference() and provide application presentation; load Bootstrap CSS separately when using syncBootstrapThemeTag.</span> |
+| System choices | Known Limit | <span class="large">Explicit local values can override device preferences; auto uses available media queries. Reflected attributes do not supply theme styles, sound or haptics. Bootstrap root synchronization belongs to the boot publisher and is opt-in.</span> | <span class="large">Consume resolved HTML attributes/currentPreference() and provide application presentation; load Bootstrap CSS separately when using the top-level syncBootstrapThemeTag option.</span> |
 | Persistence | Potential Risk | <span class="large">Storage is origin/browser-profile state, without account or cross-device synchronization. Storage events update other contexts, but concurrent writers have no conflict-resolution protocol.</span> | <span class="large">Coordinate writers and handle access/quota failures using the Core persistence contract.</span> |
 | Controls | Known Limit | <span class="large">Generic option/next/previous elements do not acquire native keyboard behavior or control roles. Built-in cycling follows the documented value lists.</span> | <span class="large">Use named native buttons or inputs and synchronize additional frontend state.</span> |
 | Coverage | Validation Gap | <span class="large">Resolved preferences and controls have browser checks; long-running concurrent tabs and later storage quota/access revocation need targeted validation.</span> | <span class="large">Test deployment storage restrictions and required cross-tab flows.</span> |

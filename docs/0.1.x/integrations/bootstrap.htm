@@ -691,15 +691,13 @@
 <p>The application controls the selectors and priority of its Extension stylesheet.</p>
 <p>When adding motion or accessibility rules alongside <a href="https://getbootstrap.com/">Bootstrap</a>, target AelluxJs preference attributes on <code>&lt;html&gt;</code> so a saved local choice and the device setting both affect the result. For example, use <code>html[data-ae-reduced-motion=&quot;reduced&quot;] .custom-transition { transition: none; }</code> for application owned motion. Apply this convention to future integration styles and scripts; use <code>$ae.currentPreference(&quot;reduced-motion&quot;)</code> in JavaScript before starting optional animations.</p>
 <h2>Color Modes</h2>
-<p>Preference can synchronize Bootstrap 5.3&#39;s <code>data-bs-theme</code> attribute on <code>&lt;html&gt;</code> without Bootstrap JavaScript:</p>
+<p>The boot script can synchronize Bootstrap 5.3&#39;s <code>data-bs-theme</code> attribute on <code>&lt;html&gt;</code> without Bootstrap JavaScript or the Preference Extension:</p>
 <pre><code class="language-js">$ae.init({
   mode: &quot;full&quot;,
-  extensions: {
-    preference: { syncBootstrapThemeTag: true }
-  }
+  syncBootstrapThemeTag: true
 });
 </code></pre>
-<p>The option defaults to <code>false</code>. When enabled, Preference writes the resolved <code>light</code> or <code>dark</code> theme at initialization and on subsequent updates, including device changes while the choice is <code>auto</code>. It updates the attribute before <code>PreferencesChange</code> and restores the previous attribute on destruction. In Basic, register <code>$ae.ext(&quot;preference&quot;)</code> explicitly and pass the same Extension options with <code>mode: &quot;basic&quot;</code>. Bootstrap CSS remains an application dependency; synchronization starts after Preference loads. See <a href="../core-extensions/preference.htm#bootstrap-color-mode">Preference</a> for the full contract.</p>
+<p>The top-level option defaults to <code>false</code>. When enabled, <code>$ae.init()</code> synchronously writes the resolved <code>light</code> or <code>dark</code> theme before downloading or mounting the runtime and Extensions. Every later <code>$ae.updatePreferenceAttributesHTML()</code> call uses the same boot publisher. Preference calls that publisher for control, storage and device updates, so the theme is current before <code>PreferencesChange</code>; destroying Preference does not restore the boot-owned attribute. In Basic, register Preference only when its controls or automatic updates are needed. Bootstrap CSS remains an application dependency. See <a href="../core-extensions/preference.htm#bootstrap-color-mode">Preference</a> and <a href="../runtime/api.htm">Runtime API</a> for the full contract.</p>
 <h2>JavaScript Coexistence</h2>
 <p>Extensions should avoid unnecessary <code>preventDefault()</code> and <code>stopPropagation()</code>, should not remove third-party listeners, and must keep mounting idempotent when <a href="https://getbootstrap.com/">Bootstrap</a> reveals or modifies content dynamically.</p>
 <p>After inserting or revealing dynamic markup, update only the affected root when possible:</p>

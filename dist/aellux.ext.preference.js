@@ -38,7 +38,7 @@
     const containerPreferences = /* @__PURE__ */ new Map();
     const containerLabels = /* @__PURE__ */ new Map();
     const labelMemories = /* @__PURE__ */ new WeakMap();
-    let bootstrapThemeMemory = null;
+    const containerOptionAria = /* @__PURE__ */ new Map();
     AelluxJs.extAttach(extensionName, { init, destroy, update, get, set });
     const attr = {
       preference: AelluxJs.attr("preference"),
@@ -64,10 +64,7 @@
       haptics: ["on", "off"],
       sound: ["off", "on", "low"]
     };
-    function init(options = {}) {
-      if (options.syncBootstrapThemeTag === true) {
-        bootstrapThemeMemory = AelluxJs.persist.element.save(document.documentElement, ["data-bs-theme"], []);
-      }
+    function init(options) {
       AelluxJs.mountManager.add({
         extensionName,
         selector: `[${attr.preference}]`,
@@ -96,8 +93,6 @@
       update();
     }
     function destroy() {
-      bootstrapThemeMemory == null ? void 0 : bootstrapThemeMemory.restore();
-      bootstrapThemeMemory = null;
       for (const container of containerPreferences.keys()) unmountPreferenceContainer(container);
       AelluxJs.mountManager.remove({ extensionName });
       containersByPreference.clear();
@@ -151,10 +146,6 @@
         computedPreferences[key] = nextPreferences[key];
       }
       AelluxJs.updatePreferenceAttributesHTML(computedPreferences);
-      if (bootstrapThemeMemory) {
-        const colorScheme = AelluxJs.currentPreference("color-scheme");
-        document.documentElement.setAttribute("data-bs-theme", colorScheme === "dark" ? "dark" : "light");
-      }
       for (const container of containerPreferences.keys()) {
         if (indexContainer(container)) updateContainer(container);
       }
@@ -187,11 +178,24 @@
       containerPreferences.set(container, key);
       return true;
     }
+    function isOptionButton(element) {
+      const role = element.getAttribute("role");
+      if (role) return role === "button";
+      return element.tagName === "BUTTON" || element.tagName === "INPUT" && /^(button|submit|reset)$/.test(element.type);
+    }
     function updateContainer(container) {
       const preference = container.getAttribute(attr.preference);
       const elements = container.querySelectorAll(`[${attr.option}]`);
       const labels = container.querySelectorAll(`[${attr.label}]`);
       const currentValue = get(preference || "");
+      let optionAria = containerOptionAria.get(container);
+      if (!optionAria) containerOptionAria.set(container, optionAria = /* @__PURE__ */ new Map());
+      for (const [element, handler] of optionAria) {
+        if (!container.contains(element) || !element.hasAttribute(attr.option) || !isOptionButton(element)) {
+          handler.release();
+          optionAria.delete(element);
+        }
+      }
       labels.forEach((label) => {
         let ownedLabels = containerLabels.get(container);
         if (!ownedLabels) {
@@ -208,8 +212,12 @@
       });
       elements.forEach((element) => {
         const value = element.getAttribute(attr.option);
-        const selected = value === currentValue;
+        const selected = String(value) === String(currentValue);
         element.classList.toggle(className.active, selected);
+        if (isOptionButton(element)) {
+          if (!optionAria.has(element)) optionAria.set(element, AelluxJs.aria.register(element));
+          optionAria.get(element).set({ pressed: selected });
+        }
         const labelFor = element.getAttribute("for");
         if (labelFor) {
           const forTarget = document.getElementById(labelFor);
@@ -234,6 +242,9 @@
     function unmountPreferenceContainer(container) {
       var _a;
       AelluxJs.offEvent(container, "$click", onContainerClick);
+      const optionAria = containerOptionAria.get(container);
+      if (optionAria) for (const handler of optionAria.values()) handler.release();
+      containerOptionAria.delete(container);
       const labels = containerLabels.get(container);
       if (labels) for (const label of labels) {
         (_a = labelMemories.get(label)) == null ? void 0 : _a.restore();
