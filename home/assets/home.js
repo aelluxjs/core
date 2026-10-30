@@ -70,19 +70,3 @@ document.querySelectorAll("[data-example-source]").forEach(details => {
     });
   });
 });
-
-function syncThemeControls() {
-  document.querySelectorAll('[data-ae-preference="color-scheme"] [data-ae-option]').forEach(button => {
-    button.setAttribute("aria-pressed", String(button.classList.contains("ae--active")));
-  });
-}
-
-$ae.on("PreferencesChange", syncThemeControls);
-$ae.on("Ready", syncThemeControls);
-$ae.ext("preference");
-$ae.init({
-  mode: "basic",
-  extensions: {
-    preference: { syncBootstrapThemeTag: true }
-  }
-});

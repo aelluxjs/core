@@ -1,25 +1,47 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="light">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="AelluxJS is a lightweight JavaScript library for declarative, reusable UX behaviors. Explore Extensions, read the documentation and get started.">
+  <meta name="description"
+    content="AelluxJS is a lightweight JavaScript library for declarative, reusable UX behaviors. Explore Extensions, read the documentation and get started.">
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#17191c" media="(prefers-color-scheme: dark)">
   <title>aellux.js — UX Behaviors Made Easy.</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-  <script src="../dist/aellux.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <link rel="stylesheet" href="assets/home.css">
   <script src="assets/home.js" defer></script>
+  <script src="../dist/aellux.min.js"></script>
+  <script>
+    function syncThemeControls() {
+      document.querySelectorAll('[data-ae-preference="color-scheme"] [data-ae-option]').forEach(button => {
+        button.setAttribute("aria-pressed", String(button.classList.contains("ae--active")));
+      });
+    }
+
+    $ae.on("PreferencesChange", syncThemeControls);
+    $ae.on("Ready", syncThemeControls);
+    $ae.ext("preference");
+    $ae.init({
+      mode: "basic",
+      extensions: {
+        preference: { syncBootstrapThemeTag: true }
+      }
+    });
+  </script>
 </head>
+
 <body>
   <a class="skip-link btn btn-warning" href="#main">Skip to content</a>
 
   <header class="site-header bg-body border-bottom">
     <div class="container d-flex flex-wrap align-items-center justify-content-between gap-3 py-3">
-      <a class="brand text-body text-decoration-none d-inline-flex align-items-center gap-2" href="#" aria-label="aellux.js home">
+      <a class="brand text-body text-decoration-none d-inline-flex align-items-center gap-2" href="#"
+        aria-label="aellux.js home">
         <span class="brand-mark bg-warning text-dark" aria-hidden="true">ae</span>
         <span>aellux<span class="brand-suffix">.js</span></span>
       </a>
@@ -29,10 +51,13 @@
         <a href="../docs/0.1.x/index.htm">Documentation</a>
         <a href="https://github.com/aelluxjs/core">GitHub <span aria-hidden="true">↗</span></a>
       </nav>
-      <div class="theme-controls btn-group btn-group-sm" role="group" aria-label="Color theme" data-ae-preference="color-scheme">
-        <button class="btn btn-outline-secondary" type="button" data-ae-option="light" aria-pressed="false">Light</button>
+      <div class="theme-controls btn-group btn-group-sm" role="group" aria-label="Color theme"
+        data-ae-preference="color-scheme">
+        <button class="btn btn-outline-secondary" type="button" data-ae-option="light"
+          aria-pressed="false">Light</button>
         <button class="btn btn-outline-secondary" type="button" data-ae-option="dark" aria-pressed="false">Dark</button>
-        <button class="btn btn-outline-secondary" type="button" data-ae-option="auto" aria-pressed="false">System</button>
+        <button class="btn btn-outline-secondary" type="button" data-ae-option="auto"
+          aria-pressed="false">System</button>
       </div>
     </div>
   </header>
@@ -42,20 +67,26 @@
       <div class="container">
         <div class="row align-items-center g-4 g-lg-5">
           <div class="col-lg-7">
-            <p class="eyebrow text-warning mb-4"><span class="status-dot bg-warning" aria-hidden="true"></span> JavaScript, with behavior.</p>
+            <p class="eyebrow text-warning mb-4"><span class="status-dot bg-warning" aria-hidden="true"></span>
+              JavaScript, with behavior.</p>
             <h1 id="hero-title" class="hero-wordmark mb-3">aellux<span class="text-warning">.js</span></h1>
             <h2 class="hero-tagline mb-4">UX Behaviors<br>Made Easy.</h2>
-            <p class="hero-description text-light-emphasis mb-4">A lightweight JavaScript library for declarative, reusable UX behaviors.</p>
+            <p class="hero-description text-light-emphasis mb-4">A lightweight JavaScript library for declarative,
+              reusable UX behaviors.</p>
             <div class="d-flex flex-wrap gap-2">
-              <a class="btn btn-warning px-4 py-2 fw-semibold" href="#getting-started">Get Started <span class="ms-2" aria-hidden="true">→</span></a>
+              <a class="btn btn-warning px-4 py-2 fw-semibold" href="#getting-started">Get Started <span class="ms-2"
+                  aria-hidden="true">→</span></a>
               <a class="btn btn-outline-light px-4 py-2" href="../docs/0.1.x/index.htm">Documentation</a>
-              <a class="btn btn-link text-light px-3 py-2" href="https://github.com/aelluxjs/core">GitHub <span aria-hidden="true">↗</span></a>
+              <a class="btn btn-link text-light px-3 py-2" href="https://github.com/aelluxjs/core">GitHub <span
+                  aria-hidden="true">↗</span></a>
             </div>
-            <p class="small text-light-emphasis mt-4 mb-0">v0.1.0-beta.10 <span class="mx-2" aria-hidden="true">/</span> Open source <span class="mx-2" aria-hidden="true">/</span> Apache 2.0</p>
+            <p class="small text-light-emphasis mt-4 mb-0">v0.1.0-beta.10 <span class="mx-2" aria-hidden="true">/</span>
+              Open source <span class="mx-2" aria-hidden="true">/</span> Apache 2.0</p>
           </div>
           <div class="col-lg-5">
             <div class="hero-code border rounded-3 overflow-hidden">
-              <div class="d-flex justify-content-between align-items-center border-bottom px-4 py-3 small text-light-emphasis">
+              <div
+                class="d-flex justify-content-between align-items-center border-bottom px-4 py-3 small text-light-emphasis">
                 <span class="font-monospace">index.html</span><span class="text-warning">HTML → UX</span>
               </div>
               <pre class="p-4 mb-0"><code><span class="code-comment">&lt;!-- Describe the behavior. --&gt;</span>
@@ -70,7 +101,9 @@
   hidden&gt;
   Hello, aellux.js.
 &lt;/div&gt;</code></pre>
-              <p class="border-top px-4 py-3 mb-0 small text-light-emphasis">With the Full runtime initialized. <a class="text-warning" href="../docs/0.1.x/core-extensions/present.htm">Meet Present <span aria-hidden="true">↗</span></a></p>
+              <p class="border-top px-4 py-3 mb-0 small text-light-emphasis">With the Full runtime initialized. <a
+                  class="text-warning" href="../docs/0.1.x/core-extensions/present.htm">Meet Present <span
+                    aria-hidden="true">↗</span></a></p>
             </div>
           </div>
         </div>
@@ -87,19 +120,23 @@
         <div class="row g-4 g-lg-5">
           <article class="col-sm-6 col-lg-3">
             <span class="feature-symbol font-monospace" aria-hidden="true">&lt;/&gt;</span>
-            <h3 class="h5 mt-3">Declarative</h3><p class="text-body-secondary mb-0">Define UX behaviors directly in HTML.</p>
+            <h3 class="h5 mt-3">Declarative</h3>
+            <p class="text-body-secondary mb-0">Define UX behaviors directly in HTML.</p>
           </article>
           <article class="col-sm-6 col-lg-3">
             <span class="feature-symbol font-monospace" aria-hidden="true">[+]</span>
-            <h3 class="h5 mt-3">Modular</h3><p class="text-body-secondary mb-0">Use only the Extensions your application needs.</p>
+            <h3 class="h5 mt-3">Modular</h3>
+            <p class="text-body-secondary mb-0">Use only the Extensions your application needs.</p>
           </article>
           <article class="col-sm-6 col-lg-3">
             <span class="feature-symbol font-monospace" aria-hidden="true">{*}</span>
-            <h3 class="h5 mt-3">Framework-agnostic</h3><p class="text-body-secondary mb-0">Integrate with existing frontend architectures.</p>
+            <h3 class="h5 mt-3">Framework-agnostic</h3>
+            <p class="text-body-secondary mb-0">Integrate with existing frontend architectures.</p>
           </article>
           <article class="col-sm-6 col-lg-3">
             <span class="feature-symbol font-monospace" aria-hidden="true">:&#8202;)</span>
-            <h3 class="h5 mt-3">Customizable</h3><p class="text-body-secondary mb-0">Reusable behaviors without imposing visual design.</p>
+            <h3 class="h5 mt-3">Customizable</h3>
+            <p class="text-body-secondary mb-0">Reusable behaviors without imposing visual design.</p>
           </article>
         </div>
       </div>
@@ -108,40 +145,104 @@
     <section id="examples" class="section-space bg-body-tertiary border-bottom" aria-labelledby="examples-title">
       <div class="container">
         <div class="row align-items-end g-3 mb-5">
-          <div class="col-lg-7"><p class="eyebrow text-body-secondary">02 / In practice</p><h2 id="examples-title" class="section-title mb-0">Less wiring.<br>More experience.</h2></div>
-          <div class="col-lg-5"><p class="text-body-secondary mb-0">Try four real behaviors. Explore the preview, inspect the complete source, then compose them in your own interface.</p></div>
+          <div class="col-lg-7">
+            <p class="eyebrow text-body-secondary">02 / In practice</p>
+            <h2 id="examples-title" class="section-title mb-0">Less wiring.<br>More experience.</h2>
+          </div>
+          <div class="col-lg-5">
+            <p class="text-body-secondary mb-0">Try four real behaviors. Explore the preview, inspect the complete
+              source, then compose them in your own interface.</p>
+          </div>
         </div>
         <div class="row g-4">
           <article class="col-lg-6" aria-labelledby="carousel-title">
             <div class="example-card bg-body border rounded-3 h-100">
-              <div class="p-4 pb-3"><p class="eyebrow text-body-secondary mb-2">01 <span class="mx-2" aria-hidden="true">/</span> Scrollbox + Scrollbox Snap</p><h3 id="carousel-title" class="h4">Interactive Carousel</h3><p class="text-body-secondary mb-0">Horizontal cards, pointer dragging and touch scrolling, with coordinated snap alignment.</p></div>
-              <iframe class="example-frame" src="examples/carousel.htm" title="Interactive Carousel live example" loading="lazy"></iframe>
-              <details class="example-source border-top px-4 py-3" data-example-source="carousel"><summary>Source <span class="text-body-secondary small">/ HTML, CSS &amp; JavaScript</span></summary></details>
-              <div class="example-footer border-top px-4 py-3 d-flex flex-wrap justify-content-between gap-2 small"><span class="text-body-secondary">Preview → Source → Documentation</span><div class="d-flex gap-3"><a href="../docs/0.1.x/core-extensions/scrollbox.htm">Scrollbox <span aria-hidden="true">↗</span></a><a href="../docs/0.1.x/core-extensions/scrollbox-snap.htm">Snap <span aria-hidden="true">↗</span></a></div></div>
+              <div class="p-4 pb-3">
+                <p class="eyebrow text-body-secondary mb-2">01 <span class="mx-2" aria-hidden="true">/</span> Scrollbox
+                  + Scrollbox Snap</p>
+                <h3 id="carousel-title" class="h4">Interactive Carousel</h3>
+                <p class="text-body-secondary mb-0">Horizontal cards, pointer dragging and touch scrolling, with
+                  coordinated snap alignment.</p>
+              </div>
+              <iframe class="example-frame" src="examples/carousel.htm" title="Interactive Carousel live example"
+                loading="lazy"></iframe>
+              <details class="example-source border-top px-4 py-3" data-example-source="carousel">
+                <summary>Source <span class="text-body-secondary small">/ HTML, CSS &amp; JavaScript</span></summary>
+              </details>
+              <div class="example-footer border-top px-4 py-3 d-flex flex-wrap justify-content-between gap-2 small">
+                <span class="text-body-secondary">Preview → Source → Documentation</span>
+                <div class="d-flex gap-3"><a href="../docs/0.1.x/core-extensions/scrollbox.htm">Scrollbox <span
+                      aria-hidden="true">↗</span></a><a href="../docs/0.1.x/core-extensions/scrollbox-snap.htm">Snap
+                    <span aria-hidden="true">↗</span></a></div>
+              </div>
             </div>
           </article>
           <article class="col-lg-6" aria-labelledby="viewport-title">
             <div class="example-card bg-body border rounded-3 h-100">
-              <div class="p-4 pb-3"><p class="eyebrow text-body-secondary mb-2">02 <span class="mx-2" aria-hidden="true">/</span> Viewport <span class="badge text-body border ms-1">Unstable</span></p><h3 id="viewport-title" class="h4">Scroll-Driven Experience</h3><p class="text-body-secondary mb-0">Panels that respond to their position and visible area through the Extension’s CSS properties.</p></div>
-              <iframe class="example-frame" src="examples/viewport.htm" title="Scroll-Driven Experience live example" loading="lazy"></iframe>
-              <details class="example-source border-top px-4 py-3" data-example-source="viewport"><summary>Source <span class="text-body-secondary small">/ HTML, CSS &amp; JavaScript</span></summary></details>
-              <div class="example-footer border-top px-4 py-3 d-flex flex-wrap justify-content-between gap-2 small"><span class="text-body-secondary">Preview → Source → Documentation</span><a href="../docs/0.1.x/core-extensions/optional/viewport.htm">Viewport <span aria-hidden="true">↗</span></a></div>
+              <div class="p-4 pb-3">
+                <p class="eyebrow text-body-secondary mb-2">02 <span class="mx-2" aria-hidden="true">/</span> Viewport
+                  <span class="badge text-body border ms-1">Unstable</span>
+                </p>
+                <h3 id="viewport-title" class="h4">Scroll-Driven Experience</h3>
+                <p class="text-body-secondary mb-0">Panels that respond to their position and visible area through the
+                  Extension’s CSS properties.</p>
+              </div>
+              <iframe class="example-frame" src="examples/viewport.htm" title="Scroll-Driven Experience live example"
+                loading="lazy"></iframe>
+              <details class="example-source border-top px-4 py-3" data-example-source="viewport">
+                <summary>Source <span class="text-body-secondary small">/ HTML, CSS &amp; JavaScript</span></summary>
+              </details>
+              <div class="example-footer border-top px-4 py-3 d-flex flex-wrap justify-content-between gap-2 small">
+                <span class="text-body-secondary">Preview → Source → Documentation</span><a
+                  href="../docs/0.1.x/core-extensions/optional/viewport.htm">Viewport <span
+                    aria-hidden="true">↗</span></a>
+              </div>
             </div>
           </article>
           <article class="col-lg-6" aria-labelledby="floating-title">
             <div class="example-card bg-body border rounded-3 h-100">
-              <div class="p-4 pb-3"><p class="eyebrow text-body-secondary mb-2">03 <span class="mx-2" aria-hidden="true">/</span> Anchor + Present</p><h3 id="floating-title" class="h4">Smart Floating UI</h3><p class="text-body-secondary mb-0">A floating panel with declarative visibility and positioning that follows its trigger.</p></div>
-              <iframe class="example-frame" src="examples/floating.htm" title="Smart Floating UI live example" loading="lazy"></iframe>
-              <details class="example-source border-top px-4 py-3" data-example-source="floating"><summary>Source <span class="text-body-secondary small">/ HTML, CSS &amp; JavaScript</span></summary></details>
-              <div class="example-footer border-top px-4 py-3 d-flex flex-wrap justify-content-between gap-2 small"><span class="text-body-secondary">Preview → Source → Documentation</span><div class="d-flex gap-3"><a href="../docs/0.1.x/core-extensions/anchor.htm">Anchor <span aria-hidden="true">↗</span></a><a href="../docs/0.1.x/core-extensions/present.htm">Present <span aria-hidden="true">↗</span></a></div></div>
+              <div class="p-4 pb-3">
+                <p class="eyebrow text-body-secondary mb-2">03 <span class="mx-2" aria-hidden="true">/</span> Anchor +
+                  Present</p>
+                <h3 id="floating-title" class="h4">Smart Floating UI</h3>
+                <p class="text-body-secondary mb-0">A floating panel with declarative visibility and positioning that
+                  follows its trigger.</p>
+              </div>
+              <iframe class="example-frame" src="examples/floating.htm" title="Smart Floating UI live example"
+                loading="lazy"></iframe>
+              <details class="example-source border-top px-4 py-3" data-example-source="floating">
+                <summary>Source <span class="text-body-secondary small">/ HTML, CSS &amp; JavaScript</span></summary>
+              </details>
+              <div class="example-footer border-top px-4 py-3 d-flex flex-wrap justify-content-between gap-2 small">
+                <span class="text-body-secondary">Preview → Source → Documentation</span>
+                <div class="d-flex gap-3"><a href="../docs/0.1.x/core-extensions/anchor.htm">Anchor <span
+                      aria-hidden="true">↗</span></a><a href="../docs/0.1.x/core-extensions/present.htm">Present <span
+                      aria-hidden="true">↗</span></a></div>
+              </div>
             </div>
           </article>
           <article class="col-lg-6" aria-labelledby="navigation-title">
             <div class="example-card bg-body border rounded-3 h-100">
-              <div class="p-4 pb-3"><p class="eyebrow text-body-secondary mb-2">04 <span class="mx-2" aria-hidden="true">/</span> Ajax Href + State Navigation + Feedback</p><h3 id="navigation-title" class="h4">Seamless Navigation</h3><p class="text-body-secondary mb-0">HTML region updates, browser history and application feedback. <span class="badge text-body border">Ajax Href: unstable</span></p></div>
-              <iframe class="example-frame" src="examples/navigation.htm" title="Seamless Navigation live example" loading="lazy"></iframe>
-              <details class="example-source border-top px-4 py-3" data-example-source="navigation"><summary>Source <span class="text-body-secondary small">/ HTML, CSS &amp; JavaScript</span></summary></details>
-              <div class="example-footer border-top px-4 py-3 d-flex flex-wrap justify-content-between gap-2 small"><span class="text-body-secondary">Preview → Source → Documentation</span><div class="d-flex flex-wrap gap-3"><a href="../docs/0.1.x/core-extensions/optional/ajax-href.htm">Ajax Href <span aria-hidden="true">↗</span></a><a href="../docs/0.1.x/core-extensions/state-navigation.htm">State Navigation <span aria-hidden="true">↗</span></a><a href="../docs/0.1.x/core-extensions/feedback.htm">Feedback <span aria-hidden="true">↗</span></a></div></div>
+              <div class="p-4 pb-3">
+                <p class="eyebrow text-body-secondary mb-2">04 <span class="mx-2" aria-hidden="true">/</span> Ajax Href
+                  + State Navigation + Feedback</p>
+                <h3 id="navigation-title" class="h4">Seamless Navigation</h3>
+                <p class="text-body-secondary mb-0">HTML region updates, browser history and application feedback. <span
+                    class="badge text-body border">Ajax Href: unstable</span></p>
+              </div>
+              <iframe class="example-frame" src="examples/navigation.htm" title="Seamless Navigation live example"
+                loading="lazy"></iframe>
+              <details class="example-source border-top px-4 py-3" data-example-source="navigation">
+                <summary>Source <span class="text-body-secondary small">/ HTML, CSS &amp; JavaScript</span></summary>
+              </details>
+              <div class="example-footer border-top px-4 py-3 d-flex flex-wrap justify-content-between gap-2 small">
+                <span class="text-body-secondary">Preview → Source → Documentation</span>
+                <div class="d-flex flex-wrap gap-3"><a href="../docs/0.1.x/core-extensions/optional/ajax-href.htm">Ajax
+                    Href <span aria-hidden="true">↗</span></a><a
+                    href="../docs/0.1.x/core-extensions/state-navigation.htm">State Navigation <span
+                      aria-hidden="true">↗</span></a><a href="../docs/0.1.x/core-extensions/feedback.htm">Feedback <span
+                      aria-hidden="true">↗</span></a></div>
+              </div>
             </div>
           </article>
         </div>
@@ -156,63 +257,190 @@
         <div class="row g-4">
           <article class="col-lg-6">
             <div class="border rounded-3 h-100 p-4">
-              <div class="d-flex align-items-center justify-content-between gap-3 mb-3"><h3 class="h5 mb-0">Browser</h3><button class="btn btn-sm btn-outline-secondary" type="button" data-copy="browser-code" aria-label="Copy browser setup">Copy</button></div>
+              <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+                <h3 class="h5 mb-0">Browser</h3><button class="btn btn-sm btn-outline-secondary" type="button"
+                  data-copy="browser-code" aria-label="Copy browser setup">Copy</button>
+              </div>
               <pre class="code-block bg-body-tertiary border rounded-2 p-3"><code id="browser-code">&lt;script src="../dist/aellux.min.js"&gt;&lt;/script&gt;
 &lt;script&gt;
   $ae.init({ mode: "full" });
 &lt;/script&gt;</code></pre>
-              <p class="small text-body-secondary mb-0">This path uses this repository’s public distribution. Keep the generated <code>dist/</code> files together when deploying: the boot script loads the matching runtime, styles and Extensions.</p>
+              <p class="small text-body-secondary mb-0">This path uses this repository’s public distribution. Keep the
+                generated <code>dist/</code> files together when deploying: the boot script loads the matching runtime,
+                styles and Extensions.</p>
             </div>
           </article>
           <article class="col-lg-6">
             <div class="border rounded-3 h-100 p-4">
-              <div class="d-flex align-items-center justify-content-between gap-3 mb-3"><h3 class="h5 mb-0">npm</h3><button class="btn btn-sm btn-outline-secondary" type="button" data-copy="npm-code" aria-label="Copy npm install command">Copy</button></div>
-              <pre class="code-block bg-body-tertiary border rounded-2 p-3"><code id="npm-code">npm install @aelluxjs/core</code></pre>
-              <p class="small text-body-secondary">Serve the package’s <code>dist/</code> directory as public assets and use the browser boot script to initialize the runtime. Modules can also import the shared API:</p>
+              <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+                <h3 class="h5 mb-0">npm</h3><button class="btn btn-sm btn-outline-secondary" type="button"
+                  data-copy="npm-code" aria-label="Copy npm install command">Copy</button>
+              </div>
+              <pre
+                class="code-block bg-body-tertiary border rounded-2 p-3"><code id="npm-code">npm install @aelluxjs/core</code></pre>
+              <p class="small text-body-secondary">Serve the package’s <code>dist/</code> directory as public assets and
+                use the browser boot script to initialize the runtime. Modules can also import the shared API:</p>
               <pre class="code-block bg-body-tertiary border rounded-2 p-3 mb-0"><code>import AelluxJs from "@aelluxjs/core";
 
 AelluxJs.attr("preference");</code></pre>
             </div>
           </article>
         </div>
-        <div class="d-flex flex-wrap align-items-center gap-3 mt-4"><a class="btn btn-warning fw-semibold" href="../docs/0.1.x/getting-started.htm">Getting Started <span class="ms-2" aria-hidden="true">→</span></a><a class="text-body" href="../docs/0.1.x/getting-started.htm">Installation &amp; Distribution <span aria-hidden="true">↗</span></a></div>
+        <div class="d-flex flex-wrap align-items-center gap-3 mt-4"><a class="btn btn-warning fw-semibold"
+            href="../docs/0.1.x/getting-started.htm">Getting Started <span class="ms-2"
+              aria-hidden="true">→</span></a><a class="text-body" href="../docs/0.1.x/getting-started.htm">Installation
+            &amp; Distribution <span aria-hidden="true">↗</span></a></div>
         <p id="copy-status" class="small text-body-secondary mt-3 mb-0" role="status" aria-live="polite"></p>
       </div>
     </section>
 
     <section id="extensions" class="section-space bg-body-tertiary border-bottom" aria-labelledby="extensions-title">
       <div class="container">
-        <div class="row align-items-end g-3 mb-5"><div class="col-lg-7"><p class="eyebrow text-body-secondary">04 / The toolkit</p><h2 id="extensions-title" class="section-title mb-0">One responsibility.<br>Each Extension.</h2></div><div class="col-lg-5"><p class="text-body-secondary mb-0">Sixteen official Core Extensions. Compose the behaviors your interface needs, on your terms.</p></div></div>
-        <p class="small text-body-secondary mb-4">Bundled / Optional describes delivery in Full mode. Stability is marked separately; Extensions without an Unstable label are stable.</p>
+        <div class="row align-items-end g-3 mb-5">
+          <div class="col-lg-7">
+            <p class="eyebrow text-body-secondary">04 / The toolkit</p>
+            <h2 id="extensions-title" class="section-title mb-0">One responsibility.<br>Each Extension.</h2>
+          </div>
+          <div class="col-lg-5">
+            <p class="text-body-secondary mb-0">Sixteen official Core Extensions. Compose the behaviors your interface
+              needs, on your terms.</p>
+          </div>
+        </div>
+        <p class="small text-body-secondary mb-4">Bundled / Optional describes delivery in Full mode. Stability is
+          marked separately; Extensions without an Unstable label are stable.</p>
         <h3 class="h6 text-body-secondary mb-3">Presentation &amp; interaction</h3>
         <div class="row g-3 mb-4">
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100" href="../docs/0.1.x/core-extensions/present.htm"><div class="d-flex justify-content-between gap-2"><h4 class="h6">Present</h4><span aria-hidden="true">↗</span></div><p>Declarative visibility, transitions and groups.</p><span class="extension-meta">Bundled</span></a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100" href="../docs/0.1.x/core-extensions/anchor.htm"><div class="d-flex justify-content-between gap-2"><h4 class="h6">Anchor</h4><span aria-hidden="true">↗</span></div><p>Position elements relative to a shared reference.</p><span class="extension-meta">Bundled</span></a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100" href="../docs/0.1.x/core-extensions/focus.htm"><div class="d-flex justify-content-between gap-2"><h4 class="h6">Focus</h4><span aria-hidden="true">↗</span></div><p>Guide focus between interface controls.</p><span class="extension-meta">Bundled <span class="badge text-body border ms-1">Unstable</span></span></a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100" href="../docs/0.1.x/core-extensions/point.htm"><div class="d-flex justify-content-between gap-2"><h4 class="h6">Point</h4><span aria-hidden="true">↗</span></div><p>Track pointer interactions on declared elements.</p><span class="extension-meta">Bundled <span class="badge text-body border ms-1">Unstable</span></span></a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100" href="../docs/0.1.x/core-extensions/optional/dialog.htm"><div class="d-flex justify-content-between gap-2"><h4 class="h6">Dialog</h4><span aria-hidden="true">↗</span></div><p>Dialog behaviors with native compatibility support.</p><span class="extension-meta">Optional <span class="badge text-body border ms-1">Unstable</span></span></a></article>
+          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
+              href="../docs/0.1.x/core-extensions/present.htm">
+              <div class="d-flex justify-content-between gap-2">
+                <h4 class="h6">Present</h4><span aria-hidden="true">↗</span>
+              </div>
+              <p>Declarative visibility, transitions and groups.</p><span class="extension-meta">Bundled</span>
+            </a></article>
+          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
+              href="../docs/0.1.x/core-extensions/anchor.htm">
+              <div class="d-flex justify-content-between gap-2">
+                <h4 class="h6">Anchor</h4><span aria-hidden="true">↗</span>
+              </div>
+              <p>Position elements relative to a shared reference.</p><span class="extension-meta">Bundled</span>
+            </a></article>
+          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
+              href="../docs/0.1.x/core-extensions/focus.htm">
+              <div class="d-flex justify-content-between gap-2">
+                <h4 class="h6">Focus</h4><span aria-hidden="true">↗</span>
+              </div>
+              <p>Guide focus between interface controls.</p><span class="extension-meta">Bundled <span
+                  class="badge text-body border ms-1">Unstable</span></span>
+            </a></article>
+          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
+              href="../docs/0.1.x/core-extensions/point.htm">
+              <div class="d-flex justify-content-between gap-2">
+                <h4 class="h6">Point</h4><span aria-hidden="true">↗</span>
+              </div>
+              <p>Track pointer interactions on declared elements.</p><span class="extension-meta">Bundled <span
+                  class="badge text-body border ms-1">Unstable</span></span>
+            </a></article>
+          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
+              href="../docs/0.1.x/core-extensions/optional/dialog.htm">
+              <div class="d-flex justify-content-between gap-2">
+                <h4 class="h6">Dialog</h4><span aria-hidden="true">↗</span>
+              </div>
+              <p>Dialog behaviors with native compatibility support.</p><span class="extension-meta">Optional <span
+                  class="badge text-body border ms-1">Unstable</span></span>
+            </a></article>
         </div>
         <h3 class="h6 text-body-secondary mb-3">Scroll &amp; geometry</h3>
         <div class="row g-3 mb-4">
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100" href="../docs/0.1.x/core-extensions/scrollbox.htm"><div class="d-flex justify-content-between gap-2"><h4 class="h6">Scrollbox</h4><span aria-hidden="true">↗</span></div><p>Native scrolling, pointer dragging and scrollbars.</p><span class="extension-meta">Bundled</span></a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100" href="../docs/0.1.x/core-extensions/scrollbox-snap.htm"><div class="d-flex justify-content-between gap-2"><h4 class="h6">Scrollbox Snap</h4><span aria-hidden="true">↗</span></div><p>Snap alignment and navigation for Scrollbox.</p><span class="extension-meta">Bundled</span></a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100" href="../docs/0.1.x/core-extensions/optional/viewport.htm"><div class="d-flex justify-content-between gap-2"><h4 class="h6">Viewport</h4><span aria-hidden="true">↗</span></div><p>Publish relative position and visibility as CSS values.</p><span class="extension-meta">Optional <span class="badge text-body border ms-1">Unstable</span></span></a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100" href="../docs/0.1.x/core-extensions/overflow-marquee.htm"><div class="d-flex justify-content-between gap-2"><h4 class="h6">Overflow Marquee</h4><span aria-hidden="true">↗</span></div><p>Reveal overflowing single-line content with motion.</p><span class="extension-meta">Bundled</span></a></article>
+          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
+              href="../docs/0.1.x/core-extensions/scrollbox.htm">
+              <div class="d-flex justify-content-between gap-2">
+                <h4 class="h6">Scrollbox</h4><span aria-hidden="true">↗</span>
+              </div>
+              <p>Native scrolling, pointer dragging and scrollbars.</p><span class="extension-meta">Bundled</span>
+            </a></article>
+          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
+              href="../docs/0.1.x/core-extensions/scrollbox-snap.htm">
+              <div class="d-flex justify-content-between gap-2">
+                <h4 class="h6">Scrollbox Snap</h4><span aria-hidden="true">↗</span>
+              </div>
+              <p>Snap alignment and navigation for Scrollbox.</p><span class="extension-meta">Bundled</span>
+            </a></article>
+          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
+              href="../docs/0.1.x/core-extensions/optional/viewport.htm">
+              <div class="d-flex justify-content-between gap-2">
+                <h4 class="h6">Viewport</h4><span aria-hidden="true">↗</span>
+              </div>
+              <p>Publish relative position and visibility as CSS values.</p><span class="extension-meta">Optional <span
+                  class="badge text-body border ms-1">Unstable</span></span>
+            </a></article>
+          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
+              href="../docs/0.1.x/core-extensions/overflow-marquee.htm">
+              <div class="d-flex justify-content-between gap-2">
+                <h4 class="h6">Overflow Marquee</h4><span aria-hidden="true">↗</span>
+              </div>
+              <p>Reveal overflowing single-line content with motion.</p><span class="extension-meta">Bundled</span>
+            </a></article>
         </div>
         <h3 class="h6 text-body-secondary mb-3">Navigation &amp; feedback</h3>
         <div class="row g-3 mb-4">
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100" href="../docs/0.1.x/core-extensions/optional/ajax-href.htm"><div class="d-flex justify-content-between gap-2"><h4 class="h6">Ajax Href</h4><span aria-hidden="true">↗</span></div><p>Replace matching HTML regions from local responses.</p><span class="extension-meta">Optional <span class="badge text-body border ms-1">Unstable</span></span></a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100" href="../docs/0.1.x/core-extensions/state-navigation.htm"><div class="d-flex justify-content-between gap-2"><h4 class="h6">State Navigation</h4><span aria-hidden="true">↗</span></div><p>Coordinate snapshots and browser history.</p><span class="extension-meta">Bundled</span></a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100" href="../docs/0.1.x/core-extensions/feedback.htm"><div class="d-flex justify-content-between gap-2"><h4 class="h6">Feedback</h4><span aria-hidden="true">↗</span></div><p>Publish structured feedback and update messages.</p><span class="extension-meta">Bundled</span></a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100" href="../docs/0.1.x/core-extensions/optional/progress.htm"><div class="d-flex justify-content-between gap-2"><h4 class="h6">Progress</h4><span aria-hidden="true">↗</span></div><p>Connect native progress and meter controls to events.</p><span class="extension-meta">Optional <span class="badge text-body border ms-1">Unstable</span></span></a></article>
+          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
+              href="../docs/0.1.x/core-extensions/optional/ajax-href.htm">
+              <div class="d-flex justify-content-between gap-2">
+                <h4 class="h6">Ajax Href</h4><span aria-hidden="true">↗</span>
+              </div>
+              <p>Replace matching HTML regions from local responses.</p><span class="extension-meta">Optional <span
+                  class="badge text-body border ms-1">Unstable</span></span>
+            </a></article>
+          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
+              href="../docs/0.1.x/core-extensions/state-navigation.htm">
+              <div class="d-flex justify-content-between gap-2">
+                <h4 class="h6">State Navigation</h4><span aria-hidden="true">↗</span>
+              </div>
+              <p>Coordinate snapshots and browser history.</p><span class="extension-meta">Bundled</span>
+            </a></article>
+          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
+              href="../docs/0.1.x/core-extensions/feedback.htm">
+              <div class="d-flex justify-content-between gap-2">
+                <h4 class="h6">Feedback</h4><span aria-hidden="true">↗</span>
+              </div>
+              <p>Publish structured feedback and update messages.</p><span class="extension-meta">Bundled</span>
+            </a></article>
+          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
+              href="../docs/0.1.x/core-extensions/optional/progress.htm">
+              <div class="d-flex justify-content-between gap-2">
+                <h4 class="h6">Progress</h4><span aria-hidden="true">↗</span>
+              </div>
+              <p>Connect native progress and meter controls to events.</p><span class="extension-meta">Optional <span
+                  class="badge text-body border ms-1">Unstable</span></span>
+            </a></article>
         </div>
         <h3 class="h6 text-body-secondary mb-3">Environment &amp; adaptation</h3>
         <div class="row g-3">
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100" href="../docs/0.1.x/core-extensions/adaptive.htm"><div class="d-flex justify-content-between gap-2"><h4 class="h6">Adaptive</h4><span aria-hidden="true">↗</span></div><p>Respond to element dimensions and aspect ratio.</p><span class="extension-meta">Bundled</span></a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100" href="../docs/0.1.x/core-extensions/preference.htm"><div class="d-flex justify-content-between gap-2"><h4 class="h6">Preference</h4><span aria-hidden="true">↗</span></div><p>Persist user choices and resolve device preferences.</p><span class="extension-meta">Bundled</span></a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100" href="../docs/0.1.x/core-extensions/optional/pwa.htm"><div class="d-flex justify-content-between gap-2"><h4 class="h6">PWA</h4><span aria-hidden="true">↗</span></div><p>Installation guidance and Service Worker registration.</p><span class="extension-meta">Optional <span class="badge text-body border ms-1">Unstable</span></span></a></article>
+          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
+              href="../docs/0.1.x/core-extensions/adaptive.htm">
+              <div class="d-flex justify-content-between gap-2">
+                <h4 class="h6">Adaptive</h4><span aria-hidden="true">↗</span>
+              </div>
+              <p>Respond to element dimensions and aspect ratio.</p><span class="extension-meta">Bundled</span>
+            </a></article>
+          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
+              href="../docs/0.1.x/core-extensions/preference.htm">
+              <div class="d-flex justify-content-between gap-2">
+                <h4 class="h6">Preference</h4><span aria-hidden="true">↗</span>
+              </div>
+              <p>Persist user choices and resolve device preferences.</p><span class="extension-meta">Bundled</span>
+            </a></article>
+          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
+              href="../docs/0.1.x/core-extensions/optional/pwa.htm">
+              <div class="d-flex justify-content-between gap-2">
+                <h4 class="h6">PWA</h4><span aria-hidden="true">↗</span>
+              </div>
+              <p>Installation guidance and Service Worker registration.</p><span class="extension-meta">Optional <span
+                  class="badge text-body border ms-1">Unstable</span></span>
+            </a></article>
         </div>
-        <a class="btn btn-warning fw-semibold mt-4" href="../docs/0.1.x/core-extensions/index.htm">Explore All Extensions <span class="ms-2" aria-hidden="true">→</span></a>
+        <a class="btn btn-warning fw-semibold mt-4" href="../docs/0.1.x/core-extensions/index.htm">Explore All
+          Extensions <span class="ms-2" aria-hidden="true">→</span></a>
       </div>
     </section>
 
@@ -220,11 +448,33 @@ AelluxJs.attr("preference");</code></pre>
       <div class="container">
         <p class="eyebrow text-body-secondary">05 / Built in the open</p>
         <h2 id="community-title" class="section-title">Better behaviors.<br>Built together.</h2>
-        <p class="text-body-secondary mb-5 community-intro">AelluxJS is open to technical contributions and conversations about real frontend experiences. Bring a fix, a challenge or an idea.</p>
+        <p class="text-body-secondary mb-5 community-intro">AelluxJS is open to technical contributions and
+          conversations about real frontend experiences. Bring a fix, a challenge or an idea.</p>
         <div class="row g-4 g-lg-5">
-          <article class="col-md-4"><div class="border-top border-warning border-2 pt-4 h-100"><h3 class="h5">Contribute Code</h3><p class="text-body-secondary">Help improve the library through implementations, fixes and tests.</p><a class="text-body fw-semibold" href="https://github.com/aelluxjs/core#build">Development guide <span aria-hidden="true">↗</span></a></div></article>
-          <article class="col-md-4"><div class="border-top pt-4 h-100"><h3 class="h5">Share Your Experience</h3><p class="text-body-secondary">Share real-world UX challenges and implementation experiences.</p><a class="text-body fw-semibold" href="https://github.com/aelluxjs/core/issues">Join the conversation <span aria-hidden="true">↗</span></a></div></article>
-          <article class="col-md-4"><div class="border-top pt-4 h-100"><h3 class="h5">Suggest Behaviors</h3><p class="text-body-secondary">Propose reusable UX patterns and new Extensions.</p><a class="text-body fw-semibold" href="https://github.com/aelluxjs/core/issues/new">Suggest an idea <span aria-hidden="true">↗</span></a></div></article>
+          <article class="col-md-4">
+            <div class="border-top border-warning border-2 pt-4 h-100">
+              <h3 class="h5">Contribute Code</h3>
+              <p class="text-body-secondary">Help improve the library through implementations, fixes and tests.</p><a
+                class="text-body fw-semibold" href="https://github.com/aelluxjs/core#build">Development guide <span
+                  aria-hidden="true">↗</span></a>
+            </div>
+          </article>
+          <article class="col-md-4">
+            <div class="border-top pt-4 h-100">
+              <h3 class="h5">Share Your Experience</h3>
+              <p class="text-body-secondary">Share real-world UX challenges and implementation experiences.</p><a
+                class="text-body fw-semibold" href="https://github.com/aelluxjs/core/issues">Join the conversation <span
+                  aria-hidden="true">↗</span></a>
+            </div>
+          </article>
+          <article class="col-md-4">
+            <div class="border-top pt-4 h-100">
+              <h3 class="h5">Suggest Behaviors</h3>
+              <p class="text-body-secondary">Propose reusable UX patterns and new Extensions.</p><a
+                class="text-body fw-semibold" href="https://github.com/aelluxjs/core/issues/new">Suggest an idea <span
+                  aria-hidden="true">↗</span></a>
+            </div>
+          </article>
         </div>
       </div>
     </section>
@@ -233,14 +483,26 @@ AelluxJs.attr("preference");</code></pre>
   <footer class="bg-body-tertiary border-top py-5">
     <div class="container">
       <div class="d-flex flex-wrap justify-content-between align-items-start gap-4 mb-4">
-        <div><a class="brand text-body text-decoration-none" href="#">aellux<span class="brand-suffix">.js</span></a><p class="small text-body-secondary mt-2 mb-0">UX Behaviors Made Easy.</p></div>
+        <div><a class="brand text-body text-decoration-none" href="#">aellux<span class="brand-suffix">.js</span></a>
+          <p class="small text-body-secondary mt-2 mb-0">UX Behaviors Made Easy.</p>
+        </div>
         <nav class="footer-nav d-flex flex-wrap gap-3 small" aria-label="Footer navigation">
-          <a href="../docs/0.1.x/index.htm">Documentation</a><a href="#examples">Examples</a><a href="https://github.com/aelluxjs/core">GitHub</a><a href="https://www.npmjs.com/package/@aelluxjs/core">npm</a><a href="https://github.com/aelluxjs/core/blob/main/CHANGELOG.md">Changelog</a><a href="https://github.com/aelluxjs/core/blob/main/LICENSE">License</a>
+          <a href="../docs/0.1.x/index.htm">Documentation</a><a href="#examples">Examples</a><a
+            href="https://github.com/aelluxjs/core">GitHub</a><a
+            href="https://www.npmjs.com/package/@aelluxjs/core">npm</a><a
+            href="https://github.com/aelluxjs/core/blob/main/CHANGELOG.md">Changelog</a><a
+            href="https://github.com/aelluxjs/core/blob/main/LICENSE">License</a>
           <!-- Add Aellux Manifesto here when an official destination is available. -->
         </nav>
       </div>
-      <div class="border-top pt-4 d-flex flex-wrap justify-content-between gap-3 small text-body-secondary"><p class="mb-0">By <a href="https://github.com/pecrodrigues">Pec Rodrigues</a>. Released under Apache 2.0.</p><p class="mb-0">Made with the help of <a href="https://chatgpt.com/">ChatGPT</a>, <a href="https://openai.com/codex/">Codex</a>, <a href="https://code.visualstudio.com/">VS Code</a>, <a href="https://getbootstrap.com/">Bootstrap</a> &amp; <a href="https://github.com/">GitHub</a>.</p></div>
+      <div class="border-top pt-4 d-flex flex-wrap justify-content-between gap-3 small text-body-secondary">
+        <p class="mb-0">By <a href="https://github.com/pecrodrigues">Pec Rodrigues</a>. Released under Apache 2.0.</p>
+        <p class="mb-0">Made with the help of <a href="https://chatgpt.com/">ChatGPT</a>, <a
+            href="https://openai.com/codex/">Codex</a>, <a href="https://code.visualstudio.com/">VS Code</a>, <a
+            href="https://getbootstrap.com/">Bootstrap</a> &amp; <a href="https://github.com/">GitHub</a>.</p>
+      </div>
     </div>
   </footer>
 </body>
+
 </html>
