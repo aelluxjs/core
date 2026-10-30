@@ -2,6 +2,8 @@
 
 The browser distribution exposes `AelluxJs` and its short alias `$ae` on the global object.
 
+The [Compatibility Commitment](compatibility-commitment.md) defines preservation and evolution of documented public contracts from `0.1.0` through `0.1.x`. Individual Extension stability and documented limits still apply.
+
 Modules can import the shared API through `@aelluxjs/core`:
 
 ```js

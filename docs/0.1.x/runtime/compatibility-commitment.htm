@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="color-scheme" content="normal">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <title>
+  Compatibility Commitment | 0.1.x | aellux.js</title>
+
+<meta name="description" content="aellux.js">
+  <link rel="canonical" href="https://aelluxjs.github.io/core/docs/0.1.x/runtime/compatibility-commitment.htm">
+
+    <meta property="og:title" content="Compatibility Commitment | 0.1.x | aellux.js" />
+    <meta property="og:type" content="website" />
+      <meta property="og:url" content="https://aelluxjs.github.io/core/docs/0.1.x/runtime/compatibility-commitment.htm" />
+        <meta property="og:description" content="aellux.js" />
+        <meta property="og:site_name" content="aellux.js" />
+
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="Compatibility Commitment | 0.1.x | aellux.js">
+        <meta name="twitter:description" content="aellux.js">
+
+          <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Compatibility Commitment | 0.1.x | aellux.js","description":"aellux.js","url":"https://aelluxjs.github.io/core/docs/0.1.x/runtime/compatibility-commitment.htm"}</script>
+
+
+        <link rel="preconnect" href="https://cdn.jsdelivr.net">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="/core/docs/assets/docweaver/css/style.css">
+
+<script src="/core/dist/aellux.min.js"></script>
+<script src="/core/docs/assets/docweaver/js/main.js"></script>
+
+<link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
+  integrity="sha384-PgrxAHrkt22+F09vWG2iuTeiqQ+UCUeSkyAe/nibdP/XtRk8nTZ+VjetKW+okArJ" crossorigin="anonymous">
+</head>
+
+<body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
+
+  <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <symbol id="bi-circle-half" fill="currentColor"
+    viewBox="0 0 16 16">
+    <path d="M8 15A7 7 0 1 0 8 1zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16" />
+  </symbol>
+  <symbol id="bi-sun" fill="currentColor"
+    viewBox="0 0 16 16">
+    <path
+      d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708" />
+  </symbol>
+  <symbol id="bi-moon-fill" fill="currentColor"
+    viewBox="0 0 16 16">
+    <path
+      d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278" />
+  </symbol>
+  <symbol id="bi-link-45deg" fill="currentColor"
+    viewBox="0 0 16 16">
+    <path
+      d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z" />
+    <path
+      d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z" />
+  </symbol>
+  <symbol id="bi-chevron-right" fill="currentColor"
+    viewBox="0 0 16 16">
+    <path fill-rule="evenodd"
+      d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708" />
+  </symbol>
+  <symbol id="bi-layout-text-sidebar" viewBox="0 0 16 16" fill="currentColor">
+    <path d="M3.5 3a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM3 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1z" />
+    <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm12-1v14h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zm-1 0H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h9z" />
+  </symbol>
+</svg>
+    <div class="section d-flex border-bottom" data-view-frame=0 style="position:sticky;top:0px;z-index:5;height: 64px;">
+      <header class="animation_header_test navbar navbar-expand-md d-flex flex-fill p-0 m-0 user-select-none bg-white"
+        style=" --bar-color:#55606F; --bar-color2:var(--bs-link-color); --bar-bg:#F0F5F5;">
+        <div class="container-fluid gap-2" style='z-index: 1;'>
+
+          <div id="toast-present-group"
+            class="position-fixed w-100 top-0 gap-1 z-1 pe-none p-4 pt-1 flex-column d-flex justify-content-center align-items-center"
+            data-ae-present-group="2">
+            <div id="toast-1" data-ae-present="opacity" data-ae-auto-unpop="1s" data-ae-unpop-on-click="false"
+              hidden="true"
+              class="position-relative overflow-hidden text-bg-danger small rounded-1 p-2 py-1 w-100 text-center"
+              style="max-width: 300px;">
+              <progress data-ae-progress-target="toast-1" class="toast-progress"></progress>
+            </div>
+            <div id="toast-2" data-ae-present="opacity" data-ae-auto-unpop="1s" data-ae-unpop-on-click="false"
+              hidden="true"
+              class="position-relative overflow-hidden text-bg-danger small rounded-1 p-2 py-1 w-100 text-center"
+              style="max-width: 300px;">
+              <progress data-ae-progress-target="toast-2" class="toast-progress"></progress>
+            </div>
+          </div>
+
+          <div class="me-auto d-flex flex-row gap-2 align-items-center">
+
+            <a class="navbar-brand m-0 me-auto p-0 lh-1 fw-medium d-flex align-items-center" href="/core/docs/0.1.x/index.htm"
+              style="font-size:1.5em;letter-spacing:-0.03em;color:inherit;">
+              aellux.js            </a>
+
+          </div>
+
+          <button class="navbar-toggler" type="button" data-ae-trigger="toggle" data-ae-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" data-ae-point>
+            <div class="hamburger">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </button>
+
+          <div class="navbar-collapse bg-white border-end d-md-block" id="navbarSupportedContent" hidden
+            data-ae-present="transform">
+            <nav class="h-100 w-100" data-ae-scrollbox="pointer" data-ae-scrollbar
+              style="overscroll-behavior: contain;">
+              <div class="navbar-nav w-100 gap-1 my-0 p-2 ps-md-3 pe-md-3 pb-4 flex-column align-self-start text-white">
+
+                <div class="d-flex flex-row gap-2 justify-content-between pb-2 pt-0 pt-md-2">
+
+                  <div class="dropdown position-relative">
+  <button id="btn-version" class="btn btn-outline-adaptive ps-3 dropdown-toggle rounded-1 border" type="button"
+    data-ae-trigger="toggle" data-ae-target="dropdown-version" aria-expanded="false">
+    0.1.x  </button>
+  <div class="position-absolute" data-ae-anchor-target="btn-version" data-ae-anchor="bottom-right:top-right">
+    <ul id="dropdown-version" data-ae-present="opacity transform" hidden="true"
+      class="dropdown-menu dropdown-menu-start rounded-2 overflow-hidden position-relative show"
+      style="min-width: unset;transform-origin: 100% 0%;">
+
+              <li>
+          <a class="dropdown-item active" data-no-ajax=true
+            href="/core/docs/0.1.x/index.htm">
+            0.1.x          </a>
+        </li>
+
+    </ul>
+  </div>
+</div>
+                    <div data-ae-preference="color-scheme" class="btn-group border rounded-1 rounded overflow-hidden" role="group"
+  aria-label="Basic example" style="--bs-border-radius:--bs-border-radius-sm;gap:1px;">
+
+  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-light" autocomplete="off"
+    aria-label="Light Mode">
+  <label class="btn  btn-outline-adaptive py-1 border-0 d-inline-flex justify-content-center align-items-center"
+    for="radio-color-mode-light" data-ae-option="light" onclick aria-label="Light Mode">
+    <svg class="svg-icon" aria-hidden="true" focusable="false"><use href="#bi-sun"></use></svg>
+    <span class="visually-hidden">Light Mode</span>
+  </label>
+
+  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-dark" autocomplete="off"
+    aria-label="Dark Mode">
+  <label class="btn  btn-outline-adaptive py-1 border-0  d-inline-flex justify-content-center align-items-center"
+    for="radio-color-mode-dark" data-ae-option="dark" onclick aria-label="Dark Mode">
+    <svg class="svg-icon" aria-hidden="true" focusable="false"><use href="#bi-moon-fill"></use></svg>
+    <span class="visually-hidden">Dark Mode</span>
+  </label>
+
+  <input type="radio" class="btn-check" name="color-mode-selected" id="radio-color-mode-auto" autocomplete="off"
+    aria-label="Auto Mode">
+  <label class="btn  btn-outline-adaptive py-1 border-0 d-inline-flex justify-content-center align-items-center"
+    for="radio-color-mode-auto" data-ae-option="auto" onclick aria-label="Auto Mode">
+    <svg class="svg-icon" aria-hidden="true" focusable="false"><use href="#bi-circle-half"></use></svg>
+    <span class="visually-hidden">Auto Mode</span>
+  </label>
+
+</div>
+                </div>
+                <div class="d-flex flex-column" data-ae-present-group>
+                                      <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                      <button data-ae-point type="button"
+                        class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                        data-ae-trigger="toggle" data-ae-target="#children-overview">
+                        Overview                          <span class="chevron"><svg class="svg-icon small"
+                                aria-hidden="true" focusable="false">
+                                <use href="#bi-chevron-right"></use>
+                              </svg></span>
+                                                  </button>
+                    </div>
+
+                                          <div id="children-overview" class="docs-menu-panel border-start ms-2"
+                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        >
+                          <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
+                                        aellux.js Docs                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/getting-started.htm" data-ae-overflow-marquee="190px">
+                                        Getting Started                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/compatibility.htm" data-ae-overflow-marquee="190px">
+                                        Compatibility                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/validation-scenarios.htm" data-ae-overflow-marquee="190px">
+                                        Validation Scenarios                                      </a>
+                                    </div>
+                                                                                                    </div>
+                      </div>
+                                                                  <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                      <button data-ae-point type="button"
+                        class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                        data-ae-trigger="toggle" data-ae-target="#children-runtime">
+                        Runtime                          <span class="chevron"><svg class="svg-icon small"
+                                aria-hidden="true" focusable="false">
+                                <use href="#bi-chevron-right"></use>
+                              </svg></span>
+                                                  </button>
+                    </div>
+
+                                          <div id="children-runtime" class="docs-menu-panel border-start ms-2"
+                        data-ae-present="height opacity" data-ae-unpop-on-click="false" >
+                          <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/api.htm" data-ae-overflow-marquee="190px">
+                                        Runtime API                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1 active"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/compatibility-commitment.htm" data-ae-overflow-marquee="190px">
+                                        Compatibility Commitment                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/wait-layout.htm" data-ae-overflow-marquee="190px">
+                                        waitLayout                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/events.htm" data-ae-overflow-marquee="190px">
+                                        Events                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/modern-legacy.htm" data-ae-overflow-marquee="190px">
+                                        Modern &amp; Legacy                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/browser-support.htm" data-ae-overflow-marquee="190px">
+                                        Browser Support                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/performance.htm" data-ae-overflow-marquee="190px">
+                                        Performance and Bundle Budget                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/known-limits-and-risks.htm" data-ae-overflow-marquee="190px">
+                                        Known Limits &amp; Risks                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/es5-support.htm" data-ae-overflow-marquee="190px">
+                                        ES5 Support                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/visual-mounting.htm" data-ae-overflow-marquee="190px">
+                                        Visual Mounting                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/diagnostics.htm" data-ae-overflow-marquee="190px">
+                                        Diagnostics                                      </a>
+                                    </div>
+                                                                                                    </div>
+                      </div>
+                                                                  <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                      <button data-ae-point type="button"
+                        class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                        data-ae-trigger="toggle" data-ae-target="#children-extensions">
+                        Extensions                          <span class="chevron"><svg class="svg-icon small"
+                                aria-hidden="true" focusable="false">
+                                <use href="#bi-chevron-right"></use>
+                              </svg></span>
+                                                  </button>
+                    </div>
+
+                                          <div id="children-extensions" class="docs-menu-panel border-start ms-2"
+                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        >
+                          <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/authoring.htm" data-ae-overflow-marquee="190px">
+                                        Extension Authoring                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/accessibility.htm" data-ae-overflow-marquee="190px">
+                                        Accessibility Requirements                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/registration.htm" data-ae-overflow-marquee="190px">
+                                        Registration                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/official-registry.htm" data-ae-overflow-marquee="190px">
+                                        Official Registry                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/declarative-loading.htm" data-ae-overflow-marquee="190px">
+                                        Declarative Loading                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/lazy-loading.htm" data-ae-overflow-marquee="190px">
+                                        Lazy Loading                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/styles.htm" data-ae-overflow-marquee="190px">
+                                        Extension Styles                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/csp-and-trust.htm" data-ae-overflow-marquee="190px">
+                                        CSP and Extension Trust                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/extensions/legacy-variants.htm" data-ae-overflow-marquee="190px">
+                                        Modern &amp; Legacy Variants                                      </a>
+                                    </div>
+                                                                                                    </div>
+                      </div>
+                                                                  <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                      <button data-ae-point type="button"
+                        class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                        data-ae-trigger="toggle" data-ae-target="#children-core-extensions">
+                        Core Extensions                          <span class="chevron"><svg class="svg-icon small"
+                                aria-hidden="true" focusable="false">
+                                <use href="#bi-chevron-right"></use>
+                              </svg></span>
+                                                  </button>
+                    </div>
+
+                                          <div id="children-core-extensions" class="docs-menu-panel border-start ms-2"
+                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        >
+                          <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion                            data-ae-present-group>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/core-extensions/index.htm" data-ae-overflow-marquee="190px">
+                                        Overview                                      </a>
+                                    </div>
+
+                                  <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
+                                    style="flex:0">
+                                    <button data-ae-point type="button"
+                                      class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      data-ae-trigger="toggle" data-ae-target="#children2-bundled">
+                                      Bundled Extensions                                        <span class="chevron"><svg
+                                              class="svg-icon small" aria-hidden="true" focusable="false">
+                                              <use href="#bi-chevron-right"></use>
+                                            </svg></span>
+                                                                              </button>
+                                  </div>
+
+                                  <div id="children2-bundled" class="docs-menu-panel border-start ms-2"
+                                    data-ae-present="height opacity" data-ae-unpop-on-click="false"                                     hidden>
+                                      <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                                  <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/adaptive.htm" data-ae-overflow-marquee="190px">
+                                              Adaptive                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/anchor.htm" data-ae-overflow-marquee="190px">
+                                              Anchor                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/overflow-marquee.htm" data-ae-overflow-marquee="190px">
+                                              Overflow Marquee                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/feedback.htm" data-ae-overflow-marquee="190px">
+                                              Feedback                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/focus.htm" data-ae-overflow-marquee="190px">
+                                              Focus                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/point.htm" data-ae-overflow-marquee="190px">
+                                              Point                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/preference.htm" data-ae-overflow-marquee="190px">
+                                              Preference                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/present.htm" data-ae-overflow-marquee="190px">
+                                              Present                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/scrollbox.htm" data-ae-overflow-marquee="190px">
+                                              Scrollbox                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/scrollbox-snap.htm" data-ae-overflow-marquee="190px">
+                                              Scrollbox Snap                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
+                                              State Navigation                                            </a>
+                                          </div>
+                                                                                </div>
+                                  </div>
+
+                                  <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
+                                    style="flex:0">
+                                    <button data-ae-point type="button"
+                                      class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      data-ae-trigger="toggle" data-ae-target="#children2-optional">
+                                      Optional Extensions                                        <span class="chevron"><svg
+                                              class="svg-icon small" aria-hidden="true" focusable="false">
+                                              <use href="#bi-chevron-right"></use>
+                                            </svg></span>
+                                                                              </button>
+                                  </div>
+
+                                  <div id="children2-optional" class="docs-menu-panel border-start ms-2"
+                                    data-ae-present="height opacity" data-ae-unpop-on-click="false"                                     hidden>
+                                      <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                                  <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/ajax-href.htm" data-ae-overflow-marquee="190px">
+                                              Ajax Href                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/dialog.htm" data-ae-overflow-marquee="190px">
+                                              Dialog                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/progress.htm" data-ae-overflow-marquee="190px">
+                                              Progress                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/pwa.htm" data-ae-overflow-marquee="190px">
+                                              PWA                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/viewport.htm" data-ae-overflow-marquee="190px">
+                                              Viewport                                            </a>
+                                          </div>
+                                                                                </div>
+                                  </div>
+                                                                                                  </div>
+                      </div>
+                                                                  <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
+                      <button data-ae-point type="button"
+                        class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
+                        data-ae-trigger="toggle" data-ae-target="#children-integrations">
+                        Integrations                          <span class="chevron"><svg class="svg-icon small"
+                                aria-hidden="true" focusable="false">
+                                <use href="#bi-chevron-right"></use>
+                              </svg></span>
+                                                  </button>
+                    </div>
+
+                                          <div id="children-integrations" class="docs-menu-panel border-start ms-2"
+                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        >
+                          <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
+                                                                                                  <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/integrations/bootstrap.htm" data-ae-overflow-marquee="190px">
+                                        Bootstrap Integration                                      </a>
+                                    </div>
+                                                                                                    </div>
+                      </div>
+                                                              </div>
+              </div>
+            </nav>
+          </div>
+
+        </div>
+      </header>
+    </div>
+
+    <div id="page-progress"></div>
+
+    <div class="content-block position-relative d-flex justify-content-center">
+
+      <div class="content-wrapper p-0 position-relative w-100"
+        style=" max-width: 1024px;transition:opacity 0.5s linear;">
+
+        <div class=" toc-header position-relative bg-white p-2 position-sticky border-bottom border-md-0"
+          style="top:64px;z-index:1;" role="contentinfo">
+
+          <div class="menu-toggle d-flex flex-row gap-2 small">
+            <button data-ae-point id="button-toc-menu" type="button"
+              class="btn btn-outline-adaptive rounded-1 text-nowrap" data-ae-trigger="toggle"
+              data-ae-target="#toc-collapse" aria-expanded="false" aria-controls="toc-collapse"
+              aria-label="Table of Contents" title="Summary">
+              <svg class="svg-icon" aria-hidden="true" focusable="false">
+                <use href="#bi-layout-text-sidebar"></use>
+              </svg>
+            </button>
+            <button type="button"
+              class="p-2 text-nowrap overflow-hidden text-truncate fw-bold border-0 bg-transparent text-start"
+              id="tocbot-current-label" data-ae-trigger="toggle" data-ae-target="#toc-collapse">
+              -
+            </button>
+          </div>
+
+          <div class="toc-collapse bg-white overflow-hidden" id="toc-collapse" data-ae-present="transform opacity"
+            hidden>
+            <div data-ae-scrollbox data-ae-scrollbar class="d-block overflow-auto"
+              style="overscroll-behavior: contain;">
+              <div class="pt-1 pt-lg-2 p-4 p-lg-0 d-table w-100">
+                <div class="h6 fw-bold p-2 pb-1">On this page</div>
+                <div class="position-relative" style="padding-bottom: 3rem;">
+                  <div class="js-toc">
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="article p-4">
+
+          <nav id="doc-breadcrumb" style="--bs-breadcrumb-divider: '›';overflow-x:auto;overflow-y:clip;" class="w-100"
+            aria-label="breadcrumb" ajax-load="doc-breadcrumb" data-ae-scrollbox="pointer">
+            <ol class="breadcrumb flex-nowrap">
+
+                                                <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                    <a href="/core/docs/0.1.x/index.htm">
+                      Home                    </a>
+                  </li>
+                                                                          <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                    <a href="/core/docs/0.1.x/runtime/api.htm">
+                      Runtime                    </a>
+                  </li>
+                                                                            <li class="breadcrumb-item text-capitalize text-nowrap flex-shrink-0">
+                      Compatibility Commitment                    </li>
+
+            </ol>
+          </nav>
+
+          <div id="doc-navlinks" ajax-load="doc-navlinks">
+            <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
+      <a href="/core/docs/0.1.x/runtime/api.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
+      ← <span class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill"
+        style="max-width:200px" data-ae-overflow-marquee="80">
+        Runtime API      </span>
+    </a>
+
+                  <a href="/core/docs/0.1.x/runtime/wait-layout.htm"
+            class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2" style="width: 40%;">
+            <span
+              class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
+              style="max-width:200px" data-ae-overflow-marquee="80">
+              waitLayout            </span> →
+          </a>
+          </div>          </div>
+
+          <main id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content"
+            ajax-load="doc-content">
+            <h1>Compatibility Commitment — AelluxJS 0.1.x</h1>
+<blockquote>
+<p>Preserve stable public contracts and observable behavior without freezing their internal implementation.</p>
+</blockquote>
+<p>This document defines how AelluxJS preserves and evolves its public contracts, beginning with <code>0.1.0</code> and continuing through subsequent <code>0.1.x</code> releases. <a href="../compatibility.htm">Compatibility</a> describes technical requirements and validated environments; this commitment defines the rules for changing the API within those boundaries.</p>
+<p>The current package is still a prerelease. This commitment does not retroactively stabilize earlier betas, their superseded names, or their behavior. The release baseline is the public contract delivered with <code>0.1.0</code>; a compatible public addition receives protection from the release that introduces it.</p>
+<h2>1. Scope &amp; Stability</h2>
+<p><a href="https://semver.org/spec/v2.0.0.html#spec-item-4">Semantic Versioning 2.0.0</a> treats <code>0.y.z</code> as initial development and does not automatically establish a stable public API. AelluxJS adopts the narrower, project-specific commitment below for the <code>0.1.x</code> line.</p>
+<table>
+<thead>
+<tr>
+<th>Classification</th>
+<th>Compatibility commitment</th>
+<th>AelluxJS examples</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Stable Public API</td>
+<td>Preserved throughout <code>0.1.x</code>, subject to documented exceptional fixes.</td>
+<td><span class="large">Documented Core methods such as <code>$ae.mount()</code>, <code>BeforeMount</code>, and Stable Extension contracts such as Present&#39;s <code>pop()</code>, <code>data-ae-present</code>, and <code>--ae-pop-progress</code>.</span></td>
+</tr>
+<tr>
+<td>Experimental Public API</td>
+<td>May evolve, including incompatible changes, with appropriate documentation.</td>
+<td><span class="large">The Not stable Focus and Point APIs; Optional Viewport attributes, outputs and events.</span></td>
+</tr>
+<tr>
+<td>Internal Implementation</td>
+<td>No compatibility guarantee.</td>
+<td><span class="large">Private controller maps, Marquee&#39;s generated wrapper structure, <code>data-ae-scrollbox-fade-state</code>, and <code>--ae-present-pop-phase</code>.</span></td>
+</tr>
+</tbody></table>
+<p>Protection applies to documented public names, supported inputs, defaults, results and observable semantics under the documented prerequisites. It does not imply identical behavior for invalid inputs unless their handling is itself documented. Known limits, required markup, lifecycle rules, dependencies and platform capabilities remain part of each contract.</p>
+<h3>Extension classification</h3>
+<p>The <a href="../core-extensions/index.htm#stability">Core Extensions index</a> and individual guides establish the current classification:</p>
+<table>
+<thead>
+<tr>
+<th>Stability</th>
+<th>Current distribution in Full</th>
+<th>Extensions</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Stable</td>
+<td>Bundled</td>
+<td><span class="large"><a href="../core-extensions/adaptive.htm">Adaptive</a>, <a href="../core-extensions/anchor.htm">Anchor</a>, <a href="../core-extensions/overflow-marquee.htm">Overflow Marquee</a>, <a href="../core-extensions/feedback.htm">Feedback</a>, <a href="../core-extensions/preference.htm">Preference</a>, <a href="../core-extensions/present.htm">Present</a>, <a href="../core-extensions/scrollbox.htm">Scrollbox</a>, <a href="../core-extensions/scrollbox-snap.htm">Scrollbox Snap</a>, <a href="../core-extensions/state-navigation.htm">State Navigation</a>.</span></td>
+</tr>
+<tr>
+<td>Not stable</td>
+<td>Bundled</td>
+<td><a href="../core-extensions/focus.htm">Focus</a>, <a href="../core-extensions/point.htm">Point</a>.</td>
+</tr>
+<tr>
+<td>Not stable</td>
+<td>Optional</td>
+<td><span class="large"><a href="../core-extensions/optional/ajax-href.htm">Ajax Href</a>, <a href="../core-extensions/optional/dialog.htm">Dialog</a>, <a href="../core-extensions/optional/progress.htm">Progress</a>, <a href="../core-extensions/optional/pwa.htm">PWA</a>, <a href="../core-extensions/optional/viewport.htm">Viewport</a>.</span></td>
+</tr>
+</tbody></table>
+<p>All sixteen remain available during <code>0.1.x</code>. Stable Extensions receive the public-contract protection in this document. Not stable means experimental: their methods, markup, CSS and events may change incompatibly, with changelog entries and migration guidance for affected usage. Their current documentation still governs use of each published version.</p>
+<p>Stability, distribution, platform compatibility and API compatibility are separate dimensions. Bundled does not mean Stable; Optional does not mean experimental. A loading or packaging change cannot revoke an existing Stable contract. Reclassifying an already Stable interface does not permit its incompatible removal within this line. Third-party Extension behavior is governed by its author; the documented Core registration and lifecycle interfaces remain protected.</p>
+<h2>2. Versioning &amp; API Evolution</h2>
+<p>Releases after <code>0.1.0</code> may include bug fixes, maintenance, internal refactoring, performance improvements, compatible functionality, additional Extensions, new methods or attributes, and optional fields or options. Within this line, these changes use subsequent <code>0.1.x</code> versions. New options must preserve existing defaults and valid usage when omitted. Adding an optional field must preserve the meaning and type of existing fields.</p>
+<p>For Stable Public APIs, a normal <code>0.1.x</code> update must not:</p>
+<ul>
+<li>remove a public method or rename a public attribute;</li>
+<li>reinterpret an existing supported value or incompatibly change a documented default;</li>
+<li>introduce incompatible required parameters or change existing parameter meanings;</li>
+<li>incompatibly change a return type, Promise result or documented failure outcome;</li>
+<li>remove required event fields, change their types, or change documented event routing or order; or</li>
+<li>change established operational semantics while retaining the same signature.</li>
+</ul>
+<p>Intentional incompatible changes to Stable APIs belong in a future <code>0.2.x</code> line. A bug fix may correct behavior that violates the documented contract; relying on an undocumented defect does not turn it into a guaranteed feature. If a proposed fix would also break documented valid usage, it must be assessed as an incompatibility rather than silently described as maintenance.</p>
+<p>Deprecation must identify the affected interface, explain the reason, name a replacement when available, and include migration guidance in the documentation and changelog. A deprecated Stable interface continues to work throughout <code>0.1.x</code> under its existing contract. Removal belongs in a later line; this is not a promise of indefinite support. There is no fixed notice period or automatic promotion schedule for experimental APIs.</p>
+<p>A security vulnerability or severe defect may require an exceptional incompatible fix. Such a change requires an explicit maintainer decision for that case and documentation of the reason, affected contracts and versions, mitigation or migration, and validation. This is not standing permission to bypass compatibility. The general exception procedure and support-policy proposals remain pending in the separate <a href="https://github.com/aelluxjs/core/blob/release/0.1.0/milestones/0.1.x-compatibility-policy-review.md">Policy Decisions Pending Review</a>.</p>
+<h2>3. JavaScript Public API</h2>
+<p>The public namespace <code>AelluxJs</code> and alias <code>$ae</code>, the shared API&#39;s documented package entry, and the documented Core methods retain their names and semantics. The <a href="api.htm">Runtime API</a>, <a href="../extensions/registration.htm">Extension registration</a> and <a href="../extensions/authoring.htm">authoring contract</a> define the protected surface; this page does not reproduce their complete reference.</p>
+<p>Compatibility includes parameter order, supported options and defaults, return types and meanings, availability before or after initialization, and documented asynchronous behavior. In particular:</p>
+<ul>
+<li><code>mount()</code> remains idempotent and resolves to distinct elements newly mounted by that call. Partial failures, empty results and cancellation retain their documented meanings.</li>
+<li><code>wait(name)</code> requires registration, awaits Extension initialization and returns the API or the documented <code>null</code> failure result. An asynchronous <code>init(options)</code> must finish before the Extension is reported initialized; supported retries remain available.</li>
+<li>Mounted controllers remain accessible through <code>$ae(elementOrId)</code> and <code>mountManager.controller()</code>. Documented Extension methods keep their element binding. Unmount removes the corresponding methods; a later mount may create a new controller. Controller object identity after remount is not guaranteed.</li>
+<li>Initialization, mount, update, unmount and destruction preserve their documented ordering, cleanup and cancellation behavior. Updating mounted elements does not implicitly register or mount every new declaration. Extension authors retain their obligations to release owned resources.</li>
+<li>Promise settlement, cancellation, supersession and failure must follow each operation&#39;s reference. A resolved Promise is not a universal success flag or proof of visual completion. For example, an interrupted Present request can settle without reaching its endpoint, and a canceled unmount resolves to <code>false</code>.</li>
+</ul>
+<p>Behavior is part of the interface. Standalone <code>present.pop(element)</code> restarts opening even when already open; <code>toggle(element, true)</code> and opening an already selected exclusive group member have their documented idempotent semantics. Making standalone <code>pop()</code> idempotent would be incompatible despite preserving its signature. See <a href="../core-extensions/present.htm">Present</a>.</p>
+<p>Public error contracts are protected where documented: for example, <code>request()</code> rejects unsuccessful HTTP responses with <code>AelluxJsRequestError</code> and its <code>status</code>, <code>statusText</code> and <code>response</code>; an automatic error event does not consume a direct caller&#39;s Promise rejection. Experimental producers retain their experimental status.</p>
+<p>Documented diagnostic identifiers, numeric codes and their meanings remain usable. The documented diagnostics API, severity and verbosity behavior remain public; explanatory wording, stack traces, auxiliary context and internal diagnostic construction may evolve. Required context fields are protected only where documented as part of a specific public contract. Applications should branch on documented codes or structured fields rather than message text. See <a href="diagnostics.htm">Diagnostics</a> and <a href="events.htm#asynchronous-failures">asynchronous failures</a>.</p>
+<p>Source exports, private helpers, caches, controller storage and undocumented functions do not become Stable merely because they are reachable or appear in an API-shape inspection. Registry access documented by the reference retains its documented use; this does not authorize arbitrary mutation of runtime indexes or freeze their private representation.</p>
+<h2>4. Declarative HTML &amp; CSS Contracts</h2>
+<p>Public semantic contracts include documented <code>data-ae-*</code> inputs and outputs, accepted syntax and values, defaults, public <code>--ae-*</code> properties, and classes documented for application use. For Stable behavior, these names, value types, units, ranges and meanings are preserved just as JavaScript contracts are.</p>
+<p>Examples include <code>data-ae-unpop-on-click</code> values and their default outside dismissal, Present&#39;s numeric <code>--ae-pop-progress</code> range of <code>0..1</code>, Scrollbox&#39;s numeric <code>--ae-scroll-x-progress</code> range of <code>0..1</code>, and Present&#39;s documented <code>ae--pop</code> state class. A documented output is for observation or styling; setting it is not automatically a supported command.</p>
+<p>Dynamic updates follow each Extension&#39;s contract. Observer-backed reconfiguration remains supported where documented, such as Present Group selection and Marquee fade changes. New DOM insertion still requires <code>$ae.mount(root)</code>. Use the documented controller or <code>mountManager.update()</code> where required; there is no promise that arbitrary attribute or CSS changes are observed automatically.</p>
+<p>The generated <code>dist/aellux.semantic.json</code> catalog, maintained through <code>scripts/semantic-definitions.mjs</code>, helps identify names, syntax, defaults and input/output/internal roles. Its native editor formats are described in <a href="../integrations/editor-tooling.htm">Editor support</a>. Open-grammar suggestions are examples rather than closed enums. Catalog inclusion alone does not stabilize an internal entry or an experimental Extension. Automatically collected class names and API shapes must be interpreted alongside the specialized public guide; conflicting descriptions require review rather than silent reclassification.</p>
+<p>Internal implementation details may change: generated wrapper nesting, auxiliary classes and attributes, private CSS properties, animation bookkeeping and intermediate state machinery receive no independent guarantee. For example, <code>--ae-present-pop-phase</code> is internal even though the similarly named <code>--ae-pop-progress</code> is public. A documented state class remains public even when the code that manages it changes.</p>
+<p>The design principle is <strong>reusable UX behavior without prescribing visual appearance</strong>. Public styling hooks and documented behavior are preserved, while stylesheet generation, selector organization, keyframe implementation and private geometry may evolve. This does not promise identical pixels, computed styles, every intermediate animation value, or invariability of all CSS produced by Extensions. Host styles and documented capability fallbacks still affect rendering.</p>
+<h2>5. Event Contracts</h2>
+<p>For Stable events, the contract includes the public name, originating target, <code>bubbles</code>, <code>composed</code>, <code>cancelable</code>, required <code>detail</code> fields and types, emission conditions, documented relative order, and the meanings of states or transitions. Use <code>eventName()</code> and the <a href="events.htm">Events reference</a> for naming and routing. Runtime dispatch defaults to bubbling, noncancelable events; composition is opt-in, so bubbling alone does not promise crossing a shadow boundary. Per-producer declarations take precedence over defaults.</p>
+<p>Different event roles must retain their meaning:</p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Example</th>
+<th>Meaning to preserve</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Intention or command</td>
+<td><code>PushState</code></td>
+<td>A request handled by State Navigation; dispatch alone does not prove completion.</td>
+</tr>
+<tr>
+<td>Cancelable pre-operation</td>
+<td><code>BeforeMount</code>, <code>BeforePop</code></td>
+<td>Synchronous <code>preventDefault()</code> vetoes the documented operation before its effects.</td>
+</tr>
+<tr>
+<td>Transition in progress</td>
+<td><code>Popping</code>, <code>Unpopping</code></td>
+<td>A transition starts; the requested endpoint has not necessarily been reached.</td>
+</tr>
+<tr>
+<td>Completion</td>
+<td><code>Pop</code>, <code>Unpop</code>, <code>Mount</code></td>
+<td>The corresponding current operation or pass finishes according to its own contract.</td>
+</tr>
+<tr>
+<td>State update</td>
+<td><code>PreferencesChange</code></td>
+<td>Reports resolved state and changed keys; it is not a request to change state.</td>
+</tr>
+<tr>
+<td>Numeric progress</td>
+<td><code>Progress</code></td>
+<td>Reports finite <code>{ value, max }</code>, with <code>max &gt; 0</code> and <code>0 &lt;= value &lt;= max</code>, on its producer.</td>
+</tr>
+</tbody></table>
+<p>For example, lifecycle before/completion events originate on <code>document</code>; canceling a mount suppresses <code>Mount</code> but does not prevent startup from emitting <code>Ready</code>. <code>Ready</code> does not guarantee that every element mounted successfully. Present emits its before-event before transition-start and current completion notifications; interrupted requests must not publish an obsolete successful completion. See <a href="events.htm#runtime-lifecycle">Runtime lifecycle</a> and <a href="../core-extensions/present.htm">Present</a> for the precise exceptions and payloads.</p>
+<p>Required event fields cannot be removed or incompatibly retyped. Optional fields may be added without changing existing meaning. Consumers should tolerate additional fields. Payload ownership and snapshot guarantees apply only where the producer documents them; event detail is not universally immutable.</p>
+<p>Generic <code>AelluxJsProgress</code> is nonbubbling and noncancelable and must be observed on the producer. It does not require the experimental Progress Extension. <code>feedback.progress()</code> continues to emit the distinct, cancelable <code>AelluxJsFeedback</code> contract, including boundary handling. These channels are not interchangeable.</p>
+<p>Notifications from Not stable Extensions, such as Point&#39;s <code>Tap</code> and Viewport&#39;s geometry events, remain experimental even though listed in the shared reference. Application-defined events and Docweaver theme events do not acquire Core stability from using the same naming helpers.</p>
+<p>This commitment does not guarantee undocumented event timing, exact frequency, event counts per frame, compositor synchronization, or a total order across unrelated operations. Cancellation must be synchronous; a Promise returned by an event listener does not delay dispatch. Scheduler and browser throttling remain applicable.</p>
+<h2>6. Distribution &amp; Loading Compatibility</h2>
+<p>Documented loading interfaces remain supported across Basic/Full and Modern/Legacy. Basic starts with no Extension registrations; declarations through <code>$ae.ext(...)</code> or <code>&lt;link rel=&quot;aelluxjs-ext&quot;&gt;</code> select the desired Extensions and loading policy. Full makes all official Extensions available through automatic registration, currently embedding eleven Bundled implementations and lazily loading five Optional scripts. Registration, loading, initialization and mounting are distinct stages.</p>
+<p>Eager loading, <code>loadWhen</code>, deferred <code>load: false</code> followed by <code>wait()</code>, optional stylesheet loading, declared dependencies, <code>extAttach()</code>, and compatible build selection preserve their documented contracts. An Extension may change its internal loading or packaging strategy while maintaining documented usage, resource requirements and availability. Applications must still meet each Extension&#39;s dependency and mount requirements. See <a href="../extensions/registration.htm">Registration</a>, <a href="../extensions/lazy-loading.htm">Lazy loading</a>, <a href="../extensions/styles.htm">Styles</a> and <a href="../extensions/authoring.htm">Authoring</a>.</p>
+<p>The npm package&#39;s public entry and subpaths are preserved during <code>0.1.x</code>: the root import/default entry, <code>/boot</code>, <code>/esm</code>, <code>/full</code>, <code>/full/legacy</code>, <code>/orchestrator</code>, <code>/orchestrator/legacy</code>, <code>/semantic</code>, <code>/html-data</code>, <code>/css-data</code>, <code>/web-types</code> and documented paths under <code>/dist/*</code>. Documented browser filenames, minified and Legacy variants, public stylesheets, official registry files and metadata discovery remain supported. A file&#39;s presence under <code>dist</code> does not make every undocumented internal file a permanent public entry.</p>
+<p>The <a href="../extensions/official-registry.htm">official registry</a> describes the versioned metadata, resolution order, exact official Core compatibility, compatible build declarations and diagnostics. Official approval is explicit; a source filename alone does not grant official status. Third-party compatibility ranges do not imply a compatibility guarantee for arbitrary mixed assets. Deploy matching boot/runtime/Extension/CSS resources: boot and orchestrator version mismatch prevents startup, and incompatible declared Extension versions are rejected unless the documented check is explicitly skipped.</p>
+<p>SRI is specific to the final bytes of each published artifact. A new version has its own integrity values; compatibility does not promise unchanged bytes or hashes between versions. Skipping a version check does not bypass SRI or URL validation. CSP, CORS, trusted origins and resource availability remain deployment requirements; see <a href="../extensions/csp-and-trust.htm">CSP and trust</a>.</p>
+<p>Public paths receive the same exceptional-change review as other Stable interfaces. Internal bundle layout, dependency organization, private file count and byte-for-byte output are not frozen. This commitment does not establish a new project-operated CDN, an npm publication/withdrawal procedure, or permanent availability of third-party hosts.</p>
+<h2>7. Platform &amp; Integration Compatibility</h2>
+<p>The boot distribution has ES5 syntax. Modern targets ES2017+; Legacy provides ES5 output plus its documented shared polyfills. Parsing ES5, running the complete Legacy distribution, and passing validation on a particular browser/OS are three different claims. Required host DOM APIs and Extension-specific dependencies still apply. See <a href="browser-support.htm">Browser support</a>, <a href="modern-legacy.htm">Modern &amp; Legacy</a> and <a href="es5-support.htm">ES5 support</a>.</p>
+<p>The recorded matrix covers Playwright-managed Chromium, Firefox and WebKit desktop engines, including forced Legacy, with exact versions and recorded scope maintained in <a href="browser-support.htm">Browser support</a> and <a href="../validation-scenarios.htm">Validation scenarios</a>. This document adds no new test result. Those tests do not establish support for all commercial Chrome, Edge, Safari or Firefox versions. Historical browsers, including Internet Explorer, and mobile devices are outside the validated matrix. An ES2017 syntax-reference table or a Babel target does not expand that matrix.</p>
+<p>Within the documented platform scope, updates must preserve supported public behavior and disclose changes to prerequisites or validated coverage. A new feature may require an additional capability without making it mandatory for existing Stable usage. A regression in previously documented supported usage requires compatibility review; adding a limitation to a page does not by itself make the regression compatible.</p>
+<p>Progressive enhancement favors available, sufficiently compatible native APIs. Polyfills and fallbacks activate according to feature detection and the documented loading contract. Core Legacy supplies only its listed shared polyfills; Extensions own extra compatibility layers. For example, declaring and mounting Dialog is necessary for its Legacy element fallback; forcing Legacy does not replace a complete native dialog. A fallback preserves its documented public behavior without promising perfect visual or internal equivalence to the browser, such as a native top layer.</p>
+<p>AelluxJS integrates with existing HTML and CSS through its namespaces and lifecycle. Applications remain responsible for native semantics, explicit mounting of dynamic content and coordination of managed styles, focus and history. Bootstrap is neither required nor bundled. The recorded Bootstrap 5.3.8 fixture validates basic CSS and namespace coexistence; it does not guarantee interoperability with Bootstrap JavaScript components, plugins or arbitrary other libraries. See <a href="../integrations/bootstrap.htm">Bootstrap integration</a>.</p>
+<p>Documented accessible behaviors remain part of Stable contracts, including applicable keyboard paths, focus handling, ARIA state, cleanup and reduced-motion behavior. The <a href="../extensions/accessibility.htm">accessibility requirements</a> apply according to each Extension&#39;s capabilities. They do not certify arbitrary application markup, universal WCAG conformance, equivalent screen-reader behavior, physical input devices or untested assistive technologies.</p>
+<h2>8. Maintenance &amp; Quality Assurance</h2>
+<p>Published changes must pass the validation gates applicable to their scope. The repository&#39;s CI verifies distribution/documentation builds, unit tests, bundle budgets, browser tests, package contents and generated-file consistency. API or behavior changes need relevant regression coverage, including loading and lifecycle effects where applicable. Documentation-only work requires editorial, link, navigation and documentation-build checks; it does not establish a fresh runtime test result.</p>
+<p>Distribution validation must check that public artifacts, compatible variants and official metadata describe the delivered files, including final-byte integrity. The build and packaging references are maintained in <a href="../getting-started.htm">Getting Started</a>, <a href="../extensions/official-registry.htm">Official registry</a> and <a href="../validation-scenarios.htm">Validation scenarios</a>.</p>
+<p>Record released public changes in the changelog. Document migrations for experimental incompatibilities and any explicitly approved exceptional Stable fix. Keep deprecated APIs identified and usable for this line, and update <a href="known-limits-and-risks.htm">Known Limits &amp; Risks</a> and individual Extension limits when evidence or contracts change. Separate demonstrated issues, potential risks, validation gaps and historical test results.</p>
+<p>Security reports and severe defects require assessment of affected versions, contracts and mitigations. No private reporting channel, response deadline, correction SLA, commercial availability or guaranteed support duration is established by this commitment. General exception handling, the maintenance focus on the latest <code>0.1.x</code>, backports, and a dedicated reporting process require the separate maintainer decisions recorded in the <a href="https://github.com/aelluxjs/core/blob/release/0.1.0/milestones/0.1.x-compatibility-policy-review.md">policy review</a>. There is no commitment to maintain every earlier patch version simultaneously.</p>
+<p>Compatibility is a maintenance rule, not a guarantee of zero bugs. Bundle budgets are internal quality controls that may evolve with reviewed changes; they do not promise an exact permanent size. No fixed latency, FPS, memory ceiling or capacity follows from this document. Performance improvements must preserve documented semantics, but actual performance depends on content, device, browser, workload and application integration. See <a href="performance.htm#scope-and-limitations">Performance and bundle budget</a>.</p>
+          </main>
+
+          <div id="doc-navlinks2" ajax-load="doc-navlinks2">
+            <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
+      <a href="/core/docs/0.1.x/runtime/api.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
+      ← <span class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill"
+        style="max-width:200px" data-ae-overflow-marquee="80">
+        Runtime API      </span>
+    </a>
+
+                  <a href="/core/docs/0.1.x/runtime/wait-layout.htm"
+            class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2" style="width: 40%;">
+            <span
+              class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
+              style="max-width:200px" data-ae-overflow-marquee="80">
+              waitLayout            </span> →
+          </a>
+          </div>          </div>
+
+          <footer class="section bg-transparent" style="margin: 50vh 0;">
+            <div class="text-center small text-body opacity-50">
+              <div>
+                2026 ©aellux.js Docs
+              </div>
+              <div class="small mb-0 text-body">
+                Special thanks to
+                <a style="color:inherit!important;" href="https://chatgpt.com/" target="_blank"
+                  rel="noopener noreferrer">ChatGPT</a>,
+                <a style="color:inherit!important;" href="https://openai.com/codex/" target="_blank"
+                  rel="noopener noreferrer">Codex</a>,
+                <a style="color:inherit!important;" href="https://code.visualstudio.com/" target="_blank"
+                  rel="noopener noreferrer">Visual Studio Code</a>,
+                <a style="color:inherit!important;" href="https://getbootstrap.com/" target="_blank"
+                  rel="noopener noreferrer">Bootstrap</a>,
+                and
+                <a style="color:inherit!important;" href="https://github.com/" target="_blank"
+                  rel="noopener noreferrer">GitHub</a>
+                for the tools and technologies that supported the development of Aellux.
+              </div>
+            </div>
+          </footer>
+        </div>
+
+      </div>
+
+    </div>
+
+</body>
+
+</html>

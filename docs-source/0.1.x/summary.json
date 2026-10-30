@@ -16,6 +16,7 @@
       "slug": "runtime",
       "children": [
         { "label": "Runtime API", "href": "runtime/api.md" },
+        { "label": "Compatibility Commitment", "href": "runtime/compatibility-commitment.md" },
         { "label": "waitLayout", "href": "runtime/wait-layout.md" },
         { "label": "Events", "href": "runtime/events.md" },
         { "label": "Modern & Legacy", "href": "runtime/modern-legacy.md" },

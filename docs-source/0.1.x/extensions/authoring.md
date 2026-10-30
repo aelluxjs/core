@@ -2,6 +2,8 @@
 
 An aellux.js Extension is a classic browser script that attaches one focused behavior through `AelluxJs.extAttach()`. Core and third-party Extensions follow the same naming, lifecycle, compatibility, and cleanup rules.
 
+The [Compatibility Commitment](../runtime/compatibility-commitment.md) defines the `0.1.x` protection of public Core integration contracts and Stable official Extensions beginning with `0.1.0`. It does not assign stability to a third-party Extension or to a Not stable official Extension.
+
 Start from [`templates/aellux.ext.template.js`](https://github.com/aelluxjs/core/blob/main/templates/aellux.ext.template.js). The scaffold contains the required structure and a compatibility summary.
 
 ## Required Contract

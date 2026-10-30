@@ -34,7 +34,8 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 ## Getting Started
 
 - [Installation, build, and runtime modes](getting-started.md)
-- [Compatibility for 0.1.0 Beta](compatibility.md)
+- [Technical compatibility and validated environments](compatibility.md)
+- [Compatibility Commitment for 0.1.x](runtime/compatibility-commitment.md)
 - [Runtime API](runtime/api.md)
 - [`waitLayout` layout scheduling](runtime/wait-layout.md)
 - [CSS Motion Controller](runtime/css-motion.md)

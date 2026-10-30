@@ -37,4 +37,4 @@ The recorded run and its command are maintained in [Validation scenarios](../val
 
 The Legacy distribution provides ES5 syntax and the shared polyfills documented in [ES5 support level](es5-support.md). Its `0.1.0` validation forces the Legacy profile in the current desktop engines listed above. Historical browser versions are outside the support matrix because they have not been tested directly.
 
-See [Modern and Legacy runtimes](modern-legacy.md) for runtime selection and [Compatibility for aellux.js 0.1.0 Beta](../compatibility.md) for the current release contract.
+See [Modern and Legacy runtimes](modern-legacy.md) for runtime selection, [Compatibility](../compatibility.md) for technical scope, and the [Compatibility Commitment](compatibility-commitment.md) for public API preservation beginning with `0.1.0`.

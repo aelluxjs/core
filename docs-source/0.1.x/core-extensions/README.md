@@ -38,6 +38,8 @@ Distribution and stability are independent. Focus and Point are included in Full
 
 Stability appears on each Extension page and in the index below. Navigation groups follow distribution. Documented limits and compatibility requirements apply to both statuses. Each Extension's Known Limits & Risks section describes its boundaries; see also the [shared Core limits](../runtime/known-limits-and-risks.md).
 
+The [Compatibility Commitment](../runtime/compatibility-commitment.md) protects Stable public contracts from `0.1.0` throughout `0.1.x`. Not stable Extensions remain available but may change incompatibly with documented migration guidance. This policy does not change the classifications below or retroactively stabilize earlier betas.
+
 <h2 id="bundled-extensions">Bundled Extensions</h2>
 
 These eleven Extensions are included in the Full JavaScript bundle.
