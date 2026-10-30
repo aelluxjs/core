@@ -7,6 +7,7 @@
 }
 
 [data-bs-theme="dark"] {
+  --bs-bg-tertiary: #0f1314!important;
   --bs-link-color: #ffc107;
   --bs-link-color-rgb: 255, 193, 7;
   --bs-link-hover-color: #ffda6a;
@@ -31,7 +32,7 @@ a { text-underline-offset: .22em; }
 .hero { padding-block: clamp(4rem, 8vw, 7rem) 2rem; }
 .eyebrow { font: 500 .72rem/1.6 var(--bs-font-monospace); letter-spacing: .09em; text-transform: uppercase; }
 .status-dot { display: inline-block; width: .45rem; height: .45rem; margin-right: .5rem; vertical-align: .1em; }
-.hero-wordmark { font-size: clamp(3.7rem, 9vw, 7.5rem); font-weight: 650; line-height: 1; letter-spacing: -.075em; }
+.hero-wordmark { font-size: clamp(3.7rem, 9vw, 7.5rem); font-weight: 650; line-height: 1; letter-spacing: -.05em; }
 .hero-tagline { font-size: clamp(1.9rem, 4vw, 3rem); font-weight: 450; letter-spacing: -.04em; line-height: 1.13; }
 .hero-description { max-width: 29rem; font-size: 1.12rem; line-height: 1.65; }
 .hero-code { background: var(--bs-body-bg); }
