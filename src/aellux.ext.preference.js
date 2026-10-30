@@ -11,7 +11,8 @@
  *
  * Inputs and activation: mounts `[data-ae-preference]`; option, next and previous
  * controls use their matching data attributes. Init options define values,
- * defaults and storage behavior.
+ * defaults and storage behavior. `syncBootstrapThemeTag: true` also reflects the
+ * resolved color scheme in the root `data-bs-theme` attribute.
  *
  * Outputs and owned state: updates preference attributes on the root HTML
  * element, synchronizes options, value labels and associated inputs, persists
@@ -47,6 +48,7 @@ import utilsNameCase from "./internal/utils-name-case.js";
   const containerPreferences = new Map();
   const containerLabels = new Map();
   const labelMemories = new WeakMap();
+  let bootstrapThemeMemory = null;
 
   AelluxJs.extAttach(extensionName, { init, destroy, update, get, set });
 
@@ -77,7 +79,11 @@ import utilsNameCase from "./internal/utils-name-case.js";
     sound: ["off", "on", "low"],
   };
 
-  function init(options) {
+  function init(options = {}) {
+    if (options.syncBootstrapThemeTag === true) {
+      bootstrapThemeMemory = AelluxJs.persist.element.save(document.documentElement, ["data-bs-theme"], []);
+    }
+
     AelluxJs.mountManager.add({
       extensionName, selector: `[${attr.preference}]`,
       priority: 0,
@@ -111,6 +117,8 @@ import utilsNameCase from "./internal/utils-name-case.js";
   }
 
   function destroy() {
+    bootstrapThemeMemory?.restore();
+    bootstrapThemeMemory = null;
     for (const container of containerPreferences.keys()) unmountPreferenceContainer(container);
     AelluxJs.mountManager.remove({ extensionName });
     containersByPreference.clear();
@@ -168,6 +176,10 @@ import utilsNameCase from "./internal/utils-name-case.js";
       computedPreferences[key] = nextPreferences[key];
     }
     AelluxJs.updatePreferenceAttributesHTML(computedPreferences);
+    if (bootstrapThemeMemory) {
+      const colorScheme = AelluxJs.currentPreference("color-scheme");
+      document.documentElement.setAttribute("data-bs-theme", colorScheme === "dark" ? "dark" : "light");
+    }
     for (const container of containerPreferences.keys()) {
       if (indexContainer(container)) updateContainer(container);
     }

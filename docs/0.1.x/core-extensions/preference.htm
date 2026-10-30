@@ -684,7 +684,7 @@
 <h2>Accessibility profile</h2>
 <ul>
 <li><strong>Capabilities:</strong> interaction and input; structure and state; visual preference policy; storage and media-query integration.</li>
-<li><strong>Owned state:</strong> computed preference values, root preference attributes, option active classes, value-label visibility and associated input values or checked state.</li>
+<li><strong>Owned state:</strong> computed preference values, root preference attributes, option active classes, value-label visibility and associated input values or checked state. With <code>syncBootstrapThemeTag: true</code>, also owns the root <code>data-bs-theme</code> attribute until destruction.</li>
 <li><strong>Consumer responsibility:</strong> use native keyboard-operable controls with accessible names and provide meaningful text for every value label.</li>
 <li><strong>Limitation:</strong> generic elements marked as options, next or previous controls do not receive button semantics or keyboard behavior automatically.</li>
 </ul>
@@ -707,6 +707,34 @@ console.log(preference.get(&quot;colorScheme&quot;));
   if (changed.includes(&quot;colorScheme&quot;)) console.log(preferences.colorScheme);
 });
 </code></pre>
+<h2>Bootstrap color mode</h2>
+<p>Set the initialization option <code>extensions.preference.syncBootstrapThemeTag</code> to <code>true</code> to synchronize Bootstrap&#39;s root color-mode attribute with the resolved AelluxJS color scheme:</p>
+<pre><code class="language-js">$ae.init({
+  mode: &quot;full&quot;,
+  extensions: {
+    preference: { syncBootstrapThemeTag: true }
+  }
+});
+</code></pre>
+<p>In Basic mode, register Preference explicitly with <code>$ae.ext(&quot;preference&quot;)</code> before calling <code>$ae.init()</code> with the same <code>extensions.preference</code> options and <code>mode: &quot;basic&quot;</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>syncBootstrapThemeTag</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td>When <code>true</code>, writes <code>data-bs-theme=&quot;light&quot;</code> or <code>data-bs-theme=&quot;dark&quot;</code> on <code>&lt;html&gt;</code> during Preference updates.</td>
+</tr>
+</tbody></table>
+<p>Synchronization starts when Preference initializes and occurs before <code>PreferencesChange</code> dispatch. Persisted choices, declared controls, programmatic <code>set()</code> followed by <code>update()</code>, device changes in <code>auto</code> mode, and storage events all use the same update path. <code>auto</code> publishes the resolved <code>light</code> or <code>dark</code> value; an unresolved color scheme falls back to <code>light</code>. <code>set()</code> alone still only saves the choice.</p>
+<p>When the option is omitted or <code>false</code>, Preference leaves <code>data-bs-theme</code> untouched. When enabled, destroying Preference restores the attribute&#39;s previous value, or removes it if it was originally absent. This option only writes the root attribute; it does not load Bootstrap CSS or JavaScript, change nested Bootstrap color-mode overrides, or synchronize the attribute during boot before Preference loads. Load Bootstrap 5.3 CSS separately to apply its color modes.</p>
 <h2>Preference controls</h2>
 <p>An element marked with <code>data-ae-preference</code> is a clickable preference container. Descendants with <code>data-ae-option</code> set a value for that preference and receive the <code>ae--active</code> class when selected.</p>
 <pre><code class="language-html">&lt;div data-ae-preference=&quot;colorScheme&quot;&gt;
@@ -746,8 +774,8 @@ console.log(preference.get(&quot;colorScheme&quot;));
 <tr>
 <td>System choices</td>
 <td>Known Limit</td>
-<td><span class="large">Explicit local values can override device preferences; auto uses available media queries. Reflected attributes do not implement a theme, sound or haptics.</span></td>
-<td><span class="large">Consume resolved HTML attributes/currentPreference() and provide application presentation.</span></td>
+<td><span class="large">Explicit local values can override device preferences; auto uses available media queries. Reflected attributes do not supply theme styles, sound or haptics. Bootstrap root synchronization is opt-in and begins at Preference initialization.</span></td>
+<td><span class="large">Consume resolved HTML attributes/currentPreference() and provide application presentation; load Bootstrap CSS separately when using syncBootstrapThemeTag.</span></td>
 </tr>
 <tr>
 <td>Persistence</td>

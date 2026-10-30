@@ -15051,7 +15051,7 @@
       "cancelable": false,
       "name": "AelluxJsPreferencesChange",
       "extension": "preference",
-      "description": "Preference update on document. detail: { changed, preferences }; changed may be empty.",
+      "description": "Preference update on document. detail: { changed, preferences }; changed may be empty. With syncBootstrapThemeTag enabled, root data-bs-theme is synchronized before dispatch.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
     },
     {

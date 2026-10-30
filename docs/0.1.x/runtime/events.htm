@@ -925,7 +925,7 @@ $ae.on(&quot;ViewportError&quot;, event =&gt; {
 <tr>
 <td>Preference</td>
 <td><code>AelluxJsPreferencesChange</code></td>
-<td><span class="large"><code>document</code>; <code>detail</code> is <code>{ changed, preferences }</code>, with a changed-key array and a snapshot of current values. <code>changed</code> can be empty.</span></td>
+<td><span class="large"><code>document</code>; <code>detail</code> is <code>{ changed, preferences }</code>, with a changed-key array and a snapshot of current values. <code>changed</code> can be empty. When <code>syncBootstrapThemeTag</code> is enabled, the root <code>data-bs-theme</code> is synchronized before dispatch.</span></td>
 </tr>
 <tr>
 <td>Present</td>

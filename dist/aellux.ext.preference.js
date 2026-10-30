@@ -38,6 +38,7 @@
     const containerPreferences = /* @__PURE__ */ new Map();
     const containerLabels = /* @__PURE__ */ new Map();
     const labelMemories = /* @__PURE__ */ new WeakMap();
+    let bootstrapThemeMemory = null;
     AelluxJs.extAttach(extensionName, { init, destroy, update, get, set });
     const attr = {
       preference: AelluxJs.attr("preference"),
@@ -63,7 +64,10 @@
       haptics: ["on", "off"],
       sound: ["off", "on", "low"]
     };
-    function init(options) {
+    function init(options = {}) {
+      if (options.syncBootstrapThemeTag === true) {
+        bootstrapThemeMemory = AelluxJs.persist.element.save(document.documentElement, ["data-bs-theme"], []);
+      }
       AelluxJs.mountManager.add({
         extensionName,
         selector: `[${attr.preference}]`,
@@ -92,6 +96,8 @@
       update();
     }
     function destroy() {
+      bootstrapThemeMemory == null ? void 0 : bootstrapThemeMemory.restore();
+      bootstrapThemeMemory = null;
       for (const container of containerPreferences.keys()) unmountPreferenceContainer(container);
       AelluxJs.mountManager.remove({ extensionName });
       containersByPreference.clear();
@@ -145,6 +151,10 @@
         computedPreferences[key] = nextPreferences[key];
       }
       AelluxJs.updatePreferenceAttributesHTML(computedPreferences);
+      if (bootstrapThemeMemory) {
+        const colorScheme = AelluxJs.currentPreference("color-scheme");
+        document.documentElement.setAttribute("data-bs-theme", colorScheme === "dark" ? "dark" : "light");
+      }
       for (const container of containerPreferences.keys()) {
         if (indexContainer(container)) updateContainer(container);
       }

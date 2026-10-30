@@ -24,6 +24,21 @@ The application controls the selectors and priority of its Extension stylesheet.
 
 When adding motion or accessibility rules alongside [Bootstrap](https://getbootstrap.com/), target AelluxJs preference attributes on `<html>` so a saved local choice and the device setting both affect the result. For example, use `html[data-ae-reduced-motion="reduced"] .custom-transition { transition: none; }` for application owned motion. Apply this convention to future integration styles and scripts; use `$ae.currentPreference("reduced-motion")` in JavaScript before starting optional animations.
 
+## Color Modes
+
+Preference can synchronize Bootstrap 5.3's `data-bs-theme` attribute on `<html>` without Bootstrap JavaScript:
+
+```js
+$ae.init({
+  mode: "full",
+  extensions: {
+    preference: { syncBootstrapThemeTag: true }
+  }
+});
+```
+
+The option defaults to `false`. When enabled, Preference writes the resolved `light` or `dark` theme at initialization and on subsequent updates, including device changes while the choice is `auto`. It updates the attribute before `PreferencesChange` and restores the previous attribute on destruction. In Basic, register `$ae.ext("preference")` explicitly and pass the same Extension options with `mode: "basic"`. Bootstrap CSS remains an application dependency; synchronization starts after Preference loads. See [Preference](../core-extensions/preference.md#bootstrap-color-mode) for the full contract.
+
 ## JavaScript Coexistence
 
 Extensions should avoid unnecessary `preventDefault()` and `stopPropagation()`, should not remove third-party listeners, and must keep mounting idempotent when [Bootstrap](https://getbootstrap.com/) reveals or modifies content dynamically.

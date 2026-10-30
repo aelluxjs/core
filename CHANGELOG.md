@@ -6,6 +6,7 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Added
 
+- Added the opt-in Preference initialization option `extensions.preference.syncBootstrapThemeTag` (default `false`). It synchronizes the root `data-bs-theme` with the resolved light/dark preference before `PreferencesChange`, follows persisted, automatic and storage changes, and restores the previous attribute on destruction. The homepage uses this option instead of an external theme bridge.
 - Added the Compatibility Commitment for AelluxJS `0.1.x`, effective from `0.1.0`, covering Stable public JavaScript, HTML, CSS, events, loading and integration contracts. Linked it from the documentation navigation and reference pages; recorded pending support policies and contract discrepancies separately for maintainer review without changing Extension stability or runtime behavior.
 
 ### Changed
