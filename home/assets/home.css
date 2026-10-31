@@ -113,6 +113,7 @@ html[data-ae-reduced-motion="reduced"] .hero-prism-light { display: none; animat
 .example-card > :first-child { min-height: 10.5rem; }
 .example-frame { display: block; width: calc(100% - 3rem); height: 27rem; margin: 0 1.5rem 1.5rem; border: 1px solid var(--bs-border-color); border-radius: var(--bs-border-radius); background: var(--bs-body-bg); }
 .example-source { margin-top: auto; }
+.example-source, .source-file { display: flex; flex-direction: column; }
 .source-toggle { display: block; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; font-size: .875rem; text-align: left; cursor: pointer; overflow-wrap: anywhere; }
 .source-toggle::after { content: "+"; float: right; margin-left: .5rem; }
 .source-toggle[aria-expanded="true"]::after { content: "−"; }
