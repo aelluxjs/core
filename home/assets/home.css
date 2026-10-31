@@ -1,4 +1,11 @@
 :root {
+  --bs-border-radius: 2px !important;
+  --bs-border-radius-sm: 2px !important;
+  --bs-border-radius-lg: 2px !important;
+  --bs-border-radius-xl: 2px !important;
+  --bs-border-radius-xxl: 2px !important;
+  --bs-border-radius-2xl: 2px !important;
+  --bs-border-radius-pill: 2px !important;
   --bs-heading-font-family: "Geist", var(--bs-font-sans-serif);
   --bs-link-color: #715400;
   --bs-link-color-rgb: 113, 84, 0;
@@ -15,6 +22,7 @@
   --bs-link-hover-color-rgb: 255, 218, 106;
 }
 
+h1, h2, h3, h4, h5, h6 { font-family: "Geist", var(--bs-font-sans-serif) !important; }
 body { -webkit-font-smoothing: antialiased; }
 section[id] { scroll-margin-top: 1.5rem; }
 a { text-underline-offset: .22em; }
