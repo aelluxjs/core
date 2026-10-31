@@ -112,6 +112,6 @@ html[data-ae-reduced-motion="reduced"] [data-ae-present] {
   transition-property: var(--ae-present-properties), --ae-present-pop-phase;
 }
 [data-ae-present].ae--unpopping {
-  transition-property: var(--ae-present-properties), --ae-present-unpop-phase;
+  transition-property: var(--ae-present-properties), --ae-present-pop-phase, --ae-present-unpop-phase;
 }
 [data-ae-present][hidden] { display: none; }

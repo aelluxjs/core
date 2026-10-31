@@ -175,9 +175,6 @@
     var fadeProperties = ["top", "right", "bottom", "left"].map(function(side) {
       return "--ae-scrollbox-hidden-".concat(side);
     });
-    var fadeGeometryProperties = ["left", "top", "width", "height"].map(function(part) {
-      return "--ae-scrollbox-mask-".concat(part);
-    });
     var supportsCSS = function supportsCSS2(name, value) {
       var _root$CSS, _root$CSS$supports;
       return !!((_root$CSS = root.CSS) !== null && _root$CSS !== void 0 && (_root$CSS$supports = _root$CSS.supports) !== null && _root$CSS$supports !== void 0 && _root$CSS$supports.call(_root$CSS, name, value));
@@ -383,9 +380,6 @@
         desktop: false,
         fadeAuthored: null,
         fadeAxes: null,
-        fadeTarget: null,
-        fadeMemory: null,
-        fadeMasks: /* @__PURE__ */ new WeakMap(),
         cursor: {
           owned: false
         },
@@ -533,7 +527,7 @@
       if (state) configure(state);
     }
     function unmountScrollbox(element) {
-      var _state$fadeMemory, _elementMemories$get;
+      var _elementMemories$get;
       var state = scrollboxes.get(element);
       if (!state) return;
       state.disposed = true;
@@ -561,7 +555,6 @@
       AelluxJs.waitLayout.cancel(state.resizeLayoutId);
       AelluxJs.waitLayout.cancel(state.publishLayoutId);
       offEvent(root, "$resize", state.onResize);
-      (_state$fadeMemory = state.fadeMemory) === null || _state$fadeMemory === void 0 || _state$fadeMemory.restore();
       (_elementMemories$get = elementMemories.get(element)) === null || _elementMemories$get === void 0 || _elementMemories$get.restore();
       elementMemories.delete(element);
       cursorMemories.delete(element);
@@ -2144,14 +2137,6 @@
       if (state.fadeAuthored === null) state.fadeAuthored = [style.maskImage, style.webkitMaskImage].some(function(value) {
         return value && value !== "none";
       });
-      var children = contentChildren(element, 2);
-      var target = children.length === 1 ? children[0] : element;
-      if (target !== element && !state.fadeMasks.has(target)) {
-        var targetStyle = root.getComputedStyle(target);
-        state.fadeMasks.set(target, target.hasAttribute(attribute) || [targetStyle.maskImage, targetStyle.webkitMaskImage].some(function(value) {
-          return value && value !== "none";
-        }));
-      }
       if (state.elastic.owned) {
         metrics = state.metrics || metrics;
         axes = state.fadeAxes || axes;
@@ -2161,22 +2146,10 @@
       var distances = [axes.y ? y : 0, axes.x ? metrics.maxX - x : 0, axes.y ? metrics.maxY - y : 0, axes.x ? x : 0];
       var snapAxis = hasSnap(element) ? element.getAttribute(snapAttribute) === "vertical" ? "y" : "x" : null;
       var primary = snapAxis || (axes.y ? "y" : "x");
-      var mode = maskSupported && !state.fadeAuthored && !state.fadeMasks.get(target) && element.getAttribute(fadeAttribute) !== "false" && (axes.x || axes.y) ? compositeSupported ? "both" : primary : "";
-      var geometry = null;
-      if (mode && target !== element) {
-        var boxRect = element.getBoundingClientRect();
-        var targetRect = target.getBoundingClientRect();
-        var scaleX = targetRect.width ? (target.offsetWidth || targetRect.width) / targetRect.width : 1;
-        var scaleY = targetRect.height ? (target.offsetHeight || targetRect.height) / targetRect.height : 1;
-        var boxScaleX = element.offsetWidth ? boxRect.width / element.offsetWidth : 1;
-        var boxScaleY = element.offsetHeight ? boxRect.height / element.offsetHeight : 1;
-        geometry = [(boxRect.left + element.clientLeft * boxScaleX - targetRect.left) * scaleX, (boxRect.top + element.clientTop * boxScaleY - targetRect.top) * scaleY, element.clientWidth * boxScaleX * scaleX, element.clientHeight * boxScaleY * scaleY];
-      }
+      var mode = maskSupported && !state.fadeAuthored && element.getAttribute(fadeAttribute) !== "false" && (axes.x || axes.y) ? compositeSupported ? "both" : primary : "";
       return {
         distances: distances,
-        mode: mode,
-        target: mode ? target : null,
-        geometry: geometry
+        mode: mode
       };
     }
     function writeFadeProperty(element, name, value) {
@@ -2184,25 +2157,11 @@
       element.style.setProperty(name, "".concat(value, "px"));
     }
     function updateFade(state, fade) {
-      if (state.fadeTarget !== fade.target) {
-        var _state$fadeMemory2;
-        (_state$fadeMemory2 = state.fadeMemory) === null || _state$fadeMemory2 === void 0 || _state$fadeMemory2.restore();
-        state.fadeTarget = fade.target;
-        state.fadeMemory = fade.target ? AelluxJs.persist.element.save(fade.target, [fadeStateAttribute], fade.target === state.element ? [] : [].concat(_toConsumableArray(fadeProperties), _toConsumableArray(fadeGeometryProperties))) : null;
-      }
       fadeProperties.forEach(function(name, index) {
         return writeFadeProperty(state.element, name, fade.distances[index]);
       });
-      if (!fade.target) return;
-      if (fade.target !== state.element) {
-        fadeProperties.forEach(function(name, index) {
-          return writeFadeProperty(fade.target, name, fade.distances[index]);
-        });
-        fadeGeometryProperties.forEach(function(name, index) {
-          return writeFadeProperty(fade.target, name, fade.geometry[index]);
-        });
-      }
-      fade.target.setAttribute(fadeStateAttribute, fade.mode);
+      if (fade.mode) state.element.setAttribute(fadeStateAttribute, fade.mode);
+      else state.element.removeAttribute(fadeStateAttribute);
     }
     function publish(state) {
       if (state.disposed) return;

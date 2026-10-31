@@ -134,7 +134,7 @@ ${present}.${popping} {
   transition-property: var(--ae-present-properties), --ae-present-pop-phase;
 }
 ${present}.${unpopping} {
-  transition-property: var(--ae-present-properties), --ae-present-unpop-phase;
+  transition-property: var(--ae-present-properties), --ae-present-pop-phase, --ae-present-unpop-phase;
 }
 ${present}[hidden] { display: none; }
 `;

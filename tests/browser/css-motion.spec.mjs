@@ -32,6 +32,45 @@ async function startPresent(page, options = {}) {
   });
 }
 
+test("Present unpop keeps a paused rendered value while its replacement timeline starts at zero", async ({ page }) => {
+  await startPresent(page);
+  await page.evaluate(() => {
+    const element = document.getElementById("present-motion");
+    element.style.setProperty("--ae-pop-ease", "linear");
+    element.style.setProperty("--ae-unpop-duration", "600ms");
+    element.style.setProperty("--ae-unpop-ease", "linear");
+    element.style.setProperty("--ae-unpop-aellux-ease", "backIn");
+    element.style.setProperty("--ae-unpop-transform", "translateX(-80px)");
+    window.opening = $ae(element).present.pop();
+  });
+  await expect.poll(() => page.locator("#present-motion").evaluate(element =>
+    element.getAnimations().some(animation => animation.transitionProperty === "transform" && animation.playState === "paused")
+  )).toBe(true);
+  const before = await page.evaluate(() => {
+    const element = document.getElementById("present-motion");
+    element.getAnimations().forEach(animation => { animation.currentTime = 270; });
+    const before = new DOMMatrixReadOnly(getComputedStyle(element).transform).m41;
+    window.closing = $ae(element).present.unpop();
+    return { before, after: new DOMMatrixReadOnly(getComputedStyle(element).transform).m41 };
+  });
+  expect(before.after).toBeCloseTo(before.before, 3);
+  await expect.poll(() => page.locator("#present-motion").evaluate(element =>
+    element.getAnimations().some(animation => animation.transitionProperty === "transform" &&
+      animation.playState === "paused" && animation.effect.getTiming().easing.startsWith("linear("))
+  )).toBe(true);
+  const samples = await page.evaluate(() => {
+    const element = document.getElementById("present-motion");
+    return [0, .25, .5, .75, 1].map(t => {
+      element.getAnimations().forEach(animation => { animation.currentTime = t * 600; });
+      return { actual: new DOMMatrixReadOnly(getComputedStyle(element).transform).m41, eased: $ae.ease("backIn", t) };
+    });
+  });
+  samples.forEach(sample => expect(sample.actual).toBeCloseTo(before.before + (-80 - before.before) * sample.eased, 3));
+  await page.evaluate(() => Promise.all([window.opening, window.closing]));
+  await expect(page.locator("#present-motion")).toHaveJSProperty("hidden", true);
+  expect(await page.locator("#present-motion").evaluate(element => element.style.transform)).toBe("");
+});
+
 test("CSS motion is controlled or safely falls back per browser operation", async ({ page, browserName }) => {
   await start(page);
   await page.evaluate(() => {

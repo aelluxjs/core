@@ -2687,7 +2687,6 @@
         ]);
         const properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
         const fadeProperties = ["top", "right", "bottom", "left"].map((side) => `--ae-scrollbox-hidden-${side}`);
-        const fadeGeometryProperties = ["left", "top", "width", "height"].map((part) => `--ae-scrollbox-mask-${part}`);
         const supportsCSS = (name, value) => {
           var _a, _b;
           return !!((_b = (_a = root2.CSS) == null ? void 0 : _a.supports) == null ? void 0 : _b.call(_a, name, value));
@@ -2841,9 +2840,6 @@
             desktop: false,
             fadeAuthored: null,
             fadeAxes: null,
-            fadeTarget: null,
-            fadeMemory: null,
-            fadeMasks: /* @__PURE__ */ new WeakMap(),
             cursor: { owned: false },
             wheelEnabled: true,
             momentumEnabled: true,
@@ -2966,7 +2962,7 @@
           if (state) configure(state);
         }
         function unmountScrollbox(element) {
-          var _a, _b;
+          var _a;
           const state = scrollboxes.get(element);
           if (!state) return;
           state.disposed = true;
@@ -2997,8 +2993,7 @@
           AelluxJs2.waitLayout.cancel(state.resizeLayoutId);
           AelluxJs2.waitLayout.cancel(state.publishLayoutId);
           offEvent(root2, "$resize", state.onResize);
-          (_a = state.fadeMemory) == null ? void 0 : _a.restore();
-          (_b = elementMemories.get(element)) == null ? void 0 : _b.restore();
+          (_a = elementMemories.get(element)) == null ? void 0 : _a.restore();
           elementMemories.delete(element);
           cursorMemories.delete(element);
           for (const name of scrollEdgeClasses) element.classList.remove(name);
@@ -4406,12 +4401,6 @@
           const element = state.element;
           if (state.fadeAuthored === null)
             state.fadeAuthored = [style.maskImage, style.webkitMaskImage].some((value) => value && value !== "none");
-          const children = contentChildren(element, 2);
-          const target = children.length === 1 ? children[0] : element;
-          if (target !== element && !state.fadeMasks.has(target)) {
-            const targetStyle = root2.getComputedStyle(target);
-            state.fadeMasks.set(target, target.hasAttribute(attribute) || [targetStyle.maskImage, targetStyle.webkitMaskImage].some((value) => value && value !== "none"));
-          }
           if (state.elastic.owned) {
             metrics = state.metrics || metrics;
             axes = state.fadeAxes || axes;
@@ -4426,46 +4415,17 @@
           ];
           const snapAxis = hasSnap(element) ? element.getAttribute(snapAttribute) === "vertical" ? "y" : "x" : null;
           const primary = snapAxis || (axes.y ? "y" : "x");
-          const mode = maskSupported && !state.fadeAuthored && !state.fadeMasks.get(target) && element.getAttribute(fadeAttribute) !== "false" && (axes.x || axes.y) ? compositeSupported ? "both" : primary : "";
-          let geometry = null;
-          if (mode && target !== element) {
-            const boxRect = element.getBoundingClientRect();
-            const targetRect = target.getBoundingClientRect();
-            const scaleX = targetRect.width ? (target.offsetWidth || targetRect.width) / targetRect.width : 1;
-            const scaleY = targetRect.height ? (target.offsetHeight || targetRect.height) / targetRect.height : 1;
-            const boxScaleX = element.offsetWidth ? boxRect.width / element.offsetWidth : 1;
-            const boxScaleY = element.offsetHeight ? boxRect.height / element.offsetHeight : 1;
-            geometry = [
-              (boxRect.left + element.clientLeft * boxScaleX - targetRect.left) * scaleX,
-              (boxRect.top + element.clientTop * boxScaleY - targetRect.top) * scaleY,
-              element.clientWidth * boxScaleX * scaleX,
-              element.clientHeight * boxScaleY * scaleY
-            ];
-          }
-          return { distances, mode, target: mode ? target : null, geometry };
+          const mode = maskSupported && !state.fadeAuthored && element.getAttribute(fadeAttribute) !== "false" && (axes.x || axes.y) ? compositeSupported ? "both" : primary : "";
+          return { distances, mode };
         }
         function writeFadeProperty(element, name, value) {
           if (element.style.getPropertyPriority(name)) element.style.removeProperty(name);
           element.style.setProperty(name, `${value}px`);
         }
         function updateFade(state, fade) {
-          var _a;
-          if (state.fadeTarget !== fade.target) {
-            (_a = state.fadeMemory) == null ? void 0 : _a.restore();
-            state.fadeTarget = fade.target;
-            state.fadeMemory = fade.target ? AelluxJs2.persist.element.save(
-              fade.target,
-              [fadeStateAttribute],
-              fade.target === state.element ? [] : [...fadeProperties, ...fadeGeometryProperties]
-            ) : null;
-          }
           fadeProperties.forEach((name, index) => writeFadeProperty(state.element, name, fade.distances[index]));
-          if (!fade.target) return;
-          if (fade.target !== state.element) {
-            fadeProperties.forEach((name, index) => writeFadeProperty(fade.target, name, fade.distances[index]));
-            fadeGeometryProperties.forEach((name, index) => writeFadeProperty(fade.target, name, fade.geometry[index]));
-          }
-          fade.target.setAttribute(fadeStateAttribute, fade.mode);
+          if (fade.mode) state.element.setAttribute(fadeStateAttribute, fade.mode);
+          else state.element.removeAttribute(fadeStateAttribute);
         }
         function publish(state) {
           if (state.disposed) return;
@@ -5619,6 +5579,7 @@
             motionEnabled: (element.getAttribute(attr.present) || "").trim() !== "",
             motionId: AelluxJs2.motion ? AelluxJs2.motion.id() : fallbackMotionId++,
             transition: null,
+            handoff: null,
             operationRevision: 0,
             presentationOrder: element.hidden ? 0 : ++presentationSequence,
             autoUnpopTimeout: null,
@@ -5659,6 +5620,7 @@
                 );
               }
               cancelAutoUnpop(this);
+              restoreHandoff(this);
               if (transitionStart) {
                 this.classList.remove(className.unpopping);
               } else {
@@ -5851,6 +5813,46 @@
           memory.restore();
           measuredMemories.delete(element);
         }
+        function restoreHandoff(controller) {
+          var _a;
+          (_a = controller.handoff) == null ? void 0 : _a.memory.restore();
+          controller.handoff = null;
+        }
+        function captureHandoff(element, controller) {
+          if ((controller.measuredHeight || controller.measuredWidth) && !measuredMemories.has(element)) {
+            measuredMemories.set(element, AelluxJs2.persist.element.save(element, [], ["max-height", "max-width"]));
+          }
+          const tokens = (element.getAttribute(attr.present) || "").split(/\s+/);
+          const properties = [];
+          if (tokens.includes("opacity")) properties.push("opacity");
+          if (tokens.includes("transform") && !element.hasAttribute(AelluxJs2.attr("anchor"))) properties.push("transform");
+          if (tokens.includes("height")) properties.push(...controller.presentMotion ? ["grid-template-rows", "height"] : ["max-height"]);
+          if (tokens.includes("width")) properties.push(...controller.presentMotion ? ["grid-template-columns", "width"] : ["max-width"]);
+          properties.push(
+            "--ae-present-pop-phase",
+            "--ae-present-unpop-phase",
+            "--ae-pop-progress",
+            "--ae-unpop-progress"
+          );
+          const computed = root2.getComputedStyle(element);
+          const values = properties.map((property) => {
+            let value = computed.getPropertyValue(property).trim();
+            if (property === "max-height" || property === "max-width") {
+              const dimension = property.slice(4);
+              value = `${Math.max(0, parseFloat(computed[dimension]) || 0)}px`;
+            }
+            return [property, value];
+          });
+          const memory = AelluxJs2.persist.element.save(element, [], [...properties, "transition-property"]);
+          const transition = AelluxJs2.persist.element.save(element, [], ["transition-property"]);
+          const freeze = () => {
+            element.style.setProperty("transition-property", "none", "important");
+            for (const [property, value] of values) element.style.setProperty(property, value, property.startsWith("--") ? "" : "important");
+            element.getBoundingClientRect();
+          };
+          freeze();
+          return { memory, transition, values, freeze };
+        }
         async function prepareMeasuredSize(element, controller, gotoVisible, previousSize, waitForPreparation) {
           if (!controller.measuredHeight && !controller.measuredWidth) return null;
           if (!measuredMemories.has(element)) {
@@ -5860,7 +5862,7 @@
               ["max-height", "max-width"]
             ));
           }
-          measuredMemories.get(element).restore();
+          if (gotoVisible || !previousSize) measuredMemories.get(element).restore();
           let size = previousSize;
           if (gotoVisible || !size) {
             const computed = root2.getComputedStyle(element);
@@ -5935,7 +5937,8 @@
             const reusePreparation = !forceRepop && controller.motionEnabled && controller.transition !== null && controller.classList.contains(className.willChange);
             const waitForPreparation = controller.motionEnabled && !reusePreparation;
             let previousSize = null;
-            if (reusePreparation && (controller.measuredHeight || controller.measuredWidth)) {
+            const handoff = !gotoVisible && controller.motionEnabled ? captureHandoff(element, controller) : null;
+            if (handoff && (controller.measuredHeight || controller.measuredWidth)) {
               const computed = root2.getComputedStyle(element);
               previousSize = {
                 height: parseFloat(computed.maxHeight),
@@ -5943,14 +5946,17 @@
               };
             }
             if (!forceRepop) {
-              controller.stop({ replacement: reusePreparation, transitionStart: true });
+              controller.stop({ replacement: !!handoff || reusePreparation, transitionStart: true });
             }
+            controller.handoff = handoff;
             controller.direction = newDirection;
             controller.setTriggerExpanded(gotoVisible);
-            setPhase(element, "pop", "0");
-            setPhase(element, "unpop", "0");
-            element.style.setProperty("--ae-pop-progress", "0");
-            element.style.setProperty("--ae-unpop-progress", "0");
+            if (!handoff) {
+              setPhase(element, "pop", "0");
+              setPhase(element, "unpop", "0");
+              element.style.setProperty("--ae-pop-progress", "0");
+              element.style.setProperty("--ae-unpop-progress", "0");
+            }
             root2.getComputedStyle(element).getPropertyValue("--ae-pop-progress");
             const interrupted = new Promise((_, interruptTransition) => {
               transition = {
@@ -5990,8 +5996,7 @@
             transition.className = className[`${newDirection}${PING}`.toLowerCase()];
             const duration = root2.getComputedStyle(element).getPropertyValue(`--ae-${newDirection}-duration`.toLowerCase()).trim();
             const timeMs = getString2Time(duration);
-            const activateTransition = () => {
-              if (controller.transition !== transition) return;
+            const applyDestination = () => {
               controller.classList.remove(
                 className.pop,
                 className.popping,
@@ -6002,7 +6007,8 @@
                 element.style.setProperty("--ae-pop-progress", "clamp(0, var(--ae-present-pop-phase), 1)");
                 element.style.setProperty("--ae-unpop-progress", "clamp(0, var(--ae-present-unpop-phase), 1)");
               }
-              setPhase(element, gotoVisible ? "pop" : "unpop", "1");
+              setPhase(element, "pop", gotoVisible ? "1" : "0");
+              setPhase(element, "unpop", gotoVisible ? "0" : "1");
               if (size) {
                 if (controller.measuredHeight) {
                   element.style.setProperty("max-height", `${gotoVisible ? size.height : 0}px`, "important");
@@ -6011,6 +6017,24 @@
                   element.style.setProperty("max-width", `${gotoVisible ? size.width : 0}px`, "important");
                 }
               }
+            };
+            const activateTransition = () => {
+              if (controller.transition !== transition) return;
+              if (handoff) {
+                handoff.memory.restore();
+                element.style.setProperty("transition-property", "none", "important");
+                applyDestination();
+                const computed = root2.getComputedStyle(element);
+                const tracks = handoff.values.filter(([property]) => property.startsWith("grid-template-") || property === "height" || property === "width").map(([property]) => [property, computed.getPropertyValue(property)]);
+                handoff.freeze();
+                handoff.transition.restore();
+                const properties = root2.getComputedStyle(element).transitionProperty;
+                element.getBoundingClientRect();
+                handoff.memory.restore();
+                applyDestination();
+                if (tracks.length) element.style.setProperty("transition-property", `${properties}, height, width`, "important");
+                for (const [property, value] of tracks) element.style.setProperty(property, value, "important");
+              } else applyDestination();
             };
             const advancedEase = root2.getComputedStyle(element).getPropertyValue(`--ae-${newDirection}-aellux-ease`.toLowerCase()).trim() || void 0;
             const motionOptions = {
@@ -6060,7 +6084,6 @@
             if (ownsTransition && transition.className) {
               controller.classList.remove(transition.className);
             }
-            if (ownsTransition) restoreMeasuredStyles(element, controller);
             switch (error && error.code) {
               case AelluxJs2.diagnostics.WARN_INTERRUPTION.code:
                 if (transition && transition.cancelled) break;
@@ -6083,6 +6106,8 @@
             }
           } finally {
             if (transition && controller.transition === transition) {
+              restoreHandoff(controller);
+              restoreMeasuredStyles(element, controller);
               controller.transition = null;
               controller.classList.remove(className.willChange);
             }
@@ -6098,6 +6123,7 @@
           });
         }
         function finishTransition(element, controller, transition, gotoVisible) {
+          restoreHandoff(controller);
           controller.classList.toggle(className.pop, gotoVisible);
           controller.classList.remove(transition.className);
           restoreMeasuredStyles(element, controller);

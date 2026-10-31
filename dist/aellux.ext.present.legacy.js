@@ -415,6 +415,7 @@
         motionEnabled: (element.getAttribute(attr.present) || "").trim() !== "",
         motionId: AelluxJs.motion ? AelluxJs.motion.id() : fallbackMotionId++,
         transition: null,
+        handoff: null,
         operationRevision: 0,
         presentationOrder: element.hidden ? 0 : ++presentationSequence,
         autoUnpopTimeout: null,
@@ -456,6 +457,7 @@
             }));
           }
           cancelAutoUnpop(this);
+          restoreHandoff(this);
           if (transitionStart) {
             this.classList.remove(className.unpopping);
           } else {
@@ -673,6 +675,56 @@
       memory.restore();
       measuredMemories.delete(element);
     }
+    function restoreHandoff(controller) {
+      var _controller$handoff;
+      (_controller$handoff = controller.handoff) === null || _controller$handoff === void 0 || _controller$handoff.memory.restore();
+      controller.handoff = null;
+    }
+    function captureHandoff(element, controller) {
+      if ((controller.measuredHeight || controller.measuredWidth) && !measuredMemories.has(element)) {
+        measuredMemories.set(element, AelluxJs.persist.element.save(element, [], ["max-height", "max-width"]));
+      }
+      var tokens = (element.getAttribute(attr.present) || "").split(/\s+/);
+      var properties = [];
+      if (tokens.includes("opacity")) properties.push("opacity");
+      if (tokens.includes("transform") && !element.hasAttribute(AelluxJs.attr("anchor"))) properties.push("transform");
+      if (tokens.includes("height")) properties.push.apply(properties, _toConsumableArray(controller.presentMotion ? ["grid-template-rows", "height"] : ["max-height"]));
+      if (tokens.includes("width")) properties.push.apply(properties, _toConsumableArray(controller.presentMotion ? ["grid-template-columns", "width"] : ["max-width"]));
+      properties.push("--ae-present-pop-phase", "--ae-present-unpop-phase", "--ae-pop-progress", "--ae-unpop-progress");
+      var computed = root.getComputedStyle(element);
+      var values = properties.map(function(property) {
+        var value = computed.getPropertyValue(property).trim();
+        if (property === "max-height" || property === "max-width") {
+          var dimension = property.slice(4);
+          value = "".concat(Math.max(0, parseFloat(computed[dimension]) || 0), "px");
+        }
+        return [property, value];
+      });
+      var memory = AelluxJs.persist.element.save(element, [], [].concat(properties, ["transition-property"]));
+      var transition = AelluxJs.persist.element.save(element, [], ["transition-property"]);
+      var freeze = function freeze2() {
+        element.style.setProperty("transition-property", "none", "important");
+        var _iterator0 = _createForOfIteratorHelper(values), _step0;
+        try {
+          for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+            var _step0$value = _slicedToArray(_step0.value, 2), property = _step0$value[0], value = _step0$value[1];
+            element.style.setProperty(property, value, property.startsWith("--") ? "" : "important");
+          }
+        } catch (err) {
+          _iterator0.e(err);
+        } finally {
+          _iterator0.f();
+        }
+        element.getBoundingClientRect();
+      };
+      freeze();
+      return {
+        memory: memory,
+        transition: transition,
+        values: values,
+        freeze: freeze
+      };
+    }
     function prepareMeasuredSize(_x, _x2, _x3, _x4, _x5) {
       return _prepareMeasuredSize.apply(this, arguments);
     }
@@ -691,7 +743,7 @@
               if (!measuredMemories.has(element)) {
                 measuredMemories.set(element, AelluxJs.persist.element.save(element, [], ["max-height", "max-width"]));
               }
-              measuredMemories.get(element).restore();
+              if (gotoVisible || !previousSize) measuredMemories.get(element).restore();
               size = previousSize;
               if (gotoVisible || !size) {
                 computed = root.getComputedStyle(element);
@@ -732,7 +784,7 @@
     }
     function _presentTransition() {
       _presentTransition = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee2(element, gotoVisible) {
-        var forceRepop, groupOperation, presentationOrder, controller, group, groupState, groupRevision, hasCapacity, newDirection, transition, _groups$get, revision, allowEvent, reusePreparation, waitForPreparation, previousSize, computed, interrupted, size, prepared, duration, timeMs, activateTransition, advancedEase, motionOptions, completed, autoUnpopValue, _duration, motionResult, ownsTransition, _args2 = arguments, _t, _t2;
+        var forceRepop, groupOperation, presentationOrder, controller, group, groupState, groupRevision, hasCapacity, newDirection, transition, _groups$get, revision, allowEvent, reusePreparation, waitForPreparation, previousSize, handoff, computed, interrupted, size, prepared, duration, timeMs, applyDestination, activateTransition, advancedEase, motionOptions, completed, autoUnpopValue, _duration, motionResult, ownsTransition, _args2 = arguments, _t, _t2;
         return _regenerator().w(function(_context2) {
           while (1) switch (_context2.p = _context2.n) {
             case 0:
@@ -829,7 +881,8 @@
               reusePreparation = !forceRepop && controller.motionEnabled && controller.transition !== null && controller.classList.contains(className.willChange);
               waitForPreparation = controller.motionEnabled && !reusePreparation;
               previousSize = null;
-              if (reusePreparation && (controller.measuredHeight || controller.measuredWidth)) {
+              handoff = !gotoVisible && controller.motionEnabled ? captureHandoff(element, controller) : null;
+              if (handoff && (controller.measuredHeight || controller.measuredWidth)) {
                 computed = root.getComputedStyle(element);
                 previousSize = {
                   height: parseFloat(computed.maxHeight),
@@ -838,16 +891,19 @@
               }
               if (!forceRepop) {
                 controller.stop({
-                  replacement: reusePreparation,
+                  replacement: !!handoff || reusePreparation,
                   transitionStart: true
                 });
               }
+              controller.handoff = handoff;
               controller.direction = newDirection;
               controller.setTriggerExpanded(gotoVisible);
-              setPhase(element, "pop", "0");
-              setPhase(element, "unpop", "0");
-              element.style.setProperty("--ae-pop-progress", "0");
-              element.style.setProperty("--ae-unpop-progress", "0");
+              if (!handoff) {
+                setPhase(element, "pop", "0");
+                setPhase(element, "unpop", "0");
+                element.style.setProperty("--ae-pop-progress", "0");
+                element.style.setProperty("--ae-unpop-progress", "0");
+              }
               root.getComputedStyle(element).getPropertyValue("--ae-pop-progress");
               interrupted = new Promise(function(_, interruptTransition) {
                 transition = {
@@ -897,15 +953,15 @@
               transition.className = className["".concat(newDirection).concat(PING).toLowerCase()];
               duration = root.getComputedStyle(element).getPropertyValue("--ae-".concat(newDirection, "-duration").toLowerCase()).trim();
               timeMs = getString2Time(duration);
-              activateTransition = function activateTransition2() {
-                if (controller.transition !== transition) return;
+              applyDestination = function applyDestination2() {
                 controller.classList.remove(className.pop, className.popping, className.unpopping);
                 controller.classList.add(transition.className);
                 if (interpolatedProgress) {
                   element.style.setProperty("--ae-pop-progress", "clamp(0, var(--ae-present-pop-phase), 1)");
                   element.style.setProperty("--ae-unpop-progress", "clamp(0, var(--ae-present-unpop-phase), 1)");
                 }
-                setPhase(element, gotoVisible ? "pop" : "unpop", "1");
+                setPhase(element, "pop", gotoVisible ? "1" : "0");
+                setPhase(element, "unpop", gotoVisible ? "0" : "1");
                 if (size) {
                   if (controller.measuredHeight) {
                     element.style.setProperty("max-height", "".concat(gotoVisible ? size.height : 0, "px"), "important");
@@ -914,6 +970,40 @@
                     element.style.setProperty("max-width", "".concat(gotoVisible ? size.width : 0, "px"), "important");
                   }
                 }
+              };
+              activateTransition = function activateTransition2() {
+                if (controller.transition !== transition) return;
+                if (handoff) {
+                  handoff.memory.restore();
+                  element.style.setProperty("transition-property", "none", "important");
+                  applyDestination();
+                  var _computed = root.getComputedStyle(element);
+                  var tracks = handoff.values.filter(function(_ref3) {
+                    var _ref4 = _slicedToArray(_ref3, 1), property2 = _ref4[0];
+                    return property2.startsWith("grid-template-") || property2 === "height" || property2 === "width";
+                  }).map(function(_ref5) {
+                    var _ref6 = _slicedToArray(_ref5, 1), property2 = _ref6[0];
+                    return [property2, _computed.getPropertyValue(property2)];
+                  });
+                  handoff.freeze();
+                  handoff.transition.restore();
+                  var properties = root.getComputedStyle(element).transitionProperty;
+                  element.getBoundingClientRect();
+                  handoff.memory.restore();
+                  applyDestination();
+                  if (tracks.length) element.style.setProperty("transition-property", "".concat(properties, ", height, width"), "important");
+                  var _iterator18 = _createForOfIteratorHelper(tracks), _step18;
+                  try {
+                    for (_iterator18.s(); !(_step18 = _iterator18.n()).done; ) {
+                      var _step18$value = _slicedToArray(_step18.value, 2), property = _step18$value[0], value = _step18$value[1];
+                      element.style.setProperty(property, value, "important");
+                    }
+                  } catch (err) {
+                    _iterator18.e(err);
+                  } finally {
+                    _iterator18.f();
+                  }
+                } else applyDestination();
               };
               advancedEase = root.getComputedStyle(element).getPropertyValue("--ae-".concat(newDirection, "-aellux-ease").toLowerCase()).trim() || void 0;
               motionOptions = {
@@ -993,7 +1083,6 @@
               if (ownsTransition && transition.className) {
                 controller.classList.remove(transition.className);
               }
-              if (ownsTransition) restoreMeasuredStyles(element, controller);
               _t2 = _t && _t.code;
               _context2.n = _t2 === AelluxJs.diagnostics.WARN_INTERRUPTION.code ? 20 : 22;
               break;
@@ -1021,6 +1110,8 @@
             case 23:
               _context2.p = 23;
               if (transition && controller.transition === transition) {
+                restoreHandoff(controller);
+                restoreMeasuredStyles(element, controller);
                 controller.transition = null;
                 controller.classList.remove(className.willChange);
               }
@@ -1046,6 +1137,7 @@
       });
     }
     function finishTransition(element, controller, transition, gotoVisible) {
+      restoreHandoff(controller);
       controller.classList.toggle(className.pop, gotoVisible);
       controller.classList.remove(transition.className);
       restoreMeasuredStyles(element, controller);
@@ -1142,10 +1234,10 @@
       controller.autoCountdown = null;
     }
     function clickAutoUnpop(eventTarget, currentExceptions) {
-      var _iterator0 = _createForOfIteratorHelper(openPresentElements), _step0;
+      var _iterator1 = _createForOfIteratorHelper(openPresentElements), _step1;
       try {
         var _loop = function _loop2() {
-          var pContainer = _step0.value;
+          var pContainer = _step1.value;
           if (pContainer.hidden === true || currentExceptions.some(function(e) {
             return pContainer.contains(e);
           })) return 0;
@@ -1154,14 +1246,14 @@
           var inside = pContainer.contains(eventTarget);
           if (inside === (mode === "inside" || mode === "in")) unpop(pContainer);
         }, _ret;
-        for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+        for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
           _ret = _loop();
           if (_ret === 0) continue;
         }
       } catch (err) {
-        _iterator0.e(err);
+        _iterator1.e(err);
       } finally {
-        _iterator0.f();
+        _iterator1.f();
       }
     }
     function refreshChangedTrigger(button) {
@@ -1173,20 +1265,20 @@
       var target = activationTarget(event);
       if (!target) return;
       var matched;
-      var _iterator1 = _createForOfIteratorHelper(pendingTaps), _step1;
+      var _iterator10 = _createForOfIteratorHelper(pendingTaps), _step10;
       try {
-        for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+        for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
           var _pending$event$detail, _pending$event$detail2;
-          var pending = _step1.value;
+          var pending = _step10.value;
           var pointerId = event.pointerId;
           var compatibilityClick = event.pointerType === "mouse" && ["touch", "pen"].includes((_pending$event$detail = pending.event.detail) === null || _pending$event$detail === void 0 ? void 0 : _pending$event$detail.pointerType);
           if (!compatibilityClick && typeof pointerId === "number" && typeof ((_pending$event$detail2 = pending.event.detail) === null || _pending$event$detail2 === void 0 ? void 0 : _pending$event$detail2.pointerId) === "number" && pointerId !== pending.event.detail.pointerId) continue;
           if (pending.target === target || pending.target.contains(target) || target.contains(pending.target)) matched = pending;
         }
       } catch (err) {
-        _iterator1.e(err);
+        _iterator10.e(err);
       } finally {
-        _iterator1.f();
+        _iterator10.f();
       }
       if (matched) cancelPendingTap(matched);
       activate(event, target);
@@ -1223,16 +1315,16 @@
       pendingTaps.delete(pending);
     }
     function cancelElementTaps(element) {
-      var _iterator10 = _createForOfIteratorHelper(pendingTaps), _step10;
+      var _iterator11 = _createForOfIteratorHelper(pendingTaps), _step11;
       try {
-        for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
-          var pending = _step10.value;
+        for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
+          var pending = _step11.value;
           if (element.contains(pending.target) || pending.present === element) cancelPendingTap(pending);
         }
       } catch (err) {
-        _iterator10.e(err);
+        _iterator11.e(err);
       } finally {
-        _iterator10.f();
+        _iterator11.f();
       }
     }
     function activate(event, eventTarget, hoverSuppressed) {
@@ -1310,16 +1402,16 @@
       if (controller.expanded !== visible) controller.setAriaExpanded(String(visible));
     }
     function refreshExpandedStates() {
-      var _iterator11 = _createForOfIteratorHelper(presentElements), _step11;
+      var _iterator12 = _createForOfIteratorHelper(presentElements), _step12;
       try {
-        for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
-          var _step11$value = _slicedToArray(_step11.value, 2), element = _step11$value[0], controller = _step11$value[1];
+        for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
+          var _step12$value = _slicedToArray(_step12.value, 2), element = _step12$value[0], controller = _step12$value[1];
           if (!controller.transition) syncAriaExpanded(element, controller);
         }
       } catch (err) {
-        _iterator11.e(err);
+        _iterator12.e(err);
       } finally {
-        _iterator11.f();
+        _iterator12.f();
       }
     }
     function setProgress(element, visible) {
@@ -1403,10 +1495,10 @@
       state.jobs.clear();
       state.reservations.clear();
       publishGroup(group, state, null);
-      var _iterator12 = _createForOfIteratorHelper(groupMembers(group)), _step12;
+      var _iterator13 = _createForOfIteratorHelper(groupMembers(group)), _step13;
       try {
-        for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
-          var member = _step12.value;
+        for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
+          var member = _step13.value;
           var controller = presentElements.get(member);
           if (controller.transition) {
             var visible = controller.direction === POP;
@@ -1420,9 +1512,9 @@
           }
         }
       } catch (err) {
-        _iterator12.e(err);
+        _iterator13.e(err);
       } finally {
-        _iterator12.f();
+        _iterator13.f();
       }
       state.memory.restore();
       if (!groups.size && groupObserver) {
@@ -1640,10 +1732,10 @@
           return presentElements.has(member2) && member2.isConnected && member2.closest(groupSelector) === group && member2.id === ids[index] && member2.getAttribute(attr.when) === conditions[index];
         });
       };
-      var _iterator13 = _createForOfIteratorHelper(changes), _step13;
+      var _iterator14 = _createForOfIteratorHelper(changes), _step14;
       try {
-        for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
-          var member = _step13.value;
+        for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
+          var member = _step14.value;
           var allowed = AelluxJs.dispatchFrom(member, member === selected2 ? "BeforePop" : "BeforeUnpop", {
             bubbles: true,
             cancelable: true
@@ -1666,9 +1758,9 @@
           }
         }
       } catch (err) {
-        _iterator13.e(err);
+        _iterator14.e(err);
       } finally {
-        _iterator13.f();
+        _iterator14.f();
       }
       state.accumulating = false;
       state.reservations.clear();
@@ -1678,10 +1770,10 @@
         complete = resolve;
       });
       state.pending = pending;
-      var _iterator14 = _createForOfIteratorHelper(changes), _step14;
+      var _iterator15 = _createForOfIteratorHelper(changes), _step15;
       try {
         var _loop2 = function _loop22() {
-          var member2 = _step14.value;
+          var member2 = _step15.value;
           var job = presentTransition(member2, member2 === selected2, false, true);
           if (groups.get(group) !== state || state.revision !== revision) {
             complete(false);
@@ -1694,14 +1786,14 @@
             if (state.jobs.get(member2) === job) state.jobs.delete(member2);
           });
         }, _ret2;
-        for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
+        for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
           _ret2 = _loop2();
           if (_ret2) return _ret2.v;
         }
       } catch (err) {
-        _iterator14.e(err);
+        _iterator15.e(err);
       } finally {
-        _iterator14.f();
+        _iterator15.f();
       }
       publishGroup(group, state, selected2);
       Promise.all(members.map(function(member2) {
@@ -1721,16 +1813,16 @@
     function inHoverRegion(target, node) {
       if (!node || !node.nodeType) return false;
       if (target.contains(node)) return true;
-      var _iterator15 = _createForOfIteratorHelper(triggerElementsSet), _step15;
+      var _iterator16 = _createForOfIteratorHelper(triggerElementsSet), _step16;
       try {
-        for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
-          var button = _step15.value;
+        for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
+          var button = _step16.value;
           if (button.getAttribute(attr.triggerOn) === "hover" && triggerTargets.get(button) === target && button.contains(node)) return true;
         }
       } catch (err) {
-        _iterator15.e(err);
+        _iterator16.e(err);
       } finally {
-        _iterator15.f();
+        _iterator16.f();
       }
       return false;
     }
@@ -1758,10 +1850,10 @@
           } else hoveredTriggers.delete(button);
         }
       }
-      var _iterator16 = _createForOfIteratorHelper(openPresentElements), _step16;
+      var _iterator17 = _createForOfIteratorHelper(openPresentElements), _step17;
       try {
         var _loop3 = function _loop32() {
-          var target2 = _step16.value;
+          var target2 = _step17.value;
           if (!inHoverRegion(target2, event.target)) return 1;
           if (entering || inHoverRegion(target2, event.relatedTarget)) cancelHoverClose(target2);
           else if (_toConsumableArray(triggerElementsSet).some(function(control) {
@@ -1774,13 +1866,13 @@
             }, 120));
           }
         };
-        for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
+        for (_iterator17.s(); !(_step17 = _iterator17.n()).done; ) {
           if (_loop3()) continue;
         }
       } catch (err) {
-        _iterator16.e(err);
+        _iterator17.e(err);
       } finally {
-        _iterator16.f();
+        _iterator17.f();
       }
     }
     function getString2Time(string) {

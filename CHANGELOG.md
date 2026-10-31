@@ -19,6 +19,8 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Fixed
 
+- Present `unpop()` now preserves the current rendered opacity, transform, grid/measured dimensions and registered progress before interrupting motion, including incomplete opening and group selection changes. Native and controlled closing use the configured unpop duration/easing without jumping to `pop` or `from`; temporary styles are restored. Closing interpolates pop progress toward zero and unpop progress toward one, retaining stable endpoints. Explicit `pop()` still restarts from `from`.
+
 - Scrollbox always applies overflow fade to its stationary container, including when there is one content child. Removed child-mask positioning and sizing updates that could lag native momentum scrolling and expose transparent strips. Container backgrounds, borders and scrollbars now share the fade in every structure.
 
 - Docweaver notifications now disable outside-click dismissal, so the click that starts a subsequent request preserves existing notifications until their own timers expire or their pool slot is reused.

@@ -36,7 +36,8 @@ export const bundleBudget = Object.freeze([
   // Includes countdown emission, accumulating groups and Feedback preparation;
   // the Progress implementation itself stays external. Measured in the report.
   // Includes numeric Present Group capacity and rollback-safe reservations.
-  { file: "aellux.full.min.js", maxRawBytes: 194 * 1024, maxGzipBytes: 60 * 1024 },
+  // Present rendered-state handoff; measured changes: core-extensions/present.md.
+  { file: "aellux.full.min.js", maxRawBytes: 195 * 1024, maxGzipBytes: 60.25 * 1024 },
   { file: "aellux.full.legacy.min.js", maxRawBytes: 515 * 1024, maxGzipBytes: 152 * 1024 },
   { file: "aellux.full.min.css", maxRawBytes: 122 * 1024, maxGzipBytes: 12 * 1024 },
   { file: "aellux.ext.adaptive.min.css", maxRawBytes: 121 * 1024, maxGzipBytes: 11 * 1024 },
@@ -64,15 +65,17 @@ export const bundleBudget = Object.freeze([
   { file: "aellux.ext.point.legacy.min.js", maxRawBytes: 9.5 * 1024, maxGzipBytes: 3.5 * 1024 },
   { file: "aellux.ext.preference.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
   { file: "aellux.ext.preference.legacy.min.js", maxRawBytes: 7 * 1024, maxGzipBytes: 3 * 1024 },
-  { file: "aellux.ext.present.min.css", maxRawBytes: 4 * 1024, maxGzipBytes: 2 * 1024 },
+  { file: "aellux.ext.present.min.css", maxRawBytes: 4.125 * 1024, maxGzipBytes: 2 * 1024 },
   // Present now reports invalid actions, missing/incompatible targets and
   // corrective context for group selections, plus consumer-local tap/click
   // arbitration and pending activation cleanup. Costs: core-extensions/present.md.
   // Includes the Popping-time zero reset and reentrant cancellation guards;
   // measured deltas: progress-implementation-report.md.
   // Capacity parsing, oldest-member reuse and pending-reservation rollback.
-  { file: "aellux.ext.present.min.js", maxRawBytes: 24.5 * 1024, maxGzipBytes: 8.5 * 1024 },
-  { file: "aellux.ext.present.legacy.min.js", maxRawBytes: 33 * 1024, maxGzipBytes: 11.25 * 1024 },
+  // Computed-state handoff for interrupted closing; byte measurements and
+  // superseded limits are recorded in core-extensions/present.md.
+  { file: "aellux.ext.present.min.js", maxRawBytes: 26.25 * 1024, maxGzipBytes: 9.125 * 1024 },
+  { file: "aellux.ext.present.legacy.min.js", maxRawBytes: 35 * 1024, maxGzipBytes: 11.75 * 1024 },
   { file: "aellux.ext.scrollbox.min.js", maxRawBytes: 46 * 1024, maxGzipBytes: 14 * 1024 },
   // Progressive 2D overflow fade; measured deltas: core-extensions/scrollbox.md.
   { file: "aellux.ext.scrollbox.min.css", maxRawBytes: 6.5 * 1024, maxGzipBytes: 1.5 * 1024 },

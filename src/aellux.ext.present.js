@@ -221,6 +221,7 @@
       motionEnabled: (element.getAttribute(attr.present) || "").trim() !== "",
       motionId: AelluxJs.motion ? AelluxJs.motion.id() : fallbackMotionId++,
       transition: null,
+      handoff: null,
       operationRevision: 0,
       presentationOrder: element.hidden ? 0 : ++presentationSequence,
       autoUnpopTimeout: null,
@@ -261,6 +262,7 @@
           );
         }
         cancelAutoUnpop(this);
+        restoreHandoff(this);
         if (transitionStart) {
           this.classList.remove(className.unpopping);
         } else {
@@ -454,6 +456,48 @@
     measuredMemories.delete(element);
   }
 
+  function restoreHandoff(controller) {
+    controller.handoff?.memory.restore();
+    controller.handoff = null;
+  }
+
+  function captureHandoff(element, controller) {
+    if ((controller.measuredHeight || controller.measuredWidth) && !measuredMemories.has(element)) {
+      measuredMemories.set(element, AelluxJs.persist.element.save(element, [], ["max-height", "max-width"]));
+    }
+    const tokens = (element.getAttribute(attr.present) || "").split(/\s+/);
+    const properties = [];
+    if (tokens.includes("opacity")) properties.push("opacity");
+    if (tokens.includes("transform") && !element.hasAttribute(AelluxJs.attr("anchor"))) properties.push("transform");
+    if (tokens.includes("height")) properties.push(...(controller.presentMotion ? ["grid-template-rows", "height"] : ["max-height"]));
+    if (tokens.includes("width")) properties.push(...(controller.presentMotion ? ["grid-template-columns", "width"] : ["max-width"]));
+    properties.push("--ae-present-pop-phase", "--ae-present-unpop-phase",
+      "--ae-pop-progress", "--ae-unpop-progress");
+    const computed = root.getComputedStyle(element);
+    // Copy strings before touching CSS: computed style is a live declaration.
+    const values = properties.map(property => {
+      let value = computed.getPropertyValue(property).trim();
+      // A stable measured panel may have max-size:none (or an author cap
+      // larger than its box). Closing starts at its actual untransformed size.
+      if (property === "max-height" || property === "max-width") {
+        const dimension = property.slice(4);
+        value = `${Math.max(0, parseFloat(computed[dimension]) || 0)}px`;
+      }
+      return [property, value];
+    });
+    const memory = AelluxJs.persist.element.save(element, [], [...properties, "transition-property"]);
+    const transition = AelluxJs.persist.element.save(element, [], ["transition-property"]);
+    const freeze = () => {
+      element.style.setProperty("transition-property", "none", "important");
+      // Progress channels are already owned inline. Keep their priority:
+      // WebKit cannot downgrade an important custom property via setProperty.
+      for (const [property, value] of values) element.style.setProperty(property, value, property.startsWith("--") ? "" : "important");
+      element.getBoundingClientRect();
+    };
+    freeze();
+    return { memory, transition, values, freeze };
+  }
+
   async function prepareMeasuredSize(element, controller, gotoVisible, previousSize, waitForPreparation) {
     if (!controller.measuredHeight && !controller.measuredWidth) return null;
     if (!measuredMemories.has(element)) {
@@ -461,7 +505,7 @@
         element, [], ["max-height", "max-width"]
       ));
     }
-    measuredMemories.get(element).restore();
+    if (gotoVisible || !previousSize) measuredMemories.get(element).restore();
     let size = previousSize;
     if (gotoVisible || !size) {
       const computed = root.getComputedStyle(element);
@@ -549,7 +593,8 @@
         controller.classList.contains(className.willChange);
       const waitForPreparation = controller.motionEnabled && !reusePreparation;
       let previousSize = null;
-      if (reusePreparation && (controller.measuredHeight || controller.measuredWidth)) {
+      const handoff = !gotoVisible && controller.motionEnabled ? captureHandoff(element, controller) : null;
+      if (handoff && (controller.measuredHeight || controller.measuredWidth)) {
         const computed = root.getComputedStyle(element);
         previousSize = {
           height: parseFloat(computed.maxHeight),
@@ -557,17 +602,19 @@
         };
       }
       if (!forceRepop) {
-        controller.stop({ replacement: reusePreparation, transitionStart: true });
+        controller.stop({ replacement: !!handoff || reusePreparation, transitionStart: true });
       }
+      controller.handoff = handoff;
       controller.direction = newDirection;
       // Triggers announce the accepted action immediately, independently of
       // the panel's effective visibility at the end of the transition.
       controller.setTriggerExpanded(gotoVisible);
-      // Neither channel animates backwards when the direction changes.
-      setPhase(element, "pop", "0");
-      setPhase(element, "unpop", "0");
-      element.style.setProperty("--ae-pop-progress", "0");
-      element.style.setProperty("--ae-unpop-progress", "0");
+      if (!handoff) {
+        setPhase(element, "pop", "0");
+        setPhase(element, "unpop", "0");
+        element.style.setProperty("--ae-pop-progress", "0");
+        element.style.setProperty("--ae-unpop-progress", "0");
+      }
       root.getComputedStyle(element).getPropertyValue("--ae-pop-progress");
 
       const interrupted = new Promise((_, interruptTransition) => {
@@ -608,8 +655,7 @@
         .getPropertyValue(`--ae-${newDirection}-duration`.toLowerCase()).trim();
       const timeMs = getString2Time(duration);
 
-      const activateTransition = () => {
-        if (controller.transition !== transition) return;
+      const applyDestination = () => {
         controller.classList.remove(
           className.pop,
           className.popping,
@@ -623,7 +669,8 @@
           element.style.setProperty("--ae-pop-progress", "clamp(0, var(--ae-present-pop-phase), 1)");
           element.style.setProperty("--ae-unpop-progress", "clamp(0, var(--ae-present-unpop-phase), 1)");
         }
-        setPhase(element, gotoVisible ? "pop" : "unpop", "1");
+        setPhase(element, "pop", gotoVisible ? "1" : "0");
+        setPhase(element, "unpop", gotoVisible ? "0" : "1");
         if (size) {
           if (controller.measuredHeight) {
             element.style.setProperty("max-height", `${gotoVisible ? size.height : 0}px`, "important");
@@ -632,6 +679,28 @@
             element.style.setProperty("max-width", `${gotoVisible ? size.width : 0}px`, "important");
           }
         }
+      };
+      const activateTransition = () => {
+        if (controller.transition !== transition) return;
+        if (handoff) {
+          handoff.memory.restore();
+          element.style.setProperty("transition-property", "none", "important");
+          applyDestination();
+          // Grid's computed tracks are pixels. Resolve the destination in the
+          // same units so px -> fr cannot become a discrete transition. This
+          // synchronous measurement is never painted; endpoints stay authored.
+          const computed = root.getComputedStyle(element);
+          const tracks = handoff.values.filter(([property]) => property.startsWith("grid-template-") || property === "height" || property === "width")
+            .map(([property]) => [property, computed.getPropertyValue(property)]);
+          handoff.freeze();
+          handoff.transition.restore();
+          const properties = root.getComputedStyle(element).transitionProperty;
+          element.getBoundingClientRect();
+          handoff.memory.restore();
+          applyDestination();
+          if (tracks.length) element.style.setProperty("transition-property", `${properties}, height, width`, "important");
+          for (const [property, value] of tracks) element.style.setProperty(property, value, "important");
+        } else applyDestination();
       };
       const advancedEase = root.getComputedStyle(element)
         .getPropertyValue(`--ae-${newDirection}-aellux-ease`.toLowerCase()).trim() || undefined;
@@ -687,7 +756,6 @@
       if (ownsTransition && transition.className) {
         controller.classList.remove(transition.className);
       }
-      if (ownsTransition) restoreMeasuredStyles(element, controller);
       switch (error && error.code) {
         case AelluxJs.diagnostics.WARN_INTERRUPTION.code:
           // Replacement and teardown are expected lifecycle operations.
@@ -712,6 +780,8 @@
       }
     } finally {
       if (transition && controller.transition === transition) {
+        restoreHandoff(controller);
+        restoreMeasuredStyles(element, controller);
         controller.transition = null;
         controller.classList.remove(className.willChange);
       }
@@ -729,6 +799,7 @@
   }
 
   function finishTransition(element, controller, transition, gotoVisible) {
+    restoreHandoff(controller);
     controller.classList.toggle(className.pop, gotoVisible);
     controller.classList.remove(transition.className);
     restoreMeasuredStyles(element, controller);

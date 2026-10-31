@@ -1,5 +1,188 @@
 import { expect, test } from "@playwright/test";
 
+test("unpop preserves native continuity without Web Animations inspection", async ({ page }) => {
+  await start(page, `<div id="panel" data-ae-present="opacity" hidden
+    style="--ae-pop-duration:1200ms;--ae-unpop-duration:500ms;--ae-pop-ease:linear;--ae-unpop-ease:linear">Content</div>`, { forceLegacy: true });
+  await page.evaluate(() => {
+    document.getElementById("panel").getAnimations = undefined;
+    window.opening = $ae("panel").present.pop();
+  });
+  await expect.poll(() => page.locator("#panel").evaluate(element => Number(getComputedStyle(element).opacity)), { intervals: [16] }).toBeGreaterThan(.3);
+  const result = await page.evaluate(async () => {
+    const element = document.getElementById("panel");
+    const before = Number(getComputedStyle(element).opacity);
+    const closing = $ae(element).present.unpop();
+    const after = Number(getComputedStyle(element).opacity);
+    await new Promise(requestAnimationFrame);
+    await new Promise(requestAnimationFrame);
+    const next = Number(getComputedStyle(element).opacity);
+    await Promise.all([window.opening, closing]);
+    return { before, after, next, hidden: element.hidden, opacity: element.style.opacity };
+  });
+  expect(result.before).toBeLessThan(.8);
+  expect(result.after).toBeCloseTo(result.before, 2);
+  expect(result.next).toBeLessThanOrEqual(result.before + .01);
+  expect(result.next).toBeGreaterThan(0);
+  expect(result).toMatchObject({ hidden: true, opacity: "" });
+});
+
+for (const cssMotionController of [true, false]) for (const forceLegacy of [false, true]) {
+  test(`unpop handoff respects veto, restart, replacement and teardown (controlled=${cssMotionController}, legacy=${forceLegacy})`, async ({ page }) => {
+    await start(page, `<div id="panel" data-ae-present="opacity height" hidden
+      style="width:100px;height:100px;max-height:240px!important;--ae-pop-duration:900ms;--ae-unpop-duration:600ms;--ae-pop-ease:linear;--ae-unpop-ease:linear"></div>`,
+    { cssMotionController, forceLegacy });
+    await page.evaluate(() => { window.opening = $ae("panel").present.pop(); });
+    await expect.poll(() => page.locator("#panel").evaluate(element => Number(getComputedStyle(element).opacity)), { intervals: [16] }).toBeGreaterThan(.25);
+    const veto = await page.evaluate(async () => {
+      const element = document.getElementById("panel");
+      const animations = element.getAnimations();
+      const styles = element.style.cssText;
+      const before = Number(getComputedStyle(element).opacity);
+      element.addEventListener("AelluxJsBeforeUnpop", event => event.preventDefault(), { once: true });
+      await $ae(element).present.unpop();
+      return { same: animations.every(animation => element.getAnimations().includes(animation)),
+        styles: styles === element.style.cssText, before, after: Number(getComputedStyle(element).opacity) };
+    });
+    expect(veto.same).toBe(true);
+    expect(veto.styles).toBe(true);
+    expect(veto.after).toBeGreaterThanOrEqual(veto.before - .01);
+    const restarted = await page.evaluate(async () => {
+      const element = document.getElementById("panel");
+      const closing = $ae(element).present.unpop();
+      const opening = $ae(element).present.pop();
+      const reset = Number(getComputedStyle(element).opacity);
+      const replacement = $ae(element).present.unpop();
+      await Promise.all([window.opening, closing, opening, replacement]);
+      return { reset, hidden: element.hidden, max: element.style.maxHeight,
+        priority: element.style.getPropertyPriority("max-height") };
+    });
+    expect(restarted).toEqual({ reset: 0, hidden: true, max: "240px", priority: "important" });
+    await page.evaluate(() => { window.opening = $ae("panel").present.pop(); });
+    await expect.poll(() => page.locator("#panel").evaluate(element => Number(getComputedStyle(element).opacity)), { intervals: [16] }).toBeGreaterThan(.25);
+    await page.evaluate(() => { window.closing = $ae("panel").present.unpop(); });
+    await expect.poll(() => page.locator("#panel").evaluate(element =>
+      element.classList.contains(AelluxJs.className("unpopping")) && element.getAnimations().length > 0), { intervals: [16] }).toBe(true);
+    const cleanup = await page.evaluate(async () => {
+      const element = document.getElementById("panel");
+      // Allow the shared controller's capture/preparation to own the new effects.
+      for (let index = 0; index < 3; index++) await new Promise(requestAnimationFrame);
+      const animations = element.getAnimations();
+      await AelluxJs.unmount(element, "present");
+      await Promise.all([window.opening, window.closing]);
+      return { max: element.style.maxHeight, priority: element.style.getPropertyPriority("max-height"),
+        temporary: ["opacity", "transition-property", "--ae-pop-progress", "--ae-present-pop-phase"]
+          .map(property => element.style.getPropertyValue(property)),
+        paused: animations.some(animation => animation.playState === "paused") };
+    });
+    expect(cleanup).toEqual({ max: "240px", priority: "important", temporary: ["", "", "", ""], paused: false });
+  });
+
+  test(`group closes an opening member from its rendered state (controlled=${cssMotionController}, legacy=${forceLegacy})`, async ({ page }) => {
+    await start(page, `<style>[data-ae-present] { --ae-pop-duration:1200ms;--ae-unpop-duration:600ms;--ae-pop-ease:linear;--ae-unpop-ease:linear }</style>
+      <div id="group" data-ae-present-group data-ae-present-active="a">
+        <div id="a" data-ae-present="opacity">A</div><div id="b" data-ae-present="opacity" hidden>B</div></div>`,
+    { cssMotionController, forceLegacy });
+    await page.evaluate(() => { window.selection = $ae("group").present.show("b"); });
+    await expect.poll(() => page.locator("#b").evaluate(element => Number(getComputedStyle(element).opacity)), { intervals: [16] }).toBeGreaterThan(.3);
+    const result = await page.evaluate(async () => {
+      const element = document.getElementById("b");
+      const before = Number(getComputedStyle(element).opacity);
+      const selected = $ae("group").present.show("a");
+      const after = Number(getComputedStyle(element).opacity);
+      await Promise.all([window.selection, selected]);
+      return { before, after, hidden: element.hidden, selected: $ae("group").present.selected().id };
+    });
+    expect(result.before).toBeLessThan(.8);
+    expect(result.after).toBeCloseTo(result.before, 2);
+    expect(result).toMatchObject({ hidden: true, selected: "a" });
+  });
+
+  for (const kind of ["visual", "grid-height", "grid-width", "grid-height-custom", "grid-width-custom", "measured-height", "measured-width"]) {
+    test(`unpop preserves intermediate ${kind} (controlled=${cssMotionController}, legacy=${forceLegacy})`, async ({ page }) => {
+      const dimension = kind.includes("height") ? "height" : "width";
+      const grid = kind.startsWith("grid");
+      const measured = kind.startsWith("measured");
+      await start(page, `<style>
+        #panel { --ae-pop-duration:1200ms; --ae-unpop-duration:700ms;
+          --ae-pop-ease:linear; --ae-unpop-ease:linear;
+          --ae-from-opacity:.2; --ae-pop-opacity:.85; --ae-unpop-opacity:.1;
+          --ae-from-transform:translateY(30px); --ae-pop-transform:translateY(0);
+          --ae-unpop-transform:translateY(-20px);
+          ${kind.endsWith("custom") ? `--ae-from-${dimension}:11px;--ae-pop-${dimension}:151px;--ae-unpop-${dimension}:7px;` : ""}
+          ${measured ? "display:inline-block;max-height:300px!important;max-width:300px!important;" : ""}
+        }
+        #content { width:160px; height:120px; opacity:var(--ae-pop-progress); }
+      </style><div id="panel" data-ae-present="${kind === "visual" ? "opacity transform" : dimension}" hidden>
+        <div id="content" ${grid ? "data-ae-present-motion" : ""}><div style="width:160px;height:120px"></div></div></div>`, { cssMotionController, forceLegacy });
+      await page.evaluate(({ kind, dimension }) => {
+        const element = document.getElementById("panel");
+        window.readPresent = () => {
+          const style = getComputedStyle(element);
+          return { value: kind === "visual" ? Number(style.opacity) : parseFloat(style[dimension]),
+            transform: new DOMMatrixReadOnly(style.transform).m42,
+            pop: Number(style.getPropertyValue("--ae-pop-progress")),
+            unpop: Number(style.getPropertyValue("--ae-unpop-progress")),
+            child: Number(getComputedStyle(document.getElementById("content")).opacity) };
+        };
+        window.opening = $ae(element).present.pop();
+      }, { kind, dimension });
+      await expect.poll(() => page.evaluate(() => window.readPresent().pop), { intervals: [16] }).toBeGreaterThan(.3);
+      const result = await page.evaluate(async () => {
+        const element = document.getElementById("panel");
+        const before = window.readPresent();
+        const oldAnimations = element.getAnimations();
+        let unpopping = 0;
+        element.addEventListener("AelluxJsUnpopping", () => unpopping++);
+        const closing = $ae(element).present.unpop();
+        const samples = [window.readPresent()];
+        await $ae(element).present.unpop();
+        for (let i = 0; i < 7; i++) {
+          await new Promise(requestAnimationFrame);
+          samples.push(window.readPresent());
+        }
+        const active = element.getAnimations().map(animation => ({
+          duration: animation.effect.getTiming().duration,
+          property: animation.transitionProperty,
+          frames: animation.effect.getKeyframes()
+        }));
+        element.getAnimations().forEach(animation => { animation.currentTime = 699.9; });
+        const endpoint = window.readPresent();
+        await Promise.all([window.opening, closing]);
+        return { before, samples, active, endpoint, final: window.readPresent(), hidden: element.hidden, unpopping,
+          obsoletePaused: oldAnimations.some(animation => animation.playState === "paused"),
+          styles: ["opacity", "transform", "grid-template-rows", "grid-template-columns", "transition-property", "height", "width"]
+            .map(property => element.style.getPropertyValue(property)),
+          max: [element.style.maxHeight, element.style.maxWidth],
+          priorities: [element.style.getPropertyPriority("max-height"), element.style.getPropertyPriority("max-width")] };
+      });
+      expect(result.before.pop).toBeLessThan(.8);
+      const tolerance = kind === "visual" ? .025 : 2;
+      expect(Math.abs(result.samples[0].value - result.before.value), JSON.stringify(result)).toBeLessThan(tolerance);
+      for (const sample of result.samples) {
+        expect(sample.value).toBeLessThanOrEqual(result.before.value + tolerance);
+        expect(sample.value).toBeGreaterThan(kind === "visual" ? .1 : 0);
+        expect(sample.pop).toBeLessThanOrEqual(result.before.pop + .025);
+        expect(sample.child).toBeCloseTo(sample.pop, 2);
+        if (kind === "visual") {
+          expect(sample.transform).toBeLessThanOrEqual(result.before.transform + .5);
+          expect(sample.transform).toBeGreaterThan(-20);
+        }
+      }
+      expect(result.samples.at(-1).value).toBeLessThan(result.before.value);
+      expect(result.active.some(animation => animation.duration === 700)).toBe(true);
+      expect(result.endpoint.value).toBeCloseTo(kind === "visual" ? .1 : kind.endsWith("custom") ? 7 : 0, 1);
+      if (kind === "visual") expect(result.endpoint.transform).toBeCloseTo(-20, 1);
+      expect(result.final).toMatchObject({ pop: 0, unpop: 1 });
+      expect(result.hidden).toBe(true);
+      expect(result.unpopping).toBe(1);
+      expect(result.obsoletePaused).toBe(false);
+      expect(result.styles).toEqual(["", "", "", "", "", "", ""]);
+      expect(result.max).toEqual(["", ""]);
+      expect(result.priorities).toEqual(["", ""]);
+    });
+  }
+}
+
 async function start(page, markup, options = {}) {
   await page.goto("/tests/index.htm");
   await page.mouse.move(-100, -100);
@@ -340,7 +523,7 @@ test("group reentrant BeforePop selection and unmount cannot revive obsolete ope
   expect(await page.locator(".ae--popping,.ae--unpopping,.ae--will-change").count()).toBe(0);
 });
 
-test("progress shares elapsed-time sampling under low FPS and resets the opposite channel", async ({ page }) => {
+test("progress shares elapsed-time sampling under low FPS and retains the opening channel on close", async ({ page }) => {
   await start(page, `<div id="panel" data-ae-present="opacity" data-ae-maxfps="8" hidden
     style="--ae-pop-duration:350ms;--ae-unpop-duration:350ms;--ae-pop-ease:linear;--ae-unpop-ease:linear">Content</div>`,
   { cssMotionPropertyMaxFPS: 5 });
@@ -354,7 +537,7 @@ test("progress shares elapsed-time sampling under low FPS and resets the opposit
   });
   expect(observation.elapsed).toBeGreaterThanOrEqual(420);
   expect(observation.elapsed).toBeLessThan(2500);
-  expect(observation.reset).toBe("0");
+  expect(observation.reset).toBe("1");
   await expect.poll(() => page.locator("#panel").evaluate(element =>
     Number(getComputedStyle(element).getPropertyValue("--ae-unpop-progress")))).toBeGreaterThan(0);
   await page.evaluate(() => window.closing);
