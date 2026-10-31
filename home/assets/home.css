@@ -86,6 +86,7 @@ a { text-underline-offset: .22em; }
 .hero-wordmark > .brand { font-size: inherit; vertical-align: middle; }
 .hero-wordmark .brand-mark { width: 2em; height: 2em; font: inherit; font-size: .5em; letter-spacing: 0; }
 .hero-prism {
+  top:0.2rem;
   position: relative;
   display: inline-block;
   isolation: isolate;
