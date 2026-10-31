@@ -24,6 +24,26 @@
 
 h1, h2, h3, h4, h5, h6 { font-family: "Geist", var(--bs-font-sans-serif) !important; }
 body { -webkit-font-smoothing: antialiased; }
+body, main > section, body > footer {
+  background-image: linear-gradient(155deg,
+    rgba(var(--bs-warning-rgb), .035) 0%,
+    transparent 55%,
+    rgba(var(--bs-body-color-rgb), .025) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-size: 100vw 100vh;
+  background-repeat: no-repeat;
+}
+.bg-body-tertiary {
+  background-image: linear-gradient(25deg,
+    rgba(var(--bs-body-color-rgb), .035) 0%,
+    transparent 50%,
+    rgba(0, 62, 248, .05) 100%);
+  background-attachment: fixed;
+  background-position: center;
+  background-size: 100vw 100vh;
+  background-repeat: no-repeat;
+}
 section[id] { scroll-margin-top: 1.5rem; }
 a { text-underline-offset: .22em; }
 :focus-visible { outline: 3px solid #9b7300 !important; outline-offset: 4px; }
@@ -38,7 +58,7 @@ a { text-underline-offset: .22em; }
 .main-nav a:hover, .footer-nav a:hover { text-decoration: underline; }
 .theme-controls .btn { font-size: .75rem; }
 .theme-controls .ae--active { background: var(--bs-warning); border-color: var(--bs-warning); color: #17191c; }
-.hero { position: relative; isolation: isolate; overflow: hidden; padding-block: clamp(4rem, 8vw, 7rem) 2rem; }
+.hero { position: relative; isolation: isolate; overflow: hidden; padding-block: clamp(4rem, 8vh, 7rem) 2rem; }
 .hero > .container { position: relative; z-index: 1; }
 .eyebrow { font: 500 .72rem/1.6 var(--bs-font-monospace); letter-spacing: .09em; text-transform: uppercase; }
 .status-dot { display: inline-block; width: .45rem; height: .45rem; margin-right: .5rem; vertical-align: .1em; }
@@ -57,13 +77,23 @@ a { text-underline-offset: .22em; }
   pointer-events: none;
   mix-blend-mode: screen;
   mix-blend-mode: plus-lighter;
-  animation: hero-prism 0.5s linear infinite alternate;
+  animation: hero-prism 2s linear infinite alternate;
 }
 .hero-prism-yellow { color: #FFFF00; }
 .hero-prism-blue { color: #00F; animation-direction: alternate-reverse; }
 @keyframes hero-prism {
   0% { transform: translate(-.006em, -.009em); }
+  8% { transform: translate(.003em, -.005em); }
+  17% { transform: translate(-.008em, .002em); }
+  25% { transform: translate(.006em, .007em); }
+  33% { transform: translate(-.002em, -.008em); }
+  42% { transform: translate(.009em, -.003em); }
   50% { transform: translate(-.009em, .006em); }
+  58% { transform: translate(.004em, .001em); }
+  67% { transform: translate(-.005em, -.006em); }
+  75% { transform: translate(.008em, .004em); }
+  83% { transform: translate(-.003em, .009em); }
+  92% { transform: translate(.001em, -.004em); }
   100% { transform: translate(.006em, .009em); }
 }
 @media (prefers-reduced-motion: reduce) {

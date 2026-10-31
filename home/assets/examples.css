@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400..700&display=swap");
-
 :root {
   --bs-border-radius: 2px !important;
   --bs-border-radius-sm: 2px !important;
@@ -10,10 +8,8 @@
   --bs-border-radius-pill: 2px !important;
 }
 
-h1, h2, h3, h4, h5, h6 { font-family: "Geist", var(--bs-font-sans-serif) !important; }
-
 /* Presentation only. AelluxJS owns dragging, snapping, geometry and visibility. */
-body { margin: 0; padding: 1rem; font-size: .875rem; }
+body { margin: 0; padding: 1rem; font-size: .875rem; min-height: 100vh; }
 main, .card, .d-flex > * { min-width: 0; }
 :focus-visible { outline: 3px solid #9b7300 !important; outline-offset: 3px; }
 [data-bs-theme="dark"] :focus-visible { outline-color: #ffc107 !important; }

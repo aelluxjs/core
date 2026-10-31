@@ -31,7 +31,7 @@
 <body>
   <a class="skip-link btn btn-warning" href="#main">Skip to content</a>
 
-  <header class="site-header bg-body border-bottom">
+  <header class="site-header bg-body border-bottom d-none d-lg-block">
     <div class="container d-flex flex-wrap align-items-center justify-content-between gap-3 py-3">
       <nav class="main-nav d-flex flex-wrap align-items-center gap-3 gap-lg-4" aria-label="Main navigation">
         <a href="#examples">Examples</a>
@@ -52,7 +52,7 @@
     <section class="hero bg-body-tertiary text-body" aria-labelledby="hero-title">
       <div class="container">
         <div class="row align-items-center g-4 g-lg-5">
-          <div class="col-lg-7">
+          <div class="col-lg-7 pb-4 pb-4 pb-lg-0">
             <p class="eyebrow text-warning-emphasis mb-1"><span class="status-dot bg-warning" aria-hidden="true"></span>
               UX Made Easy</p>
             <h1 id="hero-title" class="hero-wordmark mb-3 brand">
@@ -60,17 +60,26 @@
                 aria-label="aellux.js home">
                 <span class="brand-mark bg-warning text-dark" aria-hidden="true">æ</span>
               </a>
-              <span class="hero-prism"><span class="hero-prism-light hero-prism-yellow" aria-hidden="true">aellux<span class="brand-suffix">.js</span></span><span class="hero-prism-light hero-prism-blue" aria-hidden="true">aellux<span class="brand-suffix">.js</span></span><span class="hero-prism-text">aellux<span class="brand-suffix">.js</span></span></span>
+              <span class="hero-prism"><span class="hero-prism-light hero-prism-yellow" aria-hidden="true">aellux<span
+                    class="brand-suffix">.js</span></span><span class="hero-prism-light hero-prism-blue"
+                  aria-hidden="true">aellux<span class="brand-suffix">.js</span></span><span
+                  class="hero-prism-text">aellux<span class="brand-suffix">.js</span></span></span>
             </h1>
             <div class="d-flex flex-wrap gap-2">
-              <a class="btn btn-warning px-4 py-2 fw-semibold" href="#getting-started">Get Started <span class="ms-2"
-                  aria-hidden="true">→</span></a>
               <a class="btn btn-outline-secondary px-4 py-2" href="../docs/0.1.x/index.htm">Documentation</a>
-              <a class="btn btn-link text-body px-3 py-2" href="https://github.com/aelluxjs/core">GitHub <span
-                  aria-hidden="true">↗</span></a>
+              <a class="btn btn-outline-warning px-4 py-2 fw-semibold" href="#getting-started">
+                Get Started
+                <span class="ms-2" aria-hidden="true">→</span>
+              </a>
             </div>
-            <p class="small text-body-secondary mt-4 mb-0">v0.1.0 <span class="mx-2" aria-hidden="true">/</span>
-              Open source <span class="mx-2" aria-hidden="true">/</span> Apache 2.0</p>
+            <p class="small text-body-secondary mt-4 mb-0 pb-4 pb-lg-0">v0.1.0
+              <span class="mx-2 opacity-50" aria-hidden="true">▪</span>
+              Open Source
+              <span class="mx-2 opacity-50" aria-hidden="true">▪</span>
+              Apache 2.0
+              <span class="mx-2 opacity-50" aria-hidden="true">▪</span>
+              <a href="https://github.com/aelluxjs/core">GitHub <span aria-hidden="true">↗</span></a>
+            </p>
           </div>
           <div class="col-lg-5">
             <div class="hero-code border rounded-3 overflow-hidden">
@@ -96,7 +105,8 @@
             </div>
           </div>
         </div>
-        <div class="hero-principles d-flex flex-wrap gap-2 gap-md-4 border-top mt-5 pt-4 small text-body-secondary">
+        <div
+          class="hero-principles d-none d-md-flex flex-wrap gap-2 gap-md-4 border-top mt-0 mt-lg-5 pt-4 small text-body-secondary">
           <span>Simple to use.</span><span>Powerful behaviors.</span><span>Visually independent.</span>
         </div>
       </div>
@@ -104,7 +114,7 @@
 
     <section class="section-space border-bottom" aria-labelledby="why-title">
       <div class="container">
-        <p class="eyebrow text-body-secondary">01 / The approach</p>
+        <p class="eyebrow text-body-secondary">01 <span class="opacity-50" aria-hidden="true">▪</span> The approach</p>
         <h2 id="why-title" class="section-title mb-5">Why AelluxJS?</h2>
         <div class="row g-4 g-lg-5">
           <article class="col-sm-6 col-lg-3">
@@ -135,7 +145,8 @@
       <div class="container">
         <div class="row align-items-end g-3 mb-5">
           <div class="col-lg-7">
-            <p class="eyebrow text-body-secondary">02 / In practice</p>
+            <p class="eyebrow text-body-secondary">02 <span class="opacity-50" aria-hidden="true">▪</span> In practice
+            </p>
             <h2 id="examples-title" class="section-title mb-0">Less wiring.<br>More experience.</h2>
           </div>
           <div class="col-lg-5">
@@ -147,7 +158,8 @@
           <article class="col-lg-6" aria-labelledby="carousel-title">
             <div class="example-card bg-body border rounded-3 h-100">
               <div class="p-4 pb-3">
-                <p class="eyebrow text-body-secondary mb-2">01 <span class="mx-2" aria-hidden="true">/</span> Scrollbox
+                <p class="eyebrow text-body-secondary mb-2">01 <span class="opacity-50" aria-hidden="true">▪</span>
+                  Scrollbox
                   + Scrollbox Snap</p>
                 <h3 id="carousel-title" class="h4">Interactive Carousel</h3>
                 <p class="text-body-secondary mb-0">Horizontal cards, pointer dragging and touch scrolling, with
@@ -156,7 +168,8 @@
               <iframe class="example-frame" src="examples/carousel.htm" title="Interactive Carousel live example"
                 loading="lazy"></iframe>
               <details class="example-source border-top px-4 py-3" data-example-source="carousel">
-                <summary>Source <span class="text-body-secondary small">/ HTML, CSS &amp; JavaScript</span></summary>
+                <summary>Source <span class="opacity-50" aria-hidden="true">▪</span> <span
+                    class="text-body-secondary small">HTML, CSS &amp; JavaScript</span></summary>
               </details>
               <div class="example-footer border-top px-4 py-3 d-flex flex-wrap justify-content-between gap-2 small">
                 <span class="text-body-secondary">Preview → Source → Documentation</span>
@@ -169,7 +182,8 @@
           <article class="col-lg-6" aria-labelledby="viewport-title">
             <div class="example-card bg-body border rounded-3 h-100">
               <div class="p-4 pb-3">
-                <p class="eyebrow text-body-secondary mb-2">02 <span class="mx-2" aria-hidden="true">/</span> Viewport
+                <p class="eyebrow text-body-secondary mb-2">02 <span class="opacity-50" aria-hidden="true">▪</span>
+                  Viewport
                   <span class="badge text-body border ms-1">Unstable</span>
                 </p>
                 <h3 id="viewport-title" class="h4">Scroll-Driven Experience</h3>
@@ -179,7 +193,8 @@
               <iframe class="example-frame" src="examples/viewport.htm" title="Scroll-Driven Experience live example"
                 loading="lazy"></iframe>
               <details class="example-source border-top px-4 py-3" data-example-source="viewport">
-                <summary>Source <span class="text-body-secondary small">/ HTML, CSS &amp; JavaScript</span></summary>
+                <summary>Source <span class="opacity-50" aria-hidden="true">▪</span> <span
+                    class="text-body-secondary small">HTML, CSS &amp; JavaScript</span></summary>
               </details>
               <div class="example-footer border-top px-4 py-3 d-flex flex-wrap justify-content-between gap-2 small">
                 <span class="text-body-secondary">Preview → Source → Documentation</span><a
@@ -191,7 +206,8 @@
           <article class="col-lg-6" aria-labelledby="floating-title">
             <div class="example-card bg-body border rounded-3 h-100">
               <div class="p-4 pb-3">
-                <p class="eyebrow text-body-secondary mb-2">03 <span class="mx-2" aria-hidden="true">/</span> Anchor +
+                <p class="eyebrow text-body-secondary mb-2">03 <span class="opacity-50" aria-hidden="true">▪</span>
+                  Anchor +
                   Present</p>
                 <h3 id="floating-title" class="h4">Smart Floating UI</h3>
                 <p class="text-body-secondary mb-0">A floating panel with declarative visibility and positioning that
@@ -200,7 +216,8 @@
               <iframe class="example-frame" src="examples/floating.htm" title="Smart Floating UI live example"
                 loading="lazy"></iframe>
               <details class="example-source border-top px-4 py-3" data-example-source="floating">
-                <summary>Source <span class="text-body-secondary small">/ HTML, CSS &amp; JavaScript</span></summary>
+                <summary>Source <span class="opacity-50" aria-hidden="true">▪</span> <span
+                    class="text-body-secondary small">HTML, CSS &amp; JavaScript</span></summary>
               </details>
               <div class="example-footer border-top px-4 py-3 d-flex flex-wrap justify-content-between gap-2 small">
                 <span class="text-body-secondary">Preview → Source → Documentation</span>
@@ -213,7 +230,8 @@
           <article class="col-lg-6" aria-labelledby="navigation-title">
             <div class="example-card bg-body border rounded-3 h-100">
               <div class="p-4 pb-3">
-                <p class="eyebrow text-body-secondary mb-2">04 <span class="mx-2" aria-hidden="true">/</span> Ajax Href
+                <p class="eyebrow text-body-secondary mb-2">04 <span class="opacity-50" aria-hidden="true">▪</span> Ajax
+                  Href
                   + State Navigation + Feedback</p>
                 <h3 id="navigation-title" class="h4">Seamless Navigation</h3>
                 <p class="text-body-secondary mb-0">HTML region updates, browser history and application feedback. <span
@@ -222,7 +240,8 @@
               <iframe class="example-frame" src="examples/navigation.htm" title="Seamless Navigation live example"
                 loading="lazy"></iframe>
               <details class="example-source border-top px-4 py-3" data-example-source="navigation">
-                <summary>Source <span class="text-body-secondary small">/ HTML, CSS &amp; JavaScript</span></summary>
+                <summary>Source <span class="opacity-50" aria-hidden="true">▪</span> <span
+                    class="text-body-secondary small">HTML, CSS &amp; JavaScript</span></summary>
               </details>
               <div class="example-footer border-top px-4 py-3 d-flex flex-wrap justify-content-between gap-2 small">
                 <span class="text-body-secondary">Preview → Source → Documentation</span>
@@ -240,7 +259,8 @@
 
     <section id="getting-started" class="section-space border-bottom" aria-labelledby="getting-started-title">
       <div class="container">
-        <p class="eyebrow text-body-secondary">03 / Your first behavior</p>
+        <p class="eyebrow text-body-secondary">03 <span class="opacity-50" aria-hidden="true">▪</span> Your first
+          behavior</p>
         <h2 id="getting-started-title" class="section-title">Start with HTML.</h2>
         <p class="text-body-secondary mb-5">Load the runtime. Describe a behavior. Keep your own visual design.</p>
         <div class="row g-4">
@@ -287,7 +307,8 @@ AelluxJs.attr("preference");</code></pre>
       <div class="container">
         <div class="row align-items-end g-3 mb-5">
           <div class="col-lg-7">
-            <p class="eyebrow text-body-secondary">04 / The toolkit</p>
+            <p class="eyebrow text-body-secondary">04 <span class="opacity-50" aria-hidden="true">▪</span> The toolkit
+            </p>
             <h2 id="extensions-title" class="section-title mb-0">One responsibility.<br>Each Extension.</h2>
           </div>
           <div class="col-lg-5">
@@ -435,7 +456,8 @@ AelluxJs.attr("preference");</code></pre>
 
     <section id="community" class="section-space" aria-labelledby="community-title">
       <div class="container">
-        <p class="eyebrow text-body-secondary">05 / Built in the open</p>
+        <p class="eyebrow text-body-secondary">05 <span class="opacity-50" aria-hidden="true">▪</span> Built in the open
+        </p>
         <h2 id="community-title" class="section-title">Better behaviors.<br>Built together.</h2>
         <p class="text-body-secondary mb-5 community-intro">AelluxJS is open to technical contributions and
           conversations about real frontend experiences. Bring a fix, a challenge or an idea.</p>
