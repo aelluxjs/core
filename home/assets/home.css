@@ -130,6 +130,11 @@ pre code { overflow-wrap: normal; }
 .extension-link { display: flex; flex-direction: column; color: var(--bs-body-color); text-decoration: none; }
 .extension-link:hover { border-color: var(--bs-warning) !important; }
 .extension-link h4 { font-weight: 650; }
+.extension-link > [data-ae-present] {
+  --ae-pop-ease: cubic-bezier(.175, .885, .32, 1.275);
+  --ae-pop-aellux-ease: ease-out-back;
+}
+.extension-link .extension-motion { min-height: 0; overflow: hidden; }
 .extension-trigger { display: block; width: 100%; padding: 1.5rem; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .extension-trigger .extension-meta { display: block; margin-top: .75rem; font-weight: 400; }
 .extension-indicator { transition: transform .2s ease; }
