@@ -1,11 +1,11 @@
 :root {
-  --bs-border-radius: .05rem !important;
-  --bs-border-radius-sm: .05rem !important;
-  --bs-border-radius-lg: .05rem !important;
-  --bs-border-radius-xl: .05rem !important;
-  --bs-border-radius-xxl: .05rem !important;
-  --bs-border-radius-2xl: .05rem !important;
-  --bs-border-radius-pill: .05rem !important;
+  --bs-border-radius: .08rem !important;
+  --bs-border-radius-sm: .08rem !important;
+  --bs-border-radius-lg: .08rem !important;
+  --bs-border-radius-xl: .08rem !important;
+  --bs-border-radius-xxl: .08rem !important;
+  --bs-border-radius-2xl: .08rem !important;
+  --bs-border-radius-pill: .08rem !important;
 }
 
 /* Presentation only. AelluxJS owns dragging, snapping, geometry and visibility. */
