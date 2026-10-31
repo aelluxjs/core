@@ -103,15 +103,20 @@ test("carousel retains native touch panning", async ({ page, context, browserNam
   await cdp.detach();
 });
 
-test("Viewport publishes geometry to visual children and respects reduced motion", async ({ page }) => {
+test("Viewport scrolls horizontally, publishes geometry to visual children and respects reduced motion", async ({ page }) => {
   await page.setViewportSize({ width: 520, height: 432 });
   await openExample(page, "viewport", "viewport");
   const card = page.locator("#viewport-card-3");
   await expect.poll(() => card.evaluate(e => e.style.getPropertyValue("--ae-viewport-visible"))).not.toBe("");
   const before = await card.evaluate(e => Number(e.style.getPropertyValue("--ae-viewport-visible")));
-  await page.locator(".viewport-scroll").focus();
-  await page.keyboard.press("End");
+  const scroller = page.locator(".viewport-scroll");
+  await scroller.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect.poll(() => scroller.evaluate(e => e.scrollLeft)).toBeGreaterThan(0);
+  await scroller.evaluate(e => e.scrollTo({ left: e.scrollWidth }));
   await expect.poll(() => card.evaluate(e => Number(e.style.getPropertyValue("--ae-viewport-visible")))).toBeGreaterThan(before);
+  expect(await scroller.evaluate(e => e.scrollTop)).toBe(0);
+  expect(await scroller.evaluate(e => e.scrollHeight <= e.clientHeight)).toBe(true);
   await expect.poll(() => card.evaluate(e => getComputedStyle(e).transform)).not.toBe("none");
   expect(await page.locator(".viewport-step").first().evaluate(e => e.style.getPropertyValue("--ae-viewport-visible"))).toBe("");
   await page.emulateMedia({ reducedMotion: "reduce" });
