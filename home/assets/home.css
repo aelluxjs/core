@@ -52,7 +52,7 @@ a { text-underline-offset: .22em; }
 .skip-link:focus { transform: none; }
 .brand { font-family: var(--bs-heading-font-family); font-size: 1.5rem; font-weight: 650; letter-spacing: -.055em; white-space: nowrap; }
 .brand-suffix { font-weight: 400; }
-.brand-mark { display: grid; place-items: center; width: 2rem; height: 2rem; font: 600 1.05rem/1 var(--bs-heading-font-family); letter-spacing: -.08em; }
+.brand-mark { display: grid; place-items: center; width: 2rem; height: 2rem; font: 600 1.05rem/1 var(--bs-heading-font-family); letter-spacing: -.08em; padding-bottom: 0.2rem; }
 .main-nav a, .footer-nav a { color: var(--bs-body-color); text-decoration: none; }
 .main-nav a { font-size: .875rem; }
 .main-nav a:hover, .footer-nav a:hover { text-decoration: underline; }
