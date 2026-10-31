@@ -113,9 +113,12 @@ html[data-ae-reduced-motion="reduced"] .hero-prism-light { display: none; animat
 .example-card > :first-child { min-height: 10.5rem; }
 .example-frame { display: block; width: calc(100% - 3rem); height: 27rem; margin: 0 1.5rem 1.5rem; border: 1px solid var(--bs-border-color); border-radius: var(--bs-border-radius); background: var(--bs-body-bg); }
 .example-source { margin-top: auto; }
-.example-source summary { cursor: pointer; font-size: .875rem; }
+.source-toggle { display: block; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; font-size: .875rem; text-align: left; cursor: pointer; overflow-wrap: anywhere; }
+.source-toggle::after { content: "+"; float: right; margin-left: .5rem; }
+.source-toggle[aria-expanded="true"]::after { content: "−"; }
+.source-panel { width: 100%; --ae-pop-duration: 1s; --ae-unpop-duration: 1s; }
+.source-motion { min-height: 0; overflow: hidden; }
 .source-file { margin-block: .75rem; }
-.source-file summary { overflow-wrap: anywhere; }
 .source-file pre { max-height: 24rem; font-size: .72rem; background: var(--bs-tertiary-bg); }
 .source-file pre code { display: block; padding: 1rem; }
 .source-file [role="status"] { min-height: 1.5em; }
@@ -131,6 +134,8 @@ pre code { overflow-wrap: normal; }
 .extension-link:hover { border-color: var(--bs-warning) !important; }
 .extension-link h4 { font-weight: 650; }
 .extension-link > [data-ae-present] {
+  --ae-pop-duration: 1s;
+  --ae-unpop-duration: 1s;
   --ae-pop-ease: cubic-bezier(.175, .885, .32, 1.275);
   --ae-pop-aellux-ease: ease-out-back;
 }

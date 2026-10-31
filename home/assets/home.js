@@ -77,8 +77,24 @@ getHighlighter().then(highlighter => {
 });
 
 // Source is fetched from the same files executed by each standalone example.
+function createSourcePanel(id) {
+  const panel = document.createElement("div");
+  panel.id = id;
+  panel.className = "source-panel";
+  panel.setAttribute("data-ae-present", "height");
+  panel.setAttribute("data-ae-unpop-on-click", "false");
+  panel.hidden = true;
+  const content = document.createElement("div");
+  content.className = "source-motion";
+  content.setAttribute("data-ae-present-motion", "");
+  panel.append(content);
+  return { panel, content };
+}
+
 document.querySelectorAll("[data-example-source]").forEach(details => {
   const example = details.dataset.exampleSource;
+  const source = createSourcePanel(`source-panel-${example}`);
+  details.append(source.panel);
   const files = [`examples/${example}.htm`];
   if (example !== "viewport") files.push(`examples/${example}.js`);
   files.push("assets/examples.css");
@@ -89,13 +105,20 @@ document.querySelectorAll("[data-example-source]").forEach(details => {
   standalone.rel = "noopener";
   standalone.className = "d-inline-block small my-3";
   standalone.textContent = "Open standalone example ↗";
-  details.append(standalone);
+  source.content.append(standalone);
 
   files.forEach((file, index) => {
-    const fileDetails = document.createElement("details");
+    const fileDetails = document.createElement("div");
     fileDetails.className = "source-file";
-    const summary = document.createElement("summary");
+    const summary = document.createElement("button");
+    summary.type = "button";
+    summary.className = "source-toggle";
     summary.textContent = file;
+    const fileSource = createSourcePanel(`source-file-${example}-${index}`);
+    summary.setAttribute("data-ae-trigger", "toggle");
+    summary.setAttribute("data-ae-target", `#${fileSource.panel.id}`);
+    summary.setAttribute("aria-controls", fileSource.panel.id);
+    summary.setAttribute("aria-expanded", "false");
     const pre = document.createElement("pre");
     pre.className = "border rounded-2 mt-3 mb-2";
     const code = document.createElement("code");
@@ -112,11 +135,12 @@ document.querySelectorAll("[data-example-source]").forEach(details => {
     const status = document.createElement("p");
     status.className = "small text-body-secondary mt-2 mb-0";
     status.setAttribute("role", "status");
-    fileDetails.append(summary, pre, copy, status);
-    details.append(fileDetails);
+    fileSource.content.append(pre, copy, status);
+    fileDetails.append(summary, fileSource.panel);
+    source.content.append(fileDetails);
     let loading = false;
-    fileDetails.addEventListener("toggle", async () => {
-      if (!fileDetails.open || loading || code.dataset.highlighted) return;
+    fileSource.panel.addEventListener($ae.eventName("BeforePop"), async event => {
+      if (event.target !== fileSource.panel || loading || code.dataset.highlighted) return;
       loading = true;
       status.textContent = "Loading source…";
       try {
