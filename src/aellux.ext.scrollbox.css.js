@@ -24,15 +24,7 @@ export function generateScrollboxCSS(AelluxJs) {
   scrollbar-color: color-mix(in srgb, CanvasText 50%, transparent) transparent;
 }
 
-:where([${fadeStateAttribute}]) {
-  --ae-scrollbox-mask-left: 0px;
-  --ae-scrollbox-mask-top: 0px;
-  --ae-scrollbox-mask-width: 100%;
-  --ae-scrollbox-mask-height: 100%;
-  -webkit-mask-position: var(--ae-scrollbox-mask-left, 0px) var(--ae-scrollbox-mask-top, 0px);
-  mask-position: var(--ae-scrollbox-mask-left, 0px) var(--ae-scrollbox-mask-top, 0px);
-  -webkit-mask-size: var(--ae-scrollbox-mask-width, 100%) var(--ae-scrollbox-mask-height, 100%);
-  mask-size: var(--ae-scrollbox-mask-width, 100%) var(--ae-scrollbox-mask-height, 100%);
+:where([${scrollboxAttribute}][${fadeStateAttribute}]) {
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   --ae-scrollbox-fade-length: max(0px, var(--ae-scrollbox-fade-size, 16px));
@@ -49,17 +41,17 @@ export function generateScrollboxCSS(AelluxJs) {
     #000 var(--ae-scrollbox-fade-top), #000 calc(100% - var(--ae-scrollbox-fade-bottom)),
     transparent calc(100% + var(--ae-scrollbox-fade-length) - var(--ae-scrollbox-fade-bottom)));
 }
-:where([${fadeStateAttribute}="both"]) {
+:where([${scrollboxAttribute}][${fadeStateAttribute}="both"]) {
   -webkit-mask-image: var(--ae-scrollbox-mask-x), var(--ae-scrollbox-mask-y);
   -webkit-mask-composite: source-in;
   mask-image: var(--ae-scrollbox-mask-x), var(--ae-scrollbox-mask-y);
   mask-composite: intersect;
 }
-:where([${fadeStateAttribute}="x"]) {
+:where([${scrollboxAttribute}][${fadeStateAttribute}="x"]) {
   -webkit-mask-image: var(--ae-scrollbox-mask-x);
   mask-image: var(--ae-scrollbox-mask-x);
 }
-:where([${fadeStateAttribute}="y"]) {
+:where([${scrollboxAttribute}][${fadeStateAttribute}="y"]) {
   -webkit-mask-image: var(--ae-scrollbox-mask-y);
   mask-image: var(--ae-scrollbox-mask-y);
 }

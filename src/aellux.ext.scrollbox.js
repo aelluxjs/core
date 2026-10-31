@@ -153,7 +153,6 @@
 
   const properties = ["--ae-scroll-y-progress", "--ae-scroll-x-progress"];
   const fadeProperties = ["top", "right", "bottom", "left"].map(side => `--ae-scrollbox-hidden-${side}`);
-  const fadeGeometryProperties = ["left", "top", "width", "height"].map(part => `--ae-scrollbox-mask-${part}`);
   const supportsCSS = (name, value) => !!root.CSS?.supports?.(name, value);
   const maskSupported = supportsCSS("mask-image", "linear-gradient(#000,#000)") ||
     supportsCSS("-webkit-mask-image", "linear-gradient(#000,#000)");
@@ -278,8 +277,7 @@
 
     const state = {
       element, metrics: null, mode: null, desktop: false,
-      fadeAuthored: null, fadeAxes: null, fadeTarget: null, fadeMemory: null,
-      fadeMasks: new WeakMap(),
+      fadeAuthored: null, fadeAxes: null,
       cursor: { owned: false },
 
       wheelEnabled: true, momentumEnabled: true, elasticEnabled: false,
@@ -425,7 +423,6 @@
     AelluxJs.waitLayout.cancel(state.resizeLayoutId);
     AelluxJs.waitLayout.cancel(state.publishLayoutId);
     offEvent(root, "$resize", state.onResize);
-    state.fadeMemory?.restore();
     elementMemories.get(element)?.restore();
     elementMemories.delete(element);
     cursorMemories.delete(element);
@@ -1904,15 +1901,6 @@
     const element = state.element;
     if (state.fadeAuthored === null)
       state.fadeAuthored = [style.maskImage, style.webkitMaskImage].some(value => value && value !== "none");
-    // Two content children are enough to retain the container mask; avoid
-    // scanning long lists on each scroll publication.
-    const children = contentChildren(element, 2);
-    const target = children.length === 1 ? children[0] : element;
-    if (target !== element && !state.fadeMasks.has(target)) {
-      const targetStyle = root.getComputedStyle(target);
-      state.fadeMasks.set(target, target.hasAttribute(attribute) ||
-        [targetStyle.maskImage, targetStyle.webkitMaskImage].some(value => value && value !== "none"));
-    }
     if (state.elastic.owned) {
       metrics = state.metrics || metrics;
       axes = state.fadeAxes || axes;
@@ -1923,25 +1911,10 @@
       axes.y ? metrics.maxY - y : 0, axes.x ? x : 0];
     const snapAxis = hasSnap(element) ? element.getAttribute(snapAttribute) === "vertical" ? "y" : "x" : null;
     const primary = snapAxis || (axes.y ? "y" : "x");
-    const mode = maskSupported && !state.fadeAuthored && !state.fadeMasks.get(target) &&
+    const mode = maskSupported && !state.fadeAuthored &&
       element.getAttribute(fadeAttribute) !== "false" && (axes.x || axes.y) ?
       compositeSupported ? "both" : primary : "";
-    let geometry = null;
-    if (mode && target !== element) {
-      // A content mask moves with its child. Position its viewport-sized image
-      // in the child's coordinates during the existing layout read, including
-      // the scale/translation owned by Elastic.
-      const boxRect = element.getBoundingClientRect();
-      const targetRect = target.getBoundingClientRect();
-      const scaleX = targetRect.width ? (target.offsetWidth || targetRect.width) / targetRect.width : 1;
-      const scaleY = targetRect.height ? (target.offsetHeight || targetRect.height) / targetRect.height : 1;
-      const boxScaleX = element.offsetWidth ? boxRect.width / element.offsetWidth : 1;
-      const boxScaleY = element.offsetHeight ? boxRect.height / element.offsetHeight : 1;
-      geometry = [(boxRect.left + element.clientLeft * boxScaleX - targetRect.left) * scaleX,
-        (boxRect.top + element.clientTop * boxScaleY - targetRect.top) * scaleY,
-        element.clientWidth * boxScaleX * scaleX, element.clientHeight * boxScaleY * scaleY];
-    }
-    return { distances, mode, target: mode ? target : null, geometry };
+    return { distances, mode };
   }
 
   function writeFadeProperty(element, name, value) {
@@ -1952,19 +1925,9 @@
   }
 
   function updateFade(state, fade) {
-    if (state.fadeTarget !== fade.target) {
-      state.fadeMemory?.restore();
-      state.fadeTarget = fade.target;
-      state.fadeMemory = fade.target ? AelluxJs.persist.element.save(fade.target, [fadeStateAttribute],
-        fade.target === state.element ? [] : [...fadeProperties, ...fadeGeometryProperties]) : null;
-    }
     fadeProperties.forEach((name, index) => writeFadeProperty(state.element, name, fade.distances[index]));
-    if (!fade.target) return;
-    if (fade.target !== state.element) {
-      fadeProperties.forEach((name, index) => writeFadeProperty(fade.target, name, fade.distances[index]));
-      fadeGeometryProperties.forEach((name, index) => writeFadeProperty(fade.target, name, fade.geometry[index]));
-    }
-    fade.target.setAttribute(fadeStateAttribute, fade.mode);
+    if (fade.mode) state.element.setAttribute(fadeStateAttribute, fade.mode);
+    else state.element.removeAttribute(fadeStateAttribute);
   }
 
   function publish(state) {

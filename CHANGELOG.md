@@ -19,6 +19,8 @@ All notable changes to aellux.js will be documented in this file.
 
 ### Fixed
 
+- Scrollbox always applies overflow fade to its stationary container, including when there is one content child. Removed child-mask positioning and sizing updates that could lag native momentum scrolling and expose transparent strips. Container backgrounds, borders and scrollbars now share the fade in every structure.
+
 - Docweaver notifications now disable outside-click dismissal, so the click that starts a subsequent request preserves existing notifications until their own timers expire or their pool slot is reused.
 - Removed duplicate toast message IDs and shared message/motion targets; Feedback now updates the selected notification independently while preserving its native progress control.
 - Updated the documentation's Full bundle preload integrity to match the generated artifact.
