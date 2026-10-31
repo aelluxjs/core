@@ -136,9 +136,11 @@ pre code { overflow-wrap: normal; }
 .extension-link h4 { font-weight: 650; }
 .extension-link > [data-ae-present] {
   --ae-pop-duration: 1s;
-  --ae-unpop-duration: 1s;
-  --ae-pop-ease: cubic-bezier(.175, .885, .32, 1.275);
-  --ae-pop-aellux-ease: ease-out-back;
+  --ae-unpop-duration: .5s;
+  --ae-pop-ease: cubic-bezier(.65, 0, .35, 1);
+  --ae-unpop-ease: cubic-bezier(.65, 0, .35, 1);
+  --ae-pop-aellux-ease: ease-in-out-cubic;
+  --ae-unpop-aellux-ease: ease-in-out-cubic;
 }
 .extension-link .extension-motion { min-height: 0; overflow: hidden; }
 .extension-trigger { display: block; width: 100%; padding: 1.5rem; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
