@@ -57,16 +57,14 @@ a { text-underline-offset: .22em; }
   pointer-events: none;
   mix-blend-mode: screen;
   mix-blend-mode: plus-lighter;
-  opacity: .45;
-  filter: url(#hero-prism-distortion);
-  animation: hero-prism 8s ease-in-out infinite alternate;
+  animation: hero-prism 0.5s linear infinite alternate;
 }
-.hero-prism-yellow { color: #ffc107; }
-.hero-prism-blue { color: #2387ff; animation-direction: alternate-reverse; }
+.hero-prism-yellow { color: #FFFF00; }
+.hero-prism-blue { color: #00F; animation-direction: alternate-reverse; }
 @keyframes hero-prism {
-  0% { transform: translate(-.009em, -.003em); }
-  50% { transform: translate(-.002em, .006em); }
-  100% { transform: translate(.009em, .003em); }
+  0% { transform: translate(-.006em, -.009em); }
+  50% { transform: translate(-.009em, .006em); }
+  100% { transform: translate(.006em, .009em); }
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-prism-light { display: none; animation: none; }
