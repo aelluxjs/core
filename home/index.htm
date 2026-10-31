@@ -13,6 +13,7 @@
   <script src="../dist/aellux.min.js"></script>
   <script>
     $ae.ext("preference");
+    $ae.ext("present", { loadStyle: true, loadWhen: "[data-ae-present-group]" });
     $ae.ext("scrollbox", { loadStyle: true, loadWhen: "[data-ae-scrollbox]" });
     $ae.init({
       mode: "basic",
@@ -302,7 +303,7 @@ AelluxJs.attr("preference");</code></pre>
       </div>
     </section>
 
-    <section id="extensions" class="section-space bg-body-tertiary border-bottom" aria-labelledby="extensions-title">
+    <section data-ae-present-group id="extensions" class="section-space bg-body-tertiary border-bottom" aria-labelledby="extensions-title">
       <div class="container">
         <div class="row align-items-end g-3 mb-5">
           <div class="col-lg-7">
@@ -319,134 +320,294 @@ AelluxJs.attr("preference");</code></pre>
           marked separately; Extensions without an Unstable label are stable.</p>
         <h3 class="h6 text-body-secondary mb-3">Presentation &amp; interaction</h3>
         <div class="row g-3 mb-4">
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
-              href="../docs/0.1.x/core-extensions/present.htm">
-              <div class="d-flex justify-content-between gap-2">
-                <h4 class="h6">Present</h4><span aria-hidden="true">↗</span>
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop"
+                  data-ae-target="#extension-present" aria-controls="extension-present" aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>Present</span><span class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Bundled</span>
+                </button>
+              </h4>
+              <div id="extension-present" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false" hidden>
+                <div class="px-4 pb-4" data-ae-present-motion>
+                  <p>Declarative visibility, transitions and groups.</p>
+                  <a href="../docs/0.1.x/core-extensions/present.htm">Read documentation <span aria-hidden="true">↗</span></a>
+                </div>
               </div>
-              <p>Declarative visibility, transitions and groups.</p><span class="extension-meta">Bundled</span>
-            </a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
-              href="../docs/0.1.x/core-extensions/anchor.htm">
-              <div class="d-flex justify-content-between gap-2">
-                <h4 class="h6">Anchor</h4><span aria-hidden="true">↗</span>
+            </div>
+          </article>
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop"
+                  data-ae-target="#extension-anchor" aria-controls="extension-anchor" aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>Anchor</span><span class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Bundled</span>
+                </button>
+              </h4>
+              <div id="extension-anchor" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false" hidden>
+                <div class="px-4 pb-4" data-ae-present-motion>
+                  <p>Position elements relative to a shared reference.</p>
+                  <a href="../docs/0.1.x/core-extensions/anchor.htm">Read documentation <span aria-hidden="true">↗</span></a>
+                </div>
               </div>
-              <p>Position elements relative to a shared reference.</p><span class="extension-meta">Bundled</span>
-            </a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
-              href="../docs/0.1.x/core-extensions/focus.htm">
-              <div class="d-flex justify-content-between gap-2">
-                <h4 class="h6">Focus</h4><span aria-hidden="true">↗</span>
-              </div>
-              <p>Guide focus between interface controls.</p><span class="extension-meta">Bundled <span
+            </div>
+          </article>
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop"
+                  data-ae-target="#extension-focus" aria-controls="extension-focus" aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>Focus</span><span class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Bundled <span
                   class="badge text-body border ms-1">Unstable</span></span>
-            </a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
-              href="../docs/0.1.x/core-extensions/point.htm">
-              <div class="d-flex justify-content-between gap-2">
-                <h4 class="h6">Point</h4><span aria-hidden="true">↗</span>
+                </button>
+              </h4>
+              <div id="extension-focus" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false" hidden>
+                <div class="px-4 pb-4" data-ae-present-motion>
+                  <p>Guide focus between interface controls.</p>
+                  <a href="../docs/0.1.x/core-extensions/focus.htm">Read documentation <span aria-hidden="true">↗</span></a>
+                </div>
               </div>
-              <p>Track pointer interactions on declared elements.</p><span class="extension-meta">Bundled <span
+            </div>
+          </article>
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop"
+                  data-ae-target="#extension-point" aria-controls="extension-point" aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>Point</span><span class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Bundled <span
                   class="badge text-body border ms-1">Unstable</span></span>
-            </a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
-              href="../docs/0.1.x/core-extensions/optional/dialog.htm">
-              <div class="d-flex justify-content-between gap-2">
-                <h4 class="h6">Dialog</h4><span aria-hidden="true">↗</span>
+                </button>
+              </h4>
+              <div id="extension-point" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false" hidden>
+                <div class="px-4 pb-4" data-ae-present-motion>
+                  <p>Track pointer interactions on declared elements.</p>
+                  <a href="../docs/0.1.x/core-extensions/point.htm">Read documentation <span aria-hidden="true">↗</span></a>
+                </div>
               </div>
-              <p>Dialog behaviors with native compatibility support.</p><span class="extension-meta">Optional <span
+            </div>
+          </article>
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop"
+                  data-ae-target="#extension-dialog" aria-controls="extension-dialog" aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>Dialog</span><span class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Optional <span
                   class="badge text-body border ms-1">Unstable</span></span>
-            </a></article>
+                </button>
+              </h4>
+              <div id="extension-dialog" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false" hidden>
+                <div class="px-4 pb-4" data-ae-present-motion>
+                  <p>Dialog behaviors with native compatibility support.</p>
+                  <a href="../docs/0.1.x/core-extensions/optional/dialog.htm">Read documentation <span aria-hidden="true">↗</span></a>
+                </div>
+              </div>
+            </div>
+          </article>
         </div>
         <h3 class="h6 text-body-secondary mb-3">Scroll &amp; geometry</h3>
         <div class="row g-3 mb-4">
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
-              href="../docs/0.1.x/core-extensions/scrollbox.htm">
-              <div class="d-flex justify-content-between gap-2">
-                <h4 class="h6">Scrollbox</h4><span aria-hidden="true">↗</span>
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop"
+                  data-ae-target="#extension-scrollbox" aria-controls="extension-scrollbox" aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>Scrollbox</span><span class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Bundled</span>
+                </button>
+              </h4>
+              <div id="extension-scrollbox" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false" hidden>
+                <div class="px-4 pb-4" data-ae-present-motion>
+                  <p>Native scrolling, pointer dragging and scrollbars.</p>
+                  <a href="../docs/0.1.x/core-extensions/scrollbox.htm">Read documentation <span aria-hidden="true">↗</span></a>
+                </div>
               </div>
-              <p>Native scrolling, pointer dragging and scrollbars.</p><span class="extension-meta">Bundled</span>
-            </a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
-              href="../docs/0.1.x/core-extensions/scrollbox-snap.htm">
-              <div class="d-flex justify-content-between gap-2">
-                <h4 class="h6">Scrollbox Snap</h4><span aria-hidden="true">↗</span>
+            </div>
+          </article>
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop"
+                  data-ae-target="#extension-scrollbox-snap" aria-controls="extension-scrollbox-snap" aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>Scrollbox Snap</span><span class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Bundled</span>
+                </button>
+              </h4>
+              <div id="extension-scrollbox-snap" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false" hidden>
+                <div class="px-4 pb-4" data-ae-present-motion>
+                  <p>Snap alignment and navigation for Scrollbox.</p>
+                  <a href="../docs/0.1.x/core-extensions/scrollbox-snap.htm">Read documentation <span aria-hidden="true">↗</span></a>
+                </div>
               </div>
-              <p>Snap alignment and navigation for Scrollbox.</p><span class="extension-meta">Bundled</span>
-            </a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
-              href="../docs/0.1.x/core-extensions/optional/viewport.htm">
-              <div class="d-flex justify-content-between gap-2">
-                <h4 class="h6">Viewport</h4><span aria-hidden="true">↗</span>
-              </div>
-              <p>Publish relative position and visibility as CSS values.</p><span class="extension-meta">Optional <span
+            </div>
+          </article>
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop"
+                  data-ae-target="#extension-viewport" aria-controls="extension-viewport" aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>Viewport</span><span class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Optional <span
                   class="badge text-body border ms-1">Unstable</span></span>
-            </a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
-              href="../docs/0.1.x/core-extensions/overflow-marquee.htm">
-              <div class="d-flex justify-content-between gap-2">
-                <h4 class="h6">Overflow Marquee</h4><span aria-hidden="true">↗</span>
+                </button>
+              </h4>
+              <div id="extension-viewport" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false" hidden>
+                <div class="px-4 pb-4" data-ae-present-motion>
+                  <p>Publish relative position and visibility as CSS values.</p>
+                  <a href="../docs/0.1.x/core-extensions/optional/viewport.htm">Read documentation <span aria-hidden="true">↗</span></a>
+                </div>
               </div>
-              <p>Reveal overflowing single-line content with motion.</p><span class="extension-meta">Bundled</span>
-            </a></article>
+            </div>
+          </article>
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop"
+                  data-ae-target="#extension-overflow-marquee" aria-controls="extension-overflow-marquee" aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>Overflow Marquee</span><span class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Bundled</span>
+                </button>
+              </h4>
+              <div id="extension-overflow-marquee" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false" hidden>
+                <div class="px-4 pb-4" data-ae-present-motion>
+                  <p>Reveal overflowing single-line content with motion.</p>
+                  <a href="../docs/0.1.x/core-extensions/overflow-marquee.htm">Read documentation <span aria-hidden="true">↗</span></a>
+                </div>
+              </div>
+            </div>
+          </article>
         </div>
         <h3 class="h6 text-body-secondary mb-3">Navigation &amp; feedback</h3>
         <div class="row g-3 mb-4">
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
-              href="../docs/0.1.x/core-extensions/optional/ajax-href.htm">
-              <div class="d-flex justify-content-between gap-2">
-                <h4 class="h6">Ajax Href</h4><span aria-hidden="true">↗</span>
-              </div>
-              <p>Replace matching HTML regions from local responses.</p><span class="extension-meta">Optional <span
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop"
+                  data-ae-target="#extension-ajax-href" aria-controls="extension-ajax-href" aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>Ajax Href</span><span class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Optional <span
                   class="badge text-body border ms-1">Unstable</span></span>
-            </a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
-              href="../docs/0.1.x/core-extensions/state-navigation.htm">
-              <div class="d-flex justify-content-between gap-2">
-                <h4 class="h6">State Navigation</h4><span aria-hidden="true">↗</span>
+                </button>
+              </h4>
+              <div id="extension-ajax-href" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false" hidden>
+                <div class="px-4 pb-4" data-ae-present-motion>
+                  <p>Replace matching HTML regions from local responses.</p>
+                  <a href="../docs/0.1.x/core-extensions/optional/ajax-href.htm">Read documentation <span aria-hidden="true">↗</span></a>
+                </div>
               </div>
-              <p>Coordinate snapshots and browser history.</p><span class="extension-meta">Bundled</span>
-            </a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
-              href="../docs/0.1.x/core-extensions/feedback.htm">
-              <div class="d-flex justify-content-between gap-2">
-                <h4 class="h6">Feedback</h4><span aria-hidden="true">↗</span>
+            </div>
+          </article>
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop"
+                  data-ae-target="#extension-state-navigation" aria-controls="extension-state-navigation" aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>State Navigation</span><span class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Bundled</span>
+                </button>
+              </h4>
+              <div id="extension-state-navigation" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false" hidden>
+                <div class="px-4 pb-4" data-ae-present-motion>
+                  <p>Coordinate snapshots and browser history.</p>
+                  <a href="../docs/0.1.x/core-extensions/state-navigation.htm">Read documentation <span aria-hidden="true">↗</span></a>
+                </div>
               </div>
-              <p>Publish structured feedback and update messages.</p><span class="extension-meta">Bundled</span>
-            </a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
-              href="../docs/0.1.x/core-extensions/optional/progress.htm">
-              <div class="d-flex justify-content-between gap-2">
-                <h4 class="h6">Progress</h4><span aria-hidden="true">↗</span>
+            </div>
+          </article>
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop"
+                  data-ae-target="#extension-feedback" aria-controls="extension-feedback" aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>Feedback</span><span class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Bundled</span>
+                </button>
+              </h4>
+              <div id="extension-feedback" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false" hidden>
+                <div class="px-4 pb-4" data-ae-present-motion>
+                  <p>Publish structured feedback and update messages.</p>
+                  <a href="../docs/0.1.x/core-extensions/feedback.htm">Read documentation <span aria-hidden="true">↗</span></a>
+                </div>
               </div>
-              <p>Connect native progress and meter controls to events.</p><span class="extension-meta">Optional <span
+            </div>
+          </article>
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop"
+                  data-ae-target="#extension-progress" aria-controls="extension-progress" aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>Progress</span><span class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Optional <span
                   class="badge text-body border ms-1">Unstable</span></span>
-            </a></article>
+                </button>
+              </h4>
+              <div id="extension-progress" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false" hidden>
+                <div class="px-4 pb-4" data-ae-present-motion>
+                  <p>Connect native progress and meter controls to events.</p>
+                  <a href="../docs/0.1.x/core-extensions/optional/progress.htm">Read documentation <span aria-hidden="true">↗</span></a>
+                </div>
+              </div>
+            </div>
+          </article>
         </div>
         <h3 class="h6 text-body-secondary mb-3">Environment &amp; adaptation</h3>
         <div class="row g-3">
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
-              href="../docs/0.1.x/core-extensions/adaptive.htm">
-              <div class="d-flex justify-content-between gap-2">
-                <h4 class="h6">Adaptive</h4><span aria-hidden="true">↗</span>
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop"
+                  data-ae-target="#extension-adaptive" aria-controls="extension-adaptive" aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>Adaptive</span><span class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Bundled</span>
+                </button>
+              </h4>
+              <div id="extension-adaptive" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false" hidden>
+                <div class="px-4 pb-4" data-ae-present-motion>
+                  <p>Respond to element dimensions and aspect ratio.</p>
+                  <a href="../docs/0.1.x/core-extensions/adaptive.htm">Read documentation <span aria-hidden="true">↗</span></a>
+                </div>
               </div>
-              <p>Respond to element dimensions and aspect ratio.</p><span class="extension-meta">Bundled</span>
-            </a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
-              href="../docs/0.1.x/core-extensions/preference.htm">
-              <div class="d-flex justify-content-between gap-2">
-                <h4 class="h6">Preference</h4><span aria-hidden="true">↗</span>
+            </div>
+          </article>
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop"
+                  data-ae-target="#extension-preference" aria-controls="extension-preference" aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>Preference</span><span class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Bundled</span>
+                </button>
+              </h4>
+              <div id="extension-preference" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false" hidden>
+                <div class="px-4 pb-4" data-ae-present-motion>
+                  <p>Persist user choices and resolve device preferences.</p>
+                  <a href="../docs/0.1.x/core-extensions/preference.htm">Read documentation <span aria-hidden="true">↗</span></a>
+                </div>
               </div>
-              <p>Persist user choices and resolve device preferences.</p><span class="extension-meta">Bundled</span>
-            </a></article>
-          <article class="col-sm-6 col-xl-3"><a class="extension-link bg-body border rounded-2 p-4 h-100"
-              href="../docs/0.1.x/core-extensions/optional/pwa.htm">
-              <div class="d-flex justify-content-between gap-2">
-                <h4 class="h6">PWA</h4><span aria-hidden="true">↗</span>
-              </div>
-              <p>Installation guidance and Service Worker registration.</p><span class="extension-meta">Optional <span
+            </div>
+          </article>
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop"
+                  data-ae-target="#extension-pwa" aria-controls="extension-pwa" aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>PWA</span><span class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Optional <span
                   class="badge text-body border ms-1">Unstable</span></span>
-            </a></article>
+                </button>
+              </h4>
+              <div id="extension-pwa" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false" hidden>
+                <div class="px-4 pb-4" data-ae-present-motion>
+                  <p>Installation guidance and Service Worker registration.</p>
+                  <a href="../docs/0.1.x/core-extensions/optional/pwa.htm">Read documentation <span aria-hidden="true">↗</span></a>
+                </div>
+              </div>
+            </div>
+          </article>
         </div>
         <a class="btn btn-warning fw-semibold mt-4" href="../docs/0.1.x/core-extensions/index.htm">Explore All
           Extensions <span class="ms-2" aria-hidden="true">→</span></a>
