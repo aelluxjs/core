@@ -19,6 +19,21 @@ document.addEventListener("click", async event => {
 let highlightReady = null;
 let highlightStylesReady = false;
 
+function prepareCodeScrollboxes() {
+  document.querySelectorAll("pre:not([data-ae-scrollbox])").forEach(pre => {
+    pre.setAttribute("data-ae-scrollbox", "pointer");
+    pre.setAttribute("data-ae-scrollbar", "horizontal");
+    if (!pre.parentElement.classList.contains("code-wrapper")) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "code-wrapper";
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.append(pre);
+    }
+  });
+}
+
+$ae.on("BeforeMount", prepareCodeScrollboxes);
+
 function syncHighlightTheme() {
   if (!highlightStylesReady) return;
   const dark = $ae.currentPreference("color-scheme") === "dark";
@@ -126,3 +141,5 @@ document.querySelectorAll("[data-example-source]").forEach(details => {
     });
   });
 });
+
+prepareCodeScrollboxes();

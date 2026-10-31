@@ -13,6 +13,7 @@
   <script src="../dist/aellux.min.js"></script>
   <script>
     $ae.ext("preference");
+    $ae.ext("scrollbox", { loadStyle: true, loadWhen: "[data-ae-scrollbox]" });
     $ae.init({
       mode: "basic",
       syncBootstrapThemeTag: true

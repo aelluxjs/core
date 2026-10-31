@@ -122,6 +122,8 @@ html[data-ae-reduced-motion="reduced"] .hero-prism-light { display: none; animat
 .example-footer a { white-space: nowrap; }
 .code-block { font-size: .82rem; line-height: 1.8; }
 pre { max-width: 100%; overflow-x: auto; tab-size: 2; background: var(--bs-tertiary-bg); }
+.code-wrapper { min-width: 0; max-width: 100%; }
+pre[data-ae-scrollbox] > code { display: inline-block !important; min-width: 100%; overflow: visible !important; }
 pre code.hljs { background: var(--bs-tertiary-bg) !important; }
 code { overflow-wrap: anywhere; }
 pre code { overflow-wrap: normal; }
