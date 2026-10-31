@@ -35,7 +35,7 @@ body, main > section, body > footer {
   background-repeat: no-repeat;
 }
 .bg-body-tertiary {
-  background-image: linear-gradient(25deg,
+  background-image: linear-gradient(155deg,
     rgba(var(--bs-body-color-rgb), .035) 0%,
     transparent 50%,
     rgba(0, 62, 248, .05) 100%);
@@ -61,7 +61,7 @@ a { text-underline-offset: .22em; }
 .hero { position: relative; isolation: isolate; overflow: hidden; padding-block: clamp(4rem, 8vh, 7rem) 2rem; }
 .hero > .container { position: relative; z-index: 1; }
 .eyebrow { font: 500 .72rem/1.6 var(--bs-font-monospace); letter-spacing: .09em; text-transform: uppercase; }
-.status-dot { display: inline-block; width: .45rem; height: .45rem; margin-right: .5rem; vertical-align: .1em; }
+.status-dot { display: inline-block; width: .45rem; height: .45rem; margin-right: .5rem; }
 .hero-wordmark { font-size: clamp(3.7rem, 9vw, 7.5rem); font-weight: 650; line-height: 1; letter-spacing: -.05em; }
 .hero-wordmark > .brand { font-size: inherit; vertical-align: middle; }
 .hero-wordmark .brand-mark { width: 2em; height: 2em; font: inherit; font-size: .5em; letter-spacing: 0; }
