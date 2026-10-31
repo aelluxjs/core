@@ -38,12 +38,40 @@ a { text-underline-offset: .22em; }
 .main-nav a:hover, .footer-nav a:hover { text-decoration: underline; }
 .theme-controls .btn { font-size: .75rem; }
 .theme-controls .ae--active { background: var(--bs-warning); border-color: var(--bs-warning); color: #17191c; }
-.hero { padding-block: clamp(4rem, 8vw, 7rem) 2rem; }
+.hero { position: relative; isolation: isolate; overflow: hidden; padding-block: clamp(4rem, 8vw, 7rem) 2rem; }
+.hero > .container { position: relative; z-index: 1; }
 .eyebrow { font: 500 .72rem/1.6 var(--bs-font-monospace); letter-spacing: .09em; text-transform: uppercase; }
 .status-dot { display: inline-block; width: .45rem; height: .45rem; margin-right: .5rem; vertical-align: .1em; }
 .hero-wordmark { font-size: clamp(3.7rem, 9vw, 7.5rem); font-weight: 650; line-height: 1; letter-spacing: -.05em; }
 .hero-wordmark > .brand { font-size: inherit; vertical-align: middle; }
 .hero-wordmark .brand-mark { width: 2em; height: 2em; font: inherit; font-size: .5em; letter-spacing: 0; }
+.hero-prism {
+  position: relative;
+  display: inline-block;
+  isolation: isolate;
+}
+.hero-prism-text { position: relative; z-index: 1; }
+.hero-prism-light {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  mix-blend-mode: plus-lighter;
+  opacity: .45;
+  filter: url(#hero-prism-distortion);
+  animation: hero-prism 8s ease-in-out infinite alternate;
+}
+.hero-prism-yellow { color: #ffc107; }
+.hero-prism-blue { color: #2387ff; animation-direction: alternate-reverse; }
+@keyframes hero-prism {
+  0% { transform: translate(-.009em, -.003em); }
+  50% { transform: translate(-.002em, .006em); }
+  100% { transform: translate(.009em, .003em); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-prism-light { display: none; animation: none; }
+}
+html[data-ae-reduced-motion="reduced"] .hero-prism-light { display: none; animation: none; }
 .hero-tagline { font-size: clamp(1.9rem, 4vw, 3rem); font-weight: 450; letter-spacing: -.04em; line-height: 1.13; }
 .hero-description { max-width: 29rem; font-size: 1.12rem; line-height: 1.65; }
 .hero-code { background: var(--bs-body-bg); }

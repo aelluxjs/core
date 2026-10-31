@@ -29,6 +29,14 @@
 </head>
 
 <body>
+  <svg width="0" height="0" aria-hidden="true" focusable="false" style="position: absolute;">
+    <defs>
+      <filter id="hero-prism-distortion" x="-10%" y="-15%" width="120%" height="130%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.012 0.035" numOctaves="2" seed="7" result="prism-noise" />
+        <feDisplacementMap in="SourceGraphic" in2="prism-noise" scale="1.5" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </defs>
+  </svg>
   <a class="skip-link btn btn-warning" href="#main">Skip to content</a>
 
   <header class="site-header bg-body border-bottom">
@@ -60,7 +68,7 @@
                 aria-label="aellux.js home">
                 <span class="brand-mark bg-warning text-dark" aria-hidden="true">æ</span>
               </a>
-              aellux<span class="brand-suffix">.js</span>
+              <span class="hero-prism"><span class="hero-prism-light hero-prism-yellow" aria-hidden="true">aellux<span class="brand-suffix">.js</span></span><span class="hero-prism-light hero-prism-blue" aria-hidden="true">aellux<span class="brand-suffix">.js</span></span><span class="hero-prism-text">aellux<span class="brand-suffix">.js</span></span></span>
             </h1>
             <div class="d-flex flex-wrap gap-2">
               <a class="btn btn-warning px-4 py-2 fw-semibold" href="#getting-started">Get Started <span class="ms-2"
@@ -69,7 +77,7 @@
               <a class="btn btn-link text-body px-3 py-2" href="https://github.com/aelluxjs/core">GitHub <span
                   aria-hidden="true">↗</span></a>
             </div>
-            <p class="small text-body-secondary mt-4 mb-0">v0.1.0-beta.10 <span class="mx-2" aria-hidden="true">/</span>
+            <p class="small text-body-secondary mt-4 mb-0">v0.1.0 <span class="mx-2" aria-hidden="true">/</span>
               Open source <span class="mx-2" aria-hidden="true">/</span> Apache 2.0</p>
           </div>
           <div class="col-lg-5">
