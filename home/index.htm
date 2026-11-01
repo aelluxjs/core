@@ -33,22 +33,17 @@
 <body>
   <a class="skip-link btn btn-warning" href="#main">Skip to content</a>
 
-  <header class="site-header bg-body border-bottom d-none d-lg-block">
-    <div class="container d-flex flex-wrap align-items-center justify-content-between gap-3 py-3">
-      <nav class="main-nav d-flex flex-wrap align-items-center gap-3 gap-lg-4" aria-label="Main navigation">
-        <a href="#examples">Examples</a>
-        <a href="#extensions">Extensions</a>
-        <a href="../docs/0.1.x/index.htm">Documentation</a>
-        <a href="https://github.com/aelluxjs/core">GitHub <span aria-hidden="true">↗</span></a>
+  <div class="position-fixed z-2 p-4 bottom-0 w-100 d-flex align-items-center justify-content-center">
+    <div class="d-flex align-items-center justify-content-center bg-body p-2 px-4 rounded-1 w-100"
+      style="max-width: 800px;">
+      <nav data-ae-scrollbox="pointer" class="d-inline-flex align-items-start justify-content-start gap-1 px-2"
+        aria-label="Main navigation">
+        <a class="btn btn-outline-secondary" href="#">&uarr;</a>
+        <a class="btn btn-outline-secondary" href="#examples">Examples</a>
+        <a class="btn btn-outline-secondary" href="#extensions">Extensions</a>
       </nav>
-      <div class="theme-controls btn-group btn-group-sm" role="group" aria-label="Color theme"
-        data-ae-preference="color-scheme">
-        <button class="btn btn-outline-secondary" type="button" data-ae-option="light">Light</button>
-        <button class="btn btn-outline-secondary" type="button" data-ae-option="dark">Dark</button>
-        <button class="btn btn-outline-secondary" type="button" data-ae-option="auto">System</button>
-      </div>
     </div>
-  </header>
+  </div>
 
   <main id="main" tabindex="-1">
     <section class="hero bg-body-tertiary text-body" aria-labelledby="hero-title">
@@ -80,6 +75,12 @@
               <span class="mx-2 opacity-50" aria-hidden="true">▪</span>
               <a href="https://github.com/aelluxjs/core">GitHub <span aria-hidden="true">↗</span></a>
             </p>
+            <div class="theme-controls btn-group btn-group-sm mt-4" role="group" aria-label="Color theme"
+              data-ae-preference="color-scheme">
+              <button class="btn btn-outline-secondary" type="button" data-ae-option="light">Light</button>
+              <button class="btn btn-outline-secondary" type="button" data-ae-option="dark">Dark</button>
+              <button class="btn btn-outline-secondary" type="button" data-ae-option="auto">System</button>
+            </div>
           </div>
           <div class="col-md-5">
             <div class="hero-code border rounded-3 overflow-hidden">
