@@ -3,14 +3,19 @@ const status = document.getElementById("navigation-status");
 let pending = 0;
 
 function publish(type, message) {
-  // Feedback renders the message; the example supplies the live region and styles.
+  // Feedback renders the message; Bootstrap supplies the status colors.
   status.classList.remove("ae--feedback-busy", "ae--feedback-success", "ae--feedback-error");
+  status.classList.remove("text-body-secondary", "text-success-emphasis", "text-danger-emphasis");
+  status.classList.add({ busy: "text-body-secondary", success: "text-success-emphasis", error: "text-danger-emphasis" }[type]);
   $ae.ext.feedback.send({ type, message, target: boundary });
 }
 
 function updateNavigation() {
   document.querySelectorAll("a[data-ae-ajax-href]").forEach(link => {
-    if (new URL(link.href).pathname === location.pathname) link.setAttribute("aria-current", "page");
+    const current = new URL(link.href).pathname === location.pathname;
+    link.classList.toggle("btn-warning", current);
+    link.classList.toggle("btn-outline-secondary", !current);
+    if (current) link.setAttribute("aria-current", "page");
     else link.removeAttribute("aria-current");
   });
 }
@@ -18,6 +23,7 @@ function updateNavigation() {
 $ae.on("AjaxHrefStart", () => {
   pending += 1;
   boundary.setAttribute("aria-busy", "true");
+  document.getElementById("navigation-content").classList.add("opacity-50");
   publish("busy", "Loading the next panel…");
 });
 $ae.on("AjaxHrefLoaded", () => {
@@ -37,6 +43,7 @@ $ae.on("AjaxHrefComplete", () => {
   // Completion also covers failed, aborted and superseded attempts; it is not success.
   pending = Math.max(0, pending - 1);
   boundary.setAttribute("aria-busy", String(pending > 0));
+  document.getElementById("navigation-content").classList.toggle("opacity-50", pending > 0);
 });
 $ae.on("Ready", () => {
   updateNavigation();

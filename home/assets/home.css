@@ -29,7 +29,7 @@
   --bs-link-hover-color-rgb: 255, 218, 106;
 }
 
-h1, h2, h3, h4, h5, h6 { font-family: "Geist", var(--bs-font-sans-serif) !important; }
+h1, h2, h3, h4, h5, h6 { font-family: var(--bs-heading-font-family) !important; }
 .btn-outline-secondary {
   --bs-btn-color: var(--home-secondary);
   --bs-btn-border-color: var(--home-secondary);

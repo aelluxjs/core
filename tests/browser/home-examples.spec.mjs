@@ -211,7 +211,7 @@ test("superseded Ajax navigation does not show an error or clear active loading"
 
 test("homepage embeds four themed demos and displays the exact runnable source", async ({ page }) => {
   await page.goto("/home/index.htm");
-  await expect(page.locator(".hero-tagline")).toHaveText("UX Made Easy.");
+  await expect(page.locator(".hero .eyebrow")).toContainText("UX Made Easy");
   await expect(page.locator(".brand-mark")).toHaveCSS("font-family", /Geist/);
   await expect(page.getByRole("button", { name: "System", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator("iframe.example-frame")).toHaveCount(4);
@@ -229,13 +229,14 @@ test("homepage embeds four themed demos and displays the exact runnable source",
     await expect(frame.locator("html")).toHaveAttribute("data-bs-theme", "dark");
   }
   const source = page.locator('[data-example-source="carousel"]');
-  await expect(page.locator('[data-ae-dep^="highlightjs"]')).toHaveCount(0);
-  await source.locator(":scope > summary").click();
-  await expect(page.locator('[data-ae-dep^="highlightjs"]')).toHaveCount(0);
+  await source.locator(":scope > .source-toggle").click();
+  await expect(source.locator(".source-file > .source-toggle")).toHaveText([
+    "examples/carousel.htm", "examples/carousel.js", "assets/home.css"
+  ]);
   for (const file of await source.locator(".source-file").all()) {
-    const path = await file.locator("summary").textContent();
-    await file.locator("summary").click();
-    await expect(file.locator("button")).toBeEnabled();
+    const path = await file.locator(":scope > .source-toggle").textContent();
+    await file.locator(":scope > .source-toggle").click();
+    await expect(file.getByRole("button", { name: `Copy ${path}`, exact: true })).toBeEnabled();
     await expect(file.locator("code")).toHaveAttribute("data-highlighted", "yes");
     expect(await file.locator('code [class^="hljs-"]').count()).toBeGreaterThan(0);
     expect(await file.locator("code").textContent()).toBe(await (await page.request.get(`/home/${path}`)).text());

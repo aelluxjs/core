@@ -14,18 +14,21 @@
     });
   </script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-  <link rel="stylesheet" href="../assets/examples.css">
+  <link rel="stylesheet" href="../assets/home.css">
+  <style>
+    html[data-ae-reduced-motion="reduced"] { --viewport-opacity: 1; --viewport-transform: none; }
+  </style>
 </head>
-<body>
+<body class="p-3 small min-vh-100" style="--bs-heading-font-family: var(--bs-font-sans-serif);">
   <main aria-label="Scroll-Driven Experience example">
     <h1 class="visually-hidden">Scroll-Driven Experience</h1>
-    <p class="demo-hint" id="viewport-instructions">Scroll horizontally inside this area. Visibility controls opacity and scale; position adds a subtle horizontal shift.</p>
-    <div class="viewport-scroll border rounded-2 bg-body-tertiary" tabindex="0" role="region" aria-label="Scroll-reactive panels" aria-describedby="viewport-instructions">
-      <article class="viewport-step" data-ae-viewport="x" data-ae-viewport-target="viewport-card-1"><div id="viewport-card-1" class="viewport-card card"><span class="font-monospace text-body-secondary small">01 / ENTER</span><h2 class="h5 mt-3">From geometry to CSS.</h2><p class="mb-0 text-body-secondary small">Viewport measures this panel relative to its nearest scroll container.</p></div></article>
-      <article class="viewport-step" data-ae-viewport="x" data-ae-viewport-target="viewport-card-2"><div id="viewport-card-2" class="viewport-card card"><span class="font-monospace text-body-secondary small">02 / MOVE</span><h2 class="h5 mt-3">Position keeps changing.</h2><p class="mb-0 text-body-secondary small">The normalized X position stays reactive even when the panel is fully visible.</p></div></article>
-      <article class="viewport-step" data-ae-viewport="x" data-ae-viewport-target="viewport-card-3"><div id="viewport-card-3" class="viewport-card card"><span class="font-monospace text-body-secondary small">03 / LEAVE</span><h2 class="h5 mt-3">Let the styles respond.</h2><p class="mb-0 text-body-secondary small">CSS consumes the published values. No custom position loop is needed.</p></div></article>
+    <p class="small text-body-secondary" id="viewport-instructions">Scroll horizontally inside this area. Visibility controls opacity and scale; position adds a subtle horizontal shift.</p>
+    <div class="viewport-scroll d-flex align-items-center gap-3 overflow-x-auto overflow-y-hidden py-3 px-2 border rounded-2 bg-body-tertiary" style="height: 20rem; overscroll-behavior-x: contain;" tabindex="0" role="region" aria-label="Scroll-reactive panels" aria-describedby="viewport-instructions">
+      <article class="viewport-step py-2" style="flex: 0 0 82%; min-width: 0;" data-ae-viewport="x" data-ae-viewport-target="viewport-card-1"><div id="viewport-card-1" class="card p-4 border-start border-4 border-warning" style="min-height: 10rem; opacity: var(--viewport-opacity, calc(.25 + var(--ae-viewport-visible, 0) * .75)); transform: var(--viewport-transform, translateX(calc(var(--ae-viewport-x, 0) * .25rem)) scale(calc(.94 + var(--ae-viewport-visible, 0) * .06)));"><span class="font-monospace text-body-secondary small">01 / ENTER</span><h2 class="h5 mt-3">From geometry to CSS.</h2><p class="mb-0 text-body-secondary small">Viewport measures this panel relative to its nearest scroll container.</p></div></article>
+      <article class="viewport-step py-2" style="flex: 0 0 82%; min-width: 0;" data-ae-viewport="x" data-ae-viewport-target="viewport-card-2"><div id="viewport-card-2" class="card p-4 border-start border-4 border-warning" style="min-height: 10rem; opacity: var(--viewport-opacity, calc(.25 + var(--ae-viewport-visible, 0) * .75)); transform: var(--viewport-transform, translateX(calc(var(--ae-viewport-x, 0) * .25rem)) scale(calc(.94 + var(--ae-viewport-visible, 0) * .06)));"><span class="font-monospace text-body-secondary small">02 / MOVE</span><h2 class="h5 mt-3">Position keeps changing.</h2><p class="mb-0 text-body-secondary small">The normalized X position stays reactive even when the panel is fully visible.</p></div></article>
+      <article class="viewport-step py-2" style="flex: 0 0 82%; min-width: 0;" data-ae-viewport="x" data-ae-viewport-target="viewport-card-3"><div id="viewport-card-3" class="card p-4 border-start border-4 border-warning" style="min-height: 10rem; opacity: var(--viewport-opacity, calc(.25 + var(--ae-viewport-visible, 0) * .75)); transform: var(--viewport-transform, translateX(calc(var(--ae-viewport-x, 0) * .25rem)) scale(calc(.94 + var(--ae-viewport-visible, 0) * .06)));"><span class="font-monospace text-body-secondary small">03 / LEAVE</span><h2 class="h5 mt-3">Let the styles respond.</h2><p class="mb-0 text-body-secondary small">CSS consumes the published values. No custom position loop is needed.</p></div></article>
     </div>
-    <p class="demo-hint mt-2 mb-0">Reduced motion keeps the panels still and fully opaque.</p>
+    <p class="small text-body-secondary mt-2 mb-0">Reduced motion keeps the panels still and fully opaque.</p>
   </main>
 </body>
 </html>

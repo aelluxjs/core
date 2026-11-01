@@ -32,7 +32,11 @@ only their required Extensions and Preference. The top-level boot option
 `syncBootstrapThemeTag` synchronizes each preview immediately at initialization;
 Preference publishes later changes and manages option-button `aria-pressed`.
 Storage events synchronize separate windows on the same origin. Bootstrap 5.3.8
-CSS provides presentation. Bootstrap JavaScript is not loaded.
+CSS utilities provide layout, spacing, typography and visual states. Examples
+reuse `../assets/home.css` for shared colors, borders and focus indicators, with
+inline CSS only for dimensions and Extension-driven effects that Bootstrap does
+not express. There is no dedicated examples stylesheet. Bootstrap JavaScript is
+not loaded.
 
 Extension registration and `$ae.init()` are explicit inline scripts in each
 document's `<head>`, immediately after the boot script and before stylesheets.
@@ -41,9 +45,9 @@ install DOM interaction handlers before the runtime's initial mount; Viewport
 needs no separate JavaScript file. Source viewing includes each document's
 complete inline configuration.
 
-The homepage's native source disclosures fetch these exact HTML, JavaScript and
-CSS files; no separately maintained code excerpts are used. The first opened file
-lazily loads Highlight.js through `$ae.dep()`, using the same 11.12 CDN series and
+The homepage's source disclosures fetch these exact HTML and JavaScript files,
+plus the shared `home.css`; no separately maintained code excerpts are used.
+Highlight.js loads through `$ae.dep()`, using the same 11.12 CDN series and
 GitHub light/dark styles as Docweaver. Later files share the cached dependencies;
 Preference changes switch the active stylesheet. Highlighted markup preserves the
 original text for copying. Source remains readable if highlighting is unavailable.

@@ -97,7 +97,7 @@ document.querySelectorAll("[data-example-source]").forEach(details => {
   details.append(source.panel);
   const files = [`examples/${example}.htm`];
   if (example !== "viewport") files.push(`examples/${example}.js`);
-  files.push("assets/examples.css");
+  files.push("assets/home.css");
   if (example === "navigation") files.splice(1, 0, "examples/navigation-details.htm", "examples/navigation-activity.htm");
   const standalone = document.createElement("a");
   standalone.href = files[0];
