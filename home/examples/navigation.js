@@ -49,7 +49,7 @@ $ae.on("Ready", () => {
   updateNavigation();
   document.getElementById("navigation-error").disabled = false;
 });
-document.getElementById("navigation-error").addEventListener("click", () => {
+$ae.onEvent(document.getElementById("navigation-error"), "$click", () => {
   // Deliberately request a nonexistent document to demonstrate a real HTTP failure.
   const url = new URL("unavailable-demo.htm", location.href).href;
   $ae.ext.ajaxHref.load(url, "#navigation-content", { ignoreHistory: true }).catch(() => {

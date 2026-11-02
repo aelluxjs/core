@@ -5,7 +5,9 @@ Run `node tests/browser/server.mjs` from the repository root and open
 require same-origin requests. Each `.htm` file also runs as a standalone page.
 
 - `carousel.htm`: Scrollbox owns pointer dragging and native touch scrolling;
-  Scrollbox Snap owns alignment, selection and controller navigation.
+  Scrollbox Snap owns alignment, selection and controller navigation. Anchor
+  follows the focused card with an ease-in-out transition; a separate inner
+  square pulses through CSS without changing the placement transform.
 - `viewport.htm`: Viewport measures wrappers and publishes CSS values to separate
   visual children, avoiding feedback from their scale and translation. Reduced
   motion disables the visual effects.

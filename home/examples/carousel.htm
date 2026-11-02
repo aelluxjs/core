@@ -1,39 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Interactive Carousel — aellux.js</title>
-  <script src="../../dist/aellux.min.js"></script>
-  <script>
-    $ae.ext("preference");
-    $ae.ext("scrollbox", { loadStyle: true });
-    $ae.ext("scrollbox-snap");
-    $ae.init({
-      mode: "basic",
-      syncBootstrapThemeTag: true
-    });
-  </script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-  <link rel="stylesheet" href="../assets/home.css">
-  <script src="carousel.js" defer></script>
-</head>
-<body class="p-3 small min-vh-100" style="--bs-heading-font-family: var(--bs-font-sans-serif);">
-  <main aria-label="Interactive Carousel example" style="min-width: 0;">
-    <h1 class="visually-hidden">Interactive Carousel</h1>
-    <p class="small text-body-secondary">Drag the cards, swipe on touch, or use the navigation buttons.</p>
-    <div id="gallery" class="d-flex gap-3 overflow-x-auto p-1" style="overscroll-behavior-x: contain;" data-ae-scrollbox="pointer" data-ae-scrollbox-snap tabindex="0" role="region" aria-label="Behavior cards" aria-roledescription="carousel">
-      <article class="card p-4" style="flex: 0 0 82%; min-width: 0; min-height: 15rem; opacity: calc(.65 + var(--ae-snap-focus, 0) * .35);" data-ae-snap-item><span class="display-6 font-monospace fw-medium lh-base text-body-secondary">01</span><h2 class="h4 text-break mt-auto">Declarative.</h2><p class="text-body-secondary mb-0">Start with HTML attributes. Describe what your interface should do.</p></article>
-      <article class="card p-4" style="flex: 0 0 82%; min-width: 0; min-height: 15rem; opacity: calc(.65 + var(--ae-snap-focus, 0) * .35);" data-ae-snap-item><span class="display-6 font-monospace fw-medium lh-base text-body-secondary">02</span><h2 class="h4 text-break mt-auto">Reusable.</h2><p class="text-body-secondary mb-0">Use a focused behavior wherever the same interaction belongs.</p></article>
-      <article class="card p-4" style="flex: 0 0 82%; min-width: 0; min-height: 15rem; opacity: calc(.65 + var(--ae-snap-focus, 0) * .35);" data-ae-snap-item><span class="display-6 font-monospace fw-medium lh-base text-body-secondary">03</span><h2 class="h4 text-break mt-auto">Composable.</h2><p class="text-body-secondary mb-0">Combine scrolling and alignment through independent Extensions.</p></article>
-      <article class="card p-4" style="flex: 0 0 82%; min-width: 0; min-height: 15rem; opacity: calc(.65 + var(--ae-snap-focus, 0) * .35);" data-ae-snap-item><span class="display-6 font-monospace fw-medium lh-base text-body-secondary">04</span><h2 class="h4 text-break mt-auto">Adaptable.</h2><p class="text-body-secondary mb-0">Keep native touch scrolling alongside pointer dragging.</p></article>
-      <article class="card p-4" style="flex: 0 0 82%; min-width: 0; min-height: 15rem; opacity: calc(.65 + var(--ae-snap-focus, 0) * .35);" data-ae-snap-item><span class="display-6 font-monospace fw-medium lh-base text-body-secondary">05</span><h2 class="h4 text-break mt-auto">Your design.</h2><p class="text-body-secondary mb-0">AelluxJS supplies the behavior. You choose the presentation.</p></article>
-    </div>
-    <div class="d-flex align-items-center justify-content-between gap-2 mt-3">
-      <button id="previous-card" class="btn btn-sm btn-outline-secondary" type="button" aria-controls="gallery" disabled>← Previous</button>
-      <output id="carousel-position" class="small text-body-secondary" aria-live="polite">Card 1 of 5</output>
-      <button id="next-card" class="btn btn-sm btn-warning" type="button" aria-controls="gallery" disabled>Next →</button>
-    </div>
-  </main>
-</body>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Interactive Carousel — aellux.js</title>
+    <script src="../../dist/aellux.min.js"></script>
+    <script>
+      $ae.ext("preference");
+      $ae.ext("scrollbox", { loadStyle: true });
+      $ae.ext("scrollbox-snap");
+      $ae.ext("anchor", { loadStyle: true });
+      $ae.init({
+        mode: "basic",
+        syncBootstrapThemeTag: true
+      });
+    </script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous">
+    <link rel="stylesheet" href="../assets/home.css">
+    <script src="carousel.js" defer></script>
+  </head>
+  <body class="p-3 small min-vh-100" style="--bs-heading-font-family: var(--bs-font-sans-serif);">
+    <main aria-label="Interactive Carousel example" style="min-width: 0;">
+      <h1 class="visually-hidden">Interactive Carousel</h1>
+      <p class="small text-body-secondary">Drag the cards, swipe on touch, or use the navigation buttons.</p>
+      <div id="carousel-stage" class="position-relative">
+        <style>
+          #gallery > [data-ae-snap-item] {
+            flex: 0 0 82%;
+            min-width: 0;
+            min-height: 15rem;
+            opacity: calc(.65 + var(--ae-snap-focus, 0) * .35);
+          }
+          #carousel-focus {
+            contain: none;
+            --ae-anchor-switch-duration: 200ms;
+            --ae-anchor-switch-ease: ease-in-out;
+          }
+
+          #carousel-focus > div {
+            animation: carousel-focus-pulse .5s ease-in-out infinite alternate;
+          }
+
+          @keyframes carousel-focus-pulse {
+            from { transform: scale(.98); }
+            to { transform: scale(.99); }
+          }
+
+          html[data-ae-reduced-motion="reduced"] #carousel-focus > div {
+            animation: none;
+          }
+        </style>
+        <div
+          id="gallery"
+          class="d-flex gap-3 overflow-x-auto p-1"
+          data-ae-scrollbox="pointer"
+          data-ae-scrollbox-snap
+          style="overscroll-behavior-x: contain;"
+          tabindex="0"
+          role="region"
+          aria-label="Behavior cards"
+          aria-roledescription="carousel">
+          <article
+            id="carousel-card-1"
+            class="card p-4"
+            data-ae-snap-item>
+            <span class="display-6 font-monospace fw-medium lh-base text-body-secondary">01</span>
+            <h2 class="h4 text-break mt-auto">Declarative.</h2>
+            <p class="text-body-secondary mb-0">
+              Start with HTML attributes. Describe what your interface should do.
+            </p>
+          </article>
+          <article
+            id="carousel-card-2"
+            class="card p-4"
+            data-ae-snap-item>
+            <span class="display-6 font-monospace fw-medium lh-base text-body-secondary">02</span>
+            <h2 class="h4 text-break mt-auto">Reusable.</h2>
+            <p class="text-body-secondary mb-0">
+              Use a focused behavior wherever the same interaction belongs.
+            </p>
+          </article>
+          <article
+            id="carousel-card-3"
+            class="card p-4"
+            data-ae-snap-item>
+            <span class="display-6 font-monospace fw-medium lh-base text-body-secondary">03</span>
+            <h2 class="h4 text-break mt-auto">Composable.</h2>
+            <p class="text-body-secondary mb-0">
+              Combine scrolling and alignment through independent Extensions.
+            </p>
+          </article>
+          <article
+            id="carousel-card-4"
+            class="card p-4"
+            data-ae-snap-item>
+            <span class="display-6 font-monospace fw-medium lh-base text-body-secondary">04</span>
+            <h2 class="h4 text-break mt-auto">Adaptable.</h2>
+            <p class="text-body-secondary mb-0">Keep native touch scrolling alongside pointer dragging.</p>
+          </article>
+          <article
+            id="carousel-card-5"
+            class="card p-4"
+            data-ae-snap-item>
+            <span class="display-6 font-monospace fw-medium lh-base text-body-secondary">05</span>
+            <h2 class="h4 text-break mt-auto">Your design.</h2>
+            <p class="text-body-secondary mb-0">AelluxJS supplies the behavior. You choose the presentation.</p>
+          </article>
+          <div
+            id="carousel-focus"
+            class="z-2 pe-none overflow-visible"
+            data-ae-anchor="center:center"
+            data-ae-anchor-match="width height"
+            data-ae-anchor-target="carousel-card-1"
+            aria-hidden="true">
+            <div class="w-100 h-100 border border-5 border-warning bg-transparent"></div>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center justify-content-between gap-2 mt-3">
+        <button
+          id="previous-card"
+          class="btn btn-sm btn-outline-secondary"
+          type="button"
+          aria-controls="gallery"
+          disabled>
+          ← Previous
+        </button>
+        <output id="carousel-position" class="small text-body-secondary" aria-live="polite">
+          Card 1 of 5
+        </output>
+        <button id="next-card" class="btn btn-sm btn-warning" type="button" aria-controls="gallery" disabled>
+          Next →
+        </button>
+      </div>
+    </main>
+  </body>
 </html>
