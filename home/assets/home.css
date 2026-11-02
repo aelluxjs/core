@@ -31,6 +31,20 @@
 }
 
 h1, h2, h3, h4, h5, h6 { font-family: var(--bs-heading-font-family) !important; }
+:root:not([data-bs-theme="dark"]) .hero-get-started {
+  --bs-btn-color: #000;
+  --bs-btn-bg: var(--bs-warning);
+  --bs-btn-border-color: var(--bs-warning);
+  --bs-btn-hover-color: #000;
+  --bs-btn-hover-bg: #ffca2c;
+  --bs-btn-hover-border-color: #ffc720;
+  --bs-btn-active-color: #000;
+  --bs-btn-active-bg: #ffcd39;
+  --bs-btn-active-border-color: #ffc720;
+  --bs-btn-disabled-color: #000;
+  --bs-btn-disabled-bg: var(--bs-warning);
+  --bs-btn-disabled-border-color: var(--bs-warning);
+}
 .btn-outline-secondary {
   --bs-btn-color: var(--home-secondary);
   --bs-btn-border-color: var(--home-secondary);
