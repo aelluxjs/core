@@ -1439,6 +1439,7 @@
             lastPlacement: null,
             switchTimer: null,
             interruptSwitch: false,
+            scrollRevision: 0,
             layoutId: nextLayoutId++,
             styleLayoutId: nextLayoutId++,
             layoutUntil: 0,
@@ -1515,10 +1516,11 @@
           AelluxJs2.waitLayout.cancel(state.styleLayoutId);
           await AelluxJs2.waitLayout.update(state.styleLayoutId, deactivate, [element, state, memory]);
         }
-        function scheduleUpdate() {
+        function scheduleUpdate(event) {
           if (!anchors.size) return;
           for (const [element, state] of anchors) {
-            state.interruptSwitch = true;
+            if ((event == null ? void 0 : event.type) === "scroll") state.scrollRevision++;
+            else state.interruptSwitch = true;
             scheduleAnchor(element);
           }
         }
@@ -1754,7 +1756,8 @@
             const previous = state.lastPlacement;
             const switching = previous && previous.target !== placement.target;
             const moved = !previous || previous.signature !== placement.signature;
-            if (switching && placement.duration > 0 && !state.interruptSwitch) {
+            const scrollMoved = moved && state.switchTimer !== null && (previous == null ? void 0 : previous.scrollRevision) !== placement.scrollRevision;
+            if ((switching || scrollMoved) && placement.duration > 0 && !state.interruptSwitch) {
               startSwitch(element, state, placement.duration);
             } else if (moved || state.interruptSwitch || !placement.duration) stopSwitch(element, state);
             state.interruptSwitch = false;
@@ -1766,6 +1769,7 @@
           if (!applied && anchors.get(element) === state) return updateAnchor(element, ensureLatest);
         }
         function readPlacement(element, target, candidates, measure) {
+          var _a;
           const reference = element.offsetParent;
           target = target || reference;
           if (target && isInvisible(target)) return { hidden: true, target, reference };
@@ -1790,7 +1794,7 @@
           const targetRect = toReference(target.getBoundingClientRect(), reference, referenceRect, scaleX, scaleY);
           const selfRect = element.getBoundingClientRect();
           const projectSize = (axis, actual, desired) => {
-            var _a;
+            var _a2;
             if (!tokens.includes(axis) || element.style[axis]) return actual;
             const previous = parseFloat(element.style.getPropertyValue(`--ae-anchor-target-${axis}`)) || 0;
             const sides = axis === "width" ? ["Left", "Right"] : ["Top", "Bottom"];
@@ -1799,7 +1803,7 @@
             const minimum = Math.max(borderBox ? extra : 0, parseFloat(style.getPropertyValue(`min-${axis}`)) || 0);
             const maximum = parseFloat(style.getPropertyValue(`max-${axis}`));
             const constrain = (value) => Math.max(minimum, Math.min(Number.isFinite(maximum) ? maximum : Infinity, value));
-            return !((_a = anchors.get(element)) == null ? void 0 : _a.switchTimer) && Math.abs(parseFloat(style[axis]) - constrain(previous)) > 0.5 ? actual : constrain(desired) + (borderBox ? 0 : extra);
+            return !((_a2 = anchors.get(element)) == null ? void 0 : _a2.switchTimer) && Math.abs(parseFloat(style[axis]) - constrain(previous)) > 0.5 ? actual : constrain(desired) + (borderBox ? 0 : extra);
           };
           const selfWidth = projectSize("width", selfRect.width / scaleX, targetRect.width);
           const selfHeight = projectSize("height", selfRect.height / scaleY, targetRect.height);
@@ -1838,6 +1842,7 @@
             selected,
             opacity,
             duration,
+            scrollRevision: ((_a = anchors.get(element)) == null ? void 0 : _a.scrollRevision) || 0,
             width: targetRect.width,
             height: targetRect.height,
             signature: [selected.x, selected.y, targetRect.width, targetRect.height, ...selected.self].join("/")

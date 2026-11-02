@@ -209,6 +209,158 @@ test("superseded Ajax navigation does not show an error or clear active loading"
   await expect(page.locator("#navigation-status")).not.toHaveClass(/ae--feedback-error/);
 });
 
+for (const reducedMotion of ["no-preference", "reduce"]) {
+  test(`main navigation appears when main leaves the top and hides on return (${reducedMotion})`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion });
+    await page.goto("/home/index.htm");
+    await expect.poll(() => page.locator("#main").evaluate(element =>
+      element.style.getPropertyValue("--ae-viewport-y"))).not.toBe("");
+    const wrapper = page.locator("#main-navigation-wrapper");
+    await expect(wrapper).toHaveJSProperty("hidden", true);
+    await expect(wrapper).toHaveCSS("display", "none");
+    await page.evaluate(() => {
+      window.navigationTransitions = { pop: 0, unpop: 0 };
+      for (const [eventName, key] of [["BeforePop", "pop"], ["BeforeUnpop", "unpop"]]) {
+        $ae.on(eventName, event => {
+          if (event.target.id === "main-navigation-wrapper") navigationTransitions[key]++;
+        });
+      }
+    });
+    const scrollAndSample = top => wrapper.evaluate(async (element, top) => {
+      window.scrollTo({ top, behavior: "instant" });
+      const frames = [];
+      const deadline = performance.now() + 3000;
+      do {
+        const matrix = new DOMMatrix(getComputedStyle(element).transform);
+        frames.push({ hidden: element.hidden, scaleY: matrix.m22, translateY: matrix.m42,
+          closing: element.classList.contains("ae--unpopping") });
+        if (top > 0 ? element.classList.contains("ae--pop") : element.hidden) return frames;
+        await new Promise(requestAnimationFrame);
+      } while (performance.now() < deadline);
+      throw new Error("Navigation did not reach its requested visibility");
+    }, top);
+    const opening = await scrollAndSample(1);
+    if (reducedMotion === "no-preference") {
+      expect(opening.some(frame => !frame.hidden && frame.scaleY > .85 && frame.scaleY < .99 && frame.translateY > 0)).toBe(true);
+    }
+    await expect(wrapper).toHaveClass(/(?:^|\s)ae--pop(?:\s|$)/);
+    await expect(wrapper).toHaveJSProperty("hidden", false);
+    await page.evaluate(async () => {
+      window.scrollTo({ top: 20, behavior: "instant" });
+      await $ae.mountManager.update(document.getElementById("main"), "viewport");
+    });
+    expect(await page.evaluate(() => navigationTransitions.pop)).toBe(1);
+    const closing = await scrollAndSample(0);
+    if (reducedMotion === "no-preference") {
+      expect(closing.some(frame => !frame.hidden && frame.closing && frame.scaleY > .85 && frame.scaleY < .99 && frame.translateY > 0)).toBe(true);
+    }
+    await expect(wrapper).toHaveJSProperty("hidden", true);
+    await expect(wrapper).toHaveCSS("display", "none");
+    expect(await page.evaluate(() => navigationTransitions)).toEqual({ pop: 1, unpop: 1 });
+  });
+}
+
+test("main navigation opens on an initial section fragment and remains open after outside clicks", async ({ page }) => {
+  await page.goto("/home/index.htm#examples");
+  const wrapper = page.locator("#main-navigation-wrapper");
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
+  await expect(wrapper).toHaveClass(/(?:^|\s)ae--pop(?:\s|$)/);
+  await expect(wrapper).toHaveJSProperty("hidden", false);
+  await page.evaluate(() => {
+    window.navigationCloseRequests = 0;
+    $ae.on("BeforeUnpop", event => {
+      if (event.target.id === "main-navigation-wrapper") navigationCloseRequests++;
+    });
+  });
+  await page.locator("#examples-title").click();
+  expect(await page.evaluate(() => navigationCloseRequests)).toBe(0);
+  await expect(wrapper).toHaveClass(/(?:^|\s)ae--pop(?:\s|$)/);
+});
+
+test("homepage section Viewports select when the block top crosses the screen midpoint and restore Back to top", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/home/index.htm");
+  await expect.poll(() => page.evaluate(() => !!$ae.ext.viewport?.initialized)).toBe(true);
+  const marker = page.locator('nav[aria-label="Main navigation"] [data-ae-anchor]');
+  await expect(page.locator("section.hero")).toHaveAttribute("data-ae-viewport", "y");
+  await expect(page.locator("#item1")).toHaveAttribute("href", "#main");
+  await page.evaluate(() => {
+    window.homeViewportSnapshots = {};
+    document.addEventListener($ae.eventName("ViewportChange"), event => {
+      if (event.target.id) homeViewportSnapshots[event.target.id] = event.detail;
+    });
+  });
+  let previous = "item1";
+  for (const [id, target] of [["examples", "item2"], ["extensions", "item3"]]) {
+    const section = page.locator(`#${id}`);
+    const title = page.locator(`#${id}-title`);
+    await expect(section).toHaveAttribute("data-ae-viewport", "y");
+    await section.evaluate(element => window.scrollTo({
+      top: scrollY + element.getBoundingClientRect().top - innerHeight + 20, behavior: "instant"
+    }));
+    await expect.poll(() => section.evaluate(element => Number(element.style.getPropertyValue("--ae-viewport-visible")))).toBeGreaterThan(0);
+    expect(await section.evaluate(element => Number(element.style.getPropertyValue("--ae-viewport-visible")))).toBeLessThan(1);
+    await expect(marker).toHaveAttribute("data-ae-anchor-target", previous);
+    await section.evaluate(element => window.scrollTo({
+      top: scrollY + element.getBoundingClientRect().top - innerHeight / 2 - 10, behavior: "instant"
+    }));
+    await expect.poll(() => page.evaluate(id => homeViewportSnapshots[id]?.y1, id)).toBeCloseTo(.025, 2);
+    await expect(marker).toHaveAttribute("data-ae-anchor-target", previous);
+    await section.evaluate(element => window.scrollTo({
+      top: scrollY + element.getBoundingClientRect().top - innerHeight / 2 + 10, behavior: "instant"
+    }));
+    await expect.poll(() => page.evaluate(id => homeViewportSnapshots[id]?.y1, id)).toBeCloseTo(-.025, 2);
+    await expect(marker).toHaveAttribute("data-ae-anchor-target", target);
+    expect(await title.evaluate(element => element.getBoundingClientRect().top > innerHeight / 2)).toBe(true);
+    expect(await section.evaluate(element => element.getBoundingClientRect().bottom > innerHeight)).toBe(true);
+    await section.evaluate(element => window.scrollTo({
+      top: scrollY + element.getBoundingClientRect().top - 50, behavior: "instant"
+    }));
+    await expect(marker).toHaveAttribute("data-ae-anchor-target", target);
+    await expect.poll(() => marker.evaluate(element => {
+      const a = element.getBoundingClientRect();
+      const b = document.getElementById(element.dataset.aeAnchorTarget).getBoundingClientRect();
+      return Math.max(Math.abs(a.left - b.left), Math.abs(a.top - b.top),
+        Math.abs(a.width - b.width), Math.abs(a.height - b.height));
+    })).toBeLessThan(1);
+    previous = target;
+  }
+  await page.locator("#examples").evaluate(element => window.scrollTo({
+    top: scrollY + element.getBoundingClientRect().top - 50, behavior: "instant"
+  }));
+  await expect(marker).toHaveAttribute("data-ae-anchor-target", "item2");
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+  await expect.poll(() => page.locator("section.hero").evaluate(element => Number(element.style.getPropertyValue("--ae-viewport-visible")))).toBeGreaterThan(0);
+  await expect(marker).toHaveAttribute("data-ae-anchor-target", "item1");
+});
+
+test("homepage section Viewports work on a short viewport and link clicks wait for visibility to select", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 320 });
+  await page.goto("/home/index.htm");
+  await expect.poll(() => page.evaluate(() => !!$ae.ext.viewport?.initialized)).toBe(true);
+  const marker = page.locator('nav[aria-label="Main navigation"] [data-ae-anchor]');
+  for (const id of ["examples", "extensions"]) {
+    const section = page.locator(`#${id}`);
+    await section.evaluate(element => window.scrollTo({
+      top: scrollY + element.getBoundingClientRect().top - 20, behavior: "instant"
+    }));
+    await expect.poll(() => section.evaluate(element => Number(element.style.getPropertyValue("--ae-viewport-visible")))).toBeGreaterThan(0);
+    await expect(marker).toHaveAttribute("data-ae-anchor-target", id === "examples" ? "item2" : "item3");
+  }
+  await page.locator("#item1").click();
+  await expect(marker).toHaveAttribute("data-ae-anchor-target", "item1");
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+  await expect(page).toHaveURL(/#main$/);
+  const immediateTarget = await page.locator("#item3").evaluate(link => {
+    link.click();
+    return document.querySelector('nav[aria-label="Main navigation"] [data-ae-anchor]').dataset.aeAnchorTarget;
+  });
+  expect(immediateTarget).toBe("item1");
+  await expect.poll(() => page.locator("#extensions").evaluate(element =>
+    Number(element.style.getPropertyValue("--ae-viewport-visible")))).toBeGreaterThan(0);
+  await expect(marker).toHaveAttribute("data-ae-anchor-target", "item3");
+});
+
 test("homepage embeds four themed demos and displays the exact runnable source", async ({ page }) => {
   await page.goto("/home/index.htm");
   await expect(page.locator(".hero .eyebrow")).toContainText("UX Made Easy");

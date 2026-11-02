@@ -359,6 +359,7 @@
         lastPlacement: null,
         switchTimer: null,
         interruptSwitch: false,
+        scrollRevision: 0,
         layoutId: nextLayoutId++,
         styleLayoutId: nextLayoutId++,
         layoutUntil: 0,
@@ -454,13 +455,14 @@
       }));
       return _unmountAnchor.apply(this, arguments);
     }
-    function scheduleUpdate() {
+    function scheduleUpdate(event) {
       if (!anchors.size) return;
       var _iterator2 = _createForOfIteratorHelper(anchors), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
           var _step2$value = _slicedToArray(_step2.value, 2), element = _step2$value[0], state = _step2$value[1];
-          state.interruptSwitch = true;
+          if ((event === null || event === void 0 ? void 0 : event.type) === "scroll") state.scrollRevision++;
+          else state.interruptSwitch = true;
           scheduleAnchor(element);
         }
       } catch (err) {
@@ -857,7 +859,8 @@
                 var previous = state.lastPlacement;
                 var switching = previous && previous.target !== placement.target;
                 var moved = !previous || previous.signature !== placement.signature;
-                if (switching && placement.duration > 0 && !state.interruptSwitch) {
+                var scrollMoved = moved && state.switchTimer !== null && (previous === null || previous === void 0 ? void 0 : previous.scrollRevision) !== placement.scrollRevision;
+                if ((switching || scrollMoved) && placement.duration > 0 && !state.interruptSwitch) {
                   startSwitch(element, state, placement.duration);
                 } else if (moved || state.interruptSwitch || !placement.duration) stopSwitch(element, state);
                 state.interruptSwitch = false;
@@ -880,6 +883,7 @@
       return _updateAnchor.apply(this, arguments);
     }
     function readPlacement(element, target, candidates, measure) {
+      var _anchors$get2;
       var reference = element.offsetParent;
       target = target || reference;
       if (target && isInvisible(target)) return {
@@ -980,6 +984,7 @@
         selected: selected,
         opacity: opacity,
         duration: duration,
+        scrollRevision: ((_anchors$get2 = anchors.get(element)) === null || _anchors$get2 === void 0 ? void 0 : _anchors$get2.scrollRevision) || 0,
         width: targetRect.width,
         height: targetRect.height,
         signature: [selected.x, selected.y, targetRect.width, targetRect.height].concat(_toConsumableArray(selected.self)).join("/")

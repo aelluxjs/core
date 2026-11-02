@@ -138,7 +138,7 @@
       invalidContext: false, active: false, revision: 0,
       target: null, resolvedTarget: null, reference: null,
       group: null, lastPlacement: null, switchTimer: null,
-      interruptSwitch: false,
+      interruptSwitch: false, scrollRevision: 0,
       layoutId: nextLayoutId++, styleLayoutId: nextLayoutId++,
       layoutUntil: 0, layoutSingle: false,
       layoutFinalPending: false,
@@ -200,10 +200,11 @@
     await AelluxJs.waitLayout.update(state.styleLayoutId, deactivate, [element, state, memory]);
   }
 
-  function scheduleUpdate() {
+  function scheduleUpdate(event) {
     if (!anchors.size) return;
     for (const [element, state] of anchors) {
-      state.interruptSwitch = true;
+      if (event?.type === "scroll") state.scrollRevision++;
+      else state.interruptSwitch = true;
       scheduleAnchor(element);
     }
   }
@@ -453,7 +454,11 @@
       const previous = state.lastPlacement;
       const switching = previous && previous.target !== placement.target;
       const moved = !previous || previous.signature !== placement.signature;
-      if (switching && placement.duration > 0 && !state.interruptSwitch) {
+      // Keep scroll notifications with the measured placement across the
+      // asynchronous read/write phases. Unchanged destinations keep their timer.
+      const scrollMoved = moved && state.switchTimer !== null &&
+        previous?.scrollRevision !== placement.scrollRevision;
+      if ((switching || scrollMoved) && placement.duration > 0 && !state.interruptSwitch) {
         startSwitch(element, state, placement.duration);
       } else if (moved || state.interruptSwitch || !placement.duration) stopSwitch(element, state);
       state.interruptSwitch = false;
@@ -535,6 +540,7 @@
     const duration = AelluxJs.currentPreference("reduced-motion") === "reduced" ? 0 :
       Math.max(0, (parseFloat(rawDuration) || 0) * (rawDuration.endsWith("ms") ? 1 : 1000));
     return { valid: true, target, reference, selected, opacity, duration,
+      scrollRevision: anchors.get(element)?.scrollRevision || 0,
       width: targetRect.width, height: targetRect.height,
       signature: [selected.x, selected.y, targetRect.width, targetRect.height, ...selected.self].join("/") };
   }

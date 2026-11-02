@@ -189,20 +189,103 @@ test("native switching shares position and size timing, retargets continuously a
   await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
 });
 
-test("scroll and resize interrupt switching for immediate tracking; hidden, removed and reduced targets deactivate safely", async ({ page }) => {
+for (const forceLegacy of [false, true]) {
+  test(`rapid link changes keep switching during document scroll in a fixed reference (legacy=${forceLegacy})`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await start(page, `${stage}<style>html{scroll-behavior:smooth}
+      #ref{position:fixed;top:0;left:0} body{height:3000px}
+      #first-section{position:absolute;top:1200px} #second-section{position:absolute;top:2400px}</style>
+      <nav id="ref" onclick="const link=event.target.closest('a');if(link)document.getElementById('indicator').dataset.aeAnchorTarget=link.id">
+        <a id="a" class="target" href="#">A</a>
+        <a id="b" class="target" href="#first-section">B</a>
+        <a id="c" class="target" href="#second-section">C</a>${indicator}
+      </nav><div id="first-section"></div><div id="second-section"></div>`, { forceLegacy });
+    await aligned(page, "a");
+    const samples = await page.evaluate(async () => {
+      const anchor = document.getElementById("indicator");
+      const frames = [];
+      const until = async predicate => {
+        const deadline = performance.now() + 2000;
+        do {
+          await new Promise(requestAnimationFrame);
+          if (predicate()) return;
+        } while (performance.now() < deadline);
+        throw new Error("Expected intermediate switching state during document scroll");
+      };
+      document.getElementById("b").click();
+      await until(() => scrollY > 0 && anchor.getBoundingClientRect().width > 85 &&
+        anchor.getBoundingClientRect().width < 155);
+      const before = { x: anchor.getBoundingClientRect().left, at: performance.now() };
+      document.getElementById("c").click();
+      await until(() => anchor.style.getPropertyValue("--ae-anchor-target-width") === "110px");
+      const after = { x: anchor.getBoundingClientRect().left, at: performance.now(),
+        switching: anchor.classList.contains("ae--anchor-switching"),
+        width: anchor.getBoundingClientRect().width, scrollY };
+      const deadline = performance.now() + 200;
+      while (performance.now() < deadline) {
+        frames.push({ switching: anchor.classList.contains("ae--anchor-switching"), scrollY });
+        await new Promise(requestAnimationFrame);
+      }
+      // Repeated scroll notifications with the same destination must not
+      // restart the transition's cleanup timer.
+      while (performance.now() < after.at + 800) {
+        window.dispatchEvent(new Event("scroll"));
+        await new Promise(requestAnimationFrame);
+      }
+      return { before, after, frames, completed: !anchor.classList.contains("ae--anchor-switching") };
+    });
+    expect(samples.after.switching).toBe(true);
+    expect(Math.abs(samples.after.x - samples.before.x)).toBeLessThan(
+      (samples.after.at - samples.before.at) * 2 + 5);
+    expect(Math.abs(samples.after.width - 110)).toBeGreaterThan(1);
+    expect(samples.frames.every(frame => frame.switching)).toBe(true);
+    expect(samples.frames.at(-1).scrollY).toBeGreaterThan(samples.after.scrollY);
+    expect(samples.completed).toBe(true);
+    await aligned(page, "c");
+    await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
+  });
+
+  test(`scroll retargets an active switch when a sticky target moves and tracks immediately when idle (legacy=${forceLegacy})`, async ({ page }) => {
+    await start(page, `${stage}<style>#ref{overflow:auto}
+      #b{position:sticky;top:20px;margin:300px 0 0 300px}</style>
+      <div id="ref">${targets}${indicator}<div style="height:1500px"></div></div>`, { forceLegacy });
+    await aligned(page, "a");
+    await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "b"));
+    await expect.poll(async () => (await geometry(page)).width).toBeGreaterThan(85);
+    const sample = await page.evaluate(async () => {
+      const anchor = document.getElementById("indicator"), ref = document.getElementById("ref");
+      const previous = anchor.style.getPropertyValue("--ae-anchor-pivot-y");
+      const before = { top: anchor.getBoundingClientRect().top + ref.scrollTop, at: performance.now() };
+      ref.scrollTop = 350;
+      const deadline = performance.now() + 2000;
+      while (anchor.style.getPropertyValue("--ae-anchor-pivot-y") === previous) {
+        if (performance.now() > deadline) throw new Error("Scroll did not update the destination");
+        await new Promise(requestAnimationFrame);
+      }
+      return { before, top: anchor.getBoundingClientRect().top + ref.scrollTop, at: performance.now(),
+        switching: anchor.classList.contains("ae--anchor-switching"), width: anchor.getBoundingClientRect().width };
+    });
+    expect(sample.switching).toBe(true);
+    expect(sample.width).toBeLessThan(159);
+    expect(Math.abs(sample.top - sample.before.top)).toBeLessThan((sample.at - sample.before.at) * 2 + 5);
+    await aligned(page, "b");
+    await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
+    await page.locator("#ref").evaluate(element => { element.scrollTop = 450; });
+    await aligned(page, "b");
+    await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
+  });
+}
+
+test("resize interrupts switching for immediate tracking; hidden, removed and reduced targets deactivate safely", async ({ page }) => {
   await start(page, `${stage}<div id="ref">${targets}${indicator}</div>`);
   await aligned(page, "a");
-  for (const event of ["scroll", "resize"]) {
-    const target = await page.locator("#indicator").evaluate(element => {
-      const target = element.getAttribute("data-ae-anchor-target") === "b" ? "a" : "b";
-      element.setAttribute("data-ae-anchor-target", target);
-      return target;
-    });
-    await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
-    await page.evaluate(event => window.dispatchEvent(new Event(event)), event);
-    await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
-    await aligned(page, target);
-  }
+  await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "b"));
+  await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
+  await page.evaluate(() => window.dispatchEvent(new Event("resize")));
+  await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
+  await aligned(page, "b");
+  await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "a"));
+  await aligned(page, "a");
   await page.locator("#a").evaluate(element => { element.hidden = true; });
   await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
   await page.locator("#a").evaluate(element => { element.hidden = false; });
