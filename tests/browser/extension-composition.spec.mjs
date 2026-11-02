@@ -105,6 +105,7 @@ test("Feedback transform masks an active elastic transform", async ({ page }) =>
   const result = await page.evaluate(async () => {
     const box = document.getElementById("box"), wrapper = document.getElementById("wrapper");
     box.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaX: -100 }));
+    await AelluxJs.waitLayout.update(() => {});
     const elastic = wrapper.style.transform;
     AelluxJs.ext.feedback.error("", wrapper, null, "pulse");
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -119,11 +120,12 @@ test("Feedback transform masks an active elastic transform", async ({ page }) =>
 
 test("An active elastic inline transform prevents Present's requested transform", async ({ page }) => {
   await start(page, gallery("", 'data-ae-scrollbox-elastic data-ae-present="transform"'));
-  const result = await page.evaluate(() => {
+  const result = await page.evaluate(async () => {
     const box = document.getElementById("box"), wrapper = document.getElementById("wrapper");
     wrapper.style.transition = "none";
     getComputedStyle(wrapper).transform;
     box.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaX: -100 }));
+    await AelluxJs.waitLayout.update(() => {});
     wrapper.style.setProperty("--ae-pop-transform", "scale(2)");
     const inline = new DOMMatrix(wrapper.style.transform), effective = new DOMMatrix(getComputedStyle(wrapper).transform);
     return { difference: Math.max(...["a", "d", "e", "f"].map(key => Math.abs(inline[key] - effective[key]))), scale: effective.a,

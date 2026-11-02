@@ -72,6 +72,7 @@ test("carousel uses real snap navigation and pointer dragging", async ({ page })
   await expect(page.getByRole("button", { name: "Next" })).toBeEnabled();
   await page.getByRole("button", { name: "Next" }).click();
   await expect(page.locator("#carousel-position")).toHaveText("Card 2 of 5");
+  await expect(page.locator("#carousel-focus")).toHaveAttribute("data-ae-anchor-target", "carousel-card-2");
   await page.getByRole("button", { name: "Previous" }).click();
   await expect(page.locator("#carousel-position")).toHaveText("Card 1 of 5");
   const box = await page.locator("#gallery").boundingBox();
@@ -84,6 +85,13 @@ test("carousel uses real snap navigation and pointer dragging", async ({ page })
   await page.evaluate(() => $ae("gallery").scrollbox.goto(4));
   await expect(page.locator("#carousel-position")).toHaveText("Card 5 of 5");
   await expect(page.getByRole("button", { name: "Next" })).toBeDisabled();
+  await expect(page.locator("#carousel-focus")).toHaveAttribute("data-ae-anchor-target", "carousel-card-5");
+  await expect.poll(() => page.locator("#carousel-focus").evaluate(element => {
+    const actual = element.getBoundingClientRect();
+    const target = document.getElementById("carousel-card-5").getBoundingClientRect();
+    return Math.max(Math.abs(actual.left - target.left), Math.abs(actual.top - target.top),
+      Math.abs(actual.width - target.width), Math.abs(actual.height - target.height));
+  })).toBeLessThan(1);
 });
 
 test("carousel retains native touch panning", async ({ page, context, browserName }) => {
@@ -231,8 +239,10 @@ for (const reducedMotion of ["no-preference", "reduce"]) {
       const frames = [];
       const deadline = performance.now() + 3000;
       do {
-        const matrix = new DOMMatrix(getComputedStyle(element).transform);
+        const computed = getComputedStyle(element);
+        const matrix = new DOMMatrix(computed.transform);
         frames.push({ hidden: element.hidden, scaleY: matrix.m22, translateY: matrix.m42,
+          opacity: Number(computed.opacity),
           closing: element.classList.contains("ae--unpopping") });
         if (top > 0 ? element.classList.contains("ae--pop") : element.hidden) return frames;
         await new Promise(requestAnimationFrame);
@@ -241,7 +251,8 @@ for (const reducedMotion of ["no-preference", "reduce"]) {
     }, top);
     const opening = await scrollAndSample(1);
     if (reducedMotion === "no-preference") {
-      expect(opening.some(frame => !frame.hidden && frame.scaleY > .85 && frame.scaleY < .99 && frame.translateY > 0)).toBe(true);
+      expect(opening.some(frame => !frame.hidden && frame.scaleY > .5 && frame.scaleY < 1 &&
+        frame.translateY > 0 && frame.opacity > 0 && frame.opacity < 1)).toBe(true);
     }
     await expect(wrapper).toHaveClass(/(?:^|\s)ae--pop(?:\s|$)/);
     await expect(wrapper).toHaveJSProperty("hidden", false);
@@ -252,7 +263,8 @@ for (const reducedMotion of ["no-preference", "reduce"]) {
     expect(await page.evaluate(() => navigationTransitions.pop)).toBe(1);
     const closing = await scrollAndSample(0);
     if (reducedMotion === "no-preference") {
-      expect(closing.some(frame => !frame.hidden && frame.closing && frame.scaleY > .85 && frame.scaleY < .99 && frame.translateY > 0)).toBe(true);
+      expect(closing.some(frame => !frame.hidden && frame.closing && frame.scaleY > 1 && frame.scaleY < 1.2 &&
+        Math.abs(frame.translateY) < .1 && frame.opacity > 0 && frame.opacity < 1)).toBe(true);
     }
     await expect(wrapper).toHaveJSProperty("hidden", true);
     await expect(wrapper).toHaveCSS("display", "none");
@@ -284,6 +296,8 @@ test("homepage section Viewports select when the block top crosses the screen mi
   const marker = page.locator('nav[aria-label="Main navigation"] [data-ae-anchor]');
   await expect(page.locator("section.hero")).toHaveAttribute("data-ae-viewport", "y");
   await expect(page.locator("#item1")).toHaveAttribute("href", "#main");
+  await expect(page.locator("#item2")).toHaveAttribute("href", "#getting-started");
+  await expect(page.locator("#item2")).toHaveText("Start");
   await page.evaluate(() => {
     window.homeViewportSnapshots = {};
     document.addEventListener($ae.eventName("ViewportChange"), event => {
@@ -291,7 +305,7 @@ test("homepage section Viewports select when the block top crosses the screen mi
     });
   });
   let previous = "item1";
-  for (const [id, target] of [["examples", "item2"], ["extensions", "item3"]]) {
+  for (const [id, target] of [["getting-started", "item2"], ["examples", "item3"], ["extensions", "item4"]]) {
     const section = page.locator(`#${id}`);
     const title = page.locator(`#${id}-title`);
     await expect(section).toHaveAttribute("data-ae-viewport", "y");
@@ -312,7 +326,8 @@ test("homepage section Viewports select when the block top crosses the screen mi
     await expect.poll(() => page.evaluate(id => homeViewportSnapshots[id]?.y1, id)).toBeCloseTo(-.025, 2);
     await expect(marker).toHaveAttribute("data-ae-anchor-target", target);
     expect(await title.evaluate(element => element.getBoundingClientRect().top > innerHeight / 2)).toBe(true);
-    expect(await section.evaluate(element => element.getBoundingClientRect().bottom > innerHeight)).toBe(true);
+    if (id !== "getting-started")
+      expect(await section.evaluate(element => element.getBoundingClientRect().bottom > innerHeight)).toBe(true);
     await section.evaluate(element => window.scrollTo({
       top: scrollY + element.getBoundingClientRect().top - 50, behavior: "instant"
     }));
@@ -328,7 +343,7 @@ test("homepage section Viewports select when the block top crosses the screen mi
   await page.locator("#examples").evaluate(element => window.scrollTo({
     top: scrollY + element.getBoundingClientRect().top - 50, behavior: "instant"
   }));
-  await expect(marker).toHaveAttribute("data-ae-anchor-target", "item2");
+  await expect(marker).toHaveAttribute("data-ae-anchor-target", "item3");
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
   await expect.poll(() => page.locator("section.hero").evaluate(element => Number(element.style.getPropertyValue("--ae-viewport-visible")))).toBeGreaterThan(0);
   await expect(marker).toHaveAttribute("data-ae-anchor-target", "item1");
@@ -339,26 +354,26 @@ test("homepage section Viewports work on a short viewport and link clicks wait f
   await page.goto("/home/index.htm");
   await expect.poll(() => page.evaluate(() => !!$ae.ext.viewport?.initialized)).toBe(true);
   const marker = page.locator('nav[aria-label="Main navigation"] [data-ae-anchor]');
-  for (const id of ["examples", "extensions"]) {
+  for (const [id, target] of [["getting-started", "item2"], ["examples", "item3"], ["extensions", "item4"]]) {
     const section = page.locator(`#${id}`);
     await section.evaluate(element => window.scrollTo({
       top: scrollY + element.getBoundingClientRect().top - 20, behavior: "instant"
     }));
     await expect.poll(() => section.evaluate(element => Number(element.style.getPropertyValue("--ae-viewport-visible")))).toBeGreaterThan(0);
-    await expect(marker).toHaveAttribute("data-ae-anchor-target", id === "examples" ? "item2" : "item3");
+    await expect(marker).toHaveAttribute("data-ae-anchor-target", target);
   }
   await page.locator("#item1").click();
   await expect(marker).toHaveAttribute("data-ae-anchor-target", "item1");
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
   await expect(page).toHaveURL(/#main$/);
-  const immediateTarget = await page.locator("#item3").evaluate(link => {
+  const immediateTarget = await page.locator("#item4").evaluate(link => {
     link.click();
     return document.querySelector('nav[aria-label="Main navigation"] [data-ae-anchor]').dataset.aeAnchorTarget;
   });
   expect(immediateTarget).toBe("item1");
   await expect.poll(() => page.locator("#extensions").evaluate(element =>
     Number(element.style.getPropertyValue("--ae-viewport-visible")))).toBeGreaterThan(0);
-  await expect(marker).toHaveAttribute("data-ae-anchor-target", "item3");
+  await expect(marker).toHaveAttribute("data-ae-anchor-target", "item4");
 });
 
 test("homepage embeds four themed demos and displays the exact runnable source", async ({ page }) => {

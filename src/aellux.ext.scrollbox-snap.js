@@ -56,6 +56,7 @@
   const suspendedClass = AelluxJs.className("snap-suspended");
   const properties = ["--ae-snap-focus"];
   const states = new Map();
+  let nextLayoutId = 7000000;
 
   AelluxJs.extAttach(extensionName, { init, destroy, next, previous, goto });
 
@@ -91,7 +92,8 @@
       edgeWheelTimeout: null, frame: null,
       activePointers: new Set(), activeTouches: new Set(), savedItems: new Map(),
       suspensions: new Set(), pointerScroll: null, flick: null, release: false,
-      observer: null, resizeObserver: null, disposed: false
+      observer: null, resizeObserver: null, disposed: false,
+      valuesLayoutId: nextLayoutId++
     };
     state.onScroll = () => {
       updateValues(state);
@@ -146,6 +148,7 @@
     const state = states.get(element);
     if (!state) return;
     state.disposed = true;
+    AelluxJs.waitLayout.cancel(state.valuesLayoutId);
     cancelRelease(state);
     clearTimer(state, "timeout");
     clearTimer(state, "wheelTimeout");
@@ -247,17 +250,30 @@
 
   function updateValues(state) {
     if (state.disposed) return;
-    const axis = axisFor(state), element = state.element;
-    const rect = element.getBoundingClientRect();
-    const size = axis === HORIZONTAL ? element.clientWidth : element.clientHeight;
-    if (!size) return;
-    for (const item of itemsFor(state)) {
-      if (!state.savedItems.has(item)) {
-        state.savedItems.set(item, AelluxJs.persist.element.save(item, [], properties));
+    // Reusing the ID replaces any pending publication with the latest sample.
+    AelluxJs.waitLayout.sequence(state.valuesLayoutId, { read: () => {
+      const axis = axisFor(state), element = state.element, root = state.root;
+      const rect = element.getBoundingClientRect();
+      const size = axis === HORIZONTAL ? element.clientWidth : element.clientHeight;
+      const values = size ? itemsFor(state).map(item => ({ item,
+        value: Math.max(0, 1 - Math.abs(offset(state, item, axis, false, rect, item.getBoundingClientRect())) / size)
+      })) : [];
+      return { axis, root, values };
+    }, update: measured => {
+      if (state.root !== measured.root || axisFor(state) !== measured.axis) return;
+      for (const { item, value } of measured.values) {
+        if (!state.root.contains(item) || !item.hasAttribute(itemAttribute) ||
+          item.closest(`[${scrollboxAttribute}]`) !== state.element) continue;
+        if (!state.savedItems.has(item))
+          state.savedItems.set(item, AelluxJs.persist.element.save(item, [], properties));
+        // WebKit cannot downgrade an important registered value in one write.
+        if (item.style.getPropertyPriority(properties[0])) item.style.removeProperty(properties[0]);
+        item.style.setProperty(properties[0], value);
       }
-      const box = item.getBoundingClientRect();
-      item.style.setProperty(properties[0], Math.max(0, 1 - Math.abs(offset(state, item, axis, false, rect, box)) / size));
-    }
+    }, abort: () => state.disposed }).catch(cause => {
+      AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
+        { cause, extension: extensionName, element: state.element, method: "update" });
+    });
   }
 
   function restoreItems(state) {

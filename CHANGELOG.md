@@ -4,12 +4,21 @@ All notable changes to aellux.js will be documented in this file.
 
 ## [Unreleased]
 
+Changes in this section are pending for the `0.1.0` release candidate.
+
 ### Added
+
+- Added the homepage's four standalone interactive examples with runnable source disclosure, shared Bootstrap/homepage styling, a horizontal Viewport demo, an anchored carousel highlight, and fixed section navigation including Start.
+- Added browser regressions for adaptive CSS publication, latest-value coalescing, interruption/unmount cleanup and inline-priority restoration across Modern and Legacy distributions.
 
 - Added the opt-in top-level boot option `syncBootstrapThemeTag` (default `false`). The boot synchronously publishes `data-bs-theme` during `$ae.init()` without requiring Preference, and maintains it through the shared preference publisher. This replaces `extensions.preference.syncBootstrapThemeTag`; destroying Preference no longer restores the boot-owned tag. Preference now manages and restores option-button `aria-pressed`, replacing the homepage's manual ARIA handler.
 - Added the Compatibility Commitment for AelluxJS `0.1.x`, effective from `0.1.0`, covering Stable public JavaScript, HTML, CSS, events, loading and integration contracts. Linked it from the documentation navigation and reference pages; recorded pending support policies and contract discrepancies separately for maintainer review without changing Extension stability or runtime behavior.
 
 ### Changed
+
+- Recurring CSS publication now follows the shared adaptive `waitLayout` update phase as an explicit authoring contract, independently of active CSS Motion and its optional fixed property FPS ceiling. Bounded synchronous setup, interruption and restoration retain their correctness requirements.
+- Scrollbox custom scrollbar geometry, Snap `--ae-snap-focus`, elastic transforms/origins/margins and Legacy Progress fallback rendering now publish through scheduled updates. Repeated notifications retain the latest state, and pending publications are canceled before interruption or teardown. Native scrolling, momentum, gesture calculations and synchronous Progress numeric reflection remain independent of visual publication.
+- Raised Full Modern's raw/gzip budgets from 195/60.25 to 195.5/60.5 KiB and Scrollbox Snap Modern's from 10.5/4 to 11/4.25 KiB. Measured artifact sizes and deltas are recorded in the performance guide.
 
 - Replaced Present `data-ae-unpop-on-outside` with `data-ae-unpop-on-click`: `outside`/`out` (default), `inside`/`in`, or `false`/`none`. Explicit controls retain one action per interaction.
 - The old click-dismissal attribute is no longer read. Migrate `data-ae-unpop-on-outside="false"` to `data-ae-unpop-on-click="false"`; omission or an empty value preserves outside-click dismissal. Point taps share the policy; hover dismissal and auto-unpop remain independent. The Present guide includes the value reference and migration examples.
@@ -18,6 +27,10 @@ All notable changes to aellux.js will be documented in this file.
 - Positioned Docweaver notifications at the top of the viewport with spacing between pooled messages and reduced vertical padding.
 
 ### Fixed
+
+- Anchor preserves an active target-switch transition during scrolling, keeps unchanged destinations on their existing timeline, and retargets moving destinations from the rendered position. Resize still prioritizes immediate placement.
+- Snap replaces pre-existing inline `!important` registered focus values correctly in WebKit and restores the original value and priority on unmount.
+- Homepage section highlighting now follows Viewport visibility for Start, Examples and Extensions, with Back to top restored when returning to the hero; source disclosure lists the standalone files executed by each demo.
 
 - Present `unpop()` now preserves the current rendered opacity, transform, grid/measured dimensions and registered progress before interrupting motion, including incomplete opening and group selection changes. Native and controlled closing use the configured unpop duration/easing without jumping to `pop` or `from`; temporary styles are restored. Closing interpolates pop progress toward zero and unpop progress toward one, retaining stable endpoints. Explicit `pop()` still restarts from `from`.
 

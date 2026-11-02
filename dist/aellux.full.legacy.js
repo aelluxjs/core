@@ -30925,7 +30925,9 @@
             owned: false,
             touch: null,
             releaseFrame: null,
-            wheelTimeout: null
+            wheelTimeout: null,
+            layoutId: nextLayoutId++,
+            publication: null
           };
           var inlineWrapper = {
             element: null,
@@ -30944,9 +30946,7 @@
             hoverVisible: false,
             hoverTimeout: null,
             interactionVisible: false,
-            interactionTimeout: null,
-            lastScrollLeft: null,
-            lastScrollTop: null
+            interactionTimeout: null
           };
           var state = {
             element: element,
@@ -30985,12 +30985,6 @@
           };
           state.onScroll = function(event) {
             if (event.target !== element) return;
-            if ((state.scrollbar.x || state.scrollbar.y) && (state.scrollbar.lastScrollLeft !== element.scrollLeft || state.scrollbar.lastScrollTop !== element.scrollTop)) {
-              var metrics = nativeMetrics(element);
-              updateScrollbars(state, readScrollbars(state, metrics, wheelAxes(state, metrics)));
-              state.scrollbar.lastScrollLeft = element.scrollLeft;
-              state.scrollbar.lastScrollTop = element.scrollTop;
-            }
             publish(state);
             if (!state.desktop && state.scrollbar.listening) scheduleScrollbarInteractionHide(state);
           };
@@ -31396,8 +31390,7 @@
         function showScrollbars(state) {
           if (!state.scrollbar.listening) return;
           if (!state.element.classList.contains(scrollbarVisibleClass)) {
-            var metrics = nativeMetrics(state.element);
-            updateScrollbars(state, readScrollbars(state, metrics, wheelAxes(state, metrics)));
+            publish(state);
             state.element.classList.add(scrollbarVisibleClass);
             state.scrollbar.visibleOwned = true;
           }
@@ -31514,14 +31507,6 @@
             left: destination,
             behavior: "instant"
           });
-          updateScrollbars(state, [{
-            record: record,
-            trackSize: record.trackSize,
-            thumbSize: record.thumbSize,
-            thumbPosition: travel * destination / record.max,
-            max: record.max,
-            display: record.display
-          }]);
           publish(state);
         }
         function endScrollbarDrag(state, record, event) {
@@ -32435,7 +32420,7 @@
           elastic.active = active;
           elastic.owned = true;
           if (active) dispatchInteraction(state, "elastic", true);
-          setElasticTransform(state, dimensions);
+          setElasticTransform(state);
           return active;
         }
         function measureElasticWrapper(wrapper) {
@@ -32449,6 +32434,26 @@
           };
         }
         function setElasticTransform(state) {
+          var elastic = state.elastic;
+          if (state.disposed || elastic.publication) return;
+          var publication = {};
+          elastic.publication = publication;
+          AelluxJs2.waitLayout.update(elastic.layoutId, function() {
+            if (elastic.publication !== publication || state.disposed || !elastic.owned) return;
+            elastic.publication = null;
+            writeElasticTransform(state);
+          }).catch(function(cause) {
+            AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
+              cause: cause,
+              extension: extensionName,
+              element: state.element,
+              method: "update"
+            });
+          }).finally(function() {
+            if (elastic.publication === publication) elastic.publication = null;
+          });
+        }
+        function writeElasticTransform(state) {
           var dimensions = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : state.elastic.dimensions;
           var elastic = state.elastic;
           var wrapper = elastic.wrapper;
@@ -32548,6 +32553,8 @@
         function resetElastic(state) {
           var elastic = state.elastic;
           var wasOwned = elastic.owned;
+          AelluxJs2.waitLayout.cancel(elastic.layoutId);
+          elastic.publication = null;
           if (elastic.releaseFrame !== null) root2.cancelAnimationFrame(elastic.releaseFrame);
           if (elastic.wheelTimeout !== null) root2.clearTimeout(elastic.wheelTimeout);
           elastic.releaseFrame = null;
@@ -33047,6 +33054,7 @@
         var suspendedClass = AelluxJs2.className("snap-suspended");
         var properties = ["--ae-snap-focus"];
         var states = /* @__PURE__ */ new Map();
+        var nextLayoutId = 7e6;
         AelluxJs2.extAttach(extensionName, {
           init: init,
           destroy: destroy,
@@ -33126,7 +33134,8 @@
             release: false,
             observer: null,
             resizeObserver: null,
-            disposed: false
+            disposed: false,
+            valuesLayoutId: nextLayoutId++
           };
           state.onScroll = function() {
             updateValues(state);
@@ -33198,6 +33207,7 @@
           var state = states.get(element);
           if (!state) return;
           state.disposed = true;
+          AelluxJs2.waitLayout.cancel(state.valuesLayoutId);
           cancelRelease(state);
           clearTimer(state, "timeout");
           clearTimer(state, "wheelTimeout");
@@ -33314,25 +33324,51 @@
         }
         function updateValues(state) {
           if (state.disposed) return;
-          var axis = axisFor(state), element = state.element;
-          var rect = element.getBoundingClientRect();
-          var size = axis === HORIZONTAL ? element.clientWidth : element.clientHeight;
-          if (!size) return;
-          var _iterator3 = _createForOfIteratorHelper16(itemsFor(state)), _step3;
-          try {
-            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-              var item = _step3.value;
-              if (!state.savedItems.has(item)) {
-                state.savedItems.set(item, AelluxJs2.persist.element.save(item, [], properties));
+          AelluxJs2.waitLayout.sequence(state.valuesLayoutId, {
+            read: function read() {
+              var axis = axisFor(state), element = state.element, root3 = state.root;
+              var rect = element.getBoundingClientRect();
+              var size = axis === HORIZONTAL ? element.clientWidth : element.clientHeight;
+              var values = size ? itemsFor(state).map(function(item) {
+                return {
+                  item: item,
+                  value: Math.max(0, 1 - Math.abs(offset(state, item, axis, false, rect, item.getBoundingClientRect())) / size)
+                };
+              }) : [];
+              return {
+                axis: axis,
+                root: root3,
+                values: values
+              };
+            },
+            update: function update2(measured) {
+              if (state.root !== measured.root || axisFor(state) !== measured.axis) return;
+              var _iterator3 = _createForOfIteratorHelper16(measured.values), _step3;
+              try {
+                for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+                  var _step3$value = _step3.value, item = _step3$value.item, value = _step3$value.value;
+                  if (!state.root.contains(item) || !item.hasAttribute(itemAttribute) || item.closest("[".concat(scrollboxAttribute, "]")) !== state.element) continue;
+                  if (!state.savedItems.has(item)) state.savedItems.set(item, AelluxJs2.persist.element.save(item, [], properties));
+                  if (item.style.getPropertyPriority(properties[0])) item.style.removeProperty(properties[0]);
+                  item.style.setProperty(properties[0], value);
+                }
+              } catch (err) {
+                _iterator3.e(err);
+              } finally {
+                _iterator3.f();
               }
-              var box = item.getBoundingClientRect();
-              item.style.setProperty(properties[0], Math.max(0, 1 - Math.abs(offset(state, item, axis, false, rect, box)) / size));
+            },
+            abort: function abort() {
+              return state.disposed;
             }
-          } catch (err) {
-            _iterator3.e(err);
-          } finally {
-            _iterator3.f();
-          }
+          }).catch(function(cause) {
+            AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
+              cause: cause,
+              extension: extensionName,
+              element: state.element,
+              method: "update"
+            });
+          });
         }
         function restoreItems(state) {
           var _iterator4 = _createForOfIteratorHelper16(state.savedItems.values()), _step4;

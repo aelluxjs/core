@@ -25,6 +25,14 @@ The optional `parameters` argument is an array passed as the callback's argument
 
 `waitLayout` samples `requestAnimationFrame()` timestamps while it has frame work. It starts at the browser's measured frame rate and, after sustained slow frames or expensive callbacks, selects the nearest 15-FPS budget at or below the observed cadence, down to 5 FPS. A severe drop therefore reaches the fitting low budget in one adjustment; for example, a 60 FPS budget observed at 10 FPS falls directly to 5 FPS. When every budget is above the observed cadence, it uses the 5 FPS floor. It tries to recover one step after a longer stable period. The limiter skips work on selected browser frames; it never runs catch-up frames. It pauses work while the page is hidden and resumes from a fresh measurement when visible. CSS animations and native rendering remain under browser control. There is no ongoing frame monitor when the queue is idle.
 
+## CSS publication cadence
+
+The shared adaptive cadence is the standard performance policy for runtime-owned publication of CSS custom properties and ordinary CSS properties. Queue recurring visual writes through `update()` or a sequence's update stage, including values derived from scroll, viewport geometry, resize, observers, or progress. Coalesce repeated notifications and publish related values together. This works without an active CSS Motion operation and does not prescribe a fixed FPS value.
+
+CSS Motion uses this same scheduler for controlled timelines. While a controlled operation publishes an explicit visual FPS limit, the scheduler applies the lowest active limit to all queued consumers, including independent `read()` and `update()` calls. `cssMotionPropertyMaxFPS` adds such a limit for operations containing conservative properties; it does not permanently cap every CSS publication. When that operation completes or is canceled, its visual limit is removed and the remaining active limits and adaptive cadence continue to apply.
+
+The scheduler only regulates callbacks queued through it. A direct style write in a scroll listener, observer, timer, or independent animation-frame callback bypasses that protection. Native scroll and momentum remain independent; CSS values derived from them should be published through the scheduler. Bounded synchronous setup, interruption, and restoration may be necessary for correctness. See the [authoring contract](../extensions/authoring.md#adaptive-css-publication) for these boundaries, the runtime publication paths, and consumer code that still publishes directly.
+
 ## Identify and replace related work
 
 An ID can hold one pending read and one pending update. They form a group. Adding the other phase joins that group; queuing a second task for the same phase cancels both pending tasks in the old group and starts a new group. Canceled task Promises resolve with `undefined`.

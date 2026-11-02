@@ -28,6 +28,8 @@ The extension applies the native CSS Scroll Snap rules, aligns the first item at
 
 `AelluxJsScrollboxSnapChange` fires when scrolling settles on a new item. Its `detail` is `{ item, index, previousIndex, axis }`; the initial item has `previousIndex: null`.
 
+Focus publication uses a replaceable `waitLayout` read/update sequence. Scroll and resize notifications retain the latest geometry for the next eligible adaptive frame instead of writing CSS in each callback. `--ae-snap-focus` can therefore lag native scrolling by that cadence. Unmount cancels pending publication before restoring the item's prior inline value and priority. This does not put native scrolling or Snap navigation through CSS Motion.
+
 ```js
 document.getElementById("gallery").addEventListener("AelluxJsScrollboxSnapChange", event => {
   console.log(event.detail.index, event.detail.item);

@@ -2815,7 +2815,9 @@
             owned: false,
             touch: null,
             releaseFrame: null,
-            wheelTimeout: null
+            wheelTimeout: null,
+            layoutId: nextLayoutId++,
+            publication: null
           };
           const inlineWrapper = {
             element: null,
@@ -2834,9 +2836,7 @@
             hoverVisible: false,
             hoverTimeout: null,
             interactionVisible: false,
-            interactionTimeout: null,
-            lastScrollLeft: null,
-            lastScrollTop: null
+            interactionTimeout: null
           };
           const state = {
             element,
@@ -2873,12 +2873,6 @@
           };
           state.onScroll = (event) => {
             if (event.target !== element) return;
-            if ((state.scrollbar.x || state.scrollbar.y) && (state.scrollbar.lastScrollLeft !== element.scrollLeft || state.scrollbar.lastScrollTop !== element.scrollTop)) {
-              const metrics = nativeMetrics(element);
-              updateScrollbars(state, readScrollbars(state, metrics, wheelAxes(state, metrics)));
-              state.scrollbar.lastScrollLeft = element.scrollLeft;
-              state.scrollbar.lastScrollTop = element.scrollTop;
-            }
             publish(state);
             if (!state.desktop && state.scrollbar.listening) scheduleScrollbarInteractionHide(state);
           };
@@ -3233,8 +3227,7 @@
         function showScrollbars(state) {
           if (!state.scrollbar.listening) return;
           if (!state.element.classList.contains(scrollbarVisibleClass)) {
-            const metrics = nativeMetrics(state.element);
-            updateScrollbars(state, readScrollbars(state, metrics, wheelAxes(state, metrics)));
+            publish(state);
             state.element.classList.add(scrollbarVisibleClass);
             state.scrollbar.visibleOwned = true;
           }
@@ -3342,14 +3335,6 @@
           const destination = Math.max(0, Math.min(record.max, position / travel * record.max));
           if (record.axis === "y") state.element.scrollTo({ top: destination, behavior: "instant" });
           else state.element.scrollTo({ left: destination, behavior: "instant" });
-          updateScrollbars(state, [{
-            record,
-            trackSize: record.trackSize,
-            thumbSize: record.thumbSize,
-            thumbPosition: travel * destination / record.max,
-            max: record.max,
-            display: record.display
-          }]);
           publish(state);
         }
         function endScrollbarDrag(state, record, event) {
@@ -4155,7 +4140,7 @@
           elastic.active = active;
           elastic.owned = true;
           if (active) dispatchInteraction(state, "elastic", true);
-          setElasticTransform(state, dimensions);
+          setElasticTransform(state);
           return active;
         }
         function measureElasticWrapper(wrapper) {
@@ -4168,7 +4153,25 @@
             clientTop: wrapper.clientTop
           };
         }
-        function setElasticTransform(state, dimensions = state.elastic.dimensions) {
+        function setElasticTransform(state) {
+          const elastic = state.elastic;
+          if (state.disposed || elastic.publication) return;
+          const publication = {};
+          elastic.publication = publication;
+          AelluxJs2.waitLayout.update(elastic.layoutId, () => {
+            if (elastic.publication !== publication || state.disposed || !elastic.owned) return;
+            elastic.publication = null;
+            writeElasticTransform(state);
+          }).catch((cause) => {
+            AelluxJs2.diagnostics.error(
+              AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
+              { cause, extension: extensionName, element: state.element, method: "update" }
+            );
+          }).finally(() => {
+            if (elastic.publication === publication) elastic.publication = null;
+          });
+        }
+        function writeElasticTransform(state, dimensions = state.elastic.dimensions) {
           const elastic = state.elastic;
           const wrapper = elastic.wrapper;
           const x = elastic.amounts[3] - elastic.amounts[1];
@@ -4277,6 +4280,8 @@
           var _a;
           const elastic = state.elastic;
           const wasOwned = elastic.owned;
+          AelluxJs2.waitLayout.cancel(elastic.layoutId);
+          elastic.publication = null;
           if (elastic.releaseFrame !== null) root2.cancelAnimationFrame(elastic.releaseFrame);
           if (elastic.wheelTimeout !== null) root2.clearTimeout(elastic.wheelTimeout);
           elastic.releaseFrame = null;
@@ -4663,6 +4668,7 @@
         const suspendedClass = AelluxJs2.className("snap-suspended");
         const properties = ["--ae-snap-focus"];
         const states = /* @__PURE__ */ new Map();
+        let nextLayoutId = 7e6;
         AelluxJs2.extAttach(extensionName, { init, destroy, next, previous, goto });
         function init() {
           if (!AelluxJs2.registry.ext.scrollbox) AelluxJs2.ext("scrollbox");
@@ -4710,7 +4716,8 @@
             release: false,
             observer: null,
             resizeObserver: null,
-            disposed: false
+            disposed: false,
+            valuesLayoutId: nextLayoutId++
           };
           state.onScroll = () => {
             updateValues(state);
@@ -4763,6 +4770,7 @@
           const state = states.get(element);
           if (!state) return;
           state.disposed = true;
+          AelluxJs2.waitLayout.cancel(state.valuesLayoutId);
           cancelRelease(state);
           clearTimer(state, "timeout");
           clearTimer(state, "wheelTimeout");
@@ -4861,17 +4869,30 @@
         }
         function updateValues(state) {
           if (state.disposed) return;
-          const axis = axisFor(state), element = state.element;
-          const rect = element.getBoundingClientRect();
-          const size = axis === HORIZONTAL ? element.clientWidth : element.clientHeight;
-          if (!size) return;
-          for (const item of itemsFor(state)) {
-            if (!state.savedItems.has(item)) {
-              state.savedItems.set(item, AelluxJs2.persist.element.save(item, [], properties));
+          AelluxJs2.waitLayout.sequence(state.valuesLayoutId, { read: () => {
+            const axis = axisFor(state), element = state.element, root3 = state.root;
+            const rect = element.getBoundingClientRect();
+            const size = axis === HORIZONTAL ? element.clientWidth : element.clientHeight;
+            const values = size ? itemsFor(state).map((item) => ({
+              item,
+              value: Math.max(0, 1 - Math.abs(offset(state, item, axis, false, rect, item.getBoundingClientRect())) / size)
+            })) : [];
+            return { axis, root: root3, values };
+          }, update: (measured) => {
+            if (state.root !== measured.root || axisFor(state) !== measured.axis) return;
+            for (const { item, value } of measured.values) {
+              if (!state.root.contains(item) || !item.hasAttribute(itemAttribute) || item.closest(`[${scrollboxAttribute}]`) !== state.element) continue;
+              if (!state.savedItems.has(item))
+                state.savedItems.set(item, AelluxJs2.persist.element.save(item, [], properties));
+              if (item.style.getPropertyPriority(properties[0])) item.style.removeProperty(properties[0]);
+              item.style.setProperty(properties[0], value);
             }
-            const box = item.getBoundingClientRect();
-            item.style.setProperty(properties[0], Math.max(0, 1 - Math.abs(offset(state, item, axis, false, rect, box)) / size));
-          }
+          }, abort: () => state.disposed }).catch((cause) => {
+            AelluxJs2.diagnostics.error(
+              AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
+              { cause, extension: extensionName, element: state.element, method: "update" }
+            );
+          });
         }
         function restoreItems(state) {
           for (const memory of state.savedItems.values()) memory.restore();

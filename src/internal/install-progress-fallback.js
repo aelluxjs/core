@@ -1,6 +1,7 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 import { hasProgressAPI } from "./has-progress-api.js";
+let nextLayoutId = 8000000;
 
 // Small element-local fallback. Attributes remain the single source of truth.
 export function installProgressFallback(root, element) {
@@ -15,6 +16,8 @@ export function installProgressFallback(root, element) {
     [marker, "role", "aria-valuemin", "aria-valuemax", "aria-valuenow"],
     ["display", "position", "width", "height", "background", "overflow"]);
   let active = true;
+  const layoutId = nextLayoutId++;
+  let pending = false;
   const bar = element.ownerDocument.createElement("span");
   bar.setAttribute("aria-hidden", "true");
   bar.style.cssText = "position:absolute;left:0;top:0;height:100%;pointer-events:none";
@@ -70,15 +73,28 @@ export function installProgressFallback(root, element) {
       value = Number(value);
       if (!Number.isFinite(value)) throw new TypeError("Expected a finite number");
       element.setAttribute(name, String(value));
-      render();
+      scheduleRender();
     } })
   }));
-  const observer = new root.MutationObserver(render);
+  function scheduleRender() {
+    if (!active || pending) return;
+    pending = true;
+    api.waitLayout.update(layoutId, () => {
+      pending = false;
+      render();
+    }).catch(cause => {
+      pending = false;
+      api.diagnostics.error(api.diagnostics.ERROR_EXTENSION_MOUNT,
+        { cause, extension: "progress", element, method: "update" });
+    });
+  }
+  const observer = new root.MutationObserver(scheduleRender);
   observer.observe(element, { attributes: true,
     attributeFilter: ["value", "min", "max", "low", "high", "optimum"] });
-  render();
+  scheduleRender();
   return { destroy() {
     active = false;
+    api.waitLayout.cancel(layoutId);
     observer.disconnect();
     if (bar.parentNode) bar.parentNode.removeChild(bar);
     names.forEach((name, index) => {

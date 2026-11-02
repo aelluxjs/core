@@ -966,12 +966,13 @@ test("snap wheel at the edge stretches the elastic wrapper without scrolling a h
   await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(2));
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
     .toBe(200);
-  const result = await page.evaluate(() => {
+  const result = await page.evaluate(async () => {
     const element = document.getElementById("gallery");
     const event = new WheelEvent("wheel", {
       deltaY: 120, bubbles: true, cancelable: true
     });
     element.dispatchEvent(event);
+    await AelluxJs.waitLayout.update(() => {});
     return { prevented: event.defaultPrevented,
       overflowY: getComputedStyle(element).overflowY,
       maxY: element.scrollHeight - element.clientHeight,
@@ -1016,7 +1017,7 @@ test("vertical snap wheel at its last item stretches elastic and scrolls the par
 
   await expect.poll(() => page.evaluate(() => document.getElementById("parent").scrollTop))
     .toBeGreaterThan(0);
-  expect(await page.evaluate(() => window.__elasticTransforms)).toContainEqual(
+  await expect.poll(() => page.evaluate(() => window.__elasticTransforms)).toContainEqual(
     expect.stringMatching(/^scale\(1, [^,]+\) translate3d\(0px, -[^,]+, 0px\)/));
 });
 
@@ -1139,13 +1140,14 @@ test("horizontal wheel ignores hidden vertical overflow during elastic pressure"
     <div id="wrapper" data-ae-scrollbox-elastic
       style="width:300px;height:200px"></div>
   </div>`);
-  const result = await page.evaluate(() => {
+  const result = await page.evaluate(async () => {
     const element = document.getElementById("gallery");
     element.scrollTo({ left: element.scrollWidth, behavior: "instant" });
     const event = new WheelEvent("wheel", {
       deltaX: 130, deltaY: 120, bubbles: true, cancelable: true
     });
     element.dispatchEvent(event);
+    await AelluxJs.waitLayout.update(() => {});
     return { maxY: element.scrollHeight - element.clientHeight,
       maxX: element.scrollWidth - element.clientWidth,
       scrollLeft: element.scrollLeft,
@@ -3218,10 +3220,11 @@ test("converted wheel stretches an elastic child and scrolls its vertical parent
         <div id="elastic" data-ae-scrollbox-elastic style="width:300px;height:100px"></div>
       </div>
     </div></div>`);
-  const wheel = deltaY => page.evaluate(value => {
+  const wheel = deltaY => page.evaluate(async value => {
     const element = document.getElementById("box");
     const event = new WheelEvent("wheel", { deltaY: value, bubbles: true, cancelable: true });
     element.dispatchEvent(event);
+    await AelluxJs.waitLayout.update(() => {});
     return { prevented: event.defaultPrevented, x: element.scrollLeft,
       parent: document.getElementById("parent").scrollTop,
       transform: document.getElementById("elastic").style.transform };
@@ -3246,9 +3249,9 @@ test("converted wheel stretches an elastic child and scrolls its vertical parent
   const rect = await page.locator("#box").boundingBox();
   await page.mouse.move(rect.x + 50, rect.y + 50);
   await page.mouse.wheel(0, 120);
-  await expect.poll(() => page.evaluate(() => window.wheelAtParent)).toMatchObject({
-    prevented: true, transform: expect.stringContaining("scale(")
-  });
+  await expect.poll(() => page.evaluate(() => window.wheelAtParent?.prevented)).toBe(true);
+  await expect.poll(() => page.locator("#elastic").evaluate(element => element.style.transform))
+    .toContain("scale(");
   await expect.poll(() => page.evaluate(() => document.getElementById("parent").scrollTop))
     .toBeGreaterThan(0);
 });
@@ -3564,12 +3567,14 @@ test("elastic pointer drag transforms its marked wrapper and restores it on unmo
     });
     element.dispatchEvent(pointer("pointerdown", x, y, 1));
     window.dispatchEvent(pointer("pointermove", x + 30, y + 60, 1));
+    await AelluxJs.waitLayout.update(() => {});
     const stretched = wrapper.style.transform;
     const activeOrigin = wrapper.style.transformOrigin;
     const partialRect = wrapper.getBoundingClientRect();
     const partialGrowth = { x: partialRect.width - wrapper.offsetWidth,
       y: partialRect.height - wrapper.offsetHeight };
     window.dispatchEvent(pointer("pointermove", x + 120, y + 120, 1));
+    await AelluxJs.waitLayout.update(() => {});
     const maxRect = wrapper.getBoundingClientRect();
     const maxGrowth = { x: maxRect.width - wrapper.offsetWidth,
       y: maxRect.height - wrapper.offsetHeight };
@@ -3742,6 +3747,7 @@ test("elastic native wheel transforms its wrapper and settles", async ({ page })
     const wrapper = element.firstElementChild;
     const event = new WheelEvent("wheel", { deltaY: -60, bubbles: true, cancelable: true });
     element.dispatchEvent(event);
+    await AelluxJs.waitLayout.update(() => {});
     const transform = wrapper.style.transform;
     await new Promise(resolve => setTimeout(resolve, 160));
     return { prevented: event.defaultPrevented, limit: element.clientHeight / 4,
@@ -3776,15 +3782,16 @@ test("overscroll-behavior none suppresses elastic pressure in its axis", async (
     <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div>
   </div>`);
 
-  const result = await page.evaluate(() => ["none", "contain"].map(id => {
+  const result = await page.evaluate(() => Promise.all(["none", "contain"].map(async id => {
     const element = document.getElementById(id);
     const wheel = new WheelEvent("wheel", {
       deltaY: -60, bubbles: true, cancelable: true
     });
     element.dispatchEvent(wheel);
+    await AelluxJs.waitLayout.update(() => {});
     return { id, prevented: wheel.defaultPrevented,
       transform: element.firstElementChild.style.transform };
-  }));
+  })));
 
   expect(result[0]).toEqual({ id: "none", prevented: true, transform: "" });
   expect(result[1].prevented).toBe(true);
@@ -3861,7 +3868,7 @@ test("elastic native touch stretches while pulling beyond an edge", async ({ pag
   await setup(page, `<div id="box" data-ae-scrollbox="native"
     style="width:100px;height:100px;overflow:auto;padding:6px">
     <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div></div>`);
-  const result = await page.evaluate(() => {
+  const result = await page.evaluate(async () => {
     const element = document.getElementById("box");
     const touchEvent = (type, y, active) => {
       const event = new Event(type, { bubbles: true, cancelable: true });
@@ -3873,6 +3880,7 @@ test("elastic native touch stretches while pulling beyond an edge", async ({ pag
     element.dispatchEvent(touchEvent("touchstart", 40, true));
     const move = touchEvent("touchmove", 100, true);
     element.dispatchEvent(move);
+    await AelluxJs.waitLayout.update(() => {});
     const transform = element.firstElementChild.style.transform;
     element.dispatchEvent(touchEvent("touchend", 100, false));
     return { prevented: move.defaultPrevented, limit: element.clientHeight / 4, transform,
@@ -3930,7 +3938,7 @@ test("elastic pointer drag moves its wrapper away from the right edge", async ({
     data-ae-scrollbox-momentum="false"
     style="width:100px;height:100px;overflow:auto;padding:7px 9px 11px 13px">
     <div data-ae-scrollbox-elastic style="width:300px;height:300px"></div></div>`);
-  const result = await page.evaluate(() => {
+  const result = await page.evaluate(async () => {
     const element = document.getElementById("box");
     const maxX = element.scrollWidth - element.clientWidth;
     const maxY = element.scrollHeight - element.clientHeight;
@@ -3948,6 +3956,7 @@ test("elastic pointer drag moves its wrapper away from the right edge", async ({
       bubbles: true, cancelable: true, isPrimary: true, pointerId: 23,
       pointerType: "mouse", buttons: 1, clientX: x - 60, clientY: y - 60
     }));
+    await AelluxJs.waitLayout.update(() => {});
     return {
       transform: wrapper.style.transform,
       origin: wrapper.style.transformOrigin,
@@ -3971,7 +3980,7 @@ test("elastic pointer drag moves its wrapper away from the bottom edge", async (
   await setup(page, `<div id="box" data-ae-scrollbox="pointer"
     data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
     <div data-ae-scrollbox-elastic style="width:300px;height:300px"></div></div>`);
-  const result = await page.evaluate(() => {
+  const result = await page.evaluate(async () => {
     const element = document.getElementById("box");
     const wrapper = element.firstElementChild;
     element.scrollTo({ top: element.scrollHeight, behavior: "instant" });
@@ -3987,6 +3996,7 @@ test("elastic pointer drag moves its wrapper away from the bottom edge", async (
       bubbles: true, cancelable: true, isPrimary: true, pointerId: 124,
       pointerType: "mouse", buttons: 1, clientX: x, clientY: y - 60
     }));
+    await AelluxJs.waitLayout.update(() => {});
     const result = { transform: wrapper.style.transform,
       origin: wrapper.style.transformOrigin, scrollTop: element.scrollTop,
       maxY, gapY: before - wrapper.getBoundingClientRect().bottom };
@@ -4025,6 +4035,7 @@ test("elastic trailing pivot keeps wrapper dimensions without minimum sizes", as
       bubbles: true, cancelable: true, isPrimary: true, pointerId: 53,
       pointerType: "mouse", buttons: 1, clientX: x - 60, clientY: y - 60
     }));
+    await AelluxJs.waitLayout.update(() => {});
     const origin = wrapper.style.transformOrigin.split(" ");
     const result = { originX: Number.parseFloat(origin[0]), originY: Number.parseFloat(origin[1]),
       wrapperWidth: wrapper.offsetWidth, wrapperHeight: wrapper.offsetHeight, beforeWrapper,
@@ -4071,6 +4082,7 @@ test("elastic bottom and right transform animates during release", async ({ page
       bubbles: true, cancelable: true, isPrimary: true, pointerId: 41,
       pointerType: "mouse", buttons: 1, clientX: x - 60, clientY: y - 60
     }));
+    await AelluxJs.waitLayout.update(() => {});
     const during = gap();
     window.dispatchEvent(new PointerEvent("pointerup", {
       bubbles: true, isPrimary: true, pointerId: 41, pointerType: "mouse",
@@ -4094,13 +4106,14 @@ test("elastic native wheel moves its wrapper at bottom and right limits", async 
   await setup(page, `<div id="box" data-ae-scrollbox="native"
     style="width:100px;height:100px;overflow:auto;padding:8px">
     <div data-ae-scrollbox-elastic style="width:300px;height:300px"></div></div>`);
-  const result = await page.evaluate(() => {
+  const result = await page.evaluate(async () => {
     const element = document.getElementById("box");
     element.scrollTo({ left: element.scrollWidth, top: element.scrollHeight, behavior: "instant" });
     const event = new WheelEvent("wheel", {
       deltaX: 60, deltaY: 60, bubbles: true, cancelable: true
     });
     element.dispatchEvent(event);
+    await AelluxJs.waitLayout.update(() => {});
     return {
       prevented: event.defaultPrevented,
       transform: element.firstElementChild.style.transform,
@@ -4123,8 +4136,8 @@ test("elastic margins preserve the scroll range at trailing edges", async ({ pag
   <div id="end" data-ae-scrollbox="native"
     style="width:100px;height:100px;overflow:auto">
     <div data-ae-scrollbox-elastic style="width:300px;height:300px"></div></div>`);
-  const result = await page.evaluate(() => {
-    const read = (id, deltaX, deltaY, atEnd) => {
+  const result = await page.evaluate(async () => {
+    const read = async (id, deltaX, deltaY, atEnd) => {
       const element = document.getElementById(id);
       const wrapper = element.firstElementChild;
       if (atEnd) element.scrollTo({ left: element.scrollWidth, top: element.scrollHeight,
@@ -4133,6 +4146,7 @@ test("elastic margins preserve the scroll range at trailing edges", async ({ pag
       element.dispatchEvent(new WheelEvent("wheel", {
         deltaX, deltaY, bubbles: true, cancelable: true
       }));
+      await AelluxJs.waitLayout.update(() => {});
       return {
         before, width: element.scrollWidth, height: element.scrollHeight,
         left: element.scrollLeft, top: element.scrollTop,
@@ -4144,7 +4158,8 @@ test("elastic margins preserve the scroll range at trailing edges", async ({ pag
         }
       };
     };
-    return { start: read("start", -600, -600, false), end: read("end", 600, 600, true) };
+    const [start, end] = await Promise.all([read("start", -600, -600, false), read("end", 600, 600, true)]);
+    return { start, end };
   });
   expect(result.start.margins.bottom).toMatch(/^calc\(-[\d.]+px\)$/);
   expect(result.start.margins.right).toMatch(/^calc\(-[\d.]+px\)$/);
@@ -4172,12 +4187,13 @@ test("elastic limits accept fractions and pixel values per axis", async ({ page 
       style="width:100px;height:100px;overflow:auto">
       <div data-ae-scrollbox-elastic="${value}" style="width:300px;height:300px"></div>
     </div>`).join(""));
-  const result = await page.evaluate(count => Array.from({ length: count }, (_, index) => {
+  const result = await page.evaluate(count => Promise.all(Array.from({ length: count }, async (_, index) => {
     const element = document.getElementById(`box-${index}`);
     const wrapper = element.firstElementChild;
     element.dispatchEvent(new WheelEvent("wheel", {
       deltaX: -600, deltaY: -600, bubbles: true, cancelable: true
     }));
+    await AelluxJs.waitLayout.update(() => {});
     const transform = wrapper.style.transform;
     const scale = /scale\(([^,()]+)(?:,\s*([^)]+))?\)/.exec(transform);
     const translate = /translate3d\(([^p]+)px, ([^p]+)px, 0(?:px)?\)/.exec(transform);
@@ -4188,7 +4204,7 @@ test("elastic limits accept fractions and pixel values per axis", async ({ page 
         Math.max(wrapper.offsetHeight, wrapper.scrollHeight),
       width: element.clientWidth, height: element.clientHeight, transform
     };
-  }), cases.length);
+  })), cases.length);
   for (const [index, item] of result.entries()) {
     const expected = cases[index];
     const limitY = expected.value === "" || expected.value === "invalid" ||
@@ -4205,19 +4221,30 @@ test("elastic limits accept fractions and pixel values per axis", async ({ page 
   expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory(1)[0]?.code)).toBe(2015);
 });
 
-test("elastic pressure eases toward the limit and returns by 15 percent per frame", async ({ page }) => {
+test("elastic pressure returns by 15 percent per native frame while CSS follows scheduled updates", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox="pointer"
     data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
     <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div></div>`);
-  const result = await page.evaluate(() => {
+  const result = await page.evaluate(async () => {
+    await AelluxJs.waitLayout.update(() => {});
     const element = document.getElementById("box");
     const wrapper = element.firstElementChild;
     const rect = element.getBoundingClientRect();
     const x = rect.left + 50, y = rect.top + 50;
-    const frameCallbacks = [];
+    const frameCallbacks = new Map();
+    let nextFrameId = 1, time = performance.now();
     window.requestAnimationFrame = callback => {
-      frameCallbacks.push(callback);
-      return frameCallbacks.length;
+      const id = nextFrameId++;
+      frameCallbacks.set(id, callback);
+      return id;
+    };
+    window.cancelAnimationFrame = id => frameCallbacks.delete(id);
+    const frame = async () => {
+      const callbacks = [...frameCallbacks.values()];
+      frameCallbacks.clear();
+      time += 1000 / 60;
+      for (const callback of callbacks) callback(time);
+      for (let i = 0; i < 12; i++) await Promise.resolve();
     };
     const amount = () => Number.parseFloat(/translate3d\(0px, ([\d.]+)px/.exec(
       wrapper.style.transform)[1]);
@@ -4230,14 +4257,16 @@ test("elastic pressure eases toward the limit and returns by 15 percent per fram
     const pressures = [];
     for (const force of [30, 60, 90]) {
       window.dispatchEvent(pointer("pointermove", y + force, 1));
+      await frame();
       pressures.push(amount());
     }
     window.dispatchEvent(pointer("pointerup", y + 90, 0));
     const beforeFrame = amount();
-    for (let step = 0; step < 4 && frameCallbacks.length && amount() === beforeFrame; step++)
-      frameCallbacks.shift()(performance.now());
+    let releaseFrames = 0;
+    for (; releaseFrames < 4 && frameCallbacks.size && amount() === beforeFrame; releaseFrames++)
+      await frame();
     const afterFrame = amount();
-    return { pressures, beforeFrame, afterFrame, limit: element.clientHeight / 4 };
+    return { pressures, beforeFrame, afterFrame, releaseFrames, limit: element.clientHeight / 4 };
   });
   for (const [index, force] of [30, 60, 90].entries()) {
     expect(result.pressures[index]).toBeCloseTo(elasticAmount(force, result.limit), 2);
@@ -4246,7 +4275,8 @@ test("elastic pressure eases toward the limit and returns by 15 percent per fram
     .toBeLessThan(result.pressures[0]);
   expect(result.pressures[2] - result.pressures[1])
     .toBeLessThan(result.pressures[1] - result.pressures[0]);
-  expect(result.afterFrame).toBeCloseTo(result.beforeFrame * 0.85, 2);
+  expect(result.releaseFrames).toBeGreaterThan(0);
+  expect(result.afterFrame).toBeCloseTo(result.beforeFrame * 0.85 ** result.releaseFrames, 2);
 });
 
 test("elastic snapback is immediate with reduced motion", async ({ page }) => {
@@ -4255,7 +4285,7 @@ test("elastic snapback is immediate with reduced motion", async ({ page }) => {
     data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
     <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div></div>`);
   await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" }));
-  const result = await page.evaluate(() => {
+  const result = await page.evaluate(async () => {
     const element = document.getElementById("box");
     const wrapper = element.firstElementChild;
     const rect = element.getBoundingClientRect();
@@ -4267,6 +4297,7 @@ test("elastic snapback is immediate with reduced motion", async ({ page }) => {
     });
     element.dispatchEvent(pointer("pointerdown", y, 1));
     window.dispatchEvent(pointer("pointermove", y + 60, 1));
+    await AelluxJs.waitLayout.update(() => {});
     const during = wrapper.style.transform;
     window.dispatchEvent(pointer("pointerup", y + 60, 0));
     return { during, after: wrapper.style.transform,

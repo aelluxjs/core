@@ -16,6 +16,7 @@ Start from [`templates/aellux.ext.template.js`](https://github.com/aelluxjs/core
 6. Release Extension-wide resources in `destroy()`.
 7. Keep the public API and lifecycle behavior equivalent across Modern and Legacy variants.
 8. Core Extensions that publish or define CSS custom properties must register each property during `init()` with `AelluxJs.registerCssProperty()`, using an appropriate syntax and initial value. Properties inherit by default; set `inherits: false` only when descendants must receive the initial value instead.
+9. Recurring visual publication of CSS custom properties and ordinary CSS properties must follow the shared adaptive `waitLayout` cadence. Batch related writes in `update()` or a sequence's `update` stage, coalesce repeated notifications, and document any correctness-critical synchronous exceptions. See [Adaptive CSS publication](#adaptive-css-publication).
 
 The runtime exposes a kebab-case name as camelCase under `AelluxJs.ext`: `tab-group` becomes `AelluxJs.ext.tabGroup`.
 An Extension receives its configuration as the `options` argument to `init(options)`. Supply it through `extensions`:
@@ -71,6 +72,27 @@ The manager runs matching handlers through the mount helper during `$ae.mount(ro
 ## Layout work in Core Extensions
 
 Core Extensions must avoid interleaving DOM or CSS writes with reads that can force layout, such as `getBoundingClientRect()`, `offsetWidth`, `clientHeight`, `scrollWidth`, and `getComputedStyle()`. Collect related measurements in one `$ae.waitLayout.read()` callback, then apply dependent styles, classes, attributes, or DOM changes in `$ae.waitLayout.update()`. Queueing the update from the completed read lets the scheduler run the writes after the batched reads in the same layout frame when possible.
+
+### Adaptive CSS publication
+
+The standard performance cadence for runtime-owned CSS publication is the shared adaptive `waitLayout` cadence. This applies to ordinary properties and custom properties, including values driven by scroll, resize, observers, pointer input, timers, or progress events. Group related writes in one eligible update and retain the latest pending values instead of publishing once per incoming notification. The cadence applies to the visual batch, not separately to each `setProperty()` call within that batch. Avoid independent `requestAnimationFrame()` loops for visual publication that bypass the scheduler's response to sustained frame pressure.
+
+This rule does not impose a fixed FPS ceiling or require an active CSS Motion operation. `cssMotionPropertyMaxFPS` is an additional policy for controlled CSS Motion operations with conservative properties; it is not the default rate for all CSS writes. Use `motion.run()` when coordinating a CSS transition or animation, including optional Aellux easing. Use `waitLayout.update()` when publishing computed values directly. See [CSS publication cadence](../runtime/wait-layout.md#css-publication-cadence).
+
+Native scrolling and momentum do not need to pass through CSS Motion. Publishing CSS values derived from their position is separate work and follows the shared cadence. Keep input decisions and motion cancellation synchronous when deferring them would change the interaction. Initial setup, transition preparation or handoff, interruption freezes, and unmount restoration may also require synchronous writes to preserve a valid state before paint. Keep these operations bounded and tied to their lifecycle boundary; they are not an exemption for recurring visual updates. Cancel pending publications before releasing owned styles, and do not queue restoration that could run after a subsequent mount.
+
+This is an authoring contract, not automatic interception of browser CSS writes. CSS stylesheet interpolation remains native unless explicitly captured by CSS Motion. Application and third-party code must opt into the scheduler for their own publications.
+
+The runtime applies this rule to the following publication paths:
+
+| Path | Scheduled publication |
+| --- | --- |
+| Scrollbox Snap focus | A replaceable read/update sequence measures item proximity and publishes `--ae-snap-focus` at the shared cadence. |
+| Scrollbox custom scrollbars | Scroll and thumb-drag handlers request the existing coalesced Scrollbox read/update publication. |
+| Legacy Progress fallback | Logical values reflect synchronously; width, colors and ARIA ranges render together in a coalesced update. |
+| Scrollbox elasticity | Gesture and return calculations retain their own timing; transforms, origins and compensating margins publish together in update. Interruption cancels pending writes before synchronously restoring the wrapper. |
+
+Adaptive dimensions, ordinary Anchor placement, Scrollbox progress/fade publication, and Viewport output also use the shared scheduler. Present transition preparation and Marquee pause/freeze operations include synchronous lifecycle writes; their controlled animation timelines use CSS Motion. Repository consumers retain separate direct paths: the floating example changes its target margin directly on input, and the documentation theme writes Ajax opacity and loading-bar styles from event handlers and timers. These consumer paths are not made adaptive merely by setting `cssMotionPropertyMaxFPS`.
 
 For a single measurement and write, no revision guard is needed. These three forms do the same work. With `async`/`await`:
 
@@ -237,6 +259,7 @@ Do not leave the Extension partially initialized when an optional resource fails
 - `init`, `mount`, `unmount`, and `destroy` obey the lifecycle contract.
 - Repeated mount and destroy operations do not duplicate or retain resources.
 - Layout-sensitive Core Extensions batch measurements with `waitLayout.read()` and dependent writes with `waitLayout.update()` without adding avoidable frame delays.
+- Recurring CSS publications use the shared adaptive cadence, coalesce repeated notifications, and identify any correctness-critical synchronous boundary writes; they do not depend on an active CSS Motion operation or a fixed property FPS ceiling.
 - Core Extensions register their published and customizable CSS properties in `init()` through `registerCssProperty()` and keep working when registration is unavailable.
 - The accessibility capability profile is documented and its applicable minimum behavior is validated.
 - Both runtime selections are covered by browser tests.

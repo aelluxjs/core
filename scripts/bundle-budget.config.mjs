@@ -37,7 +37,8 @@ export const bundleBudget = Object.freeze([
   // the Progress implementation itself stays external. Measured in the report.
   // Includes numeric Present Group capacity and rollback-safe reservations.
   // Present rendered-state handoff; measured changes: core-extensions/present.md.
-  { file: "aellux.full.min.js", maxRawBytes: 195 * 1024, maxGzipBytes: 60.25 * 1024 },
+  // Adaptive CSS publication for Scrollbox/Snap; measured deltas: runtime/performance.md.
+  { file: "aellux.full.min.js", maxRawBytes: 195.5 * 1024, maxGzipBytes: 60.5 * 1024 },
   { file: "aellux.full.legacy.min.js", maxRawBytes: 515 * 1024, maxGzipBytes: 152 * 1024 },
   { file: "aellux.full.min.css", maxRawBytes: 122 * 1024, maxGzipBytes: 12 * 1024 },
   { file: "aellux.ext.adaptive.min.css", maxRawBytes: 121 * 1024, maxGzipBytes: 11 * 1024 },
@@ -82,7 +83,7 @@ export const bundleBudget = Object.freeze([
   // Child-target fade geometry/restoration; measured costs: core-extensions/scrollbox.md.
   // Layout transition tracking: +477 raw / +176 gzip bytes; costs: core-extensions/scrollbox.md.
   { file: "aellux.ext.scrollbox.legacy.min.js", maxRawBytes: 47.5 * 1024, maxGzipBytes: 15 * 1024 },
-  { file: "aellux.ext.scrollbox-snap.min.js", maxRawBytes: 10.5 * 1024, maxGzipBytes: 4 * 1024 },
+  { file: "aellux.ext.scrollbox-snap.min.js", maxRawBytes: 11 * 1024, maxGzipBytes: 4.25 * 1024 },
   { file: "aellux.ext.scrollbox-snap.legacy.min.js", maxRawBytes: 15 * 1024, maxGzipBytes: 6 * 1024 },
   { file: "aellux.ext.state-navigation.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
   // Original-error event and Promise handling: +280 raw / +106 gzip bytes.

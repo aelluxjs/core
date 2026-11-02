@@ -79,6 +79,7 @@
     var suspendedClass = AelluxJs.className("snap-suspended");
     var properties = ["--ae-snap-focus"];
     var states = /* @__PURE__ */ new Map();
+    var nextLayoutId = 7e6;
     AelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
@@ -158,7 +159,8 @@
         release: false,
         observer: null,
         resizeObserver: null,
-        disposed: false
+        disposed: false,
+        valuesLayoutId: nextLayoutId++
       };
       state.onScroll = function() {
         updateValues(state);
@@ -230,6 +232,7 @@
       var state = states.get(element);
       if (!state) return;
       state.disposed = true;
+      AelluxJs.waitLayout.cancel(state.valuesLayoutId);
       cancelRelease(state);
       clearTimer(state, "timeout");
       clearTimer(state, "wheelTimeout");
@@ -346,25 +349,51 @@
     }
     function updateValues(state) {
       if (state.disposed) return;
-      var axis = axisFor(state), element = state.element;
-      var rect = element.getBoundingClientRect();
-      var size = axis === HORIZONTAL ? element.clientWidth : element.clientHeight;
-      if (!size) return;
-      var _iterator3 = _createForOfIteratorHelper(itemsFor(state)), _step3;
-      try {
-        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-          var item = _step3.value;
-          if (!state.savedItems.has(item)) {
-            state.savedItems.set(item, AelluxJs.persist.element.save(item, [], properties));
+      AelluxJs.waitLayout.sequence(state.valuesLayoutId, {
+        read: function read() {
+          var axis = axisFor(state), element = state.element, root2 = state.root;
+          var rect = element.getBoundingClientRect();
+          var size = axis === HORIZONTAL ? element.clientWidth : element.clientHeight;
+          var values = size ? itemsFor(state).map(function(item) {
+            return {
+              item: item,
+              value: Math.max(0, 1 - Math.abs(offset(state, item, axis, false, rect, item.getBoundingClientRect())) / size)
+            };
+          }) : [];
+          return {
+            axis: axis,
+            root: root2,
+            values: values
+          };
+        },
+        update: function update2(measured) {
+          if (state.root !== measured.root || axisFor(state) !== measured.axis) return;
+          var _iterator3 = _createForOfIteratorHelper(measured.values), _step3;
+          try {
+            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+              var _step3$value = _step3.value, item = _step3$value.item, value = _step3$value.value;
+              if (!state.root.contains(item) || !item.hasAttribute(itemAttribute) || item.closest("[".concat(scrollboxAttribute, "]")) !== state.element) continue;
+              if (!state.savedItems.has(item)) state.savedItems.set(item, AelluxJs.persist.element.save(item, [], properties));
+              if (item.style.getPropertyPriority(properties[0])) item.style.removeProperty(properties[0]);
+              item.style.setProperty(properties[0], value);
+            }
+          } catch (err) {
+            _iterator3.e(err);
+          } finally {
+            _iterator3.f();
           }
-          var box = item.getBoundingClientRect();
-          item.style.setProperty(properties[0], Math.max(0, 1 - Math.abs(offset(state, item, axis, false, rect, box)) / size));
+        },
+        abort: function abort() {
+          return state.disposed;
         }
-      } catch (err) {
-        _iterator3.e(err);
-      } finally {
-        _iterator3.f();
-      }
+      }).catch(function(cause) {
+        AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT, {
+          cause: cause,
+          extension: extensionName,
+          element: state.element,
+          method: "update"
+        });
+      });
     }
     function restoreItems(state) {
       var _iterator4 = _createForOfIteratorHelper(state.savedItems.values()), _step4;

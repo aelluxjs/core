@@ -77,6 +77,7 @@
     return ("string" === r ? String : Number)(t);
   }
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  var nextLayoutId = 8e6;
   function installProgressFallback(root, element) {
     var tag = element.tagName.toLowerCase();
     if (hasProgressAPI(root, tag)) return null;
@@ -88,6 +89,8 @@
     });
     var memory = api.persist.element.save(element, [marker, "role", "aria-valuemin", "aria-valuemax", "aria-valuenow"], ["display", "position", "width", "height", "background", "overflow"]);
     var active = true;
+    var layoutId = nextLayoutId++;
+    var pending = false;
     var bar = element.ownerDocument.createElement("span");
     bar.setAttribute("aria-hidden", "true");
     bar.style.cssText = "position:absolute;left:0;top:0;height:100%;pointer-events:none";
@@ -148,19 +151,36 @@
           value = Number(value);
           if (!Number.isFinite(value)) throw new TypeError("Expected a finite number");
           element.setAttribute(name, String(value));
-          render();
+          scheduleRender();
         }
       }));
     });
-    var observer = new root.MutationObserver(render);
+    function scheduleRender() {
+      if (!active || pending) return;
+      pending = true;
+      api.waitLayout.update(layoutId, function() {
+        pending = false;
+        render();
+      }).catch(function(cause) {
+        pending = false;
+        api.diagnostics.error(api.diagnostics.ERROR_EXTENSION_MOUNT, {
+          cause: cause,
+          extension: "progress",
+          element: element,
+          method: "update"
+        });
+      });
+    }
+    var observer = new root.MutationObserver(scheduleRender);
     observer.observe(element, {
       attributes: true,
       attributeFilter: ["value", "min", "max", "low", "high", "optimum"]
     });
-    render();
+    scheduleRender();
     return {
       destroy: function destroy() {
         active = false;
+        api.waitLayout.cancel(layoutId);
         observer.disconnect();
         if (bar.parentNode) bar.parentNode.removeChild(bar);
         names.forEach(function(name, index) {

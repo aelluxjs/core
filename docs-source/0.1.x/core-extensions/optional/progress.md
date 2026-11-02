@@ -63,6 +63,8 @@ The implementation is original Apache-2.0 code, adding no third-party dependency
 
 ## Lifecycle
 
+Fallback property setters reflect numeric values and attributes synchronously. The visual width/colors and ARIA range publication are coalesced into `waitLayout.update()`, using the shared adaptive cadence even when no CSS Motion operation is active. Multiple changes before that update render the latest values. Unmount cancels the pending render before removing the generated bar and restoring the control. Complete native controls retain their browser-managed rendering.
+
 Mount priority is `-1`, before Present starts initially visible timers. Dynamic subtrees use `$ae.mount(subtree)` and `$ae.unmount(subtree)`. Changing `data-ae-progress-target` reconnects the listener automatically; `$ae(element).progress.update()` retries resolution when a target is inserted later. Missing/invalid IDs use the existing element/ID diagnostic.
 
 Unmount/destroy disconnect listeners and observers and restore the original `value` attribute, including its absence. Legacy also removes its generated bar, restores managed styles/ARIA, and restores original own-property descriptors. Remount creates a fresh integration. Native `max` remains application-owned.

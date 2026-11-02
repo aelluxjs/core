@@ -350,7 +350,9 @@
         owned: false,
         touch: null,
         releaseFrame: null,
-        wheelTimeout: null
+        wheelTimeout: null,
+        layoutId: nextLayoutId++,
+        publication: null
       };
       var inlineWrapper = {
         element: null,
@@ -369,9 +371,7 @@
         hoverVisible: false,
         hoverTimeout: null,
         interactionVisible: false,
-        interactionTimeout: null,
-        lastScrollLeft: null,
-        lastScrollTop: null
+        interactionTimeout: null
       };
       var state = {
         element: element,
@@ -410,12 +410,6 @@
       };
       state.onScroll = function(event) {
         if (event.target !== element) return;
-        if ((state.scrollbar.x || state.scrollbar.y) && (state.scrollbar.lastScrollLeft !== element.scrollLeft || state.scrollbar.lastScrollTop !== element.scrollTop)) {
-          var metrics = nativeMetrics(element);
-          updateScrollbars(state, readScrollbars(state, metrics, wheelAxes(state, metrics)));
-          state.scrollbar.lastScrollLeft = element.scrollLeft;
-          state.scrollbar.lastScrollTop = element.scrollTop;
-        }
         publish(state);
         if (!state.desktop && state.scrollbar.listening) scheduleScrollbarInteractionHide(state);
       };
@@ -821,8 +815,7 @@
     function showScrollbars(state) {
       if (!state.scrollbar.listening) return;
       if (!state.element.classList.contains(scrollbarVisibleClass)) {
-        var metrics = nativeMetrics(state.element);
-        updateScrollbars(state, readScrollbars(state, metrics, wheelAxes(state, metrics)));
+        publish(state);
         state.element.classList.add(scrollbarVisibleClass);
         state.scrollbar.visibleOwned = true;
       }
@@ -939,14 +932,6 @@
         left: destination,
         behavior: "instant"
       });
-      updateScrollbars(state, [{
-        record: record,
-        trackSize: record.trackSize,
-        thumbSize: record.thumbSize,
-        thumbPosition: travel * destination / record.max,
-        max: record.max,
-        display: record.display
-      }]);
       publish(state);
     }
     function endScrollbarDrag(state, record, event) {
@@ -1860,7 +1845,7 @@
       elastic.active = active;
       elastic.owned = true;
       if (active) dispatchInteraction(state, "elastic", true);
-      setElasticTransform(state, dimensions);
+      setElasticTransform(state);
       return active;
     }
     function measureElasticWrapper(wrapper) {
@@ -1874,6 +1859,26 @@
       };
     }
     function setElasticTransform(state) {
+      var elastic = state.elastic;
+      if (state.disposed || elastic.publication) return;
+      var publication = {};
+      elastic.publication = publication;
+      AelluxJs.waitLayout.update(elastic.layoutId, function() {
+        if (elastic.publication !== publication || state.disposed || !elastic.owned) return;
+        elastic.publication = null;
+        writeElasticTransform(state);
+      }).catch(function(cause) {
+        AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT, {
+          cause: cause,
+          extension: extensionName,
+          element: state.element,
+          method: "update"
+        });
+      }).finally(function() {
+        if (elastic.publication === publication) elastic.publication = null;
+      });
+    }
+    function writeElasticTransform(state) {
       var dimensions = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : state.elastic.dimensions;
       var elastic = state.elastic;
       var wrapper = elastic.wrapper;
@@ -1973,6 +1978,8 @@
     function resetElastic(state) {
       var elastic = state.elastic;
       var wasOwned = elastic.owned;
+      AelluxJs.waitLayout.cancel(elastic.layoutId);
+      elastic.publication = null;
       if (elastic.releaseFrame !== null) root.cancelAnimationFrame(elastic.releaseFrame);
       if (elastic.wheelTimeout !== null) root.clearTimeout(elastic.wheelTimeout);
       elastic.releaseFrame = null;

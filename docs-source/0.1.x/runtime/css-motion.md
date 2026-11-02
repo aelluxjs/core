@@ -8,6 +8,8 @@ Controlled operations containing animated properties beyond `transform`, `opacit
 
 The shared scheduler applies that visual limit once, including before its native cadence has been calibrated. CSS Motion does not also impose a timer-based sequence limit: timer wakeups can miss the next animation frame and reduce a nominal 40 FPS operation to about 32 FPS on WebKit. Frame credit preserves the requested average cadence within the browser's available frames; it does not guarantee a frame rate when the device cannot sustain it.
 
+The runtime's standard performance cadence for CSS publication is the shared adaptive `waitLayout` cadence, including when no CSS Motion operation is active. Direct publication of computed CSS values should use `waitLayout.update()`; it does not require `motion.run()`. The property ceiling described above is an additional controlled-motion policy, not a permanent global CSS-write ceiling. Direct CSSOM writes outside the scheduler do not automatically acquire adaptive protection. See [CSS publication cadence](wait-layout.md#css-publication-cadence) and the [authoring contract](../extensions/authoring.md#adaptive-css-publication), including scheduled runtime publication and synchronous lifecycle boundaries.
+
 ```js
 $ae.init({
   mode: "full",
@@ -44,6 +46,8 @@ $ae.init({ mode: "full", cssMotionController: false });
 ```
 
 The option defaults to `true`. When disabled, or when the browser lacks reliable `getAnimations()`, `pause()`, mutable `currentTime`, or computed timing, state classes and CSS are still applied normally. The controller does not pause frames, create a progress sequence, or impose a JavaScript FPS limit. No Web Animations polyfill is loaded.
+
+Disabling CSS Motion timeline control does not disable the shared adaptive cadence for other CSS publications scheduled through `waitLayout`.
 
 ## Advanced Aellux easing
 

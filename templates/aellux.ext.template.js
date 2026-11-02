@@ -15,6 +15,11 @@
  *   dependencies are not guaranteed by the Core.
  * - Declare available artifacts with builds: ["modern"], ["legacy"], or
  *   ["modern", "legacy"] when registering the Extension through $ae.ext().
+ * - Publish recurring CSS custom-property and ordinary-property changes through
+ *   waitLayout.update() or a sequence update stage, coalescing notifications.
+ *   This uses the shared adaptive cadence without requiring CSS Motion or a
+ *   fixed FPS ceiling. Keep correctness-critical setup/cancel/restore writes
+ *   synchronous and bounded; document those lifecycle exceptions.
  */
 
 (function (root) {

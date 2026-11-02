@@ -17,6 +17,22 @@ The CI workflow runs the same command after `npm run build`. A pull request fail
 
 [`scripts/bundle-budget.config.mjs`](https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs) is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The `test:budget` command prints each artifact's measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates eleven Bundled Extensions. Only the Optional Extensions (Ajax Href, Dialog, Progress, PWA and Viewport) use separate on-demand scripts in Full. Basic loads separately the Extensions explicitly registered by the developer and their declared dependencies.
 
+## Adaptive CSS publication
+
+Scrollbox custom scrollbar geometry, Snap focus, elastic styles and Legacy Progress fallback rendering use the shared adaptive update phase. This adds replaceable Snap measurement/publication and cancellable coalesced updates while preserving independent scrolling and gesture calculations. Compared with the preceding checked-in artifacts, minified raw/gzip level 9 sizes are:
+
+| Artifact | Before raw / gzip bytes | After raw / gzip bytes |
+| --- | --- | --- |
+| Full Modern | 199,219 / 61,559 | 199,767 / 61,693 |
+| Full Legacy | 523,437 / 155,259 | 524,074 / 155,379 |
+| Scrollbox Modern | 41,566 / 13,469 | 41,591 / 13,453 |
+| Scrollbox Legacy | 47,303 / 14,789 | 47,345 / 14,760 |
+| Scrollbox Snap Modern | 10,336 / 3,975 | 10,859 / 4,188 |
+| Scrollbox Snap Legacy | 12,832 / 4,729 | 13,427 / 4,950 |
+| Progress Legacy | 7,432 / 2,987 | 7,683 / 3,124 |
+
+Full Modern's raw/gzip budgets change from 195/60.25 to 195.5/60.5 KiB. Scrollbox Snap Modern changes from 10.5/4 to 11/4.25 KiB. The other affected artifacts retain their existing limits. These are distribution costs, not a measured runtime performance improvement; the publication policy and its synchronous lifecycle boundaries are described in the [authoring contract](../extensions/authoring.md#adaptive-css-publication).
+
 ## Shared selector helpers
 
 The public `isValidSelector()` and `parseSelectors()` helpers ship in the boot and ESM entries so they are available before initialization. Ajax Href delegates selector parsing to the global API, while Extension registration and mount-map validation reuse the internal validator. Compared with the preceding checked-in artifacts, measured minified raw/gzip level 9 bytes are:

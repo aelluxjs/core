@@ -262,7 +262,9 @@
         owned: false,
         touch: null,
         releaseFrame: null,
-        wheelTimeout: null
+        wheelTimeout: null,
+        layoutId: nextLayoutId++,
+        publication: null
       };
       const inlineWrapper = {
         element: null,
@@ -281,9 +283,7 @@
         hoverVisible: false,
         hoverTimeout: null,
         interactionVisible: false,
-        interactionTimeout: null,
-        lastScrollLeft: null,
-        lastScrollTop: null
+        interactionTimeout: null
       };
       const state = {
         element,
@@ -320,12 +320,6 @@
       };
       state.onScroll = (event) => {
         if (event.target !== element) return;
-        if ((state.scrollbar.x || state.scrollbar.y) && (state.scrollbar.lastScrollLeft !== element.scrollLeft || state.scrollbar.lastScrollTop !== element.scrollTop)) {
-          const metrics = nativeMetrics(element);
-          updateScrollbars(state, readScrollbars(state, metrics, wheelAxes(state, metrics)));
-          state.scrollbar.lastScrollLeft = element.scrollLeft;
-          state.scrollbar.lastScrollTop = element.scrollTop;
-        }
         publish(state);
         if (!state.desktop && state.scrollbar.listening) scheduleScrollbarInteractionHide(state);
       };
@@ -680,8 +674,7 @@
     function showScrollbars(state) {
       if (!state.scrollbar.listening) return;
       if (!state.element.classList.contains(scrollbarVisibleClass)) {
-        const metrics = nativeMetrics(state.element);
-        updateScrollbars(state, readScrollbars(state, metrics, wheelAxes(state, metrics)));
+        publish(state);
         state.element.classList.add(scrollbarVisibleClass);
         state.scrollbar.visibleOwned = true;
       }
@@ -789,14 +782,6 @@
       const destination = Math.max(0, Math.min(record.max, position / travel * record.max));
       if (record.axis === "y") state.element.scrollTo({ top: destination, behavior: "instant" });
       else state.element.scrollTo({ left: destination, behavior: "instant" });
-      updateScrollbars(state, [{
-        record,
-        trackSize: record.trackSize,
-        thumbSize: record.thumbSize,
-        thumbPosition: travel * destination / record.max,
-        max: record.max,
-        display: record.display
-      }]);
       publish(state);
     }
     function endScrollbarDrag(state, record, event) {
@@ -1602,7 +1587,7 @@
       elastic.active = active;
       elastic.owned = true;
       if (active) dispatchInteraction(state, "elastic", true);
-      setElasticTransform(state, dimensions);
+      setElasticTransform(state);
       return active;
     }
     function measureElasticWrapper(wrapper) {
@@ -1615,7 +1600,25 @@
         clientTop: wrapper.clientTop
       };
     }
-    function setElasticTransform(state, dimensions = state.elastic.dimensions) {
+    function setElasticTransform(state) {
+      const elastic = state.elastic;
+      if (state.disposed || elastic.publication) return;
+      const publication = {};
+      elastic.publication = publication;
+      AelluxJs.waitLayout.update(elastic.layoutId, () => {
+        if (elastic.publication !== publication || state.disposed || !elastic.owned) return;
+        elastic.publication = null;
+        writeElasticTransform(state);
+      }).catch((cause) => {
+        AelluxJs.diagnostics.error(
+          AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
+          { cause, extension: extensionName, element: state.element, method: "update" }
+        );
+      }).finally(() => {
+        if (elastic.publication === publication) elastic.publication = null;
+      });
+    }
+    function writeElasticTransform(state, dimensions = state.elastic.dimensions) {
       const elastic = state.elastic;
       const wrapper = elastic.wrapper;
       const x = elastic.amounts[3] - elastic.amounts[1];
@@ -1724,6 +1727,8 @@
       var _a;
       const elastic = state.elastic;
       const wasOwned = elastic.owned;
+      AelluxJs.waitLayout.cancel(elastic.layoutId);
+      elastic.publication = null;
       if (elastic.releaseFrame !== null) root.cancelAnimationFrame(elastic.releaseFrame);
       if (elastic.wheelTimeout !== null) root.clearTimeout(elastic.wheelTimeout);
       elastic.releaseFrame = null;
