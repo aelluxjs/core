@@ -21,6 +21,7 @@
 }
 
 [data-bs-theme="dark"] {
+  --bs-box-shadow-lg: 0 1rem 3rem rgba(0,0,0,1);
   --bs-tertiary-bg: #0f1314!important;
   --bs-tertiary-bg-rgb: 15, 19, 20!important;
   --bs-link-color: #ffc107;
