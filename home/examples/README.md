@@ -45,8 +45,8 @@ install DOM interaction handlers before the runtime's initial mount; Viewport
 needs no separate JavaScript file. Source viewing includes each document's
 complete inline configuration.
 
-The homepage's source disclosures fetch these exact HTML and JavaScript files,
-plus the shared `home.css`; no separately maintained code excerpts are used.
+The homepage's source disclosures fetch these exact HTML and JavaScript files;
+no separately maintained code excerpts are used.
 Highlight.js loads through `$ae.dep()`, using the same 11.12 CDN series and
 GitHub light/dark styles as Docweaver. Later files share the cached dependencies;
 Preference changes switch the active stylesheet. Highlighted markup preserves the

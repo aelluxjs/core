@@ -231,7 +231,7 @@ test("homepage embeds four themed demos and displays the exact runnable source",
   const source = page.locator('[data-example-source="carousel"]');
   await source.locator(":scope > .source-toggle").click();
   await expect(source.locator(".source-file > .source-toggle")).toHaveText([
-    "examples/carousel.htm", "examples/carousel.js", "assets/home.css"
+    "examples/carousel.htm", "examples/carousel.js"
   ]);
   for (const file of await source.locator(".source-file").all()) {
     const path = await file.locator(":scope > .source-toggle").textContent();

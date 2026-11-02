@@ -36,11 +36,12 @@
   <div class="position-fixed z-2 p-4 bottom-0 w-100 d-flex align-items-center justify-content-center">
     <div class="d-flex align-items-center justify-content-center bg-body p-2 px-4 rounded-1 w-100"
       style="max-width: 800px;">
-      <nav data-ae-scrollbox="pointer" class="d-inline-flex align-items-start justify-content-start gap-1 px-2"
-        aria-label="Main navigation">
-        <a class="btn btn-outline-secondary" href="#">&uarr;</a>
-        <a class="btn btn-outline-secondary" href="#examples">Examples</a>
-        <a class="btn btn-outline-secondary" href="#extensions">Extensions</a>
+      <nav data-ae-scrollbox="pointer" data-ae-present-group
+        class="d-inline-flex align-items-start justify-content-start gap-1 px-2" aria-label="Main navigation">
+        <span data-ae-anchor-match="width height" data-ae-anchor=""></span>
+        <a data-ae-present class="btn btn-outline-secondary d-inline-block" href="#">&uarr;</a>
+        <a data-ae-present hidden class="btn btn-outline-secondary d-inline-block" href="#examples">Examples</a>
+        <a data-ae-present hidden class="btn btn-outline-secondary d-inline-block" href="#extensions">Extensions</a>
       </nav>
     </div>
   </div>
