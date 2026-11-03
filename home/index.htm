@@ -68,12 +68,35 @@
     <div class="d-flex border align-items-center justify-content-center bg-body p-3 px-0 rounded-1 shadow-lg"
       style="max-width: 100%;">
       <nav id="main-navigation" data-ae-scrollbox="pointer" style="overflow-y: clip;"
-        class="no-scrollbar position-relative d-inline-flex align-items-start justify-content-start gap-1 px-2"
+        class="no-scrollbar position-relative d-inline-flex align-items-center justify-content-start gap-1 px-2"
         aria-label="Main navigation">
         <a data-ae-anchor="top-left:top-left" data-ae-anchor-target="item1" data-ae-anchor-match="width height"
           class="bg-warning rounded-2 z-0 d-inline-block" aria-hidden="true"
           style="pointer-events: none; --ae-anchor-switch-duration: 250ms; --ae-anchor-switch-ease: cubic-bezier(0.34, 1.56, 0.64, 1);"></a>
-        <a id="item1" class="btn bg-transparent text-body position-relative z-1 ms-2" href="#main">&uarr;</a>
+        <button id="item0" class="btn btn-outline-warning position-relative z-1 ms-2 lh-1 p-2"
+          data-ae-preference="color-scheme" data-ae-next type="button" title="Change color theme">
+          <span data-ae-label="dark" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-moon-fill"
+              viewBox="0 0 16 16">
+              <path
+                d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278" />
+            </svg>
+          </span>
+          <span data-ae-label="light" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+              class="bi bi-brightness-high" viewBox="0 0 16 16">
+              <path
+                d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708" />
+            </svg>
+          </span>
+          <span data-ae-label="auto">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-circle-half"
+              viewBox="0 0 16 16">
+              <path d="M8 15A7 7 0 1 0 8 1zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16" />
+            </svg>
+          </span>
+        </button>
+        <a id="item1" class="btn bg-transparent text-body position-relative z-1" href="#main">&uarr;</a>
         <a id="item2" class="btn bg-transparent text-body position-relative z-1" href="#getting-started">Start</a>
         <a id="item3" class="btn bg-transparent text-body position-relative z-1" href="#examples">Examples</a>
         <a id="item4" class="btn bg-transparent text-body position-relative z-1 me-2" href="#extensions">Extensions</a>
