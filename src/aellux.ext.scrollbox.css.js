@@ -91,7 +91,9 @@ export function generateScrollboxCSS(AelluxJs) {
   scroll-snap-align: end !important;
 }
 
-.${pointerscrollingClass} {
+.${pointerscrollingClass},
+.${pointerscrollingClass} :is(a, button)[draggable='false'],
+.${pointerscrollingClass} :is(a, button)[draggable='false'] * {
   cursor: grabbing !important;
 }
 

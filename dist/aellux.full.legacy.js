@@ -30686,7 +30686,8 @@
         var nativeScrollbarHideClass = AelluxJs2.className("native-sb-hide");
         var scrollbarVisibleClass = AelluxJs2.className("scrollbar-visible");
         var scrollEdgeClasses = [AelluxJs2.className("scroll-v-start"), AelluxJs2.className("scroll-v-end"), AelluxJs2.className("scroll-h-start"), AelluxJs2.className("scroll-h-end")];
-        var pointerScrollExceptionSelector = "a, button, input, select, textarea, [contenteditable], [draggable='true'], " + "[".concat(scrollbarVerticalAttribute, "], [").concat(scrollbarHorizontalAttribute, "]");
+        var pointerScrollControlSelector = "a[draggable='false'], button[draggable='false']";
+        var pointerScrollExceptionSelector = "a:not([draggable='false']), button:not([draggable='false']), input, select, textarea, [contenteditable], [draggable='true'], " + "[".concat(scrollbarVerticalAttribute, "], [").concat(scrollbarHorizontalAttribute, "]");
         var SCROLL_EDGE_MARGIN_PX = 5;
         var nextLayoutId = 3e6;
         var POINTER_SCROLL_THRESHOLD_PX = 3;
@@ -31756,14 +31757,15 @@
             time: time
           };
           if (previousDown && !previousDown.dragged && time - previousDown.time <= POINTER_SCROLL_MULTICLICK_MS && Math.abs(event.clientX - previousDown.x) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX && Math.abs(event.clientY - previousDown.y) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX) return;
-          var textOrigin = isTextAtPoint(event.target, event.clientX, event.clientY);
+          var controlOrigin = event.target.closest(pointerScrollControlSelector);
+          var textOrigin = !controlOrigin && isTextAtPoint(event.target, event.clientX, event.clientY);
           var selectionAtDown = readSelection();
           var verticalOnly = chains.y.some(function(member2) {
             return axes.get(member2).y;
           }) && !chains.x.some(function(member2) {
             return axes.get(member2).x;
           });
-          if (!textOrigin && event.cancelable) event.preventDefault();
+          if (!textOrigin && !controlOrigin && event.cancelable) event.preventDefault();
           if (state.mouseReleaseTimeout !== null) root2.clearTimeout(state.mouseReleaseTimeout);
           state.mouseReleaseTimeout = null;
           state.mouseReleaseButton = null;

@@ -2998,6 +2998,116 @@ test("touch and interactive controls do not start pointer dragging", async ({ pa
   expect(result).toEqual({ x: 0, y: 0, userSelect: "" });
 });
 
+for (const tag of ["a", "button"]) for (const nested of [false, true]) {
+  for (const elastic of [false, true]) {
+    test(`draggable=false ${tag} allows dragging from ${nested ? "a child" : "its text"}${elastic ? " with elastic" : ""} and preserves clicks`,
+      async ({ page }) => {
+        await setup(page, `<form id="form"><div id="box" data-ae-scrollbox="pointer"
+          data-ae-scrollbox-momentum="false" style="width:240px;height:120px;overflow:auto">
+          <div ${elastic ? "data-ae-scrollbox-elastic" : ""} style="width:700px;height:100px">
+            <${tag} id="control" draggable="false" ${tag === "a" ? 'href="#scrollbox-clicked"' : 'type="submit"'}
+              style="display:block;box-sizing:border-box;width:220px;height:60px;padding:20px 10px;white-space:nowrap;text-align:left;font:16px Arial">
+              ${nested ? '<span id="label">Drag this control text</span>' : 'Drag this control text'}
+            </${tag}>
+          </div></div></form>`);
+        await page.evaluate(() => {
+          window.controlClicks = [];
+          window.submissions = 0;
+          document.getElementById("control").addEventListener("click", event => {
+            window.controlClicks.push(event.defaultPrevented);
+          });
+          document.getElementById("form").addEventListener("submit", event => {
+            event.preventDefault();
+            window.submissions++;
+          });
+          document.addEventListener("pointerdown", event => {
+            if (event.target.closest("#control")) window.controlDownPrevented = event.defaultPrevented;
+          });
+        });
+        const control = page.locator("#control");
+        await control.click({ position: { x: 12, y: 8 } });
+        expect(await page.evaluate(() => ({
+          clicks: window.controlClicks, submissions: window.submissions,
+          hash: location.hash, downPrevented: window.controlDownPrevented
+        }))).toEqual({ clicks: [false], submissions: tag === "button" ? 1 : 0,
+          hash: tag === "a" ? "#scrollbox-clicked" : "", downPrevented: false });
+        await page.evaluate(() => history.replaceState(null, "", location.pathname));
+
+        const rect = await control.boundingBox();
+        const x = rect.x + 90, y = rect.y + 28;
+        await page.mouse.move(x, y);
+        await page.mouse.down();
+        expect(await page.evaluate(() => window.controlDownPrevented)).toBe(false);
+        await page.mouse.move(x - 40, y);
+        await expect(page.locator("#box")).toHaveClass(/ae--pointerscrolling/);
+        expect(await page.locator("#box").evaluate(element => element.scrollLeft)).toBe(40);
+        await expect(control).toHaveCSS("cursor", "grabbing");
+        await page.mouse.move(x - 70, y);
+        expect(await page.locator("#box").evaluate(element => element.scrollLeft)).toBe(70);
+        await page.mouse.up();
+        await expect(page.locator("#box")).not.toHaveClass(/ae--pointerscrolling/);
+        expect(await page.evaluate(() => ({
+          submissions: window.submissions, hash: location.hash,
+          activatedClicks: window.controlClicks.filter(prevented => !prevented).length,
+          selection: getSelection().toString()
+        }))).toEqual({ submissions: tag === "button" ? 1 : 0, hash: "", activatedClicks: 1, selection: "" });
+
+        await page.locator("#box").evaluate(element => element.scrollLeft = 0);
+        await control.click({ position: { x: 12, y: 8 } });
+        expect(await page.evaluate(() => window.controlClicks.filter(prevented => !prevented).length)).toBe(2);
+      });
+  }
+}
+
+test("draggable=false only opts links and buttons into pointer dragging", async ({ page }) => {
+  const cases = [
+    '<a id="control" href="#excluded">Link</a>',
+    '<button id="control">Button</button>',
+    '<a id="control" draggable="true">Native drag</a>',
+    '<button id="control" draggable="auto">Auto</button>',
+    '<div draggable="false"><a id="control">No inherited opt-in</a></div>',
+    '<a><span id="control" draggable="false">No child opt-in</span></a>',
+    '<a draggable="false"><span id="control" draggable="true">Native child drag</span></a>',
+    '<a draggable="false"><span id="control" contenteditable>Editable</span></a>',
+    '<a draggable="false"><input id="control" draggable="false"></a>',
+    '<select id="control" draggable="false"><option>Select</option></select>',
+    '<textarea id="control" draggable="false">Text</textarea>'
+  ];
+  await setup(page, box("box"));
+  for (const markup of cases) {
+    const result = await page.evaluate(markup => {
+      const element = document.getElementById("box");
+      element.firstElementChild.innerHTML = markup;
+      const control = document.getElementById("control");
+      const rect = element.getBoundingClientRect();
+      const x = rect.left + 70, y = rect.top + 20;
+      const send = (type, target, dx, buttons) => {
+        const event = new PointerEvent(type, {
+          bubbles: true, cancelable: true, isPrimary: true, pointerId: 23,
+          pointerType: "mouse", button: 0, buttons, clientX: x - dx, clientY: y
+        });
+        target.dispatchEvent(event);
+        return event.defaultPrevented;
+      };
+      const downPrevented = send("pointerdown", control, 0, 1);
+      const movePrevented = send("pointermove", window, 40, 1);
+      const active = element.classList.contains("ae--pointerscrolling");
+      send("pointerup", window, 40, 0);
+      return { downPrevented, movePrevented, active, x: element.scrollLeft };
+    }, markup);
+    expect(result, markup).toEqual({ downPrevented: false, movePrevented: false, active: false, x: 0 });
+  }
+});
+
+for (const pointerType of ["pen", "touch"]) {
+  test(`draggable=false control respects ${pointerType} pointer behavior`, async ({ page }) => {
+    await setup(page, box("box", "pointer", "", '<button id="control" draggable="false">Drag</button>'));
+    expect(await drag(page, "control", pointerType)).toMatchObject({ x: 0, y: 0 });
+    expect(await page.locator("#box").evaluate(element => element.scrollLeft))
+      .toBe(pointerType === "pen" ? 50 : 0);
+  });
+}
+
 test("pointer mode keeps native behavior on a coarse-pointer device", async ({ page }) => {
   await setup(page, box("box"), { coarse: true });
   expect(await drag(page, "box")).toMatchObject({ x: 0, y: 0 });

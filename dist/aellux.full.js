@@ -2582,7 +2582,8 @@
           AelluxJs2.className("scroll-h-start"),
           AelluxJs2.className("scroll-h-end")
         ];
-        const pointerScrollExceptionSelector = `a, button, input, select, textarea, [contenteditable], [draggable='true'], [${scrollbarVerticalAttribute}], [${scrollbarHorizontalAttribute}]`;
+        const pointerScrollControlSelector = "a[draggable='false'], button[draggable='false']";
+        const pointerScrollExceptionSelector = `a:not([draggable='false']), button:not([draggable='false']), input, select, textarea, [contenteditable], [draggable='true'], [${scrollbarVerticalAttribute}], [${scrollbarHorizontalAttribute}]`;
         const SCROLL_EDGE_MARGIN_PX = 5;
         let nextLayoutId = 3e6;
         const POINTER_SCROLL_THRESHOLD_PX = 3;
@@ -3573,10 +3574,11 @@
           const time = now();
           state.lastPointerDown = { x: event.clientX, y: event.clientY, time };
           if (previousDown && !previousDown.dragged && time - previousDown.time <= POINTER_SCROLL_MULTICLICK_MS && Math.abs(event.clientX - previousDown.x) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX && Math.abs(event.clientY - previousDown.y) <= POINTER_SCROLL_MULTICLICK_DISTANCE_PX) return;
-          const textOrigin = isTextAtPoint(event.target, event.clientX, event.clientY);
+          const controlOrigin = event.target.closest(pointerScrollControlSelector);
+          const textOrigin = !controlOrigin && isTextAtPoint(event.target, event.clientX, event.clientY);
           const selectionAtDown = readSelection();
           const verticalOnly = chains.y.some((member) => axes.get(member).y) && !chains.x.some((member) => axes.get(member).x);
-          if (!textOrigin && event.cancelable) event.preventDefault();
+          if (!textOrigin && !controlOrigin && event.cancelable) event.preventDefault();
           if (state.mouseReleaseTimeout !== null) root2.clearTimeout(state.mouseReleaseTimeout);
           state.mouseReleaseTimeout = null;
           state.mouseReleaseButton = null;

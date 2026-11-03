@@ -6847,7 +6847,9 @@ html[data-ae-reduced-motion="reduced"] .ae--feedback-motion-alert {
   scroll-snap-align: end !important;
 }
 
-.ae--pointerscrolling {
+.ae--pointerscrolling,
+.ae--pointerscrolling :is(a, button)[draggable='false'],
+.ae--pointerscrolling :is(a, button)[draggable='false'] * {
   cursor: grabbing !important;
 }
 
