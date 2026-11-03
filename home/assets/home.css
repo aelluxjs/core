@@ -61,6 +61,15 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--bs-heading-font-family) !important; 
   --bs-btn-disabled-border-color: var(--home-secondary);
 }
 body { -webkit-font-smoothing: antialiased; }
+.no-scrollbar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
 body, main > section, body > footer {
   background-image: linear-gradient(155deg,
     rgba(var(--bs-warning-rgb), .035) 0%,

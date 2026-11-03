@@ -23,7 +23,12 @@
       if (!section) return;
       const navigation = document.getElementById("main-navigation");
       const link = navigation.querySelector('a[href="#' + section.id + '"]');
-      if (link) navigation.querySelector("[data-ae-anchor]").dataset.aeAnchorTarget = link.id;
+      if (link) {
+        const anchor = navigation.querySelector("[data-ae-anchor]");
+        if (anchor.dataset.aeAnchorTarget === link.id) return;
+        anchor.dataset.aeAnchorTarget = link.id;
+        link.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+      }
     });
     $ae.on("Ready", () => {
       const main = document.getElementById("main");
@@ -63,7 +68,7 @@
     <div class="d-flex border align-items-center justify-content-center bg-body p-2 px-4 rounded-1 shadow-lg"
       style="max-width: 100%;--bs-border-radius-sm:2em;">
       <nav id="main-navigation" data-ae-scrollbox="pointer" style="overflow-y: clip;"
-        class="position-relative d-inline-flex align-items-start justify-content-start gap-1 px-2"
+        class="no-scrollbar position-relative d-inline-flex align-items-start justify-content-start gap-1 px-2"
         aria-label="Main navigation">
         <a data-ae-anchor="top-left:top-left" data-ae-anchor-target="item1" data-ae-anchor-match="width height"
           class="bg-warning rounded-2 z-0 d-inline-block" aria-hidden="true"
