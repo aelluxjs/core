@@ -1,3 +1,19 @@
+body:after {
+  content: " ";
+  display: block;
+  left: 0;
+  top: 0;
+  width: 21px;
+  height: 21px;
+  position: fixed;
+  background: red;
+  z-index: 1000;
+  --br-green: #009739;
+  --br-blue: #012169;
+  --br-yelow: #FEDD00;
+  background: linear-gradient(-45deg, transparent 50%, var(--br-green) 50.1%, var(--br-green) 66%, var(--br-yelow) 66.1%, var(--br-yelow) 82%, var(--br-blue) 82.1%, var(--br-blue));
+}
+
 :root {
   --home-secondary: #6c717d;
   --home-secondary-rgb: 108, 113, 125;
