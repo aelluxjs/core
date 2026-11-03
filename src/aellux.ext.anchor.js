@@ -13,7 +13,7 @@
  * `data-ae-anchor-target`; a Present Group target resolves to its selected member.
  * Without an explicit target, the positioning parent is the target.
  * `data-ae-anchor-scroll-into-view="block inline"` optionally scrolls the Anchor
- * itself on visibility or effective target changes, after native switching.
+ * target on visibility or effective target changes, before native switching.
  * `data-ae-maxfps` sets an optional maximum update rate.
  * Scroll, resize, size and intersection changes, and bubbling `AelluxJsLayout`
  * events schedule placement updates at the configured rate. A Layout event with
@@ -460,6 +460,11 @@
       const previous = state.lastPlacement;
       const switching = previous && previous.target !== placement.target;
       if (!previous || switching) state.scrollPending = true;
+      if (switching && effectiveTarget(element, state) === placement.target) {
+        state.scrollPending = false;
+        state.scrollVisible = true;
+        scrollTargetIntoView(element, placement.target);
+      }
       const moved = !previous || previous.signature !== placement.signature;
       // Keep scroll notifications with the measured placement across the
       // asynchronous read/write phases. Unchanged destinations keep their timer.
@@ -480,24 +485,28 @@
     // resolve with stale anchor variables (notably in WebKit).
     if (!applied && anchors.get(element) === state) return updateAnchor(element, ensureLatest);
     if (!applied || !element.hasAttribute(scrollIntoViewAttribute)) return;
-    // Read after placement so our initial hidden rule and the old transform do
-    // not decide visibility or the scroll destination. Ordinary scroll updates
-    // never re-arm this request. Native target switching must finish first.
+    // Initial placement and reappearance need a visibility check after our
+    // hidden rule is released. Target changes already scrolled before switching;
+    // transition cleanup and ordinary tracking do not re-arm that request.
     const visible = await AelluxJs.waitLayout.read(state.styleLayoutId, () =>
       current() && !isInvisible(element));
     if (!current()) return retry();
     if (visible && !state.scrollVisible) state.scrollPending = true;
     state.scrollVisible = visible;
-    if (!visible || !state.scrollPending || state.switchTimer !== null) return;
+    if (!visible || !state.scrollPending) return;
     await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
       // A DOM retarget can precede the observer's next scheduled revision.
       if (!current() || effectiveTarget(element, state) !== placement.target) return;
-      const tokens = (element.getAttribute(scrollIntoViewAttribute) || "").trim().split(/\s+/);
       state.scrollPending = false;
-      if (tokens.length !== 2 || tokens.some(token => !["start", "center", "end", "nearest"].includes(token))) return;
-      element.scrollIntoView({ block: tokens[0], inline: tokens[1],
-        behavior: AelluxJs.currentPreference("reduced-motion") === "reduced" ? "instant" : "smooth" });
+      scrollTargetIntoView(element, placement.target);
     });
+  }
+
+  function scrollTargetIntoView(element, target) {
+    const tokens = (element.getAttribute(scrollIntoViewAttribute) || "").trim().split(/\s+/);
+    if (tokens.length !== 2 || tokens.some(token => !["start", "center", "end", "nearest"].includes(token))) return;
+    target.scrollIntoView({ block: tokens[0], inline: tokens[1],
+      behavior: AelluxJs.currentPreference("reduced-motion") === "reduced" ? "instant" : "smooth" });
   }
 
   function rememberVisual(element, state) {

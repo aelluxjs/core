@@ -349,14 +349,14 @@ test("homepage section Viewports select when the block top crosses the screen mi
   await expect(marker).toHaveAttribute("data-ae-anchor-target", "item1");
 });
 
-test("main navigation scrolls its Anchor into view on reveal and section changes", async ({ page }) => {
+test("main navigation scrolls the Anchor target into view on reveal and section changes", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 640 });
   await page.addInitScript(() => {
     window.navigationScrollCalls = [];
     const native = Element.prototype.scrollIntoView;
     Element.prototype.scrollIntoView = function (options) {
       if (this.closest("#main-navigation")) navigationScrollCalls.push({
-        anchor: this.hasAttribute("data-ae-anchor"), options
+        id: this.id, anchor: this.hasAttribute("data-ae-anchor"), options
       });
       return native.call(this, options);
     };
@@ -379,7 +379,7 @@ test("main navigation scrolls its Anchor into view on reveal and section changes
       return rect.left >= nav.left - 1 && rect.right <= nav.right + 1;
     })).toBe(true);
   }
-  expect(await page.evaluate(() => navigationScrollCalls.every(call => call.anchor &&
+  expect(await page.evaluate(() => navigationScrollCalls.every(call => !call.anchor && /^item\d+$/.test(call.id) &&
     call.options.block === "center" && call.options.inline === "center"))).toBe(true);
 });
 

@@ -2349,7 +2349,7 @@
     {
       "name": "data-ae-anchor-scroll-into-view",
       "extension": "anchor",
-      "description": "Scroll the Anchor itself into view on initial visibility, reappearance or effective target change. Two tokens select block and inline alignment: start, center, end or nearest. Smooth scrolling waits for native target switching; reduced motion uses instant scrolling. Empty, missing and invalid values disable scrolling.",
+      "description": "Scroll the effective target into view on initial visibility, reappearance or target change. Target changes scroll before the Anchor transition, with no completion scroll. Two tokens select block and inline alignment: start, center, end or nearest. Scrolling is smooth; reduced motion uses instant scrolling. Empty, missing and invalid values disable scrolling.",
       "syntax": "alignment-pair",
       "examples": [
         "center center",

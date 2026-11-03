@@ -1763,6 +1763,11 @@
             const previous = state.lastPlacement;
             const switching = previous && previous.target !== placement.target;
             if (!previous || switching) state.scrollPending = true;
+            if (switching && effectiveTarget(element, state) === placement.target) {
+              state.scrollPending = false;
+              state.scrollVisible = true;
+              scrollTargetIntoView(element, placement.target);
+            }
             const moved = !previous || previous.signature !== placement.signature;
             const scrollMoved = moved && state.switchTimer !== null && (previous == null ? void 0 : previous.scrollRevision) !== placement.scrollRevision;
             if ((switching || scrollMoved) && placement.duration > 0 && !state.interruptSwitch) {
@@ -1781,17 +1786,20 @@
           if (!current()) return retry();
           if (visible && !state.scrollVisible) state.scrollPending = true;
           state.scrollVisible = visible;
-          if (!visible || !state.scrollPending || state.switchTimer !== null) return;
+          if (!visible || !state.scrollPending) return;
           await AelluxJs2.waitLayout.update(state.styleLayoutId, () => {
             if (!current() || effectiveTarget(element, state) !== placement.target) return;
-            const tokens = (element.getAttribute(scrollIntoViewAttribute) || "").trim().split(/\s+/);
             state.scrollPending = false;
-            if (tokens.length !== 2 || tokens.some((token) => !["start", "center", "end", "nearest"].includes(token))) return;
-            element.scrollIntoView({
-              block: tokens[0],
-              inline: tokens[1],
-              behavior: AelluxJs2.currentPreference("reduced-motion") === "reduced" ? "instant" : "smooth"
-            });
+            scrollTargetIntoView(element, placement.target);
+          });
+        }
+        function scrollTargetIntoView(element, target) {
+          const tokens = (element.getAttribute(scrollIntoViewAttribute) || "").trim().split(/\s+/);
+          if (tokens.length !== 2 || tokens.some((token) => !["start", "center", "end", "nearest"].includes(token))) return;
+          target.scrollIntoView({
+            block: tokens[0],
+            inline: tokens[1],
+            behavior: AelluxJs2.currentPreference("reduced-motion") === "reduced" ? "instant" : "smooth"
           });
         }
         function rememberVisual(element, state) {

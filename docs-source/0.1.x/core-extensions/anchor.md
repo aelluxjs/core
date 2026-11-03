@@ -59,7 +59,7 @@ Computed `visibility:hidden` or `collapse` on the target deactivates the Anchor.
 
 ## Scroll Into View
 
-Set `data-ae-anchor-scroll-into-view="center center"` to scroll the anchored element itself into view when it first becomes visible, reappears after being hidden, or changes its effective target (including a Present Group selection):
+Set `data-ae-anchor-scroll-into-view="center center"` to scroll the effective target into view when the Anchor first becomes visible, reappears after being hidden, or changes its effective target (including a Present Group selection):
 
 ```html
 <div data-ae-anchor="top-left:top-left" data-ae-anchor-target="selected-item"
@@ -69,7 +69,7 @@ Set `data-ae-anchor-scroll-into-view="center center"` to scroll the anchored ele
 
 The two whitespace-separated values map to native `scrollIntoView({ block, inline })`, in that order. Each accepts `start`, `center`, `end` or `nearest`. Missing, empty or invalid values disable this behavior. Attribute changes are observed automatically and affect subsequent visibility or target changes.
 
-Anchor applies placement before scrolling and waits for its native target-switch animation to finish. Scrolling is smooth, or instant when the current reduced-motion preference is `reduced`. Visibility means effective CSS visibility, including the Anchor and its ancestors; being outside the viewport does not suppress the request. Ordinary tracking, resize and scroll events, equivalent target spellings and repeated placement updates do not request scrolling again. Native `scrollIntoView` can scroll multiple containing scroll areas, including the document, and honors CSS scroll margins and padding. This option does not move focus.
+On an effective target change, Anchor calls the new target's `scrollIntoView()` before starting its native target-switch transition. It does not scroll again when the transition finishes, and never calls `scrollIntoView()` on the Anchor itself. Initial placement and reappearance check visibility after the internal hidden rule is released, then scroll the target. Scrolling is smooth, or instant when the current reduced-motion preference is `reduced`. Visibility means effective CSS visibility, including the Anchor and its ancestors; being outside the viewport does not suppress the request. Ordinary tracking, resize and scroll events, equivalent target spellings and repeated placement updates do not request scrolling again. Native `scrollIntoView` can scroll multiple containing scroll areas, including the document, and honors CSS scroll margins and padding. This option does not move focus.
 
 ## Dimension Matching
 
@@ -171,9 +171,9 @@ The limits remain 15/6 KiB for Modern and 23/8 KiB for Legacy (raw/gzip), increa
 
 ### Scroll Into View distribution cost
 
-The declarative Scroll Into View option adds visibility tracking, self-scroll requests and authoring attribute recognition without another dependency or permanent polling. Compared with the preceding build, minified Modern Anchor grows from 13,863 / 5,098 to 14,833 / 5,386 bytes (raw / gzip level 9); Legacy grows from 21,303 / 7,535 to 22,440 / 7,864 bytes. Both retain their existing Extension budgets.
+The declarative Scroll Into View option adds visibility tracking, target-scroll requests and authoring attribute recognition without another dependency or permanent polling. Compared with the build before this option, minified Modern Anchor grows from 13,863 / 5,098 to 14,909 / 5,408 bytes (raw / gzip level 9); Legacy grows from 21,303 / 7,535 to 22,524 / 7,889 bytes. Both retain their existing Extension budgets.
 
-Full Modern grows from 199,901 / 61,728 to 200,895 / 61,998 bytes, and Full Legacy from 524,208 / 155,421 to 525,363 / 155,774 bytes. Full Modern budgets move from 195.5 / 60.5 to 196.5 / 60.75 KiB, and Full Legacy's gzip budget from 152 to 152.25 KiB (raw remains 515 KiB).
+Full Modern grows from 199,901 / 61,728 to 200,971 / 62,020 bytes, and Full Legacy from 524,208 / 155,421 to 525,445 / 155,796 bytes. Full Modern budgets move from 195.5 / 60.5 to 196.5 / 60.75 KiB, and Full Legacy's gzip budget from 152 to 152.25 KiB (raw remains 515 KiB).
 
 ## Placement maps for dependent Extensions
 

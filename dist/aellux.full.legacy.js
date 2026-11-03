@@ -29015,6 +29015,11 @@
                     var previous = state.lastPlacement;
                     var switching = previous && previous.target !== placement.target;
                     if (!previous || switching) state.scrollPending = true;
+                    if (switching && effectiveTarget(element, state) === placement.target) {
+                      state.scrollPending = false;
+                      state.scrollVisible = true;
+                      scrollTargetIntoView(element, placement.target);
+                    }
                     var moved = !previous || previous.signature !== placement.signature;
                     var scrollMoved = moved && state.switchTimer !== null && (previous === null || previous === void 0 ? void 0 : previous.scrollRevision) !== placement.scrollRevision;
                     if ((switching || scrollMoved) && placement.duration > 0 && !state.interruptSwitch) {
@@ -29054,7 +29059,7 @@
                 case 29:
                   if (visible && !state.scrollVisible) state.scrollPending = true;
                   state.scrollVisible = visible;
-                  if (!(!visible || !state.scrollPending || state.switchTimer !== null)) {
+                  if (!(!visible || !state.scrollPending)) {
                     _context3.n = 30;
                     break;
                   }
@@ -29063,16 +29068,8 @@
                   _context3.n = 31;
                   return AelluxJs2.waitLayout.update(state.styleLayoutId, function() {
                     if (!current() || effectiveTarget(element, state) !== placement.target) return;
-                    var tokens = (element.getAttribute(scrollIntoViewAttribute) || "").trim().split(/\s+/);
                     state.scrollPending = false;
-                    if (tokens.length !== 2 || tokens.some(function(token) {
-                      return !["start", "center", "end", "nearest"].includes(token);
-                    })) return;
-                    element.scrollIntoView({
-                      block: tokens[0],
-                      inline: tokens[1],
-                      behavior: AelluxJs2.currentPreference("reduced-motion") === "reduced" ? "instant" : "smooth"
-                    });
+                    scrollTargetIntoView(element, placement.target);
                   });
                 case 31:
                   return _context3.a(2);
@@ -29080,6 +29077,17 @@
             }, _callee3);
           }));
           return _updateAnchor.apply(this, arguments);
+        }
+        function scrollTargetIntoView(element, target) {
+          var tokens = (element.getAttribute(scrollIntoViewAttribute) || "").trim().split(/\s+/);
+          if (tokens.length !== 2 || tokens.some(function(token) {
+            return !["start", "center", "end", "nearest"].includes(token);
+          })) return;
+          target.scrollIntoView({
+            block: tokens[0],
+            inline: tokens[1],
+            behavior: AelluxJs2.currentPreference("reduced-motion") === "reduced" ? "instant" : "smooth"
+          });
         }
         function rememberVisual(element, state) {
           state.ownClass = element.getAttribute("class");

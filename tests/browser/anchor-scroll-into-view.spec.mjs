@@ -21,7 +21,9 @@ async function start(page, { mode = "basic", forceLegacy = false, hidden = false
     const native = Element.prototype.scrollIntoView;
     Element.prototype.scrollIntoView = function (options) {
       scrollCalls.push({ id: this.id, options, left: this.getBoundingClientRect().left,
-        top: this.getBoundingClientRect().top, switching: this.classList.contains("ae--anchor-switching") });
+        top: this.getBoundingClientRect().top,
+        switching: document.getElementById("indicator").classList.contains("ae--anchor-switching"),
+        anchorX: document.getElementById("indicator").style.getPropertyValue("--ae-anchor-x") });
       return native.call(this, options);
     };
   }, { hidden, duration, group });
@@ -50,14 +52,15 @@ async function centered(page) {
 }
 
 for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
-  test(`Anchor scrolls itself after placement and target changes without feedback (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
+  test(`Anchor scrolls its target before switching without a completion scroll (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
     await start(page, { mode, forceLegacy });
     await count(page, 1);
     await centered(page);
-    expect((await calls(page))[0]).toMatchObject({ id: "indicator",
+    expect((await calls(page))[0]).toMatchObject({ id: "a",
       options: { block: "center", inline: "center", behavior: "smooth" } });
     await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "b"));
     await count(page, 2);
+    expect((await calls(page))[1]).toMatchObject({ id: "b", switching: false, anchorX: "600px" });
     await centered(page);
     await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "#b"));
     await page.evaluate(async () => {
@@ -85,26 +88,29 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
   });
 }
 
-test("rapid native target switches scroll only to the final rendered position and unmount cancels the request", async ({ page }) => {
+test("rapid switches scroll each new target before retargeting and never scroll on completion or unmount", async ({ page }) => {
   await start(page, { duration: 400 });
   await count(page, 1);
   await centered(page);
   await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "b"));
   await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
   await page.waitForTimeout(100);
-  expect((await calls(page)).length).toBe(1);
+  expect((await calls(page)).map(call => call.id)).toEqual(["a", "b"]);
+  expect((await calls(page))[1]).toMatchObject({ switching: false, anchorX: "600px" });
   await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "c"));
-  await count(page, 2);
-  expect((await calls(page))[1].switching).toBe(false);
+  await count(page, 3);
+  expect((await calls(page))[2]).toMatchObject({ id: "c", anchorX: "1000px" });
   await centered(page);
+  await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
+  expect((await calls(page)).map(call => call.id)).toEqual(["a", "b", "c"]);
   await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "b"));
   await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
   await page.evaluate(() => AelluxJs.unmount(document.getElementById("indicator"), "anchor"));
   await page.waitForTimeout(600);
-  expect((await calls(page)).length).toBe(2);
+  expect((await calls(page)).map(call => call.id)).toEqual(["a", "b", "c", "b"]);
 });
 
-test("a retarget between placement and scrolling skips the stale destination", async ({ page }) => {
+test("a retarget during placement scrolls each accepted target once", async ({ page }) => {
   await start(page);
   await count(page, 1);
   await centered(page);
@@ -119,10 +125,10 @@ test("a retarget between placement and scrolling skips the stale destination", a
     anchor.setAttribute("data-ae-anchor-target", "b");
   });
   await expect(page.locator("#indicator")).toHaveAttribute("data-ae-anchor-target", "c");
-  await count(page, 2);
+  await count(page, 3);
   await centered(page);
   await page.waitForTimeout(200);
-  expect((await calls(page)).length).toBe(2);
+  expect((await calls(page)).map(call => call.id)).toEqual(["a", "b", "c"]);
 });
 
 test("alignment changes, invalid or absent options and reduced motion use the current configuration", async ({ page }) => {
@@ -157,7 +163,7 @@ for (const forceLegacy of [false, true]) {
     await page.evaluate(() => AelluxJs("group").present.show("b"));
     await count(page, 2);
     await centered(page);
-    expect((await calls(page))[1]).toMatchObject({ id: "indicator", switching: false });
+    expect((await calls(page))[1]).toMatchObject({ id: "b", switching: false });
     await page.evaluate(() => AelluxJs("group").present.show("b"));
     await page.waitForTimeout(200);
     expect((await calls(page)).length).toBe(2);
