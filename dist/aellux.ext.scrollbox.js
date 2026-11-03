@@ -17,12 +17,14 @@
     const fadeStateAttribute = AelluxJs.attr("scrollbox-fade-state");
     const layoutEvents = ["Layout", "Pop", "Unpop"].map((name) => AelluxJs.eventName(name));
     const scrollbarAttribute = AelluxJs.attr("scrollbar");
+    const scrollbarParentAttribute = AelluxJs.attr("scrollbar-parent");
     const scrollbarVerticalAttribute = AelluxJs.attr("scrollbar-vertical");
     const scrollbarHorizontalAttribute = AelluxJs.attr("scrollbar-horizontal");
     const elasticReleaseClass = AelluxJs.className("scrollbox-elastic-release");
     const pointerScrollingClass = AelluxJs.className("pointerscrolling");
     const nativeScrollbarHideClass = AelluxJs.className("native-sb-hide");
     const scrollbarVisibleClass = AelluxJs.className("scrollbar-visible");
+    const scrollbarWrapperClass = AelluxJs.className("scrollbar-wrapper");
     const scrollEdgeClasses = [
       AelluxJs.className("scroll-v-start"),
       AelluxJs.className("scroll-v-end"),
@@ -57,6 +59,15 @@
       "--ae-scrollbar-thumb-position",
       "--ae-scrollbar-display"
     ];
+    const scrollbarThemeProperties = [
+      "size",
+      "thumb-radius",
+      "thumb-color",
+      "thumb-hover-color",
+      "track-color",
+      "opacity-visible",
+      "opacity-fade"
+    ].map((name) => `--ae-scrollbar-${name}`);
     const pointerListeners = [
       [POINTER_DOWN, "onPointerDown"],
       [POINTER_OVER, "onPointerOver"],
@@ -151,6 +162,8 @@
     const elementMemories = /* @__PURE__ */ new WeakMap();
     const cursorMemories = /* @__PURE__ */ new WeakMap();
     const scrollbarMemories = /* @__PURE__ */ new WeakMap();
+    const scrollbarWrappers = /* @__PURE__ */ new WeakMap();
+    const scrollbarOwners = /* @__PURE__ */ new WeakMap();
     const inlineMemories = /* @__PURE__ */ new WeakMap();
     const elasticMemories = /* @__PURE__ */ new WeakMap();
     const pointerScrollMemories = /* @__PURE__ */ new WeakMap();
@@ -284,7 +297,8 @@
         hoverVisible: false,
         hoverTimeout: null,
         interactionVisible: false,
-        interactionTimeout: null
+        interactionTimeout: null,
+        parent: null
       };
       const state = {
         element,
@@ -370,7 +384,7 @@
       state.onScrollbarPointerLeave = isTouch(() => setScrollbarHover(state, "pointerHover", false));
       state.onScrollbarPointerOver = isTouch(() => setScrollbarHover(state, "pointerHover", true));
       state.onScrollbarPointerOut = isTouch((event) => {
-        if (!event.relatedTarget || !element.contains(event.relatedTarget))
+        if (!containsScrollbarTarget(state, event.relatedTarget))
           setScrollbarHover(state, "pointerHover", false);
       });
       state.onScrollbarPointerMove = isTouch(() => {
@@ -385,11 +399,11 @@
         if (supportsMouseHover()) setScrollbarHover(state, "mouseHover", true);
       };
       state.onScrollbarMouseOut = (event) => {
-        if (!event.relatedTarget || !element.contains(event.relatedTarget))
+        if (!containsScrollbarTarget(state, event.relatedTarget))
           setScrollbarHover(state, "mouseHover", false);
       };
       state.onScrollbarOutsideDown = (event) => {
-        if (!element.contains(event.target)) {
+        if (!containsScrollbarTarget(state, event.target)) {
           setScrollbarHover(state, "pointerHover", false);
           setScrollbarHover(state, "mouseHover", false);
           if (!element.classList.contains(pointerScrollingClass))
@@ -514,8 +528,30 @@
       const element = state.element;
       const value = element.getAttribute(scrollbarAttribute);
       const axes = scrollbarAxes(value);
+      const previousParent = state.scrollbar.parent;
+      const parent = (axes.x || axes.y) && element.getAttribute(scrollbarParentAttribute) === "wrapper" ? element.parentElement : null;
+      if (parent !== previousParent) {
+        if (parent) {
+          let wrapper = scrollbarWrappers.get(parent);
+          if (!wrapper) {
+            wrapper = { users: 0, memory: null };
+            if (root.getComputedStyle(parent).position === "static") {
+              wrapper.memory = AelluxJs.persist.element.save(parent, [], ["position"]);
+              parent.style.setProperty("position", "relative", "important");
+            }
+            scrollbarWrappers.set(parent, wrapper);
+          }
+          wrapper.users++;
+        }
+        state.scrollbar.parent = parent;
+        if (state.resizeObserver) {
+          if (previousParent) state.resizeObserver.unobserve(previousParent);
+          if (parent) state.resizeObserver.observe(parent);
+        }
+      }
       configureScrollbarAxis(state, "y", axes.y, scrollbarVerticalAttribute);
       configureScrollbarAxis(state, "x", axes.x, scrollbarHorizontalAttribute);
+      if (parent !== previousParent) releaseScrollbarWrapper(previousParent);
       const enabled = axes.x || axes.y;
       const scrollbar = state.scrollbar;
       if (enabled && !scrollbar.listening) {
@@ -541,18 +577,18 @@
         element.classList.remove(nativeScrollbarHideClass);
         scrollbar.hideOwned = false;
       }
+      syncScrollbarVisibility(state);
     }
     function configureScrollbarAxis(state, axis, enabled, attributeName) {
       const scrollbar = state.scrollbar;
       const current = scrollbar[axis];
-      let scrollbarElement = null;
-      if (enabled) scrollbarElement = Array.from(state.element.children).find((child) => child.hasAttribute(attributeName)) || null;
-      if (current && current.element === scrollbarElement && enabled) {
+      if (current && enabled && current.parent === scrollbar.parent) {
         positionScrollbarAxis(state, current);
         return;
       }
       if (current) resetScrollbarAxis(state, axis);
       if (!enabled) return;
+      let scrollbarElement = Array.from(state.element.children).find((child) => child.hasAttribute(attributeName)) || null;
       const owned = !scrollbarElement;
       if (!scrollbarElement) {
         scrollbarElement = root.document.createElement("div");
@@ -564,13 +600,18 @@
       if (!owned) scrollbarMemories.set(scrollbarElement, AelluxJs.persist.element.save(
         scrollbarElement,
         [],
-        scrollbarProperties
+        [...scrollbarProperties, ...scrollbarThemeProperties]
       ));
       const record = {
         element: scrollbarElement,
         owned,
         axis,
         marker,
+        parent: scrollbar.parent,
+        wrapperClassOwned: false,
+        visibleClassOwned: false,
+        theme: null,
+        themeOverrides: scrollbarThemeProperties.map((name) => scrollbarElement.style.getPropertyValue(name)),
         thumbPosition: null,
         thumbSize: null,
         trackSize: null,
@@ -580,11 +621,24 @@
       record.onPointerDown = (event) => startScrollbarDrag(state, record, event);
       record.onPointerMove = (event) => moveScrollbarDrag(state, record, event);
       record.onPointerEnd = (event) => endScrollbarDrag(state, record, event);
+      record.onInteractionStart = () => state.onInteractionStart();
       setListeners(scrollbarElement, record, scrollbarAxisListeners, true);
+      scrollbarOwners.set(scrollbarElement, state);
+      if (record.parent) {
+        record.wrapperClassOwned = !scrollbarElement.classList.contains(scrollbarWrapperClass);
+        scrollbarElement.classList.add(scrollbarWrapperClass);
+        setListeners(scrollbarElement, state, scrollbarHoverListeners, true);
+        onEvent(scrollbarElement, POINTER_DOWN_TARGET, record.onInteractionStart, true);
+        onEvent(scrollbarElement, "$wheel", state.onWheel, { passive: false, capture: true });
+      }
       scrollbar[axis] = record;
       positionScrollbarAxis(state, record);
     }
     function positionScrollbarAxis(state, record) {
+      if (record.parent) {
+        if (record.element.parentElement !== record.parent) record.parent.append(record.element);
+        return;
+      }
       const container = state.element;
       if (record.axis === "y" && container.firstChild !== record.element)
         container.prepend(record.element);
@@ -598,6 +652,13 @@
       endScrollbarDrag(state, record);
       const element = record.element;
       setListeners(element, record, scrollbarAxisListeners, false);
+      if (record.parent) {
+        setListeners(element, state, scrollbarHoverListeners, false);
+        offEvent(element, POINTER_DOWN_TARGET, record.onInteractionStart, true);
+        offEvent(element, "$wheel", state.onWheel, true);
+      }
+      if (record.wrapperClassOwned) element.classList.remove(scrollbarWrapperClass);
+      if (record.visibleClassOwned) element.classList.remove(scrollbarVisibleClass);
       if (record.owned) element.remove();
       else {
         (_a = scrollbarMemories.get(element)) == null ? void 0 : _a.restore();
@@ -605,12 +666,15 @@
         else record.marker.remove();
       }
       scrollbarMemories.delete(element);
+      scrollbarOwners.delete(element);
       state.scrollbar[axis] = null;
     }
     function resetScrollbars(state) {
       resetScrollbarAxis(state, "x");
       resetScrollbarAxis(state, "y");
       const scrollbar = state.scrollbar;
+      releaseScrollbarWrapper(scrollbar.parent);
+      scrollbar.parent = null;
       if (scrollbar.listening) {
         setListeners(state.element, state, scrollbarHoverListeners, false);
         AelluxJs.off(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
@@ -621,6 +685,28 @@
       clearScrollbarInteractionVisibility(state);
       clearScrollbarHover(state);
       syncScrollbarVisibility(state);
+    }
+    function releaseScrollbarWrapper(parent) {
+      var _a;
+      const wrapper = parent && scrollbarWrappers.get(parent);
+      if (!wrapper || --wrapper.users) return;
+      (_a = wrapper.memory) == null ? void 0 : _a.restore();
+      scrollbarWrappers.delete(parent);
+    }
+    function containsScrollbarTarget(state, target) {
+      return !!target && (state.element.contains(target) || [state.scrollbar.x, state.scrollbar.y].some((record) => record == null ? void 0 : record.element.contains(target)));
+    }
+    function syncScrollbarBarVisibility(state, visible) {
+      for (const record of [state.scrollbar.x, state.scrollbar.y]) {
+        if (!(record == null ? void 0 : record.parent)) continue;
+        if (visible && !record.element.classList.contains(scrollbarVisibleClass)) {
+          record.element.classList.add(scrollbarVisibleClass);
+          record.visibleClassOwned = true;
+        } else if (!visible && record.visibleClassOwned) {
+          record.element.classList.remove(scrollbarVisibleClass);
+          record.visibleClassOwned = false;
+        }
+      }
     }
     function setScrollbarHover(state, name, active) {
       const scrollbar = state.scrollbar;
@@ -674,6 +760,7 @@
     }
     function showScrollbars(state) {
       if (!state.scrollbar.listening) return;
+      syncScrollbarBarVisibility(state, true);
       if (!state.element.classList.contains(scrollbarVisibleClass)) {
         publish(state);
         state.element.classList.add(scrollbarVisibleClass);
@@ -682,13 +769,16 @@
     }
     function hideScrollbars(state) {
       if (state.scrollbar.drag) return;
+      syncScrollbarBarVisibility(state, false);
       if (state.scrollbar.visibleOwned)
         state.element.classList.remove(scrollbarVisibleClass);
       state.scrollbar.visibleOwned = false;
     }
-    function readScrollbars(state, metrics, axes) {
+    function readScrollbars(state, metrics, axes, style) {
       const element = state.element;
       const values = [];
+      const parent = state.scrollbar.parent;
+      const theme = parent ? scrollbarThemeProperties.map((name) => style.getPropertyValue(name)) : null;
       for (const axis of ["x", "y"]) {
         const record = state.scrollbar[axis];
         if (!record) continue;
@@ -709,15 +799,31 @@
           thumbSize,
           thumbPosition,
           max: axes[axis] ? max : 0,
-          display
+          display,
+          theme,
+          x: parent ? element.offsetLeft + element.clientLeft + (vertical ? element.clientWidth : 0) : null,
+          y: parent ? element.offsetTop + element.clientTop + (vertical ? 0 : element.clientHeight) : null
         });
       }
       return values;
     }
     function updateScrollbars(state, values) {
-      for (const { record, trackSize, thumbSize, thumbPosition, max, display } of values) {
+      for (const { record, trackSize, thumbSize, thumbPosition, max, display, theme, x, y } of values) {
         if (state.scrollbar[record.axis] !== record) continue;
         const style = record.element.style;
+        if (theme) {
+          scrollbarThemeProperties.forEach((name, index) => {
+            var _a;
+            if (record.themeOverrides[index] || ((_a = record.theme) == null ? void 0 : _a[index]) === theme[index]) return;
+            if (theme[index]) style.setProperty(name, theme[index]);
+            else style.removeProperty(name);
+          });
+          record.theme = theme;
+          if (record.x !== x) writeFadeProperty(record.element, scrollbarProperties[0], x);
+          if (record.y !== y) writeFadeProperty(record.element, scrollbarProperties[1], y);
+          record.x = x;
+          record.y = y;
+        }
         if (record.trackSize !== trackSize)
           style.setProperty(scrollbarProperties[2], `${trackSize}px`);
         if (record.thumbSize !== thumbSize)
@@ -1769,6 +1875,7 @@
           if (state.resizeObserver) {
             state.resizeObserver.disconnect();
             state.resizeObserver.observe(state.element);
+            if (state.scrollbar.parent) state.resizeObserver.observe(state.scrollbar.parent);
             for (const child of state.element.children) state.resizeObserver.observe(child);
           }
           if (records.some((record) => record.type === "attributes" || record.target === state.element || record.target === state.elastic.wrapper)) configure(state);
@@ -1781,7 +1888,7 @@
             subtree: true,
             characterData: true,
             attributes: true,
-            attributeFilter: [elasticAttribute, scrollbarAttribute, snapAttribute, fadeAttribute, attribute, "dir"]
+            attributeFilter: [elasticAttribute, scrollbarAttribute, scrollbarParentAttribute, snapAttribute, fadeAttribute, attribute, "dir"]
           }
         );
       }
@@ -1874,7 +1981,9 @@
       ];
       const snapAxis = hasSnap(element) ? element.getAttribute(snapAttribute) === "vertical" ? "y" : "x" : null;
       const primary = snapAxis || (axes.y ? "y" : "x");
-      const mode = maskSupported && !state.fadeAuthored && element.getAttribute(fadeAttribute) !== "false" && (axes.x || axes.y) ? compositeSupported ? "both" : primary : "";
+      const fadeValue = element.getAttribute(fadeAttribute);
+      const fadeEnabled = fadeValue === "" || fadeValue === "true" || fadeValue !== "false" && axes.x !== axes.y;
+      const mode = maskSupported && !state.fadeAuthored && fadeEnabled && (axes.x || axes.y) ? compositeSupported ? "both" : primary : "";
       return { distances, mode };
     }
     function writeFadeProperty(element, name, value) {
@@ -1917,7 +2026,7 @@
             scrollLeft < SCROLL_EDGE_MARGIN_PX,
             scrollLeft >= metrics.maxX - SCROLL_EDGE_MARGIN_PX
           ],
-          scrollbars: bars ? readScrollbars(state, metrics, axes) : []
+          scrollbars: bars ? readScrollbars(state, metrics, axes, style) : []
         };
       }).then((values) => {
         if (!values || state.disposed) {
@@ -2002,7 +2111,7 @@
       };
       return dispatchWheel(target.state, handed);
     }
-    function chainWheel(state, event, metrics, factor) {
+    function chainWheel(state, event, metrics, factor, nativeTarget = true) {
       let deltaX = event.deltaX * factor, deltaY = event.deltaY * factor;
       let target = { element: state.element, state, metrics, axes: wheelAxes(state, metrics) };
       let first = true, handled = false;
@@ -2031,7 +2140,7 @@
         const nextX = Math.max(0, Math.min(bounds.maxX, desiredX));
         const nextY = Math.max(0, Math.min(bounds.maxY, desiredY));
         let remainingX = x - (nextX - left), remainingY = y - (nextY - top);
-        if (first && !converted && !remainingX && !remainingY) {
+        if (first && nativeTarget && !converted && !remainingX && !remainingY) {
           if (member.elastic.owned) resetElastic(member);
           return;
         }
@@ -2077,13 +2186,15 @@
         return;
       }
       if (event.defaultPrevented) return;
-      if (event.target.closest(`[${attribute}]`) !== state.element) return;
+      const bar = event.target.closest(`[${scrollbarVerticalAttribute}], [${scrollbarHorizontalAttribute}]`);
+      const owner = bar && scrollbarOwners.get(bar);
+      if (owner ? owner !== state : event.target.closest(`[${attribute}]`) !== state.element) return;
       finishElasticRelease(state);
       if (!dispatchWheel(state, event)) return;
       const metrics = nativeMetrics(state.element);
       if (!metrics) return;
       const factor = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? metrics.page : 1;
-      chainWheel(state, event, metrics, factor);
+      chainWheel(state, event, metrics, factor, !(owner == null ? void 0 : owner.scrollbar.parent));
     }
   })(typeof globalThis !== "undefined" ? globalThis : window);
 })();

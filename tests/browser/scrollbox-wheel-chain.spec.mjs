@@ -42,6 +42,12 @@ const positions = (page, axes) => page.evaluate(axes => axes.map((axis, index) =
   return element[axis === "x" ? "scrollLeft" : "scrollTop"];
 }), axes);
 
+const elasticStates = page => page.evaluate(() => Array.from(document.querySelectorAll("[data-ae-scrollbox]")).reverse()
+  .map(element => {
+    const matrix = new DOMMatrixReadOnly(getComputedStyle(element.firstElementChild).transform);
+    return Math.abs(matrix.a - 1) > 0.0001 || Math.abs(matrix.d - 1) > 0.0001;
+  }));
+
 async function wheel(page, { deltaY = 120, deltaX = 0, deltaMode = 0 } = {}) {
   return page.evaluate(options => {
     const event = new WheelEvent("wheel", { bubbles: true, cancelable: true, ...options });
@@ -65,7 +71,8 @@ for (const axes of [["y", "x", "y"], ["y", "y", "x", "y"], ["y", "x", "x", "y"],
       expect(after.map((value, index) => (value - before[index]) * sign))
         .toEqual([...rooms.slice(0, -1), 120 - spent]);
       expect(result.prevented).toBe(true);
-      expect(result.elastic).toEqual([...axes.slice(0, -1).map(() => true), false]);
+      await expect.poll(() => elasticStates(page), { intervals: [5, 10, 20] })
+        .toEqual([...axes.slice(0, -1).map(() => true), false]);
     });
   }
 }
@@ -88,8 +95,8 @@ for (const behavior of ["contain", "none"]) {
       const result = await wheel(page);
       expect(await positions(page, ["y", "x", "y"])).toEqual(before);
       expect(result.prevented).toBe(true);
-      expect(result.elastic[0]).toBe(level !== 0 || behavior === "contain");
-      expect(result.elastic[1]).toBe(level === 1 && behavior === "contain");
+      await expect.poll(() => elasticStates(page), { intervals: [5, 10, 20] })
+        .toEqual([level !== 0 || behavior === "contain", level === 1 && behavior === "contain", false]);
     });
   }
 }

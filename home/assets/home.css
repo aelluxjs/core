@@ -185,15 +185,15 @@ html[data-ae-reduced-motion="reduced"] .hero-prism-light { display: none; animat
 .source-panel { width: 100%; --ae-pop-duration: 1s; --ae-unpop-duration: 1s; }
 .source-motion { min-height: 0; overflow: hidden; }
 .source-file { margin-block: .75rem; }
-.source-file pre { max-height: 24rem; font-size: .72rem; background: var(--bs-tertiary-bg); }
+.source-file pre { max-height: 24rem; font-size: .72rem; }
 .source-file pre code { display: block; padding: 1rem; }
 .source-file [role="status"] { min-height: 1.5em; }
 .example-footer a { white-space: nowrap; }
 .code-block { font-size: .82rem; line-height: 1.8; }
-pre { max-width: 100%; overflow-x: auto; tab-size: 2; background: var(--bs-tertiary-bg); }
+pre { max-width: 100%; overflow-x: auto; tab-size: 2; background: transparent; }
 .code-wrapper { min-width: 0; max-width: 100%; }
 pre[data-ae-scrollbox] > code { display: inline-block !important; min-width: 100%; overflow: visible !important; }
-pre code.hljs { background: var(--bs-tertiary-bg) !important; }
+pre code.hljs { background: transparent !important; }
 code { overflow-wrap: anywhere; }
 pre code { overflow-wrap: normal; }
 .extension-link { display: flex; flex-direction: column; color: var(--bs-body-color); text-decoration: none; }

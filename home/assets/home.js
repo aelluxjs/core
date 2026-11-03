@@ -22,10 +22,11 @@ let highlightStylesReady = false;
 function prepareCodeScrollboxes() {
   document.querySelectorAll("pre:not([data-ae-scrollbox])").forEach(pre => {
     pre.setAttribute("data-ae-scrollbox", "pointer");
-    pre.setAttribute("data-ae-scrollbar", "horizontal");
+    pre.setAttribute("data-ae-scrollbar", pre.closest(".source-file") ? "horizontal vertical" : "horizontal");
+    pre.setAttribute("data-ae-scrollbar-parent", "wrapper");
     if (!pre.parentElement.classList.contains("code-wrapper")) {
       const wrapper = document.createElement("div");
-      wrapper.className = "code-wrapper";
+      wrapper.className = "code-wrapper bg-body-tertiary";
       pre.parentNode.insertBefore(wrapper, pre);
       wrapper.append(pre);
     }
@@ -118,12 +119,15 @@ document.querySelectorAll("[data-example-source]").forEach(details => {
     summary.setAttribute("data-ae-target", `#${fileSource.panel.id}`);
     summary.setAttribute("aria-controls", fileSource.panel.id);
     summary.setAttribute("aria-expanded", "false");
+    const wrapper = document.createElement("div");
+    wrapper.className = "code-wrapper bg-body-tertiary border rounded-2 mt-3 mb-2";
     const pre = document.createElement("pre");
-    pre.className = "border rounded-2 mt-3 mb-2";
+    pre.className = "mb-0";
     const code = document.createElement("code");
     code.id = `source-${example}-${index}`;
     code.className = `language-${file.endsWith(".js") ? "javascript" : file.endsWith(".css") ? "css" : "xml"}`;
     pre.append(code);
+    wrapper.append(pre);
     const copy = document.createElement("button");
     copy.type = "button";
     copy.className = "btn btn-sm btn-outline-secondary";
@@ -134,7 +138,7 @@ document.querySelectorAll("[data-example-source]").forEach(details => {
     const status = document.createElement("p");
     status.className = "small text-body-secondary mt-2 mb-0";
     status.setAttribute("role", "status");
-    fileSource.content.append(pre, copy, status);
+    fileSource.content.append(wrapper, copy, status);
     fileDetails.append(summary, fileSource.panel);
     source.content.append(fileDetails);
     let loading = false;

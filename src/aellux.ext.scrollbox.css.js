@@ -13,6 +13,10 @@ export function generateScrollboxCSS(AelluxJs) {
   const scrollbarVerticalAttribute = AelluxJs.attr("scrollbar-vertical");
   const scrollbarHorizontalAttribute = AelluxJs.attr("scrollbar-horizontal");
   const scrollbarVisibleClass = AelluxJs.className("scrollbar-visible");
+  const scrollbarWrapperClass = AelluxJs.className("scrollbar-wrapper");
+  const verticalBar = `[${scrollbarVerticalAttribute}]`;
+  const horizontalBar = `[${scrollbarHorizontalAttribute}]`;
+  const bars = `${verticalBar}, ${horizontalBar}`;
   const reducedMotionAttribute = AelluxJs.attr("reduced-motion");
 
   return `/*! aellux.js Scrollbox Extension | SPDX-License-Identifier: Apache-2.0 */
@@ -112,7 +116,7 @@ export function generateScrollboxCSS(AelluxJs) {
   height: 0 !important;
 }
 
-:where([${scrollboxAttribute}] > [${scrollbarVerticalAttribute}], [${scrollboxAttribute}] > [${scrollbarHorizontalAttribute}]) {
+:where(${bars}) {
   position: sticky;
   display: var(--ae-scrollbar-display, none);
   z-index: 10;
@@ -122,7 +126,7 @@ export function generateScrollboxCSS(AelluxJs) {
   transition: opacity 160ms ease;
 }
 
-:where([${scrollboxAttribute}] > [${scrollbarVerticalAttribute}]) {
+:where(${verticalBar}) {
   top: 0;
   left: calc(100% - var(--ae-scrollbar-size, 8px));
   width: var(--ae-scrollbar-size, 8px);
@@ -130,7 +134,7 @@ export function generateScrollboxCSS(AelluxJs) {
   margin-bottom: calc(-1 * var(--ae-scrollbar-length, 0px));
 }
 
-:where([${scrollboxAttribute}] > [${scrollbarHorizontalAttribute}]) {
+:where(${horizontalBar}) {
   left: 0;
   bottom: 0;
   width: var(--ae-scrollbar-length, 0px);
@@ -138,7 +142,7 @@ export function generateScrollboxCSS(AelluxJs) {
   margin-top: calc(-1 * var(--ae-scrollbar-size, 8px));
 }
 
-:where([${scrollboxAttribute}] > [${scrollbarVerticalAttribute}], [${scrollboxAttribute}] > [${scrollbarHorizontalAttribute}])::before {
+:where(${bars})::before {
   content: "";
   position: absolute;
   left: 0;
@@ -147,25 +151,42 @@ export function generateScrollboxCSS(AelluxJs) {
   background: var(--ae-scrollbar-thumb-color, color-mix(in srgb, CanvasText 50%, transparent));
 }
 
-:where([${scrollboxAttribute}] > [${scrollbarVerticalAttribute}])::before {
+:where(${verticalBar})::before {
   width: 100%;
   height: var(--ae-scrollbar-thumb-size, 0px);
   transform: translate3d(0, var(--ae-scrollbar-thumb-position, 0px), 0);
 }
 
-:where([${scrollboxAttribute}] > [${scrollbarHorizontalAttribute}])::before {
+:where(${horizontalBar})::before {
   width: var(--ae-scrollbar-thumb-size, 0px);
   height: 100%;
   transform: translate3d(var(--ae-scrollbar-thumb-position, 0px), 0, 0);
 }
 
-:where([${scrollboxAttribute}] > [${scrollbarVerticalAttribute}], [${scrollboxAttribute}] > [${scrollbarHorizontalAttribute}]):hover::before {
+:where(${bars}):hover::before {
   background: var(--ae-scrollbar-thumb-hover-color, color-mix(in srgb, CanvasText 90%, transparent));
 }
 
 :where([${scrollboxAttribute}].${scrollbarVisibleClass}, [${scrollboxAttribute}].${pointerscrollingClass}) >
-  :is([${scrollbarVerticalAttribute}], [${scrollbarHorizontalAttribute}]) {
+  :is([${scrollbarVerticalAttribute}], [${scrollbarHorizontalAttribute}]),
+:where(.${scrollbarWrapperClass}.${scrollbarVisibleClass}) {
   opacity: var(--ae-scrollbar-opacity-visible, 1);
+}
+
+:where(.${scrollbarWrapperClass}) {
+  position: absolute;
+  left: var(--ae-scrollbar-x);
+  top: var(--ae-scrollbar-y);
+  bottom: auto;
+  margin: 0;
+}
+
+:where([${scrollbarVerticalAttribute}].${scrollbarWrapperClass}) {
+  left: calc(var(--ae-scrollbar-x) - var(--ae-scrollbar-size, 8px));
+}
+
+:where([${scrollbarHorizontalAttribute}].${scrollbarWrapperClass}) {
+  top: calc(var(--ae-scrollbar-y) - var(--ae-scrollbar-size, 8px));
 }
 
 html[${reducedMotionAttribute}='reduced'] *[${scrollbarVerticalAttribute}],

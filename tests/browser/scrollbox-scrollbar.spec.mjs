@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-async function setup(page, markup) {
+async function setup(page, markup, options = {}) {
   const usesSnap = markup.includes("data-ae-scrollbox-snap");
   await page.goto("/tests/index.htm");
   await page.mouse.move(-100, -100);
@@ -10,13 +10,96 @@ async function setup(page, markup) {
     AelluxJs.ext("scrollbox", { loadStyle: true });
     if (usesSnap) AelluxJs.ext("scrollbox-snap");
   }, { html: markup, usesSnap });
-  await page.addScriptTag({ url: "/dist/aellux.ext.scrollbox.js" });
+  await page.addScriptTag({ url: `/dist/aellux.ext.scrollbox${options.forceLegacy ? ".legacy" : ""}.js` });
   if (usesSnap) await page.addScriptTag({ url: "/src/aellux.ext.scrollbox-snap.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await page.evaluate(options => AelluxJs.init({ mode: "basic", ...options }), options);
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollbox?.initialized)).toBe(true);
   if (usesSnap)
     await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollboxSnap?.initialized)).toBe(true);
 }
+
+for (const forceLegacy of [false, true]) test(`wrapper scrollbars stay outside the fade and align, inherit styles, hover and drag on both axes (${forceLegacy})`, async ({ page }) => {
+  await setup(page, `<div id="wrapper" style="padding:15px;border:3px solid black;width:220px">
+    <div id="box" data-ae-scrollbox="pointer" data-ae-scrollbar="v h" data-ae-scrollbar-parent="wrapper" data-ae-scrollbox-fade="true"
+      style="width:150px;height:120px;border:2px solid black;overflow:auto;scroll-behavior:auto;
+        --ae-scrollbar-size:12px;--ae-scrollbar-thumb-color:rgb(10,20,30);--ae-scrollbar-track-color:rgb(70,80,90)">
+      <div style="width:600px;height:600px"></div>
+    </div>
+  </div>`, { forceLegacy });
+  const box = page.locator("#box"), wrapper = page.locator("#wrapper");
+  const vertical = wrapper.locator(":scope > [data-ae-scrollbar-vertical]");
+  const horizontal = wrapper.locator(":scope > [data-ae-scrollbar-horizontal]");
+  await expect(box.locator("[data-ae-scrollbar-vertical], [data-ae-scrollbar-horizontal]")).toHaveCount(0);
+  await expect(vertical).toHaveCount(1);
+  await expect(horizontal).toHaveCount(1);
+  await expect(box).toHaveCSS("mask-image", /linear-gradient/);
+  await expect(wrapper).toHaveCSS("mask-image", "none");
+  await expect(wrapper).toHaveCSS("position", "relative");
+  await expect(vertical).toHaveCSS("width", "12px");
+  await expect(horizontal).toHaveCSS("height", "12px");
+  await expect(vertical).toHaveCSS("background-color", "rgb(70, 80, 90)");
+  await expect.poll(() => vertical.evaluate(el => getComputedStyle(el, "::before").backgroundColor)).toBe("rgb(10, 20, 30)");
+  const aligned = () => box.evaluate(box => {
+    const parent = box.parentElement, rect = box.getBoundingClientRect();
+    const v = parent.querySelector("[data-ae-scrollbar-vertical]").getBoundingClientRect();
+    const h = parent.querySelector("[data-ae-scrollbar-horizontal]").getBoundingClientRect();
+    return [Math.abs(v.top - rect.top - box.clientTop), Math.abs(v.right - rect.left - box.clientLeft - box.clientWidth),
+      Math.abs(h.left - rect.left - box.clientLeft), Math.abs(h.bottom - rect.top - box.clientTop - box.clientHeight)];
+  });
+  await expect.poll(async () => Math.max(...await aligned())).toBeLessThan(1);
+  for (const [bar, axis] of [[vertical, "y"], [horizontal, "x"]]) {
+    const rect = await bar.boundingBox();
+    const thumb = await bar.evaluate(el => parseFloat(el.style.getPropertyValue("--ae-scrollbar-thumb-size")));
+    const start = axis === "y" ? [rect.x + 6, rect.y + thumb / 2] : [rect.x + thumb / 2, rect.y + 6];
+    await page.mouse.move(...start);
+    await expect(bar).toHaveCSS("opacity", "1");
+    await page.mouse.down();
+    await page.mouse.move(start[0] + (axis === "x" ? 60 : 0), start[1] + (axis === "y" ? 60 : 0), { steps: 5 });
+    await page.mouse.up();
+    await expect.poll(() => box.evaluate((el, axis) => axis === "y" ? el.scrollTop : el.scrollLeft, axis)).toBeGreaterThan(100);
+  }
+  await expect.poll(async () => Math.max(...await aligned())).toBeLessThan(1);
+  await box.evaluate(el => el.scrollTo({ top: 0, left: 0, behavior: "instant" }));
+  await vertical.hover();
+  await page.mouse.wheel(0, 45);
+  await expect.poll(() => box.evaluate(el => el.scrollTop)).toBeGreaterThan(0);
+  await wrapper.evaluate(el => { el.style.padding = "25px"; });
+  await box.evaluate(el => { el.style.width = "180px"; el.style.height = "140px"; });
+  await expect.poll(async () => Math.max(...await aligned())).toBeLessThan(1);
+  await page.mouse.move(600, 600);
+  await expect(vertical).toHaveCSS("opacity", "0");
+  await expect(horizontal).toHaveCSS("opacity", "0");
+  await page.evaluate(() => AelluxJs.unmount(document.getElementById("box"), "scrollbox"));
+  await expect(wrapper.locator("[data-ae-scrollbar-vertical], [data-ae-scrollbar-horizontal]")).toHaveCount(0);
+  expect(await wrapper.evaluate(el => el.style.position)).toBe("");
+});
+
+test("scrollbar parent changes restore authored bars and share wrapper ownership without stealing sibling bars", async ({ page }) => {
+  await setup(page, `<div id="wrapper">
+    <div id="box" data-ae-scrollbox data-ae-scrollbar="v h" style="width:120px;height:100px;overflow:auto">
+      <div id="content" style="width:400px;height:400px"></div>
+      <div id="existing" data-ae-scrollbar-vertical style="--ae-scrollbar-x:7px!important;--ae-scrollbar-size:11px"></div>
+    </div>
+    <div id="second" data-ae-scrollbox data-ae-scrollbar="v" data-ae-scrollbar-parent="wrapper" style="width:120px;height:100px;overflow:auto">
+      <div style="height:400px"></div>
+    </div>
+  </div>`);
+  const box = page.locator("#box"), wrapper = page.locator("#wrapper");
+  await expect(box.locator(":scope > [data-ae-scrollbar-vertical]")).toHaveCount(1);
+  await box.evaluate(el => el.setAttribute("data-ae-scrollbar-parent", "wrapper"));
+  await expect(wrapper.locator(":scope > [data-ae-scrollbar-vertical]")).toHaveCount(2);
+  await expect(wrapper.locator(":scope > #existing")).toHaveCount(1);
+  await box.evaluate(el => el.setAttribute("data-ae-scrollbar-parent", "scrollbox"));
+  await expect(box.locator(":scope > #existing")).toHaveCount(1);
+  expect(await page.locator("#existing").evaluate(el => [el.style.getPropertyValue("--ae-scrollbar-x"), el.style.getPropertyPriority("--ae-scrollbar-x")])).toEqual(["7px", "important"]);
+  await box.evaluate(el => el.setAttribute("data-ae-scrollbar-parent", "wrapper"));
+  await expect(wrapper.locator(":scope > #existing")).toHaveCount(1);
+  await page.evaluate(() => AelluxJs.unmount(document.getElementById("box"), "scrollbox"));
+  await expect(wrapper).toHaveCSS("position", "relative");
+  expect(await page.locator("#existing").evaluate(el => [el.parentElement.id, el.previousElementSibling.id, el.style.getPropertyValue("--ae-scrollbar-size"), el.className])).toEqual(["box", "content", "11px", ""]);
+  await page.evaluate(() => AelluxJs.unmount(document.getElementById("second"), "scrollbox"));
+  expect(await wrapper.evaluate(el => el.style.position)).toBe("");
+});
 
 test("custom scrollbar stays over the viewport and supports track click and thumb drag", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbar="vertical"
@@ -214,19 +297,19 @@ test("custom scrollbar uses CanvasText fallbacks when colors are unset", async (
   expect(hoverColors.actual).toBe(hoverColors.expected);
 });
 
-test("snap pauses during scrollbar thumb drag while focus variables update", async ({ page }) => {
-  await setup(page, `<div id="box" data-ae-scrollbox data-ae-scrollbox-snap
-    data-ae-scrollbar="horizontal"
+for (const parent of ["scrollbox", "wrapper"]) test(`snap pauses during scrollbar thumb drag while focus variables update (${parent})`, async ({ page }) => {
+  await setup(page, `<div id="host"><div id="box" data-ae-scrollbox data-ae-scrollbox-snap
+    data-ae-scrollbar="horizontal" data-ae-scrollbar-parent="${parent}"
     style="width:120px;height:120px;overflow-x:auto;overflow-y:hidden">
     <div style="display:flex;width:360px">
       <div data-ae-snap-item style="flex:none;width:120px;height:100px"></div>
       <div data-ae-snap-item style="flex:none;width:120px;height:100px"></div>
       <div data-ae-snap-item style="flex:none;width:120px;height:100px"></div>
     </div>
-  </div>`);
+  </div></div>`);
 
   const box = page.locator("#box");
-  const track = page.locator("#box > [data-ae-scrollbar-horizontal]");
+  const track = page.locator(`${parent === "wrapper" ? "#host" : "#box"} > [data-ae-scrollbar-horizontal]`);
   const rect = await track.boundingBox();
   const thumb = await track.evaluate(element =>
     Number.parseFloat(element.style.getPropertyValue("--ae-scrollbar-thumb-size")));

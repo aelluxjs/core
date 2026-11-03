@@ -775,7 +775,7 @@
     present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-click",
     anchor: "anchor anchor-target anchor-match anchor-scroll-into-view",
     "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
-    scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
+    scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-parent scrollbar-vertical scrollbar-horizontal",
     "scrollbox-snap": "scrollbox-snap snap-item",
     focus: "focus",
     point: "point",
@@ -894,13 +894,26 @@
         else if (method === "update" && element.getClientRects().length && !target.getClientRects().length && !target.closest(`[${attr("present")}],[hidden]`))
           invalid("anchor", "anchor-target", "The explicitly updated Anchor target cannot currently be measured.", "Reveal the target before requesting placement, or update again after it becomes measurable.", "WARN_CONFIGURATION_TARGET");
       }, validateScrollbox = function() {
-        if (value("scrollbox").trim().toLowerCase() !== "pointer" || !element.getClientRects().length) return;
+        if (!has("scrollbox")) return;
+        if (has("scrollbar-parent") && !["scrollbox", "wrapper"].includes(value("scrollbar-parent")))
+          invalid("scrollbox", "scrollbar-parent", "Unknown custom scrollbar parent.", "Use scrollbox (default) or wrapper; wrapper uses the existing immediate parent.");
+        if (!element.getClientRects().length) return;
         const style = root.getComputedStyle(element);
         const blockedX = element.scrollWidth > element.clientWidth + 1 && !["auto", "scroll"].includes(style.overflowX);
         const blockedY = element.scrollHeight > element.clientHeight + 1 && !["auto", "scroll"].includes(style.overflowY);
         const usableX = element.scrollWidth > element.clientWidth + 1 && ["auto", "scroll"].includes(style.overflowX);
         const usableY = element.scrollHeight > element.clientHeight + 1 && ["auto", "scroll"].includes(style.overflowY);
-        if ((blockedX || blockedY) && !usableX && !usableY)
+        const barTokens = (value("scrollbar") || "").toLowerCase().trim().split(/[\s,|/+]+/).filter(Boolean);
+        const customBars = has("scrollbar") && (!barTokens.length || barTokens.some((token) => /^[vhxy]+$/.test(token.replace(/horizontal/g, "h").replace(/vertical/g, "v"))));
+        if (usableX && usableY && customBars && has("scrollbox-fade") && ["", "true"].includes(value("scrollbox-fade")) && value("scrollbar-parent") !== "wrapper" && parseFloat(style.getPropertyValue("--ae-scrollbox-fade-size") || "16") > 0)
+          invalid(
+            "scrollbox",
+            "scrollbar-parent",
+            "The two-axis fade also masks custom scrollbars painted inside Scrollbox.",
+            'Place Scrollbox in a wrapper and set data-ae-scrollbar-parent="wrapper" on Scrollbox to move its bars outside the fade.',
+            "WARN_SCROLLBOX_FADE_SCROLLBAR"
+          );
+        if (value("scrollbox").trim().toLowerCase() === "pointer" && (blockedX || blockedY) && !usableX && !usableY)
           invalid("scrollbox", "scrollbox", "Content overflows but CSS disables the pointer scrolling axes.", "Set overflow:auto or overflow:scroll on the intended axis.", "WARN_CONFIGURATION_STYLE");
       }, validateSnap = function() {
         if (!["", "horizontal", "vertical", "false"].includes(value("scrollbox-snap")))
@@ -1017,7 +1030,7 @@
             extension,
             "scrollbox-fade",
             "Scrollbox fade expects a boolean value.",
-            "Use true or false, or omit the attribute to enable the fade."
+            "Use true or false to force the fade, or omit the attribute for automatic single-axis fading."
           );
         if (extension === "scrollbox-snap") validateSnap();
         if (extension === "focus") {

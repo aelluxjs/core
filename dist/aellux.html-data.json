@@ -643,6 +643,24 @@
       "valueSet": "v"
     },
     {
+      "name": "data-ae-scrollbar-parent",
+      "description": "Custom scrollbar parent. Scrollbox keeps bars inside the scroll region; wrapper places them as siblings in its existing immediate parent, outside its fade mask.\n\nValue syntax: enum.\n\nDefault behavior: \"scrollbox\".",
+      "references": [
+        {
+          "name": "AelluxJS scrollbox",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "scrollbox"
+        },
+        {
+          "name": "wrapper"
+        }
+      ]
+    },
+    {
       "name": "data-ae-scrollbar-vertical",
       "description": "Vertical custom bar, created automatically or reused when supplied as a direct child of Scrollbox.\n\nValue syntax: presence.",
       "references": [
@@ -703,7 +721,7 @@
     },
     {
       "name": "data-ae-scrollbox-fade",
-      "description": "Progressive overflow fade on all scrollable edges. Targets the only content child, excluding custom bars, or the container otherwise. Enabled by default; false disables it. Existing application masks are preserved.\n\nValue syntax: enum.\n\nDefault behavior: \"true\".",
+      "description": "Progressive overflow fade on the Scrollbox container. Without this attribute, enabled only when exactly one axis scrolls; disabled for two axes. Empty or true forces on; false forces off. Existing application masks are preserved.\n\nValue syntax: enum.\n\nDefault behavior: \"enabled for one scrollable axis; disabled for two\".",
       "references": [
         {
           "name": "AelluxJS scrollbox",

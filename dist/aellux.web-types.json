@@ -263,6 +263,16 @@
           }
         },
         {
+          "name": "data-ae-scrollbar-parent",
+          "description": "Custom scrollbar parent. Scrollbox keeps bars inside the scroll region; wrapper places them as siblings in its existing immediate parent, outside its fade mask.\n\nValue syntax: enum.\n\nDefault behavior: \"scrollbox\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm",
+          "default": "scrollbox",
+          "value": {
+            "kind": "plain",
+            "type": "\"scrollbox\" | \"wrapper\""
+          }
+        },
+        {
           "name": "data-ae-scrollbar-vertical",
           "description": "Vertical custom bar, created automatically or reused when supplied as a direct child of Scrollbox.\n\nValue syntax: presence.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm",
@@ -292,9 +302,9 @@
         },
         {
           "name": "data-ae-scrollbox-fade",
-          "description": "Progressive overflow fade on all scrollable edges. Targets the only content child, excluding custom bars, or the container otherwise. Enabled by default; false disables it. Existing application masks are preserved.\n\nValue syntax: enum.\n\nDefault behavior: \"true\".",
+          "description": "Progressive overflow fade on the Scrollbox container. Without this attribute, enabled only when exactly one axis scrolls; disabled for two axes. Empty or true forces on; false forces off. Existing application masks are preserved.\n\nValue syntax: enum.\n\nDefault behavior: \"enabled for one scrollable axis; disabled for two\".",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm",
-          "default": "true",
+          "default": "enabled for one scrollable axis; disabled for two",
           "value": {
             "kind": "plain",
             "type": "\"\" | \"true\" | \"false\""
@@ -986,6 +996,11 @@
         },
         {
           "name": "ae--scrollbar-visible",
+          "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
+        },
+        {
+          "name": "ae--scrollbar-wrapper",
           "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
         },

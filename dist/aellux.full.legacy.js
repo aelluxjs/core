@@ -22205,7 +22205,7 @@
           if (_extension === "anchor") validateAnchor();
           if (_extension === "overflow-marquee" && has("overflow-marquee-fade") && !["", "true", "false"].includes(value("overflow-marquee-fade"))) invalid(_extension, "overflow-marquee-fade", "Overflow Marquee fade expects a boolean value.", "Use true or false, or omit the attribute to enable the fade.");
           if (_extension === "scrollbox") validateScrollbox();
-          if (_extension === "scrollbox" && has("scrollbox-fade") && !["", "true", "false"].includes(value("scrollbox-fade"))) invalid(_extension, "scrollbox-fade", "Scrollbox fade expects a boolean value.", "Use true or false, or omit the attribute to enable the fade.");
+          if (_extension === "scrollbox" && has("scrollbox-fade") && !["", "true", "false"].includes(value("scrollbox-fade"))) invalid(_extension, "scrollbox-fade", "Scrollbox fade expects a boolean value.", "Use true or false to force the fade, or omit the attribute for automatic single-axis fading.");
           if (_extension === "scrollbox-snap") validateSnap();
           if (_extension === "focus") {
             if (value("focus") && value("focus") !== "next") invalid(_extension, "focus", "Unknown Focus mode.", "Use next for Enter navigation, or remove the attribute.");
@@ -22303,13 +22303,20 @@
           else if (method === "update" && element.getClientRects().length && !target.getClientRects().length && !target.closest("[".concat(attr("present"), "],[hidden]"))) invalid("anchor", "anchor-target", "The explicitly updated Anchor target cannot currently be measured.", "Reveal the target before requesting placement, or update again after it becomes measurable.", "WARN_CONFIGURATION_TARGET");
         }
         function validateScrollbox() {
-          if (value("scrollbox").trim().toLowerCase() !== "pointer" || !element.getClientRects().length) return;
+          if (!has("scrollbox")) return;
+          if (has("scrollbar-parent") && !["scrollbox", "wrapper"].includes(value("scrollbar-parent"))) invalid("scrollbox", "scrollbar-parent", "Unknown custom scrollbar parent.", "Use scrollbox (default) or wrapper; wrapper uses the existing immediate parent.");
+          if (!element.getClientRects().length) return;
           var style = root2.getComputedStyle(element);
           var blockedX = element.scrollWidth > element.clientWidth + 1 && !["auto", "scroll"].includes(style.overflowX);
           var blockedY = element.scrollHeight > element.clientHeight + 1 && !["auto", "scroll"].includes(style.overflowY);
           var usableX = element.scrollWidth > element.clientWidth + 1 && ["auto", "scroll"].includes(style.overflowX);
           var usableY = element.scrollHeight > element.clientHeight + 1 && ["auto", "scroll"].includes(style.overflowY);
-          if ((blockedX || blockedY) && !usableX && !usableY) invalid("scrollbox", "scrollbox", "Content overflows but CSS disables the pointer scrolling axes.", "Set overflow:auto or overflow:scroll on the intended axis.", "WARN_CONFIGURATION_STYLE");
+          var barTokens = (value("scrollbar") || "").toLowerCase().trim().split(/[\s,|/+]+/).filter(Boolean);
+          var customBars = has("scrollbar") && (!barTokens.length || barTokens.some(function(token) {
+            return /^[vhxy]+$/.test(token.replace(/horizontal/g, "h").replace(/vertical/g, "v"));
+          }));
+          if (usableX && usableY && customBars && has("scrollbox-fade") && ["", "true"].includes(value("scrollbox-fade")) && value("scrollbar-parent") !== "wrapper" && parseFloat(style.getPropertyValue("--ae-scrollbox-fade-size") || "16") > 0) invalid("scrollbox", "scrollbar-parent", "The two-axis fade also masks custom scrollbars painted inside Scrollbox.", 'Place Scrollbox in a wrapper and set data-ae-scrollbar-parent="wrapper" on Scrollbox to move its bars outside the fade.', "WARN_SCROLLBOX_FADE_SCROLLBAR");
+          if (value("scrollbox").trim().toLowerCase() === "pointer" && (blockedX || blockedY) && !usableX && !usableY) invalid("scrollbox", "scrollbox", "Content overflows but CSS disables the pointer scrolling axes.", "Set overflow:auto or overflow:scroll on the intended axis.", "WARN_CONFIGURATION_STYLE");
         }
         function validateSnap() {
           if (!["", "horizontal", "vertical", "false"].includes(value("scrollbox-snap"))) invalid("scrollbox-snap", "scrollbox-snap", "Unknown snap axis.", "Use horizontal, vertical, or false.");
@@ -22575,7 +22582,7 @@
         present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-click",
         anchor: "anchor anchor-target anchor-match anchor-scroll-into-view",
         "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
-        scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
+        scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-parent scrollbar-vertical scrollbar-horizontal",
         "scrollbox-snap": "scrollbox-snap snap-item",
         focus: "focus",
         point: "point",
@@ -30744,12 +30751,14 @@
           return AelluxJs2.eventName(name);
         });
         var scrollbarAttribute = AelluxJs2.attr("scrollbar");
+        var scrollbarParentAttribute = AelluxJs2.attr("scrollbar-parent");
         var scrollbarVerticalAttribute = AelluxJs2.attr("scrollbar-vertical");
         var scrollbarHorizontalAttribute = AelluxJs2.attr("scrollbar-horizontal");
         var elasticReleaseClass = AelluxJs2.className("scrollbox-elastic-release");
         var pointerScrollingClass = AelluxJs2.className("pointerscrolling");
         var nativeScrollbarHideClass = AelluxJs2.className("native-sb-hide");
         var scrollbarVisibleClass = AelluxJs2.className("scrollbar-visible");
+        var scrollbarWrapperClass = AelluxJs2.className("scrollbar-wrapper");
         var scrollEdgeClasses = [AelluxJs2.className("scroll-v-start"), AelluxJs2.className("scroll-v-end"), AelluxJs2.className("scroll-h-start"), AelluxJs2.className("scroll-h-end")];
         var pointerScrollControlSelector = "a[draggable='false'], button[draggable='false']";
         var pointerScrollExceptionSelector = "a:not([draggable='false']), button:not([draggable='false']), input, select, textarea, [contenteditable], [draggable='true'], " + "[".concat(scrollbarVerticalAttribute, "], [").concat(scrollbarHorizontalAttribute, "]");
@@ -30775,6 +30784,9 @@
         var SCROLLBAR_INTERACTION_HIDE_DELAY_MS = 1e3;
         var SCROLLBAR_HOVER_HIDE_DELAY_MS = 300;
         var scrollbarProperties = ["--ae-scrollbar-x", "--ae-scrollbar-y", "--ae-scrollbar-length", "--ae-scrollbar-thumb-size", "--ae-scrollbar-thumb-position", "--ae-scrollbar-display"];
+        var scrollbarThemeProperties = ["size", "thumb-radius", "thumb-color", "thumb-hover-color", "track-color", "opacity-visible", "opacity-fade"].map(function(name) {
+          return "--ae-scrollbar-".concat(name);
+        });
         var pointerListeners = [[POINTER_DOWN, "onPointerDown"], [POINTER_OVER, "onPointerOver"], [POINTER_OUT, "onPointerOut"], ["mousedown", "onMouseDown"]];
         var scrollbarHoverListeners = [[POINTER_DOWN, "onScrollbarPointerDown"], [POINTER_ENTER, "onScrollbarPointerEnter"], [POINTER_LEAVE, "onScrollbarPointerLeave"], [POINTER_OVER, "onScrollbarPointerOver"], [POINTER_OUT, "onScrollbarPointerOut"], [POINTER_MOVE, "onScrollbarPointerMove"], [POINTER_UP, "onScrollbarPointerEnd"], [POINTER_CANCEL, "onScrollbarPointerEnd"], ["mouseenter", "onScrollbarMouseEnter"], ["mouseleave", "onScrollbarMouseLeave"], ["mouseover", "onScrollbarMouseOver"], ["mouseout", "onScrollbarMouseOut"]];
         var scrollbarAxisListeners = [[POINTER_DOWN, "onPointerDown"], [POINTER_MOVE, "onPointerMove"], [POINTER_UP, "onPointerEnd"], [POINTER_CANCEL, "onPointerEnd"]];
@@ -30827,6 +30839,8 @@
         var elementMemories = /* @__PURE__ */ new WeakMap();
         var cursorMemories = /* @__PURE__ */ new WeakMap();
         var scrollbarMemories = /* @__PURE__ */ new WeakMap();
+        var scrollbarWrappers = /* @__PURE__ */ new WeakMap();
+        var scrollbarOwners = /* @__PURE__ */ new WeakMap();
         var inlineMemories = /* @__PURE__ */ new WeakMap();
         var elasticMemories = /* @__PURE__ */ new WeakMap();
         var pointerScrollMemories = /* @__PURE__ */ new WeakMap();
@@ -31012,7 +31026,8 @@
             hoverVisible: false,
             hoverTimeout: null,
             interactionVisible: false,
-            interactionTimeout: null
+            interactionTimeout: null,
+            parent: null
           };
           var state = {
             element: element,
@@ -31121,7 +31136,7 @@
             return setScrollbarHover(state, "pointerHover", true);
           });
           state.onScrollbarPointerOut = isTouch(function(event) {
-            if (!event.relatedTarget || !element.contains(event.relatedTarget)) setScrollbarHover(state, "pointerHover", false);
+            if (!containsScrollbarTarget(state, event.relatedTarget)) setScrollbarHover(state, "pointerHover", false);
           });
           state.onScrollbarPointerMove = isTouch(function() {
             if (!state.scrollbar.pointerHover) setScrollbarHover(state, "pointerHover", true);
@@ -31136,10 +31151,10 @@
             if (supportsMouseHover()) setScrollbarHover(state, "mouseHover", true);
           };
           state.onScrollbarMouseOut = function(event) {
-            if (!event.relatedTarget || !element.contains(event.relatedTarget)) setScrollbarHover(state, "mouseHover", false);
+            if (!containsScrollbarTarget(state, event.relatedTarget)) setScrollbarHover(state, "mouseHover", false);
           };
           state.onScrollbarOutsideDown = function(event) {
-            if (!element.contains(event.target)) {
+            if (!containsScrollbarTarget(state, event.target)) {
               setScrollbarHover(state, "pointerHover", false);
               setScrollbarHover(state, "mouseHover", false);
               if (!element.classList.contains(pointerScrollingClass)) clearScrollbarInteractionVisibility(state);
@@ -31293,8 +31308,33 @@
           var element = state.element;
           var value = element.getAttribute(scrollbarAttribute);
           var axes = scrollbarAxes(value);
+          var previousParent = state.scrollbar.parent;
+          var parent = (axes.x || axes.y) && element.getAttribute(scrollbarParentAttribute) === "wrapper" ? element.parentElement : null;
+          if (parent !== previousParent) {
+            if (parent) {
+              var wrapper = scrollbarWrappers.get(parent);
+              if (!wrapper) {
+                wrapper = {
+                  users: 0,
+                  memory: null
+                };
+                if (root2.getComputedStyle(parent).position === "static") {
+                  wrapper.memory = AelluxJs2.persist.element.save(parent, [], ["position"]);
+                  parent.style.setProperty("position", "relative", "important");
+                }
+                scrollbarWrappers.set(parent, wrapper);
+              }
+              wrapper.users++;
+            }
+            state.scrollbar.parent = parent;
+            if (state.resizeObserver) {
+              if (previousParent) state.resizeObserver.unobserve(previousParent);
+              if (parent) state.resizeObserver.observe(parent);
+            }
+          }
           configureScrollbarAxis(state, "y", axes.y, scrollbarVerticalAttribute);
           configureScrollbarAxis(state, "x", axes.x, scrollbarHorizontalAttribute);
+          if (parent !== previousParent) releaseScrollbarWrapper(previousParent);
           var enabled = axes.x || axes.y;
           var scrollbar = state.scrollbar;
           if (enabled && !scrollbar.listening) {
@@ -31320,20 +31360,20 @@
             element.classList.remove(nativeScrollbarHideClass);
             scrollbar.hideOwned = false;
           }
+          syncScrollbarVisibility(state);
         }
         function configureScrollbarAxis(state, axis, enabled, attributeName) {
           var scrollbar = state.scrollbar;
           var current = scrollbar[axis];
-          var scrollbarElement = null;
-          if (enabled) scrollbarElement = Array.from(state.element.children).find(function(child) {
-            return child.hasAttribute(attributeName);
-          }) || null;
-          if (current && current.element === scrollbarElement && enabled) {
+          if (current && enabled && current.parent === scrollbar.parent) {
             positionScrollbarAxis(state, current);
             return;
           }
           if (current) resetScrollbarAxis(state, axis);
           if (!enabled) return;
+          var scrollbarElement = Array.from(state.element.children).find(function(child) {
+            return child.hasAttribute(attributeName);
+          }) || null;
           var owned = !scrollbarElement;
           if (!scrollbarElement) {
             scrollbarElement = root2.document.createElement("div");
@@ -31342,12 +31382,19 @@
           }
           var marker = owned ? null : root2.document.createComment("scrollbar position");
           if (marker) scrollbarElement.before(marker);
-          if (!owned) scrollbarMemories.set(scrollbarElement, AelluxJs2.persist.element.save(scrollbarElement, [], scrollbarProperties));
+          if (!owned) scrollbarMemories.set(scrollbarElement, AelluxJs2.persist.element.save(scrollbarElement, [], [].concat(scrollbarProperties, _toConsumableArray7(scrollbarThemeProperties))));
           var record = {
             element: scrollbarElement,
             owned: owned,
             axis: axis,
             marker: marker,
+            parent: scrollbar.parent,
+            wrapperClassOwned: false,
+            visibleClassOwned: false,
+            theme: null,
+            themeOverrides: scrollbarThemeProperties.map(function(name) {
+              return scrollbarElement.style.getPropertyValue(name);
+            }),
             thumbPosition: null,
             thumbSize: null,
             trackSize: null,
@@ -31363,11 +31410,29 @@
           record.onPointerEnd = function(event) {
             return endScrollbarDrag(state, record, event);
           };
+          record.onInteractionStart = function() {
+            return state.onInteractionStart();
+          };
           setListeners(scrollbarElement, record, scrollbarAxisListeners, true);
+          scrollbarOwners.set(scrollbarElement, state);
+          if (record.parent) {
+            record.wrapperClassOwned = !scrollbarElement.classList.contains(scrollbarWrapperClass);
+            scrollbarElement.classList.add(scrollbarWrapperClass);
+            setListeners(scrollbarElement, state, scrollbarHoverListeners, true);
+            onEvent(scrollbarElement, POINTER_DOWN_TARGET, record.onInteractionStart, true);
+            onEvent(scrollbarElement, "$wheel", state.onWheel, {
+              passive: false,
+              capture: true
+            });
+          }
           scrollbar[axis] = record;
           positionScrollbarAxis(state, record);
         }
         function positionScrollbarAxis(state, record) {
+          if (record.parent) {
+            if (record.element.parentElement !== record.parent) record.parent.append(record.element);
+            return;
+          }
           var container = state.element;
           if (record.axis === "y" && container.firstChild !== record.element) container.prepend(record.element);
           else if (record.axis === "x" && container.lastChild !== record.element) container.append(record.element);
@@ -31378,6 +31443,13 @@
           endScrollbarDrag(state, record);
           var element = record.element;
           setListeners(element, record, scrollbarAxisListeners, false);
+          if (record.parent) {
+            setListeners(element, state, scrollbarHoverListeners, false);
+            offEvent(element, POINTER_DOWN_TARGET, record.onInteractionStart, true);
+            offEvent(element, "$wheel", state.onWheel, true);
+          }
+          if (record.wrapperClassOwned) element.classList.remove(scrollbarWrapperClass);
+          if (record.visibleClassOwned) element.classList.remove(scrollbarVisibleClass);
           if (record.owned) element.remove();
           else {
             var _scrollbarMemories$ge;
@@ -31386,12 +31458,15 @@
             else record.marker.remove();
           }
           scrollbarMemories.delete(element);
+          scrollbarOwners.delete(element);
           state.scrollbar[axis] = null;
         }
         function resetScrollbars(state) {
           resetScrollbarAxis(state, "x");
           resetScrollbarAxis(state, "y");
           var scrollbar = state.scrollbar;
+          releaseScrollbarWrapper(scrollbar.parent);
+          scrollbar.parent = null;
           if (scrollbar.listening) {
             setListeners(state.element, state, scrollbarHoverListeners, false);
             AelluxJs2.off(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
@@ -31402,6 +31477,31 @@
           clearScrollbarInteractionVisibility(state);
           clearScrollbarHover(state);
           syncScrollbarVisibility(state);
+        }
+        function releaseScrollbarWrapper(parent) {
+          var _wrapper$memory;
+          var wrapper = parent && scrollbarWrappers.get(parent);
+          if (!wrapper || --wrapper.users) return;
+          (_wrapper$memory = wrapper.memory) === null || _wrapper$memory === void 0 || _wrapper$memory.restore();
+          scrollbarWrappers.delete(parent);
+        }
+        function containsScrollbarTarget(state, target) {
+          return !!target && (state.element.contains(target) || [state.scrollbar.x, state.scrollbar.y].some(function(record) {
+            return record === null || record === void 0 ? void 0 : record.element.contains(target);
+          }));
+        }
+        function syncScrollbarBarVisibility(state, visible) {
+          for (var _i = 0, _arr = [state.scrollbar.x, state.scrollbar.y]; _i < _arr.length; _i++) {
+            var record = _arr[_i];
+            if (!(record !== null && record !== void 0 && record.parent)) continue;
+            if (visible && !record.element.classList.contains(scrollbarVisibleClass)) {
+              record.element.classList.add(scrollbarVisibleClass);
+              record.visibleClassOwned = true;
+            } else if (!visible && record.visibleClassOwned) {
+              record.element.classList.remove(scrollbarVisibleClass);
+              record.visibleClassOwned = false;
+            }
+          }
         }
         function setScrollbarHover(state, name, active) {
           var scrollbar = state.scrollbar;
@@ -31455,6 +31555,7 @@
         }
         function showScrollbars(state) {
           if (!state.scrollbar.listening) return;
+          syncScrollbarBarVisibility(state, true);
           if (!state.element.classList.contains(scrollbarVisibleClass)) {
             publish(state);
             state.element.classList.add(scrollbarVisibleClass);
@@ -31463,14 +31564,19 @@
         }
         function hideScrollbars(state) {
           if (state.scrollbar.drag) return;
+          syncScrollbarBarVisibility(state, false);
           if (state.scrollbar.visibleOwned) state.element.classList.remove(scrollbarVisibleClass);
           state.scrollbar.visibleOwned = false;
         }
-        function readScrollbars(state, metrics, axes) {
+        function readScrollbars(state, metrics, axes, style) {
           var element = state.element;
           var values = [];
-          for (var _i = 0, _arr = ["x", "y"]; _i < _arr.length; _i++) {
-            var axis = _arr[_i];
+          var parent = state.scrollbar.parent;
+          var theme = parent ? scrollbarThemeProperties.map(function(name) {
+            return style.getPropertyValue(name);
+          }) : null;
+          for (var _i2 = 0, _arr2 = ["x", "y"]; _i2 < _arr2.length; _i2++) {
+            var axis = _arr2[_i2];
             var record = state.scrollbar[axis];
             if (!record) continue;
             var vertical = axis === "y";
@@ -31487,7 +31593,10 @@
               thumbSize: thumbSize,
               thumbPosition: thumbPosition,
               max: axes[axis] ? max : 0,
-              display: display
+              display: display,
+              theme: theme,
+              x: parent ? element.offsetLeft + element.clientLeft + (vertical ? element.clientWidth : 0) : null,
+              y: parent ? element.offsetTop + element.clientTop + (vertical ? 0 : element.clientHeight) : null
             });
           }
           return values;
@@ -31495,10 +31604,23 @@
         function updateScrollbars(state, values) {
           var _iterator5 = _createForOfIteratorHelper15(values), _step5;
           try {
-            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-              var _step5$value = _step5.value, record = _step5$value.record, trackSize = _step5$value.trackSize, thumbSize = _step5$value.thumbSize, thumbPosition = _step5$value.thumbPosition, max = _step5$value.max, display = _step5$value.display;
-              if (state.scrollbar[record.axis] !== record) continue;
+            var _loop = function _loop2() {
+              var _step5$value = _step5.value, record = _step5$value.record, trackSize = _step5$value.trackSize, thumbSize = _step5$value.thumbSize, thumbPosition = _step5$value.thumbPosition, max = _step5$value.max, display = _step5$value.display, theme = _step5$value.theme, x = _step5$value.x, y = _step5$value.y;
+              if (state.scrollbar[record.axis] !== record) return 1;
               var style = record.element.style;
+              if (theme) {
+                scrollbarThemeProperties.forEach(function(name, index) {
+                  var _record$theme;
+                  if (record.themeOverrides[index] || ((_record$theme = record.theme) === null || _record$theme === void 0 ? void 0 : _record$theme[index]) === theme[index]) return;
+                  if (theme[index]) style.setProperty(name, theme[index]);
+                  else style.removeProperty(name);
+                });
+                record.theme = theme;
+                if (record.x !== x) writeFadeProperty(record.element, scrollbarProperties[0], x);
+                if (record.y !== y) writeFadeProperty(record.element, scrollbarProperties[1], y);
+                record.x = x;
+                record.y = y;
+              }
               if (record.trackSize !== trackSize) style.setProperty(scrollbarProperties[2], "".concat(trackSize, "px"));
               if (record.thumbSize !== thumbSize) style.setProperty(scrollbarProperties[3], "".concat(thumbSize, "px"));
               if (record.thumbPosition !== thumbPosition) style.setProperty(scrollbarProperties[4], "".concat(thumbPosition, "px"));
@@ -31508,6 +31630,9 @@
               record.thumbPosition = thumbPosition;
               record.max = max;
               record.display = display;
+            };
+            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+              if (_loop()) continue;
             }
           } catch (err) {
             _iterator5.e(err);
@@ -31793,8 +31918,8 @@
           if (chain.some(function(member2) {
             return member2.scrollbar.drag;
           })) return;
-          for (var _i2 = 0, _chain = chain; _i2 < _chain.length; _i2++) {
-            var _member = _chain[_i2];
+          for (var _i3 = 0, _chain = chain; _i3 < _chain.length; _i3++) {
+            var _member = _chain[_i3];
             cancelMomentum(_member);
             if (_member.elastic.owned) resetElastic(_member);
           }
@@ -32551,9 +32676,9 @@
             bottom: elastic.amounts[0] * (2 + scaleY),
             left: 0
           };
-          for (var _i3 = 0, _arr2 = ["top", "right", "bottom", "left"]; _i3 < _arr2.length; _i3++) {
+          for (var _i4 = 0, _arr3 = ["top", "right", "bottom", "left"]; _i4 < _arr3.length; _i4++) {
             var _elastic$baseMargins;
-            var side = _arr2[_i3];
+            var side = _arr3[_i4];
             var base = ((_elastic$baseMargins = elastic.baseMargins) === null || _elastic$baseMargins === void 0 ? void 0 : _elastic$baseMargins[side]) || "0px";
             var property = "margin-".concat(side);
             if (compensated[side]) {
@@ -32677,6 +32802,7 @@
               if (state.resizeObserver) {
                 state.resizeObserver.disconnect();
                 state.resizeObserver.observe(state.element);
+                if (state.scrollbar.parent) state.resizeObserver.observe(state.scrollbar.parent);
                 var _iterator21 = _createForOfIteratorHelper15(state.element.children), _step21;
                 try {
                   for (_iterator21.s(); !(_step21 = _iterator21.n()).done; ) {
@@ -32699,7 +32825,7 @@
               subtree: true,
               characterData: true,
               attributes: true,
-              attributeFilter: [elasticAttribute, scrollbarAttribute, snapAttribute, fadeAttribute, attribute, "dir"]
+              attributeFilter: [elasticAttribute, scrollbarAttribute, scrollbarParentAttribute, snapAttribute, fadeAttribute, attribute, "dir"]
             });
           }
         }
@@ -32795,7 +32921,9 @@
           var distances = [axes.y ? y : 0, axes.x ? metrics.maxX - x : 0, axes.y ? metrics.maxY - y : 0, axes.x ? x : 0];
           var snapAxis = hasSnap(element) ? element.getAttribute(snapAttribute) === "vertical" ? "y" : "x" : null;
           var primary = snapAxis || (axes.y ? "y" : "x");
-          var mode = maskSupported && !state.fadeAuthored && element.getAttribute(fadeAttribute) !== "false" && (axes.x || axes.y) ? compositeSupported ? "both" : primary : "";
+          var fadeValue = element.getAttribute(fadeAttribute);
+          var fadeEnabled = fadeValue === "" || fadeValue === "true" || fadeValue !== "false" && axes.x !== axes.y;
+          var mode = maskSupported && !state.fadeAuthored && fadeEnabled && (axes.x || axes.y) ? compositeSupported ? "both" : primary : "";
           return {
             distances: distances,
             mode: mode
@@ -32837,7 +32965,7 @@
               y: progress(scrollTop, metrics.maxY),
               x: progress(scrollLeft, metrics.maxX),
               edges: state.elastic.owned ? null : [scrollTop < SCROLL_EDGE_MARGIN_PX, scrollTop >= metrics.maxY - SCROLL_EDGE_MARGIN_PX, scrollLeft < SCROLL_EDGE_MARGIN_PX, scrollLeft >= metrics.maxX - SCROLL_EDGE_MARGIN_PX],
-              scrollbars: bars ? readScrollbars(state, metrics, axes) : []
+              scrollbars: bars ? readScrollbars(state, metrics, axes, style) : []
             };
           }).then(function(values) {
             if (!values || state.disposed) {
@@ -32941,6 +33069,7 @@
           return dispatchWheel(target.state, handed);
         }
         function chainWheel(state, event, metrics, factor) {
+          var nativeTarget = arguments.length > 4 && arguments[4] !== void 0 ? arguments[4] : true;
           var deltaX = event.deltaX * factor, deltaY = event.deltaY * factor;
           var target = {
             element: state.element,
@@ -32949,7 +33078,7 @@
             axes: wheelAxes(state, metrics)
           };
           var first = true, handled = false;
-          var _loop = function _loop2() {
+          var _loop2 = function _loop22() {
             var member = target.state, element = target.element;
             if (!first && member) {
               if (member.desktop && element.classList.contains(pointerScrollingClass)) {
@@ -32978,7 +33107,7 @@
             var nextX = Math.max(0, Math.min(bounds.maxX, desiredX));
             var nextY = Math.max(0, Math.min(bounds.maxY, desiredY));
             var remainingX = x - (nextX - left), remainingY = y - (nextY - top);
-            if (first && !converted && !remainingX && !remainingY) {
+            if (first && nativeTarget && !converted && !remainingX && !remainingY) {
               if (member.elastic.owned) resetElastic(member);
               return {
                 v: void 0
@@ -33012,7 +33141,7 @@
             target = deltaX || deltaY ? nextWheelTarget(element) : null;
           }, _ret;
           while (target && (deltaX || deltaY)) {
-            _ret = _loop();
+            _ret = _loop2();
             if (_ret) return _ret.v;
           }
           if (handled) event.preventDefault();
@@ -33026,13 +33155,15 @@
             return;
           }
           if (event.defaultPrevented) return;
-          if (event.target.closest("[".concat(attribute, "]")) !== state.element) return;
+          var bar = event.target.closest("[".concat(scrollbarVerticalAttribute, "], [").concat(scrollbarHorizontalAttribute, "]"));
+          var owner = bar && scrollbarOwners.get(bar);
+          if (owner ? owner !== state : event.target.closest("[".concat(attribute, "]")) !== state.element) return;
           finishElasticRelease(state);
           if (!dispatchWheel(state, event)) return;
           var metrics = nativeMetrics(state.element);
           if (!metrics) return;
           var factor = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? metrics.page : 1;
-          chainWheel(state, event, metrics, factor);
+          chainWheel(state, event, metrics, factor, !(owner !== null && owner !== void 0 && owner.scrollbar.parent));
         }
       })(typeof globalThis !== "undefined" ? globalThis : window);
     }

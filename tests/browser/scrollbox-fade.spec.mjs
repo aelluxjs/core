@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 const hiddenProperties = ["top", "right", "bottom", "left"].map(side => `--ae-scrollbox-hidden-${side}`);
 const boxHTML = (extra = "", content = '<div id="content" style="width:320px;height:300px;background:black"></div>') =>
-  `<div id="box" data-ae-scrollbox="native" data-ae-scrollbar="none" style="width:120px;height:100px" ${extra}>${content}</div>`;
+  `<div id="box" data-ae-scrollbox="native" data-ae-scrollbar="none" style="width:120px;height:100px" ${extra.includes("data-ae-scrollbox-fade") ? "" : 'data-ae-scrollbox-fade="true"'} ${extra}>${content}</div>`;
 const content = box => box.locator(':scope > :not([data-ae-scrollbar-vertical]):not([data-ae-scrollbar-horizontal])').first();
 
 async function start(page, html = boxHTML(), options = {}) {
@@ -47,6 +47,30 @@ async function pixels(page, box, inset = 0) {
         pixel(image.width - 1, image.height - 1)[0], pixel(0, image.height - 1)[0]] };
   }, { png, inset });
 }
+
+for (const forceLegacy of [false, true]) test(`fade defaults follow actual scrollable axes and explicit values override them (${forceLegacy})`, async ({ page }) => {
+  const box = await start(page, boxHTML().replace('data-ae-scrollbox-fade="true"', ''), { forceLegacy });
+  await expect(box).toHaveCSS("mask-image", "none");
+  await box.evaluate(element => element.setAttribute("data-ae-scrollbox-fade", "true"));
+  await expect(box).toHaveCSS("mask-image", /linear-gradient/);
+  await box.evaluate(element => element.setAttribute("data-ae-scrollbox-fade", ""));
+  await expect(box).toHaveCSS("mask-image", /linear-gradient/);
+  await box.evaluate(element => element.removeAttribute("data-ae-scrollbox-fade"));
+  await expect(box).toHaveCSS("mask-image", "none");
+  await page.locator("#content").evaluate(element => element.style.width = "100px");
+  await expect(box).toHaveCSS("mask-image", /linear-gradient/);
+  await box.evaluate(element => element.setAttribute("data-ae-scrollbox-fade", "false"));
+  await expect(box).toHaveCSS("mask-image", "none");
+  await box.evaluate(element => element.removeAttribute("data-ae-scrollbox-fade"));
+  await expect(box).toHaveCSS("mask-image", /linear-gradient/);
+  await page.locator("#content").evaluate(element => { element.style.width = "320px"; element.style.height = "80px"; });
+  await expect(box).toHaveCSS("mask-image", /linear-gradient/);
+  await page.locator("#content").evaluate(element => element.style.height = "300px");
+  await expect(box).toHaveCSS("mask-image", "none");
+  await box.evaluate(element => { element.style.overflowY = "hidden"; });
+  await page.evaluate(() => AelluxJs.mountManager.update(document));
+  await expect(box).toHaveCSS("mask-image", /linear-gradient/);
+});
 
 for (const forceLegacy of [false, true]) {
   test(`one content child keeps the fade on the stationary container (${forceLegacy})`, async ({ page }) => {
@@ -125,6 +149,8 @@ for (const forceLegacy of [false, true]) {
       entry.context?.attribute === "data-ae-scrollbox-fade").map(entry => entry.code))).toContain(2026);
     await box.evaluate(element => element.removeAttribute("data-ae-scrollbox-fade"));
     await page.evaluate(() => document.documentElement.setAttribute("data-ae-reduced-motion", "reduced"));
+    await expect(box).toHaveCSS("mask-image", "none");
+    await box.evaluate(element => element.setAttribute("data-ae-scrollbox-fade", ""));
     await expect(box).toHaveCSS("mask-image", /linear-gradient/);
     await box.evaluate(element => { element.style.width = "400px"; element.style.height = "400px"; });
     await expect(box).toHaveCSS("mask-image", "none");
@@ -276,7 +302,7 @@ for (const mode of ["low-fps", "reduced-motion"]) {
 
 test("a direct child Scrollbox retains ownership of its own fade", async ({ page }) => {
   const box = await start(page, boxHTML("", '<div id="inner" data-ae-scrollbox data-ae-scrollbar="none" style="width:320px;height:300px">' +
-    '<div id="inner-content" style="width:600px;height:500px;background:black"></div></div>'));
+    '<div id="inner-content" style="width:600px;height:500px;background:black"></div></div>').replace('id="inner" data-ae-scrollbox', 'id="inner" data-ae-scrollbox-fade="true" data-ae-scrollbox'));
   const inner = page.locator("#inner"), innerContent = page.locator("#inner-content");
   await expect(box).toHaveCSS("mask-image", /linear-gradient/);
   await expect(inner).toHaveCSS("mask-image", /linear-gradient/);

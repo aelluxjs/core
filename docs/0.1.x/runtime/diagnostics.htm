@@ -824,6 +824,10 @@ $ae.init({ environment: &quot;production&quot;, verboseLevel: &quot;warn&quot; }
 <td><code>2033</code></td>
 <td><span class="large">Behaviors replace the same CSS resource on one element. The context identifies the <code>property</code> and its <code>writers</code>.</span></td>
 </tr>
+<tr>
+<td><code>2034</code></td>
+<td><span class="large">A two-axis Scrollbox has explicitly enabled fade and custom scrollbars inside the mask. Add a surrounding wrapper and set <code>data-ae-scrollbar-parent=&quot;wrapper&quot;</code> on Scrollbox to keep its bars outside the fade.</span></td>
+</tr>
 </tbody></table>
 <p><code>WARN_RESOURCE_CONFLICT</code> (<code>2033</code>) checks persistent transform writers without a separate ownership registry. Development mounts and explicit updates diagnose Present transform on a valid Elastic wrapper. When CSS Motion captures an actual replacing transform effect, it compares that effect with Anchor, Elastic and Present on the effect&#39;s target. Feedback passes its resolved <code>data-ae-transform-target</code> destination, so animating a child remains valid. This works with controlled and native CSS Motion when Web Animations exposes keyframes. Opacity-only effects, additive composition, pseudo-elements and separate targets are excluded. Reduced motion with no active effect emits no motion conflict. Browsers without inspectable effects skip this runtime check; production skips all resource checks.</p>
 <p>The checks report incompatible composition and preserve the requested animation. Move visual animation onto a child to keep positioning and elastic transforms independent. They do not automatically merge transforms, inspect arbitrary application animations outside CSS Motion, or infer a conflict merely from two Extension declarations.</p>

@@ -439,6 +439,13 @@ test("homepage embeds four themed demos and displays the exact runnable source",
     await file.locator(":scope > .source-toggle").click();
     await expect(file.getByRole("button", { name: `Copy ${path}`, exact: true })).toBeEnabled();
     await expect(file.locator("code")).toHaveAttribute("data-highlighted", "yes");
+    await expect(file.locator("pre")).toHaveAttribute("data-ae-scrollbar", "horizontal vertical");
+    await expect(file.locator("pre")).toHaveAttribute("data-ae-scrollbar-parent", "wrapper");
+    await expect(file.locator(".code-wrapper > [data-ae-scrollbar-vertical]")).toHaveCount(1);
+    await expect(file.locator(".code-wrapper > [data-ae-scrollbar-horizontal]")).toHaveCount(1);
+    await expect(file.locator("pre")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    await expect(file.locator("code")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    await expect(file.locator(".code-wrapper")).toHaveCSS("border-top-width", "1px");
     expect(await file.locator('code [class^="hljs-"]').count()).toBeGreaterThan(0);
     expect(await file.locator("code").textContent()).toBe(await (await page.request.get(`/home/${path}`)).text());
   }

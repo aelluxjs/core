@@ -153,7 +153,8 @@
                 class="d-flex justify-content-between align-items-center border-bottom px-4 py-3 small text-body-secondary">
                 <span class="font-monospace">index.html</span><span class="text-warning-emphasis">HTML → UX</span>
               </div>
-              <pre class="p-4 mb-0"><code class="language-xml">&lt;!-- Describe the behavior. --&gt;
+              <div class="code-wrapper bg-body-tertiary">
+                <pre class="p-4 mb-0"><code class="language-xml">&lt;!-- Describe the behavior. --&gt;
 &lt;button
   data-ae-trigger="toggle"
   data-ae-target="#panel"&gt;
@@ -165,6 +166,7 @@
   hidden&gt;
   Hello, aellux.js.
 &lt;/div&gt;</code></pre>
+              </div>
               <p class="border-top px-4 py-3 mb-0 small text-body-secondary">With the Full runtime initialized. <a
                   class="text-warning-emphasis" href="../docs/0.1.x/core-extensions/present.htm">Meet Present <span
                     aria-hidden="true">↗</span></a></p>
@@ -245,10 +247,12 @@
                 <h3 class="h5 mb-0">Browser</h3><button class="btn btn-sm btn-outline-secondary" type="button"
                   data-copy="browser-code" aria-label="Copy browser setup">Copy</button>
               </div>
-              <pre class="code-block bg-body-tertiary border rounded-2 p-3"><code id="browser-code" class="language-xml">&lt;script src="../dist/aellux.min.js"&gt;&lt;/script&gt;
+              <div class="code-wrapper bg-body-tertiary border rounded-2 mb-3">
+                <pre class="code-block p-3 mb-0"><code id="browser-code" class="language-xml">&lt;script src="../dist/aellux.min.js"&gt;&lt;/script&gt;
     &lt;script&gt;
       $ae.init({ mode: "full" });
     &lt;/script&gt;</code></pre>
+              </div>
               <p class="small text-body-secondary mb-0">This path uses this repository’s public distribution. Keep the
                 generated <code>dist/</code> files together when deploying: the boot script loads the matching runtime,
                 styles and Extensions.</p>
@@ -260,13 +264,16 @@
                 <h3 class="h5 mb-0">npm</h3><button class="btn btn-sm btn-outline-secondary" type="button"
                   data-copy="npm-code" aria-label="Copy npm install command">Copy</button>
               </div>
-              <pre
-                class="code-block bg-body-tertiary border rounded-2 p-3"><code id="npm-code" class="language-bash">npm install @aelluxjs/core</code></pre>
+              <div class="code-wrapper bg-body-tertiary border rounded-2 mb-3">
+                <pre class="code-block p-3 mb-0"><code id="npm-code" class="language-bash">npm install @aelluxjs/core</code></pre>
+              </div>
               <p class="small text-body-secondary">Serve the package’s <code>dist/</code> directory as public assets and
                 use the browser boot script to initialize the runtime. Modules can also import the shared API:</p>
-              <pre class="code-block bg-body-tertiary border rounded-2 p-3 mb-0"><code class="language-javascript">import AelluxJs from "@aelluxjs/core";
+              <div class="code-wrapper bg-body-tertiary border rounded-2">
+                <pre class="code-block p-3 mb-0"><code class="language-javascript">import AelluxJs from "@aelluxjs/core";
 
     AelluxJs.attr("preference");</code></pre>
+              </div>
             </div>
           </article>
         </div>

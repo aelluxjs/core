@@ -24,6 +24,25 @@ async function diagnostics(page) {
   })));
 }
 
+for (const environment of ["development", "production"]) test(`two-axis fade with internal custom bars suggests wrapper placement (${environment})`, async ({ page }) => {
+  const box = (id, attributes = "", size = "300px", style = "") => `<div id="${id}" data-ae-scrollbox data-ae-scrollbar="v h"
+    ${attributes} style="width:100px;height:100px;overflow:auto;${style}"><div style="width:${size};height:300px"></div></div>`;
+  await start(page, box("warn", 'data-ae-scrollbox-fade="true"') +
+    box("empty", 'data-ae-scrollbox-fade') + box("auto") +
+    box("off", 'data-ae-scrollbox-fade="false"') +
+    box("single", 'data-ae-scrollbox-fade="true"', "50px") +
+    `<div>${box("wrapper", 'data-ae-scrollbox-fade="true" data-ae-scrollbar-parent="wrapper"')}</div>` +
+    box("zero", 'data-ae-scrollbox-fade="true"', "300px", "--ae-scrollbox-fade-size:0px") +
+    box("native", 'data-ae-scrollbox-fade="true"').replace('data-ae-scrollbar="v h"', '') +
+    box("none", 'data-ae-scrollbox-fade="true"').replace('data-ae-scrollbar="v h"', 'data-ae-scrollbar="none"'),
+    { environment });
+  const warnings = (await diagnostics(page)).filter(entry => entry.code === 2034);
+  expect(warnings.map(entry => entry.element).sort()).toEqual(environment === "development" ? ["empty", "warn"] : []);
+  if (warnings.length) expect(warnings[0].suggestion).toContain('data-ae-scrollbar-parent="wrapper"');
+  await page.evaluate(() => AelluxJs.mountManager.update(document));
+  expect((await diagnostics(page)).filter(entry => entry.code === 2034)).toHaveLength(warnings.length);
+});
+
 for (const forceLegacy of [false, true]) test(`initial HTML source diagnoses duplicate attributes once (${forceLegacy ? "Legacy" : "Modern"})`, async ({ page }) => {
   let requests = 0;
   await page.route("**/duplicate-source.html", route => {

@@ -24,7 +24,8 @@ export const bundleBudget = Object.freeze([
   // Development source inspection and CSS resource conflict diagnostics.
   // Also covers CSS Motion subtree capture; fade costs: core-extensions/overflow-marquee.md.
   // Measured deltas and the superseded limits: runtime/diagnostics.md.
-  { file: "aellux.orchestrator.min.js", maxRawBytes: 64.5 * 1024, maxGzipBytes: 21.5 * 1024 },
+  // Two-axis fade/scrollbar composition diagnostic; costs: core-extensions/scrollbox.md.
+  { file: "aellux.orchestrator.min.js", maxRawBytes: 65 * 1024, maxGzipBytes: 21.5 * 1024 },
   // Dialog-specific compatibility now ships separately; costs: runtime/performance.md.
   { file: "aellux.orchestrator.legacy.min.js", maxRawBytes: 331 * 1024, maxGzipBytes: 105 * 1024 },
   // Full uses one external stylesheet shared by all Core Extensions.
@@ -39,8 +40,9 @@ export const bundleBudget = Object.freeze([
   // Present rendered-state handoff; measured changes: core-extensions/present.md.
   // Adaptive CSS publication for Scrollbox/Snap; measured deltas: runtime/performance.md.
   // Anchor declarative scroll-into-view; measured deltas: core-extensions/anchor.md.
-  { file: "aellux.full.min.js", maxRawBytes: 196.5 * 1024, maxGzipBytes: 60.75 * 1024 },
-  { file: "aellux.full.legacy.min.js", maxRawBytes: 515 * 1024, maxGzipBytes: 152.25 * 1024 },
+  // Sibling scrollbar placement and automatic fade policy; costs: core-extensions/scrollbox.md.
+  { file: "aellux.full.min.js", maxRawBytes: 200 * 1024, maxGzipBytes: 62 * 1024 },
+  { file: "aellux.full.legacy.min.js", maxRawBytes: 517 * 1024, maxGzipBytes: 153.5 * 1024 },
   { file: "aellux.full.min.css", maxRawBytes: 122 * 1024, maxGzipBytes: 12 * 1024 },
   { file: "aellux.ext.adaptive.min.css", maxRawBytes: 121 * 1024, maxGzipBytes: 11 * 1024 },
   { file: "aellux.ext.adaptive.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
@@ -83,7 +85,8 @@ export const bundleBudget = Object.freeze([
   { file: "aellux.ext.scrollbox.min.css", maxRawBytes: 6.5 * 1024, maxGzipBytes: 1.5 * 1024 },
   // Child-target fade geometry/restoration; measured costs: core-extensions/scrollbox.md.
   // Layout transition tracking: +477 raw / +176 gzip bytes; costs: core-extensions/scrollbox.md.
-  { file: "aellux.ext.scrollbox.legacy.min.js", maxRawBytes: 47.5 * 1024, maxGzipBytes: 15 * 1024 },
+  // Sibling bars, shared parent restoration and wheel ownership; measured in core-extensions/scrollbox.md.
+  { file: "aellux.ext.scrollbox.legacy.min.js", maxRawBytes: 49.25 * 1024, maxGzipBytes: 15.5 * 1024 },
   { file: "aellux.ext.scrollbox-snap.min.js", maxRawBytes: 11 * 1024, maxGzipBytes: 4.25 * 1024 },
   { file: "aellux.ext.scrollbox-snap.legacy.min.js", maxRawBytes: 15 * 1024, maxGzipBytes: 6 * 1024 },
   { file: "aellux.ext.state-navigation.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },

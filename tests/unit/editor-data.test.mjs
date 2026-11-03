@@ -41,6 +41,7 @@ test("open attribute grammars remain open while closed enums preserve string val
   assert.equal(find(attributes, "data-ae-overflow-marquee").value.type, "string");
   assert.equal(find(attributes, "data-ae-overflow-marquee-fade").value.type, '\"\" | \"true\" | \"false\"');
   assert.equal(find(attributes, "data-ae-scrollbox-fade").value.type, '\"\" | \"true\" | \"false\"');
+  assert.equal(find(attributes, "data-ae-scrollbar-parent").value.type, '\"scrollbox\" | \"wrapper\"');
   assert.match(find(catalog.attributes, "data-ae-anchor-target").description, /multiple Anchors per group/);
 });
 
@@ -59,6 +60,7 @@ test("metadata agrees with runtime defaults and distinguishes outputs from priva
   assert.equal(find(catalog.cssProperties, "--ae-scrollbar-size").default, "8px");
   assert.equal(find(catalog.cssProperties, "--ae-overflow-marquee-fade-size").default, "16px");
   assert.equal(find(catalog.cssProperties, "--ae-scrollbox-fade-size").default, "16px");
+  assert.equal(find(catalog.attributes, "data-ae-scrollbar-parent").default, "scrollbox");
   assert.equal(find(catalog.cssProperties, "--ae-pop-duration").default, "250ms");
   assert.equal(find(catalog.cssProperties, "--ae-snap-focus").role, "output");
   assert.equal(find(catalog.cssProperties, "--ae-snap-viewport"), undefined);
