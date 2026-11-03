@@ -72,7 +72,7 @@ export function validateMotionResourceConflicts(api, element, animations, extens
 // the responsibility of each Extension. No observers or production DOM scans.
 const attributesByExtension = {
   present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-click",
-  anchor: "anchor anchor-target anchor-match",
+  anchor: "anchor anchor-target anchor-match anchor-scroll-into-view",
   "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
   scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
   "scrollbox-snap": "scrollbox-snap snap-item",

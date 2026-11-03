@@ -2347,6 +2347,19 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
     },
     {
+      "name": "data-ae-anchor-scroll-into-view",
+      "extension": "anchor",
+      "description": "Scroll the Anchor itself into view on initial visibility, reappearance or effective target change. Two tokens select block and inline alignment: start, center, end or nearest. Smooth scrolling waits for native target switching; reduced motion uses instant scrolling. Empty, missing and invalid values disable scrolling.",
+      "syntax": "alignment-pair",
+      "examples": [
+        "center center",
+        "nearest nearest",
+        "start nearest"
+      ],
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
+    },
+    {
       "name": "data-ae-anchor-target",
       "extension": "anchor",
       "description": "Target ID or CSS selector. A Present Group target resolves to its accepted selected member, allowing multiple Anchors per group. Empty uses offsetParent. Effective target and Anchor must share a positioning reference.",

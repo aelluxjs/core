@@ -27,7 +27,6 @@
         const anchor = navigation.querySelector("[data-ae-anchor]");
         if (anchor.dataset.aeAnchorTarget === link.id) return;
         anchor.dataset.aeAnchorTarget = link.id;
-        link.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
       }
     });
     $ae.on("Ready", () => {
@@ -71,6 +70,7 @@
         class="no-scrollbar position-relative d-inline-flex align-items-center justify-content-start gap-1 ps-2"
         aria-label="Main navigation">
         <a data-ae-anchor="top-left:top-left" data-ae-anchor-target="item1" data-ae-anchor-match="width height"
+          data-ae-anchor-scroll-into-view="center center"
           class="bg-warning rounded-2 z-0 d-inline-block" aria-hidden="true"
           style="pointer-events: none; --ae-anchor-switch-duration: 250ms; --ae-anchor-switch-ease: cubic-bezier(0.34, 1.56, 0.64, 1);"></a>
         <a id="item1" draggable="false" class="fw-normal btn bg-transparent text-body position-relative z-1 ms-2"

@@ -12,6 +12,8 @@
  * Inputs and activation: mounts `[data-ae-anchor]` and resolves an optional
  * `data-ae-anchor-target`; a Present Group target resolves to its selected member.
  * Without an explicit target, the positioning parent is the target.
+ * `data-ae-anchor-scroll-into-view="block inline"` optionally scrolls the Anchor
+ * itself on visibility or effective target changes, after native switching.
  * `data-ae-maxfps` sets an optional maximum update rate.
  * Scroll, resize, size and intersection changes, and bubbling `AelluxJsLayout`
  * events schedule placement updates at the configured rate. A Layout event with
@@ -47,6 +49,7 @@
   const presentAttribute = AelluxJs.attr("present");
   const targetAttribute = AelluxJs.attr("anchor-target");
   const matchAttribute = AelluxJs.attr("anchor-match");
+  const scrollIntoViewAttribute = AelluxJs.attr("anchor-scroll-into-view");
   const groupAttribute = AelluxJs.attr("present-group");
   const layoutEvent = AelluxJs.eventName("Layout");
   const anchoredClass = AelluxJs.className("anchored");
@@ -139,6 +142,7 @@
       target: null, resolvedTarget: null, reference: null,
       group: null, lastPlacement: null, switchTimer: null,
       interruptSwitch: false, scrollRevision: 0,
+      scrollVisible: false, scrollPending: false, ownClass: null, ownStyle: null,
       layoutId: nextLayoutId++, styleLayoutId: nextLayoutId++,
       layoutUntil: 0, layoutSingle: false,
       layoutFinalPending: false,
@@ -160,7 +164,7 @@
       if (typeof root.MutationObserver === "function") {
         mutations = new root.MutationObserver(onMutations);
         mutations.observe(document, { subtree: true, childList: true, attributes: true,
-          attributeFilter: [attribute, targetAttribute, matchAttribute, groupAttribute,
+          attributeFilter: [attribute, targetAttribute, matchAttribute, scrollIntoViewAttribute, groupAttribute,
             AelluxJs.attr("reduced-motion"), "id", "hidden", "class", "style"] });
       }
     }
@@ -224,7 +228,9 @@
         // Present can mount after Anchor's first read, revealing a target by
         // class alone. Ignore our own visual writes to avoid observer loops.
         if (visual) {
-          if (node !== element && (state.resolvedTarget && node.contains(state.resolvedTarget) ||
+          if (node === element && element.hasAttribute(scrollIntoViewAttribute) &&
+              (element.getAttribute("class") !== state.ownClass || element.getAttribute("style") !== state.ownStyle)) affected.add(element);
+          if (node !== element && (node.contains(element) || state.resolvedTarget && node.contains(state.resolvedTarget) ||
               state.group && node.contains(state.group) || targetChanged(element, state))) affected.add(element);
           continue;
         }
@@ -453,6 +459,7 @@
       observe(state, element, placement.target, placement.reference);
       const previous = state.lastPlacement;
       const switching = previous && previous.target !== placement.target;
+      if (!previous || switching) state.scrollPending = true;
       const moved = !previous || previous.signature !== placement.signature;
       // Keep scroll notifications with the measured placement across the
       // asynchronous read/write phases. Unchanged destinations keep their timer.
@@ -463,6 +470,7 @@
       } else if (moved || state.interruptSwitch || !placement.duration) stopSwitch(element, state);
       state.interruptSwitch = false;
       writePlacement(element, placement);
+      rememberVisual(element, state);
       state.lastUpdateAt = now();
       state.lastPlacement = placement;
       applied = true;
@@ -471,6 +479,30 @@
     // flight. Complete the latest revision so mountManager.update() does not
     // resolve with stale anchor variables (notably in WebKit).
     if (!applied && anchors.get(element) === state) return updateAnchor(element, ensureLatest);
+    if (!applied || !element.hasAttribute(scrollIntoViewAttribute)) return;
+    // Read after placement so our initial hidden rule and the old transform do
+    // not decide visibility or the scroll destination. Ordinary scroll updates
+    // never re-arm this request. Native target switching must finish first.
+    const visible = await AelluxJs.waitLayout.read(state.styleLayoutId, () =>
+      current() && !isInvisible(element));
+    if (!current()) return retry();
+    if (visible && !state.scrollVisible) state.scrollPending = true;
+    state.scrollVisible = visible;
+    if (!visible || !state.scrollPending || state.switchTimer !== null) return;
+    await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
+      // A DOM retarget can precede the observer's next scheduled revision.
+      if (!current() || effectiveTarget(element, state) !== placement.target) return;
+      const tokens = (element.getAttribute(scrollIntoViewAttribute) || "").trim().split(/\s+/);
+      state.scrollPending = false;
+      if (tokens.length !== 2 || tokens.some(token => !["start", "center", "end", "nearest"].includes(token))) return;
+      element.scrollIntoView({ block: tokens[0], inline: tokens[1],
+        behavior: AelluxJs.currentPreference("reduced-motion") === "reduced" ? "instant" : "smooth" });
+    });
+  }
+
+  function rememberVisual(element, state) {
+    state.ownClass = element.getAttribute("class");
+    state.ownStyle = element.getAttribute("style");
   }
 
   function readPlacement(element, target, candidates, measure) {
@@ -628,12 +660,16 @@
     if (state.active && memory) memory.restore();
     state.active = false;
     state.lastPlacement = null;
+    state.scrollVisible = false;
+    state.scrollPending = false;
+    rememberVisual(element, state);
   }
 
   function stopSwitch(element, state) {
     if (state.switchTimer !== null) root.clearTimeout(state.switchTimer);
     state.switchTimer = null;
     element.classList.remove(switchingClass);
+    rememberVisual(element, state);
   }
 
   function setValue(style, name, value) {

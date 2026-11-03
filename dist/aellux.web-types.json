@@ -34,6 +34,15 @@
           }
         },
         {
+          "name": "data-ae-anchor-scroll-into-view",
+          "description": "Scroll the Anchor itself into view on initial visibility, reappearance or effective target change. Two tokens select block and inline alignment: start, center, end or nearest. Smooth scrolling waits for native target switching; reduced motion uses instant scrolling. Empty, missing and invalid values disable scrolling.\n\nValue syntax: alignment-pair.\n\nExamples: `center center`, `nearest nearest`, `start nearest`.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm",
+          "value": {
+            "kind": "plain",
+            "type": "string"
+          }
+        },
+        {
           "name": "data-ae-anchor-target",
           "description": "Target ID or CSS selector. A Present Group target resolves to its accepted selected member, allowing multiple Anchors per group. Empty uses offsetParent. Effective target and Anchor must share a positioning reference.\n\nValue syntax: selector.\n\nDefault behavior: \"\".\n\nExamples: `menu-trigger`, `#menu-trigger`, `#views`.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm",

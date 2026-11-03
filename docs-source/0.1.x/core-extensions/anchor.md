@@ -57,6 +57,20 @@ Anchor uses computed CSS to decide whether its target is visible. A `hidden` att
 
 Computed `visibility:hidden` or `collapse` on the target deactivates the Anchor. A descendant may restore inherited visibility with `visibility:visible`. Effective `display:none`, `content-visibility:hidden` or zero opacity on the target or any ancestor also deactivates the Anchor; descendants cannot override an ancestor's zero opacity or absent display. The same checks apply to a selected Present Group member, including during transitions. These checks concern CSS visibility rather than viewport intersection or occlusion by another element.
 
+## Scroll Into View
+
+Set `data-ae-anchor-scroll-into-view="center center"` to scroll the anchored element itself into view when it first becomes visible, reappears after being hidden, or changes its effective target (including a Present Group selection):
+
+```html
+<div data-ae-anchor="top-left:top-left" data-ae-anchor-target="selected-item"
+     data-ae-anchor-match="width height"
+     data-ae-anchor-scroll-into-view="center center"></div>
+```
+
+The two whitespace-separated values map to native `scrollIntoView({ block, inline })`, in that order. Each accepts `start`, `center`, `end` or `nearest`. Missing, empty or invalid values disable this behavior. Attribute changes are observed automatically and affect subsequent visibility or target changes.
+
+Anchor applies placement before scrolling and waits for its native target-switch animation to finish. Scrolling is smooth, or instant when the current reduced-motion preference is `reduced`. Visibility means effective CSS visibility, including the Anchor and its ancestors; being outside the viewport does not suppress the request. Ordinary tracking, resize and scroll events, equivalent target spellings and repeated placement updates do not request scrolling again. Native `scrollIntoView` can scroll multiple containing scroll areas, including the document, and honors CSS scroll margins and padding. This option does not move focus.
+
 ## Dimension Matching
 
 `data-ae-anchor-match="width"`, `"height"` or `"width height"` applies the target's corresponding dimensions through weak CSS. Without the attribute, Anchor retains its original sizing behavior. Empty values and unknown tokens report `WARN_ANCHOR_MATCH` (2022); recognized tokens still work.
@@ -154,6 +168,12 @@ The following historical measurements describe Delivery B, before CSS was moved 
 The compressed increases are 1,774 and 1,925 bytes respectively. No dependency or animation scheduler is added. The new weak rules ship with Anchor rather than enlarging the boot's weak stylesheet. Boot, Full and Present remain within their existing limits.
 
 The limits remain 15/6 KiB for Modern and 23/8 KiB for Legacy (raw/gzip), increased from 9/4 and 16/6 KiB respectively. The separate [Overflow Marquee](overflow-marquee.md#distribution-cost) distribution has its own measured limits; Anchor does not include that implementation.
+
+### Scroll Into View distribution cost
+
+The declarative Scroll Into View option adds visibility tracking, self-scroll requests and authoring attribute recognition without another dependency or permanent polling. Compared with the preceding build, minified Modern Anchor grows from 13,863 / 5,098 to 14,833 / 5,386 bytes (raw / gzip level 9); Legacy grows from 21,303 / 7,535 to 22,440 / 7,864 bytes. Both retain their existing Extension budgets.
+
+Full Modern grows from 199,901 / 61,728 to 200,895 / 61,998 bytes, and Full Legacy from 524,208 / 155,421 to 525,363 / 155,774 bytes. Full Modern budgets move from 195.5 / 60.5 to 196.5 / 60.75 KiB, and Full Legacy's gzip budget from 152 to 152.25 KiB (raw remains 515 KiB).
 
 ## Placement maps for dependent Extensions
 

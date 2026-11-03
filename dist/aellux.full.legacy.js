@@ -22573,7 +22573,7 @@
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       attributesByExtension = {
         present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-click",
-        anchor: "anchor anchor-target anchor-match",
+        anchor: "anchor anchor-target anchor-match anchor-scroll-into-view",
         "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
         scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
         "scrollbox-snap": "scrollbox-snap snap-item",
@@ -28349,6 +28349,7 @@
         var presentAttribute = AelluxJs2.attr("present");
         var targetAttribute = AelluxJs2.attr("anchor-target");
         var matchAttribute = AelluxJs2.attr("anchor-match");
+        var scrollIntoViewAttribute = AelluxJs2.attr("anchor-scroll-into-view");
         var groupAttribute = AelluxJs2.attr("present-group");
         var layoutEvent = AelluxJs2.eventName("Layout");
         var anchoredClass = AelluxJs2.className("anchored");
@@ -28510,6 +28511,10 @@
             switchTimer: null,
             interruptSwitch: false,
             scrollRevision: 0,
+            scrollVisible: false,
+            scrollPending: false,
+            ownClass: null,
+            ownStyle: null,
             layoutId: nextLayoutId++,
             styleLayoutId: nextLayoutId++,
             layoutUntil: 0,
@@ -28543,7 +28548,7 @@
                 subtree: true,
                 childList: true,
                 attributes: true,
-                attributeFilter: [attribute, targetAttribute, matchAttribute, groupAttribute, AelluxJs2.attr("reduced-motion"), "id", "hidden", "class", "style"]
+                attributeFilter: [attribute, targetAttribute, matchAttribute, scrollIntoViewAttribute, groupAttribute, AelluxJs2.attr("reduced-motion"), "id", "hidden", "class", "style"]
               });
             }
           }
@@ -28650,7 +28655,8 @@
                   var _state$reference;
                   var _step6$value = _slicedToArray7(_step6.value, 2), element = _step6$value[0], state = _step6$value[1];
                   if (visual) {
-                    if (node !== element && (state.resolvedTarget && node.contains(state.resolvedTarget) || state.group && node.contains(state.group) || targetChanged(element, state))) affected.add(element);
+                    if (node === element && element.hasAttribute(scrollIntoViewAttribute) && (element.getAttribute("class") !== state.ownClass || element.getAttribute("style") !== state.ownStyle)) affected.add(element);
+                    if (node !== element && (node.contains(element) || state.resolvedTarget && node.contains(state.resolvedTarget) || state.group && node.contains(state.group) || targetChanged(element, state))) affected.add(element);
                     continue;
                   }
                   if (node === element || node === document.documentElement || node.contains(element) || state.resolvedTarget && node.contains(state.resolvedTarget) || state.group && node.contains(state.group) || structural && (_state$reference = state.reference) !== null && _state$reference !== void 0 && _state$reference.contains(node) || targetChanged(element, state)) affected.add(element);
@@ -28839,7 +28845,7 @@
         }
         function _updateAnchor() {
           _updateAnchor = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee3(element) {
-            var ensureLatest, state, revision, current, retry, target, candidates, placement, applied, _args3 = arguments;
+            var ensureLatest, state, revision, current, retry, target, candidates, placement, applied, visible, _args3 = arguments;
             return _regenerator5().w(function(_context3) {
               while (1) switch (_context3.n) {
                 case 0:
@@ -29008,6 +29014,7 @@
                     observe(state, element, placement.target, placement.reference);
                     var previous = state.lastPlacement;
                     var switching = previous && previous.target !== placement.target;
+                    if (!previous || switching) state.scrollPending = true;
                     var moved = !previous || previous.signature !== placement.signature;
                     var scrollMoved = moved && state.switchTimer !== null && (previous === null || previous === void 0 ? void 0 : previous.scrollRevision) !== placement.scrollRevision;
                     if ((switching || scrollMoved) && placement.duration > 0 && !state.interruptSwitch) {
@@ -29015,6 +29022,7 @@
                     } else if (moved || state.interruptSwitch || !placement.duration) stopSwitch(element, state);
                     state.interruptSwitch = false;
                     writePlacement(element, placement);
+                    rememberVisual(element, state);
                     state.lastUpdateAt = now();
                     state.lastPlacement = placement;
                     applied = true;
@@ -29026,11 +29034,56 @@
                   }
                   return _context3.a(2, updateAnchor(element, ensureLatest));
                 case 26:
+                  if (!(!applied || !element.hasAttribute(scrollIntoViewAttribute))) {
+                    _context3.n = 27;
+                    break;
+                  }
+                  return _context3.a(2);
+                case 27:
+                  _context3.n = 28;
+                  return AelluxJs2.waitLayout.read(state.styleLayoutId, function() {
+                    return current() && !isInvisible(element);
+                  });
+                case 28:
+                  visible = _context3.v;
+                  if (current()) {
+                    _context3.n = 29;
+                    break;
+                  }
+                  return _context3.a(2, retry());
+                case 29:
+                  if (visible && !state.scrollVisible) state.scrollPending = true;
+                  state.scrollVisible = visible;
+                  if (!(!visible || !state.scrollPending || state.switchTimer !== null)) {
+                    _context3.n = 30;
+                    break;
+                  }
+                  return _context3.a(2);
+                case 30:
+                  _context3.n = 31;
+                  return AelluxJs2.waitLayout.update(state.styleLayoutId, function() {
+                    if (!current() || effectiveTarget(element, state) !== placement.target) return;
+                    var tokens = (element.getAttribute(scrollIntoViewAttribute) || "").trim().split(/\s+/);
+                    state.scrollPending = false;
+                    if (tokens.length !== 2 || tokens.some(function(token) {
+                      return !["start", "center", "end", "nearest"].includes(token);
+                    })) return;
+                    element.scrollIntoView({
+                      block: tokens[0],
+                      inline: tokens[1],
+                      behavior: AelluxJs2.currentPreference("reduced-motion") === "reduced" ? "instant" : "smooth"
+                    });
+                  });
+                case 31:
                   return _context3.a(2);
               }
             }, _callee3);
           }));
           return _updateAnchor.apply(this, arguments);
+        }
+        function rememberVisual(element, state) {
+          state.ownClass = element.getAttribute("class");
+          state.ownStyle = element.getAttribute("style");
         }
         function readPlacement(element, target, candidates, measure) {
           var _anchors$get2;
@@ -29223,11 +29276,15 @@
           if (state.active && memory) memory.restore();
           state.active = false;
           state.lastPlacement = null;
+          state.scrollVisible = false;
+          state.scrollPending = false;
+          rememberVisual(element, state);
         }
         function stopSwitch(element, state) {
           if (state.switchTimer !== null) root2.clearTimeout(state.switchTimer);
           state.switchTimer = null;
           element.classList.remove(switchingClass);
+          rememberVisual(element, state);
         }
         function setValue(style, name, value) {
           if (style.getPropertyValue(name) === value && !style.getPropertyPriority(name)) return;

@@ -349,6 +349,40 @@ test("homepage section Viewports select when the block top crosses the screen mi
   await expect(marker).toHaveAttribute("data-ae-anchor-target", "item1");
 });
 
+test("main navigation scrolls its Anchor into view on reveal and section changes", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.addInitScript(() => {
+    window.navigationScrollCalls = [];
+    const native = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = function (options) {
+      if (this.closest("#main-navigation")) navigationScrollCalls.push({
+        anchor: this.hasAttribute("data-ae-anchor"), options
+      });
+      return native.call(this, options);
+    };
+  });
+  await page.goto("/home/index.htm");
+  await expect.poll(() => page.evaluate(() => !!$ae.ext.viewport?.initialized)).toBe(true);
+  const marker = page.locator("#main-navigation [data-ae-anchor]");
+  await expect(marker).toHaveAttribute("data-ae-anchor-scroll-into-view", "center center");
+  expect(await page.evaluate(() => navigationScrollCalls)).toEqual([]);
+  for (const [id, target] of [["getting-started", "item2"], ["extensions", "item4"]]) {
+    const previous = await page.evaluate(() => navigationScrollCalls.length);
+    await page.locator(`#${id}`).evaluate(element => window.scrollTo({
+      top: scrollY + element.getBoundingClientRect().top - 20, behavior: "instant"
+    }));
+    await expect(marker).toHaveAttribute("data-ae-anchor-target", target);
+    await expect.poll(() => page.evaluate(() => navigationScrollCalls.length)).toBeGreaterThan(previous);
+    await expect.poll(() => marker.evaluate(element => {
+      const rect = element.getBoundingClientRect();
+      const nav = element.closest("nav").getBoundingClientRect();
+      return rect.left >= nav.left - 1 && rect.right <= nav.right + 1;
+    })).toBe(true);
+  }
+  expect(await page.evaluate(() => navigationScrollCalls.every(call => call.anchor &&
+    call.options.block === "center" && call.options.inline === "center"))).toBe(true);
+});
+
 test("homepage section Viewports work on a short viewport and link clicks wait for visibility to select", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 320 });
   await page.goto("/home/index.htm");

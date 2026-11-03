@@ -1335,6 +1335,7 @@
         const presentAttribute = AelluxJs2.attr("present");
         const targetAttribute = AelluxJs2.attr("anchor-target");
         const matchAttribute = AelluxJs2.attr("anchor-match");
+        const scrollIntoViewAttribute = AelluxJs2.attr("anchor-scroll-into-view");
         const groupAttribute = AelluxJs2.attr("present-group");
         const layoutEvent = AelluxJs2.eventName("Layout");
         const anchoredClass = AelluxJs2.className("anchored");
@@ -1440,6 +1441,10 @@
             switchTimer: null,
             interruptSwitch: false,
             scrollRevision: 0,
+            scrollVisible: false,
+            scrollPending: false,
+            ownClass: null,
+            ownStyle: null,
             layoutId: nextLayoutId++,
             styleLayoutId: nextLayoutId++,
             layoutUntil: 0,
@@ -1472,6 +1477,7 @@
                   attribute,
                   targetAttribute,
                   matchAttribute,
+                  scrollIntoViewAttribute,
                   groupAttribute,
                   AelluxJs2.attr("reduced-motion"),
                   "id",
@@ -1538,7 +1544,8 @@
             const visual = record.attributeName === "class" || record.attributeName === "style";
             for (const [element, state] of anchors) {
               if (visual) {
-                if (node !== element && (state.resolvedTarget && node.contains(state.resolvedTarget) || state.group && node.contains(state.group) || targetChanged(element, state))) affected.add(element);
+                if (node === element && element.hasAttribute(scrollIntoViewAttribute) && (element.getAttribute("class") !== state.ownClass || element.getAttribute("style") !== state.ownStyle)) affected.add(element);
+                if (node !== element && (node.contains(element) || state.resolvedTarget && node.contains(state.resolvedTarget) || state.group && node.contains(state.group) || targetChanged(element, state))) affected.add(element);
                 continue;
               }
               if (node === element || node === document.documentElement || node.contains(element) || state.resolvedTarget && node.contains(state.resolvedTarget) || state.group && node.contains(state.group) || structural && ((_a = state.reference) == null ? void 0 : _a.contains(node)) || targetChanged(element, state)) affected.add(element);
@@ -1755,6 +1762,7 @@
             observe(state, element, placement.target, placement.reference);
             const previous = state.lastPlacement;
             const switching = previous && previous.target !== placement.target;
+            if (!previous || switching) state.scrollPending = true;
             const moved = !previous || previous.signature !== placement.signature;
             const scrollMoved = moved && state.switchTimer !== null && (previous == null ? void 0 : previous.scrollRevision) !== placement.scrollRevision;
             if ((switching || scrollMoved) && placement.duration > 0 && !state.interruptSwitch) {
@@ -1762,11 +1770,33 @@
             } else if (moved || state.interruptSwitch || !placement.duration) stopSwitch(element, state);
             state.interruptSwitch = false;
             writePlacement(element, placement);
+            rememberVisual(element, state);
             state.lastUpdateAt = now();
             state.lastPlacement = placement;
             applied = true;
           });
           if (!applied && anchors.get(element) === state) return updateAnchor(element, ensureLatest);
+          if (!applied || !element.hasAttribute(scrollIntoViewAttribute)) return;
+          const visible = await AelluxJs2.waitLayout.read(state.styleLayoutId, () => current() && !isInvisible(element));
+          if (!current()) return retry();
+          if (visible && !state.scrollVisible) state.scrollPending = true;
+          state.scrollVisible = visible;
+          if (!visible || !state.scrollPending || state.switchTimer !== null) return;
+          await AelluxJs2.waitLayout.update(state.styleLayoutId, () => {
+            if (!current() || effectiveTarget(element, state) !== placement.target) return;
+            const tokens = (element.getAttribute(scrollIntoViewAttribute) || "").trim().split(/\s+/);
+            state.scrollPending = false;
+            if (tokens.length !== 2 || tokens.some((token) => !["start", "center", "end", "nearest"].includes(token))) return;
+            element.scrollIntoView({
+              block: tokens[0],
+              inline: tokens[1],
+              behavior: AelluxJs2.currentPreference("reduced-motion") === "reduced" ? "instant" : "smooth"
+            });
+          });
+        }
+        function rememberVisual(element, state) {
+          state.ownClass = element.getAttribute("class");
+          state.ownStyle = element.getAttribute("style");
         }
         function readPlacement(element, target, candidates, measure) {
           var _a;
@@ -1926,11 +1956,15 @@
           if (state.active && memory) memory.restore();
           state.active = false;
           state.lastPlacement = null;
+          state.scrollVisible = false;
+          state.scrollPending = false;
+          rememberVisual(element, state);
         }
         function stopSwitch(element, state) {
           if (state.switchTimer !== null) root2.clearTimeout(state.switchTimer);
           state.switchTimer = null;
           element.classList.remove(switchingClass);
+          rememberVisual(element, state);
         }
         function setValue(style, name, value) {
           if (style.getPropertyValue(name) === value && !style.getPropertyPriority(name)) return;
@@ -7483,7 +7517,7 @@
   }
   var attributesByExtension = {
     present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-click",
-    anchor: "anchor anchor-target anchor-match",
+    anchor: "anchor anchor-target anchor-match anchor-scroll-into-view",
     "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
     scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-vertical scrollbar-horizontal",
     "scrollbox-snap": "scrollbox-snap snap-item",

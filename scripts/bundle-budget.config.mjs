@@ -38,8 +38,9 @@ export const bundleBudget = Object.freeze([
   // Includes numeric Present Group capacity and rollback-safe reservations.
   // Present rendered-state handoff; measured changes: core-extensions/present.md.
   // Adaptive CSS publication for Scrollbox/Snap; measured deltas: runtime/performance.md.
-  { file: "aellux.full.min.js", maxRawBytes: 195.5 * 1024, maxGzipBytes: 60.5 * 1024 },
-  { file: "aellux.full.legacy.min.js", maxRawBytes: 515 * 1024, maxGzipBytes: 152 * 1024 },
+  // Anchor declarative scroll-into-view; measured deltas: core-extensions/anchor.md.
+  { file: "aellux.full.min.js", maxRawBytes: 196.5 * 1024, maxGzipBytes: 60.75 * 1024 },
+  { file: "aellux.full.legacy.min.js", maxRawBytes: 515 * 1024, maxGzipBytes: 152.25 * 1024 },
   { file: "aellux.full.min.css", maxRawBytes: 122 * 1024, maxGzipBytes: 12 * 1024 },
   { file: "aellux.ext.adaptive.min.css", maxRawBytes: 121 * 1024, maxGzipBytes: 11 * 1024 },
   { file: "aellux.ext.adaptive.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
