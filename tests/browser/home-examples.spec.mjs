@@ -12,9 +12,12 @@ test.beforeEach(async ({ page, context }) => {
   // Use the existing versioned Bootstrap fixture; the examples still load their public dist scripts.
   await context.route("https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css", route =>
     route.fulfill({ path: "tests/fixtures/bootstrap-5.3.8.min.css", contentType: "text/css" }));
-  // Behavior tests use system font fallbacks to stay independent of Google Fonts.
+  // Standalone examples use system fonts; the homepage brand loads Geist below.
   await context.route("https://fonts.googleapis.com/**", route =>
     route.fulfill({ body: "", contentType: "text/css" }));
+  // The brand SVGs import Geist directly; export tests use the real frozen font.
+  await context.route("https://fonts.gstatic.com/s/geist/**", route =>
+    route.fulfill({ path: "tests/fixtures/geist-v5/geist-latin.woff2", contentType: "font/woff2" }));
   await context.route("https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.12/**", route => {
     const file = new URL(route.request().url()).pathname.split("/").pop();
     return route.fulfill({ path: `tests/fixtures/highlightjs-11.12.0/${file}`,
@@ -51,11 +54,11 @@ test("brand SVGs own their styles, default to light and detect either theme attr
     return states;
   });
   expect(result).toEqual([
-    ["rgb(255, 193, 7)", "rgb(23, 25, 28)"],
-    ["rgb(255, 218, 106)", "rgb(248, 249, 250)"],
-    ["rgb(255, 193, 7)", "rgb(23, 25, 28)"],
-    ["rgb(255, 218, 106)", "rgb(248, 249, 250)"],
-    ["rgb(255, 193, 7)", "rgb(23, 25, 28)"]
+    ["rgb(255, 193, 7)", "rgb(33, 37, 41)"],
+    ["rgb(255, 193, 7)", "rgb(222, 226, 230)"],
+    ["rgb(255, 193, 7)", "rgb(33, 37, 41)"],
+    ["rgb(255, 193, 7)", "rgb(222, 226, 230)"],
+    ["rgb(255, 193, 7)", "rgb(33, 37, 41)"]
   ]);
 });
 
@@ -65,6 +68,21 @@ for (const theme of ["light", "dark"]) {
       await page.goto("/home/index.htm");
       await expect.poll(() => page.evaluate(() => !!$ae.ext.svgDownloader?.initialized)).toBe(true);
       await page.getByRole("button", { name: theme === "dark" ? "Dark" : "Light", exact: true }).click();
+      const wordColor = await page.evaluate(async () => {
+        await document.fonts.ready;
+        return getComputedStyle(document.querySelector(".hero-prism-text")).color;
+      });
+      await expect(page.locator(`#brand-${variant} .ae-brand-tile`)).toHaveCSS("fill",
+        await page.locator(".hero .brand-mark").evaluate(el => getComputedStyle(el).backgroundColor));
+      await expect(page.locator(`#brand-${variant} .ae-brand-glyph`)).toHaveCSS("fill",
+        await page.locator(".hero .brand-mark").evaluate(el => getComputedStyle(el).color));
+      await expect(page.locator(`#brand-${variant} .ae-brand-glyph`)).toHaveCSS("font-family", /Geist/);
+      await expect(page.locator(`#brand-${variant} .ae-brand-glyph`)).toHaveCSS("font-weight", "650");
+      if (variant === "logotype") {
+        await expect(page.locator("#brand-logotype .ae-brand-word")).toHaveCSS("fill", wordColor);
+        await expect(page.locator("#brand-logotype .ae-brand-word")).toHaveCSS("font-weight", "650");
+        await expect(page.locator("#brand-logotype .ae-brand-suffix")).toHaveCSS("font-weight", "400");
+      }
       const original = await page.locator(`#brand-${variant}`).evaluate(svg => svg.outerHTML);
       for (const format of ["svg", "png"]) {
         const pending = page.waitForEvent("download");
@@ -72,7 +90,7 @@ for (const theme of ["light", "dark"]) {
         const download = await pending;
         expect(download.suggestedFilename()).toBe(`aellux-${variant}.${format}`);
         const buffer = await readFile(await download.path());
-        const rendered = await page.evaluate(async ({ base64, format, theme }) => {
+        const rendered = await page.evaluate(async ({ base64, format, wordColor }) => {
           const blob = await (await fetch(`data:image/${format === "svg" ? "svg+xml" : "png"};base64,${base64}`)).blob();
           // Image loading has no host ancestors and must retain the selected colors.
           const url = URL.createObjectURL(blob);
@@ -84,38 +102,86 @@ for (const theme of ["light", "dark"]) {
             canvas.height = image.naturalHeight;
             const context = canvas.getContext("2d");
             context.drawImage(image, 0, 0);
-            const pixel = (x, y) => [...context.getImageData(x, y, 1, 1).data];
-            const pixels = context.getImageData(280, 0, Math.max(1, canvas.width - 280), canvas.height).data;
-            const expected = theme === "dark" ? [248, 249, 250] : [23, 25, 28];
+            const allPixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+            const expected = wordColor.match(/\d+/g).map(Number);
             let wordPixels = 0;
-            for (let i = 0; i < pixels.length; i += 4) {
-              if (pixels[i] === expected[0] && pixels[i + 1] === expected[1] && pixels[i + 2] === expected[2] && pixels[i + 3] === 255) wordPixels++;
+            const bounds = { left: canvas.width, top: canvas.height, right: 0, bottom: 0 };
+            for (let i = 0; i < allPixels.length; i += 4) {
+              if (!allPixels[i + 3]) continue;
+              const x = (i / 4) % canvas.width, y = Math.floor(i / 4 / canvas.width);
+              bounds.left = Math.min(bounds.left, x);
+              bounds.top = Math.min(bounds.top, y);
+              bounds.right = Math.max(bounds.right, x);
+              bounds.bottom = Math.max(bounds.bottom, y);
+              if (x > 340 && allPixels[i] === expected[0] && allPixels[i + 1] === expected[1] && allPixels[i + 2] === expected[2] && allPixels[i + 3] === 255) wordPixels++;
             }
-            return { width: canvas.width, height: canvas.height, tile: pixel(20, 20), corner: pixel(0, 0), wordPixels };
+            let fontDifference = 0;
+            if (format === "svg") {
+              const withoutFont = (await blob.text()).replace(/@font-face\s*\{[^}]*\}/g, "");
+              const fallback = new Image();
+              await new Promise((resolve, reject) => {
+                fallback.onload = resolve; fallback.onerror = reject;
+                fallback.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(withoutFont)}`;
+              });
+              context.clearRect(0, 0, canvas.width, canvas.height);
+              context.drawImage(fallback, 0, 0);
+              const fallbackPixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+              for (let i = 0; i < allPixels.length; i += 4) {
+                if (allPixels[i] !== fallbackPixels[i] || allPixels[i + 1] !== fallbackPixels[i + 1] ||
+                  allPixels[i + 2] !== fallbackPixels[i + 2] || allPixels[i + 3] !== fallbackPixels[i + 3]) fontDifference++;
+              }
+            }
+            const tileIndex = (84 * canvas.width + 84) * 4;
+            let pngDifference = 0;
+            if (format === "svg") window.brandSVGExportPixels = allPixels;
+            else {
+              const reference = window.brandSVGExportPixels;
+              for (let i = 0; i < allPixels.length; i += 4) {
+                pngDifference = Math.max(pngDifference, Math.abs(allPixels[i + 3] - reference[i + 3]));
+                for (let channel = 0; channel < 3; channel++) {
+                  // Compare premultiplied color: PNG round trips may round the
+                  // RGB of translucent edge pixels, especially in WebKit.
+                  pngDifference = Math.max(pngDifference,
+                    Math.abs(allPixels[i + channel] * allPixels[i + 3] / 255 - reference[i + channel] * reference[i + 3] / 255));
+                }
+              }
+            }
+            return { width: canvas.width, height: canvas.height, tile: [...allPixels.slice(tileIndex, tileIndex + 4)],
+              corner: [...allPixels.slice(0, 4)], bounds, wordPixels, fontDifference, pngDifference };
           } finally { URL.revokeObjectURL(url); }
-        }, { base64: buffer.toString("base64"), format, theme });
-        expect(rendered.width).toBe(variant === "symbol" ? 256 : 1024);
-        expect(rendered.height).toBe(256);
-        expect(rendered.tile).toEqual(theme === "dark" ? [255, 218, 106, 255] : [255, 193, 7, 255]);
+        }, { base64: buffer.toString("base64"), format, wordColor });
+        expect(rendered.width).toBe(variant === "symbol" ? 384 : 1152);
+        expect(rendered.height).toBe(384);
+        expect(rendered.tile).toEqual([255, 193, 7, 255]);
         expect(rendered.corner[3]).toBe(0);
+        expect(rendered.bounds.left).toBe(64);
+        expect(rendered.bounds.top).toBe(64);
+        expect(rendered.bounds.right).toBeLessThanOrEqual(rendered.width - 65);
+        expect(rendered.bounds.bottom).toBe(319);
         if (variant === "logotype") expect(rendered.wordPixels).toBeGreaterThan(1000);
         if (format === "svg") {
+          expect(buffer.toString("utf8")).toContain("@font-face");
+          expect(buffer.toString("utf8")).toContain("data:font/woff2;base64,");
+          expect(buffer.toString("utf8")).not.toContain("https://fonts.");
+          expect(rendered.fontDifference).toBeGreaterThan(100);
           const frozenColors = await page.evaluate(async svg => {
             const frame = document.createElement("iframe");
             frame.srcdoc = `<html data-bs-theme="dark" data-ae-color-scheme="dark"><body>${svg}</body></html>`;
             const loaded = new Promise(resolve => { frame.onload = resolve; });
             document.body.append(frame);
             await loaded;
-            const tile = frame.contentDocument.querySelector(".ae-brand-tile");
-            const colors = [frame.contentWindow.getComputedStyle(tile).fill];
+            const lettering = frame.contentDocument.querySelector(".ae-brand-word, .ae-brand-glyph:last-child");
+            const colors = [frame.contentWindow.getComputedStyle(lettering).fill];
             frame.contentDocument.documentElement.setAttribute("data-bs-theme", "light");
             frame.contentDocument.documentElement.setAttribute("data-ae-color-scheme", "light");
-            colors.push(frame.contentWindow.getComputedStyle(tile).fill);
+            colors.push(frame.contentWindow.getComputedStyle(lettering).fill);
             frame.remove();
             return colors;
           }, buffer.toString("utf8"));
-          const expected = theme === "dark" ? "rgb(255, 218, 106)" : "rgb(255, 193, 7)";
+          const expected = variant === "logotype" ? wordColor : "rgb(33, 37, 41)";
           expect(frozenColors).toEqual([expected, expected]);
+        } else {
+          expect(rendered.pngDifference).toBeLessThanOrEqual(2);
         }
       }
       expect(await page.locator(`#brand-${variant}`).evaluate(svg => svg.outerHTML)).toBe(original);

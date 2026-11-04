@@ -841,23 +841,34 @@
       <div class="container">
         <p class="eyebrow text-body-secondary">06 <span class="opacity-50" aria-hidden="true">▪</span> Brand assets</p>
         <h2 id="brand-assets-title" class="section-title">Take aellux.js with you.</h2>
-        <p class="text-body-secondary mb-5">Download the symbol or the symbol with logotype as SVG or PNG, with a
-          transparent background. Both formats keep the colors of the current theme.</p>
+        <p class="text-body-secondary">The æ symbol pairs Bootstrap warning yellow with dark lettering, just like
+          the mark above. The logotype uses Geist from Google Fonts: a 650-weight name and a lighter, 400-weight
+          <span class="text-nowrap">.js</span> suffix. Its text follows the same light or dark color as the page.</p>
+        <p class="text-body-secondary">Keep clear space of at least one quarter of the symbol’s width around the
+          brand. Both variants include this transparent margin for composition. The SVGs default to light and adapt
+          automatically to the Bootstrap or AelluxJS dark theme.</p>
+        <p class="text-body-secondary mb-5">Download the symbol or the symbol with logotype as SVG or PNG.
+          Exports preserve the current colors, Geist typography and transparent clear space; the SVG includes its font.</p>
         <div class="row g-4">
           <article class="col-md-5">
             <div class="border rounded-3 p-4 h-100">
               <h3 class="h5">Symbol</h3>
               <div class="d-flex align-items-center justify-content-center py-4">
-                <svg id="brand-symbol" class="mw-100" xmlns="http://www.w3.org/2000/svg" width="256" height="256"
-                  viewBox="0 0 128 128" role="img" aria-label="AelluxJS symbol">
+                <svg id="brand-symbol" class="mw-100" xmlns="http://www.w3.org/2000/svg" width="384" height="384"
+                  viewBox="-32 -32 192 192" role="img" aria-label="AelluxJS symbol">
                   <style>
-                    #brand-symbol .ae-brand-tile { fill: #ffc107; }
-                    #brand-symbol .ae-brand-glyph { fill: #17191c; font: 600 76px Arial, sans-serif; text-anchor: middle; }
-                    [data-bs-theme="dark"] #brand-symbol .ae-brand-tile,
-                    [data-ae-color-scheme="dark"] #brand-symbol .ae-brand-tile { fill: #ffda6a; }
+                    @font-face {
+                      font-family: "Geist";
+                      font-style: normal;
+                      font-weight: 400 700;
+                      font-display: swap;
+                      src: url("https://fonts.gstatic.com/s/geist/v5/gyByhwUxId8gMEwcGFU.woff2") format("woff2");
+                    }
+                    #brand-symbol .ae-brand-tile { fill: var(--bs-warning, #ffc107); }
+                    #brand-symbol .ae-brand-glyph { fill: var(--bs-dark, #212529); font: 650 64px "Geist", sans-serif; text-anchor: middle; }
                   </style>
                   <rect class="ae-brand-tile" width="128" height="128" rx="4" />
-                  <text class="ae-brand-glyph" x="64" y="87">æ</text>
+                  <text class="ae-brand-glyph" x="64" y="84">æ</text>
                 </svg>
               </div>
               <div class="d-flex gap-2 flex-wrap">
@@ -873,20 +884,25 @@
             <div class="border rounded-3 p-4 h-100">
               <h3 class="h5">Symbol with logotype</h3>
               <div class="d-flex align-items-center justify-content-center py-4">
-                <svg id="brand-logotype" class="mw-100" xmlns="http://www.w3.org/2000/svg" width="1024" height="256"
-                  viewBox="0 0 512 128" role="img" aria-label="AelluxJS symbol with logotype">
+                <svg id="brand-logotype" class="mw-100" xmlns="http://www.w3.org/2000/svg" width="1152" height="384"
+                  viewBox="-32 -32 576 192" role="img" aria-label="AelluxJS symbol with logotype">
                   <style>
-                    #brand-logotype .ae-brand-tile { fill: #ffc107; }
-                    #brand-logotype .ae-brand-glyph { fill: #17191c; font: 600 76px Arial, sans-serif; text-anchor: middle; }
-                    #brand-logotype .ae-brand-word { fill: #17191c; font: 600 80px Arial, sans-serif; letter-spacing: -4px; }
+                    @font-face {
+                      font-family: "Geist";
+                      font-style: normal;
+                      font-weight: 400 700;
+                      font-display: swap;
+                      src: url("https://fonts.gstatic.com/s/geist/v5/gyByhwUxId8gMEwcGFU.woff2") format("woff2");
+                    }
+                    #brand-logotype .ae-brand-tile { fill: var(--bs-warning, #ffc107); }
+                    #brand-logotype .ae-brand-glyph { fill: var(--bs-dark, #212529); font: 650 64px "Geist", sans-serif; text-anchor: middle; }
+                    #brand-logotype .ae-brand-word { fill: var(--bs-body-color, #212529); font: 650 80px "Geist", sans-serif; letter-spacing: -4px; }
                     #brand-logotype .ae-brand-suffix { font-weight: 400; }
-                    [data-bs-theme="dark"] #brand-logotype .ae-brand-tile,
-                    [data-ae-color-scheme="dark"] #brand-logotype .ae-brand-tile { fill: #ffda6a; }
                     [data-bs-theme="dark"] #brand-logotype .ae-brand-word,
-                    [data-ae-color-scheme="dark"] #brand-logotype .ae-brand-word { fill: #f8f9fa; }
+                    [data-ae-color-scheme="dark"] #brand-logotype .ae-brand-word { fill: var(--bs-body-color, #dee2e6); }
                   </style>
                   <rect class="ae-brand-tile" width="128" height="128" rx="4" />
-                  <text class="ae-brand-glyph" x="64" y="87">æ</text>
+                  <text class="ae-brand-glyph" x="64" y="84">æ</text>
                   <text class="ae-brand-word" x="152" y="88">aellux<tspan class="ae-brand-suffix">.js</tspan></text>
                 </svg>
               </div>

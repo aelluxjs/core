@@ -4,6 +4,7 @@
 
   const api = window.AelluxJs;
   const attribute = api.attr("svg-downloader");
+  const fontDownloads = new Map();
   // Freeze presentation while the original still has its theme ancestors.
   const presentation = [
     "color", "fill", "fill-opacity", "fill-rule", "stroke", "stroke-width", "stroke-opacity",
@@ -18,7 +19,31 @@
     destroy() { document.removeEventListener("click", onClick); }
   });
 
-  function snapshot(svg) {
+  async function embedFontFace(rule) {
+    for (const reference of rule.match(/url\([^)]*\)/g) || []) {
+      const source = reference.slice(4, -1).trim().replace(/^['"]|['"]$/g, "");
+      if (source.startsWith("data:")) continue;
+      const url = new URL(source, document.baseURI).href;
+      if (!fontDownloads.has(url)) {
+        const pending = (async () => {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error(`Font download failed (HTTP ${response.status}).`);
+          const blob = await response.blob();
+          return await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error("Font could not be embedded."));
+            reader.readAsDataURL(blob);
+          });
+        })().catch(error => { fontDownloads.delete(url); throw error; });
+        fontDownloads.set(url, pending);
+      }
+      rule = rule.replace(reference, `url("${await fontDownloads.get(url)}")`);
+    }
+    return rule;
+  }
+
+  async function snapshot(svg) {
     const clone = svg.cloneNode(true);
     const originals = [svg, ...svg.querySelectorAll("*")];
     const copies = [clone, ...clone.querySelectorAll("*")];
@@ -28,7 +53,11 @@
         copies[index].style.setProperty(property, computed.getPropertyValue(property), "important");
       });
     });
-    // The exported file no longer needs selectors that refer to the host page.
+    const fontFaces = [...svg.querySelectorAll("style")].flatMap(style =>
+      style.textContent.match(/@font-face\s*\{[^}]*\}/g) || []);
+    // Freeze colors before awaiting the font: changing theme while it downloads
+    // must not change the appearance selected at the moment of the click.
+    // Replace host styles with self-contained font rules and resolved styles.
     clone.querySelectorAll("style").forEach(style => style.remove());
     clone.removeAttribute("class");
     const viewBox = svg.viewBox.baseVal;
@@ -38,6 +67,11 @@
     clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
     clone.setAttribute("width", width);
     clone.setAttribute("height", height);
+    if (fontFaces.length) {
+      const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
+      style.textContent = (await Promise.all(fontFaces.map(embedFontFace))).join("\n");
+      clone.prepend(style);
+    }
     return { blob: new Blob([new XMLSerializer().serializeToString(clone)], { type: "image/svg+xml;charset=utf-8" }), width, height };
   }
 
@@ -76,7 +110,7 @@
       if (!(svg instanceof SVGSVGElement)) throw new Error("SVG target was not found.");
       const format = button.getAttribute(api.attr("svg-format")) || "svg";
       if (format !== "svg" && format !== "png") throw new Error("Unsupported export format.");
-      const resolved = snapshot(svg);
+      const resolved = await snapshot(svg);
       const blob = format === "png" ? await rasterize(resolved) : resolved.blob;
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
