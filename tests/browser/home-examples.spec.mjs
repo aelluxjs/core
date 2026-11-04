@@ -82,6 +82,21 @@ for (const theme of ["light", "dark"]) {
         await expect(page.locator("#brand-logotype .ae-brand-word")).toHaveCSS("fill", wordColor);
         await expect(page.locator("#brand-logotype .ae-brand-word")).toHaveCSS("font-weight", "650");
         await expect(page.locator("#brand-logotype .ae-brand-suffix")).toHaveCSS("font-weight", "400");
+        const proportions = await page.evaluate(() => {
+          const word = document.querySelector("#brand-logotype .ae-brand-word");
+          const tile = document.querySelector("#brand-logotype .ae-brand-tile");
+          const glyph = document.querySelector("#brand-logotype .ae-brand-glyph");
+          const hero = document.querySelector(".hero-prism-text");
+          const heroTile = document.querySelector(".hero .brand-mark");
+          return {
+            tile: tile.getBBox().width / parseFloat(getComputedStyle(word).fontSize),
+            heroTile: heroTile.getBoundingClientRect().width / parseFloat(getComputedStyle(hero).fontSize),
+            glyph: parseFloat(getComputedStyle(glyph).fontSize) / parseFloat(getComputedStyle(word).fontSize),
+            heroGlyph: parseFloat(getComputedStyle(heroTile).fontSize) / parseFloat(getComputedStyle(hero).fontSize)
+          };
+        });
+        expect(proportions.tile).toBeCloseTo(proportions.heroTile, 3);
+        expect(proportions.glyph).toBeCloseTo(proportions.heroGlyph, 3);
       }
       const original = await page.locator(`#brand-${variant}`).evaluate(svg => svg.outerHTML);
       for (const format of ["svg", "png"]) {
@@ -113,7 +128,7 @@ for (const theme of ["light", "dark"]) {
               bounds.top = Math.min(bounds.top, y);
               bounds.right = Math.max(bounds.right, x);
               bounds.bottom = Math.max(bounds.bottom, y);
-              if (x > 340 && allPixels[i] === expected[0] && allPixels[i + 1] === expected[1] && allPixels[i + 2] === expected[2] && allPixels[i + 3] === 255) wordPixels++;
+              if (x > 224 && allPixels[i] === expected[0] && allPixels[i + 1] === expected[1] && allPixels[i + 2] === expected[2] && allPixels[i + 3] === 255) wordPixels++;
             }
             let fontDifference = 0;
             if (format === "svg") {
@@ -131,7 +146,7 @@ for (const theme of ["light", "dark"]) {
                   allPixels[i + 2] !== fallbackPixels[i + 2] || allPixels[i + 3] !== fallbackPixels[i + 3]) fontDifference++;
               }
             }
-            const tileIndex = (84 * canvas.width + 84) * 4;
+            const tileIndex = (144 * canvas.width + 84) * 4;
             let pngDifference = 0;
             if (format === "svg") window.brandSVGExportPixels = allPixels;
             else {
@@ -155,9 +170,9 @@ for (const theme of ["light", "dark"]) {
         expect(rendered.tile).toEqual([255, 193, 7, 255]);
         expect(rendered.corner[3]).toBe(0);
         expect(rendered.bounds.left).toBe(64);
-        expect(rendered.bounds.top).toBe(64);
+        expect(rendered.bounds.top).toBeGreaterThanOrEqual(64);
         expect(rendered.bounds.right).toBeLessThanOrEqual(rendered.width - 65);
-        expect(rendered.bounds.bottom).toBe(319);
+        expect(rendered.bounds.bottom).toBeLessThanOrEqual(rendered.height - 65);
         if (variant === "logotype") expect(rendered.wordPixels).toBeGreaterThan(1000);
         if (format === "svg") {
           expect(buffer.toString("utf8")).toContain("@font-face");

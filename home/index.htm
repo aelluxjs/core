@@ -86,6 +86,8 @@
           href="#extensions">Extensions</a>
         <a id="item5" draggable="false" class="fw-normal btn bg-transparent text-body position-relative z-1 me-2"
           href="#community">Build</a>
+        <a id="item6" draggable="false" class="fw-normal btn bg-transparent text-body position-relative z-1 me-2"
+          href="#brand-assets">Brand</a>
       </nav>
       <button id="item0" class="btn btn-outline-warning position-relative z-1 me-3 ms-2 lh-1 p-2"
         data-ae-preference="color-scheme" data-ae-next type="button" title="Change color theme">
@@ -843,12 +845,14 @@
         <h2 id="brand-assets-title" class="section-title">Take aellux.js with you.</h2>
         <p class="text-body-secondary">The æ symbol pairs Bootstrap warning yellow with dark lettering, just like
           the mark above. The logotype uses Geist from Google Fonts: a 650-weight name and a lighter, 400-weight
-          <span class="text-nowrap">.js</span> suffix. Its text follows the same light or dark color as the page.</p>
+          <span class="text-nowrap">.js</span> suffix. Its text follows the same light or dark color as the page.
+        </p>
         <p class="text-body-secondary">Keep clear space of at least one quarter of the symbol’s width around the
           brand. Both variants include this transparent margin for composition. The SVGs default to light and adapt
           automatically to the Bootstrap or AelluxJS dark theme.</p>
         <p class="text-body-secondary mb-5">Download the symbol or the symbol with logotype as SVG or PNG.
-          Exports preserve the current colors, Geist typography and transparent clear space; the SVG includes its font.</p>
+          Exports preserve the current colors, Geist typography and transparent clear space; the SVG includes its font.
+        </p>
         <div class="row g-4">
           <article class="col-md-5">
             <div class="border rounded-3 p-4 h-100">
@@ -864,10 +868,18 @@
                       font-display: swap;
                       src: url("https://fonts.gstatic.com/s/geist/v5/gyByhwUxId8gMEwcGFU.woff2") format("woff2");
                     }
-                    #brand-symbol .ae-brand-tile { fill: var(--bs-warning, #ffc107); }
-                    #brand-symbol .ae-brand-glyph { fill: var(--bs-dark, #212529); font: 650 64px "Geist", sans-serif; text-anchor: middle; }
+
+                    #brand-symbol .ae-brand-tile {
+                      fill: var(--bs-warning, #ffc107);
+                    }
+
+                    #brand-symbol .ae-brand-glyph {
+                      fill: var(--bs-dark, #212529);
+                      font: 650 64px "Geist", sans-serif;
+                      text-anchor: middle;
+                    }
                   </style>
-                  <rect class="ae-brand-tile" width="128" height="128" rx="4" />
+                  <rect class="ae-brand-tile" width="128" height="128" rx="1" />
                   <text class="ae-brand-glyph" x="64" y="84">æ</text>
                 </svg>
               </div>
@@ -894,16 +906,35 @@
                       font-display: swap;
                       src: url("https://fonts.gstatic.com/s/geist/v5/gyByhwUxId8gMEwcGFU.woff2") format("woff2");
                     }
-                    #brand-logotype .ae-brand-tile { fill: var(--bs-warning, #ffc107); }
-                    #brand-logotype .ae-brand-glyph { fill: var(--bs-dark, #212529); font: 650 64px "Geist", sans-serif; text-anchor: middle; }
-                    #brand-logotype .ae-brand-word { fill: var(--bs-body-color, #212529); font: 650 80px "Geist", sans-serif; letter-spacing: -4px; }
-                    #brand-logotype .ae-brand-suffix { font-weight: 400; }
+
+                    #brand-logotype .ae-brand-tile {
+                      fill: var(--bs-warning, #ffc107);
+                    }
+
+                    #brand-logotype .ae-brand-glyph {
+                      fill: var(--bs-dark, #212529);
+                      font: 650 40px "Geist", sans-serif;
+                      text-anchor: middle;
+                    }
+
+                    #brand-logotype .ae-brand-word {
+                      fill: var(--bs-body-color, #212529);
+                      font: 650 80px "Geist", sans-serif;
+                      letter-spacing: -4px;
+                    }
+
+                    #brand-logotype .ae-brand-suffix {
+                      font-weight: 400;
+                    }
+
                     [data-bs-theme="dark"] #brand-logotype .ae-brand-word,
-                    [data-ae-color-scheme="dark"] #brand-logotype .ae-brand-word { fill: var(--bs-body-color, #dee2e6); }
+                    [data-ae-color-scheme="dark"] #brand-logotype .ae-brand-word {
+                      fill: var(--bs-body-color, #dee2e6);
+                    }
                   </style>
-                  <rect class="ae-brand-tile" width="128" height="128" rx="4" />
-                  <text class="ae-brand-glyph" x="64" y="84">æ</text>
-                  <text class="ae-brand-word" x="152" y="88">aellux<tspan class="ae-brand-suffix">.js</tspan></text>
+                  <rect class="ae-brand-tile" y="24" width="80" height="80" rx="1" />
+                  <text class="ae-brand-glyph" x="40" y="76.5">æ</text>
+                  <text class="ae-brand-word" x="104" y="88">aellux<tspan class="ae-brand-suffix">.js</tspan></text>
                 </svg>
               </div>
               <div class="d-flex gap-2 flex-wrap">
