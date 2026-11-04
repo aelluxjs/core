@@ -254,9 +254,9 @@
               </div>
               <div class="code-wrapper bg-body-tertiary border rounded-2 mb-3">
                 <pre class="code-block p-3 mb-0"><code id="browser-code" class="language-xml">&lt;script src="../dist/aellux.min.js"&gt;&lt;/script&gt;
-    &lt;script&gt;
-      $ae.init({ mode: "full" });
-    &lt;/script&gt;</code></pre>
+&lt;script&gt;
+    $ae.init({ mode: "full" });
+&lt;/script&gt;</code></pre>
               </div>
               <p class="small text-body-secondary mb-0">This path uses this repository’s public distribution. Keep the
                 generated <code>dist/</code> files together when deploying: the boot script loads the matching runtime,
@@ -278,7 +278,7 @@
               <div class="code-wrapper bg-body-tertiary border rounded-2">
                 <pre class="code-block p-3 mb-0"><code class="language-javascript">import AelluxJs from "@aelluxjs/core";
 
-    AelluxJs.attr("preference");</code></pre>
+AelluxJs.attr("preference");</code></pre>
               </div>
             </div>
           </article>
@@ -871,6 +871,10 @@
                       src: url("https://fonts.gstatic.com/s/geist/v5/gyByhwUxId8gMEwcGFU.woff2") format("woff2");
                     }
 
+                    #brand-symbol {
+                      user-select: none;
+                    }
+
                     #brand-symbol .ae-brand-tile {
                       fill: var(--bs-warning, #ffc107);
                     }
@@ -907,6 +911,10 @@
                       font-weight: 400 700;
                       font-display: swap;
                       src: url("https://fonts.gstatic.com/s/geist/v5/gyByhwUxId8gMEwcGFU.woff2") format("woff2");
+                    }
+
+                    #brand-logotype {
+                      user-select: none;
                     }
 
                     #brand-logotype .ae-brand-tile {
