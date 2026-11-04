@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { readFile } from "node:fs/promises";
 
 const logs = new WeakMap();
 test.beforeEach(async ({ page, context }) => {
@@ -25,6 +26,101 @@ test.afterEach(async ({ page }) => expect(logs.get(page).errors).toEqual([]));
 async function openExample(page, name, extension) {
   await page.goto(`/home/examples/${name}.htm`);
   await expect.poll(() => page.evaluate(name => !!window.$ae?.ext[name]?.initialized, extension)).toBe(true);
+}
+
+test("brand SVGs own their styles, default to light and detect either theme attribute", async ({ page }) => {
+  await page.goto("/home/index.htm");
+  const result = await page.evaluate(async () => {
+    const frame = document.createElement("iframe");
+    frame.srcdoc = document.getElementById("brand-symbol").outerHTML + document.getElementById("brand-logotype").outerHTML;
+    const loaded = new Promise(resolve => { frame.onload = resolve; });
+    document.body.append(frame);
+    await loaded;
+    const doc = frame.contentDocument;
+    const colors = () => [".ae-brand-tile", ".ae-brand-word"].map(selector =>
+      frame.contentWindow.getComputedStyle(doc.querySelector(selector)).fill);
+    const states = [colors()];
+    for (const attribute of ["data-bs-theme", "data-ae-color-scheme"]) {
+      doc.documentElement.setAttribute(attribute, "dark");
+      states.push(colors());
+      doc.documentElement.setAttribute(attribute, "light");
+      states.push(colors());
+      doc.documentElement.removeAttribute(attribute);
+    }
+    frame.remove();
+    return states;
+  });
+  expect(result).toEqual([
+    ["rgb(255, 193, 7)", "rgb(23, 25, 28)"],
+    ["rgb(255, 218, 106)", "rgb(248, 249, 250)"],
+    ["rgb(255, 193, 7)", "rgb(23, 25, 28)"],
+    ["rgb(255, 218, 106)", "rgb(248, 249, 250)"],
+    ["rgb(255, 193, 7)", "rgb(23, 25, 28)"]
+  ]);
+});
+
+for (const theme of ["light", "dark"]) {
+  for (const variant of ["symbol", "logotype"]) {
+    test(`brand ${variant} SVG and PNG downloads preserve ${theme} colors and transparency`, async ({ page }) => {
+      await page.goto("/home/index.htm");
+      await expect.poll(() => page.evaluate(() => !!$ae.ext.svgDownloader?.initialized)).toBe(true);
+      await page.getByRole("button", { name: theme === "dark" ? "Dark" : "Light", exact: true }).click();
+      const original = await page.locator(`#brand-${variant}`).evaluate(svg => svg.outerHTML);
+      for (const format of ["svg", "png"]) {
+        const pending = page.waitForEvent("download");
+        await page.locator(`[data-ae-svg-downloader="brand-${variant}"][data-ae-svg-format="${format}"]`).click();
+        const download = await pending;
+        expect(download.suggestedFilename()).toBe(`aellux-${variant}.${format}`);
+        const buffer = await readFile(await download.path());
+        const rendered = await page.evaluate(async ({ base64, format, theme }) => {
+          const blob = await (await fetch(`data:image/${format === "svg" ? "svg+xml" : "png"};base64,${base64}`)).blob();
+          // Image loading has no host ancestors and must retain the selected colors.
+          const url = URL.createObjectURL(blob);
+          try {
+            const image = new Image();
+            await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = reject; image.src = url; });
+            const canvas = document.createElement("canvas");
+            canvas.width = image.naturalWidth;
+            canvas.height = image.naturalHeight;
+            const context = canvas.getContext("2d");
+            context.drawImage(image, 0, 0);
+            const pixel = (x, y) => [...context.getImageData(x, y, 1, 1).data];
+            const pixels = context.getImageData(280, 0, Math.max(1, canvas.width - 280), canvas.height).data;
+            const expected = theme === "dark" ? [248, 249, 250] : [23, 25, 28];
+            let wordPixels = 0;
+            for (let i = 0; i < pixels.length; i += 4) {
+              if (pixels[i] === expected[0] && pixels[i + 1] === expected[1] && pixels[i + 2] === expected[2] && pixels[i + 3] === 255) wordPixels++;
+            }
+            return { width: canvas.width, height: canvas.height, tile: pixel(20, 20), corner: pixel(0, 0), wordPixels };
+          } finally { URL.revokeObjectURL(url); }
+        }, { base64: buffer.toString("base64"), format, theme });
+        expect(rendered.width).toBe(variant === "symbol" ? 256 : 1024);
+        expect(rendered.height).toBe(256);
+        expect(rendered.tile).toEqual(theme === "dark" ? [255, 218, 106, 255] : [255, 193, 7, 255]);
+        expect(rendered.corner[3]).toBe(0);
+        if (variant === "logotype") expect(rendered.wordPixels).toBeGreaterThan(1000);
+        if (format === "svg") {
+          const frozenColors = await page.evaluate(async svg => {
+            const frame = document.createElement("iframe");
+            frame.srcdoc = `<html data-bs-theme="dark" data-ae-color-scheme="dark"><body>${svg}</body></html>`;
+            const loaded = new Promise(resolve => { frame.onload = resolve; });
+            document.body.append(frame);
+            await loaded;
+            const tile = frame.contentDocument.querySelector(".ae-brand-tile");
+            const colors = [frame.contentWindow.getComputedStyle(tile).fill];
+            frame.contentDocument.documentElement.setAttribute("data-bs-theme", "light");
+            frame.contentDocument.documentElement.setAttribute("data-ae-color-scheme", "light");
+            colors.push(frame.contentWindow.getComputedStyle(tile).fill);
+            frame.remove();
+            return colors;
+          }, buffer.toString("utf8"));
+          const expected = theme === "dark" ? "rgb(255, 218, 106)" : "rgb(255, 193, 7)";
+          expect(frozenColors).toEqual([expected, expected]);
+        }
+      }
+      expect(await page.locator(`#brand-${variant}`).evaluate(svg => svg.outerHTML)).toBe(original);
+    });
+  }
 }
 
 test("inline head initialization publishes preferences before styles and deferred handlers", async ({ page }) => {

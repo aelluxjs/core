@@ -17,6 +17,9 @@
     $ae.ext("scrollbox", { loadStyle: true, loadWhen: "[data-ae-scrollbox]" });
     $ae.ext("anchor", { loadStyle: true, loadWhen: "[data-ae-anchor]" });
     $ae.ext("viewport", { loadWhen: "[data-ae-viewport]" });
+    $ae.ext(new URL("assets/aellux.ext.svg-downloader.js", document.baseURI).href, {
+      builds: "modern", loadWhen: "[data-ae-svg-downloader]"
+    });
     $ae.on("ViewportChange", event => {
       if (event.target.id === "main" || !event.detail.measurable || event.detail.visible <= 0 || event.detail.y1 >= 0) return;
       const section = event.target.closest("section[id], main[id]");
@@ -834,6 +837,71 @@
         </div>
       </div>
     </section>
+    <section id="brand-assets" class="section-space border-top" aria-labelledby="brand-assets-title">
+      <div class="container">
+        <p class="eyebrow text-body-secondary">06 <span class="opacity-50" aria-hidden="true">▪</span> Brand assets</p>
+        <h2 id="brand-assets-title" class="section-title">Take aellux.js with you.</h2>
+        <p class="text-body-secondary mb-5">Download the symbol or the symbol with logotype as SVG or PNG, with a
+          transparent background. Both formats keep the colors of the current theme.</p>
+        <div class="row g-4">
+          <article class="col-md-5">
+            <div class="border rounded-3 p-4 h-100">
+              <h3 class="h5">Symbol</h3>
+              <div class="d-flex align-items-center justify-content-center py-4">
+                <svg id="brand-symbol" class="mw-100" xmlns="http://www.w3.org/2000/svg" width="256" height="256"
+                  viewBox="0 0 128 128" role="img" aria-label="AelluxJS symbol">
+                  <style>
+                    #brand-symbol .ae-brand-tile { fill: #ffc107; }
+                    #brand-symbol .ae-brand-glyph { fill: #17191c; font: 600 76px Arial, sans-serif; text-anchor: middle; }
+                    [data-bs-theme="dark"] #brand-symbol .ae-brand-tile,
+                    [data-ae-color-scheme="dark"] #brand-symbol .ae-brand-tile { fill: #ffda6a; }
+                  </style>
+                  <rect class="ae-brand-tile" width="128" height="128" rx="4" />
+                  <text class="ae-brand-glyph" x="64" y="87">æ</text>
+                </svg>
+              </div>
+              <div class="d-flex gap-2 flex-wrap">
+                <button type="button" class="btn btn-outline-secondary" data-ae-svg-downloader="brand-symbol"
+                  data-ae-svg-format="svg" data-ae-svg-filename="aellux-symbol">Download SVG</button>
+                <button type="button" class="btn btn-outline-secondary" data-ae-svg-downloader="brand-symbol"
+                  data-ae-svg-format="png" data-ae-svg-filename="aellux-symbol">Download PNG</button>
+              </div>
+              <p class="small text-body-secondary mt-3 mb-0" role="status"></p>
+            </div>
+          </article>
+          <article class="col-md-7">
+            <div class="border rounded-3 p-4 h-100">
+              <h3 class="h5">Symbol with logotype</h3>
+              <div class="d-flex align-items-center justify-content-center py-4">
+                <svg id="brand-logotype" class="mw-100" xmlns="http://www.w3.org/2000/svg" width="1024" height="256"
+                  viewBox="0 0 512 128" role="img" aria-label="AelluxJS symbol with logotype">
+                  <style>
+                    #brand-logotype .ae-brand-tile { fill: #ffc107; }
+                    #brand-logotype .ae-brand-glyph { fill: #17191c; font: 600 76px Arial, sans-serif; text-anchor: middle; }
+                    #brand-logotype .ae-brand-word { fill: #17191c; font: 600 80px Arial, sans-serif; letter-spacing: -4px; }
+                    #brand-logotype .ae-brand-suffix { font-weight: 400; }
+                    [data-bs-theme="dark"] #brand-logotype .ae-brand-tile,
+                    [data-ae-color-scheme="dark"] #brand-logotype .ae-brand-tile { fill: #ffda6a; }
+                    [data-bs-theme="dark"] #brand-logotype .ae-brand-word,
+                    [data-ae-color-scheme="dark"] #brand-logotype .ae-brand-word { fill: #f8f9fa; }
+                  </style>
+                  <rect class="ae-brand-tile" width="128" height="128" rx="4" />
+                  <text class="ae-brand-glyph" x="64" y="87">æ</text>
+                  <text class="ae-brand-word" x="152" y="88">aellux<tspan class="ae-brand-suffix">.js</tspan></text>
+                </svg>
+              </div>
+              <div class="d-flex gap-2 flex-wrap">
+                <button type="button" class="btn btn-outline-secondary" data-ae-svg-downloader="brand-logotype"
+                  data-ae-svg-format="svg" data-ae-svg-filename="aellux-logotype">Download SVG</button>
+                <button type="button" class="btn btn-outline-secondary" data-ae-svg-downloader="brand-logotype"
+                  data-ae-svg-format="png" data-ae-svg-filename="aellux-logotype">Download PNG</button>
+              </div>
+              <p class="small text-body-secondary mt-3 mb-0" role="status"></p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer class="bg-body-tertiary border-top py-5">
@@ -843,7 +911,7 @@
           <p class="small text-body-secondary mt-2 mb-0">UX Made Easy.</p>
         </div>
         <nav class="footer-nav d-flex flex-wrap gap-3 small" aria-label="Footer navigation">
-          <a href="../docs">Documentation</a><a href="#examples">Examples</a>
+          <a href="../docs">Documentation</a><a href="#examples">Examples</a><a href="#brand-assets">Brand assets</a>
           <a href="https://github.com/aelluxjs/core">GitHub <span aria-hidden="true">↗</span></a>
           <a href="https://npmjs.com/package/@aelluxjs/core">npm <span aria-hidden="true">↗</span></a>
           <a href="https://github.com/aelluxjs/core/blob/main/CHANGELOG.md">Changelog <span
