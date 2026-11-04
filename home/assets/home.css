@@ -130,7 +130,9 @@ a { text-underline-offset: .22em; }
 #main-navigation:has([data-ae-anchor-target="item1"]) #item1,
 #main-navigation:has([data-ae-anchor-target="item2"]) #item2,
 #main-navigation:has([data-ae-anchor-target="item3"]) #item3,
-#main-navigation:has([data-ae-anchor-target="item4"]) #item4 {
+#main-navigation:has([data-ae-anchor-target="item4"]) #item4,
+#main-navigation:has([data-ae-anchor-target="item5"]) #item5,
+#main-navigation:has([data-ae-anchor-target="item6"]) #item6{
   color: #000 !important;
   border-color: transparent!important;
 }
