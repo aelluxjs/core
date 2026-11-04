@@ -61,8 +61,12 @@
     clone.querySelectorAll("style").forEach(style => style.remove());
     clone.removeAttribute("class");
     const viewBox = svg.viewBox.baseVal;
-    const width = svg.width.baseVal.value || viewBox.width;
-    const height = svg.height.baseVal.value || viewBox.height;
+    let width = svg.width.baseVal.value || viewBox.width;
+    let height = svg.height.baseVal.value || viewBox.height;
+    // An omitted dimension is automatic in HTML; export the intrinsic aspect
+    // ratio instead of the preview's responsive size.
+    if (!svg.hasAttribute("height") && viewBox.width > 0) height = width * viewBox.height / viewBox.width;
+    else if (!svg.hasAttribute("width") && viewBox.height > 0) width = height * viewBox.width / viewBox.height;
     if (!(width > 0 && height > 0)) throw new Error("SVG dimensions must be positive.");
     clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
     clone.setAttribute("width", width);

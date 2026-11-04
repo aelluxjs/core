@@ -165,13 +165,14 @@ for (const theme of ["light", "dark"]) {
               corner: [...allPixels.slice(0, 4)], bounds, wordPixels, fontDifference, pngDifference };
           } finally { URL.revokeObjectURL(url); }
         }, { base64: buffer.toString("base64"), format, wordColor });
-        expect(rendered.width).toBe(variant === "symbol" ? 384 : 1152);
+        expect(rendered.width).toBe(variant === "symbol" ? 384 : 904);
         expect(rendered.height).toBe(384);
         expect(rendered.tile).toEqual([255, 193, 7, 255]);
         expect(rendered.corner[3]).toBe(0);
         expect(rendered.bounds.left).toBe(64);
         expect(rendered.bounds.top).toBeGreaterThanOrEqual(64);
         expect(rendered.bounds.right).toBeLessThanOrEqual(rendered.width - 65);
+        if (variant === "logotype") expect(rendered.width - rendered.bounds.right - 1).toBeLessThanOrEqual(85);
         expect(rendered.bounds.bottom).toBeLessThanOrEqual(rendered.height - 65);
         if (variant === "logotype") expect(rendered.wordPixels).toBeGreaterThan(1000);
         if (format === "svg") {
