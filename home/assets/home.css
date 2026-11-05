@@ -137,12 +137,6 @@ a { text-underline-offset: .22em; }
   color: #000 !important;
   border-color: transparent!important;
 }
-#main-navigation-3D{
-  --rotate: calc(-3deg + var(--home-scroll-progress-y) * 6deg);
-  transform: rotateX(var(--rotate));
-  transform-style: preserve-3d;
-  backface-visibility: visible;
-}
 #main-navigation-3D:after{
   --x:var(--home-scroll-progress-y);
   content:" ";
