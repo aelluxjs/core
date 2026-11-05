@@ -277,20 +277,20 @@
     }
     function _destroy() {
       _destroy = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee() {
-        var _iterator10, _step10, map;
+        var _iterator11, _step11, map;
         return _regenerator().w(function(_context) {
           while (1) switch (_context.n) {
             case 0:
-              _iterator10 = _createForOfIteratorHelper(placementMaps);
+              _iterator11 = _createForOfIteratorHelper(placementMaps);
               try {
-                for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
-                  map = _step10.value;
+                for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
+                  map = _step11.value;
                   map.destroy();
                 }
               } catch (err) {
-                _iterator10.e(err);
+                _iterator11.e(err);
               } finally {
-                _iterator10.f();
+                _iterator11.f();
               }
               _context.n = 1;
               return Promise.all(Array.from(anchors.keys(), unmountAnchor));
@@ -358,7 +358,9 @@
         reference: null,
         group: null,
         lastPlacement: null,
-        switchTimer: null,
+        switchOperation: null,
+        motionId: AelluxJs.motion.id(),
+        cleanupLayoutId: nextLayoutId++,
         interruptSwitch: false,
         scrollRevision: 0,
         scrollVisible: false,
@@ -404,7 +406,7 @@
       }
       if (typeof root.ResizeObserver === "function") {
         state.observer = new root.ResizeObserver(function(entries) {
-          if (state.switchTimer !== null && entries.every(function(entry) {
+          if (state.switchOperation !== null && entries.every(function(entry) {
             return entry.target === element;
           })) return;
           scheduleAnchor(element);
@@ -451,6 +453,7 @@
               }
               AelluxJs.waitLayout.cancel(state.layoutId);
               AelluxJs.waitLayout.cancel(state.styleLayoutId);
+              AelluxJs.waitLayout.cancel(state.cleanupLayoutId);
               _context2.n = 2;
               return AelluxJs.waitLayout.update(state.styleLayoutId, deactivate, [element, state, memory]);
             case 2:
@@ -871,12 +874,14 @@
                   scrollTargetIntoView(element, placement.target);
                 }
                 var moved = !previous || previous.signature !== placement.signature;
-                var scrollMoved = moved && state.switchTimer !== null && (previous === null || previous === void 0 ? void 0 : previous.scrollRevision) !== placement.scrollRevision;
+                var scrollMoved = moved && state.switchOperation !== null && (previous === null || previous === void 0 ? void 0 : previous.scrollRevision) !== placement.scrollRevision;
                 if ((switching || scrollMoved) && placement.duration > 0 && !state.interruptSwitch) {
-                  startSwitch(element, state, placement.duration);
-                } else if (moved || state.interruptSwitch || !placement.duration) stopSwitch(element, state);
+                  startSwitch(element, state, placement);
+                } else {
+                  if (moved || state.interruptSwitch || !placement.duration) stopSwitch(element, state);
+                  writePlacement(element, placement);
+                }
                 state.interruptSwitch = false;
-                writePlacement(element, placement);
                 rememberVisual(element, state);
                 state.lastUpdateAt = now();
                 state.lastPlacement = placement;
@@ -999,7 +1004,7 @@
         var constrain = function constrain2(value) {
           return Math.max(minimum, Math.min(Number.isFinite(maximum) ? maximum : Infinity, value));
         };
-        return !((_anchors$get = anchors.get(element)) !== null && _anchors$get !== void 0 && _anchors$get.switchTimer) && Math.abs(parseFloat(style[axis]) - constrain(previous)) > 0.5 ? actual : constrain(desired) + (borderBox ? 0 : extra);
+        return !((_anchors$get = anchors.get(element)) !== null && _anchors$get !== void 0 && _anchors$get.switchOperation) && Math.abs(parseFloat(style[axis]) - constrain(previous)) > 0.5 ? actual : constrain(desired) + (borderBox ? 0 : extra);
       };
       var selfWidth = projectSize("width", selfRect.width / scaleX, targetRect.width);
       var selfHeight = projectSize("height", selfRect.height / scaleY, targetRect.height);
@@ -1038,6 +1043,7 @@
       var opacity = present ? root.getComputedStyle(present).opacity : "1";
       var rawDuration = style.getPropertyValue("--ae-anchor-switch-duration").trim();
       var duration = AelluxJs.currentPreference("reduced-motion") === "reduced" ? 0 : Math.max(0, (parseFloat(rawDuration) || 0) * (rawDuration.endsWith("ms") ? 1 : 1e3));
+      var position = tokens.includes("width") || tokens.includes("height") ? [selected.pivotX, selected.pivotY] : [selected.x, selected.y];
       return {
         valid: true,
         target: target,
@@ -1048,7 +1054,7 @@
         scrollRevision: ((_anchors$get2 = anchors.get(element)) === null || _anchors$get2 === void 0 ? void 0 : _anchors$get2.scrollRevision) || 0,
         width: targetRect.width,
         height: targetRect.height,
-        signature: [selected.x, selected.y, targetRect.width, targetRect.height].concat(_toConsumableArray(selected.self)).join("/")
+        signature: [].concat(position, [targetRect.width, targetRect.height], _toConsumableArray(selected.self)).join("/")
       };
     }
     function writePlacement(element, placement) {
@@ -1139,8 +1145,9 @@
       rememberVisual(element, state);
     }
     function stopSwitch(element, state) {
-      if (state.switchTimer !== null) root.clearTimeout(state.switchTimer);
-      state.switchTimer = null;
+      state.switchOperation = null;
+      AelluxJs.motion.cancel(state.motionId);
+      AelluxJs.waitLayout.cancel(state.cleanupLayoutId);
       element.classList.remove(switchingClass);
       rememberVisual(element, state);
     }
@@ -1149,14 +1156,71 @@
       if (style.getPropertyPriority(name)) style.removeProperty(name);
       style.setProperty(name, value);
     }
-    function startSwitch(element, state, duration) {
-      if (state.switchTimer !== null) root.clearTimeout(state.switchTimer);
+    function startSwitch(element, state, placement) {
+      var handoff = null;
+      if (state.switchOperation) {
+        var properties = ["transform"].concat(_toConsumableArray((element.getAttribute(matchAttribute) || "").split(/\s+/).filter(function(property2) {
+          return property2 === "width" || property2 === "height";
+        })));
+        var computed = root.getComputedStyle(element);
+        var values = properties.map(function(property2) {
+          return [property2, computed.getPropertyValue(property2)];
+        });
+        var transitions = computed.transitionProperty.split(",").flatMap(function(property2) {
+          var _element$getAnimation;
+          property2 = property2.trim();
+          return property2 === "all" ? (((_element$getAnimation = element.getAnimations) === null || _element$getAnimation === void 0 ? void 0 : _element$getAnimation.call(element)) || []).map(function(animation) {
+            return animation.transitionProperty;
+          }).filter(Boolean) : [property2];
+        }).filter(function(property2) {
+          return !properties.includes(property2);
+        });
+        handoff = AelluxJs.persist.element.save(element, [], [].concat(_toConsumableArray(properties), ["transition-property"]));
+        element.style.setProperty("transition-property", transitions.join(",") || "none", "important");
+        var _iterator1 = _createForOfIteratorHelper(values), _step1;
+        try {
+          for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+            var _step1$value = _slicedToArray(_step1.value, 2), property = _step1$value[0], value = _step1$value[1];
+            element.style.setProperty(property, value, "important");
+          }
+        } catch (err) {
+          _iterator1.e(err);
+        } finally {
+          _iterator1.f();
+        }
+        element.getBoundingClientRect();
+      }
+      stopSwitch(element, state);
+      var operation = {};
+      state.switchOperation = operation;
       element.classList.add(switchingClass);
-      state.switchTimer = root.setTimeout(function() {
-        if (anchors.get(element) !== state) return;
-        stopSwitch(element, state);
-        scheduleAnchor(element);
-      }, duration + 100);
+      AelluxJs.motion.run(element, {
+        id: state.motionId,
+        extension: extensionName,
+        nativeDuration: placement.duration,
+        ownedOnly: true,
+        abort: function abort() {
+          return anchors.get(element) !== state || state.switchOperation !== operation;
+        },
+        apply: function apply() {
+          if (handoff) handoff.restore();
+          writePlacement(element, placement);
+        }
+      }).catch(function(cause) {
+        AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT, {
+          cause: cause,
+          extension: extensionName,
+          element: element,
+          method: "switch"
+        });
+      }).then(function() {
+        if (anchors.get(element) !== state || state.switchOperation !== operation) return;
+        return AelluxJs.waitLayout.update(state.cleanupLayoutId, function() {
+          if (anchors.get(element) !== state || state.switchOperation !== operation) return;
+          stopSwitch(element, state);
+          scheduleAnchor(element);
+        });
+      });
     }
     function resolveElement(value) {
       if (!value || !value.trim()) return null;
@@ -1172,10 +1236,10 @@
     }
     function parseCandidates(value) {
       var result = [];
-      var _iterator1 = _createForOfIteratorHelper((value || "").split(",")), _step1;
+      var _iterator10 = _createForOfIteratorHelper((value || "").split(",")), _step10;
       try {
-        for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
-          var token = _step1.value;
+        for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
+          var token = _step10.value;
           var pair = token.trim().toLowerCase().split(":");
           if (pair.length !== 2 || !pivots[pair[0].trim()] || !pivots[pair[1].trim()]) continue;
           result.push({
@@ -1184,9 +1248,9 @@
           });
         }
       } catch (err) {
-        _iterator1.e(err);
+        _iterator10.e(err);
       } finally {
-        _iterator1.f();
+        _iterator10.f();
       }
       return result;
     }

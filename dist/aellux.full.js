@@ -1474,7 +1474,9 @@
             reference: null,
             group: null,
             lastPlacement: null,
-            switchTimer: null,
+            switchOperation: null,
+            motionId: AelluxJs2.motion.id(),
+            cleanupLayoutId: nextLayoutId++,
             interruptSwitch: false,
             scrollRevision: 0,
             scrollVisible: false,
@@ -1526,7 +1528,7 @@
           }
           if (typeof root2.ResizeObserver === "function") {
             state.observer = new root2.ResizeObserver((entries) => {
-              if (state.switchTimer !== null && entries.every((entry) => entry.target === element)) return;
+              if (state.switchOperation !== null && entries.every((entry) => entry.target === element)) return;
               scheduleAnchor(element);
             });
           }
@@ -1556,6 +1558,7 @@
           }
           AelluxJs2.waitLayout.cancel(state.layoutId);
           AelluxJs2.waitLayout.cancel(state.styleLayoutId);
+          AelluxJs2.waitLayout.cancel(state.cleanupLayoutId);
           await AelluxJs2.waitLayout.update(state.styleLayoutId, deactivate, [element, state, memory]);
         }
         function scheduleUpdate(event) {
@@ -1805,12 +1808,14 @@
               scrollTargetIntoView(element, placement.target);
             }
             const moved = !previous || previous.signature !== placement.signature;
-            const scrollMoved = moved && state.switchTimer !== null && (previous == null ? void 0 : previous.scrollRevision) !== placement.scrollRevision;
+            const scrollMoved = moved && state.switchOperation !== null && (previous == null ? void 0 : previous.scrollRevision) !== placement.scrollRevision;
             if ((switching || scrollMoved) && placement.duration > 0 && !state.interruptSwitch) {
-              startSwitch(element, state, placement.duration);
-            } else if (moved || state.interruptSwitch || !placement.duration) stopSwitch(element, state);
+              startSwitch(element, state, placement);
+            } else {
+              if (moved || state.interruptSwitch || !placement.duration) stopSwitch(element, state);
+              writePlacement(element, placement);
+            }
             state.interruptSwitch = false;
-            writePlacement(element, placement);
             rememberVisual(element, state);
             state.lastUpdateAt = now();
             state.lastPlacement = placement;
@@ -1877,7 +1882,7 @@
             const minimum = Math.max(borderBox ? extra : 0, parseFloat(style.getPropertyValue(`min-${axis}`)) || 0);
             const maximum = parseFloat(style.getPropertyValue(`max-${axis}`));
             const constrain = (value) => Math.max(minimum, Math.min(Number.isFinite(maximum) ? maximum : Infinity, value));
-            return !((_a2 = anchors.get(element)) == null ? void 0 : _a2.switchTimer) && Math.abs(parseFloat(style[axis]) - constrain(previous)) > 0.5 ? actual : constrain(desired) + (borderBox ? 0 : extra);
+            return !((_a2 = anchors.get(element)) == null ? void 0 : _a2.switchOperation) && Math.abs(parseFloat(style[axis]) - constrain(previous)) > 0.5 ? actual : constrain(desired) + (borderBox ? 0 : extra);
           };
           const selfWidth = projectSize("width", selfRect.width / scaleX, targetRect.width);
           const selfHeight = projectSize("height", selfRect.height / scaleY, targetRect.height);
@@ -1909,6 +1914,7 @@
           const opacity = present ? root2.getComputedStyle(present).opacity : "1";
           const rawDuration = style.getPropertyValue("--ae-anchor-switch-duration").trim();
           const duration = AelluxJs2.currentPreference("reduced-motion") === "reduced" ? 0 : Math.max(0, (parseFloat(rawDuration) || 0) * (rawDuration.endsWith("ms") ? 1 : 1e3));
+          const position = tokens.includes("width") || tokens.includes("height") ? [selected.pivotX, selected.pivotY] : [selected.x, selected.y];
           return {
             valid: true,
             target,
@@ -1919,7 +1925,7 @@
             scrollRevision: ((_a = anchors.get(element)) == null ? void 0 : _a.scrollRevision) || 0,
             width: targetRect.width,
             height: targetRect.height,
-            signature: [selected.x, selected.y, targetRect.width, targetRect.height, ...selected.self].join("/")
+            signature: [...position, targetRect.width, targetRect.height, ...selected.self].join("/")
           };
         }
         function writePlacement(element, placement) {
@@ -2005,8 +2011,9 @@
           rememberVisual(element, state);
         }
         function stopSwitch(element, state) {
-          if (state.switchTimer !== null) root2.clearTimeout(state.switchTimer);
-          state.switchTimer = null;
+          state.switchOperation = null;
+          AelluxJs2.motion.cancel(state.motionId);
+          AelluxJs2.waitLayout.cancel(state.cleanupLayoutId);
           element.classList.remove(switchingClass);
           rememberVisual(element, state);
         }
@@ -2015,14 +2022,49 @@
           if (style.getPropertyPriority(name)) style.removeProperty(name);
           style.setProperty(name, value);
         }
-        function startSwitch(element, state, duration) {
-          if (state.switchTimer !== null) root2.clearTimeout(state.switchTimer);
+        function startSwitch(element, state, placement) {
+          let handoff = null;
+          if (state.switchOperation) {
+            const properties = ["transform", ...(element.getAttribute(matchAttribute) || "").split(/\s+/).filter((property) => property === "width" || property === "height")];
+            const computed = root2.getComputedStyle(element);
+            const values = properties.map((property) => [property, computed.getPropertyValue(property)]);
+            const transitions = computed.transitionProperty.split(",").flatMap((property) => {
+              var _a;
+              property = property.trim();
+              return property === "all" ? (((_a = element.getAnimations) == null ? void 0 : _a.call(element)) || []).map((animation) => animation.transitionProperty).filter(Boolean) : [property];
+            }).filter((property) => !properties.includes(property));
+            handoff = AelluxJs2.persist.element.save(element, [], [...properties, "transition-property"]);
+            element.style.setProperty("transition-property", transitions.join(",") || "none", "important");
+            for (const [property, value] of values) element.style.setProperty(property, value, "important");
+            element.getBoundingClientRect();
+          }
+          stopSwitch(element, state);
+          const operation = {};
+          state.switchOperation = operation;
           element.classList.add(switchingClass);
-          state.switchTimer = root2.setTimeout(() => {
-            if (anchors.get(element) !== state) return;
-            stopSwitch(element, state);
-            scheduleAnchor(element);
-          }, duration + 100);
+          AelluxJs2.motion.run(element, {
+            id: state.motionId,
+            extension: extensionName,
+            nativeDuration: placement.duration,
+            ownedOnly: true,
+            abort: () => anchors.get(element) !== state || state.switchOperation !== operation,
+            apply: () => {
+              if (handoff) handoff.restore();
+              writePlacement(element, placement);
+            }
+          }).catch((cause) => {
+            AelluxJs2.diagnostics.error(
+              AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
+              { cause, extension: extensionName, element, method: "switch" }
+            );
+          }).then(() => {
+            if (anchors.get(element) !== state || state.switchOperation !== operation) return;
+            return AelluxJs2.waitLayout.update(state.cleanupLayoutId, () => {
+              if (anchors.get(element) !== state || state.switchOperation !== operation) return;
+              stopSwitch(element, state);
+              scheduleAnchor(element);
+            });
+          });
         }
         function resolveElement(value) {
           if (!value || !value.trim()) return null;

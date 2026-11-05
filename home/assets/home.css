@@ -148,6 +148,7 @@ a { text-underline-offset: .22em; }
   width: 100%;
   height: 1px;
   transform: scaleX(var(--x));
+  transform-origin: 0 0;
 }
 .theme-controls .btn { font-size: .75rem; background-color: #6c717d14!important; }
 .theme-controls .ae--active { background: var(--bs-warning)!important; border-color: var(--bs-warning); color: #17191c; }

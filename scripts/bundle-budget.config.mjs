@@ -43,17 +43,18 @@ export const bundleBudget = Object.freeze([
   // Sibling scrollbar placement and automatic fade policy; costs: core-extensions/scrollbox.md.
   // Captured opening replay, native CSS fallback and reverse lifecycle;
   // measured before/after bytes: runtime/performance.md.
-  { file: "aellux.full.min.js", maxRawBytes: 209.5 * 1024, maxGzipBytes: 64.75 * 1024 },
-  { file: "aellux.full.legacy.min.js", maxRawBytes: 531.75 * 1024, maxGzipBytes: 157 * 1024 },
+  // Anchor controlled target switching; measured deltas: core-extensions/anchor.md.
+  { file: "aellux.full.min.js", maxRawBytes: 210.5 * 1024, maxGzipBytes: 65 * 1024 },
+  { file: "aellux.full.legacy.min.js", maxRawBytes: 533 * 1024, maxGzipBytes: 157.5 * 1024 },
   { file: "aellux.full.min.css", maxRawBytes: 123.75 * 1024, maxGzipBytes: 12 * 1024 },
   { file: "aellux.ext.adaptive.min.css", maxRawBytes: 121 * 1024, maxGzipBytes: 11 * 1024 },
   { file: "aellux.ext.adaptive.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
   { file: "aellux.ext.adaptive.legacy.min.js", maxRawBytes: 8.5 * 1024, maxGzipBytes: 3.5 * 1024 },
   { file: "aellux.ext.dialog.min.js", maxRawBytes: 1024, maxGzipBytes: 0.5 * 1024 },
   { file: "aellux.ext.dialog.legacy.min.js", maxRawBytes: 14.5 * 1024, maxGzipBytes: 5 * 1024 },
-  { file: "aellux.ext.anchor.min.js", maxRawBytes: 15 * 1024, maxGzipBytes: 6 * 1024 },
+  { file: "aellux.ext.anchor.min.js", maxRawBytes: 16 * 1024, maxGzipBytes: 6 * 1024 },
   { file: "aellux.ext.anchor.min.css", maxRawBytes: 2 * 1024, maxGzipBytes: 1024 },
-  { file: "aellux.ext.anchor.legacy.min.js", maxRawBytes: 23 * 1024, maxGzipBytes: 8 * 1024 },
+  { file: "aellux.ext.anchor.legacy.min.js", maxRawBytes: 23.5 * 1024, maxGzipBytes: 8.25 * 1024 },
   // Dedicated lazy Extension, including dormant pixel-limit lifecycle;
   // measured costs and previous limits: core-extensions/overflow-marquee.md.
   { file: "aellux.ext.overflow-marquee.min.js", maxRawBytes: 13.5 * 1024, maxGzipBytes: 5 * 1024 },

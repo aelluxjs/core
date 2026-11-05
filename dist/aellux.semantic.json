@@ -3270,7 +3270,7 @@
       "name": "--ae-anchor-switch-duration",
       "extension": "anchor",
       "syntax": "<time>",
-      "description": "Native target-switch transition duration; reduced motion disables the transition.",
+      "description": "CSS Motion target-switch duration, with native fallback; reduced motion disables switching.",
       "default": "0ms",
       "values": [
         "0ms",
@@ -3284,7 +3284,7 @@
       "name": "--ae-anchor-switch-ease",
       "extension": "anchor",
       "syntax": "<easing-function>",
-      "description": "Easing for native Anchor target switches.",
+      "description": "CSS easing for Anchor target switches; position and matched dimensions share one clock.",
       "default": "ease-in-out",
       "values": [
         "linear",

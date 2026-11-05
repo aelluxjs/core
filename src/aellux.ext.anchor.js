@@ -13,7 +13,7 @@
  * `data-ae-anchor-target`; a Present Group target resolves to its selected member.
  * Without an explicit target, the positioning parent is the target.
  * `data-ae-anchor-scroll-into-view="block inline"` optionally scrolls the Anchor
- * target on visibility or effective target changes, before native switching.
+ * target on visibility or effective target changes, before switching.
  * `data-ae-maxfps` sets an optional maximum update rate.
  * Scroll, resize, size and intersection changes, and bubbling `AelluxJsLayout`
  * events schedule placement updates at the configured rate. A Layout event with
@@ -140,7 +140,8 @@
     const state = {
       invalidContext: false, active: false, revision: 0,
       target: null, resolvedTarget: null, reference: null,
-      group: null, lastPlacement: null, switchTimer: null,
+      group: null, lastPlacement: null, switchOperation: null,
+      motionId: AelluxJs.motion.id(), cleanupLayoutId: nextLayoutId++,
       interruptSwitch: false, scrollRevision: 0,
       scrollVisible: false, scrollPending: false, ownClass: null, ownStyle: null,
       layoutId: nextLayoutId++, styleLayoutId: nextLayoutId++,
@@ -170,7 +171,7 @@
     }
     if (typeof root.ResizeObserver === "function") {
       state.observer = new root.ResizeObserver(entries => {
-        if (state.switchTimer !== null && entries.every(entry => entry.target === element)) return;
+        if (state.switchOperation !== null && entries.every(entry => entry.target === element)) return;
         scheduleAnchor(element);
       });
     }
@@ -201,6 +202,7 @@
     }
     AelluxJs.waitLayout.cancel(state.layoutId);
     AelluxJs.waitLayout.cancel(state.styleLayoutId);
+    AelluxJs.waitLayout.cancel(state.cleanupLayoutId);
     await AelluxJs.waitLayout.update(state.styleLayoutId, deactivate, [element, state, memory]);
   }
 
@@ -467,14 +469,16 @@
       }
       const moved = !previous || previous.signature !== placement.signature;
       // Keep scroll notifications with the measured placement across the
-      // asynchronous read/write phases. Unchanged destinations keep their timer.
-      const scrollMoved = moved && state.switchTimer !== null &&
+      // asynchronous read/write phases. Unchanged destinations keep their clock.
+      const scrollMoved = moved && state.switchOperation !== null &&
         previous?.scrollRevision !== placement.scrollRevision;
       if ((switching || scrollMoved) && placement.duration > 0 && !state.interruptSwitch) {
-        startSwitch(element, state, placement.duration);
-      } else if (moved || state.interruptSwitch || !placement.duration) stopSwitch(element, state);
+        startSwitch(element, state, placement);
+      } else {
+        if (moved || state.interruptSwitch || !placement.duration) stopSwitch(element, state);
+        writePlacement(element, placement);
+      }
       state.interruptSwitch = false;
-      writePlacement(element, placement);
       rememberVisual(element, state);
       state.lastUpdateAt = now();
       state.lastPlacement = placement;
@@ -549,7 +553,7 @@
       const constrain = value => Math.max(minimum, Math.min(Number.isFinite(maximum) ? maximum : Infinity, value));
       // An application width/height that differs from the prior weak match
       // remains authoritative. The percentage self-pivot also uses its actual box.
-      return !anchors.get(element)?.switchTimer && Math.abs(parseFloat(style[axis]) - constrain(previous)) > 0.5
+      return !anchors.get(element)?.switchOperation && Math.abs(parseFloat(style[axis]) - constrain(previous)) > 0.5
         ? actual : constrain(desired) + (borderBox ? 0 : extra);
     };
     const selfWidth = projectSize("width", selfRect.width / scaleX, targetRect.width);
@@ -580,10 +584,15 @@
     const rawDuration = style.getPropertyValue("--ae-anchor-switch-duration").trim();
     const duration = AelluxJs.currentPreference("reduced-motion") === "reduced" ? 0 :
       Math.max(0, (parseFloat(rawDuration) || 0) * (rawDuration.endsWith("ms") ? 1 : 1000));
+    // Matched positioning uses the target pivot plus a percentage self-pivot.
+    // Its rendered width/height may change during motion (including authored
+    // inline sizing); that alone must not look like a changed destination.
+    const position = tokens.includes("width") || tokens.includes("height")
+      ? [selected.pivotX, selected.pivotY] : [selected.x, selected.y];
     return { valid: true, target, reference, selected, opacity, duration,
       scrollRevision: anchors.get(element)?.scrollRevision || 0,
       width: targetRect.width, height: targetRect.height,
-      signature: [selected.x, selected.y, targetRect.width, targetRect.height, ...selected.self].join("/") };
+      signature: [...position, targetRect.width, targetRect.height, ...selected.self].join("/") };
   }
 
   function writePlacement(element, placement) {
@@ -617,7 +626,7 @@
 
   function hideForTarget(element, state, placement) {
     // Keep the prior geometry across a group switch's invisible preparation,
-    // so it can seed the native transition once the new target becomes visible.
+    // so it can seed the transition once the new target becomes visible.
     const previous = state.group && state.lastPlacement?.target !== placement.target
       ? state.lastPlacement : null;
     deactivate(element, state);
@@ -675,8 +684,9 @@
   }
 
   function stopSwitch(element, state) {
-    if (state.switchTimer !== null) root.clearTimeout(state.switchTimer);
-    state.switchTimer = null;
+    state.switchOperation = null;
+    AelluxJs.motion.cancel(state.motionId);
+    AelluxJs.waitLayout.cancel(state.cleanupLayoutId);
     element.classList.remove(switchingClass);
     rememberVisual(element, state);
   }
@@ -689,16 +699,49 @@
     style.setProperty(name, value);
   }
 
-  function startSwitch(element, state, duration) {
-    if (state.switchTimer !== null) root.clearTimeout(state.switchTimer);
+  function startSwitch(element, state, placement) {
+    let handoff = null;
+    if (state.switchOperation) {
+      // A paused transition would jump to its previous destination on cancel.
+      // Copy the rendered values before releasing that clock, then materialize
+      // a bounded frozen frame for CSS to use as the next transition's origin.
+      const properties = ["transform", ...(element.getAttribute(matchAttribute) || "").split(/\s+/)
+        .filter(property => property === "width" || property === "height")];
+      const computed = root.getComputedStyle(element);
+      const values = properties.map(property => [property, computed.getPropertyValue(property)]);
+      // Suppress only the properties being frozen. Existing application
+      // transitions on other properties must survive the handoff as well.
+      const transitions = computed.transitionProperty.split(",").flatMap(property => {
+        property = property.trim();
+        return property === "all" ? (element.getAnimations?.() || []).map(animation => animation.transitionProperty).filter(Boolean) : [property];
+      }).filter(property => !properties.includes(property));
+      handoff = AelluxJs.persist.element.save(element, [], [...properties, "transition-property"]);
+      element.style.setProperty("transition-property", transitions.join(",") || "none", "important");
+      for (const [property, value] of values) element.style.setProperty(property, value, "important");
+      element.getBoundingClientRect();
+    }
+    stopSwitch(element, state);
+    const operation = {};
+    state.switchOperation = operation;
     element.classList.add(switchingClass);
-    // CSS owns interpolation and native retargeting from the current visual
-    // position. This finite timer only releases the temporary transition rule.
-    state.switchTimer = root.setTimeout(() => {
-      if (anchors.get(element) !== state) return;
-      stopSwitch(element, state);
-      scheduleAnchor(element);
-    }, duration + 100);
+    AelluxJs.motion.run(element, {
+      id: state.motionId, extension: extensionName, nativeDuration: placement.duration, ownedOnly: true,
+      abort: () => anchors.get(element) !== state || state.switchOperation !== operation,
+      apply: () => {
+        if (handoff) handoff.restore();
+        writePlacement(element, placement);
+      }
+    }).catch(cause => {
+      AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
+        { cause, extension: extensionName, element, method: "switch" });
+    }).then(() => {
+      if (anchors.get(element) !== state || state.switchOperation !== operation) return;
+      return AelluxJs.waitLayout.update(state.cleanupLayoutId, () => {
+        if (anchors.get(element) !== state || state.switchOperation !== operation) return;
+        stopSwitch(element, state);
+        scheduleAnchor(element);
+      });
+    });
   }
 
   function resolveElement(value) {

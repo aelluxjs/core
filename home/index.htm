@@ -63,7 +63,7 @@
   <div id="main-navigation-wrapper" data-ae-present="transform opacity" data-ae-dismiss-on-click="false" hidden
     class="position-fixed z-2 p-2 bottom-0 w-100 d-flex align-items-center justify-content-center">
     <div id="main-navigation-3D"
-      class="d-flex border align-items-center justify-content-center bg-body p-3 px-0 rounded-1 shadow-lg"
+      class="d-flex border align-items-center justify-content-center bg-body p-3 px-0 rounded-1 shadow-lg position-relative"
       style="max-width: 100%;">
       <nav id="main-navigation" data-ae-scrollbox="pointer" style="overflow-y: clip;"
         class="no-scrollbar position-relative d-inline-flex align-items-center justify-content-start gap-1 ps-2"
@@ -72,7 +72,7 @@
           data-ae-anchor-scroll-into-view="center center" class="bg-warning rounded-2 z-0 d-inline-block"
           aria-hidden="true"
           style="pointer-events: none; --ae-anchor-switch-duration: 250ms; --ae-anchor-switch-ease: cubic-bezier(0.34, 1.56, 0.64, 1);"></a>
-        <a id="item2" draggable="false" class="fw-normal btn bg-transparent text-body position-relative z-1"
+        <a id="item2" draggable="false" class="fw-normal btn bg-transparent text-body position-relative z-1 ms-2"
           href="#getting-started">Start</a>
         <a id="item3" draggable="false" class="fw-normal btn bg-transparent text-body position-relative z-1"
           href="#examples">Examples</a>
@@ -83,7 +83,7 @@
         <a id="item6" draggable="false" class="fw-normal btn bg-transparent text-body position-relative z-1 me-2"
           href="#brand-assets">Branding</a>
       </nav>
-      <button id="item0" class="btn btn-outline-warning position-relative z-1 me-3 ms-2 lh-1 p-2"
+      <button id="item0" class="btn btn-outline-warning position-relative z-1 ms-2 lh-1 p-2"
         data-ae-preference="color-scheme" data-ae-next type="button" title="Change color theme">
         <span data-ae-label="dark" hidden>
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-moon-fill"
@@ -107,7 +107,13 @@
         </span>
       </button>
       <a id="item1" class="btn btn-outline-warning position-relative z-1 me-3 ms-2 lh-1 p-2" title="Back to top"
-        href="#main">&uarr;</a>
+        href="#main">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+          class="bi bi-arrow-up-square-fill" viewBox="0 0 16 16">
+          <path
+            d="M2 16a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2zm6.5-4.5V5.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 5.707V11.5a.5.5 0 0 0 1 0" />
+        </svg>
+      </a>
     </div>
   </div>
 
@@ -145,7 +151,7 @@
               data-ae-preference="color-scheme">
               <button class="btn bg-transparent" type="button" data-ae-option="light">Light</button>
               <button class="btn bg-transparent" type="button" data-ae-option="dark">Dark</button>
-              <button class="btn bg-transparent" type="button" data-ae-option="auto">System</button>
+              <button class="btn bg-transparent" type="button" data-ae-option="auto">Auto</button>
             </div>
           </div>
           <div class="col-md-5">

@@ -26,7 +26,7 @@
     },
     {
       "name": "--ae-anchor-switch-duration",
-      "description": "Native target-switch transition duration; reduced motion disables the transition.\n\nValue syntax: <time>.\n\nDefault behavior: \"0ms\".\n\nSuggested values: `0ms`, `150ms`, `250ms`. This is an open grammar, not a closed enumeration.",
+      "description": "CSS Motion target-switch duration, with native fallback; reduced motion disables switching.\n\nValue syntax: <time>.\n\nDefault behavior: \"0ms\".\n\nSuggested values: `0ms`, `150ms`, `250ms`. This is an open grammar, not a closed enumeration.",
       "syntax": "<time>",
       "references": [
         {
@@ -48,7 +48,7 @@
     },
     {
       "name": "--ae-anchor-switch-ease",
-      "description": "Easing for native Anchor target switches.\n\nValue syntax: <easing-function>.\n\nDefault behavior: \"ease-in-out\".\n\nSuggested values: `linear`, `ease`, `ease-in-out`. This is an open grammar, not a closed enumeration.",
+      "description": "CSS easing for Anchor target switches; position and matched dimensions share one clock.\n\nValue syntax: <easing-function>.\n\nDefault behavior: \"ease-in-out\".\n\nSuggested values: `linear`, `ease`, `ease-in-out`. This is an open grammar, not a closed enumeration.",
       "syntax": "<easing-function>",
       "references": [
         {
