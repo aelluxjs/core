@@ -1,3 +1,46 @@
+function setupDocumentScrollProgress() {
+  const target = document.getElementById("main-navigation-3D");
+  if (!target) return;
+  let pending = false;
+  let dirty = false;
+
+  function schedule() {
+    dirty = true;
+    if (pending) return;
+    pending = true;
+    $ae.waitLayout.read(() => {
+      dirty = false;
+      const documentScroll = document.scrollingElement || document.documentElement;
+      const maximum = documentScroll.scrollHeight - documentScroll.clientHeight;
+      return maximum > 0 ? Math.max(0, Math.min(1, documentScroll.scrollTop / maximum)) : 0;
+    }).then(progress => $ae.waitLayout.update(() => {
+      if (!target.isConnected) return;
+      const value = String(progress);
+      if (target.style.getPropertyValue("--home-scroll-progress-y") !== value)
+        target.style.setProperty("--home-scroll-progress-y", value);
+    })).catch(error => {
+      console.error("Failed to update document scroll progress.", error);
+    }).finally(() => {
+      pending = false;
+      if (dirty) schedule();
+    });
+  }
+
+  window.addEventListener("scroll", schedule, { passive: true });
+  window.addEventListener("resize", schedule);
+  window.addEventListener("pageshow", schedule);
+  window.addEventListener("load", schedule, { once: true });
+  if (window.ResizeObserver) {
+    const observer = new ResizeObserver(schedule);
+    observer.observe(document.documentElement);
+    observer.observe(document.body);
+  }
+  schedule();
+}
+
+if ($ae.waitLayout) setupDocumentScrollProgress();
+else $ae.on("Ready", setupDocumentScrollProgress, { once: true });
+
 document.addEventListener("click", async event => {
   const button = event.target.closest("[data-copy]");
   if (!button) return;
