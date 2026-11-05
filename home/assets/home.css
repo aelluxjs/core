@@ -144,15 +144,16 @@ a { text-underline-offset: .22em; }
   backface-visibility: visible;
 }
 #main-navigation-3D:after{
+  --x:var(--home-scroll-progress-y);
   content:" ";
   display:block;
-  background-color: rgba(var(--bs-warning-rgb), 1);
+  background-color: rgba(var(--bs-warning-rgb), var(--x));
   position: absolute;
   bottom:0;
   left:0;
   width: 100%;
   height: 1px;
-  transform: scale(var(--home-scroll-progress-y));
+  transform: scaleX(var(--x));
 }
 .theme-controls .btn { font-size: .75rem; background-color: #6c717d14!important; }
 .theme-controls .ae--active { background: var(--bs-warning)!important; border-color: var(--bs-warning); color: #17191c; }
