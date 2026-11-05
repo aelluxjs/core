@@ -83,13 +83,13 @@
           <div id="toast-present-group"
             class="position-fixed w-100 top-0 gap-1 z-1 pe-none p-4 pt-1 flex-column d-flex justify-content-center align-items-center"
             data-ae-present-group="2">
-            <div id="toast-1" data-ae-present="opacity" data-ae-auto-unpop="1s" data-ae-unpop-on-click="false"
+            <div id="toast-1" data-ae-present="opacity" data-ae-auto-dismiss="1s" data-ae-dismiss-on-click="false"
               hidden="true"
               class="position-relative overflow-hidden text-bg-danger small rounded-1 p-2 py-1 w-100 text-center"
               style="max-width: 300px;">
               <progress data-ae-progress-target="toast-1" class="toast-progress"></progress>
             </div>
-            <div id="toast-2" data-ae-present="opacity" data-ae-auto-unpop="1s" data-ae-unpop-on-click="false"
+            <div id="toast-2" data-ae-present="opacity" data-ae-auto-dismiss="1s" data-ae-dismiss-on-click="false"
               hidden="true"
               class="position-relative overflow-hidden text-bg-danger small rounded-1 p-2 py-1 w-100 text-center"
               style="max-width: 300px;">
@@ -183,7 +183,7 @@
                     </div>
 
                                           <div id="children-overview" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -228,7 +228,7 @@
                     </div>
 
                                           <div id="children-runtime" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false" >
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false" >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -321,7 +321,7 @@
                     </div>
 
                                           <div id="children-extensions" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -401,7 +401,7 @@
                     </div>
 
                                           <div id="children-core-extensions" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion                            data-ae-present-group>
                                                                                                   <div
@@ -425,7 +425,7 @@
                                   </div>
 
                                   <div id="children2-bundled" class="docs-menu-panel border-start ms-2"
-                                    data-ae-present="height opacity" data-ae-unpop-on-click="false"                                     hidden>
+                                    data-ae-present="height opacity" data-ae-dismiss-on-click="false"                                     hidden>
                                       <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                   <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -520,7 +520,7 @@
                                   </div>
 
                                   <div id="children2-optional" class="docs-menu-panel border-start ms-2"
-                                    data-ae-present="height opacity" data-ae-unpop-on-click="false"                                     hidden>
+                                    data-ae-present="height opacity" data-ae-dismiss-on-click="false"                                     hidden>
                                       <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                   <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -573,7 +573,7 @@
                     </div>
 
                                           <div id="children-integrations" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -676,7 +676,7 @@
           <main id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content"
             ajax-load="doc-content">
             <h1>Events</h1>
-<p><code>AelluxJsProgress</code> is a generic numeric notification emitted on the producer with <code>bubbles: false</code> and <code>cancelable: false</code>. Detail contains finite numbers <code>{ value, max }</code>, with <code>max &gt; 0</code> and <code>0 &lt;= value &lt;= max</code>. Listen directly with <code>$ae.onEvent(producer, &quot;Progress&quot;, handler)</code>. It is independent of Feedback; <code>feedback.progress()</code> still emits <code>AelluxJsFeedback</code>. Present auto-unpop adds <code>status</code>, <code>elapsedMs</code>, <code>durationMs</code> and <code>remainingMs</code>; see <a href="../core-extensions/optional/progress.htm">Progress</a>.</p>
+<p><code>AelluxJsProgress</code> is a generic numeric notification emitted on the producer with <code>bubbles: false</code> and <code>cancelable: false</code>. Detail contains finite numbers <code>{ value, max }</code>, with <code>max &gt; 0</code> and <code>0 &lt;= value &lt;= max</code>. Listen directly with <code>$ae.onEvent(producer, &quot;Progress&quot;, handler)</code>. It is independent of Feedback; <code>feedback.progress()</code> still emits <code>AelluxJsFeedback</code>. Present auto-dismiss adds <code>status</code>, <code>elapsedMs</code>, <code>durationMs</code> and <code>remainingMs</code>; see <a href="../core-extensions/optional/progress.htm">Progress</a>.</p>
 <p>AelluxJs uses the <code>AelluxJs</code> prefix for its DOM events by default. Its event helpers also accept exact names without this prefix. The main API listens on <code>document</code>; <code>onEvent</code> and <code>offEvent</code> listen on an explicit target; a mounted element controller listens on its element. A document listener also receives bubbling events from elements:</p>
 <pre><code class="language-js">const onUpdate = event =&gt; console.log(event.type);
 $ae.on(&quot;Update&quot;, onUpdate);
@@ -930,22 +930,22 @@ $ae.on(&quot;ViewportError&quot;, event =&gt; {
 </tr>
 <tr>
 <td>Present</td>
-<td><code>AelluxJsBeforePop</code>, <code>AelluxJsBeforeUnpop</code></td>
+<td><code>AelluxJsBeforePop</code>, <code>AelluxJsBeforeDismiss</code>, <code>AelluxJsBeforeUnpop</code></td>
 <td>Present element; cancelable before a transition starts.</td>
 </tr>
 <tr>
 <td>Present</td>
-<td><span class="large"><code>AelluxJsPopping</code>, <code>AelluxJsUnpopping</code>, <code>AelluxJsPop</code>, <code>AelluxJsUnpop</code></span></td>
+<td><span class="large"><code>AelluxJsPopping</code>, <code>AelluxJsDismissing</code>, <code>AelluxJsUnpopping</code>, <code>AelluxJsPop</code>, <code>AelluxJsDismiss</code>, <code>AelluxJsUnpop</code></span></td>
 <td><span class="large">Present element; transition start and completion notifications.</span></td>
 </tr>
 <tr>
 <td>Present</td>
 <td><code>AelluxJsLayout</code></td>
-<td><span class="large">Present element; bubbles when a Pop or Unpop transition starts. <code>detail</code> contains <code>origin</code> (<code>&quot;present.pop&quot;</code> or <code>&quot;present.unpop&quot;</code>) and <code>durationMs</code>, the maximum expected layout change time in milliseconds. Anchor listens on the shared positioning parent.</span></td>
+<td><span class="large">Present element; bubbles when a Pop, Dismiss or Unpop transition starts. <code>detail</code> contains <code>origin</code> (<code>&quot;present.pop&quot;</code>, <code>&quot;present.dismiss&quot;</code> or <code>&quot;present.unpop&quot;</code>) and <code>durationMs</code>, the maximum expected layout change time in milliseconds. Anchor listens on the shared positioning parent.</span></td>
 </tr>
 <tr>
 <td>Present</td>
-<td><code>AelluxJsUnpopFocusLost</code></td>
+<td><code>AelluxJsDismissFocusLost</code>, <code>AelluxJsUnpopFocusLost</code></td>
 <td><span class="large"><code>document</code>; <code>detail</code> is <code>{ element, focused }</code>, identifying the closed Present region and the element that lost focus.</span></td>
 </tr>
 <tr>
@@ -980,7 +980,7 @@ $ae.on(&quot;ViewportError&quot;, event =&gt; {
 </tr>
 </tbody></table>
 <pre><code class="language-js">panel.addEventListener(&quot;AelluxJsLayout&quot;, event =&gt; {
-  console.log(event.detail.origin); // &quot;present.pop&quot; or &quot;present.unpop&quot;
+  console.log(event.detail.origin); // &quot;present.pop&quot;, &quot;present.dismiss&quot; or &quot;present.unpop&quot;
   console.log(event.detail.durationMs); // Maximum transition time in milliseconds.
 });
 </code></pre>
@@ -1044,6 +1044,10 @@ $ae.on(&quot;ViewportError&quot;, event =&gt; {
                   rel="noopener noreferrer">ChatGPT</a>,
                 <a style="color:inherit!important;" href="https://openai.com/codex/" target="_blank"
                   rel="noopener noreferrer">Codex</a>,
+                <a style="color:inherit!important;" href="https://www.google.com/" target="_blank"
+                  rel="noopener noreferrer">Google</a>,
+                <a style="color:inherit!important;" href="https://gemini.google.com/" target="_blank"
+                  rel="noopener noreferrer">Gemini</a>,
                 <a style="color:inherit!important;" href="https://code.visualstudio.com/" target="_blank"
                   rel="noopener noreferrer">Visual Studio Code</a>,
                 <a style="color:inherit!important;" href="https://getbootstrap.com/" target="_blank"

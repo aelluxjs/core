@@ -225,7 +225,7 @@ A transform applied to the observed element changes its measured rectangle. Driv
 
 Without CSS property registration, custom properties follow native inheritance behavior; explicitly inheriting the child values works in either environment.
 
-An element can declare both `data-ae-viewport` and `data-ae-present="opacity transform"`. Present continues to own presentation and transitions. Viewport does not drive `pop()`/`unpop()` progress, add animation settings or execute animations. Prefer separate structural and visual elements when transforms are involved.
+An element can declare both `data-ae-viewport` and `data-ae-present="opacity transform"`. Present continues to own presentation and transitions. Viewport does not drive `pop()`/`dismiss()` progress, add animation settings or execute animations. Prefer separate structural and visual elements when transforms are involved.
 
 ## Lifecycle
 
@@ -250,7 +250,7 @@ All entries below are **Known Limits**. See [Axes and outputs](#axes-and-outputs
 | L5: Oversized elements | <span class="large">Visible area is divided by the element's total rectangular area, rather than the viewport's area. An element larger than its reference may never reach `--ae-viewport-visible: 1`.</span> |
 | L6: Unmeasurable geometry | <span class="large">Zero-sized or non-finite element/reference geometry publishes neutral `0` for selected CSS positions and visible area. Event coordinates/state are `null` with `measurable: false`; unknown initial geometry stays silent. Neutral CSS positions do not prove center alignment or outside state; unselected axes retain their authored declarations.</span> |
 | L7: Physical coordinates | <span class="large">Negative X means left and positive X means right; negative Y means above and positive Y means below. RTL writing direction does not reverse these signs.</span> |
-| L8: Observation only | <span class="large">Viewport publishes geometry without controlling scroll, animation, `pop()`/`unpop()`, `hidden`, opacity, transforms or interaction state. Present and other consumers require explicit integration.</span> |
+| L8: Observation only | <span class="large">Viewport publishes geometry without controlling scroll, animation, `pop()`/`dismiss()`, `hidden`, opacity, transforms or interaction state. Present and other consumers require explicit integration.</span> |
 | L9: Notification precision and cadence | <span class="large">`ViewportChange`, `ViewportFullyInside` and `ViewportFullyOutside` describe processed scheduler samples. Numeric changes use a normalized `0.000001` tolerance; state and reference-edge crossings bypass it. Intermediate geometry between processed samples can be missed. Events are asynchronous and are not synchronized frame by frame with the compositor. The shared `Layout` event remains a refresh input.</span> |
 
 ### Performance Risks

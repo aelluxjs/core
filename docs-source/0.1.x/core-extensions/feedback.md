@@ -63,7 +63,7 @@ Set `data-ae-present-target` on the boundary to request `Present.pop()` for each
 | Empty or whitespace-only | Use the message target's closest `data-ae-present` element, including the target itself. If none exists, use the transform target's closest Present element. Request pop only on that element. |
 | Element ID, with or without `#` | Request pop only on that element. |
 
-Feedback updates the text and type classes before requesting the pop, then starts any requested feedback motion. The call also applies when the Present target is already open, following the usual Present replay behavior, auto-unpop timing, groups and cancelable `BeforePop` event. Feedback does not await the transition. Present must already be initialized and targets mounted; its public API ignores unmounted elements. In Basic, explicitly register Present as well as Feedback. If Present is unavailable, message and motion handling still run. An invalid explicit target ID records `2011` when Present is initialized. Automatic discovery falls back to the transform target when the message target is unresolved or has no closest Present element. It does not open additional Present elements or search above the selected nearest container.
+Feedback updates the text and type classes before requesting the pop, then starts any requested feedback motion. The call also applies when the Present target is already open, following the usual Present replay behavior, auto-dismiss timing, groups and cancelable `BeforePop` event. Feedback does not await the transition. Present must already be initialized and targets mounted; its public API ignores unmounted elements. In Basic, explicitly register Present as well as Feedback. If Present is unavailable, message and motion handling still run. An invalid explicit target ID records `2011` when Present is initialized. Automatic discovery falls back to the transform target when the message target is unresolved or has no closest Present element. It does not open additional Present elements or search above the selected nearest container.
 
 ```html
 <section data-ae-feedback
@@ -97,25 +97,25 @@ Without explicit message/transform targets, a group uses its reserved member as 
 ```html
 <section id="feedback-source" data-ae-feedback data-ae-present-target="notifications"></section>
 <div id="notifications" data-ae-present-group="3" aria-live="polite">
-  <article id="notice-1" data-ae-present="opacity" data-ae-auto-unpop="5000"
-           data-ae-unpop-on-click="false" hidden>
+  <article id="notice-1" data-ae-present="opacity" data-ae-auto-dismiss="5000"
+           data-ae-dismiss-on-click="false" hidden>
     <progress max="100" value="0" data-ae-progress-target="notice-1"
               aria-label="Time until notification closes"></progress>
   </article>
-  <article id="notice-2" data-ae-present="opacity" data-ae-auto-unpop="5000"
-           data-ae-unpop-on-click="false" hidden>
+  <article id="notice-2" data-ae-present="opacity" data-ae-auto-dismiss="5000"
+           data-ae-dismiss-on-click="false" hidden>
     <progress max="100" value="0" data-ae-progress-target="notice-2"
               aria-label="Time until notification closes"></progress>
   </article>
-  <article id="notice-3" data-ae-present="opacity" data-ae-auto-unpop="5000"
-           data-ae-unpop-on-click="false" hidden>
+  <article id="notice-3" data-ae-present="opacity" data-ae-auto-dismiss="5000"
+           data-ae-dismiss-on-click="false" hidden>
     <progress max="100" value="0" data-ae-progress-target="notice-3"
               aria-label="Time until notification closes"></progress>
   </article>
 </div>
 ```
 
-After mounting, publish normally: `$ae("feedback-source").feedback.success("Saved.")`. The group explicitly sets capacity to three, bounded by the three HTML members; a fourth message reuses the oldest active slot and resets only its auto-unpop. An empty group value defaults to one. No application timer or member-selection code is needed. Basic registers Feedback, Present and [Progress](optional/progress.md) explicitly; Full registers them automatically.
+After mounting, publish normally: `$ae("feedback-source").feedback.success("Saved.")`. The group explicitly sets capacity to three, bounded by the three HTML members; a fourth message reuses the oldest active slot and resets only its auto-dismiss. An empty group value defaults to one. No application timer or member-selection code is needed. Basic registers Feedback, Present and [Progress](optional/progress.md) explicitly; Full registers them automatically.
 
 Use opacity-only Present motion when animating Feedback on the same member. To combine transform animations, give Feedback an explicit descendant transform target and keep Present's transform on the outer member; do not have both replace one transform. Explicit descendant IDs are absolute, so configure independent sources/targets if per-member nested motion is required. Live-region announcements and reading time remain application responsibilities.
 

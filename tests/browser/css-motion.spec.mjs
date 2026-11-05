@@ -32,15 +32,15 @@ async function startPresent(page, options = {}) {
   });
 }
 
-test("Present unpop keeps a paused rendered value while its replacement timeline starts at zero", async ({ page }) => {
+test("Present dismiss keeps a paused rendered value while its replacement timeline starts at zero", async ({ page }) => {
   await startPresent(page);
   await page.evaluate(() => {
     const element = document.getElementById("present-motion");
     element.style.setProperty("--ae-pop-ease", "linear");
-    element.style.setProperty("--ae-unpop-duration", "600ms");
-    element.style.setProperty("--ae-unpop-ease", "linear");
-    element.style.setProperty("--ae-unpop-aellux-ease", "backIn");
-    element.style.setProperty("--ae-unpop-transform", "translateX(-80px)");
+    element.style.setProperty("--ae-dismiss-duration", "600ms");
+    element.style.setProperty("--ae-dismiss-ease", "linear");
+    element.style.setProperty("--ae-dismiss-aellux-ease", "backIn");
+    element.style.setProperty("--ae-dismiss-transform", "translateX(-80px)");
     window.opening = $ae(element).present.pop();
   });
   await expect.poll(() => page.locator("#present-motion").evaluate(element =>
@@ -50,7 +50,7 @@ test("Present unpop keeps a paused rendered value while its replacement timeline
     const element = document.getElementById("present-motion");
     element.getAnimations().forEach(animation => { animation.currentTime = 270; });
     const before = new DOMMatrixReadOnly(getComputedStyle(element).transform).m41;
-    window.closing = $ae(element).present.unpop();
+    window.closing = $ae(element).present.dismiss();
     return { before, after: new DOMMatrixReadOnly(getComputedStyle(element).transform).m41 };
   });
   expect(before.after).toBeCloseTo(before.before, 3);

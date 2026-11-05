@@ -16,7 +16,7 @@ Scrollbox uses the external `aellux.ext.scrollbox.css`, requested with `{ loadSt
 
 ## Overflow fade
 
-Scrollbox follows bubbling `AelluxJsLayout` events from its container, ancestors and descendants. A finite positive `detail.durationMs` keeps measurements updated through the transition at the configured layout FPS. Present's final `Pop` and `Unpop` events also refresh the box, so a fade measured while an ancestor has `scale(0)` recovers without scroll input.
+Scrollbox follows bubbling `AelluxJsLayout` events from its container, ancestors and descendants. A finite positive `detail.durationMs` keeps measurements updated through the transition at the configured layout FPS. Present's final `Pop` and `Dismiss` events also refresh the box, so a fade measured while an ancestor has `scale(0)` recovers without scroll input.
 
 Without `data-ae-scrollbox-fade`, the visual transparency fade is enabled when exactly one axis scrolls and disabled when both axes scroll. This default follows actual overflow, so resizing or changing content can change it. The top, right, bottom and left fades correspond to the actual content hidden beyond each physical edge. User scrolling and programmatic scrolling, including smooth Snap travel, update them through the existing `publish(state)` layout read/update. Fitting content and axes whose computed overflow is not `auto` or `scroll` contribute no fade. RTL scroll offsets are normalized to physical left/right distances, including older positive-coordinate models. Native overscroll is clamped to the real range; Elastic uses the original scroll bounds and axis availability rather than its temporary transformed extent.
 

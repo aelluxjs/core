@@ -83,13 +83,13 @@
           <div id="toast-present-group"
             class="position-fixed w-100 top-0 gap-1 z-1 pe-none p-4 pt-1 flex-column d-flex justify-content-center align-items-center"
             data-ae-present-group="2">
-            <div id="toast-1" data-ae-present="opacity" data-ae-auto-unpop="1s" data-ae-unpop-on-click="false"
+            <div id="toast-1" data-ae-present="opacity" data-ae-auto-dismiss="1s" data-ae-dismiss-on-click="false"
               hidden="true"
               class="position-relative overflow-hidden text-bg-danger small rounded-1 p-2 py-1 w-100 text-center"
               style="max-width: 300px;">
               <progress data-ae-progress-target="toast-1" class="toast-progress"></progress>
             </div>
-            <div id="toast-2" data-ae-present="opacity" data-ae-auto-unpop="1s" data-ae-unpop-on-click="false"
+            <div id="toast-2" data-ae-present="opacity" data-ae-auto-dismiss="1s" data-ae-dismiss-on-click="false"
               hidden="true"
               class="position-relative overflow-hidden text-bg-danger small rounded-1 p-2 py-1 w-100 text-center"
               style="max-width: 300px;">
@@ -183,7 +183,7 @@
                     </div>
 
                                           <div id="children-overview" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -228,7 +228,7 @@
                     </div>
 
                                           <div id="children-runtime" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -322,7 +322,7 @@
                     </div>
 
                                           <div id="children-extensions" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -402,7 +402,7 @@
                     </div>
 
                                           <div id="children-core-extensions" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false" >
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false" >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion                            data-ae-present-group>
                                                                                                   <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -425,7 +425,7 @@
                                   </div>
 
                                   <div id="children2-bundled" class="docs-menu-panel border-start ms-2"
-                                    data-ae-present="height opacity" data-ae-unpop-on-click="false" >
+                                    data-ae-present="height opacity" data-ae-dismiss-on-click="false" >
                                       <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                   <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -520,7 +520,7 @@
                                   </div>
 
                                   <div id="children2-optional" class="docs-menu-panel border-start ms-2"
-                                    data-ae-present="height opacity" data-ae-unpop-on-click="false"                                     hidden>
+                                    data-ae-present="height opacity" data-ae-dismiss-on-click="false"                                     hidden>
                                       <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                   <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -573,7 +573,7 @@
                     </div>
 
                                           <div id="children-integrations" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -698,7 +698,7 @@
 </code></pre>
 <p>The anchored element and an explicit target must share the same <code>offsetParent</code>. The target may also be that <code>offsetParent</code> itself. This is the positioning reference, which need not be the immediate DOM parent. If an explicit target is missing or the pivot list has no valid pair, Anchor leaves the element inactive. If the positioning references differ, Anchor reports <code>ERROR_ANCHOR_REFERENCE_CONTEXT</code> and leaves the element inactive.</p>
 <p>Anchor uses the external <code>aellux.ext.anchor.css</code>, requested with <code>{ loadStyle: true }</code> in Basic or included in the shared Full stylesheet. Before the first valid calculation, this weak CSS keeps the element hidden and applies <code>contain: layout paint</code>. Once calculated, the <code>ae--anchored</code> class makes it visible and applies absolute positioning at <code>top: 0; left: 0</code> with <code>translate3d()</code>. Anchor publishes <code>--ae-anchor-x</code>, <code>--ae-anchor-y</code>, <code>--ae-anchor-origin-x</code>, and <code>--ae-anchor-origin-y</code> as inline CSS properties. If the target is inside a <code>data-ae-present</code> element, Anchor also copies that element&#39;s computed opacity to <code>--anchor-opacity</code>; otherwise it writes <code>1</code>. The weak CSS uses <code>opacity: var(--anchor-opacity, 1)</code> for mounted anchors, and application CSS can override the opacity. Add a <code>transform</code> transition in your own CSS if you want animated movement. On unmount, Anchor removes its class and restores the previous inline values and priorities.</p>
-<p>Anchor updates after captured scroll events, including native Scrollbox scrolling, window resize, observed size changes, intersection changes when <code>IntersectionObserver</code> is available, or a bubbling <code>AelluxJsLayout</code> event received by the shared positioning parent. There is no Anchor-specific FPS attribute or fixed default throttle. Use the shared <code>data-ae-maxfps</code> attribute when an anchored element needs an explicit ceiling; otherwise the global adaptive <code>waitLayout</code> cadence applies. Anchor observes the anchored element, target, and positioning reference; it does not normally poll their positions. Present emits <code>AelluxJsLayout</code> when a Pop or Unpop transition starts, with <code>detail.origin</code> set to <code>&quot;present.pop&quot;</code> or <code>&quot;present.unpop&quot;</code> and <code>detail.durationMs</code> set to the transition time. Anchor then checks the position throughout that duration at the eligible scheduler cadence. A zero duration schedules one deferred check. Other code that changes layout without triggering those observers can dispatch the event from a descendant of the positioning parent:</p>
+<p>Anchor updates after captured scroll events, including native Scrollbox scrolling, window resize, observed size changes, intersection changes when <code>IntersectionObserver</code> is available, or a bubbling <code>AelluxJsLayout</code> event received by the shared positioning parent. There is no Anchor-specific FPS attribute or fixed default throttle. Use the shared <code>data-ae-maxfps</code> attribute when an anchored element needs an explicit ceiling; otherwise the global adaptive <code>waitLayout</code> cadence applies. Anchor observes the anchored element, target, and positioning reference; it does not normally poll their positions. Present emits <code>AelluxJsLayout</code> when a Pop or Dismiss transition starts, with <code>detail.origin</code> set to <code>&quot;present.pop&quot;</code> or <code>&quot;present.dismiss&quot;</code> and <code>detail.durationMs</code> set to the transition time. Anchor then checks the position throughout that duration at the eligible scheduler cadence. A zero duration schedules one deferred check. Other code that changes layout without triggering those observers can dispatch the event from a descendant of the positioning parent:</p>
 <pre><code class="language-js">$ae.dispatchFrom(document.getElementById(&quot;menu&quot;), &quot;Layout&quot;, {
   detail: { origin: &quot;app.openPanel&quot;, durationMs: 300 },
   bubbles: true
@@ -773,7 +773,7 @@ await $ae.mountManager.update(anchor, &quot;anchor&quot;);
 &lt;/div&gt;
 &lt;button type=&quot;button&quot; data-ae-trigger=&quot;pop&quot; data-ae-target=&quot;second&quot;&gt;Second view&lt;/button&gt;
 </code></pre>
-<p>Or select with <code>await $ae(&quot;views&quot;).present.show(&quot;second&quot;)</code>. Attribute changes, class selection and triggers all use the same accepted selection. The associated Anchor resolves the target as soon as that selection is confirmed and positions against it once its computed CSS passes the visibility checks; it does not wait for Pop completion. A canceled BeforePop/BeforeUnpop does not publish a new selection. The normal Present opacity-copying behavior remains; the example overrides opacity to keep its decorative marker opaque while the target fades in, once the target&#39;s opacity is greater than zero.</p>
+<p>Or select with <code>await $ae(&quot;views&quot;).present.show(&quot;second&quot;)</code>. Attribute changes, class selection and triggers all use the same accepted selection. The associated Anchor resolves the target as soon as that selection is confirmed and positions against it once its computed CSS passes the visibility checks; it does not wait for Pop completion. A canceled BeforePop/BeforeDismiss does not publish a new selection. The normal Present opacity-copying behavior remains; the example overrides opacity to keep its decorative marker opaque while the target fades in, once the target&#39;s opacity is greater than zero.</p>
 <p>Target resolution is:</p>
 <ol>
 <li>Resolve the explicit <code>data-ae-anchor-target</code> ID or selector.</li>
@@ -893,6 +893,10 @@ await $ae.mountManager.update(anchor, &quot;anchor&quot;);
                   rel="noopener noreferrer">ChatGPT</a>,
                 <a style="color:inherit!important;" href="https://openai.com/codex/" target="_blank"
                   rel="noopener noreferrer">Codex</a>,
+                <a style="color:inherit!important;" href="https://www.google.com/" target="_blank"
+                  rel="noopener noreferrer">Google</a>,
+                <a style="color:inherit!important;" href="https://gemini.google.com/" target="_blank"
+                  rel="noopener noreferrer">Gemini</a>,
                 <a style="color:inherit!important;" href="https://code.visualstudio.com/" target="_blank"
                   rel="noopener noreferrer">Visual Studio Code</a>,
                 <a style="color:inherit!important;" href="https://getbootstrap.com/" target="_blank"

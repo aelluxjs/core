@@ -1,4 +1,294 @@
 (() => {
+  var __defProp = Object.defineProperty;
+  var __defProps = Object.defineProperties;
+  var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+  var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __propIsEnum = Object.prototype.propertyIsEnumerable;
+  var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+  var __spreadValues = (a, b) => {
+    for (var prop in b || (b = {}))
+      if (__hasOwnProp.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    if (__getOwnPropSymbols)
+      for (var prop of __getOwnPropSymbols(b)) {
+        if (__propIsEnum.call(b, prop))
+          __defNormalProp(a, prop, b[prop]);
+      }
+    return a;
+  };
+  var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+  var __objRest = (source, exclude) => {
+    var target = {};
+    for (var prop in source)
+      if (__hasOwnProp.call(source, prop) && exclude.indexOf(prop) < 0)
+        target[prop] = source[prop];
+    if (source != null && __getOwnPropSymbols)
+      for (var prop of __getOwnPropSymbols(source)) {
+        if (exclude.indexOf(prop) < 0 && __propIsEnum.call(source, prop))
+          target[prop] = source[prop];
+      }
+    return target;
+  };
+
+  // src/internal/sample-css-easing.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function sampleCssEasing(api, name) {
+    const points = [];
+    const round = (value) => Math.round(value * 1e5) / 1e5;
+    try {
+      for (let index = 0; index <= 60; index++) {
+        const progress = index / 60;
+        const value = api.ease(name, progress);
+        if (!Number.isFinite(value)) return null;
+        points.push(`${round(value)} ${round(progress * 100)}%`);
+      }
+    } catch (_) {
+      return null;
+    }
+    return `linear(${points.join(", ")})`;
+  }
+
+  // src/internal/create-present-playback.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  var presentPlaybackProperties = [
+    "opacity",
+    "transform",
+    "grid-template-rows",
+    "grid-template-columns",
+    "max-height",
+    "max-width",
+    "--ae-present-pop-phase"
+  ];
+  var camel = (name) => name.startsWith("--") ? name : name.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+  var suffix = (name) => name.replace(/^--ae-present-/, "");
+  var seconds = (value) => (parseFloat(value) || 0) * (String(value).trim().endsWith("ms") ? 1 : 1e3);
+  var list = (value) => value.split(/,(?![^()]*\))/).map((item) => item.trim());
+  var animationProperties = ["name", "duration", "delay", "timing-function", "direction", "fill-mode", "iteration-count", "play-state"];
+  var transitionProperties = ["property", "duration", "delay", "timing-function"];
+  function createPresentPlayback(root, api) {
+    let interpolatedSizes = false;
+    const now = () => root.performance.now();
+    const animations = (element) => {
+      try {
+        return element.getAnimations();
+      } catch (_) {
+        return null;
+      }
+    };
+    const properties = (element, controller, progress) => {
+      const tokens = (element.getAttribute(api.attr("present")) || "").split(/\s+/);
+      return presentPlaybackProperties.filter((property) => {
+        if (property === "--ae-present-pop-phase") return progress;
+        if (property === "transform") return tokens.includes(property) && !element.hasAttribute(api.attr("anchor"));
+        if (property === "opacity") return tokens.includes(property);
+        const dimension = /rows|height/.test(property) ? "height" : "width";
+        return tokens.includes(dimension) && property.startsWith(controller.presentMotion ? "grid" : "max");
+      });
+    };
+    function init() {
+      interpolatedSizes = !!api.registerCssProperty(...["height", "width"].map((dimension) => ({
+        name: `--ae-present-reverse-max-${dimension}`,
+        syntax: "<length>",
+        initialValue: "0px"
+      })));
+    }
+    function capture(element, controller, apply, size, progress) {
+      var _a, _b;
+      const computed = root.getComputedStyle(element);
+      const tracks = properties(element, controller, progress).map((property) => {
+        const dimension = /rows|height/.test(property) ? "height" : "width";
+        const to = property === "--ae-present-pop-phase" ? "1" : property.startsWith("max-") ? `${size[dimension]}px` : computed.getPropertyValue(`--ae-pop-${property.startsWith("grid") ? dimension : property}`).trim();
+        const from = property.startsWith("grid") ? computed.getPropertyValue(`--ae-from-${dimension}`).trim() : computed.getPropertyValue(property).trim();
+        return { property, from, to };
+      });
+      const before = animations(element);
+      apply();
+      const style = root.getComputedStyle(element);
+      const names = list(style.transitionProperty), durations = list(style.transitionDuration), delays = list(style.transitionDelay), easings = list(style.transitionTimingFunction);
+      for (const track of tracks) {
+        let index = names.lastIndexOf(track.property);
+        if (index < 0) index = names.lastIndexOf("all");
+        track.duration = index < 0 ? 0 : seconds(durations[index % durations.length]);
+        track.delay = index < 0 ? 0 : seconds(delays[index % delays.length]);
+        track.easing = index < 0 ? "linear" : easings[index % easings.length];
+      }
+      const after = animations(element);
+      const advanced = style.getPropertyValue("--ae-pop-aellux-ease").trim();
+      const curve = advanced && ((_a = api.motion) == null ? void 0 : _a.supported(element)) ? sampleCssEasing(api, advanced) : null;
+      return {
+        tracks,
+        effects: after == null ? void 0 : after.filter((effect) => !(before == null ? void 0 : before.includes(effect)) && tracks.some((track) => track.property === effect.transitionProperty)),
+        advancedEasing: curve && ((_b = root.CSS) == null ? void 0 : _b.supports("animation-timing-function", curve)) ? curve : null,
+        nativeEasing: style.getPropertyValue("--ae-pop-ease").trim(),
+        start: now(),
+        completed: false
+      };
+    }
+    function snapshot(element, controller, progress) {
+      let record = controller.opening;
+      if (!record) {
+        if (controller.transition) return [];
+        const owned = properties(element, controller, progress);
+        const memory = api.persist.element.save(element, [], owned);
+        const transition = api.persist.element.save(element, [], ["transition-property"]);
+        const classes = ["pop", "popping"].map((name) => api.className(name)).filter((name) => element.classList.contains(name));
+        const to = owned.map((property) => {
+          const style2 = root.getComputedStyle(element);
+          if (property === "transform" || property.startsWith("grid")) {
+            const name = property === "transform" ? property : property.endsWith("rows") ? "height" : "width";
+            return style2.getPropertyValue(`--ae-pop-${name}`).trim() || style2.getPropertyValue(property).trim();
+          }
+          return property.startsWith("max-") ? style2.getPropertyValue(property.slice(4)).trim() : style2.getPropertyValue(property).trim();
+        });
+        const style = root.getComputedStyle(element);
+        const duration = seconds(style.getPropertyValue("--ae-pop-duration"));
+        const easing = style.getPropertyValue("--ae-pop-ease").trim() || "ease-out";
+        try {
+          element.style.setProperty("transition-property", "none", "important");
+          element.classList.remove(...classes);
+          if (controller.measuredHeight) element.style.setProperty("max-height", "0px", "important");
+          if (controller.measuredWidth) element.style.setProperty("max-width", "0px", "important");
+          if (progress) element.style.setProperty("--ae-present-pop-phase", "0");
+          const from = root.getComputedStyle(element);
+          record = { completed: true, start: now(), tracks: owned.map((property, index) => {
+            const name = property === "transform" ? property : property.endsWith("rows") ? "height" : "width";
+            const start = property === "transform" || property.startsWith("grid") ? from.getPropertyValue(`--ae-from-${name}`).trim() : from.getPropertyValue(property).trim();
+            return { property, from: start, to: to[index], duration, delay: 0, easing };
+          }) };
+        } finally {
+          element.classList.add(...classes);
+          memory.restore();
+          element.getBoundingClientRect();
+          transition.restore();
+        }
+      }
+      if (record.effects) {
+        return record.effects.map((animation) => {
+          const timing = animation.effect.getTiming();
+          if (record.advancedEasing && timing.easing.startsWith("linear(")) timing.easing = record.advancedEasing;
+          else if (/^linear\(/i.test(record.nativeEasing || "") && timing.easing.startsWith("linear(")) timing.easing = record.nativeEasing;
+          const duration = Number(timing.duration);
+          const time = record.completed ? duration : Math.max(0, Math.min(duration, Number(animation.currentTime) - timing.delay));
+          const source = record.tracks.find((track) => track.property === animation.transitionProperty);
+          const frames = source.property.startsWith("grid") ? [{ [camel(source.property)]: source.from }, { [camel(source.property)]: source.to }] : animation.effect.getKeyframes().map((_a) => {
+            var _b = _a, { computedOffset } = _b, frame = __objRest(_b, ["computedOffset"]);
+            return frame;
+          });
+          return {
+            property: animation.transitionProperty,
+            frames,
+            timing,
+            time,
+            duration
+          };
+        }).filter((track) => Number.isFinite(track.duration) && track.duration > 0 && track.time > 0);
+      }
+      return record.tracks.map((track) => __spreadProps(__spreadValues({}, track), {
+        frames: [{ [camel(track.property)]: track.from }, { [camel(track.property)]: track.to }],
+        timing: { easing: /^linear\(/i.test(record.nativeEasing || "") ? record.nativeEasing : track.easing },
+        time: record.completed ? track.duration : Math.max(0, Math.min(track.duration, now() - record.start - track.delay))
+      })).filter((track) => track.duration > 0 && track.time > 0 && track.from !== track.to);
+    }
+    function complete(element, controller, progress) {
+      if (!controller.opening) return;
+      controller.opening.completed = true;
+      const tracks = snapshot(element, controller, progress);
+      controller.opening = { completed: true, start: now(), tracks: [], effects: null, saved: tracks };
+    }
+    function reverse(element, tracks, progress) {
+      const duration = Math.max(0, ...tracks.map((track) => track.time));
+      const owned = [...new Set(tracks.map((track) => track.property))];
+      const privateProperties = owned.flatMap((property) => ["from", "to"].map((phase) => `--ae-present-reverse-${phase}-${suffix(property)}`));
+      privateProperties.push(...owned.filter((property) => property.startsWith("max-")).map((property) => `--ae-present-reverse-${property}`));
+      let memory = null, effects = [];
+      const inspectable = typeof element.getAnimations === "function" && root.KeyframeEffect && typeof root.KeyframeEffect.prototype.setKeyframes === "function";
+      function apply() {
+        var _a;
+        memory = api.persist.element.save(element, [], [
+          ...owned,
+          ...privateProperties,
+          ...transitionProperties.map((name) => `transition-${name}`),
+          ...animationProperties.map((name) => `animation-${name}`)
+        ]);
+        const style = element.style;
+        if (!duration) return;
+        if (inspectable) {
+          style.setProperty("transition-property", "none", "important");
+          for (const track of tracks) style.setProperty(track.property, track.frames[0][camel(track.property)], track.property.startsWith("--") ? "" : "important");
+          element.getBoundingClientRect();
+          style.setProperty("transition-property", owned.join(","), "important");
+          style.setProperty("transition-duration", tracks.map((track) => `${track.duration}ms`).join(","), "important");
+          style.setProperty("transition-delay", "0ms", "important");
+          style.setProperty("transition-timing-function", "linear", "important");
+          for (const track of tracks) style.setProperty(track.property, track.frames[track.frames.length - 1][camel(track.property)], track.property.startsWith("--") ? "" : "important");
+          effects = ((_a = animations(element)) == null ? void 0 : _a.filter((animation) => owned.includes(animation.transitionProperty))) || [];
+          for (const animation of effects) {
+            const track = tracks.find((track2) => track2.property === animation.transitionProperty);
+            animation.effect.setKeyframes(track.frames);
+            animation.effect.updateTiming({
+              duration: track.duration,
+              easing: track.timing.easing || "linear",
+              delay: track.time - track.duration,
+              direction: "reverse",
+              fill: "both",
+              iterations: 1,
+              iterationStart: 0,
+              endDelay: 0
+            });
+            animation.currentTime = 0;
+          }
+        } else {
+          const computed = root.getComputedStyle(element);
+          const previous = animationProperties.map((name) => computed.getPropertyValue(`animation-${name}`));
+          const additions = [[], [], [], [], [], [], [], []];
+          for (const track of tracks) {
+            const name = suffix(track.property);
+            style.setProperty(`--ae-present-reverse-from-${name}`, track.frames[0][camel(track.property)]);
+            style.setProperty(`--ae-present-reverse-to-${name}`, track.frames[track.frames.length - 1][camel(track.property)]);
+            if (track.property.startsWith("max-") && interpolatedSizes)
+              style.setProperty(track.property, `var(--ae-present-reverse-${track.property})`, "important");
+            else style.setProperty(track.property, track.frames[0][camel(track.property)]);
+            const nativeName = track.property.startsWith("max-") && !interpolatedSizes ? `${name}-plain` : name;
+            const values = [
+              api.className(`present-reverse-${nativeName}`),
+              `${track.duration}ms`,
+              `${track.time - track.duration}ms`,
+              track.timing.easing || "linear",
+              "reverse",
+              "both",
+              "1",
+              "running"
+            ];
+            values.forEach((value, index) => additions[index].push(value));
+          }
+          animationProperties.forEach((name, index) => style.setProperty(`animation-${name}`, [previous[index], ...additions[index]].join(","), "important"));
+        }
+        if (progress) {
+          style.setProperty("--ae-unpop-progress", "0");
+          element.getBoundingClientRect();
+          const computed = root.getComputedStyle(element);
+          const previous = list(computed.transitionProperty);
+          const durations = list(computed.transitionDuration), delays = list(computed.transitionDelay), easings = list(computed.transitionTimingFunction);
+          style.setProperty("transition-property", [...previous, "--ae-unpop-progress"].join(","), "important");
+          for (const [name, values, extra] of [["duration", durations, `${duration}ms`], ["delay", delays, "0ms"], ["timing-function", easings, "linear"]])
+            style.setProperty(`transition-${name}`, [...previous.map((_, index) => values[index % values.length]), extra].join(","), "important");
+          style.setProperty("--ae-unpop-progress", "1");
+        }
+      }
+      return { duration, apply, cleanup() {
+        for (const animation of effects) animation.cancel();
+        effects = [];
+        memory == null ? void 0 : memory.restore();
+        memory = null;
+      } };
+    }
+    return { init, capture, snapshot: (element, controller, progress) => {
+      var _a;
+      return ((_a = controller.opening) == null ? void 0 : _a.saved) || snapshot(element, controller, progress);
+    }, complete, reverse };
+  }
+
   // src/aellux.ext.present.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
@@ -14,11 +304,11 @@
       active: AelluxJs.attr("present-active"),
       when: AelluxJs.attr("present-when"),
       triggerOn: AelluxJs.attr("trigger-on"),
-      autoUnpop: AelluxJs.attr("auto-unpop"),
+      autoDismiss: AelluxJs.attr("auto-dismiss"),
       presentMotion: AelluxJs.attr("present-motion"),
-      unpopOnClick: AelluxJs.attr("unpop-on-click"),
+      dismissOnClick: AelluxJs.attr("dismiss-on-click"),
       trigger: AelluxJs.attr("trigger"),
-      //toggle,pop,unpop
+      //toggle,pop,dismiss,unpop
       dismiss: AelluxJs.attr("dismiss"),
       //target ID
       target: AelluxJs.attr("target")
@@ -27,6 +317,7 @@
     const className = {
       pop: AelluxJs.className("pop"),
       popping: AelluxJs.className("popping"),
+      dismissing: AelluxJs.className("dismissing"),
       unpopping: AelluxJs.className("unpopping"),
       willChange: AelluxJs.className("will-change"),
       grid: AelluxJs.className("present-grid")
@@ -37,6 +328,7 @@
       init,
       destroy,
       pop,
+      dismiss,
       unpop,
       toggle,
       trigger,
@@ -44,7 +336,7 @@
       selected,
       popNext
     });
-    const POP = "Pop", UNPOP = "Unpop", BEFORE = "Before", PING = "ping", MILLISECOND = "ms", SECOND = "s", DEFAULT_PRESENT = "opacity transform height width", OPACITY_SYNTAX = "<number> | <percentage>", TRANSFORM_SYNTAX = "<transform-list> | none";
+    const POP = "Pop", DISMISS = "Dismiss", UNPOP = "Unpop", BEFORE = "Before", MILLISECOND = "ms", SECOND = "s", DEFAULT_PRESENT = "opacity transform height width", OPACITY_SYNTAX = "<number> | <percentage>", TRANSFORM_SYNTAX = "<transform-list> | none";
     const TRANSITION_PREPARE_TIME = 100;
     const TAP_CLICK_WAIT_TIME = 32;
     const presentElements = /* @__PURE__ */ new Map();
@@ -65,34 +357,38 @@
     let groupObserver = null;
     let groupsQueued = false;
     let interpolatedProgress = false;
+    let interpolatedUnpop = false;
+    const playback = createPresentPlayback(root, AelluxJs);
     let autoObserver = null;
     let presentationSequence = 0;
     const cssProperties = [
       ["pop-progress", "<number>", "0"],
-      ["unpop-progress", "<number>", "1"],
+      ["dismiss-progress", "<number>", "1"],
       ["present-pop-phase", "<number>", "0"],
-      ["present-unpop-phase", "<number>", "1"],
+      ["present-dismiss-phase", "<number>", "1"],
       ["from-opacity", OPACITY_SYNTAX, "0"],
       ["pop-opacity", OPACITY_SYNTAX, "1"],
-      ["unpop-opacity", OPACITY_SYNTAX, "0"],
+      ["dismiss-opacity", OPACITY_SYNTAX, "0"],
       ["from-transform", TRANSFORM_SYNTAX, "scale(0.5)"],
       ["pop-transform", TRANSFORM_SYNTAX, "scale(1)"],
-      ["unpop-transform", TRANSFORM_SYNTAX, "scale(1.2)"],
+      ["dismiss-transform", TRANSFORM_SYNTAX, "scale(1.2)"],
       ["from-height", "*", "0fr"],
       ["pop-height", "*", "1fr"],
-      ["unpop-height", "*", "0fr"],
+      ["dismiss-height", "*", "0fr"],
       ["from-width", "*", "0fr"],
       ["pop-width", "*", "1fr"],
-      ["unpop-width", "*", "0fr"],
+      ["dismiss-width", "*", "0fr"],
       ["pop-ease", "*", "ease-out"],
-      ["unpop-ease", "*", "ease-in"],
+      ["dismiss-ease", "*", "ease-in"],
       ["pop-duration", "<time>", "250ms"],
-      ["unpop-duration", "<time>", "250ms"]
+      ["dismiss-duration", "<time>", "250ms"]
     ];
     function init(options) {
+      playback.init();
       const descriptors = cssProperties.map(([name, syntax, initialValue]) => ({ name: `--ae-${name}`, syntax, initialValue }));
       const progressRegistered = AelluxJs.registerCssProperty(...descriptors.slice(0, 4));
       interpolatedProgress = !!(progressRegistered && root.CSS.supports && root.CSS.supports("opacity", "clamp(0, 0.5, 1)"));
+      interpolatedUnpop = !!AelluxJs.registerCssProperty({ name: "--ae-unpop-progress", syntax: "<number>", initialValue: "1" });
       AelluxJs.registerCssProperty(...descriptors.slice(4));
       AelluxJs.mountManager.add({
         extensionName,
@@ -100,8 +396,8 @@
         priority: 0,
         mount: mountPresentContainer,
         unmount: unmountPresentContainer,
-        update: (element) => autoUnpopSchedule(element, presentElements.get(element)),
-        controllers: ["pop", "unpop", "trigger", "toggle"]
+        update: (element) => autoDismissSchedule(element, presentElements.get(element)),
+        controllers: ["pop", "dismiss", "unpop", "trigger", "toggle"]
       });
       AelluxJs.mountManager.add({
         extensionName,
@@ -125,10 +421,10 @@
       autoObserver = new root.MutationObserver((records) => {
         for (const record of records) {
           const controller = presentElements.get(record.target);
-          if (controller) autoUnpopSchedule(record.target, controller);
+          if (controller) autoDismissSchedule(record.target, controller);
         }
       });
-      autoObserver.observe(document, { subtree: true, attributes: true, attributeFilter: [attr.autoUnpop] });
+      autoObserver.observe(document, { subtree: true, attributes: true, attributeFilter: [attr.autoDismiss] });
       document.addEventListener("pointerover", onHover);
       document.addEventListener("pointerout", onHover);
       AelluxJs.on("$click", OnClick);
@@ -163,9 +459,10 @@
         [attr.present, attr.presentMotion, "hidden"],
         [
           "--ae-pop-progress",
+          "--ae-dismiss-progress",
           "--ae-unpop-progress",
           "--ae-present-pop-phase",
-          "--ae-present-unpop-phase"
+          "--ae-present-dismiss-phase"
         ]
       ));
       containerAriaHandlers.set(element, AelluxJs.aria.register(element));
@@ -194,9 +491,11 @@
         motionId: AelluxJs.motion ? AelluxJs.motion.id() : fallbackMotionId++,
         transition: null,
         handoff: null,
+        opening: null,
+        reverse: null,
         operationRevision: 0,
         presentationOrder: element.hidden ? 0 : ++presentationSequence,
-        autoUnpopTimeout: null,
+        autoDismissTimeout: null,
         autoCountdown: null,
         direction: null,
         classList: element.classList,
@@ -211,6 +510,7 @@
           this.triggers.forEach(updateTriggerAriaExpanded);
         },
         stop: function(options = {}) {
+          var _a;
           const replacement = options.replacement === true;
           const transitionStart = options.transitionStart === true;
           const transition = this.transition;
@@ -233,14 +533,17 @@
               )
             );
           }
-          cancelAutoUnpop(this);
+          cancelAutoDismiss(this);
+          (_a = this.reverse) == null ? void 0 : _a.cleanup();
+          this.reverse = null;
           restoreHandoff(this);
           if (transitionStart) {
-            this.classList.remove(className.unpopping);
+            this.classList.remove(className.dismissing, className.unpopping);
           } else {
             this.classList.remove(
               className.pop,
               className.popping,
+              className.dismissing,
               className.unpopping,
               className.willChange
             );
@@ -270,7 +573,7 @@
       setProgress(element, !element.hidden);
       syncAriaExpanded(element, presentController);
       queueGroups();
-      autoUnpopSchedule(element, presentController);
+      autoDismissSchedule(element, presentController);
     }
     function unmountPresentContainer(element) {
       var _a, _b, _c;
@@ -360,15 +663,15 @@
       var _a, _b, _c, _d, _e;
       const previousTarget = triggerTargets.get(triggerElement);
       const targetSelector = triggerElement.getAttribute(attr.target);
-      const dismiss = triggerElement.getAttribute(attr.dismiss);
-      indexTriggerTarget(triggerElement, dismiss || targetSelector);
+      const dismiss2 = triggerElement.getAttribute(attr.dismiss);
+      indexTriggerTarget(triggerElement, dismiss2 || targetSelector);
       const container = triggerElement.closest(presentSelector);
       if (previousTarget) {
         (_a = presentElements.get(previousTarget)) == null ? void 0 : _a.triggers.delete(triggerElement);
       }
       let target = null;
-      if (dismiss || targetSelector) {
-        target = targetById(dismiss || targetSelector);
+      if (dismiss2 || targetSelector) {
+        target = targetById(dismiss2 || targetSelector);
       } else if (container && container.id) {
         target = container;
       }
@@ -399,15 +702,18 @@
     function pop(element) {
       return presentTransition(element, true, true);
     }
-    function unpop(element) {
+    function dismiss(element) {
       return presentTransition(element, false);
+    }
+    function unpop(element) {
+      return presentTransition(element, false, false, false, void 0, UNPOP);
     }
     function toggle(element, goto) {
       return presentTransition(element, goto);
     }
     function trigger(element, trigger2) {
       trigger2 = typeof trigger2 === "string" ? (trigger2 || "toggle").toLowerCase() : "toggle";
-      if (!["pop", "unpop", "toggle"].includes(trigger2)) AelluxJs.diagnostics.warn(
+      if (!["pop", "dismiss", "unpop", "toggle"].includes(trigger2)) AelluxJs.diagnostics.warn(
         AelluxJs.diagnostics.WARN_CONFIGURATION_VALUE,
         {
           extension: extensionName,
@@ -415,10 +721,10 @@
           attribute: attr.trigger,
           value: trigger2,
           reason: "Unknown Present action; using toggle.",
-          suggestion: "Use pop, unpop, or toggle."
+          suggestion: "Use pop, dismiss, unpop, or toggle."
         }
       );
-      const method = trigger2 === "pop" ? pop : trigger2 === "unpop" ? unpop : toggle;
+      const method = trigger2 === "pop" ? pop : trigger2 === "dismiss" ? dismiss : trigger2 === "unpop" ? unpop : toggle;
       return method(element);
     }
     function restoreMeasuredStyles(element, controller) {
@@ -444,8 +750,9 @@
       if (tokens.includes("width")) properties.push(...controller.presentMotion ? ["grid-template-columns", "width"] : ["max-width"]);
       properties.push(
         "--ae-present-pop-phase",
-        "--ae-present-unpop-phase",
+        "--ae-present-dismiss-phase",
         "--ae-pop-progress",
+        "--ae-dismiss-progress",
         "--ae-unpop-progress"
       );
       const computed = root.getComputedStyle(element);
@@ -457,6 +764,11 @@
         }
         return [property, value];
       });
+      if (controller.reverse) {
+        controller.reverse.cleanup();
+        controller.reverse = null;
+        restoreHandoff(controller);
+      }
       const memory = AelluxJs.persist.element.save(element, [], [...properties, "transition-property"]);
       const transition = AelluxJs.persist.element.save(element, [], ["transition-property"]);
       const freeze = () => {
@@ -501,12 +813,14 @@
         );
       return size;
     }
-    async function presentTransition(element, gotoVisible, forceRepop = false, groupOperation = false, presentationOrder) {
-      var _a;
+    async function presentTransition(element, gotoVisible, forceRepop = false, groupOperation = false, presentationOrder, closingDirection = DISMISS) {
+      var _a, _b, _c;
       const controller = presentElements.get(element);
       if (!controller) return;
+      const reversing = closingDirection === UNPOP && gotoVisible === false;
+      if (reversing && controller.direction === DISMISS && controller.transition) return false;
       if (controller.direction === null)
-        controller.direction = element.hidden ? UNPOP : POP;
+        controller.direction = element.hidden ? DISMISS : POP;
       if (typeof gotoVisible === "undefined" || gotoVisible === null)
         gotoVisible = controller.direction === POP ? false : true;
       const group = element.closest(groupSelector);
@@ -518,11 +832,15 @@
           return false;
         }
         if (gotoVisible) return show(group, element.id);
-        if (groups.get(group).selected === element) return show(group, "");
+        if (groups.get(group).selected === element) {
+          if (!reversing) return show(group, "");
+          if (group.getAttribute(attr.active) !== "") group.setAttribute(attr.active, "");
+          return selectGroup(group, null, groupMembers(group), UNPOP);
+        }
       }
       const hasCapacity = () => groupOperation || element === group || !gotoVisible || !(groupState == null ? void 0 : groupState.accumulating) || groupMemberActive(element, groupState) || activeGroupMembers(group, groupState).length < groupLimit(group, groupState);
       if (!hasCapacity()) return false;
-      const newDirection = gotoVisible ? POP : UNPOP;
+      const newDirection = gotoVisible ? POP : closingDirection;
       if (element.hidden && !gotoVisible || newDirection === controller.direction && !forceRepop) {
         if (!controller.transition) syncAriaExpanded(element, controller);
         return;
@@ -539,8 +857,11 @@
         if (!groupOperation && element !== group && (element.closest(groupSelector) !== group || groupState && (groups.get(group) !== groupState || groupState.revision !== groupRevision))) return;
         if (!hasCapacity()) return false;
         controller.operationRevision++;
+        const impliedReverse = reversing && !controller.opening && !controller.transition;
+        const reverseTracks = reversing && controller.motionEnabled && ((_a = AelluxJs.currentPreference) == null ? void 0 : _a.call(AelluxJs, "reduced-motion")) !== "reduced" ? playback.snapshot(element, controller, interpolatedProgress) : [];
+        if (gotoVisible) controller.opening = null;
         if (gotoVisible) controller.presentationOrder = presentationOrder === void 0 ? ++presentationSequence : presentationOrder;
-        if (!gotoVisible || !groupOperation) (_a = groups.get(group)) == null ? void 0 : _a.reservations.delete(element);
+        if (!gotoVisible || !groupOperation) (_b = groups.get(group)) == null ? void 0 : _b.reservations.delete(element);
         if (forceRepop && (!element.hidden || controller.transition)) {
           controller.stop();
           element.hidden = true;
@@ -549,7 +870,7 @@
           element.getBoundingClientRect();
         }
         const reusePreparation = !forceRepop && controller.motionEnabled && controller.transition !== null && controller.classList.contains(className.willChange);
-        const waitForPreparation = controller.motionEnabled && !reusePreparation;
+        const waitForPreparation = controller.motionEnabled && !reusePreparation && !reversing;
         let previousSize = null;
         const handoff = !gotoVisible && controller.motionEnabled ? captureHandoff(element, controller) : null;
         if (handoff && (controller.measuredHeight || controller.measuredWidth)) {
@@ -564,13 +885,15 @@
         }
         controller.handoff = handoff;
         controller.direction = newDirection;
+        if (reversing) controller.reverse = playback.reverse(element, reverseTracks, interpolatedUnpop);
         controller.setTriggerExpanded(gotoVisible);
         if (!handoff) {
           setPhase(element, "pop", "0");
-          setPhase(element, "unpop", "0");
+          setPhase(element, "dismiss", "0");
           element.style.setProperty("--ae-pop-progress", "0");
-          element.style.setProperty("--ae-unpop-progress", "0");
+          element.style.setProperty("--ae-dismiss-progress", "0");
         }
+        if (gotoVisible || reversing) element.style.setProperty("--ae-unpop-progress", "0");
         root.getComputedStyle(element).getPropertyValue("--ae-pop-progress");
         const interrupted = new Promise((_, interruptTransition) => {
           transition = {
@@ -586,7 +909,7 @@
         element.hidden = false;
         openPresentElements.add(element);
         let size = null;
-        if (controller.measuredHeight || controller.measuredWidth)
+        if (!reversing && (controller.measuredHeight || controller.measuredWidth))
           size = await prepareMeasuredSize(
             element,
             controller,
@@ -607,22 +930,24 @@
           });
           await Promise.race([prepared, interrupted]);
         }
-        transition.className = className[`${newDirection}${PING}`.toLowerCase()];
-        const duration = root.getComputedStyle(element).getPropertyValue(`--ae-${newDirection}-duration`.toLowerCase()).trim();
-        const timeMs = getString2Time(duration);
+        transition.className = gotoVisible ? className.popping : reversing ? className.unpopping : className.dismissing;
+        const configurationDirection = reversing ? POP : newDirection;
+        const duration = root.getComputedStyle(element).getPropertyValue(`--ae-${configurationDirection}-duration`.toLowerCase()).trim();
+        const timeMs = reversing ? controller.reverse.duration : getString2Time(duration);
         const applyDestination = () => {
           controller.classList.remove(
             className.pop,
             className.popping,
+            className.dismissing,
             className.unpopping
           );
           controller.classList.add(transition.className);
           if (interpolatedProgress) {
             element.style.setProperty("--ae-pop-progress", "clamp(0, var(--ae-present-pop-phase), 1)");
-            element.style.setProperty("--ae-unpop-progress", "clamp(0, var(--ae-present-unpop-phase), 1)");
+            element.style.setProperty("--ae-dismiss-progress", "clamp(0, var(--ae-present-dismiss-phase), 1)");
           }
           setPhase(element, "pop", gotoVisible ? "1" : "0");
-          setPhase(element, "unpop", gotoVisible ? "0" : "1");
+          setPhase(element, "dismiss", gotoVisible ? "0" : "1");
           if (size) {
             if (controller.measuredHeight) {
               element.style.setProperty("max-height", `${gotoVisible ? size.height : 0}px`, "important");
@@ -634,6 +959,15 @@
         };
         const activateTransition = () => {
           if (controller.transition !== transition) return;
+          if (reversing) {
+            handoff == null ? void 0 : handoff.memory.restore();
+            if (interpolatedProgress)
+              element.style.setProperty("--ae-pop-progress", "clamp(0, var(--ae-present-pop-phase), 1)");
+            controller.classList.remove(className.pop, className.popping, className.dismissing);
+            controller.classList.add(className.unpopping);
+            controller.reverse.apply();
+            return;
+          }
           if (handoff) {
             handoff.memory.restore();
             element.style.setProperty("transition-property", "none", "important");
@@ -648,14 +982,17 @@
             applyDestination();
             if (tracks.length) element.style.setProperty("transition-property", `${properties}, height, width`, "important");
             for (const [property, value] of tracks) element.style.setProperty(property, value, "important");
+          } else if (gotoVisible) {
+            controller.opening = playback.capture(element, controller, applyDestination, size, interpolatedProgress);
           } else applyDestination();
         };
-        const advancedEase = root.getComputedStyle(element).getPropertyValue(`--ae-${newDirection}-aellux-ease`.toLowerCase()).trim() || void 0;
+        const advancedEase = root.getComputedStyle(element).getPropertyValue(`--ae-${configurationDirection}-aellux-ease`.toLowerCase()).trim() || void 0;
         const motionOptions = {
           extension: extensionName,
           id: controller.motionId,
+          ownedOnly: reversing,
           apply: activateTransition,
-          easing: advancedEase,
+          easing: reversing && !impliedReverse ? void 0 : advancedEase,
           nativeDuration: timeMs,
           maxFPS: AelluxJs.layoutMaxFPS ? AelluxJs.layoutMaxFPS(element) : void 0,
           abort: () => controller.transition !== transition || !element.isConnected
@@ -669,25 +1006,26 @@
           bubbles: true
         });
         if (controller.transition !== transition || !element.isConnected) return;
-        const autoUnpopValue = gotoVisible && element.getAttribute(attr.autoUnpop);
-        if (autoUnpopValue) {
-          const duration2 = getString2Time(autoUnpopValue);
+        const autoDismissValue = gotoVisible && element.getAttribute(attr.autoDismiss);
+        if (autoDismissValue) {
+          const duration2 = getString2Time(autoDismissValue);
           if (Number.isFinite(duration2) && duration2 >= 0) {
-            emitAutoUnpopProgress(element, 0, duration2);
+            emitAutoDismissProgress(element, 0, duration2);
           }
         }
         if (controller.transition !== transition || !element.isConnected) return;
-        AelluxJs.dispatchFrom(element, `${newDirection}${PING}`, { bubbles: true });
+        AelluxJs.dispatchFrom(element, gotoVisible ? "Popping" : reversing ? "Unpopping" : "Dismissing", { bubbles: true });
         const motionResult = await Promise.race([completed, interrupted]);
         if (controller.transition !== transition || motionResult && motionResult.status !== "completed") return;
+        if (gotoVisible) playback.complete(element, controller, interpolatedProgress);
         finishTransition(element, controller, transition, gotoVisible);
         if (gotoVisible && !element.hidden) {
-          autoUnpopSchedule(element, controller);
+          autoDismissSchedule(element, controller);
           controller.classList.add(className.pop);
           AelluxJs.dispatchFrom(element, POP, { bubbles: true });
         }
         if (!gotoVisible && element.hidden) {
-          AelluxJs.dispatchFrom(element, UNPOP, { bubbles: true });
+          AelluxJs.dispatchFrom(element, newDirection, { bubbles: true });
         }
       } catch (error) {
         const ownsTransition = transition && controller.transition === transition;
@@ -720,6 +1058,8 @@
         }
       } finally {
         if (transition && controller.transition === transition) {
+          (_c = controller.reverse) == null ? void 0 : _c.cleanup();
+          controller.reverse = null;
           restoreHandoff(controller);
           restoreMeasuredStyles(element, controller);
           controller.transition = null;
@@ -737,12 +1077,15 @@
       });
     }
     function finishTransition(element, controller, transition, gotoVisible) {
+      var _a;
       restoreHandoff(controller);
       controller.classList.toggle(className.pop, gotoVisible);
       controller.classList.remove(transition.className);
-      restoreMeasuredStyles(element, controller);
       const focused = !gotoVisible && element.contains(document.activeElement) ? document.activeElement : null;
       element.hidden = gotoVisible ? false : true;
+      (_a = controller.reverse) == null ? void 0 : _a.cleanup();
+      controller.reverse = null;
+      restoreMeasuredStyles(element, controller);
       setProgress(element, gotoVisible);
       syncAriaExpanded(element, controller);
       refreshExpandedStates();
@@ -750,30 +1093,30 @@
       else openPresentElements.add(element);
       if (focused) {
         if (document.activeElement === focused) focused.blur();
-        if (document.activeElement !== focused) AelluxJs.dispatch("UnpopFocusLost", {
+        if (document.activeElement !== focused) AelluxJs.dispatch(`${controller.direction}FocusLost`, {
           detail: { element, focused }
         });
       }
       transition.timeout = null;
     }
-    function autoUnpopSchedule(element, controller) {
+    function autoDismissSchedule(element, controller) {
       if (!controller) return;
-      cancelAutoUnpop(controller);
-      const autoUnpopValue = element.getAttribute(attr.autoUnpop);
-      if (element.hidden || controller.transition && !controller.classList.contains(className.pop) || !element.isConnected || !autoUnpopValue) return;
-      const duration = getString2Time(autoUnpopValue);
+      cancelAutoDismiss(controller);
+      const autoDismissValue = element.getAttribute(attr.autoDismiss);
+      if (element.hidden || controller.transition && !controller.classList.contains(className.pop) || !element.isConnected || !autoDismissValue) return;
+      const duration = getString2Time(autoDismissValue);
       if (!Number.isFinite(duration) || duration < 0) return;
       const countdown = { start: root.performance.now(), duration, frame: null, last: 0 };
       controller.autoCountdown = countdown;
       const valid = () => controller.autoCountdown === countdown && presentElements.get(element) === controller && element.isConnected;
       const emit = (completed, initial = false) => {
         const elapsedMs = initial ? 0 : Math.min(duration, Math.max(0, root.performance.now() - countdown.start));
-        emitAutoUnpopProgress(element, elapsedMs, duration, completed);
+        emitAutoDismissProgress(element, elapsedMs, duration, completed);
       };
       const tick = () => {
         var _a;
         if (!valid()) {
-          if (controller.autoCountdown === countdown) cancelAutoUnpop(controller);
+          if (controller.autoCountdown === countdown) cancelAutoDismiss(controller);
           return;
         }
         const now = root.performance.now();
@@ -784,23 +1127,23 @@
         }
         if (valid()) countdown.frame = root.requestAnimationFrame(tick);
       };
-      controller.autoUnpopTimeout = setTimeout(() => {
+      controller.autoDismissTimeout = setTimeout(() => {
         if (!valid()) {
-          if (controller.autoCountdown === countdown) cancelAutoUnpop(controller);
+          if (controller.autoCountdown === countdown) cancelAutoDismiss(controller);
           return;
         }
         if (countdown.frame !== null) root.cancelAnimationFrame(countdown.frame);
         countdown.frame = null;
-        controller.autoUnpopTimeout = null;
+        controller.autoDismissTimeout = null;
         emit(true);
         if (!valid()) return;
         controller.autoCountdown = null;
-        unpop(element);
+        dismiss(element);
       }, duration);
       emit(false, true);
       if (valid()) countdown.frame = root.requestAnimationFrame(tick);
     }
-    function emitAutoUnpopProgress(element, elapsedMs, duration, completed = false) {
+    function emitAutoDismissProgress(element, elapsedMs, duration, completed = false) {
       AelluxJs.dispatchFrom(element, "Progress", {
         bubbles: false,
         cancelable: false,
@@ -814,20 +1157,20 @@
         }
       });
     }
-    function cancelAutoUnpop(controller) {
-      if (controller.autoUnpopTimeout !== null) clearTimeout(controller.autoUnpopTimeout);
+    function cancelAutoDismiss(controller) {
+      if (controller.autoDismissTimeout !== null) clearTimeout(controller.autoDismissTimeout);
       const countdown = controller.autoCountdown;
       if (countdown && countdown.frame !== null) root.cancelAnimationFrame(countdown.frame);
-      controller.autoUnpopTimeout = null;
+      controller.autoDismissTimeout = null;
       controller.autoCountdown = null;
     }
-    function clickAutoUnpop(eventTarget, currentExceptions) {
+    function clickAutoDismiss(eventTarget, currentExceptions) {
       for (const pContainer of openPresentElements) {
         if (pContainer.hidden === true || currentExceptions.some((e) => pContainer.contains(e))) continue;
-        const mode = (pContainer.getAttribute(attr.unpopOnClick) || "outside").trim().toLowerCase();
+        const mode = (pContainer.getAttribute(attr.dismissOnClick) || "outside").trim().toLowerCase();
         if (mode === "false" || mode === "none") continue;
         const inside = pContainer.contains(eventTarget);
-        if (inside === (mode === "inside" || mode === "in")) unpop(pContainer);
+        if (inside === (mode === "inside" || mode === "in")) dismiss(pContainer);
       }
     }
     function refreshChangedTrigger(button) {
@@ -916,18 +1259,18 @@
       button = eventTarget.closest(`[${attr.dismiss}]`);
       if (button) {
         refreshChangedTrigger(button);
-        const dismiss = button.getAttribute(attr.dismiss);
+        const dismissTargetId = button.getAttribute(attr.dismiss);
         const targetSelector = button.getAttribute(attr.target);
-        if (dismiss || targetSelector) {
-          const target = targetById(dismiss || targetSelector);
-          diagnoseTarget(button, target, dismiss ? attr.dismiss : attr.target, dismiss || targetSelector);
+        if (dismissTargetId || targetSelector) {
+          const target = targetById(dismissTargetId || targetSelector);
+          diagnoseTarget(button, target, dismissTargetId ? attr.dismiss : attr.target, dismissTargetId || targetSelector);
           if (target) {
             exceptions.push(target);
-            unpop(target);
+            dismiss(target);
           }
         } else if (container) {
           exceptions.push(container);
-          unpop(container);
+          dismiss(container);
         } else {
           AelluxJs.diagnostics.error(
             AelluxJs.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING,
@@ -935,7 +1278,7 @@
           );
         }
       }
-      clickAutoUnpop(eventTarget, exceptions);
+      clickAutoDismiss(eventTarget, exceptions);
     }
     function diagnoseTarget(element, target, attribute, value) {
       if (!targetIdFor(value)) return;
@@ -966,8 +1309,9 @@
     }
     function setProgress(element, visible) {
       setPhase(element, "pop", visible ? "1" : "0");
-      setPhase(element, "unpop", visible ? "0" : "1");
+      setPhase(element, "dismiss", visible ? "0" : "1");
       element.style.setProperty("--ae-pop-progress", visible ? "1" : "0");
+      element.style.setProperty("--ae-dismiss-progress", visible ? "0" : "1");
       element.style.setProperty("--ae-unpop-progress", visible ? "0" : "1");
     }
     function setPhase(element, direction, value) {
@@ -996,8 +1340,10 @@
       return state.limit;
     }
     function groupMemberActive(member, state) {
-      var _a;
-      return state.reservations.has(member) || !member.hidden && ((_a = presentElements.get(member)) == null ? void 0 : _a.direction) !== UNPOP;
+      return state.reservations.has(member) || !member.hidden && !isClosing(presentElements.get(member));
+    }
+    function isClosing(controller) {
+      return (controller == null ? void 0 : controller.direction) === DISMISS || (controller == null ? void 0 : controller.direction) === UNPOP;
     }
     function activeGroupMembers(group, state) {
       return groupMembers(group, true).filter((member) => groupMemberActive(member, state));
@@ -1102,7 +1448,7 @@
           return token && !/\s/.test(token) && group.classList.contains(token);
         });
         if (!matches.length) {
-          const visible = members.filter((member) => !member.hidden && presentElements.get(member).direction !== UNPOP);
+          const visible = members.filter((member) => !member.hidden && !isClosing(presentElements.get(member)));
           if (visible.length > 1) groupDiagnostic(group, "Multiple initially visible members.");
           else if (!state.selected) state.selected = visible[0] || null;
           return;
@@ -1207,12 +1553,12 @@
         detail: { group, previous, current, key: current && current.id }
       });
     }
-    function selectGroup(group, selected2, members) {
+    function selectGroup(group, selected2, members, closingDirection = DISMISS) {
       var _a;
       const state = groups.get(group);
       const changes = members.filter((member) => {
         const controller = presentElements.get(member);
-        return member === selected2 ? member.hidden || controller.direction === UNPOP : !member.hidden && controller.direction !== UNPOP;
+        return member === selected2 ? member.hidden || isClosing(controller) : !member.hidden && !isClosing(controller);
       });
       if (state.selected === selected2 && !changes.length) {
         state.accumulating = false;
@@ -1228,7 +1574,7 @@
       for (const member of changes) {
         const allowed = AelluxJs.dispatchFrom(
           member,
-          member === selected2 ? "BeforePop" : "BeforeUnpop",
+          member === selected2 ? "BeforePop" : `${BEFORE}${closingDirection}`,
           { bubbles: true, cancelable: true }
         );
         if (!valid()) {
@@ -1256,7 +1602,7 @@
       });
       state.pending = pending;
       for (const member of changes) {
-        const job = presentTransition(member, member === selected2, false, true);
+        const job = presentTransition(member, member === selected2, false, true, void 0, closingDirection);
         if (groups.get(group) !== state || state.revision !== revision) {
           complete(false);
           return pending;
@@ -1312,11 +1658,11 @@
       for (const target of openPresentElements) {
         if (!inHoverRegion(target, event.target)) continue;
         if (entering || inHoverRegion(target, event.relatedTarget)) cancelHoverClose(target);
-        else if ([...triggerElementsSet].some((control) => triggerTargets.get(control) === target && control.getAttribute(attr.triggerOn) === "hover" && control.getAttribute(attr.trigger) !== "unpop")) {
+        else if ([...triggerElementsSet].some((control) => triggerTargets.get(control) === target && control.getAttribute(attr.triggerOn) === "hover" && !["dismiss", "unpop"].includes(control.getAttribute(attr.trigger)))) {
           cancelHoverClose(target);
           hoverTimers.set(target, setTimeout(() => {
             hoverTimers.delete(target);
-            if (presentElements.has(target) && target.isConnected && !inHoverRegion(target, document.activeElement)) unpop(target);
+            if (presentElements.has(target) && target.isConnected && !inHoverRegion(target, document.activeElement)) dismiss(target);
           }, 120));
         }
       }

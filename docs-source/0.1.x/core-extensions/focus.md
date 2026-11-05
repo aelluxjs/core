@@ -25,7 +25,7 @@ The Extension observes `focusin`, capture-phase `focus` and `blur` on the docume
 const restored = $ae.ext.focus.restoreLastFocus();
 ```
 
-When Present dispatches `AelluxJsUnpopFocusLost` after hiding a region containing the active element, Focus attempts to restore the previous valid target from its history. Ordinary blur events do not trigger automatic restoration.
+When Present dispatches `AelluxJsDismissFocusLost` or `AelluxJsUnpopFocusLost` after hiding a region containing the active element, Focus attempts to restore the previous valid target from its history. Ordinary blur events do not trigger automatic restoration.
 
 For a focused input, textarea, select, editable element or element explicitly declaring `data-ae-focus`, a non-empty `id` lets Focus emit `AelluxJsPushState` with `detail: { key: "ae-focus", value: element.id }`. Ordinary buttons and links can enter local focus history without creating navigation snapshots unless explicitly declared. State Navigation records eligible IDs in the hash as `ae-focus={elementid}` and dispatches `AelluxJsSnapshotRestore` to restore a matching connected, visible, eligible element. Elements without an ID still enter local history for `restoreLastFocus()`, but do not push a state. Without State Navigation, the command remains available to another consumer.
 

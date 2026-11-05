@@ -80,4 +80,4 @@ The [Core Extensions overview](core-extensions/README.md) explains distribution 
 
 ## Acknowledgments
 
-Special thanks to [ChatGPT](https://chatgpt.com/), [Codex](https://openai.com/codex/), [Visual Studio Code](https://code.visualstudio.com/), [Bootstrap](https://getbootstrap.com/), and [GitHub](https://github.com/) for the tools and technologies that supported the development of Aellux.
+Special thanks to [ChatGPT](https://chatgpt.com/), [Codex](https://openai.com/codex/), [Google](https://www.google.com/), [Gemini](https://gemini.google.com/), [Visual Studio Code](https://code.visualstudio.com/), [Bootstrap](https://getbootstrap.com/), and [GitHub](https://github.com/) for the tools and technologies that supported the development of Aellux.

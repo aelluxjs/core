@@ -83,7 +83,7 @@ function createSourcePanel(id) {
   panel.id = id;
   panel.className = "source-panel";
   panel.setAttribute("data-ae-present", "height");
-  panel.setAttribute("data-ae-unpop-on-click", "false");
+  panel.setAttribute("data-ae-dismiss-on-click", "false");
   panel.hidden = true;
   const content = document.createElement("div");
   content.className = "source-motion";

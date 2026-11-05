@@ -1,6 +1,6 @@
 # Events
 
-`AelluxJsProgress` is a generic numeric notification emitted on the producer with `bubbles: false` and `cancelable: false`. Detail contains finite numbers `{ value, max }`, with `max > 0` and `0 <= value <= max`. Listen directly with `$ae.onEvent(producer, "Progress", handler)`. It is independent of Feedback; `feedback.progress()` still emits `AelluxJsFeedback`. Present auto-unpop adds `status`, `elapsedMs`, `durationMs` and `remainingMs`; see [Progress](../core-extensions/optional/progress.md).
+`AelluxJsProgress` is a generic numeric notification emitted on the producer with `bubbles: false` and `cancelable: false`. Detail contains finite numbers `{ value, max }`, with `max > 0` and `0 <= value <= max`. Listen directly with `$ae.onEvent(producer, "Progress", handler)`. It is independent of Feedback; `feedback.progress()` still emits `AelluxJsFeedback`. Present auto-dismiss adds `status`, `elapsedMs`, `durationMs` and `remainingMs`; see [Progress](../core-extensions/optional/progress.md).
 
 AelluxJs uses the `AelluxJs` prefix for its DOM events by default. Its event helpers also accept exact names without this prefix. The main API listens on `document`; `onEvent` and `offEvent` listen on an explicit target; a mounted element controller listens on its element. A document listener also receives bubbling events from elements:
 
@@ -182,10 +182,10 @@ These events are available when the corresponding Extension is loaded. Events fr
 | Point | <span class="large">`AelluxJsPointerDown`, `AelluxJsPointerMove`, `AelluxJsPointerUp`, `AelluxJsPointerCancel`, `AelluxJsPointerHover`</span> | <span class="large">Selected element; `detail` includes `pointer`, `target`, `pressStart`, `originalEvent`, and `hover`. These events do **not** bubble.</span> |
 | Point | `AelluxJsTap` | <span class="large">Eligible mounted button, link or role button; bubbling and composed. `detail` is `{ pointerType, pointerId, duration, distance, originalEvent }`. Emitted on a valid short primary release, independently of native click and scroll.</span> |
 | Preference | `AelluxJsPreferencesChange` | <span class="large">`document`; `detail` is `{ changed, preferences }`, with a changed-key array and a snapshot of current values. `changed` can be empty. Option-button `aria-pressed` is synchronized before dispatch. When the top-level `syncBootstrapThemeTag` option is enabled, the boot preference publisher synchronizes root `data-bs-theme` before dispatch.</span> |
-| Present | `AelluxJsBeforePop`, `AelluxJsBeforeUnpop` | Present element; cancelable before a transition starts. |
-| Present | <span class="large">`AelluxJsPopping`, `AelluxJsUnpopping`, `AelluxJsPop`, `AelluxJsUnpop`</span> | <span class="large">Present element; transition start and completion notifications.</span> |
-| Present | `AelluxJsLayout` | <span class="large">Present element; bubbles when a Pop or Unpop transition starts. `detail` contains `origin` (`"present.pop"` or `"present.unpop"`) and `durationMs`, the maximum expected layout change time in milliseconds. Anchor listens on the shared positioning parent.</span> |
-| Present | `AelluxJsUnpopFocusLost` | <span class="large">`document`; `detail` is `{ element, focused }`, identifying the closed Present region and the element that lost focus.</span> |
+| Present | `AelluxJsBeforePop`, `AelluxJsBeforeDismiss`, `AelluxJsBeforeUnpop` | Present element; cancelable before a transition starts. |
+| Present | <span class="large">`AelluxJsPopping`, `AelluxJsDismissing`, `AelluxJsUnpopping`, `AelluxJsPop`, `AelluxJsDismiss`, `AelluxJsUnpop`</span> | <span class="large">Present element; transition start and completion notifications.</span> |
+| Present | `AelluxJsLayout` | <span class="large">Present element; bubbles when a Pop, Dismiss or Unpop transition starts. `detail` contains `origin` (`"present.pop"`, `"present.dismiss"` or `"present.unpop"`) and `durationMs`, the maximum expected layout change time in milliseconds. Anchor listens on the shared positioning parent.</span> |
+| Present | `AelluxJsDismissFocusLost`, `AelluxJsUnpopFocusLost` | <span class="large">`document`; `detail` is `{ element, focused }`, identifying the closed Present region and the element that lost focus.</span> |
 | Scrollbox | `AelluxJsScrollboxSnapChange` | <span class="large">Scrollbox element; `detail` is `{ item, index, previousIndex, axis }` after a new snap item is selected and scrolling settles. The initial item uses `previousIndex: null`.</span> |
 | Scrollbox | `AelluxJsScrollboxInteraction` | <span class="large">Scrollbox element; `detail` is `{ reason, active }` for `scrollbar`, `pointer`, or `elastic`. It is the integration hook used by Scrollbox Snap to suspend and resume native snap alignment.</span> |
 | Scrollbox | `AelluxJsScrollboxSnapGesture` | <span class="large">Scrollbox element; desktop PDS integration event. `detail` includes `phase` (`"probe"`, `"start"`, or `"end"`), `axis`, `moved`, start and final coordinates, and timestamps. Probe and end are cancelable; Scrollbox Snap accepts a short eligible flick at probe, then cancels end to prevent PDS momentum before snap settles the gesture.</span> |
@@ -195,7 +195,7 @@ These events are available when the corresponding Extension is loaded. Events fr
 
 ```js
 panel.addEventListener("AelluxJsLayout", event => {
-  console.log(event.detail.origin); // "present.pop" or "present.unpop"
+  console.log(event.detail.origin); // "present.pop", "present.dismiss" or "present.unpop"
   console.log(event.detail.durationMs); // Maximum transition time in milliseconds.
 });
 ```

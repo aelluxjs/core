@@ -9,14 +9,14 @@ $ae.onEvent(document.getElementById("trigger-position"), "$input", event => {
     detail: { origin: "example.triggerPosition", durationMs: 0 }
   });
 });
-$ae.onEvent(panel, "BeforeUnpop", () => {
+$ae.onEvent(panel, "BeforeDismiss", () => {
   returnFocus = panel.contains(document.activeElement);
 });
-$ae.onEvent(panel, "Unpop", () => {
+$ae.onEvent(panel, "Dismiss", () => {
   if (returnFocus) trigger.focus({ preventScroll: true });
 });
 $ae.on("$keydown", event => {
   if (event.key !== "Escape" || trigger.getAttribute("aria-expanded") !== "true") return;
   event.preventDefault();
-  $ae("floating-panel").present.unpop().catch(error => console.error("Unable to close the panel.", error));
+  $ae("floating-panel").present.dismiss().catch(error => console.error("Unable to close the panel.", error));
 });

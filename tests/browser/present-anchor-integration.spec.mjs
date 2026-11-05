@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 const fixture = `<style>
   body{margin:0} #ref{position:relative;width:740px;height:480px;overflow:auto}
-  .panel{position:absolute;width:90px;height:50px;--ae-pop-duration:400ms;--ae-unpop-duration:400ms}
+  .panel{position:absolute;width:90px;height:50px;--ae-pop-duration:400ms;--ae-dismiss-duration:400ms}
   #a{left:30px;top:50px} #b{left:280px;top:140px;width:150px;height:80px}
   #c{left:500px;top:260px;width:110px;height:60px}
   </style><button id="trigger" data-ae-trigger="pop" data-ae-trigger-on="hover" data-ae-target="b">Open B</button>
@@ -33,12 +33,12 @@ async function start(page, options = {}, html = fixture) {
 }
 
 for (const forceLegacy of [false, true]) for (const cssMotionController of [true, false]) for (const grid of [true, false]) {
-  test(`Anchor owns transform during Present pop/unpop (legacy=${forceLegacy}, controlled=${cssMotionController}, grid=${grid})`, async ({ page }) => {
+  test(`Anchor owns transform during Present pop/dismiss (legacy=${forceLegacy}, controlled=${cssMotionController}, grid=${grid})`, async ({ page }) => {
     await start(page, { forceLegacy, cssMotionController }, `<style>
       #ref{position:relative;margin:80px;width:500px;height:300px}
       #trigger{position:relative;width:150px;height:40px}
-      #menu{position:absolute;--ae-pop-duration:250ms;--ae-unpop-duration:250ms;
-        --ae-from-transform:translateX(200px) scale(.3);--ae-pop-transform:scale(2);--ae-unpop-transform:translateY(100px)}
+      #menu{position:absolute;--ae-pop-duration:250ms;--ae-dismiss-duration:250ms;
+        --ae-from-transform:translateX(200px) scale(.3);--ae-pop-transform:scale(2);--ae-dismiss-transform:translateY(100px)}
       #content{height:60px}
       </style><div id="ref"><button id="trigger">Versions</button>
       <div id="menu" data-ae-anchor="bottom-right:top-right" data-ae-anchor-target="trigger"
@@ -48,7 +48,7 @@ for (const forceLegacy of [false, true]) for (const cssMotionController of [true
     await page.evaluate(async () => {
       const menu = document.getElementById("menu");
       window.anchorMotionStates = [];
-      for (const event of ["AelluxJsPopping", "AelluxJsUnpopping"]) menu.addEventListener(event, () => {
+      for (const event of ["AelluxJsPopping", "AelluxJsDismissing"]) menu.addEventListener(event, () => {
         window.anchorMotionStates.push({ event, properties: getComputedStyle(menu).transitionProperty });
       });
       await $ae("menu").present.pop();
@@ -66,7 +66,7 @@ for (const forceLegacy of [false, true]) for (const cssMotionController of [true
       await AelluxJs.mountManager.update("menu", "anchor");
     });
     await expect.poll(alignment).toEqual({ right: 0, top: 0, width: 0, opacity: "1" });
-    await page.evaluate(() => $ae("menu").present.unpop());
+    await page.evaluate(() => $ae("menu").present.dismiss());
     await expect(page.locator("#menu")).toHaveJSProperty("hidden", true);
     const states = await page.evaluate(() => window.anchorMotionStates);
     expect(states).toHaveLength(2);
@@ -127,7 +127,7 @@ for (const failure of ["throws", "incompatible", "duplicate"]) {
   test(`progress registration ${failure} keeps bounded, numeric progress and visual completion`, async ({ page }) => {
     await page.addInitScript(failure => {
       if (failure === "throws") CSS.registerProperty = () => { throw new Error("Registration rejected"); };
-      else for (const name of ["--ae-present-pop-phase", "--ae-present-unpop-phase"])
+      else for (const name of ["--ae-present-pop-phase", "--ae-present-dismiss-phase"])
         CSS.registerProperty({ name, syntax: failure === "incompatible" ? "<length>" : "<number>", inherits: true,
           initialValue: failure === "incompatible" ? "0px" : "0" });
     }, failure);
@@ -202,7 +202,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) f
       await AelluxJs.mount(anchor, "anchor");
       await $ae("group").present.show("b");
       await AelluxJs.destroy();
-      return { accepted, classes: document.querySelectorAll(".ae--popping,.ae--unpopping,.ae--will-change,.ae--anchor-switching,.ae--anchored").length,
+      return { accepted, classes: document.querySelectorAll(".ae--popping,.ae--dismissing,.ae--will-change,.ae--anchor-switching,.ae--anchored").length,
         paused: document.getAnimations().filter(a => a.playState === "paused").length,
         warnings: AelluxJs.diagnostics.showHistory().filter(e => e.level <= AelluxJs.diagnostics.levels.warn).map(e => e.code) };
     });

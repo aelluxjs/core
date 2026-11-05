@@ -14,7 +14,7 @@ for (const { boot, forceLegacy } of [
   { boot: "aellux.js", forceLegacy: true },
   { boot: "aellux.min.js", forceLegacy: true }
 ]) {
-  test(`full ${boot} keeps only foundational extensions eager with forceLegacy=${forceLegacy}`, async ({ page }) => {
+  test(`full ${boot} keeps only foundational extensions eager with forceLegacy=${forceLegacy}`, async ({ page, baseURL }) => {
     await page.goto("/tests/index.htm");
     await page.addScriptTag({ url: `/dist/${boot}` });
     await page.evaluate(forceLegacy => AelluxJs.init({ mode: "full", forceLegacy }), forceLegacy);
@@ -40,7 +40,7 @@ for (const { boot, forceLegacy } of [
     });
     const cssFilename = boot.includes(".min.") ? "aellux.full.min.css" : "aellux.full.css";
     const style = page.locator("link[data-ae-full-style]");
-    await expect(style).toHaveAttribute("href", `http://127.0.0.1:4173/dist/${cssFilename}`);
+    await expect(style).toHaveAttribute("href", new URL(`/dist/${cssFilename}`, baseURL).href);
     expect(await style.getAttribute("integrity")).toBe("sha384-" + createHash("sha384")
       .update(await readFile(new URL(`../../dist/${cssFilename}`, import.meta.url))).digest("base64"));
     await expect(page.locator("link[data-ae-ext-style],style[data-ae-weak-style]")).toHaveCount(0);

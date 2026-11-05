@@ -11,6 +11,24 @@ const catalog = await createSemanticCatalog(metadata);
 const output = renderEditorData(catalog);
 const find = (entries, name) => entries.find(entry => entry.name === name);
 
+test("Present metadata distinguishes dismissal and opening reversal", () => {
+  assert.ok(find(catalog.methods, "present.dismiss"));
+  assert.deepEqual(find(catalog.attributes, "data-ae-trigger").values, ["", "toggle", "pop", "dismiss", "unpop"]);
+  for (const name of ["data-ae-auto-dismiss", "data-ae-dismiss-on-click", "data-ae-dismiss"])
+    assert.ok(find(catalog.attributes, name), name);
+  for (const suffix of ["opacity", "transform", "height", "width", "duration", "ease", "aellux-ease", "progress"])
+    assert.ok(find(catalog.cssProperties, `--ae-dismiss-${suffix}`), suffix);
+  assert.ok(find(catalog.classes, "ae--dismissing"));
+  for (const name of ["BeforeDismiss", "Dismissing", "Dismiss", "DismissFocusLost"])
+    assert.ok(find(catalog.events, `AelluxJs${name}`), name);
+  assert.ok(find(catalog.methods, "present.unpop"));
+  assert.ok(find(catalog.cssProperties, "--ae-unpop-progress"));
+  for (const name of ["opacity", "transform", "height", "width", "duration", "ease", "aellux-ease"])
+    assert.equal(find(catalog.cssProperties, `--ae-unpop-${name}`), undefined);
+  for (const name of ["data-ae-auto-unpop", "data-ae-unpop-on-click"])
+    assert.equal(find(catalog.attributes, name), undefined);
+});
+
 for (const [name, schemaName] of [["aellux.html-data.json", "html"], ["aellux.css-data.json", "css"], ["aellux.web-types.json", "web-types"]]) {
   test(`${name} validates against the official ${schemaName} schema`, async () => {
     const schemaUrl = new URL(`tests/fixtures/editor-schemas/${schemaName}.schema.json`, root);
@@ -29,7 +47,7 @@ for (const [name, schemaName] of [["aellux.html-data.json", "html"], ["aellux.cs
 
 test("open attribute grammars remain open while closed enums preserve string values", () => {
   const attributes = output["aellux.web-types.json"].contributions.html.attributes;
-  assert.equal(find(attributes, "data-ae-trigger").value.type, '\"\" | \"toggle\" | \"pop\" | \"unpop\"');
+  assert.equal(find(attributes, "data-ae-trigger").value.type, '\"\" | \"toggle\" | \"pop\" | \"dismiss\" | \"unpop\"');
   assert.equal(find(attributes, "data-ae-target").value.type, "string");
   assert.equal(find(attributes, "data-ae-anchor").value.type, "string");
   assert.equal(find(attributes, "data-ae-present").value.type, "string");

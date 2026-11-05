@@ -39,7 +39,7 @@
         if (visible === navigationVisible) return;
         navigationVisible = visible;
         const present = $ae("main-navigation-wrapper").present;
-        const transition = visible ? present.pop() : present.unpop();
+        const transition = visible ? present.pop() : present.dismiss();
         transition.catch(error => console.error("Failed to update main navigation visibility.", error));
       };
       $ae.on("ViewportChange", event => {
@@ -65,7 +65,7 @@
 <body>
   <a class="skip-link btn btn-warning" href="#main">Skip to content</a>
 
-  <div id="main-navigation-wrapper" data-ae-present="transform opacity" data-ae-unpop-on-click="false" hidden
+  <div id="main-navigation-wrapper" data-ae-present="transform opacity" data-ae-dismiss-on-click="false" hidden
     class="position-fixed z-2 p-2 bottom-0 w-100 d-flex align-items-center justify-content-center">
     <div class="d-flex border align-items-center justify-content-center bg-body p-3 px-0 rounded-1 shadow-lg"
       style="max-width: 100%;">
@@ -444,7 +444,7 @@ AelluxJs.attr("preference");</code></pre>
                   <span class="extension-meta">Bundled</span>
                 </button>
               </h4>
-              <div id="extension-present" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false"
+              <div id="extension-present" class="w-100" data-ae-present="height opacity" data-ae-dismiss-on-click="false"
                 hidden>
                 <div class="extension-motion" data-ae-present-motion>
                   <div class="px-4 pb-4">
@@ -466,7 +466,7 @@ AelluxJs.attr("preference");</code></pre>
                   <span class="extension-meta">Bundled</span>
                 </button>
               </h4>
-              <div id="extension-anchor" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false"
+              <div id="extension-anchor" class="w-100" data-ae-present="height opacity" data-ae-dismiss-on-click="false"
                 hidden>
                 <div class="extension-motion" data-ae-present-motion>
                   <div class="px-4 pb-4">
@@ -488,7 +488,7 @@ AelluxJs.attr("preference");</code></pre>
                   <span class="extension-meta">Bundled <span class="badge text-body border ms-1">Unstable</span></span>
                 </button>
               </h4>
-              <div id="extension-focus" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false"
+              <div id="extension-focus" class="w-100" data-ae-present="height opacity" data-ae-dismiss-on-click="false"
                 hidden>
                 <div class="extension-motion" data-ae-present-motion>
                   <div class="px-4 pb-4">
@@ -510,7 +510,7 @@ AelluxJs.attr("preference");</code></pre>
                   <span class="extension-meta">Bundled <span class="badge text-body border ms-1">Unstable</span></span>
                 </button>
               </h4>
-              <div id="extension-point" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false"
+              <div id="extension-point" class="w-100" data-ae-present="height opacity" data-ae-dismiss-on-click="false"
                 hidden>
                 <div class="extension-motion" data-ae-present-motion>
                   <div class="px-4 pb-4">
@@ -532,7 +532,7 @@ AelluxJs.attr("preference");</code></pre>
                   <span class="extension-meta">Optional <span class="badge text-body border ms-1">Unstable</span></span>
                 </button>
               </h4>
-              <div id="extension-dialog" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false"
+              <div id="extension-dialog" class="w-100" data-ae-present="height opacity" data-ae-dismiss-on-click="false"
                 hidden>
                 <div class="extension-motion" data-ae-present-motion>
                   <div class="px-4 pb-4">
@@ -558,7 +558,7 @@ AelluxJs.attr("preference");</code></pre>
                 </button>
               </h4>
               <div id="extension-scrollbox" class="w-100" data-ae-present="height opacity"
-                data-ae-unpop-on-click="false" hidden>
+                data-ae-dismiss-on-click="false" hidden>
                 <div class="extension-motion" data-ae-present-motion>
                   <div class="px-4 pb-4">
                     <p>Native scrolling, pointer dragging and scrollbars.</p>
@@ -581,7 +581,7 @@ AelluxJs.attr("preference");</code></pre>
                 </button>
               </h4>
               <div id="extension-scrollbox-snap" class="w-100" data-ae-present="height opacity"
-                data-ae-unpop-on-click="false" hidden>
+                data-ae-dismiss-on-click="false" hidden>
                 <div class="extension-motion" data-ae-present-motion>
                   <div class="px-4 pb-4">
                     <p>Snap alignment and navigation for Scrollbox.</p>
@@ -602,7 +602,7 @@ AelluxJs.attr("preference");</code></pre>
                   <span class="extension-meta">Optional <span class="badge text-body border ms-1">Unstable</span></span>
                 </button>
               </h4>
-              <div id="extension-viewport" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false"
+              <div id="extension-viewport" class="w-100" data-ae-present="height opacity" data-ae-dismiss-on-click="false"
                 hidden>
                 <div class="extension-motion" data-ae-present-motion>
                   <div class="px-4 pb-4">
@@ -626,7 +626,7 @@ AelluxJs.attr("preference");</code></pre>
                 </button>
               </h4>
               <div id="extension-overflow-marquee" class="w-100" data-ae-present="height opacity"
-                data-ae-unpop-on-click="false" hidden>
+                data-ae-dismiss-on-click="false" hidden>
                 <div class="extension-motion" data-ae-present-motion>
                   <div class="px-4 pb-4">
                     <p>Reveal overflowing single-line content with motion.</p>
@@ -651,7 +651,7 @@ AelluxJs.attr("preference");</code></pre>
                 </button>
               </h4>
               <div id="extension-ajax-href" class="w-100" data-ae-present="height opacity"
-                data-ae-unpop-on-click="false" hidden>
+                data-ae-dismiss-on-click="false" hidden>
                 <div class="extension-motion" data-ae-present-motion>
                   <div class="px-4 pb-4">
                     <p>Replace matching HTML regions from local responses.</p>
@@ -674,7 +674,7 @@ AelluxJs.attr("preference");</code></pre>
                 </button>
               </h4>
               <div id="extension-state-navigation" class="w-100" data-ae-present="height opacity"
-                data-ae-unpop-on-click="false" hidden>
+                data-ae-dismiss-on-click="false" hidden>
                 <div class="extension-motion" data-ae-present-motion>
                   <div class="px-4 pb-4">
                     <p>Coordinate snapshots and browser history.</p>
@@ -695,7 +695,7 @@ AelluxJs.attr("preference");</code></pre>
                   <span class="extension-meta">Bundled</span>
                 </button>
               </h4>
-              <div id="extension-feedback" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false"
+              <div id="extension-feedback" class="w-100" data-ae-present="height opacity" data-ae-dismiss-on-click="false"
                 hidden>
                 <div class="extension-motion" data-ae-present-motion>
                   <div class="px-4 pb-4">
@@ -717,7 +717,7 @@ AelluxJs.attr("preference");</code></pre>
                   <span class="extension-meta">Optional <span class="badge text-body border ms-1">Unstable</span></span>
                 </button>
               </h4>
-              <div id="extension-progress" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false"
+              <div id="extension-progress" class="w-100" data-ae-present="height opacity" data-ae-dismiss-on-click="false"
                 hidden>
                 <div class="extension-motion" data-ae-present-motion>
                   <div class="px-4 pb-4">
@@ -742,7 +742,7 @@ AelluxJs.attr("preference");</code></pre>
                   <span class="extension-meta">Bundled</span>
                 </button>
               </h4>
-              <div id="extension-adaptive" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false"
+              <div id="extension-adaptive" class="w-100" data-ae-present="height opacity" data-ae-dismiss-on-click="false"
                 hidden>
                 <div class="extension-motion" data-ae-present-motion>
                   <div class="px-4 pb-4">
@@ -765,7 +765,7 @@ AelluxJs.attr("preference");</code></pre>
                 </button>
               </h4>
               <div id="extension-preference" class="w-100" data-ae-present="height opacity"
-                data-ae-unpop-on-click="false" hidden>
+                data-ae-dismiss-on-click="false" hidden>
                 <div class="extension-motion" data-ae-present-motion>
                   <div class="px-4 pb-4">
                     <p>Persist user choices and resolve device preferences.</p>
@@ -786,7 +786,7 @@ AelluxJs.attr("preference");</code></pre>
                   <span class="extension-meta">Optional <span class="badge text-body border ms-1">Unstable</span></span>
                 </button>
               </h4>
-              <div id="extension-pwa" class="w-100" data-ae-present="height opacity" data-ae-unpop-on-click="false"
+              <div id="extension-pwa" class="w-100" data-ae-present="height opacity" data-ae-dismiss-on-click="false"
                 hidden>
                 <div class="extension-motion" data-ae-present-motion>
                   <div class="px-4 pb-4">
@@ -980,7 +980,8 @@ AelluxJs.attr("preference");</code></pre>
       <div class="border-top pt-4 d-flex flex-wrap justify-content-between gap-3 small text-body-secondary">
         <p class="mb-0">By <a href="https://github.com/pecrodrigues">Pec Rodrigues</a>. Released under Apache 2.0.</p>
         <p class="mb-0">Made with the help of <a href="https://chatgpt.com/">ChatGPT</a>, <a
-            href="https://openai.com/codex/">Codex</a>, <a href="https://code.visualstudio.com/">VS Code</a>, <a
+            href="https://openai.com/codex/">Codex</a>, <a href="https://www.google.com/">Google</a>, <a
+            href="https://gemini.google.com/">Gemini</a>, <a href="https://code.visualstudio.com/">VS Code</a>, <a
             href="https://getbootstrap.com/">Bootstrap</a> &amp; <a href="https://github.com/">GitHub</a>.</p>
       </div>
     </div>

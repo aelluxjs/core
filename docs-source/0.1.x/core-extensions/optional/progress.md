@@ -41,17 +41,17 @@ $ae.dispatchFrom(document.getElementById("operation"), "Progress", {
 
 `AelluxJsProgress` is independent of this Extension and Feedback. Any producer can emit it, and multiple controls can consume the same producer. Both values must be finite numbers, `max > 0`, and `0 <= value <= max`; invalid payloads are ignored. The consumer computes `value / max * progress.max`. A valid first event makes an indeterminate control determinate. `<meter>` does not consume temporal progress. `feedback.progress()` continues publishing the separate `AelluxJsFeedback` contract.
 
-## Present auto-unpop
+## Present auto-dismiss
 
 ```html
-<section id="notification" data-ae-present="opacity" data-ae-auto-unpop="5000" hidden>
+<section id="notification" data-ae-present="opacity" data-ae-auto-dismiss="5000" hidden>
   Operation completed.
   <progress max="100" value="0" data-ae-progress-target="notification"
             aria-label="Time until notification closes"></progress>
 </section>
 ```
 
-Present first emits zero at the start of `Popping` to reset the bar. This does not start the close timer: after opening completes, the countdown emits zero again, publishes monotonically elapsed progress while waiting, and emits one before requesting closure. Detail includes `status: "running"` or `"completed"`, `elapsedMs`, `durationMs`, and `remainingMs`. The timer remains independent of motion duration/easing. A canceled `BeforeUnpop` leaves completed progress at one without retrying. See [Present](../present.md) and the [stacked Feedback example](../feedback.md#stacked-notifications).
+Present first emits zero at the start of `Popping` to reset the bar. This does not start the close timer: after opening completes, the countdown emits zero again, publishes monotonically elapsed progress while waiting, and emits one before requesting closure. Detail includes `status: "running"` or `"completed"`, `elapsedMs`, `durationMs`, and `remainingMs`. The timer remains independent of motion duration/easing. A canceled `BeforeDismiss` leaves completed progress at one without retrying. See [Present](../present.md) and the [stacked Feedback example](../feedback.md#stacked-notifications).
 
 ## Modern and Legacy compatibility
 

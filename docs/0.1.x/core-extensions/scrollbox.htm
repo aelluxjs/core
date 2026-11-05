@@ -83,13 +83,13 @@
           <div id="toast-present-group"
             class="position-fixed w-100 top-0 gap-1 z-1 pe-none p-4 pt-1 flex-column d-flex justify-content-center align-items-center"
             data-ae-present-group="2">
-            <div id="toast-1" data-ae-present="opacity" data-ae-auto-unpop="1s" data-ae-unpop-on-click="false"
+            <div id="toast-1" data-ae-present="opacity" data-ae-auto-dismiss="1s" data-ae-dismiss-on-click="false"
               hidden="true"
               class="position-relative overflow-hidden text-bg-danger small rounded-1 p-2 py-1 w-100 text-center"
               style="max-width: 300px;">
               <progress data-ae-progress-target="toast-1" class="toast-progress"></progress>
             </div>
-            <div id="toast-2" data-ae-present="opacity" data-ae-auto-unpop="1s" data-ae-unpop-on-click="false"
+            <div id="toast-2" data-ae-present="opacity" data-ae-auto-dismiss="1s" data-ae-dismiss-on-click="false"
               hidden="true"
               class="position-relative overflow-hidden text-bg-danger small rounded-1 p-2 py-1 w-100 text-center"
               style="max-width: 300px;">
@@ -183,7 +183,7 @@
                     </div>
 
                                           <div id="children-overview" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -228,7 +228,7 @@
                     </div>
 
                                           <div id="children-runtime" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -322,7 +322,7 @@
                     </div>
 
                                           <div id="children-extensions" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -402,7 +402,7 @@
                     </div>
 
                                           <div id="children-core-extensions" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false" >
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false" >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion                            data-ae-present-group>
                                                                                                   <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -425,7 +425,7 @@
                                   </div>
 
                                   <div id="children2-bundled" class="docs-menu-panel border-start ms-2"
-                                    data-ae-present="height opacity" data-ae-unpop-on-click="false" >
+                                    data-ae-present="height opacity" data-ae-dismiss-on-click="false" >
                                       <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                   <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -520,7 +520,7 @@
                                   </div>
 
                                   <div id="children2-optional" class="docs-menu-panel border-start ms-2"
-                                    data-ae-present="height opacity" data-ae-unpop-on-click="false"                                     hidden>
+                                    data-ae-present="height opacity" data-ae-dismiss-on-click="false"                                     hidden>
                                       <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                   <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -573,7 +573,7 @@
                     </div>
 
                                           <div id="children-integrations" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -689,7 +689,7 @@
 </code></pre>
 <p>Scrollbox uses the external <code>aellux.ext.scrollbox.css</code>, requested with <code>{ loadStyle: true }</code> in Basic or included in the shared Full stylesheet. This weak CSS supplies <code>overflow: auto</code>, <code>contain: layout paint</code>, and thin scrollbars. It gives the elastic child <code>display: inline-block</code> with <code>vertical-align: top</code> so the inline line box adds no scrollable space below. If application CSS sets the elastic wrapper to <code>block</code>, <code>flex</code>, or <code>grid</code>, Scrollbox reports diagnostic 2016 and uses <code>inline-block</code>, <code>inline-flex</code>, or <code>inline-grid</code> respectively. It restores the previous inline <code>display</code> when the wrapper changes or unmounts. The boot&#39;s global weak CSS enables smooth programmatic scrolling on all elements; <code>html[data-ae-reduced-motion=&quot;reduced&quot;]</code> restores immediate scrolling and removes custom scrollbar transitions. Elastic snapback also finishes immediately under that attribute. Pointer dragging and momentum set each position immediately so they follow the gesture. An application can override the weak styles. Basic Scrollbox and snap do not require a content wrapper; elastic edges require a single marked content child.</p>
 <h2>Overflow fade</h2>
-<p>Scrollbox follows bubbling <code>AelluxJsLayout</code> events from its container, ancestors and descendants. A finite positive <code>detail.durationMs</code> keeps measurements updated through the transition at the configured layout FPS. Present&#39;s final <code>Pop</code> and <code>Unpop</code> events also refresh the box, so a fade measured while an ancestor has <code>scale(0)</code> recovers without scroll input.</p>
+<p>Scrollbox follows bubbling <code>AelluxJsLayout</code> events from its container, ancestors and descendants. A finite positive <code>detail.durationMs</code> keeps measurements updated through the transition at the configured layout FPS. Present&#39;s final <code>Pop</code> and <code>Dismiss</code> events also refresh the box, so a fade measured while an ancestor has <code>scale(0)</code> recovers without scroll input.</p>
 <p>Without <code>data-ae-scrollbox-fade</code>, the visual transparency fade is enabled when exactly one axis scrolls and disabled when both axes scroll. This default follows actual overflow, so resizing or changing content can change it. The top, right, bottom and left fades correspond to the actual content hidden beyond each physical edge. User scrolling and programmatic scrolling, including smooth Snap travel, update them through the existing <code>publish(state)</code> layout read/update. Fitting content and axes whose computed overflow is not <code>auto</code> or <code>scroll</code> contribute no fade. RTL scroll offsets are normalized to physical left/right distances, including older positive-coordinate models. Native overscroll is clamped to the real range; Elastic uses the original scroll bounds and axis availability rather than its temporary transformed extent.</p>
 <pre><code class="language-html">&lt;div data-ae-scrollbox data-ae-scrollbox-fade=&quot;false&quot;&gt;
   &lt;!-- Scrolling remains available without the visual fade. --&gt;
@@ -1107,6 +1107,10 @@ gallery.previous();  // Move to the preceding point.
                   rel="noopener noreferrer">ChatGPT</a>,
                 <a style="color:inherit!important;" href="https://openai.com/codex/" target="_blank"
                   rel="noopener noreferrer">Codex</a>,
+                <a style="color:inherit!important;" href="https://www.google.com/" target="_blank"
+                  rel="noopener noreferrer">Google</a>,
+                <a style="color:inherit!important;" href="https://gemini.google.com/" target="_blank"
+                  rel="noopener noreferrer">Gemini</a>,
                 <a style="color:inherit!important;" href="https://code.visualstudio.com/" target="_blank"
                   rel="noopener noreferrer">Visual Studio Code</a>,
                 <a style="color:inherit!important;" href="https://getbootstrap.com/" target="_blank"

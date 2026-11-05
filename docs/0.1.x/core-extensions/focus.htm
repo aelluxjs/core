@@ -83,13 +83,13 @@
           <div id="toast-present-group"
             class="position-fixed w-100 top-0 gap-1 z-1 pe-none p-4 pt-1 flex-column d-flex justify-content-center align-items-center"
             data-ae-present-group="2">
-            <div id="toast-1" data-ae-present="opacity" data-ae-auto-unpop="1s" data-ae-unpop-on-click="false"
+            <div id="toast-1" data-ae-present="opacity" data-ae-auto-dismiss="1s" data-ae-dismiss-on-click="false"
               hidden="true"
               class="position-relative overflow-hidden text-bg-danger small rounded-1 p-2 py-1 w-100 text-center"
               style="max-width: 300px;">
               <progress data-ae-progress-target="toast-1" class="toast-progress"></progress>
             </div>
-            <div id="toast-2" data-ae-present="opacity" data-ae-auto-unpop="1s" data-ae-unpop-on-click="false"
+            <div id="toast-2" data-ae-present="opacity" data-ae-auto-dismiss="1s" data-ae-dismiss-on-click="false"
               hidden="true"
               class="position-relative overflow-hidden text-bg-danger small rounded-1 p-2 py-1 w-100 text-center"
               style="max-width: 300px;">
@@ -183,7 +183,7 @@
                     </div>
 
                                           <div id="children-overview" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -228,7 +228,7 @@
                     </div>
 
                                           <div id="children-runtime" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -322,7 +322,7 @@
                     </div>
 
                                           <div id="children-extensions" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -402,7 +402,7 @@
                     </div>
 
                                           <div id="children-core-extensions" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false" >
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false" >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion                            data-ae-present-group>
                                                                                                   <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -425,7 +425,7 @@
                                   </div>
 
                                   <div id="children2-bundled" class="docs-menu-panel border-start ms-2"
-                                    data-ae-present="height opacity" data-ae-unpop-on-click="false" >
+                                    data-ae-present="height opacity" data-ae-dismiss-on-click="false" >
                                       <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                   <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -520,7 +520,7 @@
                                   </div>
 
                                   <div id="children2-optional" class="docs-menu-panel border-start ms-2"
-                                    data-ae-present="height opacity" data-ae-unpop-on-click="false"                                     hidden>
+                                    data-ae-present="height opacity" data-ae-dismiss-on-click="false"                                     hidden>
                                       <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                   <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -573,7 +573,7 @@
                     </div>
 
                                           <div id="children-integrations" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -694,7 +694,7 @@ $ae.init({ mode: &quot;basic&quot; });
 <p>The Extension observes <code>focusin</code>, capture-phase <code>focus</code> and <code>blur</code> on the document, and <code>focus</code> and <code>blur</code> on the window. A blur preserves the last valid element target; repeated notifications for the same element do not create duplicate history entries. Focus changes are recorded in a bounded, in-memory history. Call <code>AelluxJs.ext.focus.restoreLastFocus()</code> to focus the previous connected, visible target. It returns <code>true</code> if focus moved and <code>false</code> when no valid target remains. Hidden, inert, disabled and detached targets are skipped.</p>
 <pre><code class="language-js">const restored = $ae.ext.focus.restoreLastFocus();
 </code></pre>
-<p>When Present dispatches <code>AelluxJsUnpopFocusLost</code> after hiding a region containing the active element, Focus attempts to restore the previous valid target from its history. Ordinary blur events do not trigger automatic restoration.</p>
+<p>When Present dispatches <code>AelluxJsDismissFocusLost</code> or <code>AelluxJsUnpopFocusLost</code> after hiding a region containing the active element, Focus attempts to restore the previous valid target from its history. Ordinary blur events do not trigger automatic restoration.</p>
 <p>For a focused input, textarea, select, editable element or element explicitly declaring <code>data-ae-focus</code>, a non-empty <code>id</code> lets Focus emit <code>AelluxJsPushState</code> with <code>detail: { key: &quot;ae-focus&quot;, value: element.id }</code>. Ordinary buttons and links can enter local focus history without creating navigation snapshots unless explicitly declared. State Navigation records eligible IDs in the hash as <code>ae-focus={elementid}</code> and dispatches <code>AelluxJsSnapshotRestore</code> to restore a matching connected, visible, eligible element. Elements without an ID still enter local history for <code>restoreLastFocus()</code>, but do not push a state. Without State Navigation, the command remains available to another consumer.</p>
 <p>With the default hash navigation setting, recorded focus changes also change the hash. Set <code>useHash: false</code> in the Core options if that URL behavior is unwanted. Local focus history remains in memory and does not survive a page reload. Unmount removes an <code>enterkeyhint</code> generated by Focus while preserving a value originally declared by the application.</p>
 <p>The Extension does not trap focus or announce navigation changes. Applications remain responsible for suitable focus order and accessible controls. A <code>change</code> event alone does not move focus, so changing a value and clicking another control retains the user&#39;s chosen target.</p>
@@ -765,6 +765,10 @@ $ae.init({ mode: &quot;basic&quot; });
                   rel="noopener noreferrer">ChatGPT</a>,
                 <a style="color:inherit!important;" href="https://openai.com/codex/" target="_blank"
                   rel="noopener noreferrer">Codex</a>,
+                <a style="color:inherit!important;" href="https://www.google.com/" target="_blank"
+                  rel="noopener noreferrer">Google</a>,
+                <a style="color:inherit!important;" href="https://gemini.google.com/" target="_blank"
+                  rel="noopener noreferrer">Gemini</a>,
                 <a style="color:inherit!important;" href="https://code.visualstudio.com/" target="_blank"
                   rel="noopener noreferrer">Visual Studio Code</a>,
                 <a style="color:inherit!important;" href="https://getbootstrap.com/" target="_blank"

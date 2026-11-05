@@ -2396,7 +2396,7 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
     },
     {
-      "name": "data-ae-auto-unpop",
+      "name": "data-ae-auto-dismiss",
       "extension": "present",
       "description": "Automatically closes after the specified nonnegative duration. Values use milliseconds by default, or ms/s units.",
       "syntax": "duration",
@@ -2473,6 +2473,23 @@
       "examples": [
         "details"
       ],
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "data-ae-dismiss-on-click",
+      "extension": "present",
+      "description": "Close on outside/out clicks (default), inside/in clicks, or disable click dismissal with false/none.",
+      "syntax": "enum",
+      "values": [
+        "outside",
+        "inside",
+        "out",
+        "in",
+        "false",
+        "none"
+      ],
+      "default": "outside",
       "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     },
@@ -3141,12 +3158,13 @@
     {
       "name": "data-ae-trigger",
       "extension": "present",
-      "description": "Present action. Target is one native ID, or the closest Present ancestor when omitted. Prefer a native button for keyboard activation.",
+      "description": "Present action. unpop reverses opening; dismiss uses its independent outgoing destination. Target is one native ID, or the closest Present ancestor when omitted. Prefer a native button for keyboard activation.",
       "syntax": "enum",
       "values": [
         "",
         "toggle",
         "pop",
+        "dismiss",
         "unpop"
       ],
       "default": "toggle",
@@ -3164,23 +3182,6 @@
         "hover"
       ],
       "default": "click",
-      "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-    },
-    {
-      "name": "data-ae-unpop-on-click",
-      "extension": "present",
-      "description": "Close on outside/out clicks (default), inside/in clicks, or disable click dismissal with false/none.",
-      "syntax": "enum",
-      "values": [
-        "outside",
-        "inside",
-        "out",
-        "in",
-        "false",
-        "none"
-      ],
-      "default": "outside",
       "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     },
@@ -3326,6 +3327,93 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
     },
     {
+      "name": "--ae-dismiss-aellux-ease",
+      "extension": "present",
+      "syntax": "string",
+      "description": "Optional advanced $ae.ease() curve for controlled dismiss motion. Keep a valid CSS easing as the native fallback.",
+      "examples": [
+        "backOut",
+        "ease-in-out-circ"
+      ],
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-dismiss-duration",
+      "extension": "present",
+      "syntax": "<time>",
+      "description": "dismiss transition duration.",
+      "default": "250ms",
+      "values": [
+        "0s",
+        "150ms",
+        "250ms",
+        "500ms"
+      ],
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-dismiss-ease",
+      "extension": "present",
+      "syntax": "<easing-function>",
+      "description": "dismiss easing; CSS easing strings, including cubic-bezier, are supported.",
+      "default": "ease-in",
+      "values": [
+        "linear",
+        "ease",
+        "ease-in",
+        "ease-out",
+        "ease-in-out"
+      ],
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-dismiss-height",
+      "extension": "present",
+      "syntax": "<flex>",
+      "description": "dismiss grid height endpoint.",
+      "default": "0fr",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-dismiss-opacity",
+      "extension": "present",
+      "syntax": "<number> | <percentage>",
+      "description": "dismiss opacity endpoint.",
+      "default": "0",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-dismiss-progress",
+      "extension": "present",
+      "syntax": "<number>",
+      "description": "Bounded dismiss progress from 0 to 1. Safe for application CSS.",
+      "role": "output",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-dismiss-transform",
+      "extension": "present",
+      "syntax": "<transform-list> | none",
+      "description": "dismiss transform endpoint.",
+      "default": "scale(1.2)",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-dismiss-width",
+      "extension": "present",
+      "syntax": "<flex>",
+      "description": "dismiss grid width endpoint.",
+      "default": "0fr",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
       "name": "--ae-feedback-aellux-ease",
       "extension": "core",
       "syntax": "*",
@@ -3458,6 +3546,18 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
     },
     {
+      "name": "--ae-pop-aellux-ease",
+      "extension": "present",
+      "syntax": "string",
+      "description": "Optional advanced $ae.ease() curve for controlled pop motion. Keep a valid CSS easing as the native fallback.",
+      "examples": [
+        "backOut",
+        "ease-in-out-circ"
+      ],
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
       "name": "--ae-pop-duration",
       "extension": "present",
       "syntax": "<time>",
@@ -3533,6 +3633,14 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     },
     {
+      "name": "--ae-present-dismiss-phase",
+      "extension": "core",
+      "syntax": "*",
+      "description": "Private implementation property; not an application configuration contract.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/api.htm"
+    },
+    {
       "name": "--ae-present-pop-phase",
       "extension": "core",
       "syntax": "*",
@@ -3549,12 +3657,132 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/api.htm"
     },
     {
-      "name": "--ae-present-unpop-phase",
-      "extension": "core",
+      "name": "--ae-present-reverse-from-grid-template-columns",
+      "extension": "present",
       "syntax": "*",
-      "description": "Private implementation property; not an application configuration contract.",
+      "description": "Private captured opening endpoint for native reverse playback.",
       "role": "internal",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/api.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-present-reverse-from-grid-template-rows",
+      "extension": "present",
+      "syntax": "*",
+      "description": "Private captured opening endpoint for native reverse playback.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-present-reverse-from-max-height",
+      "extension": "present",
+      "syntax": "*",
+      "description": "Private captured opening endpoint for native reverse playback.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-present-reverse-from-max-width",
+      "extension": "present",
+      "syntax": "*",
+      "description": "Private captured opening endpoint for native reverse playback.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-present-reverse-from-opacity",
+      "extension": "present",
+      "syntax": "*",
+      "description": "Private captured opening endpoint for native reverse playback.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-present-reverse-from-pop-phase",
+      "extension": "present",
+      "syntax": "*",
+      "description": "Private captured opening endpoint for native reverse playback.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-present-reverse-from-transform",
+      "extension": "present",
+      "syntax": "*",
+      "description": "Private captured opening endpoint for native reverse playback.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-present-reverse-max-height",
+      "extension": "present",
+      "syntax": "<length>",
+      "description": "Private native reverse dimension interpolation.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-present-reverse-max-width",
+      "extension": "present",
+      "syntax": "<length>",
+      "description": "Private native reverse dimension interpolation.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-present-reverse-to-grid-template-columns",
+      "extension": "present",
+      "syntax": "*",
+      "description": "Private captured opening endpoint for native reverse playback.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-present-reverse-to-grid-template-rows",
+      "extension": "present",
+      "syntax": "*",
+      "description": "Private captured opening endpoint for native reverse playback.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-present-reverse-to-max-height",
+      "extension": "present",
+      "syntax": "*",
+      "description": "Private captured opening endpoint for native reverse playback.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-present-reverse-to-max-width",
+      "extension": "present",
+      "syntax": "*",
+      "description": "Private captured opening endpoint for native reverse playback.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-present-reverse-to-opacity",
+      "extension": "present",
+      "syntax": "*",
+      "description": "Private captured opening endpoint for native reverse playback.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-present-reverse-to-pop-phase",
+      "extension": "present",
+      "syntax": "*",
+      "description": "Private captured opening endpoint for native reverse playback.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-present-reverse-to-transform",
+      "extension": "present",
+      "syntax": "*",
+      "description": "Private captured opening endpoint for native reverse playback.",
+      "role": "internal",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     },
     {
       "name": "--ae-scroll-x-progress",
@@ -3799,78 +4027,11 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox-snap.htm"
     },
     {
-      "name": "--ae-unpop-duration",
-      "extension": "present",
-      "syntax": "<time>",
-      "description": "unpop transition duration.",
-      "default": "250ms",
-      "values": [
-        "0s",
-        "150ms",
-        "250ms",
-        "500ms"
-      ],
-      "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-    },
-    {
-      "name": "--ae-unpop-ease",
-      "extension": "present",
-      "syntax": "<easing-function>",
-      "description": "unpop easing; CSS easing strings, including cubic-bezier, are supported.",
-      "default": "ease-in",
-      "values": [
-        "linear",
-        "ease",
-        "ease-in",
-        "ease-out",
-        "ease-in-out"
-      ],
-      "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-    },
-    {
-      "name": "--ae-unpop-height",
-      "extension": "present",
-      "syntax": "<flex>",
-      "description": "unpop grid height endpoint.",
-      "default": "0fr",
-      "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-    },
-    {
-      "name": "--ae-unpop-opacity",
-      "extension": "present",
-      "syntax": "<number> | <percentage>",
-      "description": "unpop opacity endpoint.",
-      "default": "0",
-      "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-    },
-    {
       "name": "--ae-unpop-progress",
       "extension": "present",
       "syntax": "<number>",
-      "description": "Bounded unpop progress from 0 to 1. Safe for application CSS.",
+      "description": "Normalized progress of reverse playback, from 0 to 1. Hidden regions settle at 1; presented regions at 0. No independent unpop destination, duration or easing exists.",
       "role": "output",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-    },
-    {
-      "name": "--ae-unpop-transform",
-      "extension": "present",
-      "syntax": "<transform-list> | none",
-      "description": "unpop transform endpoint.",
-      "default": "scale(1.2)",
-      "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-    },
-    {
-      "name": "--ae-unpop-width",
-      "extension": "present",
-      "syntax": "<flex>",
-      "description": "unpop grid width endpoint.",
-      "default": "0fr",
-      "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     },
     {
@@ -3949,6 +4110,13 @@
       "role": "output",
       "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
+    },
+    {
+      "name": "ae--dismissing",
+      "extension": "present",
+      "role": "output",
+      "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     },
     {
       "name": "ae--feedback-motion-",
@@ -4178,7 +4346,7 @@
       "name": "ae--unpopping",
       "extension": "present",
       "role": "output",
-      "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
+      "description": "Runtime-managed state class; useful in CSS selectors.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     },
     {
@@ -14908,6 +15076,36 @@
   ],
   "methods": [
     {
+      "name": "present.unpop",
+      "extension": "present",
+      "description": "unpop(element) reverses the captured opening trajectory and its easing back to from, using only its travelled time. Returns false during independent dismissal without interrupting it. Mounted controller: $ae(element).present.unpop().",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "present.pop",
+      "extension": "present",
+      "description": "pop(element) restarts opening from the configured from state. Mounted controller: $ae(element).present.pop().",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "present.dismiss",
+      "extension": "present",
+      "description": "dismiss(element) closes from the current rendered state toward the independent dismiss destination using dismiss timing/easing. Repeated dismissal is idempotent; BeforeDismiss can veto without changing current motion. Mounted controller: $ae(element).present.dismiss().",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "present.toggle",
+      "extension": "present",
+      "description": "toggle(element, goto?) opens when true, dismisses when false, otherwise toggles the accepted direction. Mounted controller: $ae(element).present.toggle(goto?).",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "present.trigger",
+      "extension": "present",
+      "description": "trigger(element, action) routes pop, dismiss or toggle; an unknown action warns and toggles. Mounted controller: $ae(element).present.trigger(action).",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
       "name": "present.popNext",
       "extension": "present",
       "description": "popNext(group, prepare?) reserves a closed direct mounted member while data-ae-present-group capacity is available (default 1), otherwise reuses the oldest active eligible member, preserving other members. Rotates synchronously and prepares before BeforePop/opening. Returns Promise<Element|null>; preparation errors reject. Controller: $ae(group).present.popNext(prepare?). show() stays exclusive.",
@@ -14974,6 +15172,14 @@
     {
       "bubbles": true,
       "cancelable": true,
+      "name": "AelluxJsBeforeDismiss",
+      "extension": "present",
+      "description": "BeforeDismiss notification on the Present element. Cancel to veto the transition.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
+      "cancelable": true,
       "name": "AelluxJsBeforeMount",
       "extension": "core",
       "description": "BeforeMount pass preflight on document. Cancel to prevent the pass and its completion event. detail: { root, extensions }.",
@@ -15001,6 +15207,30 @@
       "name": "AelluxJsBeforeUnpop",
       "extension": "present",
       "description": "BeforeUnpop notification on the Present element. Cancel to veto the transition.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
+      "cancelable": false,
+      "name": "AelluxJsDismiss",
+      "extension": "present",
+      "description": "Dismiss notification on the Present element.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
+      "cancelable": false,
+      "name": "AelluxJsDismissFocusLost",
+      "extension": "present",
+      "description": "Closed Present region lost focus. document event; detail: { element, focused }.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
+      "cancelable": false,
+      "name": "AelluxJsDismissing",
+      "extension": "present",
+      "description": "Dismissing notification on the Present element.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
     },
     {
@@ -15120,7 +15350,7 @@
       "cancelable": false,
       "name": "AelluxJsProgress",
       "extension": "core",
-      "description": "Numeric progress on the producing element. detail: { value, max }, finite numbers with 0 <= value <= max and max > 0. Independent of Progress and Feedback. Present auto-unpop includes status (running/completed), elapsedMs, durationMs and remainingMs.",
+      "description": "Numeric progress on the producing element. detail: { value, max }, finite numbers with 0 <= value <= max and max > 0. Independent of Progress and Feedback. Present auto-dismiss includes status (running/completed), elapsedMs, durationMs and remainingMs.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
     },
     {
@@ -15321,7 +15551,7 @@
       "cancelable": false,
       "name": "AelluxJsUnpopFocusLost",
       "extension": "present",
-      "description": "Closed Present region lost focus. document event; detail: { element, focused }.",
+      "description": "Reverse playback hid the focused Present region. document event; detail: { element, focused }.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
     },
     {

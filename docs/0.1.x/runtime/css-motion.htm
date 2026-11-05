@@ -83,13 +83,13 @@
           <div id="toast-present-group"
             class="position-fixed w-100 top-0 gap-1 z-1 pe-none p-4 pt-1 flex-column d-flex justify-content-center align-items-center"
             data-ae-present-group="2">
-            <div id="toast-1" data-ae-present="opacity" data-ae-auto-unpop="1s" data-ae-unpop-on-click="false"
+            <div id="toast-1" data-ae-present="opacity" data-ae-auto-dismiss="1s" data-ae-dismiss-on-click="false"
               hidden="true"
               class="position-relative overflow-hidden text-bg-danger small rounded-1 p-2 py-1 w-100 text-center"
               style="max-width: 300px;">
               <progress data-ae-progress-target="toast-1" class="toast-progress"></progress>
             </div>
-            <div id="toast-2" data-ae-present="opacity" data-ae-auto-unpop="1s" data-ae-unpop-on-click="false"
+            <div id="toast-2" data-ae-present="opacity" data-ae-auto-dismiss="1s" data-ae-dismiss-on-click="false"
               hidden="true"
               class="position-relative overflow-hidden text-bg-danger small rounded-1 p-2 py-1 w-100 text-center"
               style="max-width: 300px;">
@@ -183,7 +183,7 @@
                     </div>
 
                                           <div id="children-overview" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -228,7 +228,7 @@
                     </div>
 
                                           <div id="children-runtime" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -322,7 +322,7 @@
                     </div>
 
                                           <div id="children-extensions" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -402,7 +402,7 @@
                     </div>
 
                                           <div id="children-core-extensions" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion                            data-ae-present-group>
                                                                                                   <div
@@ -426,7 +426,7 @@
                                   </div>
 
                                   <div id="children2-bundled" class="docs-menu-panel border-start ms-2"
-                                    data-ae-present="height opacity" data-ae-unpop-on-click="false"                                     hidden>
+                                    data-ae-present="height opacity" data-ae-dismiss-on-click="false"                                     hidden>
                                       <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                   <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -521,7 +521,7 @@
                                   </div>
 
                                   <div id="children2-optional" class="docs-menu-panel border-start ms-2"
-                                    data-ae-present="height opacity" data-ae-unpop-on-click="false"                                     hidden>
+                                    data-ae-present="height opacity" data-ae-dismiss-on-click="false"                                     hidden>
                                       <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                   <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -574,7 +574,7 @@
                     </div>
 
                                           <div id="children-integrations" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -660,7 +660,7 @@
             <h1>CSS Motion Controller</h1>
 <p><code>AelluxJs.motion</code> coordinates CSS transitions and CSS animations with <code>waitLayout</code>. CSS remains responsible for properties, keyframes, duration, delay, iterations and the normal CSS easing. In browsers with sufficient Web Animations API support, Aellux pauses only the animations created by the requested state change and advances their <code>currentTime</code> from a monotonic clock. <code>waitLayout.sequence()</code> decides which frames perform those updates, including adaptive FPS reduction and the element&#39;s optional <code>data-ae-maxfps</code> limit.</p>
 <p>The controller intentionally accepts a small main-thread cost under ideal conditions. Its purpose is predictable degradation: if the browser begins missing frames because of a constrained device or competing applications, the shared scheduler can reduce update frequency instead of allowing managed motion to contribute to stalls. A sustained severe delay selects the nearest compatible lower 15-FPS budget in one adjustment; an observed 10 FPS cadence reaches the 5 FPS floor immediately.</p>
-<p>Controlled operations containing animated properties beyond <code>transform</code>, <code>opacity</code>, and Present&#39;s internal progress channels have a conservative default ceiling of 55 FPS. The exempt progress properties are <code>--ae-pop-progress</code>, <code>--ae-unpop-progress</code>, <code>--ae-present-pop-phase</code>, and <code>--ae-present-unpop-phase</code>; arbitrary custom properties remain conservative because they can drive layout. Configure the ceiling with <code>cssMotionPropertyMaxFPS</code> in <code>init()</code>. This is a workload policy, not a promise that exempt properties stay on the GPU: browser composition and painting still depend on the document and device. Classification applies to the whole operation. If one transition combines <code>opacity</code>, <code>transform</code>, and <code>height</code>, all captured animations share one clock at the lowest applicable limit from <code>data-ae-maxfps</code>, <code>run({ maxFPS })</code>, and <code>cssMotionPropertyMaxFPS</code>; properties never receive independent schedules.</p>
+<p>Controlled operations containing animated properties beyond <code>transform</code>, <code>opacity</code>, and Present&#39;s internal progress channels have a conservative default ceiling of 55 FPS. The exempt progress properties are <code>--ae-pop-progress</code>, <code>--ae-dismiss-progress</code>, <code>--ae-unpop-progress</code>, <code>--ae-present-pop-phase</code>, and <code>--ae-present-dismiss-phase</code>; arbitrary custom properties remain conservative because they can drive layout. Configure the ceiling with <code>cssMotionPropertyMaxFPS</code> in <code>init()</code>. This is a workload policy, not a promise that exempt properties stay on the GPU: browser composition and painting still depend on the document and device. Classification applies to the whole operation. If one transition combines <code>opacity</code>, <code>transform</code>, and <code>height</code>, all captured animations share one clock at the lowest applicable limit from <code>data-ae-maxfps</code>, <code>run({ maxFPS })</code>, and <code>cssMotionPropertyMaxFPS</code>; properties never receive independent schedules.</p>
 <p>The shared scheduler applies that visual limit once, including before its native cadence has been calibrated. CSS Motion does not also impose a timer-based sequence limit: timer wakeups can miss the next animation frame and reduce a nominal 40 FPS operation to about 32 FPS on WebKit. Frame credit preserves the requested average cadence within the browser&#39;s available frames; it does not guarantee a frame rate when the device cannot sustain it.</p>
 <p>The runtime&#39;s standard performance cadence for CSS publication is the shared adaptive <code>waitLayout</code> cadence, including when no CSS Motion operation is active. Direct publication of computed CSS values should use <code>waitLayout.update()</code>; it does not require <code>motion.run()</code>. The property ceiling described above is an additional controlled-motion policy, not a permanent global CSS-write ceiling. Direct CSSOM writes outside the scheduler do not automatically acquire adaptive protection. See <a href="wait-layout.htm#css-publication-cadence">CSS publication cadence</a> and the <a href="../extensions/authoring.htm#adaptive-css-publication">authoring contract</a>, including scheduled runtime publication and synchronous lifecycle boundaries.</p>
 <pre><code class="language-js">$ae.init({
@@ -680,6 +680,7 @@ await $ae.motion.run(panel, {
 });
 </code></pre>
 <p><code>run()</code> returns <code>{ id, status, mode }</code>. <code>mode</code> is <code>&quot;controlled&quot;</code>, <code>&quot;native&quot;</code>, or <code>&quot;reduced&quot;</code>. A new operation with the same ID replaces the previous operation. <code>$ae.motion.cancel(id)</code> cancels owned scheduler work and releases captured animations.</p>
+<p>Present reverse playback retains the original opening keyframes and easing, changes direction, and excludes the untravelled segment with a negative delay. It uses the same capture and adaptive clock as other motion. Its native completion waits only for newly owned effects, so unrelated existing infinite animations cannot hold a reverse request open. See <a href="../core-extensions/present.htm#opening-reverse-playback">opening reverse playback</a>. Direction and negative-delay behavior follow <a href="https://www.w3.org/TR/web-animations-1/">Web Animations timing</a> and <a href="https://www.w3.org/TR/css-animations-1/#animation-delay">CSS Animations</a>.</p>
 <p>Set <code>subtree: true</code> to capture new transitions and animations on the element and its descendants in the same operation. Existing effects remain outside its ownership. All captured effects share the same clock and FPS policy. Overflow Marquee uses this to synchronize a stationary viewport&#39;s fade offset with its child content&#39;s transform. The default captures only effects on the requested element.</p>
 <p>Cancellation also settles a native operation as <code>status: &quot;aborted&quot;</code>, even if an underlying <code>Animation.finished</code> Promise never settles. A failure partway through capturing multiple effects releases every effect already paused, resuming native playback before reporting the error. Completion or cancellation clears the operation&#39;s visual FPS ceiling. Native fallback leaves CSS playback under browser control; canceling the waiting operation does not claim ownership of unrelated native animations.</p>
 <h2>Native fallback and disabling control</h2>
@@ -690,7 +691,7 @@ await $ae.motion.run(panel, {
 <p>Disabling CSS Motion timeline control does not disable the shared adaptive cadence for other CSS publications scheduled through <code>waitLayout</code>.</p>
 <h2>Advanced Aellux easing</h2>
 <p>Controlled motion can opt into an easing name supported by <code>$ae.ease()</code>. When the browser accepts CSS <code>linear()</code>, the controller samples the Aellux curve into a native timing function and lets the browser continue interpolating the CSS properties. Samples retain values outside <code>0..1</code>, preserving Back and Elastic overshoot without applying the original CSS easing a second time.</p>
-<p>Present reads <code>--ae-pop-aellux-ease</code> and <code>--ae-unpop-aellux-ease</code>. Feedback reads <code>--ae-feedback-aellux-ease</code> from its transform target.</p>
+<p>Present reads <code>--ae-pop-aellux-ease</code> and <code>--ae-dismiss-aellux-ease</code>. Feedback reads <code>--ae-feedback-aellux-ease</code> from its transform target.</p>
 <pre><code class="language-css">.panel {
   --ae-pop-ease: ease-out;
   --ae-pop-aellux-ease: elasticOut;
@@ -717,6 +718,10 @@ await $ae.motion.run(panel, {
                   rel="noopener noreferrer">ChatGPT</a>,
                 <a style="color:inherit!important;" href="https://openai.com/codex/" target="_blank"
                   rel="noopener noreferrer">Codex</a>,
+                <a style="color:inherit!important;" href="https://www.google.com/" target="_blank"
+                  rel="noopener noreferrer">Google</a>,
+                <a style="color:inherit!important;" href="https://gemini.google.com/" target="_blank"
+                  rel="noopener noreferrer">Gemini</a>,
                 <a style="color:inherit!important;" href="https://code.visualstudio.com/" target="_blank"
                   rel="noopener noreferrer">Visual Studio Code</a>,
                 <a style="color:inherit!important;" href="https://getbootstrap.com/" target="_blank"

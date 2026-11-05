@@ -374,7 +374,7 @@ test("present layout event activates an anchor whose target started hidden", asy
   await page.evaluate(() => {
     document.body.innerHTML = `<div style="position:relative;width:300px;height:100px">
       <div id="panel" data-ae-present hidden
-        style="--ae-pop-duration:0ms;--ae-unpop-duration:0ms">
+        style="--ae-pop-duration:0ms;--ae-dismiss-duration:0ms">
         <div id="target" style="position:absolute;left:40px;top:20px;width:30px;height:20px"></div>
       </div>
       <div id="anchor" data-ae-anchor-target="target" data-ae-anchor="top-left:top-left"
@@ -392,7 +392,7 @@ test("present layout event activates an anchor whose target started hidden", asy
     element.style.getPropertyValue("--ae-anchor-x")
   )).toBe("40px");
 
-  await page.evaluate(() => $ae("panel").present.unpop());
+  await page.evaluate(() => $ae("panel").present.dismiss());
   await expect(page.locator("#anchor")).not.toHaveClass(/ae--anchored/);
 });
 

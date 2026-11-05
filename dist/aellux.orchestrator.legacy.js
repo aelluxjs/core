@@ -22234,7 +22234,7 @@
             return token && !["opacity", "transform", "height", "width"].includes(token);
           })) invalid("present", "present", "Unknown animated Present property.", "Use opacity, transform, height, width, all, or an empty value to disable motion.");
           if (has("present-when") && /\s/.test(value("present-when"))) invalid("present", "present-when", "A group condition must be one class token.", "Use one class name without spaces or a leading dot.", "WARN_PRESENT_GROUP_SELECTION");
-          for (var _i4 = 0, _arr2 = [["trigger", ["", "toggle", "pop", "unpop"]], ["trigger-on", ["", "click", "hover"]]]; _i4 < _arr2.length; _i4++) {
+          for (var _i4 = 0, _arr2 = [["trigger", ["", "toggle", "pop", "dismiss", "unpop"]], ["trigger-on", ["", "click", "hover"]]]; _i4 < _arr2.length; _i4++) {
             var _arr2$_i = _slicedToArray(_arr2[_i4], 2), _name = _arr2$_i[0], allowed = _arr2$_i[1];
             if (has(_name) && !allowed.includes(_name === "trigger" ? value(_name).toLowerCase() : value(_name))) invalid("present", _name, "Unknown Present control value.", "Use ".concat(allowed.filter(Boolean).join(", "), "."));
           }
@@ -22245,7 +22245,7 @@
             else if (!element.closest("[".concat(attr("present"), "]"))) invalid("present", has("trigger") ? "trigger" : "dismiss", "Control has no target or enclosing Present container.", "Set data-ae-target to an existing Present ID or place the control inside its Present container.", "WARN_CONFIGURATION_TARGET");
             if (element.tabIndex < 0 && !element.matches(":disabled,[inert]")) invalid("present", has("trigger") ? "trigger" : "dismiss", "Control is not reachable with the keyboard.", "Prefer a native button; custom controls need focusability and appropriate keyboard activation.", "WARN_CONTROL_ACCESSIBILITY");
           }
-          if (has("auto-unpop") && value("auto-unpop") && !/^(?:\d+(?:\.\d+)?|\.\d+)(?:ms|s)?$/.test(value("auto-unpop").trim())) invalid("present", "auto-unpop", "Auto-unpop duration is invalid.", "Use a nonnegative duration such as 250ms or 2s.");
+          if (has("auto-dismiss") && value("auto-dismiss") && !/^(?:\d+(?:\.\d+)?|\.\d+)(?:ms|s)?$/.test(value("auto-dismiss").trim())) invalid("present", "auto-dismiss", "Auto-dismiss duration is invalid.", "Use a nonnegative duration such as 250ms or 2s.");
           if (has("present-group")) {
             var members = _toConsumableArray2(element.querySelectorAll("[".concat(attr("present"), "]"))).filter(function(member2) {
               return member2.closest("[".concat(attr("present-group"), "]")) === element;
@@ -22360,7 +22360,7 @@
           })) invalid("present", "present", "Anchor and Present both declare transform; Anchor takes priority.", "Remove transform from Present, or animate a child element instead.", "WARN_PRESENT_ANCHOR_TRANSFORM");
           var extension2 = checkAnchor ? "anchor" : "present";
           var style = root.getComputedStyle(element);
-          var durations = [].concat(_toConsumableArray2(checkPresent ? ["--ae-pop-duration", "--ae-unpop-duration"] : []), _toConsumableArray2(checkAnchor ? ["--ae-anchor-switch-duration"] : []));
+          var durations = [].concat(_toConsumableArray2(checkPresent ? ["--ae-pop-duration", "--ae-dismiss-duration"] : []), _toConsumableArray2(checkAnchor ? ["--ae-anchor-switch-duration"] : []));
           var _iterator0 = _createForOfIteratorHelper3(durations), _step0;
           try {
             for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
@@ -22579,7 +22579,7 @@
       init_utils_name_case();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       attributesByExtension = {
-        present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-click",
+        present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-dismiss dismiss-on-click",
         anchor: "anchor anchor-target anchor-match anchor-scroll-into-view",
         "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
         scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-parent scrollbar-vertical scrollbar-horizontal",
@@ -24222,6 +24222,30 @@
     }
   });
 
+  // src/internal/sample-css-easing.js
+  function sampleCssEasing(api, name) {
+    var points = [];
+    var round = function round2(value2) {
+      return Math.round(value2 * 1e5) / 1e5;
+    };
+    try {
+      for (var index = 0; index <= 60; index++) {
+        var progress = index / 60;
+        var value = api.ease(name, progress);
+        if (!Number.isFinite(value)) return null;
+        points.push("".concat(round(value), " ").concat(round(progress * 100), "%"));
+      }
+    } catch (_) {
+      return null;
+    }
+    return "linear(".concat(points.join(", "), ")");
+  }
+  var init_sample_css_easing = __esm({
+    "src/internal/sample-css-easing.js": function() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
   // src/internal/create-css-motion-controller.js
   function _toConsumableArray4(r) {
     return _arrayWithoutHoles4(r) || _iterableToArray4(r) || _unsupportedIterableToArray7(r) || _nonIterableSpread4();
@@ -24280,7 +24304,7 @@
   }
   function createCssMotionController(root, getAelluxJs) {
     var operations = /* @__PURE__ */ new Map();
-    var lightweightProperties = /* @__PURE__ */ new Set(["transform", "opacity", "--ae-pop-progress", "--ae-unpop-progress", "--ae-present-pop-phase", "--ae-present-unpop-phase"]);
+    var lightweightProperties = /* @__PURE__ */ new Set(["transform", "opacity", "--ae-pop-progress", "--ae-dismiss-progress", "--ae-unpop-progress", "--ae-present-pop-phase", "--ae-present-dismiss-phase"]);
     var nextId = 4e6;
     function id() {
       return nextId++;
@@ -24549,31 +24573,16 @@
     function applyAelluxEasing(operation, animation) {
       var name = operation.options.easing;
       if (!name || !root.CSS || typeof root.CSS.supports !== "function" || !animation.effect || typeof animation.effect.updateTiming !== "function") return;
-      var easing = sampledLinear(name);
+      var easing = sampleCssEasing(getAelluxJs(), name);
       if (!easing || !root.CSS.supports("animation-timing-function", easing)) return;
       animation.effect.updateTiming({
         easing: easing
       });
     }
-    function sampledLinear(name) {
-      var AelluxJs2 = getAelluxJs();
-      var points = [];
-      try {
-        for (var index = 0; index <= 60; index++) {
-          var progress = index / 60;
-          var value = AelluxJs2.ease(name, progress);
-          if (!Number.isFinite(value)) return null;
-          points.push("".concat(round(value), " ").concat(round(progress * 100), "%"));
-        }
-      } catch (_) {
-        return null;
-      }
-      return "linear(".concat(points.join(", "), ")");
-    }
     function nativeRun(operation) {
       var before = operation.before;
-      if ((operation.options.subtree || getAelluxJs().options.environment === "development") && typeof operation.element.getAnimations === "function") before = new Set(animationsFor(operation));
-      if (operation.options.subtree) operation.before = before;
+      if ((operation.options.subtree || operation.options.ownedOnly || getAelluxJs().options.environment === "development") && typeof operation.element.getAnimations === "function") before = new Set(animationsFor(operation));
+      if (operation.options.subtree || operation.options.ownedOnly) operation.before = before;
       operation.options.apply();
       return nativeWait(operation, before);
     }
@@ -24674,9 +24683,6 @@
     function now() {
       return root.performance && typeof root.performance.now === "function" ? root.performance.now() : Date.now();
     }
-    function round(value) {
-      return Math.round(value * 1e5) / 1e5;
-    }
     return Object.freeze({
       run: run,
       cancel: cancel,
@@ -24687,6 +24693,7 @@
   var init_create_css_motion_controller = __esm({
     "src/internal/create-css-motion-controller.js": function() {
       init_development_helpers();
+      init_sample_css_easing();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
     }
   });

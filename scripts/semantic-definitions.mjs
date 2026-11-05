@@ -15,12 +15,12 @@ export const semanticAttributes = [
   attribute("present-active", "present", "Selected member's native ID, without #. An empty value selects no member. Invalid or ambiguous selection preserves the previous selection.", { syntax: "id", default: "", examples: ["details"] }),
   attribute("present-when", "present", "One class token on the Present Group that selects this member when no explicit active attribute is present.", { syntax: "class-token", examples: ["show-details"] }),
   attribute("present-motion", "present", "Direct content child of a Present container; enables grid-based size transitions. Put hidden on the container.", { syntax: "presence" }),
-  attribute("trigger", "present", "Present action. Target is one native ID, or the closest Present ancestor when omitted. Prefer a native button for keyboard activation.", { syntax: "enum", values: ["", "toggle", "pop", "unpop"], default: "toggle" }),
+  attribute("trigger", "present", "Present action. unpop reverses opening; dismiss uses its independent outgoing destination. Target is one native ID, or the closest Present ancestor when omitted. Prefer a native button for keyboard activation.", { syntax: "enum", values: ["", "toggle", "pop", "dismiss", "unpop"], default: "toggle" }),
   attribute("trigger-on", "present", "Use hover for delegated pointer hover opening/closing. Touch and keyboard activation keep click behavior.", { syntax: "enum", values: ["", "click", "hover"], default: "click" }),
   attribute("target", "present", "One Present target ID, optionally prefixed with #; CSS selector lists are not accepted.", { syntax: "id", examples: ["details", "#details"] }),
   attribute("dismiss", "present", "Closes one Present ID, optionally prefixed with #. Empty uses data-ae-target or the closest Present ancestor.", { syntax: "id", default: "", examples: ["details"] }),
-  attribute("auto-unpop", "present", "Automatically closes after the specified nonnegative duration. Values use milliseconds by default, or ms/s units.", { syntax: "duration", examples: ["250ms", "2s"] }),
-  attribute("unpop-on-click", "present", "Close on outside/out clicks (default), inside/in clicks, or disable click dismissal with false/none.", { syntax: "enum", values: ["outside", "inside", "out", "in", "false", "none"], default: "outside" }),
+  attribute("auto-dismiss", "present", "Automatically closes after the specified nonnegative duration. Values use milliseconds by default, or ms/s units.", { syntax: "duration", examples: ["250ms", "2s"] }),
+  attribute("dismiss-on-click", "present", "Close on outside/out clicks (default), inside/in clicks, or disable click dismissal with false/none.", { syntax: "enum", values: ["outside", "inside", "out", "in", "false", "none"], default: "outside" }),
   attribute("anchor", "anchor", "Comma-separated target-pivot:self-pivot candidates. Pivots: top-left, top-center, top-right, center-left, center, center-right, bottom-left, bottom-center, bottom-right.", { syntax: "pivot-list", values: ["bottom-left:top-left", "bottom-center:top-center", "bottom-right:top-right", "top-left:bottom-left", "center:center"], examples: ["bottom-left:top-left, top-left:bottom-left"] }),
   attribute("anchor-target", "anchor", "Target ID or CSS selector. A Present Group target resolves to its accepted selected member, allowing multiple Anchors per group. Empty uses offsetParent. Effective target and Anchor must share a positioning reference.", { syntax: "selector", default: "", examples: ["menu-trigger", "#menu-trigger", "#views"] }),
   attribute("anchor-match", "anchor", "Match the target's width and/or height through weak CSS. Empty and unknown tokens are invalid; application sizing can override the match.", { syntax: "token-list", values: ["width", "height", "width height"] }),
@@ -71,12 +71,17 @@ export const semanticAttributes = [
 
 const property = (name, extension, syntax, description, options = {}) => ({ name, extension, syntax, description, ...options });
 export const semanticCSSProperties = [
-  ...["pop", "unpop"].flatMap(phase => [
+  property("unpop-progress", "present", "<number>", "Normalized progress of reverse playback, from 0 to 1. Hidden regions settle at 1; presented regions at 0. No independent unpop destination, duration or easing exists.", { role: "output" }),
+  ...["height", "width"].map(dimension => property(`present-reverse-max-${dimension}`, "present", "<length>", "Private native reverse dimension interpolation.", { role: "internal" })),
+  ...["opacity", "transform", "grid-template-rows", "grid-template-columns", "max-height", "max-width", "pop-phase"].flatMap(name =>
+    ["from", "to"].map(phase => property(`present-reverse-${phase}-${name}`, "present", "*", "Private captured opening endpoint for native reverse playback.", { role: "internal" }))),
+  ...["pop", "dismiss"].flatMap(phase => [
     property(`${phase}-duration`, "present", "<time>", `${phase} transition duration.`, { default: "250ms", values: ["0s", "150ms", "250ms", "500ms"] }),
     property(`${phase}-ease`, "present", "<easing-function>", `${phase} easing; CSS easing strings, including cubic-bezier, are supported.`, { default: phase === "pop" ? "ease-out" : "ease-in", values: ["linear", "ease", "ease-in", "ease-out", "ease-in-out"] }),
+    property(`${phase}-aellux-ease`, "present", "string", `Optional advanced $ae.ease() curve for controlled ${phase} motion. Keep a valid CSS easing as the native fallback.`, { examples: ["backOut", "ease-in-out-circ"] }),
     property(`${phase}-progress`, "present", "<number>", `Bounded ${phase} progress from 0 to 1. Safe for application CSS.`, { role: "output" })
   ]),
-  ...["from", "pop", "unpop"].flatMap(phase => [
+  ...["from", "pop", "dismiss"].flatMap(phase => [
     property(`${phase}-opacity`, "present", "<number> | <percentage>", `${phase} opacity endpoint.`, { default: phase === "pop" ? "1" : "0" }),
     property(`${phase}-transform`, "present", "<transform-list> | none", `${phase} transform endpoint.`, { default: phase === "from" ? "scale(0.5)" : phase === "pop" ? "scale(1)" : "scale(1.2)" }),
     ...["height", "width"].map(axis => property(`${phase}-${axis}`, "present", "<flex>", `${phase} grid ${axis} endpoint.`, { default: phase === "pop" ? "1fr" : "0fr" }))
@@ -104,16 +109,21 @@ export const semanticCSSProperties = [
   property("scrollbar-track-color", "scrollbox", "<color>", "Custom scrollbar track color. Unset uses a transparent track."),
   property("scrollbar-opacity-fade", "scrollbox", "<number>", "Opacity after both mouse and pointer hover end.", { default: "0", values: ["0", "1"] }),
   property("scrollbar-opacity-visible", "scrollbox", "<number>", "Opacity while hover, drag or post-drag visibility is active.", { default: "1", values: ["0", "1"] }),
-  ...["present-pop-phase", "present-unpop-phase", "present-properties", "anchor-pivot-x", "anchor-pivot-y", "scrollbar-display", "scrollbar-length", "scrollbar-thumb-position", "scrollbar-thumb-size", "scrollbar-x", "scrollbar-y", "feedback-aellux-ease"].map(name => property(name, "core", "*", "Private implementation property; not an application configuration contract.", { role: "internal" })),
+  ...["present-pop-phase", "present-dismiss-phase", "present-properties", "anchor-pivot-x", "anchor-pivot-y", "scrollbar-display", "scrollbar-length", "scrollbar-thumb-position", "scrollbar-thumb-size", "scrollbar-x", "scrollbar-y", "feedback-aellux-ease"].map(name => property(name, "core", "*", "Private implementation property; not an application configuration contract.", { role: "internal" })),
   property("--anchor-opacity", "anchor", "<number>", "Opacity copied from the target's nearest Present region, or 1. This property intentionally has no ae prefix.", { role: "output", literal: true })
 ];
 
 export const semanticMethods = [
+  { name: "present.unpop", extension: "present", description: "unpop(element) reverses the captured opening trajectory and its easing back to from, using only its travelled time. Returns false during independent dismissal without interrupting it. Mounted controller: $ae(element).present.unpop()." },
+  { name: "present.pop", extension: "present", description: "pop(element) restarts opening from the configured from state. Mounted controller: $ae(element).present.pop()." },
+  { name: "present.dismiss", extension: "present", description: "dismiss(element) closes from the current rendered state toward the independent dismiss destination using dismiss timing/easing. Repeated dismissal is idempotent; BeforeDismiss can veto without changing current motion. Mounted controller: $ae(element).present.dismiss()." },
+  { name: "present.toggle", extension: "present", description: "toggle(element, goto?) opens when true, dismisses when false, otherwise toggles the accepted direction. Mounted controller: $ae(element).present.toggle(goto?)." },
+  { name: "present.trigger", extension: "present", description: "trigger(element, action) routes pop, dismiss or toggle; an unknown action warns and toggles. Mounted controller: $ae(element).present.trigger(action)." },
   { name: "present.popNext", extension: "present", description: "popNext(group, prepare?) reserves a closed direct mounted member while data-ae-present-group capacity is available (default 1), otherwise reuses the oldest active eligible member, preserving other members. Rotates synchronously and prepares before BeforePop/opening. Returns Promise<Element|null>; preparation errors reject. Controller: $ae(group).present.popNext(prepare?). show() stays exclusive." }
 ];
 
 export const semanticEvents = [
-  { name: "Progress", extension: "core", bubbles: false, cancelable: false, description: "Numeric progress on the producing element. detail: { value, max }, finite numbers with 0 <= value <= max and max > 0. Independent of Progress and Feedback. Present auto-unpop includes status (running/completed), elapsedMs, durationMs and remainingMs." },
+  { name: "Progress", extension: "core", bubbles: false, cancelable: false, description: "Numeric progress on the producing element. detail: { value, max }, finite numbers with 0 <= value <= max and max > 0. Independent of Progress and Feedback. Present auto-dismiss includes status (running/completed), elapsedMs, durationMs and remainingMs." },
   { name: "RuntimeStartError", extension: "core", description: "Initial mount failure on document. detail: { operation: 'mount', error }. startAelluxJs also rejects with the original error." },
   { name: "StateNavigationError", extension: "state-navigation", description: "Failed state change on document. detail: { operation: 'setState', key, value, title, silent, error }. setState also rejects with the original error." },
   { name: "ViewportError", extension: "viewport", description: "Scheduled failure on document. detail: { operation: 'refresh' or 'unmount', reference, elements, error }. Automatic work is observed; direct refresh callers retain rejection." },
@@ -131,9 +141,10 @@ export const semanticEvents = [
   ...["Down", "Move", "Up", "Cancel", "Hover"].map(name => ({ name: `Pointer${name}`, extension: "point", bubbles: false, description: "Selected element's pointer notification. Does not bubble; detail includes pointer, target, pressStart, originalEvent and hover." })),
   { name: "Tap", extension: "point", composed: true, description: "Short primary pointer activation of an eligible mounted Point control. Bubbles across shadow boundaries; detail: { pointerType, pointerId, duration, distance, originalEvent }. Independent of native click and scroll." },
   { name: "PreferencesChange", extension: "preference", description: "Preference update on document. detail: { changed, preferences }; changed may be empty. Option-button aria-pressed is synchronized before dispatch. The boot preference publisher synchronizes root data-bs-theme when the top-level syncBootstrapThemeTag option is enabled." },
-  ...["BeforePop", "BeforeUnpop", "Popping", "Unpopping", "Pop", "Unpop"].map(name => ({ name, extension: "present", cancelable: name.startsWith("Before"), description: `${name} notification on the Present element.${name.startsWith("Before") ? " Cancel to veto the transition." : ""}` })),
+  ...["BeforePop", "BeforeDismiss", "BeforeUnpop", "Popping", "Dismissing", "Unpopping", "Pop", "Dismiss", "Unpop"].map(name => ({ name, extension: "present", cancelable: name.startsWith("Before"), description: `${name} notification on the Present element.${name.startsWith("Before") ? " Cancel to veto the transition." : ""}` })),
   { name: "Layout", extension: "present", description: "Bubbling layout change announcement; detail: { origin, durationMs }. Anchor tracks the announced finite duration." },
-  { name: "UnpopFocusLost", extension: "present", description: "Closed Present region lost focus. document event; detail: { element, focused }." },
+  { name: "DismissFocusLost", extension: "present", description: "Closed Present region lost focus. document event; detail: { element, focused }." },
+  { name: "UnpopFocusLost", extension: "present", description: "Reverse playback hid the focused Present region. document event; detail: { element, focused }." },
   { name: "ScrollboxSnapChange", extension: "scrollbox-snap", description: "New snap item selected after scrolling settles. detail: { item, index, previousIndex, axis }." },
   { name: "ScrollboxInteraction", extension: "scrollbox", description: "Snap suspension integration. detail: { reason, active }; reasons are scrollbar, pointer and elastic." },
   { name: "ScrollboxSnapGesture", extension: "scrollbox", description: "PDS integration with Snap. detail includes phase, axis, moved, coordinates and timestamps; probe/end phases are cancelable." },

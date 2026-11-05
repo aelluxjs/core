@@ -20,14 +20,14 @@ async function start(page, markup, { mode = "full", forceLegacy = false, missing
 
 const notices = `<section id="source" data-ae-feedback data-ae-present-target="group"></section>
 <div id="group" data-ae-present-group="3">
-${[1, 2, 3].map(n => `<article id="n${n}" data-ae-present data-ae-auto-unpop="5000"
-data-ae-unpop-on-click="false" hidden><b>Keep child</b><progress max="100" value="0"
+${[1, 2, 3].map(n => `<article id="n${n}" data-ae-present data-ae-auto-dismiss="5000"
+data-ae-dismiss-on-click="false" hidden><b>Keep child</b><progress max="100" value="0"
 data-ae-progress-target="n${n}"></progress></article>`).join("")}
 </div>`;
 
 for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
   test(`Popping resets progress without starting the close timer (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
-    await start(page, '<article id="notice" data-ae-present="opacity" data-ae-auto-unpop="1000" hidden>' +
+    await start(page, '<article id="notice" data-ae-present="opacity" data-ae-auto-dismiss="1000" hidden>' +
       '<progress max="100" value="77" data-ae-progress-target="notice"></progress></article>', { mode, forceLegacy });
     await page.clock.install();
     expect(await page.evaluate(async () => {
@@ -125,7 +125,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
       order: ["n3", "n1", "n2"], classes: [false, true], exclusive: true, visible: ["n2"], selected: "n2", children: 6 });
   });
 
-  test(`auto-unpop clock, cancellation, restart and veto (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
+  test(`auto-dismiss clock, cancellation, restart and veto (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
     await start(page, notices, { mode, forceLegacy });
     await page.clock.install();
     await page.evaluate(async () => {
@@ -141,7 +141,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
     expect(await page.evaluate(() => window.samples[0])).toMatchObject({ value: 0, max: 1, status: "running", bubbles: false, cancelable: false });
     await page.clock.runFor(2450);
     expect(await page.locator("#n3 progress").evaluate(p => p.value)).toBeGreaterThan(45);
-    await page.evaluate(() => { window.closing = $ae("n3").present.unpop(); });
+    await page.evaluate(() => { window.closing = $ae("n3").present.dismiss(); });
     await page.clock.runFor(50);
     await page.evaluate(() => window.closing);
     const count = await page.evaluate(() => window.samples.length);
@@ -157,14 +157,14 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
       return window.samples.slice(window.restartSampleIndex);
     });
     expect(restarted.slice(0, 2).map(sample => sample.value)).toEqual([0, 0]);
-    await page.evaluate(() => document.getElementById("n3").addEventListener("AelluxJsBeforeUnpop", e => e.preventDefault()));
+    await page.evaluate(() => document.getElementById("n3").addEventListener("AelluxJsBeforeDismiss", e => e.preventDefault()));
     await page.clock.runFor(5100);
     expect(await page.evaluate(() => ({ last: window.samples.at(-1), ancestor: window.ancestorProgress,
       hidden: document.getElementById("n3").hidden }))).toMatchObject({ last: { value: 1, status: "completed" }, ancestor: 0, hidden: false });
     const completedCount = await page.evaluate(() => window.samples.length);
     await page.clock.runFor(6000);
     expect(await page.evaluate(() => window.samples.length)).toBe(completedCount);
-    await page.evaluate(() => document.getElementById("n3").setAttribute("data-ae-auto-unpop", "0"));
+    await page.evaluate(() => document.getElementById("n3").setAttribute("data-ae-auto-dismiss", "0"));
     await page.clock.runFor(50);
     expect(await page.evaluate(() => window.samples.slice(-2).map(e => [e.value, e.status])))
       .toEqual([[0, "running"], [1, "completed"]]);
@@ -272,13 +272,13 @@ for (const forceLegacy of [false, true]) {
     await page.clock.runFor(3100);
     expect(await page.locator("#n3").evaluate(e => e.hidden)).toBe(true);
     expect(await page.locator("#n2").evaluate(e => e.hidden)).toBe(false);
-    await page.evaluate(() => document.getElementById("n2").removeAttribute("data-ae-auto-unpop"));
+    await page.evaluate(() => document.getElementById("n2").removeAttribute("data-ae-auto-dismiss"));
     await page.clock.runFor(6000);
     expect(await page.locator("#n2").evaluate(e => e.hidden)).toBe(false);
     await page.evaluate(() => {
       window.emissions = 0;
       document.getElementById("n2").addEventListener("AelluxJsProgress", () => window.emissions++);
-      document.getElementById("n2").setAttribute("data-ae-auto-unpop", "10s");
+      document.getElementById("n2").setAttribute("data-ae-auto-dismiss", "10s");
     });
     await page.clock.runFor(250);
     expect(await page.evaluate(() => window.emissions)).toBeGreaterThan(1);
@@ -402,7 +402,7 @@ test("late producer resolution supports multiple consumers and diagnoses missing
 test("initially visible Present emits zero without Progress or Feedback installed", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
-    document.body.innerHTML = '<article id="initial" data-ae-present data-ae-auto-unpop="60000">Visible</article>';
+    document.body.innerHTML = '<article id="initial" data-ae-present data-ae-auto-dismiss="60000">Visible</article>';
     window.initialSamples = [];
     document.getElementById("initial").addEventListener("AelluxJsProgress", event => window.initialSamples.push(event.detail));
   });
@@ -417,7 +417,7 @@ test("initially visible Present emits zero without Progress or Feedback installe
       first: { value: 0, max: 1, status: "running", elapsedMs: 0, durationMs: 60000 }, registered: ["present"]
     });
   await page.clock.install();
-  await page.evaluate(() => { window.initialClose = $ae("initial").present.unpop(); });
+  await page.evaluate(() => { window.initialClose = $ae("initial").present.dismiss(); });
   await page.clock.runFor(50);
   await page.evaluate(() => window.initialClose);
   const count = await page.evaluate(() => window.initialSamples.length);

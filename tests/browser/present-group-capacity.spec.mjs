@@ -26,18 +26,18 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
       for (let n = 0; n < 5; n++) {
         const group = document.getElementById(`g${n}`);
         const opened = [];
-        let unpops = 0;
-        group.addEventListener("AelluxJsBeforeUnpop", e => { unpops++; e.preventDefault(); });
+        let dismissals = 0;
+        group.addEventListener("AelluxJsBeforeDismiss", e => { dismissals++; e.preventDefault(); });
         for (let i = 0; i < 5; i++) opened.push((await $ae(group).present.popNext()).id.split("-").at(-1));
-        results.push({ opened, visible: Array.from(group.children).filter(e => !e.hidden).map(e => e.textContent).sort(), unpops });
+        results.push({ opened, visible: Array.from(group.children).filter(e => !e.hidden).map(e => e.textContent).sort(), dismissals });
       }
       return results;
     })).toEqual([
-      { opened: ["d", "d", "d", "d", "d"], visible: ["d"], unpops: 0 },
-      { opened: ["d", "d", "d", "d", "d"], visible: ["d"], unpops: 0 },
-      { opened: ["d", "c", "d", "c", "d"], visible: ["c", "d"], unpops: 0 },
-      { opened: ["d", "c", "b", "d", "c"], visible: ["b", "c", "d"], unpops: 0 },
-      { opened: ["d", "c", "b", "a", "d"], visible: ["a", "b", "c", "d"], unpops: 0 }
+      { opened: ["d", "d", "d", "d", "d"], visible: ["d"], dismissals: 0 },
+      { opened: ["d", "d", "d", "d", "d"], visible: ["d"], dismissals: 0 },
+      { opened: ["d", "c", "d", "c", "d"], visible: ["c", "d"], dismissals: 0 },
+      { opened: ["d", "c", "b", "d", "c"], visible: ["b", "c", "d"], dismissals: 0 },
+      { opened: ["d", "c", "b", "a", "d"], visible: ["a", "b", "c", "d"], dismissals: 0 }
     ]);
   });
 
@@ -64,12 +64,12 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
       const second = await controller.popNext();
       await controller.popNext();
       await controller.popNext();
-      await $ae(second).present.unpop();
-      const unpops = [];
-      document.getElementById("pool").addEventListener("AelluxJsBeforeUnpop", e => unpops.push(e.target.id));
+      await $ae(second).present.dismiss();
+      const dismissals = [];
+      document.getElementById("pool").addEventListener("AelluxJsBeforeDismiss", e => dismissals.push(e.target.id));
       const next = await controller.popNext();
-      return { next: next.id, firstVisible: !first.hidden, unpops };
-    })).toEqual({ next: "pool-c", firstVisible: true, unpops: [] });
+      return { next: next.id, firstVisible: !first.hidden, dismissals };
+    })).toEqual({ next: "pool-c", firstVisible: true, dismissals: [] });
   });
 
   test(`consecutive and reentrant reservations respect capacity (${label})`, async ({ page }) => {
@@ -112,7 +112,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
       group.setAttribute("data-ae-present-group", "1");
       const reused = await controller.popNext();
       const retained = Array.from(group.children).filter(e => !e.hidden).length;
-      await $ae("pool-b").present.unpop(); await $ae("pool-c").present.unpop();
+      await $ae("pool-b").present.dismiss(); await $ae("pool-c").present.dismiss();
       group.setAttribute("data-ae-present-group", "2");
       document.getElementById("pool-a").addEventListener("AelluxJsBeforePop", () => {
         group.setAttribute("data-ae-present-group", "1");
@@ -173,13 +173,13 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
     })).toEqual({ opened: ["pool-d", "pool-c"], next: "pool-d", visible: 2 });
   });
 
-  test(`reusing the oldest member restarts only its auto-unpop (${label})`, async ({ page }) => {
+  test(`reusing the oldest member restarts only its auto-dismiss (${label})`, async ({ page }) => {
     await start(page, groupMarkup("2"), { mode, forceLegacy });
     await page.clock.install();
     await page.evaluate(() => {
       window.zeroCounts = { "pool-c": 0, "pool-d": 0 };
       for (const member of document.querySelectorAll("#pool > article")) {
-        member.setAttribute("data-ae-auto-unpop", "3000");
+        member.setAttribute("data-ae-auto-dismiss", "3000");
         member.addEventListener("AelluxJsProgress", e => {
           if (e.detail.value === 0 && member.id in window.zeroCounts) window.zeroCounts[member.id]++;
         });
@@ -205,13 +205,13 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
     expect(await page.evaluate(async () => {
       const group = document.getElementById("pool"), pool = $ae(group).present;
       await pool.popNext(); const member = await pool.popNext();
-      const closing = $ae(member).present.unpop();
+      const closing = $ae(member).present.dismiss();
       group.appendChild(member);
       const next = pool.popNext();
       const chosen = await next; await closing;
       const single = $ae("single").present;
       await single.popNext(); const only = document.getElementById("only");
-      const outgoing = $ae(only).present.unpop();
+      const outgoing = $ae(only).present.dismiss();
       const reused = await single.popNext(); await outgoing;
       return { chosen: chosen.id, dismissedClosed: member.hidden, reused: reused.id, onlyVisible: !only.hidden };
     })).toEqual({ chosen: "pool-b", dismissedClosed: true, reused: "only", onlyVisible: true });

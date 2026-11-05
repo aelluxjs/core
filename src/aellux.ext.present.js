@@ -1,5 +1,7 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
+import { createPresentPlayback } from "./internal/create-present-playback.js";
+
 /**
  * Present Extension
  *
@@ -20,10 +22,10 @@
  *
  * Outputs and owned state: owns presentation and will-change classes plus its
  * changes to `hidden`, `aria-expanded` and `aria-controls`. It exposes
- * controller methods for presenting, dismissing and toggling and dispatches
+ * controller methods for presenting, dismissing, reversing and toggling and dispatches
  * lifecycle events.
  * When hiding a region containing the active element, it dispatches
- * `UnpopFocusLost` after that element loses focus.
+ * `DismissFocusLost` or `UnpopFocusLost` after that element loses focus.
  *
  * Lifecycle: cancels timers, removes listeners and restores managed initial
  * attributes on unmount.
@@ -48,16 +50,17 @@
     active: AelluxJs.attr("present-active"),
     when: AelluxJs.attr("present-when"),
     triggerOn: AelluxJs.attr("trigger-on"),
-    autoUnpop: AelluxJs.attr("auto-unpop"),
+    autoDismiss: AelluxJs.attr("auto-dismiss"),
     presentMotion: AelluxJs.attr("present-motion"),
-    unpopOnClick: AelluxJs.attr("unpop-on-click"),
-    trigger: AelluxJs.attr("trigger"), //toggle,pop,unpop
+    dismissOnClick: AelluxJs.attr("dismiss-on-click"),
+    trigger: AelluxJs.attr("trigger"), //toggle,pop,dismiss,unpop
     dismiss: AelluxJs.attr("dismiss"), //target ID
     target: AelluxJs.attr("target"), //target ID
   };
   const className = {
     pop: AelluxJs.className("pop"),
     popping: AelluxJs.className("popping"),
+    dismissing: AelluxJs.className("dismissing"),
     unpopping: AelluxJs.className("unpopping"),
     willChange: AelluxJs.className("will-change"),
     grid: AelluxJs.className("present-grid")
@@ -67,14 +70,14 @@
 
   AelluxJs.extAttach(extensionName, {
     init, destroy,
-    pop, unpop, toggle, trigger, show, selected, popNext
+    pop, dismiss, unpop, toggle, trigger, show, selected, popNext
   });
 
   const
     POP = "Pop",
+    DISMISS = "Dismiss",
     UNPOP = "Unpop",
     BEFORE = "Before",
-    PING = "ping",
     MILLISECOND = "ms",
     SECOND = "s",
     DEFAULT_PRESENT = "opacity transform height width",
@@ -101,39 +104,43 @@
   let groupObserver = null;
   let groupsQueued = false;
   let interpolatedProgress = false;
+  let interpolatedUnpop = false;
+  const playback = createPresentPlayback(root, AelluxJs);
   let autoObserver = null;
   let presentationSequence = 0;
   const cssProperties = [
     ["pop-progress", "<number>", "0"],
-    ["unpop-progress", "<number>", "1"],
+    ["dismiss-progress", "<number>", "1"],
     ["present-pop-phase", "<number>", "0"],
-    ["present-unpop-phase", "<number>", "1"],
+    ["present-dismiss-phase", "<number>", "1"],
     ["from-opacity", OPACITY_SYNTAX, "0"],
     ["pop-opacity", OPACITY_SYNTAX, "1"],
-    ["unpop-opacity", OPACITY_SYNTAX, "0"],
+    ["dismiss-opacity", OPACITY_SYNTAX, "0"],
     ["from-transform", TRANSFORM_SYNTAX, "scale(0.5)"],
     ["pop-transform", TRANSFORM_SYNTAX, "scale(1)"],
-    ["unpop-transform", TRANSFORM_SYNTAX, "scale(1.2)"],
+    ["dismiss-transform", TRANSFORM_SYNTAX, "scale(1.2)"],
     ["from-height", "*", "0fr"], ["pop-height", "*", "1fr"],
-    ["unpop-height", "*", "0fr"], ["from-width", "*", "0fr"],
-    ["pop-width", "*", "1fr"], ["unpop-width", "*", "0fr"],
-    ["pop-ease", "*", "ease-out"], ["unpop-ease", "*", "ease-in"],
-    ["pop-duration", "<time>", "250ms"], ["unpop-duration", "<time>", "250ms"]
+    ["dismiss-height", "*", "0fr"], ["from-width", "*", "0fr"],
+    ["pop-width", "*", "1fr"], ["dismiss-width", "*", "0fr"],
+    ["pop-ease", "*", "ease-out"], ["dismiss-ease", "*", "ease-in"],
+    ["pop-duration", "<time>", "250ms"], ["dismiss-duration", "<time>", "250ms"]
   ];
 
   function init(options) {
+    playback.init();
     const descriptors = cssProperties.map(([name, syntax, initialValue]) =>
       ({ name: `--ae-${name}`, syntax, initialValue }));
     const progressRegistered = AelluxJs.registerCssProperty(...descriptors.slice(0, 4));
     interpolatedProgress = !!(progressRegistered && root.CSS.supports &&
       root.CSS.supports("opacity", "clamp(0, 0.5, 1)"));
+    interpolatedUnpop = !!AelluxJs.registerCssProperty({ name: "--ae-unpop-progress", syntax: "<number>", initialValue: "1" });
     AelluxJs.registerCssProperty(...descriptors.slice(4));
     AelluxJs.mountManager.add({
       extensionName, selector: presentSelector,
       priority: 0,
       mount: mountPresentContainer, unmount: unmountPresentContainer,
-      update: element => autoUnpopSchedule(element, presentElements.get(element)),
-      controllers: ["pop", "unpop", "trigger", "toggle"]
+      update: element => autoDismissSchedule(element, presentElements.get(element)),
+      controllers: ["pop", "dismiss", "unpop", "trigger", "toggle"]
     });
 
     AelluxJs.mountManager.add({
@@ -154,10 +161,10 @@
     autoObserver = new root.MutationObserver(records => {
       for (const record of records) {
         const controller = presentElements.get(record.target);
-        if (controller) autoUnpopSchedule(record.target, controller);
+        if (controller) autoDismissSchedule(record.target, controller);
       }
     });
-    autoObserver.observe(document, { subtree: true, attributes: true, attributeFilter: [attr.autoUnpop] });
+    autoObserver.observe(document, { subtree: true, attributes: true, attributeFilter: [attr.autoDismiss] });
     document.addEventListener("pointerover", onHover);
     document.addEventListener("pointerout", onHover);
     AelluxJs.on("$click", OnClick);
@@ -193,8 +200,8 @@
     elementMemories.set(element, AelluxJs.persist.element.save(
       element,
       [attr.present, attr.presentMotion, "hidden"],
-      ["--ae-pop-progress", "--ae-unpop-progress",
-        "--ae-present-pop-phase", "--ae-present-unpop-phase"]
+      ["--ae-pop-progress", "--ae-dismiss-progress", "--ae-unpop-progress",
+        "--ae-present-pop-phase", "--ae-present-dismiss-phase"]
     ));
     containerAriaHandlers.set(element, AelluxJs.aria.register(element));
     if ((element.getAttribute(attr.present) || "").trim().toLowerCase() === "all") {
@@ -222,9 +229,11 @@
       motionId: AelluxJs.motion ? AelluxJs.motion.id() : fallbackMotionId++,
       transition: null,
       handoff: null,
+      opening: null,
+      reverse: null,
       operationRevision: 0,
       presentationOrder: element.hidden ? 0 : ++presentationSequence,
-      autoUnpopTimeout: null,
+      autoDismissTimeout: null,
       autoCountdown: null,
       direction: null,
       classList: element.classList,
@@ -261,14 +270,17 @@
             )
           );
         }
-        cancelAutoUnpop(this);
+        cancelAutoDismiss(this);
+        this.reverse?.cleanup();
+        this.reverse = null;
         restoreHandoff(this);
         if (transitionStart) {
-          this.classList.remove(className.unpopping);
+          this.classList.remove(className.dismissing, className.unpopping);
         } else {
           this.classList.remove(
             className.pop,
             className.popping,
+            className.dismissing,
             className.unpopping,
             className.willChange
           );
@@ -298,7 +310,7 @@
     setProgress(element, !element.hidden);
     syncAriaExpanded(element, presentController);
     queueGroups();
-    autoUnpopSchedule(element, presentController);
+    autoDismissSchedule(element, presentController);
   }
 
   function unmountPresentContainer(element) {
@@ -433,19 +445,20 @@
   }
 
   function pop(element) { return presentTransition(element, true, true); }
-  function unpop(element) { return presentTransition(element, false); }
+  function dismiss(element) { return presentTransition(element, false); }
+  function unpop(element) { return presentTransition(element, false, false, false, undefined, UNPOP); }
   function toggle(element, goto) { return presentTransition(element, goto); }
   function trigger(element, trigger) {
     trigger = typeof trigger === "string" ?
       (trigger || "toggle").toLowerCase() :
       "toggle";
-    if (!["pop", "unpop", "toggle"].includes(trigger)) AelluxJs.diagnostics.warn(
+    if (!["pop", "dismiss", "unpop", "toggle"].includes(trigger)) AelluxJs.diagnostics.warn(
       AelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
         extension: extensionName, element, attribute: attr.trigger, value: trigger,
         reason: "Unknown Present action; using toggle.",
-        suggestion: "Use pop, unpop, or toggle."
+        suggestion: "Use pop, dismiss, unpop, or toggle."
       });
-    const method = trigger === "pop" ? pop : trigger === "unpop" ? unpop : toggle;
+    const method = trigger === "pop" ? pop : trigger === "dismiss" ? dismiss : trigger === "unpop" ? unpop : toggle;
     return method(element);
   }
 
@@ -471,8 +484,8 @@
     if (tokens.includes("transform") && !element.hasAttribute(AelluxJs.attr("anchor"))) properties.push("transform");
     if (tokens.includes("height")) properties.push(...(controller.presentMotion ? ["grid-template-rows", "height"] : ["max-height"]));
     if (tokens.includes("width")) properties.push(...(controller.presentMotion ? ["grid-template-columns", "width"] : ["max-width"]));
-    properties.push("--ae-present-pop-phase", "--ae-present-unpop-phase",
-      "--ae-pop-progress", "--ae-unpop-progress");
+    properties.push("--ae-present-pop-phase", "--ae-present-dismiss-phase",
+      "--ae-pop-progress", "--ae-dismiss-progress", "--ae-unpop-progress");
     const computed = root.getComputedStyle(element);
     // Copy strings before touching CSS: computed style is a live declaration.
     const values = properties.map(property => {
@@ -485,6 +498,13 @@
       }
       return [property, value];
     });
+    if (controller.reverse) {
+      // Snapshot the rendered reverse frame above, but save the author's
+      // declarations below rather than the replay's temporary endpoints.
+      controller.reverse.cleanup();
+      controller.reverse = null;
+      restoreHandoff(controller);
+    }
     const memory = AelluxJs.persist.element.save(element, [], [...properties, "transition-property"]);
     const transition = AelluxJs.persist.element.save(element, [], ["transition-property"]);
     const freeze = () => {
@@ -530,12 +550,14 @@
     return size;
   }
 
-  async function presentTransition(element, gotoVisible, forceRepop = false, groupOperation = false, presentationOrder) {
+  async function presentTransition(element, gotoVisible, forceRepop = false, groupOperation = false, presentationOrder, closingDirection = DISMISS) {
     const controller = presentElements.get(element);
     if (!controller) return;
+    const reversing = closingDirection === UNPOP && gotoVisible === false;
+    if (reversing && controller.direction === DISMISS && controller.transition) return false;
 
     if (controller.direction === null)
-      controller.direction = element.hidden ? UNPOP : POP;
+      controller.direction = element.hidden ? DISMISS : POP;
     if (typeof gotoVisible === "undefined" || gotoVisible === null)
       gotoVisible = (controller.direction === POP) ? false : true;
 
@@ -548,13 +570,17 @@
         return false;
       }
       if (gotoVisible) return show(group, element.id);
-      if (groups.get(group).selected === element) return show(group, "");
+      if (groups.get(group).selected === element) {
+        if (!reversing) return show(group, "");
+        if (group.getAttribute(attr.active) !== "") group.setAttribute(attr.active, "");
+        return selectGroup(group, null, groupMembers(group), UNPOP);
+      }
     }
     const hasCapacity = () => groupOperation || element === group || !gotoVisible || !groupState?.accumulating ||
       groupMemberActive(element, groupState) ||
       activeGroupMembers(group, groupState).length < groupLimit(group, groupState);
     if (!hasCapacity()) return false;
-    const newDirection = gotoVisible ? POP : UNPOP;
+    const newDirection = gotoVisible ? POP : closingDirection;
 
     if ((element.hidden && !gotoVisible)
       || (newDirection === controller.direction && !forceRepop)) {
@@ -576,6 +602,11 @@
         (groupState && (groups.get(group) !== groupState || groupState.revision !== groupRevision)))) return;
       if (!hasCapacity()) return false;
       controller.operationRevision++;
+      const impliedReverse = reversing && !controller.opening && !controller.transition;
+      const reverseTracks = reversing && controller.motionEnabled &&
+        AelluxJs.currentPreference?.("reduced-motion") !== "reduced"
+        ? playback.snapshot(element, controller, interpolatedProgress) : [];
+      if (gotoVisible) controller.opening = null;
       if (gotoVisible) controller.presentationOrder = presentationOrder === undefined
         ? ++presentationSequence : presentationOrder;
       if (!gotoVisible || !groupOperation) groups.get(group)?.reservations.delete(element);
@@ -591,7 +622,7 @@
       const reusePreparation = !forceRepop && controller.motionEnabled &&
         controller.transition !== null &&
         controller.classList.contains(className.willChange);
-      const waitForPreparation = controller.motionEnabled && !reusePreparation;
+      const waitForPreparation = controller.motionEnabled && !reusePreparation && !reversing;
       let previousSize = null;
       const handoff = !gotoVisible && controller.motionEnabled ? captureHandoff(element, controller) : null;
       if (handoff && (controller.measuredHeight || controller.measuredWidth)) {
@@ -606,15 +637,17 @@
       }
       controller.handoff = handoff;
       controller.direction = newDirection;
+      if (reversing) controller.reverse = playback.reverse(element, reverseTracks, interpolatedUnpop);
       // Triggers announce the accepted action immediately, independently of
       // the panel's effective visibility at the end of the transition.
       controller.setTriggerExpanded(gotoVisible);
       if (!handoff) {
         setPhase(element, "pop", "0");
-        setPhase(element, "unpop", "0");
+        setPhase(element, "dismiss", "0");
         element.style.setProperty("--ae-pop-progress", "0");
-        element.style.setProperty("--ae-unpop-progress", "0");
+        element.style.setProperty("--ae-dismiss-progress", "0");
       }
+      if (gotoVisible || reversing) element.style.setProperty("--ae-unpop-progress", "0");
       root.getComputedStyle(element).getPropertyValue("--ae-pop-progress");
 
       const interrupted = new Promise((_, interruptTransition) => {
@@ -631,7 +664,7 @@
       element.hidden = false;
       openPresentElements.add(element);
       let size = null;
-      if (controller.measuredHeight || controller.measuredWidth)
+      if (!reversing && (controller.measuredHeight || controller.measuredWidth))
         size = await prepareMeasuredSize(
           element, controller, gotoVisible, previousSize, waitForPreparation
         );
@@ -650,16 +683,17 @@
         await Promise.race([prepared, interrupted]);
       }
 
-      transition.className = className[`${newDirection}${PING}`.toLowerCase()];
+      transition.className = gotoVisible ? className.popping : reversing ? className.unpopping : className.dismissing;
+      const configurationDirection = reversing ? POP : newDirection;
       const duration = root.getComputedStyle(element)
-        .getPropertyValue(`--ae-${newDirection}-duration`.toLowerCase()).trim();
-      const timeMs = getString2Time(duration);
+        .getPropertyValue(`--ae-${configurationDirection}-duration`.toLowerCase()).trim();
+      const timeMs = reversing ? controller.reverse.duration : getString2Time(duration);
 
       const applyDestination = () => {
         controller.classList.remove(
           className.pop,
           className.popping,
-          className.unpopping
+          className.dismissing, className.unpopping
         );
         controller.classList.add(transition.className);
         // Clamp private CSS interpolation without adding an animation loop.
@@ -667,10 +701,10 @@
         // dependencies after Firefox releases a controlled custom-property effect.
         if (interpolatedProgress) {
           element.style.setProperty("--ae-pop-progress", "clamp(0, var(--ae-present-pop-phase), 1)");
-          element.style.setProperty("--ae-unpop-progress", "clamp(0, var(--ae-present-unpop-phase), 1)");
+          element.style.setProperty("--ae-dismiss-progress", "clamp(0, var(--ae-present-dismiss-phase), 1)");
         }
         setPhase(element, "pop", gotoVisible ? "1" : "0");
-        setPhase(element, "unpop", gotoVisible ? "0" : "1");
+        setPhase(element, "dismiss", gotoVisible ? "0" : "1");
         if (size) {
           if (controller.measuredHeight) {
             element.style.setProperty("max-height", `${gotoVisible ? size.height : 0}px`, "important");
@@ -682,6 +716,15 @@
       };
       const activateTransition = () => {
         if (controller.transition !== transition) return;
+        if (reversing) {
+          handoff?.memory.restore();
+          if (interpolatedProgress)
+            element.style.setProperty("--ae-pop-progress", "clamp(0, var(--ae-present-pop-phase), 1)");
+          controller.classList.remove(className.pop, className.popping, className.dismissing);
+          controller.classList.add(className.unpopping);
+          controller.reverse.apply();
+          return;
+        }
         if (handoff) {
           handoff.memory.restore();
           element.style.setProperty("transition-property", "none", "important");
@@ -700,15 +743,18 @@
           applyDestination();
           if (tracks.length) element.style.setProperty("transition-property", `${properties}, height, width`, "important");
           for (const [property, value] of tracks) element.style.setProperty(property, value, "important");
+        } else if (gotoVisible) {
+          controller.opening = playback.capture(element, controller, applyDestination, size, interpolatedProgress);
         } else applyDestination();
       };
       const advancedEase = root.getComputedStyle(element)
-        .getPropertyValue(`--ae-${newDirection}-aellux-ease`.toLowerCase()).trim() || undefined;
+        .getPropertyValue(`--ae-${configurationDirection}-aellux-ease`.toLowerCase()).trim() || undefined;
       const motionOptions = {
         extension: extensionName,
         id: controller.motionId,
+        ownedOnly: reversing,
         apply: activateTransition,
-        easing: advancedEase,
+        easing: reversing && !impliedReverse ? undefined : advancedEase,
         nativeDuration: timeMs,
         maxFPS: AelluxJs.layoutMaxFPS ? AelluxJs.layoutMaxFPS(element) : undefined,
         abort: () => controller.transition !== transition || !element.isConnected
@@ -725,27 +771,28 @@
         bubbles: true
       });
       if (controller.transition !== transition || !element.isConnected) return;
-      const autoUnpopValue = gotoVisible && element.getAttribute(attr.autoUnpop);
-      if (autoUnpopValue) {
-        const duration = getString2Time(autoUnpopValue);
+      const autoDismissValue = gotoVisible && element.getAttribute(attr.autoDismiss);
+      if (autoDismissValue) {
+        const duration = getString2Time(autoDismissValue);
         if (Number.isFinite(duration) && duration >= 0) {
-          emitAutoUnpopProgress(element, 0, duration);
+          emitAutoDismissProgress(element, 0, duration);
         }
       }
       if (controller.transition !== transition || !element.isConnected) return;
-      AelluxJs.dispatchFrom(element, `${newDirection}${PING}`, { bubbles: true });
+      AelluxJs.dispatchFrom(element, gotoVisible ? "Popping" : reversing ? "Unpopping" : "Dismissing", { bubbles: true });
       const motionResult = await Promise.race([completed, interrupted]);
       if (controller.transition !== transition ||
         (motionResult && motionResult.status !== "completed")) return;
+      if (gotoVisible) playback.complete(element, controller, interpolatedProgress);
       finishTransition(element, controller, transition, gotoVisible);
 
       if (gotoVisible && !element.hidden) {
-        autoUnpopSchedule(element, controller);
+        autoDismissSchedule(element, controller);
         controller.classList.add(className.pop);
         AelluxJs.dispatchFrom(element, POP, { bubbles: true });
       }
       if (!gotoVisible && element.hidden) {
-        AelluxJs.dispatchFrom(element, UNPOP, { bubbles: true });
+        AelluxJs.dispatchFrom(element, newDirection, { bubbles: true });
       }
     } catch (error) {
       const ownsTransition = transition && controller.transition === transition;
@@ -780,6 +827,8 @@
       }
     } finally {
       if (transition && controller.transition === transition) {
+        controller.reverse?.cleanup();
+        controller.reverse = null;
         restoreHandoff(controller);
         restoreMeasuredStyles(element, controller);
         controller.transition = null;
@@ -802,10 +851,12 @@
     restoreHandoff(controller);
     controller.classList.toggle(className.pop, gotoVisible);
     controller.classList.remove(transition.className);
-    restoreMeasuredStyles(element, controller);
     const focused = !gotoVisible && element.contains(document.activeElement)
       ? document.activeElement : null;
     element.hidden = gotoVisible ? false : true;
+    controller.reverse?.cleanup();
+    controller.reverse = null;
+    restoreMeasuredStyles(element, controller);
     setProgress(element, gotoVisible);
     syncAriaExpanded(element, controller);
     refreshExpandedStates();
@@ -813,20 +864,20 @@
     else openPresentElements.add(element);
     if (focused) {
       if (document.activeElement === focused) focused.blur();
-      if (document.activeElement !== focused) AelluxJs.dispatch("UnpopFocusLost", {
+      if (document.activeElement !== focused) AelluxJs.dispatch(`${controller.direction}FocusLost`, {
         detail: { element, focused }
       });
     }
     transition.timeout = null;
   }
 
-  function autoUnpopSchedule(element, controller) {
+  function autoDismissSchedule(element, controller) {
     if (!controller) return;
-    cancelAutoUnpop(controller);
-    const autoUnpopValue = element.getAttribute(attr.autoUnpop);
+    cancelAutoDismiss(controller);
+    const autoDismissValue = element.getAttribute(attr.autoDismiss);
     if (element.hidden || (controller.transition && !controller.classList.contains(className.pop)) ||
-      !element.isConnected || !autoUnpopValue) return;
-    const duration = getString2Time(autoUnpopValue);
+      !element.isConnected || !autoDismissValue) return;
+    const duration = getString2Time(autoDismissValue);
     if (!Number.isFinite(duration) || duration < 0) return;
     const countdown = { start: root.performance.now(), duration, frame: null, last: 0 };
     controller.autoCountdown = countdown;
@@ -834,10 +885,10 @@
       presentElements.get(element) === controller && element.isConnected;
     const emit = (completed, initial = false) => {
       const elapsedMs = initial ? 0 : Math.min(duration, Math.max(0, root.performance.now() - countdown.start));
-      emitAutoUnpopProgress(element, elapsedMs, duration, completed);
+      emitAutoDismissProgress(element, elapsedMs, duration, completed);
     };
     const tick = () => {
-      if (!valid()) { if (controller.autoCountdown === countdown) cancelAutoUnpop(controller); return; }
+      if (!valid()) { if (controller.autoCountdown === countdown) cancelAutoDismiss(controller); return; }
       const now = root.performance.now();
       const fps = AelluxJs.layoutMaxFPS?.(element) || AelluxJs.options.cssMotionPropertyMaxFPS || 55;
       if (now - countdown.last >= 1000 / fps) {
@@ -847,43 +898,43 @@
       if (valid()) countdown.frame = root.requestAnimationFrame(tick);
     };
     // Install before dispatch: a consumer can synchronously cancel/restart.
-    controller.autoUnpopTimeout = setTimeout(() => {
-      if (!valid()) { if (controller.autoCountdown === countdown) cancelAutoUnpop(controller); return; }
+    controller.autoDismissTimeout = setTimeout(() => {
+      if (!valid()) { if (controller.autoCountdown === countdown) cancelAutoDismiss(controller); return; }
       if (countdown.frame !== null) root.cancelAnimationFrame(countdown.frame);
       countdown.frame = null;
-      controller.autoUnpopTimeout = null;
+      controller.autoDismissTimeout = null;
       emit(true);
       if (!valid()) return;
       controller.autoCountdown = null;
-      unpop(element);
+      dismiss(element);
     }, duration);
     emit(false, true);
     if (valid()) countdown.frame = root.requestAnimationFrame(tick);
   }
 
-  function emitAutoUnpopProgress(element, elapsedMs, duration, completed = false) {
+  function emitAutoDismissProgress(element, elapsedMs, duration, completed = false) {
     AelluxJs.dispatchFrom(element, "Progress", { bubbles: false, cancelable: false,
       detail: { value: completed ? 1 : duration ? elapsedMs / duration : 0, max: 1,
         status: completed ? "completed" : "running", elapsedMs,
         durationMs: duration, remainingMs: Math.max(0, duration - elapsedMs) } });
   }
 
-  function cancelAutoUnpop(controller) {
-    if (controller.autoUnpopTimeout !== null) clearTimeout(controller.autoUnpopTimeout);
+  function cancelAutoDismiss(controller) {
+    if (controller.autoDismissTimeout !== null) clearTimeout(controller.autoDismissTimeout);
     const countdown = controller.autoCountdown;
     if (countdown && countdown.frame !== null) root.cancelAnimationFrame(countdown.frame);
-    controller.autoUnpopTimeout = null;
+    controller.autoDismissTimeout = null;
     controller.autoCountdown = null;
   }
 
-  function clickAutoUnpop(eventTarget, currentExceptions) {
+  function clickAutoDismiss(eventTarget, currentExceptions) {
     for (const pContainer of openPresentElements) {
       if (pContainer.hidden === true
         || currentExceptions.some((e) => pContainer.contains(e))) continue;
-      const mode = (pContainer.getAttribute(attr.unpopOnClick) || "outside").trim().toLowerCase();
+      const mode = (pContainer.getAttribute(attr.dismissOnClick) || "outside").trim().toLowerCase();
       if (mode === "false" || mode === "none") continue;
       const inside = pContainer.contains(eventTarget);
-      if (inside === (mode === "inside" || mode === "in")) unpop(pContainer);
+      if (inside === (mode === "inside" || mode === "in")) dismiss(pContainer);
     }
   }
 
@@ -982,18 +1033,18 @@
     button = eventTarget.closest(`[${attr.dismiss}]`);
     if (button) {
       refreshChangedTrigger(button);
-      const dismiss = button.getAttribute(attr.dismiss);
+      const dismissTargetId = button.getAttribute(attr.dismiss);
       const targetSelector = button.getAttribute(attr.target);
-      if (dismiss || targetSelector) {
-        const target = targetById(dismiss || targetSelector);
-        diagnoseTarget(button, target, dismiss ? attr.dismiss : attr.target, dismiss || targetSelector);
+      if (dismissTargetId || targetSelector) {
+        const target = targetById(dismissTargetId || targetSelector);
+        diagnoseTarget(button, target, dismissTargetId ? attr.dismiss : attr.target, dismissTargetId || targetSelector);
         if (target) {
           exceptions.push(target);
-          unpop(target);
+          dismiss(target);
         }
       } else if (container) {
         exceptions.push(container);
-        unpop(container);
+        dismiss(container);
       } else {
         AelluxJs.diagnostics.error(
           AelluxJs.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING,
@@ -1002,7 +1053,7 @@
       }
     }
 
-    clickAutoUnpop(eventTarget, exceptions);
+    clickAutoDismiss(eventTarget, exceptions);
   }
 
   function diagnoseTarget(element, target, attribute, value) {
@@ -1038,8 +1089,9 @@
 
   function setProgress(element, visible) {
     setPhase(element, "pop", visible ? "1" : "0");
-    setPhase(element, "unpop", visible ? "0" : "1");
+    setPhase(element, "dismiss", visible ? "0" : "1");
     element.style.setProperty("--ae-pop-progress", visible ? "1" : "0");
+    element.style.setProperty("--ae-dismiss-progress", visible ? "0" : "1");
     element.style.setProperty("--ae-unpop-progress", visible ? "0" : "1");
   }
 
@@ -1071,8 +1123,10 @@
 
   function groupMemberActive(member, state) {
     return state.reservations.has(member) ||
-      (!member.hidden && presentElements.get(member)?.direction !== UNPOP);
+      (!member.hidden && !isClosing(presentElements.get(member)));
   }
+
+  function isClosing(controller) { return controller?.direction === DISMISS || controller?.direction === UNPOP; }
 
   function activeGroupMembers(group, state) {
     return groupMembers(group, true).filter(member => groupMemberActive(member, state));
@@ -1170,7 +1224,7 @@
       });
       if (!matches.length) {
         const visible = members.filter(member => !member.hidden &&
-          presentElements.get(member).direction !== UNPOP);
+          !isClosing(presentElements.get(member)));
         if (visible.length > 1) groupDiagnostic(group, "Multiple initially visible members.");
         else if (!state.selected) state.selected = visible[0] || null;
         return;
@@ -1292,12 +1346,12 @@
       detail: { group, previous, current, key: current && current.id } });
   }
 
-  function selectGroup(group, selected, members) {
+  function selectGroup(group, selected, members, closingDirection = DISMISS) {
     const state = groups.get(group);
     const changes = members.filter(member => {
       const controller = presentElements.get(member);
-      return member === selected ? member.hidden || controller.direction === UNPOP :
-        !member.hidden && controller.direction !== UNPOP;
+      return member === selected ? member.hidden || isClosing(controller) :
+        !member.hidden && !isClosing(controller);
     });
     if (state.selected === selected && !changes.length) {
       state.accumulating = false;
@@ -1318,7 +1372,7 @@
         presentElements.has(member) && member.isConnected && member.closest(groupSelector) === group &&
         member.id === ids[index] && member.getAttribute(attr.when) === conditions[index]);
     for (const member of changes) {
-      const allowed = AelluxJs.dispatchFrom(member, member === selected ? "BeforePop" : "BeforeUnpop",
+      const allowed = AelluxJs.dispatchFrom(member, member === selected ? "BeforePop" : `${BEFORE}${closingDirection}`,
         { bubbles: true, cancelable: true });
       if (!valid()) { queueGroups(); return false; }
       if (!allowed) {
@@ -1343,7 +1397,7 @@
     const pending = new Promise(resolve => { complete = resolve; });
     state.pending = pending;
     for (const member of changes) {
-      const job = presentTransition(member, member === selected, false, true);
+      const job = presentTransition(member, member === selected, false, true, undefined, closingDirection);
       if (groups.get(group) !== state || state.revision !== revision) {
         complete(false);
         return pending;
@@ -1409,12 +1463,12 @@
       if (entering || inHoverRegion(target, event.relatedTarget)) cancelHoverClose(target);
       else if ([...triggerElementsSet].some(control =>
         triggerTargets.get(control) === target && control.getAttribute(attr.triggerOn) === "hover" &&
-        control.getAttribute(attr.trigger) !== "unpop")) {
+        !["dismiss", "unpop"].includes(control.getAttribute(attr.trigger)))) {
         cancelHoverClose(target);
         hoverTimers.set(target, setTimeout(() => {
           hoverTimers.delete(target);
           if (presentElements.has(target) && target.isConnected &&
-            !inHoverRegion(target, document.activeElement)) unpop(target);
+            !inHoverRegion(target, document.activeElement)) dismiss(target);
         }, 120));
       }
     }

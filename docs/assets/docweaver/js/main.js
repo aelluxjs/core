@@ -123,7 +123,7 @@ AelluxJs.on("AjaxHrefStart", (e) => {
   container.style.transition = null;
   container.style.opacity = .2;
   setNavActiveByUrl(e.detail.url);
-  $ae('navbarSupportedContent').present.unpop();
+  $ae('navbarSupportedContent').present.dismiss();
   window.scrollTo({ top: 0 });
 });
 

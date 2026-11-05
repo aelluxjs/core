@@ -8,6 +8,8 @@ Changes in this section are pending for the `0.1.0` release candidate.
 
 ### Added
 
+- Present `unpop()` now reverses the captured opening trajectory back to `from`, including nonlinear easing and partially travelled duration, independently of `dismiss()`. Added the `unpop` trigger action, `ae--unpopping`, reverse lifecycle/focus events, `present.unpop` layout origin and bounded `--ae-unpop-progress`. Native fallback replays opening CSS with reverse direction and clipped time. Calling `unpop()` during an active independent dismissal returns false and preserves it. Default close controls, toggle/groups and automation still dismiss.
+
 - Added the homepage's four standalone interactive examples with runnable source disclosure, shared Bootstrap/homepage styling, a horizontal Viewport demo, an anchored carousel highlight, and fixed section navigation including Start.
 - Added browser regressions for adaptive CSS publication, latest-value coalescing, interruption/unmount cleanup and inline-priority restoration across Modern and Legacy distributions.
 
@@ -16,12 +18,14 @@ Changes in this section are pending for the `0.1.0` release candidate.
 
 ### Changed
 
+- Finalized Present's prerelease closing contract as `dismiss()`: renamed trigger action, auto-dismiss/click attributes, CSS destinations/timing/progress, `ae--dismissing`, lifecycle/focus events and `present.dismiss` layout origin. Existing `data-ae-dismiss` controls, toggle/group/hover/Point/countdown behavior and rendered-state handoff are preserved. No alias retains the former `unpop()` dismissal meaning; the separate reverse-playback operation to `from` is documented in `milestones/present-unpop-reverse.md`. See the Present guide for the complete beta migration table. Package version remains unchanged; npm publication was checked and only prereleases existed on 2026-11-04.
+
 - Recurring CSS publication now follows the shared adaptive `waitLayout` update phase as an explicit authoring contract, independently of active CSS Motion and its optional fixed property FPS ceiling. Bounded synchronous setup, interruption and restoration retain their correctness requirements.
 - Scrollbox custom scrollbar geometry, Snap `--ae-snap-focus`, elastic transforms/origins/margins and Legacy Progress fallback rendering now publish through scheduled updates. Repeated notifications retain the latest state, and pending publications are canceled before interruption or teardown. Native scrolling, momentum, gesture calculations and synchronous Progress numeric reflection remain independent of visual publication.
 - Raised Full Modern's raw/gzip budgets from 195/60.25 to 195.5/60.5 KiB and Scrollbox Snap Modern's from 10.5/4 to 11/4.25 KiB. Measured artifact sizes and deltas are recorded in the performance guide.
 
-- Replaced Present `data-ae-unpop-on-outside` with `data-ae-unpop-on-click`: `outside`/`out` (default), `inside`/`in`, or `false`/`none`. Explicit controls retain one action per interaction.
-- The old click-dismissal attribute is no longer read. Migrate `data-ae-unpop-on-outside="false"` to `data-ae-unpop-on-click="false"`; omission or an empty value preserves outside-click dismissal. Point taps share the policy; hover dismissal and auto-unpop remain independent. The Present guide includes the value reference and migration examples.
+- Replaced Present `data-ae-unpop-on-outside` with `data-ae-dismiss-on-click`: `outside`/`out` (default), `inside`/`in`, or `false`/`none`. Explicit controls retain one action per interaction.
+- The old click-dismissal attribute is no longer read. Migrate `data-ae-unpop-on-outside="false"` to `data-ae-dismiss-on-click="false"`; omission or an empty value preserves outside-click dismissal. Point taps share the policy; hover dismissal and auto-dismiss remain independent. The Present guide includes the value reference and migration examples.
 
 - Centralized development-only HTML, Extension declaration, CSS Motion resource and PWA manifest diagnostics in `src/internal/development-helpers.js`. Duplicate-attribute validation now uses `validateDoubleAttributeHTML()`, preserving the initial document's independent one-shot source inspection and production guards.
 - Positioned Docweaver notifications at the top of the viewport with spacing between pooled messages and reduced vertical padding.
@@ -32,7 +36,7 @@ Changes in this section are pending for the `0.1.0` release candidate.
 - Snap replaces pre-existing inline `!important` registered focus values correctly in WebKit and restores the original value and priority on unmount.
 - Homepage section highlighting now follows Viewport visibility for Start, Examples and Extensions, with Back to top restored when returning to the hero; source disclosure lists the standalone files executed by each demo.
 
-- Present `unpop()` now preserves the current rendered opacity, transform, grid/measured dimensions and registered progress before interrupting motion, including incomplete opening and group selection changes. Native and controlled closing use the configured unpop duration/easing without jumping to `pop` or `from`; temporary styles are restored. Closing interpolates pop progress toward zero and unpop progress toward one, retaining stable endpoints. Explicit `pop()` still restarts from `from`.
+- Present `dismiss()` now preserves the current rendered opacity, transform, grid/measured dimensions and registered progress before interrupting motion, including incomplete opening and group selection changes. Native and controlled closing use the configured dismiss duration/easing without jumping to `pop` or `from`; temporary styles are restored. Closing interpolates pop progress toward zero and dismiss progress toward one, retaining stable endpoints. Explicit `pop()` still restarts from `from`.
 
 - Scrollbox always applies overflow fade to its stationary container, including when there is one content child. Removed child-mask positioning and sizing updates that could lag native momentum scrolling and expose transparent strips. Container backgrounds, borders and scrollbars now share the fade in every structure.
 

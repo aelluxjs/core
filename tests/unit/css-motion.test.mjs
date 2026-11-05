@@ -41,8 +41,8 @@ async function propertyPolicy(properties, options = {}, transition = true, reque
 for (const transition of [true, false]) {
   test(`Present progress shares transform/opacity policy (CSS transition=${transition})`, async () => {
     const result = await propertyPolicy([
-      "transform", "opacity", "--ae-pop-progress", "--ae-unpop-progress",
-      "--ae-present-pop-phase", "--ae-present-unpop-phase"
+      "transform", "opacity", "--ae-pop-progress", "--ae-dismiss-progress", "--ae-unpop-progress",
+      "--ae-present-pop-phase", "--ae-present-dismiss-phase"
     ], { cssMotionPropertyMaxFPS: 5 }, transition);
     assert.equal(result.limit, undefined);
     assert.equal(result.stageLimit, undefined);
@@ -77,6 +77,17 @@ test("cancelling native CSS motion settles even when Animation.finished stays pe
     })]);
     assert.deepEqual(result, { id, status: "aborted", mode: "native" });
   } finally { clearTimeout(timeout); }
+});
+
+test("owned native playback excludes preexisting infinite animations", async () => {
+  const existing = { finished: new Promise(() => {}) }, created = { finished: Promise.resolve() };
+  let applied = false;
+  const api = { options: { cssMotionController: false }, currentPreference: () => "no-preference",
+    waitLayout: { cancel() {}, setVisualFPSLimit() {} } };
+  const motion = createCssMotionController({ setTimeout, clearTimeout }, () => api);
+  const element = { nodeType: 1, getAnimations: () => applied ? [existing, created] : [existing] };
+  const result = await motion.run(element, { id: motion.id(), ownedOnly: true, apply() { applied = true; } });
+  assert.equal(result.status, "completed");
 });
 
 test("a partial WAAPI capture failure resumes every effect already paused", async () => {

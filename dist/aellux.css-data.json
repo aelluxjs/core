@@ -113,6 +113,125 @@
       ]
     },
     {
+      "name": "--ae-dismiss-aellux-ease",
+      "description": "Optional advanced $ae.ease() curve for controlled dismiss motion. Keep a valid CSS easing as the native fallback.\n\nValue syntax: string.\n\nExamples: `backOut`, `ease-in-out-circ`.",
+      "syntax": "string",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-dismiss-duration",
+      "description": "dismiss transition duration.\n\nValue syntax: <time>.\n\nDefault behavior: \"250ms\".\n\nSuggested values: `0s`, `150ms`, `250ms`, `500ms`. This is an open grammar, not a closed enumeration.",
+      "syntax": "<time>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "0s"
+        },
+        {
+          "name": "150ms"
+        },
+        {
+          "name": "250ms"
+        },
+        {
+          "name": "500ms"
+        }
+      ]
+    },
+    {
+      "name": "--ae-dismiss-ease",
+      "description": "dismiss easing; CSS easing strings, including cubic-bezier, are supported.\n\nValue syntax: <easing-function>.\n\nDefault behavior: \"ease-in\".\n\nSuggested values: `linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out`. This is an open grammar, not a closed enumeration.",
+      "syntax": "<easing-function>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "linear"
+        },
+        {
+          "name": "ease"
+        },
+        {
+          "name": "ease-in"
+        },
+        {
+          "name": "ease-out"
+        },
+        {
+          "name": "ease-in-out"
+        }
+      ]
+    },
+    {
+      "name": "--ae-dismiss-height",
+      "description": "dismiss grid height endpoint.\n\nValue syntax: <flex>.\n\nDefault behavior: \"0fr\".",
+      "syntax": "<flex>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-dismiss-opacity",
+      "description": "dismiss opacity endpoint.\n\nValue syntax: <number> | <percentage>.\n\nDefault behavior: \"0\".",
+      "syntax": "<number> | <percentage>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-dismiss-progress",
+      "description": "Bounded dismiss progress from 0 to 1. Safe for application CSS.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
+      "syntax": "<number>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-dismiss-transform",
+      "description": "dismiss transform endpoint.\n\nValue syntax: <transform-list> | none.\n\nDefault behavior: \"scale(1.2)\".",
+      "syntax": "<transform-list> | none",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-dismiss-width",
+      "description": "dismiss grid width endpoint.\n\nValue syntax: <flex>.\n\nDefault behavior: \"0fr\".",
+      "syntax": "<flex>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
       "name": "--ae-from-height",
       "description": "from grid height endpoint.\n\nValue syntax: <flex>.\n\nDefault behavior: \"0fr\".",
       "syntax": "<flex>",
@@ -208,6 +327,17 @@
         {
           "name": "AelluxJS overflow-marquee",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-pop-aellux-ease",
+      "description": "Optional advanced $ae.ease() curve for controlled pop motion. Keep a valid CSS easing as the native fallback.\n\nValue syntax: string.\n\nExamples: `backOut`, `ease-in-out-circ`.",
+      "syntax": "string",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ]
     },
@@ -468,106 +598,9 @@
       ]
     },
     {
-      "name": "--ae-unpop-duration",
-      "description": "unpop transition duration.\n\nValue syntax: <time>.\n\nDefault behavior: \"250ms\".\n\nSuggested values: `0s`, `150ms`, `250ms`, `500ms`. This is an open grammar, not a closed enumeration.",
-      "syntax": "<time>",
-      "references": [
-        {
-          "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-        }
-      ],
-      "values": [
-        {
-          "name": "0s"
-        },
-        {
-          "name": "150ms"
-        },
-        {
-          "name": "250ms"
-        },
-        {
-          "name": "500ms"
-        }
-      ]
-    },
-    {
-      "name": "--ae-unpop-ease",
-      "description": "unpop easing; CSS easing strings, including cubic-bezier, are supported.\n\nValue syntax: <easing-function>.\n\nDefault behavior: \"ease-in\".\n\nSuggested values: `linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out`. This is an open grammar, not a closed enumeration.",
-      "syntax": "<easing-function>",
-      "references": [
-        {
-          "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-        }
-      ],
-      "values": [
-        {
-          "name": "linear"
-        },
-        {
-          "name": "ease"
-        },
-        {
-          "name": "ease-in"
-        },
-        {
-          "name": "ease-out"
-        },
-        {
-          "name": "ease-in-out"
-        }
-      ]
-    },
-    {
-      "name": "--ae-unpop-height",
-      "description": "unpop grid height endpoint.\n\nValue syntax: <flex>.\n\nDefault behavior: \"0fr\".",
-      "syntax": "<flex>",
-      "references": [
-        {
-          "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-        }
-      ]
-    },
-    {
-      "name": "--ae-unpop-opacity",
-      "description": "unpop opacity endpoint.\n\nValue syntax: <number> | <percentage>.\n\nDefault behavior: \"0\".",
-      "syntax": "<number> | <percentage>",
-      "references": [
-        {
-          "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-        }
-      ]
-    },
-    {
       "name": "--ae-unpop-progress",
-      "description": "Bounded unpop progress from 0 to 1. Safe for application CSS.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
+      "description": "Normalized progress of reverse playback, from 0 to 1. Hidden regions settle at 1; presented regions at 0. No independent unpop destination, duration or easing exists.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
       "syntax": "<number>",
-      "references": [
-        {
-          "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-        }
-      ]
-    },
-    {
-      "name": "--ae-unpop-transform",
-      "description": "unpop transform endpoint.\n\nValue syntax: <transform-list> | none.\n\nDefault behavior: \"scale(1.2)\".",
-      "syntax": "<transform-list> | none",
-      "references": [
-        {
-          "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-        }
-      ]
-    },
-    {
-      "name": "--ae-unpop-width",
-      "description": "unpop grid width endpoint.\n\nValue syntax: <flex>.\n\nDefault behavior: \"0fr\".",
-      "syntax": "<flex>",
       "references": [
         {
           "name": "AelluxJS present",

@@ -772,7 +772,7 @@
     }
   }
   var attributesByExtension = {
-    present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-unpop unpop-on-click",
+    present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-dismiss dismiss-on-click",
     anchor: "anchor anchor-target anchor-match anchor-scroll-into-view",
     "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
     scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-parent scrollbar-vertical scrollbar-horizontal",
@@ -827,7 +827,7 @@
           invalid("present", "present", "Unknown animated Present property.", "Use opacity, transform, height, width, all, or an empty value to disable motion.");
         if (has("present-when") && /\s/.test(value("present-when")))
           invalid("present", "present-when", "A group condition must be one class token.", "Use one class name without spaces or a leading dot.", "WARN_PRESENT_GROUP_SELECTION");
-        for (const [name, allowed] of [["trigger", ["", "toggle", "pop", "unpop"]], ["trigger-on", ["", "click", "hover"]]])
+        for (const [name, allowed] of [["trigger", ["", "toggle", "pop", "dismiss", "unpop"]], ["trigger-on", ["", "click", "hover"]]])
           if (has(name) && !allowed.includes(name === "trigger" ? value(name).toLowerCase() : value(name)))
             invalid("present", name, "Unknown Present control value.", `Use ${allowed.filter(Boolean).join(", ")}.`);
         if (has("trigger") || has("dismiss")) {
@@ -851,8 +851,8 @@
               "WARN_CONTROL_ACCESSIBILITY"
             );
         }
-        if (has("auto-unpop") && value("auto-unpop") && !/^(?:\d+(?:\.\d+)?|\.\d+)(?:ms|s)?$/.test(value("auto-unpop").trim()))
-          invalid("present", "auto-unpop", "Auto-unpop duration is invalid.", "Use a nonnegative duration such as 250ms or 2s.");
+        if (has("auto-dismiss") && value("auto-dismiss") && !/^(?:\d+(?:\.\d+)?|\.\d+)(?:ms|s)?$/.test(value("auto-dismiss").trim()))
+          invalid("present", "auto-dismiss", "Auto-dismiss duration is invalid.", "Use a nonnegative duration such as 250ms or 2s.");
         if (has("present-group")) {
           const members = [...element.querySelectorAll(`[${attr("present")}]`)].filter((member) => member.closest(`[${attr("present-group")}]`) === element);
           if (!members.some((member) => member.id))
@@ -956,7 +956,7 @@
         const extension = checkAnchor ? "anchor" : "present";
         const style = root.getComputedStyle(element);
         const durations = [
-          ...checkPresent ? ["--ae-pop-duration", "--ae-unpop-duration"] : [],
+          ...checkPresent ? ["--ae-pop-duration", "--ae-dismiss-duration"] : [],
           ...checkAnchor ? ["--ae-anchor-switch-duration"] : []
         ];
         for (const name of durations) {
@@ -1961,6 +1961,24 @@
     return { register };
   }
 
+  // src/internal/sample-css-easing.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function sampleCssEasing(api, name) {
+    const points = [];
+    const round = (value) => Math.round(value * 1e5) / 1e5;
+    try {
+      for (let index = 0; index <= 60; index++) {
+        const progress = index / 60;
+        const value = api.ease(name, progress);
+        if (!Number.isFinite(value)) return null;
+        points.push(`${round(value)} ${round(progress * 100)}%`);
+      }
+    } catch (_) {
+      return null;
+    }
+    return `linear(${points.join(", ")})`;
+  }
+
   // src/internal/create-css-motion-controller.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function createCssMotionController(root, getAelluxJs) {
@@ -1969,9 +1987,10 @@
       "transform",
       "opacity",
       "--ae-pop-progress",
+      "--ae-dismiss-progress",
       "--ae-unpop-progress",
       "--ae-present-pop-phase",
-      "--ae-present-unpop-phase"
+      "--ae-present-dismiss-phase"
     ]);
     let nextId = 4e6;
     function id() {
@@ -2174,30 +2193,15 @@
     function applyAelluxEasing(operation, animation) {
       const name = operation.options.easing;
       if (!name || !root.CSS || typeof root.CSS.supports !== "function" || !animation.effect || typeof animation.effect.updateTiming !== "function") return;
-      const easing = sampledLinear(name);
+      const easing = sampleCssEasing(getAelluxJs(), name);
       if (!easing || !root.CSS.supports("animation-timing-function", easing)) return;
       animation.effect.updateTiming({ easing });
     }
-    function sampledLinear(name) {
-      const AelluxJs2 = getAelluxJs();
-      const points = [];
-      try {
-        for (let index = 0; index <= 60; index++) {
-          const progress = index / 60;
-          const value = AelluxJs2.ease(name, progress);
-          if (!Number.isFinite(value)) return null;
-          points.push(`${round(value)} ${round(progress * 100)}%`);
-        }
-      } catch (_) {
-        return null;
-      }
-      return `linear(${points.join(", ")})`;
-    }
     function nativeRun(operation) {
       let before = operation.before;
-      if ((operation.options.subtree || getAelluxJs().options.environment === "development") && typeof operation.element.getAnimations === "function")
+      if ((operation.options.subtree || operation.options.ownedOnly || getAelluxJs().options.environment === "development") && typeof operation.element.getAnimations === "function")
         before = new Set(animationsFor(operation));
-      if (operation.options.subtree) operation.before = before;
+      if (operation.options.subtree || operation.options.ownedOnly) operation.before = before;
       operation.options.apply();
       return nativeWait(operation, before);
     }
@@ -2283,9 +2287,6 @@
     }
     function now() {
       return root.performance && typeof root.performance.now === "function" ? root.performance.now() : Date.now();
-    }
-    function round(value) {
-      return Math.round(value * 1e5) / 1e5;
     }
     return Object.freeze({ run, cancel, id, supported });
   }

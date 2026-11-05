@@ -6,12 +6,12 @@ async function start(page, mode, forceLegacy) {
   await page.evaluate(({ mode, forceLegacy }) => new Promise(resolve => {
     document.body.innerHTML = `<button id="control" data-ae-point="2" data-ae-trigger="toggle" data-ae-target="panel">
       <span id="child">Toggle</span></button>
-      <section id="panel" data-ae-present="" data-ae-unpop-on-click="false" hidden>
+      <section id="panel" data-ae-present="" data-ae-dismiss-on-click="false" hidden>
         <button id="dismiss" data-ae-point data-ae-dismiss>Dismiss</button>
         <button id="inside-child" data-ae-point><span>Inside</span></button>
       </section><button id="outside" data-ae-point>Outside</button>
       <button id="other" data-ae-point data-ae-trigger="toggle" data-ae-target="other-panel">Other</button>
-      <section id="other-panel" data-ae-present="" data-ae-unpop-on-click="false" hidden>Other panel</section>`;
+      <section id="other-panel" data-ae-present="" data-ae-dismiss-on-click="false" hidden>Other panel</section>`;
     if (mode === "basic") {
       AelluxJs.ext("point");
       AelluxJs.ext("present", { loadStyle: true });
@@ -22,7 +22,7 @@ async function start(page, mode, forceLegacy) {
   await page.evaluate(() => {
     window.actions = [];
     window.tapCount = 0;
-    for (const name of ["BeforePop", "BeforeUnpop"]) document.addEventListener(AelluxJs.eventName(name), event => {
+    for (const name of ["BeforePop", "BeforeDismiss"]) document.addEventListener(AelluxJs.eventName(name), event => {
       actions.push({ name, target: event.target.id });
     });
     document.addEventListener(AelluxJs.eventName("tap"), () => tapCount++);
@@ -51,10 +51,10 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
       for (const value of [null, "outside", "out", "inside", "in", "false", "none"]) {
         for (const gesture of ["click", "tap"]) {
           await page.evaluate(async value => {
-            await $ae("panel").present.unpop();
+            await $ae("panel").present.dismiss();
             const panel = document.getElementById("panel");
-            if (value === null) panel.removeAttribute("data-ae-unpop-on-click");
-            else panel.setAttribute("data-ae-unpop-on-click", value);
+            if (value === null) panel.removeAttribute("data-ae-dismiss-on-click");
+            else panel.setAttribute("data-ae-dismiss-on-click", value);
           }, value);
           const activate = async id => {
             await page.evaluate(({ id, gesture }) => {
@@ -91,7 +91,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
       await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
       await page.evaluate(async () => {
         await $ae("panel").present.pop();
-        document.getElementById("panel").removeAttribute("data-ae-unpop-on-click");
+        document.getElementById("panel").removeAttribute("data-ae-dismiss-on-click");
         tapGesture("outside");
       });
       await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
@@ -112,7 +112,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
       // The next physical gesture is independent and closes the same control once.
       await page.evaluate(() => { tapGesture(); clickGesture(); });
       await page.waitForTimeout(64);
-      expect(await page.evaluate(() => actions.map(action => action.name))).toEqual(["BeforePop", "BeforeUnpop"]);
+      expect(await page.evaluate(() => actions.map(action => action.name))).toEqual(["BeforePop", "BeforeDismiss"]);
       await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
     });
 
@@ -159,7 +159,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
       expect(await page.evaluate(() => actions.length)).toBe(2);
       await page.evaluate(() => { actions.length = 0; tapGesture(); clickGesture("child", 72); });
       await page.waitForTimeout(64);
-      expect(await page.evaluate(() => actions.map(action => action.name))).toEqual(["BeforeUnpop", "BeforePop"]);
+      expect(await page.evaluate(() => actions.map(action => action.name))).toEqual(["BeforeDismiss", "BeforePop"]);
       await expect(page.locator("#panel")).toHaveJSProperty("hidden", false);
     });
 

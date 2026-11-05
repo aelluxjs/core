@@ -104,7 +104,7 @@
       ]
     },
     {
-      "name": "data-ae-auto-unpop",
+      "name": "data-ae-auto-dismiss",
       "description": "Automatically closes after the specified nonnegative duration. Values use milliseconds by default, or ms/s units.\n\nValue syntax: duration.\n\nExamples: `250ms`, `2s`.",
       "references": [
         {
@@ -133,6 +133,36 @@
       "values": [
         {
           "name": "details"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-dismiss-on-click",
+      "description": "Close on outside/out clicks (default), inside/in clicks, or disable click dismissal with false/none.\n\nValue syntax: enum.\n\nDefault behavior: \"outside\".",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "outside"
+        },
+        {
+          "name": "inside"
+        },
+        {
+          "name": "out"
+        },
+        {
+          "name": "in"
+        },
+        {
+          "name": "false"
+        },
+        {
+          "name": "none"
         }
       ]
     },
@@ -871,7 +901,7 @@
     },
     {
       "name": "data-ae-trigger",
-      "description": "Present action. Target is one native ID, or the closest Present ancestor when omitted. Prefer a native button for keyboard activation.\n\nValue syntax: enum.\n\nDefault behavior: \"toggle\".",
+      "description": "Present action. unpop reverses opening; dismiss uses its independent outgoing destination. Target is one native ID, or the closest Present ancestor when omitted. Prefer a native button for keyboard activation.\n\nValue syntax: enum.\n\nDefault behavior: \"toggle\".",
       "references": [
         {
           "name": "AelluxJS present",
@@ -887,6 +917,9 @@
         },
         {
           "name": "pop"
+        },
+        {
+          "name": "dismiss"
         },
         {
           "name": "unpop"
@@ -911,36 +944,6 @@
         },
         {
           "name": "hover"
-        }
-      ]
-    },
-    {
-      "name": "data-ae-unpop-on-click",
-      "description": "Close on outside/out clicks (default), inside/in clicks, or disable click dismissal with false/none.\n\nValue syntax: enum.\n\nDefault behavior: \"outside\".",
-      "references": [
-        {
-          "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-        }
-      ],
-      "values": [
-        {
-          "name": "outside"
-        },
-        {
-          "name": "inside"
-        },
-        {
-          "name": "out"
-        },
-        {
-          "name": "in"
-        },
-        {
-          "name": "false"
-        },
-        {
-          "name": "none"
         }
       ]
     },

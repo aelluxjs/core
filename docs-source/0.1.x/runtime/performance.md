@@ -79,6 +79,23 @@ The optional [Viewport Extension](../core-extensions/optional/viewport.md) ships
 
 Viewport's regular budgets are 14/4 KiB raw/gzip for Modern and 26/7 KiB for Legacy; minified budgets are 7/3 KiB and 12/5 KiB respectively. Boot's signed registry entries add 803/274 bytes and its limits change from 47.5/15.5 KiB to 48/16 KiB. Full gets smaller because removing Snap's old position calculation outweighs the new registration entry; Orchestrator adds only registration metadata. Existing Ajax Href budget excesses remain byte-identical to the preceding artifacts.
 
+## Present opening reverse playback
+
+Present now retains the opening trajectory, recreates its CSS effects with reversed direction and clipped time, and provides native CSS-only keyframes plus reverse lifecycle/progress and cleanup. Completed openings retain serializable frames/timing instead of live effects. The shared CSS Motion clock and property FPS policy remain in use. There is no recurring extra JavaScript interpolation loop; setup performs bounded style/layout reads before the first reverse frame.
+
+The following raw/gzip level 9 measurements compare commit `79b9e497b54e` with the combined prerelease dismissal migration and implemented reverse playback:
+
+| Artifact | Before raw / gzip bytes | After raw / gzip bytes | New raw / gzip limits (KiB) |
+| --- | --- | --- | --- |
+| Present Modern minified | 26,718 / 9,199 | 36,995 / 12,135 | 36.25 / 12 |
+| Present Legacy minified | 35,710 / 11,936 | 50,752 / 15,735 | 49.75 / 15.5 |
+| Full Modern minified | 204,334 / 63,191 | 214,121 / 65,963 | 209.5 / 64.75 |
+| Full Legacy minified | 529,072 / 156,960 | 544,068 / 160,470 | 531.75 / 157 |
+| Present CSS minified | 4,102 / 805 | 5,703 / 1,009 | 5.75 / 2 |
+| Full CSS minified | 124,775 / 11,748 | 126,376 / 11,952 | 123.75 / 12 |
+
+The prior raw/gzip limits were Present Modern 26.25/9.125 KiB, Present Legacy 35/11.75, Full Modern 200/62, Full Legacy 517/153.5, Present CSS 4.125/2 and Full CSS 122/12. Only these affected limits change. Gzip CSS limits and unrelated artifact budgets stay unchanged. These are distribution-size measurements, not runtime performance benchmarks.
+
 ## Scope and Limitations
 
 The [Dialog Extension](../core-extensions/optional/dialog.md) Legacy script exclusively includes `dialog-polyfill` 0.5.6, its CSS and per-element mount registration. Compared with the preceding checked-in artifacts, the measured minified sizes are raw/gzip level 9 bytes:

@@ -1,5 +1,7 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
+import { presentPlaybackProperties } from "./internal/create-present-playback.js";
+
 export function generatePresentCSS(AelluxJs) {
   const presentAttribute = AelluxJs.attr("present");
   const motionAttribute = AelluxJs.attr("present-motion");
@@ -14,7 +16,7 @@ export function generatePresentCSS(AelluxJs) {
   const presentWidth = `[${presentAttribute}~="width"]`;
   const pop = AelluxJs.className("pop");
   const popping = AelluxJs.className("popping");
-  const unpopping = AelluxJs.className("unpopping");
+  const dismissing = AelluxJs.className("dismissing");
   const willChange = AelluxJs.className("will-change");
   const grid = AelluxJs.className("present-grid");
   const gridPresent = `${present}.${grid}`;
@@ -25,20 +27,20 @@ export function generatePresentCSS(AelluxJs) {
 ${present} {
   --ae-from-opacity: 0;
   --ae-pop-opacity: 1;
-  --ae-unpop-opacity: 0;
+  --ae-dismiss-opacity: 0;
   --ae-from-transform: scale(0.5);
   --ae-pop-transform: scale(1);
-  --ae-unpop-transform: scale(1.2);
+  --ae-dismiss-transform: scale(1.2);
   --ae-from-height: 0fr;
   --ae-pop-height: 1fr;
-  --ae-unpop-height: 0fr;
+  --ae-dismiss-height: 0fr;
   --ae-from-width: 0fr;
   --ae-pop-width: 1fr;
-  --ae-unpop-width: 0fr;
+  --ae-dismiss-width: 0fr;
   --ae-pop-ease: ease-out;
-  --ae-unpop-ease: ease-in;
+  --ae-dismiss-ease: ease-in;
   --ae-pop-duration: 300ms;
-  --ae-unpop-duration: 150ms;
+  --ae-dismiss-duration: 150ms;
 
   transition-property: var(--ae-present-properties);
 }
@@ -60,7 +62,7 @@ ${presentWithoutMotion} {
   transition: none !important;
   will-change: auto !important;
   --ae-pop-duration: 0s !important;
-  --ae-unpop-duration: 0s !important;
+  --ae-dismiss-duration: 0s !important;
 }
 ${gridPresent}${presentWidth}.${willChange}, ${gridPresent}${presentWidth}.${willChange}>${motion}{
   min-width: 0 !important;
@@ -75,7 +77,7 @@ ${gridPresent}${presentHeight}.${willChange}, ${gridPresent}${presentHeight}.${w
 html[${reducedMotionAttribute}="reduced"] ${present} {
   transition: none !important;
   --ae-pop-duration: 0s !important;
-  --ae-unpop-duration: 0s !important;
+  --ae-dismiss-duration: 0s !important;
 }
 ${present}.${willChange} {
   will-change: opacity, transform;
@@ -102,19 +104,19 @@ ${presentOpacity}:is(.${popping}, .${pop}) {
 ${presentTransform}:is(.${popping}, .${pop}) {
   transform: var(--ae-pop-transform);
 }
-${presentOpacity}.${unpopping} {
-  opacity: var(--ae-unpop-opacity, 0);
+${presentOpacity}.${dismissing} {
+  opacity: var(--ae-dismiss-opacity, 0);
 }
-${presentTransform}.${unpopping} {
-  transform: var(--ae-unpop-transform);
+${presentTransform}.${dismissing} {
+  transform: var(--ae-dismiss-transform);
 }
 ${present}.${pop}, ${present}.${popping} {
   transition-duration: var(--ae-pop-duration);
   transition-timing-function: var(--ae-pop-ease);
 }
-${present}.${unpopping} {
-  transition-duration: var(--ae-unpop-duration);
-  transition-timing-function: var(--ae-unpop-ease);
+${present}.${dismissing} {
+  transition-duration: var(--ae-dismiss-duration);
+  transition-timing-function: var(--ae-dismiss-ease);
 }
 ${gridPresent}${presentHeight} {
   grid-template-rows: var(--ae-from-height);
@@ -128,14 +130,26 @@ ${gridPresent}${presentWidth}.${popping}, ${gridPresent}${presentWidth}.${pop} {
 ${gridPresent}${presentHeight}.${popping}, ${gridPresent}${presentHeight}.${pop} {
   grid-template-rows: var(--ae-pop-height);
 }
-${gridPresent}${presentWidth}.${unpopping} { grid-template-columns: var(--ae-unpop-width); }
-${gridPresent}${presentHeight}.${unpopping} { grid-template-rows: var(--ae-unpop-height); }
+${gridPresent}${presentWidth}.${dismissing} { grid-template-columns: var(--ae-dismiss-width); }
+${gridPresent}${presentHeight}.${dismissing} { grid-template-rows: var(--ae-dismiss-height); }
 ${present}.${popping} {
   transition-property: var(--ae-present-properties), --ae-present-pop-phase;
 }
-${present}.${unpopping} {
-  transition-property: var(--ae-present-properties), --ae-present-pop-phase, --ae-present-unpop-phase;
+${present}.${dismissing} {
+  transition-property: var(--ae-present-properties), --ae-present-pop-phase, --ae-present-dismiss-phase;
 }
 ${present}[hidden] { display: none; }
+${presentPlaybackProperties.map(property => {
+  const name = property.replace(/^--ae-present-/, "");
+  const output = property.startsWith("max-") ? `--ae-present-reverse-${property}` : property;
+  return `@keyframes ${AelluxJs.className(`present-reverse-${name}`)} {
+  from { ${output}: var(--ae-present-reverse-from-${name}); }
+  to { ${output}: var(--ae-present-reverse-to-${name}); }
+}`;
+}).join("\n")}
+${["height", "width"].map(dimension => `@keyframes ${AelluxJs.className(`present-reverse-max-${dimension}-plain`)} {
+  from { max-${dimension}: var(--ae-present-reverse-from-max-${dimension}); }
+  to { max-${dimension}: var(--ae-present-reverse-to-max-${dimension}); }
+}`).join("\n")}
 `;
 }

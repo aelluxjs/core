@@ -53,7 +53,7 @@
           }
         },
         {
-          "name": "data-ae-auto-unpop",
+          "name": "data-ae-auto-dismiss",
           "description": "Automatically closes after the specified nonnegative duration. Values use milliseconds by default, or ms/s units.\n\nValue syntax: duration.\n\nExamples: `250ms`, `2s`.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm",
           "value": {
@@ -69,6 +69,16 @@
           "value": {
             "kind": "plain",
             "type": "string"
+          }
+        },
+        {
+          "name": "data-ae-dismiss-on-click",
+          "description": "Close on outside/out clicks (default), inside/in clicks, or disable click dismissal with false/none.\n\nValue syntax: enum.\n\nDefault behavior: \"outside\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm",
+          "default": "outside",
+          "value": {
+            "kind": "plain",
+            "type": "\"outside\" | \"inside\" | \"out\" | \"in\" | \"false\" | \"none\""
           }
         },
         {
@@ -370,12 +380,12 @@
         },
         {
           "name": "data-ae-trigger",
-          "description": "Present action. Target is one native ID, or the closest Present ancestor when omitted. Prefer a native button for keyboard activation.\n\nValue syntax: enum.\n\nDefault behavior: \"toggle\".",
+          "description": "Present action. unpop reverses opening; dismiss uses its independent outgoing destination. Target is one native ID, or the closest Present ancestor when omitted. Prefer a native button for keyboard activation.\n\nValue syntax: enum.\n\nDefault behavior: \"toggle\".",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm",
           "default": "toggle",
           "value": {
             "kind": "plain",
-            "type": "\"\" | \"toggle\" | \"pop\" | \"unpop\""
+            "type": "\"\" | \"toggle\" | \"pop\" | \"dismiss\" | \"unpop\""
           }
         },
         {
@@ -386,16 +396,6 @@
           "value": {
             "kind": "plain",
             "type": "\"\" | \"click\" | \"hover\""
-          }
-        },
-        {
-          "name": "data-ae-unpop-on-click",
-          "description": "Close on outside/out clicks (default), inside/in clicks, or disable click dismissal with false/none.\n\nValue syntax: enum.\n\nDefault behavior: \"outside\".",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm",
-          "default": "outside",
-          "value": {
-            "kind": "plain",
-            "type": "\"outside\" | \"inside\" | \"out\" | \"in\" | \"false\" | \"none\""
           }
         },
         {
@@ -619,6 +619,59 @@
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
         },
         {
+          "name": "--ae-dismiss-aellux-ease",
+          "description": "Optional advanced $ae.ease() curve for controlled dismiss motion. Keep a valid CSS easing as the native fallback.\n\nValue syntax: string.\n\nExamples: `backOut`, `ease-in-out-circ`.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        },
+        {
+          "name": "--ae-dismiss-duration",
+          "description": "dismiss transition duration.\n\nValue syntax: <time>.\n\nDefault behavior: \"250ms\".\n\nSuggested values: `0s`, `150ms`, `250ms`, `500ms`. This is an open grammar, not a closed enumeration.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm",
+          "values": [
+            "0s",
+            "150ms",
+            "250ms",
+            "500ms"
+          ]
+        },
+        {
+          "name": "--ae-dismiss-ease",
+          "description": "dismiss easing; CSS easing strings, including cubic-bezier, are supported.\n\nValue syntax: <easing-function>.\n\nDefault behavior: \"ease-in\".\n\nSuggested values: `linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out`. This is an open grammar, not a closed enumeration.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm",
+          "values": [
+            "linear",
+            "ease",
+            "ease-in",
+            "ease-out",
+            "ease-in-out"
+          ]
+        },
+        {
+          "name": "--ae-dismiss-height",
+          "description": "dismiss grid height endpoint.\n\nValue syntax: <flex>.\n\nDefault behavior: \"0fr\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        },
+        {
+          "name": "--ae-dismiss-opacity",
+          "description": "dismiss opacity endpoint.\n\nValue syntax: <number> | <percentage>.\n\nDefault behavior: \"0\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        },
+        {
+          "name": "--ae-dismiss-progress",
+          "description": "Bounded dismiss progress from 0 to 1. Safe for application CSS.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        },
+        {
+          "name": "--ae-dismiss-transform",
+          "description": "dismiss transform endpoint.\n\nValue syntax: <transform-list> | none.\n\nDefault behavior: \"scale(1.2)\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        },
+        {
+          "name": "--ae-dismiss-width",
+          "description": "dismiss grid width endpoint.\n\nValue syntax: <flex>.\n\nDefault behavior: \"0fr\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        },
+        {
           "name": "--ae-from-height",
           "description": "from grid height endpoint.\n\nValue syntax: <flex>.\n\nDefault behavior: \"0fr\".",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
@@ -662,6 +715,11 @@
           "name": "--ae-overflow-marquee-speed",
           "description": "Overflow Marquee speed in CSS pixels per second. Positive numbers only; invalid values use 30.\n\nValue syntax: <number>.\n\nDefault behavior: \"30\".",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+        },
+        {
+          "name": "--ae-pop-aellux-ease",
+          "description": "Optional advanced $ae.ease() curve for controlled pop motion. Keep a valid CSS easing as the native fallback.\n\nValue syntax: string.\n\nExamples: `backOut`, `ease-in-out-circ`.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         },
         {
           "name": "--ae-pop-duration",
@@ -780,51 +838,8 @@
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox-snap.htm"
         },
         {
-          "name": "--ae-unpop-duration",
-          "description": "unpop transition duration.\n\nValue syntax: <time>.\n\nDefault behavior: \"250ms\".\n\nSuggested values: `0s`, `150ms`, `250ms`, `500ms`. This is an open grammar, not a closed enumeration.",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm",
-          "values": [
-            "0s",
-            "150ms",
-            "250ms",
-            "500ms"
-          ]
-        },
-        {
-          "name": "--ae-unpop-ease",
-          "description": "unpop easing; CSS easing strings, including cubic-bezier, are supported.\n\nValue syntax: <easing-function>.\n\nDefault behavior: \"ease-in\".\n\nSuggested values: `linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out`. This is an open grammar, not a closed enumeration.",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm",
-          "values": [
-            "linear",
-            "ease",
-            "ease-in",
-            "ease-out",
-            "ease-in-out"
-          ]
-        },
-        {
-          "name": "--ae-unpop-height",
-          "description": "unpop grid height endpoint.\n\nValue syntax: <flex>.\n\nDefault behavior: \"0fr\".",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-        },
-        {
-          "name": "--ae-unpop-opacity",
-          "description": "unpop opacity endpoint.\n\nValue syntax: <number> | <percentage>.\n\nDefault behavior: \"0\".",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-        },
-        {
           "name": "--ae-unpop-progress",
-          "description": "Bounded unpop progress from 0 to 1. Safe for application CSS.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-        },
-        {
-          "name": "--ae-unpop-transform",
-          "description": "unpop transform endpoint.\n\nValue syntax: <transform-list> | none.\n\nDefault behavior: \"scale(1.2)\".",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-        },
-        {
-          "name": "--ae-unpop-width",
-          "description": "unpop grid width endpoint.\n\nValue syntax: <flex>.\n\nDefault behavior: \"0fr\".",
+          "description": "Normalized progress of reverse playback, from 0 to 1. Hidden regions settle at 1; presented regions at 0. No independent unpop destination, duration or easing exists.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         },
         {
@@ -873,6 +888,11 @@
           "name": "ae--anchored",
           "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
+        },
+        {
+          "name": "ae--dismissing",
+          "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         },
         {
           "name": "ae--feedback-motion-",
@@ -1036,7 +1056,7 @@
         },
         {
           "name": "ae--unpopping",
-          "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
+          "description": "Runtime-managed state class; useful in CSS selectors.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         },
         {
@@ -8739,6 +8759,11 @@
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
         },
         {
+          "name": "AelluxJsBeforeDismiss",
+          "description": "BeforeDismiss notification on the Present element. Cancel to veto the transition. Bubbles: true. Cancelable: true.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+        },
+        {
           "name": "AelluxJsBeforeMount",
           "description": "BeforeMount pass preflight on document. Cancel to prevent the pass and its completion event. detail: { root, extensions }. Bubbles: true. Cancelable: true.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
@@ -8756,6 +8781,21 @@
         {
           "name": "AelluxJsBeforeUnpop",
           "description": "BeforeUnpop notification on the Present element. Cancel to veto the transition. Bubbles: true. Cancelable: true.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsDismiss",
+          "description": "Dismiss notification on the Present element. Bubbles: true. Cancelable: false.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsDismissFocusLost",
+          "description": "Closed Present region lost focus. document event; detail: { element, focused }. Bubbles: true. Cancelable: false.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsDismissing",
+          "description": "Dismissing notification on the Present element. Bubbles: true. Cancelable: false.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
         },
         {
@@ -8830,7 +8870,7 @@
         },
         {
           "name": "AelluxJsProgress",
-          "description": "Numeric progress on the producing element. detail: { value, max }, finite numbers with 0 <= value <= max and max > 0. Independent of Progress and Feedback. Present auto-unpop includes status (running/completed), elapsedMs, durationMs and remainingMs. Bubbles: false. Cancelable: false.",
+          "description": "Numeric progress on the producing element. detail: { value, max }, finite numbers with 0 <= value <= max and max > 0. Independent of Progress and Feedback. Present auto-dismiss includes status (running/completed), elapsedMs, durationMs and remainingMs. Bubbles: false. Cancelable: false.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
         },
         {
@@ -8955,7 +8995,7 @@
         },
         {
           "name": "AelluxJsUnpopFocusLost",
-          "description": "Closed Present region lost focus. document event; detail: { element, focused }. Bubbles: true. Cancelable: false.",
+          "description": "Reverse playback hid the focused Present region. document event; detail: { element, focused }. Bubbles: true. Cancelable: false.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
         },
         {

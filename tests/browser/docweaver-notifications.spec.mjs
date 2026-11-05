@@ -17,11 +17,11 @@ for (const [label, html] of documents) for (const mode of ["basic", "full"]) for
       for (const attr of parsed.body.attributes) {
         if (attr.name.startsWith("data-ae-")) document.body.setAttribute(attr.name, attr.value);
       }
-      window.unpops = [];
+      window.dismissals = [];
       for (const member of document.querySelectorAll("[data-ae-present]")) {
         // Isolate outside-click behavior from the intended one-second expiry.
-        member.setAttribute("data-ae-auto-unpop", "30s");
-        member.addEventListener("AelluxJsBeforeUnpop", () => window.unpops.push(member.id));
+        member.setAttribute("data-ae-auto-dismiss", "30s");
+        member.addEventListener("AelluxJsBeforeDismiss", () => window.dismissals.push(member.id));
       }
       for (const message of ["First", "Second", "Third"]) {
         const button = document.createElement("button");
@@ -60,7 +60,7 @@ for (const [label, html] of documents) for (const mode of ["basic", "full"]) for
     await page.getByRole("button", { name: "Outside", exact: true }).click();
     await expect(page.locator("#toast-1")).toBeVisible();
     await expect(page.locator("#toast-2")).toBeVisible();
-    expect(await page.evaluate(() => window.unpops)).toEqual([]);
+    expect(await page.evaluate(() => window.dismissals)).toEqual([]);
     await expect(page.locator("#toast-present-group progress")).toHaveCount(2);
   });
 }

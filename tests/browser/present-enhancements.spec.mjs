@@ -1,8 +1,74 @@
 import { expect, test } from "@playwright/test";
 
-test("unpop preserves native continuity without Web Animations inspection", async ({ page }) => {
+for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
+  test(`dismiss contract replaces beta names (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
+    await start(page, `<button id="trigger" data-ae-trigger="dismiss" data-ae-target="#panel">Close</button>
+      <button id="explicit" data-ae-dismiss="panel">Close by ID</button>
+      <div id="panel" data-ae-present="" data-ae-dismiss-on-click="none" hidden>
+        <button id="nested" data-ae-dismiss>Close ancestor</button></div>`, { mode, forceLegacy });
+    const api = await page.evaluate(() => ({
+      publicDismiss: typeof $ae.ext.present.dismiss, mountedDismiss: typeof $ae("panel").present.dismiss,
+      publicUnpop: typeof $ae.ext.present.unpop, mountedUnpop: typeof $ae("panel").present.unpop
+    }));
+    expect(api).toEqual({ publicDismiss: "function", mountedDismiss: "function", publicUnpop: "function", mountedUnpop: "function" });
+    for (const id of ["trigger", "explicit", "nested"]) {
+      await page.evaluate(() => $ae.ext.present.pop(document.getElementById("panel")));
+      await page.locator(`#${id}`).click();
+      await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
+    }
+    const result = await page.evaluate(async () => {
+      const panel = document.getElementById("panel");
+      await $ae(panel).present.pop();
+      const events = [];
+      for (const name of ["BeforeDismiss", "Layout", "Dismissing", "Dismiss", "BeforeUnpop", "Unpopping", "Unpop"])
+        panel.addEventListener(AelluxJs.eventName(name), event => events.push({ name, bubbles: event.bubbles,
+          cancelable: event.cancelable, origin: event.detail?.origin, durationMs: event.detail?.durationMs }));
+      await $ae(panel).present.toggle(false);
+      await $ae.ext.present.dismiss(panel);
+      return { events, progress: ["--ae-pop-progress", "--ae-dismiss-progress"].map(name => getComputedStyle(panel).getPropertyValue(name).trim()),
+        oldProgress: getComputedStyle(panel).getPropertyValue("--ae-unpop-progress"), classes: [...panel.classList] };
+    });
+    expect(result.events.map(event => event.name)).toEqual(["BeforeDismiss", "Layout", "Dismissing", "Dismiss"]);
+    expect(result.events.map(event => event.cancelable)).toEqual([true, false, false, false]);
+    expect(result.events.every(event => event.bubbles)).toBe(true);
+    expect(result.events[1]).toMatchObject({ origin: "present.dismiss", durationMs: 0 });
+    expect(result.progress).toEqual(["0", "1"]);
+    expect(result.oldProgress).toBe("1");
+    expect(result.classes).not.toContain("ae--unpopping");
+    expect(result.classes).not.toContain("ae--dismissing");
+  });
+
+  test(`only renamed automatic dismissal attributes are active (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
+    await start(page, `<button id="outside">Outside</button><div id="panel" data-ae-present=""
+      data-ae-auto-unpop="0ms" data-ae-unpop-on-click="inside" data-ae-unpop-on-outside="false" hidden>
+      <button id="inside">Inside</button></div>`, { mode, forceLegacy });
+    await page.evaluate(() => $ae("panel").present.pop());
+    await page.waitForTimeout(100);
+    await expect(page.locator("#panel")).toHaveJSProperty("hidden", false);
+    await page.locator("#inside").click();
+    await expect(page.locator("#panel")).toHaveJSProperty("hidden", false);
+    await page.locator("#outside").click();
+    await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
+    await page.evaluate(async () => {
+      await $ae("panel").present.pop();
+      const panel = document.getElementById("panel");
+      panel.setAttribute("data-ae-dismiss-on-click", "none");
+      window.countdown = [];
+      panel.addEventListener("AelluxJsProgress", event => countdown.push({ bubbles: event.bubbles,
+        cancelable: event.cancelable, ...event.detail }));
+      panel.setAttribute("data-ae-auto-dismiss", "80ms");
+    });
+    await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
+    const countdown = await page.evaluate(() => window.countdown);
+    expect(countdown[0]).toMatchObject({ value: 0, max: 1, elapsedMs: 0, durationMs: 80, remainingMs: 80, bubbles: false, cancelable: false });
+    expect(countdown.at(-1)).toMatchObject({ value: 1, max: 1, status: "completed", elapsedMs: 80, durationMs: 80, remainingMs: 0 });
+    expect(countdown.every((sample, index) => index === 0 || sample.value >= countdown[index - 1].value)).toBe(true);
+  });
+}
+
+test("dismiss preserves native continuity without Web Animations inspection", async ({ page }) => {
   await start(page, `<div id="panel" data-ae-present="opacity" hidden
-    style="--ae-pop-duration:1200ms;--ae-unpop-duration:500ms;--ae-pop-ease:linear;--ae-unpop-ease:linear">Content</div>`, { forceLegacy: true });
+    style="--ae-pop-duration:1200ms;--ae-dismiss-duration:500ms;--ae-pop-ease:linear;--ae-dismiss-ease:linear">Content</div>`, { forceLegacy: true });
   await page.evaluate(() => {
     document.getElementById("panel").getAnimations = undefined;
     window.opening = $ae("panel").present.pop();
@@ -11,7 +77,7 @@ test("unpop preserves native continuity without Web Animations inspection", asyn
   const result = await page.evaluate(async () => {
     const element = document.getElementById("panel");
     const before = Number(getComputedStyle(element).opacity);
-    const closing = $ae(element).present.unpop();
+    const closing = $ae(element).present.dismiss();
     const after = Number(getComputedStyle(element).opacity);
     await new Promise(requestAnimationFrame);
     await new Promise(requestAnimationFrame);
@@ -27,9 +93,9 @@ test("unpop preserves native continuity without Web Animations inspection", asyn
 });
 
 for (const cssMotionController of [true, false]) for (const forceLegacy of [false, true]) {
-  test(`unpop handoff respects veto, restart, replacement and teardown (controlled=${cssMotionController}, legacy=${forceLegacy})`, async ({ page }) => {
+  test(`dismiss handoff respects veto, restart, replacement and teardown (controlled=${cssMotionController}, legacy=${forceLegacy})`, async ({ page }) => {
     await start(page, `<div id="panel" data-ae-present="opacity height" hidden
-      style="width:100px;height:100px;max-height:240px!important;--ae-pop-duration:900ms;--ae-unpop-duration:600ms;--ae-pop-ease:linear;--ae-unpop-ease:linear"></div>`,
+      style="width:100px;height:100px;max-height:240px!important;--ae-pop-duration:900ms;--ae-dismiss-duration:600ms;--ae-pop-ease:linear;--ae-dismiss-ease:linear"></div>`,
     { cssMotionController, forceLegacy });
     await page.evaluate(() => { window.opening = $ae("panel").present.pop(); });
     await expect.poll(() => page.locator("#panel").evaluate(element => Number(getComputedStyle(element).opacity)), { intervals: [16] }).toBeGreaterThan(.25);
@@ -38,8 +104,8 @@ for (const cssMotionController of [true, false]) for (const forceLegacy of [fals
       const animations = element.getAnimations();
       const styles = element.style.cssText;
       const before = Number(getComputedStyle(element).opacity);
-      element.addEventListener("AelluxJsBeforeUnpop", event => event.preventDefault(), { once: true });
-      await $ae(element).present.unpop();
+      element.addEventListener("AelluxJsBeforeDismiss", event => event.preventDefault(), { once: true });
+      await $ae(element).present.dismiss();
       return { same: animations.every(animation => element.getAnimations().includes(animation)),
         styles: styles === element.style.cssText, before, after: Number(getComputedStyle(element).opacity) };
     });
@@ -48,10 +114,10 @@ for (const cssMotionController of [true, false]) for (const forceLegacy of [fals
     expect(veto.after).toBeGreaterThanOrEqual(veto.before - .01);
     const restarted = await page.evaluate(async () => {
       const element = document.getElementById("panel");
-      const closing = $ae(element).present.unpop();
+      const closing = $ae(element).present.dismiss();
       const opening = $ae(element).present.pop();
       const reset = Number(getComputedStyle(element).opacity);
-      const replacement = $ae(element).present.unpop();
+      const replacement = $ae(element).present.dismiss();
       await Promise.all([window.opening, closing, opening, replacement]);
       return { reset, hidden: element.hidden, max: element.style.maxHeight,
         priority: element.style.getPropertyPriority("max-height") };
@@ -59,9 +125,9 @@ for (const cssMotionController of [true, false]) for (const forceLegacy of [fals
     expect(restarted).toEqual({ reset: 0, hidden: true, max: "240px", priority: "important" });
     await page.evaluate(() => { window.opening = $ae("panel").present.pop(); });
     await expect.poll(() => page.locator("#panel").evaluate(element => Number(getComputedStyle(element).opacity)), { intervals: [16] }).toBeGreaterThan(.25);
-    await page.evaluate(() => { window.closing = $ae("panel").present.unpop(); });
+    await page.evaluate(() => { window.closing = $ae("panel").present.dismiss(); });
     await expect.poll(() => page.locator("#panel").evaluate(element =>
-      element.classList.contains(AelluxJs.className("unpopping")) && element.getAnimations().length > 0), { intervals: [16] }).toBe(true);
+      element.classList.contains(AelluxJs.className("dismissing")) && element.getAnimations().length > 0), { intervals: [16] }).toBe(true);
     const cleanup = await page.evaluate(async () => {
       const element = document.getElementById("panel");
       // Allow the shared controller's capture/preparation to own the new effects.
@@ -78,7 +144,7 @@ for (const cssMotionController of [true, false]) for (const forceLegacy of [fals
   });
 
   test(`group closes an opening member from its rendered state (controlled=${cssMotionController}, legacy=${forceLegacy})`, async ({ page }) => {
-    await start(page, `<style>[data-ae-present] { --ae-pop-duration:1200ms;--ae-unpop-duration:600ms;--ae-pop-ease:linear;--ae-unpop-ease:linear }</style>
+    await start(page, `<style>[data-ae-present] { --ae-pop-duration:1200ms;--ae-dismiss-duration:600ms;--ae-pop-ease:linear;--ae-dismiss-ease:linear }</style>
       <div id="group" data-ae-present-group data-ae-present-active="a">
         <div id="a" data-ae-present="opacity">A</div><div id="b" data-ae-present="opacity" hidden>B</div></div>`,
     { cssMotionController, forceLegacy });
@@ -98,17 +164,17 @@ for (const cssMotionController of [true, false]) for (const forceLegacy of [fals
   });
 
   for (const kind of ["visual", "grid-height", "grid-width", "grid-height-custom", "grid-width-custom", "measured-height", "measured-width"]) {
-    test(`unpop preserves intermediate ${kind} (controlled=${cssMotionController}, legacy=${forceLegacy})`, async ({ page }) => {
+    test(`dismiss preserves intermediate ${kind} (controlled=${cssMotionController}, legacy=${forceLegacy})`, async ({ page }) => {
       const dimension = kind.includes("height") ? "height" : "width";
       const grid = kind.startsWith("grid");
       const measured = kind.startsWith("measured");
       await start(page, `<style>
-        #panel { --ae-pop-duration:1200ms; --ae-unpop-duration:700ms;
-          --ae-pop-ease:linear; --ae-unpop-ease:linear;
-          --ae-from-opacity:.2; --ae-pop-opacity:.85; --ae-unpop-opacity:.1;
+        #panel { --ae-pop-duration:1200ms; --ae-dismiss-duration:700ms;
+          --ae-pop-ease:linear; --ae-dismiss-ease:linear;
+          --ae-from-opacity:.2; --ae-pop-opacity:.85; --ae-dismiss-opacity:.1;
           --ae-from-transform:translateY(30px); --ae-pop-transform:translateY(0);
-          --ae-unpop-transform:translateY(-20px);
-          ${kind.endsWith("custom") ? `--ae-from-${dimension}:11px;--ae-pop-${dimension}:151px;--ae-unpop-${dimension}:7px;` : ""}
+          --ae-dismiss-transform:translateY(-20px);
+          ${kind.endsWith("custom") ? `--ae-from-${dimension}:11px;--ae-pop-${dimension}:151px;--ae-dismiss-${dimension}:7px;` : ""}
           ${measured ? "display:inline-block;max-height:300px!important;max-width:300px!important;" : ""}
         }
         #content { width:160px; height:120px; opacity:var(--ae-pop-progress); }
@@ -121,7 +187,7 @@ for (const cssMotionController of [true, false]) for (const forceLegacy of [fals
           return { value: kind === "visual" ? Number(style.opacity) : parseFloat(style[dimension]),
             transform: new DOMMatrixReadOnly(style.transform).m42,
             pop: Number(style.getPropertyValue("--ae-pop-progress")),
-            unpop: Number(style.getPropertyValue("--ae-unpop-progress")),
+            dismiss: Number(style.getPropertyValue("--ae-dismiss-progress")),
             child: Number(getComputedStyle(document.getElementById("content")).opacity) };
         };
         window.opening = $ae(element).present.pop();
@@ -131,11 +197,11 @@ for (const cssMotionController of [true, false]) for (const forceLegacy of [fals
         const element = document.getElementById("panel");
         const before = window.readPresent();
         const oldAnimations = element.getAnimations();
-        let unpopping = 0;
-        element.addEventListener("AelluxJsUnpopping", () => unpopping++);
-        const closing = $ae(element).present.unpop();
+        let dismissing = 0;
+        element.addEventListener("AelluxJsDismissing", () => dismissing++);
+        const closing = $ae(element).present.dismiss();
         const samples = [window.readPresent()];
-        await $ae(element).present.unpop();
+        await $ae(element).present.dismiss();
         for (let i = 0; i < 7; i++) {
           await new Promise(requestAnimationFrame);
           samples.push(window.readPresent());
@@ -148,7 +214,7 @@ for (const cssMotionController of [true, false]) for (const forceLegacy of [fals
         element.getAnimations().forEach(animation => { animation.currentTime = 699.9; });
         const endpoint = window.readPresent();
         await Promise.all([window.opening, closing]);
-        return { before, samples, active, endpoint, final: window.readPresent(), hidden: element.hidden, unpopping,
+        return { before, samples, active, endpoint, final: window.readPresent(), hidden: element.hidden, dismissing,
           obsoletePaused: oldAnimations.some(animation => animation.playState === "paused"),
           styles: ["opacity", "transform", "grid-template-rows", "grid-template-columns", "transition-property", "height", "width"]
             .map(property => element.style.getPropertyValue(property)),
@@ -172,9 +238,9 @@ for (const cssMotionController of [true, false]) for (const forceLegacy of [fals
       expect(result.active.some(animation => animation.duration === 700)).toBe(true);
       expect(result.endpoint.value).toBeCloseTo(kind === "visual" ? .1 : kind.endsWith("custom") ? 7 : 0, 1);
       if (kind === "visual") expect(result.endpoint.transform).toBeCloseTo(-20, 1);
-      expect(result.final).toMatchObject({ pop: 0, unpop: 1 });
+      expect(result.final).toMatchObject({ pop: 0, dismiss: 1 });
       expect(result.hidden).toBe(true);
-      expect(result.unpopping).toBe(1);
+      expect(result.dismissing).toBe(1);
       expect(result.obsoletePaused).toBe(false);
       expect(result.styles).toEqual(["", "", "", "", "", "", ""]);
       expect(result.max).toEqual(["", ""]);
@@ -316,7 +382,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
     await expect(page.locator("#b")).toHaveJSProperty("hidden", false);
     await page.locator("#inside").focus();
     expect(await page.evaluate(async () => {
-      document.getElementById("b").addEventListener("AelluxJsBeforeUnpop", event => event.preventDefault(), { once: true });
+      document.getElementById("b").addEventListener("AelluxJsBeforeDismiss", event => event.preventDefault(), { once: true });
       return $ae("group").present.show("c");
     })).toBe(false);
     await expect(page.locator("#b")).toHaveJSProperty("hidden", false);
@@ -337,17 +403,17 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
 for (const cssMotionController of [true, false]) {
   test(`progress endpoints, easing, reversal and restoration (controller=${cssMotionController})`, async ({ page }) => {
     await start(page, `<div id="panel" data-ae-present="opacity" hidden data-ae-maxfps="20"
-      style="--ae-pop-duration:600ms;--ae-unpop-duration:300ms;--ae-pop-ease:ease-in;--ae-pop-progress:0.7">
+      style="--ae-pop-duration:600ms;--ae-dismiss-duration:300ms;--ae-pop-ease:ease-in;--ae-pop-progress:0.7">
       <span id="child" style="opacity:var(--ae-pop-progress)">Content</span></div>
       <div id="visible" data-ae-present="opacity">Visible</div>`, { cssMotionController });
     const progress = () => page.locator("#panel").evaluate(element => {
       const style = getComputedStyle(element);
-      return [Number(style.getPropertyValue("--ae-pop-progress")), Number(style.getPropertyValue("--ae-unpop-progress"))];
+      return [Number(style.getPropertyValue("--ae-pop-progress")), Number(style.getPropertyValue("--ae-dismiss-progress"))];
     });
     expect(await progress()).toEqual([0, 1]);
     expect(await page.locator("#visible").evaluate(element => [
       getComputedStyle(element).getPropertyValue("--ae-pop-progress").trim(),
-      getComputedStyle(element).getPropertyValue("--ae-unpop-progress").trim()
+      getComputedStyle(element).getPropertyValue("--ae-dismiss-progress").trim()
     ])).toEqual(["1", "0"]);
     await page.evaluate(() => { window.opening = $ae("panel").present.pop(); });
     await expect.poll(async () => (await progress())[0]).toBeGreaterThan(0);
@@ -361,7 +427,7 @@ for (const cssMotionController of [true, false]) {
     expect(sample.value).toBeLessThan(1);
     expect(sample.child).toBeCloseTo(sample.value, 2);
     expect(sample.value).toBeLessThan(sample.time / sample.duration + 0.06);
-    await page.evaluate(() => $ae("panel").present.unpop());
+    await page.evaluate(() => $ae("panel").present.dismiss());
     expect(await progress()).toEqual([0, 1]);
     await page.evaluate(async () => {
       await Promise.all([$ae("panel").present.pop(), $ae("panel").present.pop()]);
@@ -369,7 +435,7 @@ for (const cssMotionController of [true, false]) {
     expect(await progress()).toEqual([1, 0]);
     await page.evaluate(() => AelluxJs.unmount(document.getElementById("panel"), "present"));
     expect(await page.locator("#panel").evaluate(element => [
-      element.style.getPropertyValue("--ae-pop-progress"), element.style.getPropertyValue("--ae-unpop-progress")
+      element.style.getPropertyValue("--ae-pop-progress"), element.style.getPropertyValue("--ae-dismiss-progress")
     ])).toEqual(["0.7", ""]);
   });
 }
@@ -443,7 +509,7 @@ test("touch hover is ignored, click toggles once, descendants and remount do not
   await expect(page.locator("#panel")).toHaveAttribute("aria-expanded", "true");
   expect(await page.evaluate(() => window.pops)).toBe(1);
   await page.evaluate(async () => {
-    await $ae("panel").present.unpop();
+    await $ae("panel").present.dismiss();
     await AelluxJs.unmount(document.getElementById("trigger"), "present");
     await AelluxJs.mount(document.getElementById("trigger"), "present");
   });
@@ -470,9 +536,9 @@ for (const fallback of ["unregistered", "no-waapi", "reduced"]) {
     await page.evaluate(() => $ae("panel").present.pop());
     await expect(page.locator("#panel")).toHaveCSS("opacity", "1");
     await expect(page.locator("#panel")).toHaveCSS("--ae-pop-progress", "1");
-    await page.evaluate(() => $ae("panel").present.unpop());
+    await page.evaluate(() => $ae("panel").present.dismiss());
     await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
-    await expect(page.locator("#panel")).toHaveCSS("--ae-unpop-progress", "1");
+    await expect(page.locator("#panel")).toHaveCSS("--ae-dismiss-progress", "1");
   });
 }
 
@@ -520,28 +586,28 @@ test("group reentrant BeforePop selection and unmount cannot revive obsolete ope
   });
   await expect(page.locator("#a")).toHaveJSProperty("hidden", false);
   await expect(page.locator("#c")).toHaveJSProperty("hidden", true);
-  expect(await page.locator(".ae--popping,.ae--unpopping,.ae--will-change").count()).toBe(0);
+  expect(await page.locator(".ae--popping,.ae--dismissing,.ae--will-change").count()).toBe(0);
 });
 
 test("progress shares elapsed-time sampling under low FPS and retains the opening channel on close", async ({ page }) => {
   await start(page, `<div id="panel" data-ae-present="opacity" data-ae-maxfps="8" hidden
-    style="--ae-pop-duration:350ms;--ae-unpop-duration:350ms;--ae-pop-ease:linear;--ae-unpop-ease:linear">Content</div>`,
+    style="--ae-pop-duration:350ms;--ae-dismiss-duration:350ms;--ae-pop-ease:linear;--ae-dismiss-ease:linear">Content</div>`,
   { cssMotionPropertyMaxFPS: 5 });
   const observation = await page.evaluate(async () => {
     const panel = document.getElementById("panel");
     const start = performance.now();
     await $ae("panel").present.pop();
     const elapsed = performance.now() - start;
-    window.closing = $ae("panel").present.unpop();
+    window.closing = $ae("panel").present.dismiss();
     return { elapsed, reset: getComputedStyle(panel).getPropertyValue("--ae-pop-progress").trim() };
   });
   expect(observation.elapsed).toBeGreaterThanOrEqual(420);
   expect(observation.elapsed).toBeLessThan(2500);
   expect(observation.reset).toBe("1");
   await expect.poll(() => page.locator("#panel").evaluate(element =>
-    Number(getComputedStyle(element).getPropertyValue("--ae-unpop-progress")))).toBeGreaterThan(0);
+    Number(getComputedStyle(element).getPropertyValue("--ae-dismiss-progress")))).toBeGreaterThan(0);
   await page.evaluate(() => window.closing);
-  await expect(page.locator("#panel")).toHaveCSS("--ae-unpop-progress", "1");
+  await expect(page.locator("#panel")).toHaveCSS("--ae-dismiss-progress", "1");
 });
 
 for (const cssMotionController of [false, true]) {

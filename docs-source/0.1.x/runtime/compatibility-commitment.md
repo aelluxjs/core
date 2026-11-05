@@ -6,6 +6,8 @@ This document defines how AelluxJS preserves and evolves its public contracts, b
 
 The current package is still a prerelease. This commitment does not retroactively stabilize earlier betas, their superseded names, or their behavior. The release baseline is the public contract delivered with `0.1.0`; a compatible public addition receives protection from the release that introduces it.
 
+The Present dismissal rename is part of this prerelease finalization: the beta closing operation becomes `dismiss()`, with matching HTML, CSS and events, without an `unpop()` alias. `unpop()` now implements actual opening reverse playback as a distinct operation; it never aliases dismissal. Its trigger, progress channel, class and events identify that new meaning. See the [Present migration table](../core-extensions/present.md#operations-and-prerelease-migration). Publication was checked on 2026-11-04: npm listed only `0.1.0-beta.*` versions (through beta.9), the local package remained `0.1.0-beta.10`, and the public repository had no GitHub releases. No version is changed by this migration. A stable publication with the previous contract would require a maintainer compatibility decision before applying or releasing this removal.
+
 ## 1. Scope & Stability
 
 [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html#spec-item-4) treats `0.y.z` as initial development and does not automatically establish a stable public API. AelluxJS adopts the narrower, project-specific commitment below for the `0.1.x` line.
@@ -75,7 +77,7 @@ Source exports, private helpers, caches, controller storage and undocumented fun
 
 Public semantic contracts include documented `data-ae-*` inputs and outputs, accepted syntax and values, defaults, public `--ae-*` properties, and classes documented for application use. For Stable behavior, these names, value types, units, ranges and meanings are preserved just as JavaScript contracts are.
 
-Examples include `data-ae-unpop-on-click` values and their default outside dismissal, Present's numeric `--ae-pop-progress` range of `0..1`, Scrollbox's numeric `--ae-scroll-x-progress` range of `0..1`, and Present's documented `ae--pop` state class. A documented output is for observation or styling; setting it is not automatically a supported command.
+Examples include `data-ae-dismiss-on-click` values and their default outside dismissal, Present's numeric `--ae-pop-progress` range of `0..1`, Scrollbox's numeric `--ae-scroll-x-progress` range of `0..1`, and Present's documented `ae--pop` state class. A documented output is for observation or styling; setting it is not automatically a supported command.
 
 Dynamic updates follow each Extension's contract. Observer-backed reconfiguration remains supported where documented, such as Present Group selection and Marquee fade changes. New DOM insertion still requires `$ae.mount(root)`. Use the documented controller or `mountManager.update()` where required; there is no promise that arbitrary attribute or CSS changes are observed automatically.
 
@@ -95,8 +97,8 @@ Different event roles must retain their meaning:
 | --- | --- | --- |
 | Intention or command | `PushState` | A request handled by State Navigation; dispatch alone does not prove completion. |
 | Cancelable pre-operation | `BeforeMount`, `BeforePop` | Synchronous `preventDefault()` vetoes the documented operation before its effects. |
-| Transition in progress | `Popping`, `Unpopping` | A transition starts; the requested endpoint has not necessarily been reached. |
-| Completion | `Pop`, `Unpop`, `Mount` | The corresponding current operation or pass finishes according to its own contract. |
+| Transition in progress | `Popping`, `Dismissing` | A transition starts; the requested endpoint has not necessarily been reached. |
+| Completion | `Pop`, `Dismiss`, `Mount` | The corresponding current operation or pass finishes according to its own contract. |
 | State update | `PreferencesChange` | Reports resolved state and changed keys; it is not a request to change state. |
 | Numeric progress | `Progress` | Reports finite `{ value, max }`, with `max > 0` and `0 <= value <= max`, on its producer. |
 

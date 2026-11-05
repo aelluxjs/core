@@ -1,14 +1,15 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 import { validateMotionResourceConflicts } from "./development-helpers.js";
+import { sampleCssEasing } from "./sample-css-easing.js";
 
 // CSS remains the motion definition. This service only owns time progression
 // when the browser exposes enough of Web Animations to do that safely.
 export function createCssMotionController(root, getAelluxJs) {
   const operations = new Map();
   const lightweightProperties = new Set([
-    "transform", "opacity", "--ae-pop-progress", "--ae-unpop-progress",
-    "--ae-present-pop-phase", "--ae-present-unpop-phase"
+    "transform", "opacity", "--ae-pop-progress", "--ae-dismiss-progress", "--ae-unpop-progress",
+    "--ae-present-pop-phase", "--ae-present-dismiss-phase"
   ]);
   let nextId = 4000000;
 
@@ -234,34 +235,17 @@ export function createCssMotionController(root, getAelluxJs) {
     const name = operation.options.easing;
     if (!name || !root.CSS || typeof root.CSS.supports !== "function" ||
       !animation.effect || typeof animation.effect.updateTiming !== "function") return;
-    const easing = sampledLinear(name);
+    const easing = sampleCssEasing(getAelluxJs(), name);
     if (!easing || !root.CSS.supports("animation-timing-function", easing)) return;
     animation.effect.updateTiming({ easing });
   }
 
-  function sampledLinear(name) {
-    const AelluxJs = getAelluxJs();
-    const points = [];
-    try {
-      // Explicit percentages preserve overshoot values from Back and Elastic.
-      for (let index = 0; index <= 60; index++) {
-        const progress = index / 60;
-        const value = AelluxJs.ease(name, progress);
-        if (!Number.isFinite(value)) return null;
-        points.push(`${round(value)} ${round(progress * 100)}%`);
-      }
-    } catch (_) {
-      return null;
-    }
-    return `linear(${points.join(", ")})`;
-  }
-
   function nativeRun(operation) {
     let before = operation.before;
-    if ((operation.options.subtree || getAelluxJs().options.environment === "development") &&
+    if ((operation.options.subtree || operation.options.ownedOnly || getAelluxJs().options.environment === "development") &&
       typeof operation.element.getAnimations === "function")
       before = new Set(animationsFor(operation));
-    if (operation.options.subtree) operation.before = before;
+    if (operation.options.subtree || operation.options.ownedOnly) operation.before = before;
     operation.options.apply();
     return nativeWait(operation, before);
   }
@@ -358,10 +342,6 @@ export function createCssMotionController(root, getAelluxJs) {
   function now() {
     return root.performance && typeof root.performance.now === "function"
       ? root.performance.now() : Date.now();
-  }
-
-  function round(value) {
-    return Math.round(value * 100000) / 100000;
   }
 
   return Object.freeze({ run, cancel, id, supported });

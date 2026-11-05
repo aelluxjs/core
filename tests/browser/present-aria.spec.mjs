@@ -27,7 +27,7 @@ for (const options of [
         <button id="dismiss" data-ae-dismiss="panel">Dismiss</button>
         <button id="target" data-ae-target="panel">Target</button>
         <div id="panel" data-ae-present="${motion}" hidden
-          style="--ae-pop-duration:120ms;--ae-unpop-duration:120ms">
+          style="--ae-pop-duration:120ms;--ae-dismiss-duration:120ms">
           <button id="inside" data-ae-dismiss>Close</button>
         </div>`;
     }, options.motion ?? "opacity");
@@ -47,7 +47,7 @@ for (const options of [
         .map(id => document.getElementById(id));
       const expanded = () => controls.map(el => el.getAttribute("aria-expanded"));
       const events = [];
-      for (const name of ["BeforePop", "Layout", "Popping", "Pop", "BeforeUnpop", "Unpopping", "Unpop"]) {
+      for (const name of ["BeforePop", "Layout", "Popping", "Pop", "BeforeDismiss", "Dismissing", "Dismiss"]) {
         panel.addEventListener(`AelluxJs${name}`, () => {
           events.push({ name, expanded: expanded(), hidden: panel.hidden });
         });
@@ -55,7 +55,7 @@ for (const options of [
       const opening = $ae(panel).present.toggle(true);
       const preparation = expanded();
       await opening;
-      const closing = new Promise(resolve => panel.addEventListener("AelluxJsUnpop", resolve, { once: true }));
+      const closing = new Promise(resolve => panel.addEventListener("AelluxJsDismiss", resolve, { once: true }));
       document.getElementById("dismiss").click();
       await closing;
       return { preparation, events };
@@ -70,10 +70,10 @@ for (const options of [
       { name: "Layout", expanded: opening, hidden: false },
       { name: "Popping", expanded: opening, hidden: false },
       { name: "Pop", expanded: opened, hidden: false },
-      { name: "BeforeUnpop", expanded: opened, hidden: false },
+      { name: "BeforeDismiss", expanded: opened, hidden: false },
       { name: "Layout", expanded: closing, hidden: false },
-      { name: "Unpopping", expanded: closing, hidden: false },
-      { name: "Unpop", expanded: closed, hidden: true }
+      { name: "Dismissing", expanded: closing, hidden: false },
+      { name: "Dismiss", expanded: closed, hidden: true }
     ]);
   });
 }
@@ -84,7 +84,7 @@ test("present keeps expanded state current through vetoes, reversals and newly m
     document.body.innerHTML = `
       <button id="trigger" data-ae-trigger="toggle" data-ae-target="panel">Toggle</button>
       <div id="panel" data-ae-present="opacity" hidden
-        style="--ae-pop-duration:600ms;--ae-unpop-duration:600ms">Content</div>`;
+        style="--ae-pop-duration:600ms;--ae-dismiss-duration:600ms">Content</div>`;
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
@@ -100,7 +100,7 @@ test("present keeps expanded state current through vetoes, reversals and newly m
     const state = () => [panel, trigger].map(el => el.getAttribute("aria-expanded"));
     const completions = [];
     panel.addEventListener("AelluxJsPop", () => completions.push("Pop"));
-    panel.addEventListener("AelluxJsUnpop", () => completions.push("Unpop"));
+    panel.addEventListener("AelluxJsDismiss", () => completions.push("Dismiss"));
     panel.addEventListener("AelluxJsBeforePop", event => event.preventDefault(), { once: true });
     await controller.toggle(true);
     const vetoedPop = { expanded: state(), hidden: panel.hidden };
@@ -108,11 +108,11 @@ test("present keeps expanded state current through vetoes, reversals and newly m
     const started = new Promise(resolve => panel.addEventListener("AelluxJsPopping", resolve, { once: true }));
     const opening = controller.toggle(true);
     await started;
-    panel.addEventListener("AelluxJsBeforeUnpop", event => event.preventDefault(), { once: true });
-    await controller.unpop();
-    const vetoedUnpop = state();
+    panel.addEventListener("AelluxJsBeforeDismiss", event => event.preventDefault(), { once: true });
+    await controller.dismiss();
+    const vetoedDismiss = state();
 
-    const closing = controller.unpop();
+    const closing = controller.dismiss();
     const reversing = { expanded: state(), hidden: panel.hidden };
     document.body.insertAdjacentHTML("beforeend", '<button id="late" data-ae-trigger="toggle" data-ae-target="panel">Late</button>');
     const late = document.getElementById("late");
@@ -121,12 +121,12 @@ test("present keeps expanded state current through vetoes, reversals and newly m
     const reopening = controller.toggle(true);
     const reopened = [...state(), late.getAttribute("aria-expanded")];
     await Promise.all([opening, closing, reopening]);
-    return { vetoedPop, vetoedUnpop, reversing, mountedDuringClose, reopened, completions,
+    return { vetoedPop, vetoedDismiss, reversing, mountedDuringClose, reopened, completions,
       final: [...state(), late.getAttribute("aria-expanded")] };
   });
   expect(result).toEqual({
     vetoedPop: { expanded: ["false", "false"], hidden: true },
-    vetoedUnpop: ["false", "true"],
+    vetoedDismiss: ["false", "true"],
     reversing: { expanded: ["false", "false"], hidden: false },
     mountedDuringClose: "false",
     reopened: ["false", "true", "true"],
@@ -139,7 +139,7 @@ test("present announces layout at transition start with its duration", async ({ 
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     document.body.innerHTML = `<div id="panel" data-ae-present="opacity" hidden
-      style="--ae-pop-duration:30ms;--ae-unpop-duration:40ms">
+      style="--ae-pop-duration:30ms;--ae-dismiss-duration:40ms">
       <div data-ae-present-motion></div>
     </div>`;
   });
@@ -154,27 +154,27 @@ test("present announces layout at transition start with its duration", async ({ 
   const events = await page.evaluate(async () => {
     const panel = document.getElementById("panel");
     const received = [];
-    for (const name of ["Pop", "Unpop"])
+    for (const name of ["Pop", "Dismiss"])
       panel.addEventListener(`AelluxJs${name}`, () => received.push(name));
     document.body.addEventListener("AelluxJsLayout", event => {
       received.push(`Layout:${event.target.id}:${event.detail.origin}:${event.detail.durationMs}`);
     });
     await $ae("panel").present.pop();
-    await $ae("panel").present.unpop();
+    await $ae("panel").present.dismiss();
     return received;
   });
   expect(events).toEqual([
     "Layout:panel:present.pop:30", "Pop",
-    "Layout:panel:present.unpop:40", "Unpop"
+    "Layout:panel:present.dismiss:40", "Dismiss"
   ]);
 });
 
-test("unpop restores previous focus only when hiding the active element", async ({ page }) => {
+test("dismiss restores previous focus only when hiding the active element", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     document.body.innerHTML = `
       <button id="previous">Previous</button>
-      <div id="panel" data-ae-present style="--ae-unpop-duration: 0ms">
+      <div id="panel" data-ae-present style="--ae-dismiss-duration: 0ms">
         <div data-ae-present-motion><button id="inside">Inside</button></div>
       </div>
       <button id="outside">Outside</button>
@@ -187,7 +187,7 @@ test("unpop restores previous focus only when hiding the active element", async 
   });
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.focus?.initialized)).toBe(true);
   await expect.poll(() => page.evaluate(() =>
-    typeof AelluxJs.mountManager?.controller("panel")?.present?.unpop === "function"
+    typeof AelluxJs.mountManager?.controller("panel")?.present?.dismiss === "function"
   )).toBe(true);
 
   await page.locator("#previous").focus();
@@ -195,14 +195,14 @@ test("unpop restores previous focus only when hiding the active element", async 
   await page.evaluate(() => {
     window.focusLostCount = 0;
     window.focusLostDetails = [];
-    AelluxJs.on("UnpopFocusLost", event => {
+    AelluxJs.on("DismissFocusLost", event => {
       window.focusLostCount++;
       window.focusLostDetails.push({
         element: event.detail.element.id,
         focused: event.detail.focused.id
       });
     });
-    AelluxJs.mountManager.controller("panel").present.unpop();
+    AelluxJs.mountManager.controller("panel").present.dismiss();
   });
   await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
   await expect.poll(() => page.evaluate(() => document.activeElement.id)).toBe("previous");
@@ -213,7 +213,7 @@ test("unpop restores previous focus only when hiding the active element", async 
   await page.evaluate(() => AelluxJs.mountManager.controller("panel").present.pop());
   await expect(page.locator("#panel")).toHaveJSProperty("hidden", false);
   await page.locator("#outside").focus();
-  await page.evaluate(() => AelluxJs.mountManager.controller("panel").present.unpop());
+  await page.evaluate(() => AelluxJs.mountManager.controller("panel").present.dismiss());
   await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
   expect(await page.evaluate(() => ({ active: document.activeElement.id, count: window.focusLostCount })))
     .toEqual({ active: "outside", count: 1 });
@@ -224,7 +224,7 @@ test("mounted present controller binds public methods to its element", async ({ 
   await page.evaluate(() => {
     document.body.innerHTML = `
       <div id="panel" data-ae-present hidden
-        style="--ae-pop-duration: 0ms; --ae-unpop-duration: 0ms">
+        style="--ae-pop-duration: 0ms; --ae-dismiss-duration: 0ms">
         <div data-ae-present-motion></div>
       </div>
     `;
@@ -257,7 +257,7 @@ test("mounted present controller binds public methods to its element", async ({ 
   });
   expect(result).toEqual({
     sameController: true,
-    methods: ["pop", "toggle", "trigger", "unpop", "update"],
+    methods: ["dismiss", "pop", "toggle", "trigger", "unpop", "update"],
     update: "function",
     returnsPromise: true,
     presentUpdate: "function",
@@ -277,7 +277,7 @@ test("present prepares will-change before starting a transition", async ({ page 
   await page.evaluate(() => {
     document.body.innerHTML = `
       <div id="panel" data-ae-present="all" hidden
-        style="--ae-pop-duration: 0ms; --ae-unpop-duration: 0ms">
+        style="--ae-pop-duration: 0ms; --ae-dismiss-duration: 0ms">
         <div data-ae-present-motion></div>
       </div>`;
   });
@@ -345,23 +345,23 @@ test("present prepares will-change before starting a transition", async ({ page 
     motionWillChangeStyle: "auto"
   });
 
-  const unpopPreparation = await page.evaluate(() => {
+  const dismissPreparation = await page.evaluate(() => {
     const panel = document.getElementById("panel");
-    window.presentUnpopPromise = AelluxJs.mountManager.controller(panel).present.unpop();
+    window.presentDismissPromise = AelluxJs.mountManager.controller(panel).present.dismiss();
     return {
       pop: panel.classList.contains(AelluxJs.className("pop")),
       popping: panel.classList.contains(AelluxJs.className("popping")),
-      unpopping: panel.classList.contains(AelluxJs.className("unpopping")),
+      dismissing: panel.classList.contains(AelluxJs.className("dismissing")),
       willChange: panel.classList.contains(AelluxJs.className("will-change"))
     };
   });
-  expect(unpopPreparation).toEqual({
+  expect(dismissPreparation).toEqual({
     pop: true,
     popping: false,
-    unpopping: false,
+    dismissing: false,
     willChange: true
   });
-  await page.evaluate(() => window.presentUnpopPromise);
+  await page.evaluate(() => window.presentDismissPromise);
 });
 
 test("replacement transitions reuse preparation and final interruptions clean it", async ({ page }) => {
@@ -369,7 +369,7 @@ test("replacement transitions reuse preparation and final interruptions clean it
   await page.evaluate(() => {
     document.body.innerHTML = `
       <div id="panel" data-ae-present="all" hidden
-        style="--ae-pop-duration: 1500ms; --ae-unpop-duration: 120ms">
+        style="--ae-pop-duration: 1500ms; --ae-dismiss-duration: 120ms">
         <div data-ae-present-motion></div>
       </div>`;
   });
@@ -390,23 +390,23 @@ test("replacement transitions reuse preparation and final interruptions clean it
   const replacement = await page.evaluate(async () => {
     const panel = document.getElementById("panel");
     const startedAt = performance.now();
-    let unpoppingAt = null;
-    panel.addEventListener(AelluxJs.eventName("Unpopping"), () => {
-      unpoppingAt = performance.now();
+    let dismissingAt = null;
+    panel.addEventListener(AelluxJs.eventName("Dismissing"), () => {
+      dismissingAt = performance.now();
     }, { once: true });
-    window.replacementTransition = AelluxJs.mountManager.controller(panel).present.unpop();
+    window.replacementTransition = AelluxJs.mountManager.controller(panel).present.dismiss();
     const result = {
-      delay: unpoppingAt - startedAt,
+      delay: dismissingAt - startedAt,
       willChange: panel.classList.contains(AelluxJs.className("will-change")),
       popping: panel.classList.contains(AelluxJs.className("popping")),
-      unpopping: panel.classList.contains(AelluxJs.className("unpopping"))
+      dismissing: panel.classList.contains(AelluxJs.className("dismissing"))
     };
     await new Promise(resolve => setTimeout(resolve, 30));
     result.willChangeAfterDelay = panel.classList.contains(AelluxJs.className("will-change"));
     return result;
   });
   expect(replacement).toMatchObject({
-    willChange: true, willChangeAfterDelay: true, popping: false, unpopping: true
+    willChange: true, willChangeAfterDelay: true, popping: false, dismissing: true
   });
   expect(replacement.delay).toBeGreaterThanOrEqual(0);
   expect(replacement.delay).toBeLessThan(50);
@@ -425,19 +425,19 @@ test("replacement transitions reuse preparation and final interruptions clean it
   const rapidReplacement = await page.evaluate(async () => {
     const panel = document.getElementById("panel");
     const controller = AelluxJs.mountManager.controller(panel).present;
-    window.rapidReverseTransition = controller.unpop();
+    window.rapidReverseTransition = controller.dismiss();
     window.rapidResumeTransition = controller.pop();
     await Promise.resolve();
     return {
       willChange: panel.classList.contains(AelluxJs.className("will-change")),
       popping: panel.classList.contains(AelluxJs.className("popping")),
-      unpopping: panel.classList.contains(AelluxJs.className("unpopping"))
+      dismissing: panel.classList.contains(AelluxJs.className("dismissing"))
     };
   });
   expect(rapidReplacement).toEqual({
     willChange: true,
     popping: false,
-    unpopping: false
+    dismissing: false
   });
   await page.evaluate(async () => {
     const panel = document.getElementById("panel");
@@ -454,14 +454,14 @@ test("replacement transitions reuse preparation and final interruptions clean it
       controller: AelluxJs.mountManager.controller(panel),
       pop: panel.classList.contains(AelluxJs.className("pop")),
       popping: panel.classList.contains(AelluxJs.className("popping")),
-      unpopping: panel.classList.contains(AelluxJs.className("unpopping")),
+      dismissing: panel.classList.contains(AelluxJs.className("dismissing")),
       willChange: panel.classList.contains(AelluxJs.className("will-change"))
     };
   })).toEqual({
     controller: null,
     pop: false,
     popping: false,
-    unpopping: false,
+    dismissing: false,
     willChange: false
   });
 });
@@ -476,7 +476,7 @@ test("direct pop restarts from hidden during either transition and when already 
     ]);
     document.body.innerHTML = `
       <div id="panel" data-ae-present="opacity" hidden
-        style="--ae-pop-duration: 80ms; --ae-unpop-duration: 80ms"></div>`;
+        style="--ae-pop-duration: 80ms; --ae-dismiss-duration: 80ms"></div>`;
     const events = [];
     window.AelluxJs = {
       registerCssProperty: () => true,
@@ -532,8 +532,8 @@ test("direct pop restarts from hidden during either transition and when already 
     const restarted = extension.pop(panel);
     await Promise.all([first, restarted]);
 
-    const closing = extension.unpop(panel);
-    await waitFor("Unpopping");
+    const closing = extension.dismiss(panel);
+    await waitFor("Dismissing");
     const reversed = extension.pop(panel);
     await Promise.all([closing, reversed]);
 
@@ -554,7 +554,7 @@ test("direct pop restarts from hidden during either transition and when already 
   for (const classes of result.hiddenSnapshots) {
     expect(classes).not.toContain("ae-pop");
     expect(classes).not.toContain("ae-popping");
-    expect(classes).not.toContain("ae-unpopping");
+    expect(classes).not.toContain("ae-dismissing");
     expect(classes).not.toContain("ae-will-change");
   }
   expect(result).toMatchObject({ beforeToggle: 3, hidden: false, expanded: "true", popEvents: 3 });
@@ -582,18 +582,18 @@ test("present attribute tokens independently select transition properties", asyn
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     document.body.innerHTML = `
-      <style>[data-ae-present] { --ae-pop-duration: 0ms; --ae-unpop-duration: 0ms; }</style>
+      <style>[data-ae-present] { --ae-pop-duration: 0ms; --ae-dismiss-duration: 0ms; }</style>
       <div id="empty" data-ae-present><div data-ae-present-motion>empty</div></div>
       <div id="all" data-ae-present="all"><div data-ae-present-motion>all</div></div>
       <div id="opacity" data-ae-present="opacity"><div data-ae-present-motion>opacity</div></div>
       <div id="transform" data-ae-present="transform"><div data-ae-present-motion>transform</div></div>
       <div id="height" data-ae-present="height"
-        style="width: 200px; --ae-from-height: 11px; --ae-pop-height: 41px; --ae-unpop-height: 7px"><div data-ae-present-motion>height</div></div>
+        style="width: 200px; --ae-from-height: 11px; --ae-pop-height: 41px; --ae-dismiss-height: 7px"><div data-ae-present-motion>height</div></div>
       <div id="width" data-ae-present="width"
-        style="height: 50px; --ae-from-width: 13px; --ae-pop-width: 83px; --ae-unpop-width: 5px"><div data-ae-present-motion>width</div></div>
+        style="height: 50px; --ae-from-width: 13px; --ae-pop-width: 83px; --ae-dismiss-width: 5px"><div data-ae-present-motion>width</div></div>
       <div id="combined" data-ae-present="opacity height"
         style="width: 200px; --ae-from-height: 19px; --ae-pop-height: 43px;
-          --ae-unpop-height: 2px"><div data-ae-present-motion>combined</div></div>
+          --ae-dismiss-height: 2px"><div data-ae-present-motion>combined</div></div>
     `;
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
@@ -608,7 +608,7 @@ test("present attribute tokens independently select transition properties", asyn
   const states = await page.evaluate(() => {
     const ids = ["empty", "all", "opacity", "transform", "height", "width", "combined"];
     const pop = AelluxJs.className("pop");
-    const unpopping = AelluxJs.className("unpopping");
+    const dismissing = AelluxJs.className("dismissing");
     const willChange = AelluxJs.className("will-change");
     const read = () => Object.fromEntries(ids.map(id => {
       const element = document.getElementById(id);
@@ -636,15 +636,15 @@ test("present attribute tokens independently select transition properties", asyn
     const opened = read();
     ids.forEach(id => document.getElementById(id).classList.remove(pop));
     const from = read();
-    ids.forEach(id => document.getElementById(id).classList.add(unpopping));
-    const unpoppingState = read();
+    ids.forEach(id => document.getElementById(id).classList.add(dismissing));
+    const dismissingState = read();
     ids.forEach(id => {
       const element = document.getElementById(id);
-      element.classList.remove(unpopping);
+      element.classList.remove(dismissing);
       element.classList.add(willChange);
     });
     const prepared = read();
-    return { opened, from, unpopping: unpoppingState, prepared };
+    return { opened, from, dismissing: dismissingState, prepared };
   });
 
   expect(states.opened.empty).toMatchObject({
@@ -681,13 +681,13 @@ test("present attribute tokens independently select transition properties", asyn
   expect(states.from.height.rows).toBe("11px");
   expect(states.from.width.columns).toBe("13px");
   expect(states.from.combined).toMatchObject({ opacity: "0", rows: "19px" });
-  expect(states.unpopping.opacity).toMatchObject({ opacity: "0", transform: "none" });
-  expect(states.unpopping.transform).toMatchObject({
+  expect(states.dismissing.opacity).toMatchObject({ opacity: "0", transform: "none" });
+  expect(states.dismissing.transform).toMatchObject({
     opacity: "1", transform: "matrix(1.2, 0, 0, 1.2, 0, 0)"
   });
-  expect(states.unpopping.height.rows).toBe("7px");
-  expect(states.unpopping.width.columns).toBe("5px");
-  expect(states.unpopping.combined).toMatchObject({ opacity: "0", rows: "2px" });
+  expect(states.dismissing.height.rows).toBe("7px");
+  expect(states.dismissing.width.columns).toBe("5px");
+  expect(states.dismissing.combined).toMatchObject({ opacity: "0", rows: "2px" });
   expect(states.prepared.empty).toMatchObject({
     willChange: "auto",
     motionWillChange: "auto",
@@ -710,7 +710,7 @@ test("present preserves easing without step variables when a low-hardware marker
     document.documentElement.setAttribute("data-ae-low-hardware", "");
     document.body.innerHTML = `
       <div id="panel" data-ae-present="all" hidden
-        style="--ae-pop-duration: 500ms; --ae-pop-ease: ease-out; --ae-unpop-ease: ease-in"><div data-ae-present-motion></div></div>`;
+        style="--ae-pop-duration: 500ms; --ae-pop-ease: ease-out; --ae-dismiss-ease: ease-in"><div data-ae-present-motion></div></div>`;
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
@@ -720,7 +720,7 @@ test("present preserves easing without step variables when a low-hardware marker
   const states = await page.evaluate(async () => {
     const panel = document.getElementById("panel");
     const states = [];
-    for (const direction of ["pop", "unpop"]) {
+    for (const direction of ["pop", "dismiss"]) {
       await AelluxJs.mountManager.controller(panel).present[direction]();
       const style = getComputedStyle(panel);
       states.push({
@@ -1000,12 +1000,12 @@ test("present measures natural and explicit sizes without a motion child and res
     document.body.innerHTML = `
       <style>#fixed { width: 140px; height: 90px; }</style>
       <div id="natural" data-ae-present="height width" hidden
-        style="display: inline-block; --ae-pop-duration: 40ms; --ae-unpop-duration: 40ms">
+        style="display: inline-block; --ae-pop-duration: 40ms; --ae-dismiss-duration: 40ms">
         <div id="natural-content" style="width: 120px; height: 48px">Content</div>
       </div>
       <div id="fixed" data-ae-present="height width" hidden
         style="max-height: 300px; max-width: 250px;
-          --ae-pop-duration: 40ms; --ae-unpop-duration: 40ms">Content</div>`;
+          --ae-pop-duration: 40ms; --ae-dismiss-duration: 40ms">Content</div>`;
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
@@ -1022,7 +1022,7 @@ test("present measures natural and explicit sizes without a motion child and res
       element.addEventListener("AelluxJsPopping", () => {
         states[element.id].opening = [element.style.maxHeight, element.style.maxWidth];
       });
-      element.addEventListener("AelluxJsUnpopping", () => {
+      element.addEventListener("AelluxJsDismissing", () => {
         states[element.id].closing = [element.style.maxHeight, element.style.maxWidth];
       });
     }
@@ -1035,7 +1035,7 @@ test("present measures natural and explicit sizes without a motion child and res
       fixedMaximums: [fixed.style.maxHeight, fixed.style.maxWidth],
       measuredProperties: getComputedStyle(natural).transitionProperty
     };
-    await Promise.all([AelluxJs.ext.present.unpop(natural), AelluxJs.ext.present.unpop(fixed)]);
+    await Promise.all([AelluxJs.ext.present.dismiss(natural), AelluxJs.ext.present.dismiss(fixed)]);
     return {
       states,
       opened,
@@ -1073,7 +1073,7 @@ test("present restores measured styles after a reversed transition", async ({ pa
   await page.evaluate(() => {
     document.body.innerHTML = `<div id="panel" data-ae-present="height width" hidden
       style="width: 140px; height: 90px; max-height: 300px; max-width: 250px;
-        --ae-pop-duration: 200ms; --ae-unpop-duration: 40ms">Content</div>`;
+        --ae-pop-duration: 200ms; --ae-dismiss-duration: 40ms">Content</div>`;
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
@@ -1089,7 +1089,7 @@ test("present restores measured styles after a reversed transition", async ({ pa
     const first = AelluxJs.ext.present.pop(panel);
     await popping;
     await new Promise(resolve => setTimeout(resolve, 25));
-    const second = AelluxJs.ext.present.unpop(panel);
+    const second = AelluxJs.ext.present.dismiss(panel);
     await Promise.all([first, second]);
     const afterReverse = {
       hidden: panel.hidden,
@@ -1215,7 +1215,7 @@ test("present ignores expected cancellation, reports unexpected interruptions an
       import("/src/internal/build-diagnostics.js"),
       import("/src/internal/create-aellux-constants.js")
     ]);
-    document.body.innerHTML = '<div id="panel" data-ae-present hidden style="--ae-pop-duration: 100ms; --ae-unpop-duration: 0ms"><div data-ae-present-motion></div></div>';
+    document.body.innerHTML = '<div id="panel" data-ae-present hidden style="--ae-pop-duration: 100ms; --ae-dismiss-duration: 0ms"><div data-ae-present-motion></div></div>';
     window.AelluxJs = {
       registerCssProperty: () => true,
       on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
@@ -1247,7 +1247,7 @@ test("present ignores expected cancellation, reports unexpected interruptions an
     const panel = document.querySelector("#panel");
     panels.mount(panel);
     extension.pop(panel);
-    extension.unpop(panel);
+    extension.dismiss(panel);
     await new Promise(resolve => setTimeout(resolve, 130));
     window.expectedCancellationHistory = AelluxJs.diagnostics.showHistory().length;
     window.failPopping = "interruption";

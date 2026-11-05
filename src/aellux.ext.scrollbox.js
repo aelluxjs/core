@@ -56,7 +56,7 @@
   const elasticAttribute = AelluxJs.attr("scrollbox-elastic");
   const fadeAttribute = AelluxJs.attr("scrollbox-fade");
   const fadeStateAttribute = AelluxJs.attr("scrollbox-fade-state");
-  const layoutEvents = ["Layout", "Pop", "Unpop"].map(name => AelluxJs.eventName(name));
+  const layoutEvents = ["Layout", "Pop", "Dismiss", "Unpop"].map(name => AelluxJs.eventName(name));
 
   const scrollbarAttribute = AelluxJs.attr("scrollbar");
   const scrollbarParentAttribute = AelluxJs.attr("scrollbar-parent");

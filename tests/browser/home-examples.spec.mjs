@@ -405,8 +405,8 @@ for (const reducedMotion of ["no-preference", "reduce"]) {
     await expect(wrapper).toHaveJSProperty("hidden", true);
     await expect(wrapper).toHaveCSS("display", "none");
     await page.evaluate(() => {
-      window.navigationTransitions = { pop: 0, unpop: 0 };
-      for (const [eventName, key] of [["BeforePop", "pop"], ["BeforeUnpop", "unpop"]]) {
+      window.navigationTransitions = { pop: 0, dismiss: 0 };
+      for (const [eventName, key] of [["BeforePop", "pop"], ["BeforeDismiss", "dismiss"]]) {
         $ae.on(eventName, event => {
           if (event.target.id === "main-navigation-wrapper") navigationTransitions[key]++;
         });
@@ -421,7 +421,7 @@ for (const reducedMotion of ["no-preference", "reduce"]) {
         const matrix = new DOMMatrix(computed.transform);
         frames.push({ hidden: element.hidden, scaleY: matrix.m22, translateY: matrix.m42,
           opacity: Number(computed.opacity),
-          closing: element.classList.contains("ae--unpopping") });
+          closing: element.classList.contains("ae--dismissing") });
         if (top > 0 ? element.classList.contains("ae--pop") : element.hidden) return frames;
         await new Promise(requestAnimationFrame);
       } while (performance.now() < deadline);
@@ -446,7 +446,7 @@ for (const reducedMotion of ["no-preference", "reduce"]) {
     }
     await expect(wrapper).toHaveJSProperty("hidden", true);
     await expect(wrapper).toHaveCSS("display", "none");
-    expect(await page.evaluate(() => navigationTransitions)).toEqual({ pop: 1, unpop: 1 });
+    expect(await page.evaluate(() => navigationTransitions)).toEqual({ pop: 1, dismiss: 1 });
   });
 }
 
@@ -458,7 +458,7 @@ test("main navigation opens on an initial section fragment and remains open afte
   await expect(wrapper).toHaveJSProperty("hidden", false);
   await page.evaluate(() => {
     window.navigationCloseRequests = 0;
-    $ae.on("BeforeUnpop", event => {
+    $ae.on("BeforeDismiss", event => {
       if (event.target.id === "main-navigation-wrapper") navigationCloseRequests++;
     });
   });

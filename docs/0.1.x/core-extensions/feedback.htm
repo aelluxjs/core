@@ -83,13 +83,13 @@
           <div id="toast-present-group"
             class="position-fixed w-100 top-0 gap-1 z-1 pe-none p-4 pt-1 flex-column d-flex justify-content-center align-items-center"
             data-ae-present-group="2">
-            <div id="toast-1" data-ae-present="opacity" data-ae-auto-unpop="1s" data-ae-unpop-on-click="false"
+            <div id="toast-1" data-ae-present="opacity" data-ae-auto-dismiss="1s" data-ae-dismiss-on-click="false"
               hidden="true"
               class="position-relative overflow-hidden text-bg-danger small rounded-1 p-2 py-1 w-100 text-center"
               style="max-width: 300px;">
               <progress data-ae-progress-target="toast-1" class="toast-progress"></progress>
             </div>
-            <div id="toast-2" data-ae-present="opacity" data-ae-auto-unpop="1s" data-ae-unpop-on-click="false"
+            <div id="toast-2" data-ae-present="opacity" data-ae-auto-dismiss="1s" data-ae-dismiss-on-click="false"
               hidden="true"
               class="position-relative overflow-hidden text-bg-danger small rounded-1 p-2 py-1 w-100 text-center"
               style="max-width: 300px;">
@@ -183,7 +183,7 @@
                     </div>
 
                                           <div id="children-overview" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -228,7 +228,7 @@
                     </div>
 
                                           <div id="children-runtime" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -322,7 +322,7 @@
                     </div>
 
                                           <div id="children-extensions" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -402,7 +402,7 @@
                     </div>
 
                                           <div id="children-core-extensions" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false" >
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false" >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion                            data-ae-present-group>
                                                                                                   <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -425,7 +425,7 @@
                                   </div>
 
                                   <div id="children2-bundled" class="docs-menu-panel border-start ms-2"
-                                    data-ae-present="height opacity" data-ae-unpop-on-click="false" >
+                                    data-ae-present="height opacity" data-ae-dismiss-on-click="false" >
                                       <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                   <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -520,7 +520,7 @@
                                   </div>
 
                                   <div id="children2-optional" class="docs-menu-panel border-start ms-2"
-                                    data-ae-present="height opacity" data-ae-unpop-on-click="false"                                     hidden>
+                                    data-ae-present="height opacity" data-ae-dismiss-on-click="false"                                     hidden>
                                       <div class="ps-2 gap-1 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                   <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -573,7 +573,7 @@
                     </div>
 
                                           <div id="children-integrations" class="docs-menu-panel border-start ms-2"
-                        data-ae-present="height opacity" data-ae-unpop-on-click="false"                         hidden
+                        data-ae-present="height opacity" data-ae-dismiss-on-click="false"                         hidden
                         >
                           <div class="ps-2 d-flex flex-column overflow-hidden" data-ae-present-motion>
                                                                                                   <div
@@ -737,7 +737,7 @@ controller.feedback.send({ type: &quot;progress&quot;, message: &quot;Uploading&
 <td>Request pop only on that element.</td>
 </tr>
 </tbody></table>
-<p>Feedback updates the text and type classes before requesting the pop, then starts any requested feedback motion. The call also applies when the Present target is already open, following the usual Present replay behavior, auto-unpop timing, groups and cancelable <code>BeforePop</code> event. Feedback does not await the transition. Present must already be initialized and targets mounted; its public API ignores unmounted elements. In Basic, explicitly register Present as well as Feedback. If Present is unavailable, message and motion handling still run. An invalid explicit target ID records <code>2011</code> when Present is initialized. Automatic discovery falls back to the transform target when the message target is unresolved or has no closest Present element. It does not open additional Present elements or search above the selected nearest container.</p>
+<p>Feedback updates the text and type classes before requesting the pop, then starts any requested feedback motion. The call also applies when the Present target is already open, following the usual Present replay behavior, auto-dismiss timing, groups and cancelable <code>BeforePop</code> event. Feedback does not await the transition. Present must already be initialized and targets mounted; its public API ignores unmounted elements. In Basic, explicitly register Present as well as Feedback. If Present is unavailable, message and motion handling still run. An invalid explicit target ID records <code>2011</code> when Present is initialized. Automatic discovery falls back to the transform target when the message target is unresolved or has no closest Present element. It does not open additional Present elements or search above the selected nearest container.</p>
 <pre><code class="language-html">&lt;section data-ae-feedback
          data-ae-message-target=&quot;status-message&quot;
          data-ae-transform-target=&quot;status-message&quot;
@@ -761,24 +761,24 @@ controller.feedback.send({ type: &quot;progress&quot;, message: &quot;Uploading&
 <p>Without explicit message/transform targets, a group uses its reserved member as both logical destinations. Feedback replaces the first direct text node or appends one, preserving children such as buttons and progress controls. Each member keeps an independent message and current feedback type class; reuse replaces its prior type. Explicit message and transform IDs remain absolute destinations, so sharing one across notifications shares that content/motion instead of isolating it.</p>
 <pre><code class="language-html">&lt;section id=&quot;feedback-source&quot; data-ae-feedback data-ae-present-target=&quot;notifications&quot;&gt;&lt;/section&gt;
 &lt;div id=&quot;notifications&quot; data-ae-present-group=&quot;3&quot; aria-live=&quot;polite&quot;&gt;
-  &lt;article id=&quot;notice-1&quot; data-ae-present=&quot;opacity&quot; data-ae-auto-unpop=&quot;5000&quot;
-           data-ae-unpop-on-click=&quot;false&quot; hidden&gt;
+  &lt;article id=&quot;notice-1&quot; data-ae-present=&quot;opacity&quot; data-ae-auto-dismiss=&quot;5000&quot;
+           data-ae-dismiss-on-click=&quot;false&quot; hidden&gt;
     &lt;progress max=&quot;100&quot; value=&quot;0&quot; data-ae-progress-target=&quot;notice-1&quot;
               aria-label=&quot;Time until notification closes&quot;&gt;&lt;/progress&gt;
   &lt;/article&gt;
-  &lt;article id=&quot;notice-2&quot; data-ae-present=&quot;opacity&quot; data-ae-auto-unpop=&quot;5000&quot;
-           data-ae-unpop-on-click=&quot;false&quot; hidden&gt;
+  &lt;article id=&quot;notice-2&quot; data-ae-present=&quot;opacity&quot; data-ae-auto-dismiss=&quot;5000&quot;
+           data-ae-dismiss-on-click=&quot;false&quot; hidden&gt;
     &lt;progress max=&quot;100&quot; value=&quot;0&quot; data-ae-progress-target=&quot;notice-2&quot;
               aria-label=&quot;Time until notification closes&quot;&gt;&lt;/progress&gt;
   &lt;/article&gt;
-  &lt;article id=&quot;notice-3&quot; data-ae-present=&quot;opacity&quot; data-ae-auto-unpop=&quot;5000&quot;
-           data-ae-unpop-on-click=&quot;false&quot; hidden&gt;
+  &lt;article id=&quot;notice-3&quot; data-ae-present=&quot;opacity&quot; data-ae-auto-dismiss=&quot;5000&quot;
+           data-ae-dismiss-on-click=&quot;false&quot; hidden&gt;
     &lt;progress max=&quot;100&quot; value=&quot;0&quot; data-ae-progress-target=&quot;notice-3&quot;
               aria-label=&quot;Time until notification closes&quot;&gt;&lt;/progress&gt;
   &lt;/article&gt;
 &lt;/div&gt;
 </code></pre>
-<p>After mounting, publish normally: <code>$ae(&quot;feedback-source&quot;).feedback.success(&quot;Saved.&quot;)</code>. The group explicitly sets capacity to three, bounded by the three HTML members; a fourth message reuses the oldest active slot and resets only its auto-unpop. An empty group value defaults to one. No application timer or member-selection code is needed. Basic registers Feedback, Present and <a href="optional/progress.htm">Progress</a> explicitly; Full registers them automatically.</p>
+<p>After mounting, publish normally: <code>$ae(&quot;feedback-source&quot;).feedback.success(&quot;Saved.&quot;)</code>. The group explicitly sets capacity to three, bounded by the three HTML members; a fourth message reuses the oldest active slot and resets only its auto-dismiss. An empty group value defaults to one. No application timer or member-selection code is needed. Basic registers Feedback, Present and <a href="optional/progress.htm">Progress</a> explicitly; Full registers them automatically.</p>
 <p>Use opacity-only Present motion when animating Feedback on the same member. To combine transform animations, give Feedback an explicit descendant transform target and keep Present&#39;s transform on the outer member; do not have both replace one transform. Explicit descendant IDs are absolute, so configure independent sources/targets if per-member nested motion is required. Live-region announcements and reading time remain application responsibilities.</p>
 <h2>Known Limits &amp; Risks</h2>
 <p>See <a href="../runtime/known-limits-and-risks.htm">Core Known Limits &amp; Risks</a> for classifications and shared architecture, loading and lifecycle boundaries.</p>
@@ -853,6 +853,10 @@ controller.feedback.send({ type: &quot;progress&quot;, message: &quot;Uploading&
                   rel="noopener noreferrer">ChatGPT</a>,
                 <a style="color:inherit!important;" href="https://openai.com/codex/" target="_blank"
                   rel="noopener noreferrer">Codex</a>,
+                <a style="color:inherit!important;" href="https://www.google.com/" target="_blank"
+                  rel="noopener noreferrer">Google</a>,
+                <a style="color:inherit!important;" href="https://gemini.google.com/" target="_blank"
+                  rel="noopener noreferrer">Gemini</a>,
                 <a style="color:inherit!important;" href="https://code.visualstudio.com/" target="_blank"
                   rel="noopener noreferrer">Visual Studio Code</a>,
                 <a style="color:inherit!important;" href="https://getbootstrap.com/" target="_blank"

@@ -53,6 +53,8 @@ The shared [`harness.js`](https://github.com/aelluxjs/core/blob/main/tests/brows
 
 ## Core Contract Regression Matrix
 
+Present regressions use the `dismiss` contract: public and mounted methods, trigger actions and existing close controls, auto-dismiss attribute mutation/countdown, click/Point/hover routing, group outgoing members, vetoes and event order. They also cover independent CSS destinations, progress endpoints, intermediate rendered-state handoff in controlled/native motion, Modern/Legacy, reduced motion, repeated/replaced operations and teardown. Removed beta automatic attributes remain inactive. Present reverse-playback coverage compares nonlinear intermediate opacity/transform values against the captured opening timeline, partial/full duration, grid/measured dimensions, native and controlled modes, CSS-only fallback, veto, refusal during dismissal, selection/capacity, repeated calls, replacement and teardown.
+
 The browser suite covers the release contract in Chromium, Firefox, and WebKit:
 
 | Contract area | Covered behavior |

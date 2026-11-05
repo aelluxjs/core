@@ -267,7 +267,7 @@ for (const forceLegacy of [false, true]) for (const axis of ["X", "Y"]) {
   test(`fade follows a Present scaling from zero without scroll input (${axis}, legacy=${forceLegacy})`, async ({ page }) => {
     const box = await start(page, `<div id="panel" data-ae-present="transform opacity" hidden
       style="transform-origin:top left;--ae-from-transform:scale${axis}(0);--ae-pop-transform:scale${axis}(1);
-        --ae-unpop-transform:scale${axis}(0);--ae-pop-duration:600ms;--ae-unpop-duration:100ms">
+        --ae-dismiss-transform:scale${axis}(0);--ae-pop-duration:600ms;--ae-dismiss-duration:100ms">
       ${boxHTML()}</div>`, { forceLegacy });
     const child = content(box);
     for (let opening = 0; opening < 2; opening++) {
@@ -281,7 +281,7 @@ for (const forceLegacy of [false, true]) for (const axis of ["X", "Y"]) {
       await expect(child).toHaveCSS("mask-image", "none");
       expect(await pixels(page, box)).toMatchObject({ middle: 0 });
       expect(await box.evaluate(element => [element.scrollLeft, element.scrollTop])).toEqual([0, 0]);
-      await page.evaluate(() => $ae("panel").present.unpop());
+      await page.evaluate(() => $ae("panel").present.dismiss());
     }
   });
 }

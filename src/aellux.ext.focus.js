@@ -60,7 +60,8 @@
     AelluxJs.onEvent(root, "$focus", onWindowFocus);
     AelluxJs.onEvent(root, "$blur", onWindowBlur);
     AelluxJs.on("SnapshotRestore", onSnapshotRestore);
-    AelluxJs.on("UnpopFocusLost", onUnpopFocusLost);
+    AelluxJs.on("DismissFocusLost", onDismissFocusLost);
+    AelluxJs.on("UnpopFocusLost", onDismissFocusLost);
     remember(document.activeElement, false);
   }
 
@@ -71,7 +72,8 @@
     AelluxJs.offEvent(root, "$focus", onWindowFocus);
     AelluxJs.offEvent(root, "$blur", onWindowBlur);
     AelluxJs.off("SnapshotRestore", onSnapshotRestore);
-    AelluxJs.off("UnpopFocusLost", onUnpopFocusLost);
+    AelluxJs.off("DismissFocusLost", onDismissFocusLost);
+    AelluxJs.off("UnpopFocusLost", onDismissFocusLost);
     AelluxJs.mountManager.remove({ extensionName });
     entries.length = 0;
     current = null;
@@ -187,7 +189,7 @@
     return false;
   }
 
-  function onUnpopFocusLost() {
+  function onDismissFocusLost() {
     restoreLastFocus();
   }
 

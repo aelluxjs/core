@@ -41,9 +41,11 @@ export const bundleBudget = Object.freeze([
   // Adaptive CSS publication for Scrollbox/Snap; measured deltas: runtime/performance.md.
   // Anchor declarative scroll-into-view; measured deltas: core-extensions/anchor.md.
   // Sibling scrollbar placement and automatic fade policy; costs: core-extensions/scrollbox.md.
-  { file: "aellux.full.min.js", maxRawBytes: 200 * 1024, maxGzipBytes: 62 * 1024 },
-  { file: "aellux.full.legacy.min.js", maxRawBytes: 517 * 1024, maxGzipBytes: 153.5 * 1024 },
-  { file: "aellux.full.min.css", maxRawBytes: 122 * 1024, maxGzipBytes: 12 * 1024 },
+  // Captured opening replay, native CSS fallback and reverse lifecycle;
+  // measured before/after bytes: runtime/performance.md.
+  { file: "aellux.full.min.js", maxRawBytes: 209.5 * 1024, maxGzipBytes: 64.75 * 1024 },
+  { file: "aellux.full.legacy.min.js", maxRawBytes: 531.75 * 1024, maxGzipBytes: 157 * 1024 },
+  { file: "aellux.full.min.css", maxRawBytes: 123.75 * 1024, maxGzipBytes: 12 * 1024 },
   { file: "aellux.ext.adaptive.min.css", maxRawBytes: 121 * 1024, maxGzipBytes: 11 * 1024 },
   { file: "aellux.ext.adaptive.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
   { file: "aellux.ext.adaptive.legacy.min.js", maxRawBytes: 8.5 * 1024, maxGzipBytes: 3.5 * 1024 },
@@ -69,7 +71,7 @@ export const bundleBudget = Object.freeze([
   { file: "aellux.ext.point.legacy.min.js", maxRawBytes: 9.5 * 1024, maxGzipBytes: 3.5 * 1024 },
   { file: "aellux.ext.preference.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
   { file: "aellux.ext.preference.legacy.min.js", maxRawBytes: 7 * 1024, maxGzipBytes: 3 * 1024 },
-  { file: "aellux.ext.present.min.css", maxRawBytes: 4.125 * 1024, maxGzipBytes: 2 * 1024 },
+  { file: "aellux.ext.present.min.css", maxRawBytes: 5.75 * 1024, maxGzipBytes: 2 * 1024 },
   // Present now reports invalid actions, missing/incompatible targets and
   // corrective context for group selections, plus consumer-local tap/click
   // arbitration and pending activation cleanup. Costs: core-extensions/present.md.
@@ -78,8 +80,9 @@ export const bundleBudget = Object.freeze([
   // Capacity parsing, oldest-member reuse and pending-reservation rollback.
   // Computed-state handoff for interrupted closing; byte measurements and
   // superseded limits are recorded in core-extensions/present.md.
-  { file: "aellux.ext.present.min.js", maxRawBytes: 26.25 * 1024, maxGzipBytes: 9.125 * 1024 },
-  { file: "aellux.ext.present.legacy.min.js", maxRawBytes: 35 * 1024, maxGzipBytes: 11.75 * 1024 },
+  // Opening trajectory capture/reversal and native CSS-only playback.
+  { file: "aellux.ext.present.min.js", maxRawBytes: 36.25 * 1024, maxGzipBytes: 12 * 1024 },
+  { file: "aellux.ext.present.legacy.min.js", maxRawBytes: 49.75 * 1024, maxGzipBytes: 15.5 * 1024 },
   { file: "aellux.ext.scrollbox.min.js", maxRawBytes: 46 * 1024, maxGzipBytes: 14 * 1024 },
   // Progressive 2D overflow fade; measured deltas: core-extensions/scrollbox.md.
   { file: "aellux.ext.scrollbox.min.css", maxRawBytes: 6.5 * 1024, maxGzipBytes: 1.5 * 1024 },

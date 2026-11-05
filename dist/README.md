@@ -107,6 +107,10 @@ aellux.js `0.1.0-beta.10` is the current prerelease. Beta 1 established the init
 
 Review the [0.1.0 milestone](milestones/0.1.0.md), the [Beta 1 milestone](milestones/0.1.0-beta.1.md), and delivered changes in the [changelog](../CHANGELOG.md).
 
+## Acknowledgments
+
+Special thanks to [ChatGPT](https://chatgpt.com/), [Codex](https://openai.com/codex/), [Google](https://www.google.com/), [Gemini](https://gemini.google.com/), [Visual Studio Code](https://code.visualstudio.com/), [Bootstrap](https://getbootstrap.com/), and [GitHub](https://github.com/) for the tools and technologies that supported the development of Aellux.
+
 ## License
 
 aellux.js is licensed under the [Apache License 2.0](LICENSE). Incorporated third-party material and its license texts are listed in [Third-party licenses](THIRD_PARTY_LICENSES.md).
