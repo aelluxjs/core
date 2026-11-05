@@ -37,14 +37,14 @@ export function createPresentPlayback(root, api) {
     })));
   }
 
-  function capture(element, controller, apply, size, progress) {
+  function capture(element, controller, apply, size, progress, direction = "pop") {
     const computed = root.getComputedStyle(element);
     const tracks = properties(element, controller, progress).map(property => {
       const dimension = /rows|height/.test(property) ? "height" : "width";
       const to = property === "--ae-present-pop-phase" ? "1" : property.startsWith("max-")
-        ? `${size[dimension]}px` : computed.getPropertyValue(`--ae-pop-${property.startsWith("grid") ? dimension : property}`).trim();
+        ? `${direction === "pop" ? size[dimension] : 0}px` : computed.getPropertyValue(`--ae-${direction}-${property.startsWith("grid") ? dimension : property}`).trim();
       const from = property.startsWith("grid")
-        ? computed.getPropertyValue(`--ae-from-${dimension}`).trim() : computed.getPropertyValue(property).trim();
+        ? computed.getPropertyValue(`--ae-${direction === "pop" ? "from" : "pop"}-${dimension}`).trim() : computed.getPropertyValue(property).trim();
       return { property, from, to };
     });
     const before = animations(element);
@@ -60,12 +60,12 @@ export function createPresentPlayback(root, api) {
       track.easing = index < 0 ? "linear" : easings[index % easings.length];
     }
     const after = animations(element);
-    const advanced = style.getPropertyValue("--ae-pop-aellux-ease").trim();
+    const advanced = style.getPropertyValue(`--ae-${direction}-aellux-ease`).trim();
     const curve = advanced && api.motion?.supported(element) ? sampleCssEasing(api, advanced) : null;
     return { tracks, effects: after?.filter(effect => !before?.includes(effect) &&
       tracks.some(track => track.property === effect.transitionProperty)),
       advancedEasing: curve && root.CSS?.supports("animation-timing-function", curve) ? curve : null,
-      nativeEasing: style.getPropertyValue("--ae-pop-ease").trim(),
+      nativeEasing: style.getPropertyValue(`--ae-${direction}-ease`).trim(),
       start: now(), completed: false };
   }
 
@@ -113,7 +113,7 @@ export function createPresentPlayback(root, api) {
     if (record.effects) {
       return record.effects.map(animation => {
         const timing = animation.effect.getTiming();
-        if (record.advancedEasing && timing.easing.startsWith("linear(")) timing.easing = record.advancedEasing;
+        if (record.advancedEasing) timing.easing = record.advancedEasing;
         else if (/^linear\(/i.test(record.nativeEasing || "") && timing.easing.startsWith("linear(")) timing.easing = record.nativeEasing;
         const duration = Number(timing.duration);
         const time = record.completed ? duration : Math.max(0, Math.min(duration, Number(animation.currentTime) - timing.delay));
@@ -142,7 +142,7 @@ export function createPresentPlayback(root, api) {
     controller.opening = { completed: true, start: now(), tracks: [], effects: null, saved: tracks };
   }
 
-  function reverse(element, tracks, progress) {
+  function reverse(element, tracks, progress, interactive = false) {
     const duration = Math.max(0, ...tracks.map(track => track.time));
     const owned = [...new Set(tracks.map(track => track.property))];
     const privateProperties = owned.flatMap(property => ["from", "to"].map(phase => `--ae-present-reverse-${phase}-${suffix(property)}`));
@@ -171,8 +171,9 @@ export function createPresentPlayback(root, api) {
         for (const animation of effects) {
           const track = tracks.find(track => track.property === animation.transitionProperty);
           animation.effect.setKeyframes(track.frames);
-          animation.effect.updateTiming({ duration: track.duration, easing: track.timing.easing || "linear",
-            delay: track.time - track.duration, direction: "reverse", fill: "both", iterations: 1, iterationStart: 0, endDelay: 0 });
+          animation.effect.updateTiming({ duration: track.duration, easing: interactive ? "linear" : track.timing.easing || "linear",
+            delay: interactive ? 0 : track.time - track.duration, direction: interactive ? "normal" : "reverse", fill: "both", iterations: 1, iterationStart: 0, endDelay: 0 });
+          if (interactive) animation.pause();
           animation.currentTime = 0;
         }
       } else {
@@ -197,7 +198,7 @@ export function createPresentPlayback(root, api) {
         }
         animationProperties.forEach((name, index) => style.setProperty(`animation-${name}`, [previous[index], ...additions[index]].join(","), "important"));
       }
-      if (progress) {
+      if (progress && !interactive) {
         // Independent normalized reverse-operation progress; pop progress is
         // replayed on the actual opening trajectory above.
         style.setProperty("--ae-unpop-progress", "0");
@@ -211,7 +212,50 @@ export function createPresentPlayback(root, api) {
         style.setProperty("--ae-unpop-progress", "1");
       }
     }
-    return { duration, apply, cleanup() {
+    return { duration, apply,
+      seek(value) {
+        for (const effect of effects) effect.currentTime = value * Number(effect.effect.getTiming().duration);
+      },
+      playTo(target) {
+        for (const animation of effects) {
+          const track = tracks.find(track => track.property === animation.transitionProperty);
+          const timing = animation.effect.getTiming();
+          const value = Number(animation.currentTime) / Number(timing.duration);
+          // Restore the authored curve at the same rendered position. Searching
+          // timing progress needs no layout and keeps the original keyframes.
+          animation.effect.updateTiming({ easing: track.timing.easing || "linear" });
+          let best = value, error = Infinity;
+          const evaluate = fraction => {
+            animation.currentTime = fraction * track.duration;
+            return animation.effect.getComputedTiming().progress;
+          };
+          let previous = evaluate(0), previousTime = 0;
+          for (let index = 1; index <= 120; index++) {
+            const time = index / 120, next = evaluate(time);
+            if ((previous - value) * (next - value) <= 0) {
+              let low = previousTime, high = time, lowValue = previous;
+              for (let step = 0; step < 20; step++) {
+                const middle = (low + high) / 2, result = evaluate(middle);
+                if ((lowValue - value) * (result - value) <= 0) high = middle;
+                else { low = middle; lowValue = result; }
+              }
+              const candidate = (low + high) / 2;
+              if (Math.abs(candidate - value) < error) { best = candidate; error = Math.abs(candidate - value); }
+            }
+            previous = next; previousTime = time;
+          }
+          if (value !== 0 && value !== 1 && Math.abs(evaluate(best) - value) > .0001) {
+            // Discontinuous easing (for example steps()) cannot represent every
+            // scrubbed position. Keep linear timing instead of introducing a jump.
+            animation.effect.updateTiming({ easing: "linear" }); best = value;
+          }
+          animation.currentTime = (value === 0 || value === 1 ? value : best) * track.duration;
+          animation.playbackRate = target ? 1 : -1;
+          animation.play();
+          if (value === target) animation.finish();
+        }
+        return Promise.all(effects.map(effect => effect.finished));
+      }, cleanup() {
       for (const animation of effects) animation.cancel();
       effects = [];
       memory?.restore();
@@ -219,5 +263,31 @@ export function createPresentPlayback(root, api) {
     } };
   }
 
-  return { init, capture, snapshot: (element, controller, progress) => controller.opening?.saved || snapshot(element, controller, progress), complete, reverse };
+  function full(element, controller, progress) {
+    if (controller.opening?.saved) return controller.opening.saved;
+    const record = controller.opening;
+    if (record) {
+      const completed = record.completed;
+      record.completed = true;
+      try { return snapshot(element, controller, progress); }
+      finally { record.completed = completed; }
+    }
+    return snapshot(element, controller, progress);
+  }
+
+  function control(element, source, dismiss, progress, unpop) {
+    const tracks = source.filter(track => !track.property.startsWith("--ae-"));
+    const duration = Math.max(0, ...tracks.map(track => track.duration));
+    const easing = tracks[0]?.timing.easing || "linear";
+    const channels = progress ? ["--ae-present-pop-phase", "--ae-present-dismiss-phase", "--ae-pop-progress", "--ae-dismiss-progress"] : [];
+    if (unpop) channels.push("--ae-unpop-progress");
+    for (const property of channels) {
+      const forward = property.includes("dismiss") ? dismiss : property.includes("unpop") ? dismiss : !dismiss;
+      tracks.push({ property, duration, time: duration, timing: { easing },
+        frames: [{ [property]: forward ? "0" : "1" }, { [property]: forward ? "1" : "0" }] });
+    }
+    return reverse(element, tracks, false, true);
+  }
+
+  return { init, capture, full, control, snapshot: (element, controller, progress) => controller.opening?.saved || snapshot(element, controller, progress), complete, reverse };
 }

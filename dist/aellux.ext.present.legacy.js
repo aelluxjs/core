@@ -223,11 +223,12 @@
     }
     function capture(element, controller, apply, size, progress) {
       var _api$motion, _root$CSS;
+      var direction = arguments.length > 5 && arguments[5] !== void 0 ? arguments[5] : "pop";
       var computed = root.getComputedStyle(element);
       var tracks = properties(element, controller, progress).map(function(property) {
         var dimension = /rows|height/.test(property) ? "height" : "width";
-        var to = property === "--ae-present-pop-phase" ? "1" : property.startsWith("max-") ? "".concat(size[dimension], "px") : computed.getPropertyValue("--ae-pop-".concat(property.startsWith("grid") ? dimension : property)).trim();
-        var from = property.startsWith("grid") ? computed.getPropertyValue("--ae-from-".concat(dimension)).trim() : computed.getPropertyValue(property).trim();
+        var to = property === "--ae-present-pop-phase" ? "1" : property.startsWith("max-") ? "".concat(direction === "pop" ? size[dimension] : 0, "px") : computed.getPropertyValue("--ae-".concat(direction, "-").concat(property.startsWith("grid") ? dimension : property)).trim();
+        var from = property.startsWith("grid") ? computed.getPropertyValue("--ae-".concat(direction === "pop" ? "from" : "pop", "-").concat(dimension)).trim() : computed.getPropertyValue(property).trim();
         return {
           property: property,
           from: from,
@@ -254,7 +255,7 @@
         _iterator.f();
       }
       var after = animations(element);
-      var advanced = style.getPropertyValue("--ae-pop-aellux-ease").trim();
+      var advanced = style.getPropertyValue("--ae-".concat(direction, "-aellux-ease")).trim();
       var curve = advanced && (_api$motion = api.motion) !== null && _api$motion !== void 0 && _api$motion.supported(element) ? sampleCssEasing(api, advanced) : null;
       return {
         tracks: tracks,
@@ -264,7 +265,7 @@
           });
         }),
         advancedEasing: curve && (_root$CSS = root.CSS) !== null && _root$CSS !== void 0 && _root$CSS.supports("animation-timing-function", curve) ? curve : null,
-        nativeEasing: style.getPropertyValue("--ae-pop-ease").trim(),
+        nativeEasing: style.getPropertyValue("--ae-".concat(direction, "-ease")).trim(),
         start: now(),
         completed: false
       };
@@ -327,7 +328,7 @@
       if (record.effects) {
         return record.effects.map(function(animation) {
           var timing = animation.effect.getTiming();
-          if (record.advancedEasing && timing.easing.startsWith("linear(")) timing.easing = record.advancedEasing;
+          if (record.advancedEasing) timing.easing = record.advancedEasing;
           else if (/^linear\(/i.test(record.nativeEasing || "") && timing.easing.startsWith("linear(")) timing.easing = record.nativeEasing;
           var duration2 = Number(timing.duration);
           var time = record.completed ? duration2 : Math.max(0, Math.min(duration2, Number(animation.currentTime) - timing.delay));
@@ -374,6 +375,7 @@
       };
     }
     function reverse(element, tracks, progress) {
+      var interactive = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : false;
       var duration = Math.max.apply(Math, [0].concat(_toConsumableArray(tracks.map(function(track) {
         return track.time;
       }))));
@@ -445,14 +447,15 @@
               animation.effect.setKeyframes(track2.frames);
               animation.effect.updateTiming({
                 duration: track2.duration,
-                easing: track2.timing.easing || "linear",
-                delay: track2.time - track2.duration,
-                direction: "reverse",
+                easing: interactive ? "linear" : track2.timing.easing || "linear",
+                delay: interactive ? 0 : track2.time - track2.duration,
+                direction: interactive ? "normal" : "reverse",
                 fill: "both",
                 iterations: 1,
                 iterationStart: 0,
                 endDelay: 0
               });
+              if (interactive) animation.pause();
               animation.currentTime = 0;
             };
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
@@ -493,7 +496,7 @@
             return style.setProperty("animation-".concat(name2), [previous[index]].concat(_toConsumableArray(additions[index])).join(","), "important");
           });
         }
-        if (progress) {
+        if (progress && !interactive) {
           style.setProperty("--ae-unpop-progress", "0");
           element.getBoundingClientRect();
           var _computed = root.getComputedStyle(element);
@@ -515,18 +518,94 @@
       return {
         duration: duration,
         apply: apply,
-        cleanup: function cleanup() {
-          var _memory;
+        seek: function seek(value) {
           var _iterator6 = _createForOfIteratorHelper(effects), _step6;
           try {
             for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-              var animation = _step6.value;
-              animation.cancel();
+              var effect = _step6.value;
+              effect.currentTime = value * Number(effect.effect.getTiming().duration);
             }
           } catch (err) {
             _iterator6.e(err);
           } finally {
             _iterator6.f();
+          }
+        },
+        playTo: function playTo(target) {
+          var _iterator7 = _createForOfIteratorHelper(effects), _step7;
+          try {
+            var _loop3 = function _loop32() {
+              var animation = _step7.value;
+              var track = tracks.find(function(track2) {
+                return track2.property === animation.transitionProperty;
+              });
+              var timing = animation.effect.getTiming();
+              var value = Number(animation.currentTime) / Number(timing.duration);
+              animation.effect.updateTiming({
+                easing: track.timing.easing || "linear"
+              });
+              var best = value, error = Infinity;
+              var evaluate = function evaluate2(fraction) {
+                animation.currentTime = fraction * track.duration;
+                return animation.effect.getComputedTiming().progress;
+              };
+              var previous = evaluate(0), previousTime = 0;
+              for (var index = 1; index <= 120; index++) {
+                var time = index / 120, next = evaluate(time);
+                if ((previous - value) * (next - value) <= 0) {
+                  var low = previousTime, high = time, lowValue = previous;
+                  for (var step = 0; step < 20; step++) {
+                    var middle = (low + high) / 2, result = evaluate(middle);
+                    if ((lowValue - value) * (result - value) <= 0) high = middle;
+                    else {
+                      low = middle;
+                      lowValue = result;
+                    }
+                  }
+                  var candidate = (low + high) / 2;
+                  if (Math.abs(candidate - value) < error) {
+                    best = candidate;
+                    error = Math.abs(candidate - value);
+                  }
+                }
+                previous = next;
+                previousTime = time;
+              }
+              if (value !== 0 && value !== 1 && Math.abs(evaluate(best) - value) > 1e-4) {
+                animation.effect.updateTiming({
+                  easing: "linear"
+                });
+                best = value;
+              }
+              animation.currentTime = (value === 0 || value === 1 ? value : best) * track.duration;
+              animation.playbackRate = target ? 1 : -1;
+              animation.play();
+              if (value === target) animation.finish();
+            };
+            for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+              _loop3();
+            }
+          } catch (err) {
+            _iterator7.e(err);
+          } finally {
+            _iterator7.f();
+          }
+          return Promise.all(effects.map(function(effect) {
+            return effect.finished;
+          }));
+        },
+        cleanup: function cleanup() {
+          var _memory;
+          var _iterator8 = _createForOfIteratorHelper(effects), _step8;
+          try {
+            for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+              var animation = _step8.value;
+              animation.cancel();
+            }
+          } catch (err) {
+            _iterator8.e(err);
+          } finally {
+            _iterator8.f();
           }
           effects = [];
           (_memory = memory) === null || _memory === void 0 || _memory.restore();
@@ -534,15 +613,525 @@
         }
       };
     }
+    function full(element, controller, progress) {
+      var _controller$opening;
+      if ((_controller$opening = controller.opening) !== null && _controller$opening !== void 0 && _controller$opening.saved) return controller.opening.saved;
+      var record = controller.opening;
+      if (record) {
+        var completed = record.completed;
+        record.completed = true;
+        try {
+          return _snapshot(element, controller, progress);
+        } finally {
+          record.completed = completed;
+        }
+      }
+      return _snapshot(element, controller, progress);
+    }
+    function control(element, source, dismiss, progress, unpop) {
+      var _tracks$;
+      var tracks = source.filter(function(track) {
+        return !track.property.startsWith("--ae-");
+      });
+      var duration = Math.max.apply(Math, [0].concat(_toConsumableArray(tracks.map(function(track) {
+        return track.duration;
+      }))));
+      var easing = ((_tracks$ = tracks[0]) === null || _tracks$ === void 0 ? void 0 : _tracks$.timing.easing) || "linear";
+      var channels = progress ? ["--ae-present-pop-phase", "--ae-present-dismiss-phase", "--ae-pop-progress", "--ae-dismiss-progress"] : [];
+      if (unpop) channels.push("--ae-unpop-progress");
+      for (var _i2 = 0, _channels = channels; _i2 < _channels.length; _i2++) {
+        var property = _channels[_i2];
+        var forward = property.includes("dismiss") ? dismiss : property.includes("unpop") ? dismiss : !dismiss;
+        tracks.push({
+          property: property,
+          duration: duration,
+          time: duration,
+          timing: {
+            easing: easing
+          },
+          frames: [_defineProperty({}, property, forward ? "0" : "1"), _defineProperty({}, property, forward ? "1" : "0")]
+        });
+      }
+      return reverse(element, tracks, false, true);
+    }
     return {
       init: init,
       capture: capture,
+      full: full,
+      control: control,
       snapshot: function snapshot(element, controller, progress) {
-        var _controller$opening;
-        return ((_controller$opening = controller.opening) === null || _controller$opening === void 0 ? void 0 : _controller$opening.saved) || _snapshot(element, controller, progress);
+        var _controller$opening2;
+        return ((_controller$opening2 = controller.opening) === null || _controller$opening2 === void 0 ? void 0 : _controller$opening2.saved) || _snapshot(element, controller, progress);
       },
       complete: complete,
       reverse: reverse
+    };
+  }
+
+  // src/internal/create-present-gestures.js
+  function _typeof2(o) {
+    "@babel/helpers - typeof";
+    return _typeof2 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof2(o);
+  }
+  function _toConsumableArray2(r) {
+    return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray2(r) || _nonIterableSpread2();
+  }
+  function _nonIterableSpread2() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArray2(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles2(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray2(r);
+  }
+  function ownKeys2(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function(r2) {
+        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
+      })), t.push.apply(t, o);
+    }
+    return t;
+  }
+  function _objectSpread2(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys2(Object(t), true).forEach(function(r2) {
+        _defineProperty2(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys2(Object(t)).forEach(function(r2) {
+        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
+      });
+    }
+    return e;
+  }
+  function _defineProperty2(e, r, t) {
+    return (r = _toPropertyKey2(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  }
+  function _toPropertyKey2(t) {
+    var i = _toPrimitive2(t, "string");
+    return "symbol" == _typeof2(i) ? i : i + "";
+  }
+  function _toPrimitive2(t, r) {
+    if ("object" != _typeof2(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r || "default");
+      if ("object" != _typeof2(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return ("string" === r ? String : Number)(t);
+  }
+  function _createForOfIteratorHelper2(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray2(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _unsupportedIterableToArray2(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray2(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray2(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray2(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  var directions = {
+    up: ["y", -1],
+    down: ["y", 1],
+    left: ["x", -1],
+    right: ["x", 1]
+  };
+  var clamp = function clamp2(value) {
+    return Math.max(0, Math.min(1, value));
+  };
+  function createPresentGestures(root, api, services) {
+    var entries = /* @__PURE__ */ new Map(), sources = /* @__PURE__ */ new Map();
+    var interaction = null, suppressed = null, suppressTimer = null;
+    var attribute = function attribute2(name) {
+      return api.attr("present-gesture".concat(name ? "-".concat(name) : ""));
+    };
+    var warn = function warn2(element, name, value, reason) {
+      return api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_VALUE, {
+        extension: "present",
+        element: element,
+        attribute: name,
+        value: value,
+        reason: reason
+      });
+    };
+    var state = function state2(element) {
+      return services.state(element);
+    };
+    function update(element) {
+      var _entries$get, _entries$get2;
+      if (!element.hasAttribute(attribute(""))) {
+        remove(element);
+        return;
+      }
+      var signature = ["", "source", "unpop", "dismiss"].map(function(name) {
+        return element.getAttribute(attribute(name));
+      }).join("|");
+      var direction = element.getAttribute(attribute(""));
+      if (!directions[direction]) {
+        remove(element);
+        warn(element, attribute(""), direction, "Use up, down, left or right.");
+        return;
+      }
+      var value = element.getAttribute(attribute("source"));
+      var id = value === null || value === void 0 ? void 0 : value.replace(/^#/, "");
+      var source = value === "document" ? root.document : value ? !/[\s#]/.test(id) && root.document.getElementById(id) : element;
+      if (((_entries$get = entries.get(element)) === null || _entries$get === void 0 ? void 0 : _entries$get.signature) === signature && ((_entries$get2 = entries.get(element)) === null || _entries$get2 === void 0 ? void 0 : _entries$get2.source) === source) return;
+      remove(element);
+      if (!source) {
+        api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_TARGET, {
+          extension: "present",
+          element: element,
+          attribute: attribute("source"),
+          value: value,
+          reason: "Gesture source ID was not found."
+        });
+        return;
+      }
+      var dismiss = element.getAttribute(attribute("dismiss"));
+      if (dismiss && (!directions[dismiss] || directions[dismiss][0] === directions[direction][0])) {
+        warn(element, attribute("dismiss"), dismiss, "Dismiss must use a direction on the other axis.");
+        dismiss = null;
+      }
+      var unpop = element.getAttribute(attribute("unpop"));
+      if (unpop !== null && !["", "true", "false"].includes(unpop)) warn(element, attribute("unpop"), unpop, "Use true or false; invalid values enable gesture Unpop.");
+      var entry = {
+        element: element,
+        source: source,
+        direction: direction,
+        dismiss: dismiss,
+        unpop: unpop !== "false",
+        signature: signature
+      };
+      entries.set(element, entry);
+      var _iterator = _createForOfIteratorHelper2(/* @__PURE__ */ new Set([source, element])), _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+          var target = _step.value;
+          if (!sources.has(target)) {
+            sources.set(target, /* @__PURE__ */ new Set());
+            target.addEventListener("pointerdown", down);
+          }
+          sources.get(target).add(entry);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+      inspect(element);
+    }
+    function inspect(element) {
+      var _entries$get3;
+      if (((_entries$get3 = entries.get(element)) === null || _entries$get3 === void 0 ? void 0 : _entries$get3.source) === element && root.getComputedStyle(element).display === "none") api.diagnostics.info(api.diagnostics.INFO_PRESENT_GESTURE_HIDDEN, {
+        extension: "present",
+        element: element
+      });
+    }
+    function remove(element) {
+      var _interaction, _interaction2;
+      var entry = entries.get(element);
+      if (!entry) return;
+      if (((_interaction = interaction) === null || _interaction === void 0 || (_interaction = _interaction.owner) === null || _interaction === void 0 ? void 0 : _interaction.entry) === entry || (_interaction2 = interaction) !== null && _interaction2 !== void 0 && _interaction2.candidates.some(function(candidate) {
+        return candidate.entry === entry;
+      })) cancel();
+      entries.delete(element);
+      var _iterator2 = _createForOfIteratorHelper2(/* @__PURE__ */ new Set([entry.source, element])), _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+          var target = _step2.value;
+          var set = sources.get(target);
+          set.delete(entry);
+          if (!set.size) {
+            target.removeEventListener("pointerdown", down);
+            sources.delete(target);
+          }
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+    }
+    function down(event) {
+      if (interaction && interaction.id !== event.pointerId) {
+        cancel();
+        return;
+      }
+      if (event.button !== 0 || event.isPrimary === false || event.defaultPrevented) return;
+      var target = event.target;
+      if (!target.closest || target.closest("input,textarea,select,button,a,[contenteditable]:not([contenteditable=false]),[data-ae-scrollbox]")) return;
+      if (!interaction) {
+        interaction = {
+          id: event.pointerId,
+          x: event.clientX,
+          y: event.clientY,
+          candidates: [],
+          owner: null,
+          target: target
+        };
+        for (var _i = 0, _arr = ["pointermove", "pointerup", "pointercancel", "lostpointercapture"]; _i < _arr.length; _i++) {
+          var name = _arr[_i];
+          root.document.addEventListener(name, move, {
+            capture: true,
+            passive: false
+          });
+        }
+      }
+      var _iterator3 = _createForOfIteratorHelper2(sources.get(event.currentTarget) || []), _step3;
+      try {
+        var _loop = function _loop2() {
+          var entry = _step3.value;
+          if (interaction.candidates.some(function(candidate) {
+            return candidate.entry === entry;
+          })) return 0;
+          var origin = state(entry.element);
+          var onElement = entry.element.contains(target);
+          var onSource = entry.source === root.document || entry.source.contains(target);
+          if (services.busy(entry.element)) return 0;
+          if (origin === "Pop" ? onElement : onSource) interaction.candidates.push({
+            entry: entry,
+            origin: origin
+          });
+        }, _ret;
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+          _ret = _loop();
+          if (_ret === 0) continue;
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
+      }
+    }
+    function parameters(element, axis) {
+      var style = root.getComputedStyle(element);
+      var thresholds = {};
+      for (var _i2 = 0, _arr2 = ["pop", "unpop", "dismiss"]; _i2 < _arr2.length; _i2++) {
+        var name = _arr2[_i2];
+        var _property = "--ae-present-".concat(name, "-threshold"), _raw = style.getPropertyValue(_property).trim();
+        var value = _raw === "" ? 0.5 : Number(_raw);
+        thresholds[name] = Number.isFinite(value) && value >= 0 && value <= 1 ? value : 0.5;
+        if (thresholds[name] !== value) warn(element, _property, _raw, "Use a number between 0 and 1; using 0.5.");
+      }
+      var property = "--ae-present-gesture-distance", raw = style.getPropertyValue(property).trim();
+      var distance = 0;
+      if (raw && raw !== "auto") {
+        var probe = root.document.createElement("span");
+        probe.style.cssText = "position:absolute;visibility:hidden;pointer-events:none;padding:0;border:0;min-width:0;max-width:none;height:0;";
+        probe.style.fontSize = style.fontSize;
+        probe.style.width = raw;
+        if (probe.style.width && !raw.includes("%")) {
+          element.appendChild(probe);
+          distance = parseFloat(root.getComputedStyle(probe).width);
+          probe.remove();
+        }
+        if (!(distance > 0)) warn(element, property, raw, "Use a positive CSS length or auto; using auto.");
+      }
+      return _objectSpread2(_objectSpread2({}, thresholds), {}, {
+        distance: distance > 0 ? distance : 0,
+        fallback: Math.max(1, axis === "x" ? element.offsetWidth : element.offsetHeight)
+      });
+    }
+    function move(event) {
+      var current = interaction;
+      if (!current || current.id !== event.pointerId) return;
+      if (event.type !== "pointermove") {
+        release(event.type !== "pointerup");
+        return;
+      }
+      var x = event.clientX - current.x, y = event.clientY - current.y;
+      if (!current.owner) {
+        var _root$KeyframeEffect;
+        if (Math.max(Math.abs(x), Math.abs(y)) < 8) return;
+        var axis = Math.abs(x) > Math.abs(y) * 1.2 ? "x" : Math.abs(y) > Math.abs(x) * 1.2 ? "y" : null;
+        if (!axis) return;
+        var delta = axis === "x" ? x : y;
+        var candidates = current.candidates.filter(function(candidate2) {
+          var entry = candidate2.entry, origin = candidate2.origin;
+          if (!entry.element.isConnected || state(entry.element) !== origin || services.busy(entry.element)) return false;
+          var main = directions[entry.direction], dismiss = directions[entry.dismiss];
+          candidate2.dismiss = origin === "Pop" && (dismiss === null || dismiss === void 0 ? void 0 : dismiss[0]) === axis && delta * dismiss[1] > 0;
+          candidate2.sign = candidate2.dismiss ? dismiss[1] : main[1];
+          return candidate2.dismiss || main[0] === axis && (origin === "Pop" ? entry.unpop && delta * main[1] < 0 : delta * main[1] > 0);
+        });
+        candidates.sort(function(a, b) {
+          var left = a.origin === "Pop" ? a.entry.element : a.entry.source;
+          var right = b.origin === "Pop" ? b.entry.element : b.entry.source;
+          if (left !== right) {
+            if (left.contains(right)) return 1;
+            if (right.contains(left)) return -1;
+          }
+          return services.order(b.entry.element) - services.order(a.entry.element);
+        });
+        var candidate = candidates[0];
+        if (!candidate || nativeScroll(current.target, candidate.entry.element, axis, delta)) {
+          clear();
+          return;
+        }
+        if (!((_root$KeyframeEffect = root.KeyframeEffect) !== null && _root$KeyframeEffect !== void 0 && _root$KeyframeEffect.prototype.setKeyframes) || !candidate.entry.element.getAnimations) {
+          warn(candidate.entry.element, attribute(""), candidate.entry.direction, "Interactive Present requires inspectable Web Animations transitions.");
+          clear();
+          return;
+        }
+        var params = parameters(candidate.entry.element, axis);
+        var resolve;
+        var settled = new Promise(function(done) {
+          resolve = done;
+        });
+        var _owner = current.owner = _objectSpread2(_objectSpread2({}, candidate), {}, {
+          params: params,
+          axis: axis,
+          displacement: 0,
+          progress: candidate.dismiss ? 0 : candidate.origin === "Pop" ? 1 : 0,
+          handle: null,
+          released: null,
+          settled: settled,
+          attach: function attach(handle, autoDistance) {
+            this.handle = handle;
+            if (!params.distance) params.distance = autoDistance || Math.max(1, axis === "x" ? this.entry.element.offsetWidth : this.entry.element.offsetHeight);
+            this.progress = clamp(this.start + this.displacement / params.distance);
+            this.seek();
+            if (this.released !== null) this.finish(this.released);
+          },
+          seek: function seek() {
+            var _this$handle;
+            (_this$handle = this.handle) === null || _this$handle === void 0 || _this$handle.seek(this.progress);
+          },
+          finish: function finish(cancelled) {
+            this.released = cancelled;
+            if (!this.handle) return;
+            var target = cancelled ? this.dismiss ? 0 : this.origin === "Pop" ? 1 : 0 : this.dismiss ? +(this.progress >= params.dismiss) : this.origin === "Pop" ? +(this.progress > params.unpop) : +(this.progress >= params.pop);
+            var destination = this.dismiss ? target ? "Dismiss" : this.origin : target ? "Pop" : this.origin === "Dismiss" ? "Dismiss" : "Unpop";
+            this.handle.playTo(target).then(function() {
+              return resolve(destination);
+            }, function() {
+              return resolve(null);
+            });
+          },
+          abort: function abort() {
+            var _interaction3;
+            resolve(null);
+            if (((_interaction3 = interaction) === null || _interaction3 === void 0 ? void 0 : _interaction3.owner) === this) clear();
+          }
+        });
+        _owner.start = _owner.progress;
+        services.begin(candidate.entry.element, candidate.dismiss ? "Dismiss" : candidate.origin === "Pop" ? "Unpop" : "Pop", _owner);
+        if (interaction !== current) return;
+        try {
+          current.target.setPointerCapture(event.pointerId);
+          current.captured = true;
+        } catch (_) {
+        }
+      }
+      var owner = current.owner;
+      var displacement = (owner.axis === "x" ? x : y) * owner.sign;
+      owner.displacement = displacement;
+      owner.progress = clamp(owner.start + displacement / (owner.params.distance || owner.params.fallback));
+      owner.seek();
+      if (event.cancelable) event.preventDefault();
+    }
+    function nativeScroll(target, element, axis, delta) {
+      for (var current = target; current && current !== element && current !== root.document; current = current.parentElement) {
+        var style = root.getComputedStyle(current);
+        if (!/auto|scroll/.test(axis === "x" ? style.overflowX : style.overflowY)) continue;
+        var position = axis === "x" ? current.scrollLeft : current.scrollTop;
+        var maximum = axis === "x" ? current.scrollWidth - current.clientWidth : current.scrollHeight - current.clientHeight;
+        if (maximum > 0 && (delta < 0 ? position < maximum : position > 0)) return true;
+      }
+      return false;
+    }
+    function release(cancelled) {
+      var _interaction4;
+      var owner = (_interaction4 = interaction) === null || _interaction4 === void 0 ? void 0 : _interaction4.owner;
+      if (owner) {
+        owner.finish(cancelled);
+        suppressed = interaction.target;
+        clearTimeout(suppressTimer);
+        root.document.addEventListener("click", click, true);
+        suppressTimer = setTimeout(clearClick, 500);
+      }
+      clear();
+    }
+    function click(event) {
+      if (!suppressed || !(suppressed === event.target || suppressed.contains(event.target) || event.target.contains(suppressed))) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      clearClick();
+    }
+    function clearClick() {
+      clearTimeout(suppressTimer);
+      suppressTimer = null;
+      suppressed = null;
+      root.document.removeEventListener("click", click, true);
+    }
+    function clear() {
+      var previous = interaction;
+      interaction = null;
+      for (var _i3 = 0, _arr3 = ["pointermove", "pointerup", "pointercancel", "lostpointercapture"]; _i3 < _arr3.length; _i3++) {
+        var name = _arr3[_i3];
+        root.document.removeEventListener(name, move, true);
+      }
+      if (previous !== null && previous !== void 0 && previous.captured) try {
+        previous.target.releasePointerCapture(previous.id);
+      } catch (_) {
+      }
+    }
+    function cancel() {
+      release(true);
+    }
+    return {
+      update: update,
+      remove: remove,
+      inspect: inspect,
+      destroy: function destroy() {
+        cancel();
+        for (var _i4 = 0, _arr4 = _toConsumableArray2(entries.keys()); _i4 < _arr4.length; _i4++) {
+          var element = _arr4[_i4];
+          remove(element);
+        }
+        clearClick();
+      }
     };
   }
 
@@ -648,10 +1237,10 @@
       });
     };
   }
-  function _createForOfIteratorHelper2(r, e) {
+  function _createForOfIteratorHelper3(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray2(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray3(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -679,32 +1268,32 @@
       }
     } };
   }
-  function _toConsumableArray2(r) {
-    return _arrayWithoutHoles2(r) || _iterableToArray2(r) || _unsupportedIterableToArray2(r) || _nonIterableSpread2();
+  function _toConsumableArray3(r) {
+    return _arrayWithoutHoles3(r) || _iterableToArray3(r) || _unsupportedIterableToArray3(r) || _nonIterableSpread3();
   }
-  function _nonIterableSpread2() {
+  function _nonIterableSpread3() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray2(r) {
+  function _iterableToArray3(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles2(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray2(r);
+  function _arrayWithoutHoles3(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray3(r);
   }
   function _slicedToArray2(r, e) {
-    return _arrayWithHoles2(r) || _iterableToArrayLimit2(r, e) || _unsupportedIterableToArray2(r, e) || _nonIterableRest2();
+    return _arrayWithHoles2(r) || _iterableToArrayLimit2(r, e) || _unsupportedIterableToArray3(r, e) || _nonIterableRest2();
   }
   function _nonIterableRest2() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray2(r, a) {
+  function _unsupportedIterableToArray3(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray2(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray3(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray2(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray3(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray2(r, a) {
+  function _arrayLikeToArray3(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -762,6 +1351,8 @@
       popping: AelluxJs.className("popping"),
       dismissing: AelluxJs.className("dismissing"),
       unpopping: AelluxJs.className("unpopping"),
+      unpop: AelluxJs.className("unpop"),
+      dismissed: AelluxJs.className("dismissed"),
       willChange: AelluxJs.className("will-change"),
       grid: AelluxJs.className("present-grid")
     };
@@ -802,6 +1393,29 @@
     var interpolatedProgress = false;
     var interpolatedUnpop = false;
     var playback = createPresentPlayback(root, AelluxJs);
+    var gestures = createPresentGestures(root, AelluxJs, {
+      state: function state(element) {
+        var _presentElements$get;
+        return (_presentElements$get = presentElements.get(element)) === null || _presentElements$get === void 0 ? void 0 : _presentElements$get.state;
+      },
+      busy: function busy(element) {
+        var _presentElements$get2;
+        return !!((_presentElements$get2 = presentElements.get(element)) !== null && _presentElements$get2 !== void 0 && _presentElements$get2.transition);
+      },
+      order: function order(element) {
+        var _presentElements$get3;
+        return ((_presentElements$get3 = presentElements.get(element)) === null || _presentElements$get3 === void 0 ? void 0 : _presentElements$get3.presentationOrder) || 0;
+      },
+      begin: function begin(element, direction, gesture) {
+        var controller = presentElements.get(element);
+        controller.gestureRequest = gesture;
+        presentTransition(element, direction === POP, false, false, void 0, direction).finally(function() {
+          if (controller.gestureRequest === gesture) controller.gestureRequest = null;
+          if (controller.gesture !== gesture) gesture.abort();
+        });
+        if (!controller.transition) gesture.abort();
+      }
+    });
     var autoObserver = null;
     var presentationSequence = 0;
     var cssProperties = [["pop-progress", "<number>", "0"], ["dismiss-progress", "<number>", "1"], ["present-pop-phase", "<number>", "0"], ["present-dismiss-phase", "<number>", "1"], ["from-opacity", OPACITY_SYNTAX, "0"], ["pop-opacity", OPACITY_SYNTAX, "1"], ["dismiss-opacity", OPACITY_SYNTAX, "0"], ["from-transform", TRANSFORM_SYNTAX, "scale(0.5)"], ["pop-transform", TRANSFORM_SYNTAX, "scale(1)"], ["dismiss-transform", TRANSFORM_SYNTAX, "scale(1.2)"], ["from-height", "*", "0fr"], ["pop-height", "*", "1fr"], ["dismiss-height", "*", "0fr"], ["from-width", "*", "0fr"], ["pop-width", "*", "1fr"], ["dismiss-width", "*", "0fr"], ["pop-ease", "*", "ease-out"], ["dismiss-ease", "*", "ease-in"], ["pop-duration", "<time>", "250ms"], ["dismiss-duration", "<time>", "250ms"]];
@@ -815,14 +1429,14 @@
           initialValue: initialValue
         };
       });
-      var progressRegistered = AelluxJs.registerCssProperty.apply(AelluxJs, _toConsumableArray2(descriptors.slice(0, 4)));
+      var progressRegistered = AelluxJs.registerCssProperty.apply(AelluxJs, _toConsumableArray3(descriptors.slice(0, 4)));
       interpolatedProgress = !!(progressRegistered && root.CSS.supports && root.CSS.supports("opacity", "clamp(0, 0.5, 1)"));
       interpolatedUnpop = !!AelluxJs.registerCssProperty({
         name: "--ae-unpop-progress",
         syntax: "<number>",
         initialValue: "1"
       });
-      AelluxJs.registerCssProperty.apply(AelluxJs, _toConsumableArray2(descriptors.slice(4)));
+      AelluxJs.registerCssProperty.apply(AelluxJs, _toConsumableArray3(descriptors.slice(4)));
       AelluxJs.mountManager.add({
         extensionName: extensionName,
         selector: presentSelector,
@@ -850,23 +1464,44 @@
         controllers: ["show", "selected", "popNext"]
       });
       autoObserver = new root.MutationObserver(function(records) {
-        var _iterator = _createForOfIteratorHelper2(records), _step;
+        var _iterator = _createForOfIteratorHelper3(records), _step;
         try {
           for (_iterator.s(); !(_step = _iterator.n()).done; ) {
             var record = _step.value;
             var controller = presentElements.get(record.target);
-            if (controller) autoDismissSchedule(record.target, controller);
+            if (controller) {
+              if (record.attributeName !== attr.autoDismiss) gestures.update(record.target);
+              autoDismissSchedule(record.target, controller);
+            }
           }
         } catch (err) {
           _iterator.e(err);
         } finally {
           _iterator.f();
         }
+        if (records.some(function(record2) {
+          return record2.type === "childList" || record2.attributeName === "id";
+        })) {
+          var _iterator2 = _createForOfIteratorHelper3(presentElements.keys()), _step2;
+          try {
+            for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+              var element = _step2.value;
+              if (element.hasAttribute(AelluxJs.attr("present-gesture-source"))) gestures.update(element);
+            }
+          } catch (err) {
+            _iterator2.e(err);
+          } finally {
+            _iterator2.f();
+          }
+        }
       });
       autoObserver.observe(document, {
         subtree: true,
+        childList: true,
         attributes: true,
-        attributeFilter: [attr.autoDismiss]
+        attributeFilter: [attr.autoDismiss, "id"].concat(_toConsumableArray3(["", "-source", "-unpop", "-dismiss"].map(function(suffix3) {
+          return AelluxJs.attr("present-gesture".concat(suffix3));
+        })))
       });
       document.addEventListener("pointerover", onHover);
       document.addEventListener("pointerout", onHover);
@@ -876,6 +1511,7 @@
     }
     function destroy() {
       var _autoObserver;
+      gestures.destroy();
       (_autoObserver = autoObserver) === null || _autoObserver === void 0 || _autoObserver.disconnect();
       autoObserver = null;
       AelluxJs.mountManager.remove({
@@ -883,64 +1519,64 @@
       });
       AelluxJs.off("$click", OnClick);
       AelluxJs.off("tap", onTap);
-      var _iterator2 = _createForOfIteratorHelper2(pendingTaps), _step2;
-      try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-          var pending = _step2.value;
-          cancelPendingTap(pending);
-        }
-      } catch (err) {
-        _iterator2.e(err);
-      } finally {
-        _iterator2.f();
-      }
-      AelluxJs.offEvent(root, "$resize", refreshExpandedStates);
-      document.removeEventListener("pointerover", onHover);
-      document.removeEventListener("pointerout", onHover);
-      var _iterator3 = _createForOfIteratorHelper2(groups.keys()), _step3;
+      var _iterator3 = _createForOfIteratorHelper3(pendingTaps), _step3;
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-          var group = _step3.value;
-          unmountGroup(group);
+          var pending = _step3.value;
+          cancelPendingTap(pending);
         }
       } catch (err) {
         _iterator3.e(err);
       } finally {
         _iterator3.f();
       }
-      var _iterator4 = _createForOfIteratorHelper2(hoverTimers.keys()), _step4;
+      AelluxJs.offEvent(root, "$resize", refreshExpandedStates);
+      document.removeEventListener("pointerover", onHover);
+      document.removeEventListener("pointerout", onHover);
+      var _iterator4 = _createForOfIteratorHelper3(groups.keys()), _step4;
       try {
         for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-          var target = _step4.value;
-          cancelHoverClose(target);
+          var group = _step4.value;
+          unmountGroup(group);
         }
       } catch (err) {
         _iterator4.e(err);
       } finally {
         _iterator4.f();
       }
-      hoveredTriggers.clear();
-      var _iterator5 = _createForOfIteratorHelper2(triggerElementsSet), _step5;
+      var _iterator5 = _createForOfIteratorHelper3(hoverTimers.keys()), _step5;
       try {
         for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-          var triggerElement = _step5.value;
-          unmountTriggerElement(triggerElement);
+          var target = _step5.value;
+          cancelHoverClose(target);
         }
       } catch (err) {
         _iterator5.e(err);
       } finally {
         _iterator5.f();
       }
-      var _iterator6 = _createForOfIteratorHelper2(presentElements.keys()), _step6;
+      hoveredTriggers.clear();
+      var _iterator6 = _createForOfIteratorHelper3(triggerElementsSet), _step6;
       try {
         for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-          var element = _step6.value;
-          unmountPresentContainer(element);
+          var triggerElement = _step6.value;
+          unmountTriggerElement(triggerElement);
         }
       } catch (err) {
         _iterator6.e(err);
       } finally {
         _iterator6.f();
+      }
+      var _iterator7 = _createForOfIteratorHelper3(presentElements.keys()), _step7;
+      try {
+        for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+          var element = _step7.value;
+          unmountPresentContainer(element);
+        }
+      } catch (err) {
+        _iterator7.e(err);
+      } finally {
+        _iterator7.f();
       }
       openPresentElements.clear();
     }
@@ -948,6 +1584,10 @@
       if (presentElements.has(element)) return;
       elementMemories.set(element, AelluxJs.persist.element.save(element, [attr.present, attr.presentMotion, "hidden"], ["--ae-pop-progress", "--ae-dismiss-progress", "--ae-unpop-progress", "--ae-present-pop-phase", "--ae-present-dismiss-phase"]));
       containerAriaHandlers.set(element, AelluxJs.aria.register(element));
+      var initialState = element.classList.contains(className.dismissed) ? DISMISS : element.classList.contains(className.unpop) || element.hidden ? UNPOP : POP;
+      var legacyHidden = element.hidden || ![className.pop, className.unpop, className.dismissed].some(function(name) {
+        return element.classList.contains(name);
+      });
       if ((element.getAttribute(attr.present) || "").trim().toLowerCase() === "all") {
         element.setAttribute(attr.present, DEFAULT_PRESENT);
       }
@@ -966,6 +1606,13 @@
         });
       }
       var presentController = {
+        state: initialState,
+        legacyHidden: legacyHidden,
+        initialClasses: [className.pop, className.unpop, className.dismissed].filter(function(name) {
+          return element.classList.contains(name);
+        }),
+        gesture: null,
+        gestureRequest: null,
         presentMotion: presentMotion,
         measuredHeight: measuredHeight,
         measuredWidth: measuredWidth,
@@ -979,10 +1626,10 @@
         presentationOrder: element.hidden ? 0 : ++presentationSequence,
         autoDismissTimeout: null,
         autoCountdown: null,
-        direction: null,
+        direction: initialState,
         classList: element.classList,
         triggers: /* @__PURE__ */ new Set(),
-        triggerExpanded: !element.hidden,
+        triggerExpanded: initialState === POP,
         setAriaExpanded: function setAriaExpanded(value) {
           this.expanded = value === "true";
           containerAriaHandlers.get(element).set({
@@ -994,8 +1641,10 @@
           this.triggers.forEach(updateTriggerAriaExpanded);
         },
         stop: function stop() {
-          var _this$reverse;
+          var _this$gesture, _this$reverse, _this$gestureDisplay;
           var options = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
+          (_this$gesture = this.gesture) === null || _this$gesture === void 0 || _this$gesture.abort();
+          this.gesture = null;
           var replacement = options.replacement === true;
           var transitionStart = options.transitionStart === true;
           var transition = this.transition;
@@ -1019,6 +1668,8 @@
           cancelAutoDismiss(this);
           (_this$reverse = this.reverse) === null || _this$reverse === void 0 || _this$reverse.cleanup();
           this.reverse = null;
+          (_this$gestureDisplay = this.gestureDisplay) === null || _this$gestureDisplay === void 0 || _this$gestureDisplay.restore();
+          this.gestureDisplay = null;
           restoreHandoff(this);
           if (transitionStart) {
             this.classList.remove(className.dismissing, className.unpopping);
@@ -1028,64 +1679,68 @@
           if (!replacement) restoreMeasuredStyles(element, this);
         }
       };
-      if (!element.hidden) {
-        presentController.classList.add(className.pop);
+      establishState(element, presentController, initialState);
+      if (initialState === POP) {
         openPresentElements.add(element);
       }
       presentElements.set(element, presentController);
-      var _iterator7 = _createForOfIteratorHelper2(element.querySelectorAll("[".concat(attr.trigger, "],[").concat(attr.dismiss, "],[").concat(attr.target, "]"))), _step7;
+      var _iterator8 = _createForOfIteratorHelper3(element.querySelectorAll("[".concat(attr.trigger, "],[").concat(attr.dismiss, "],[").concat(attr.target, "]"))), _step8;
       try {
-        for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-          var _triggerElement = _step7.value;
+        for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+          var _triggerElement = _step8.value;
           if (triggerTargets.get(_triggerElement) === element) {
             presentController.triggers.add(_triggerElement);
             updateTriggerAriaExpanded(_triggerElement);
           }
         }
       } catch (err) {
-        _iterator7.e(err);
+        _iterator8.e(err);
       } finally {
-        _iterator7.f();
+        _iterator8.f();
       }
       var idTriggers = triggersByTargetId.get(element.id);
       if (idTriggers) {
-        var _iterator8 = _createForOfIteratorHelper2(idTriggers), _step8;
+        var _iterator9 = _createForOfIteratorHelper3(idTriggers), _step9;
         try {
-          for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
-            var triggerElement = _step8.value;
+          for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+            var triggerElement = _step9.value;
             refreshTriggerTargets(triggerElement);
           }
         } catch (err) {
-          _iterator8.e(err);
+          _iterator9.e(err);
         } finally {
-          _iterator8.f();
+          _iterator9.f();
         }
       }
-      setProgress(element, !element.hidden);
+      setProgress(element, initialState === POP);
       syncAriaExpanded(element, presentController);
       queueGroups();
       autoDismissSchedule(element, presentController);
+      gestures.update(element);
     }
     function unmountPresentContainer(element) {
-      var _AelluxJs$waitLayout, _containerAriaHandler, _elementMemories$get;
+      var _AelluxJs$waitLayout, _element$classList, _containerAriaHandler, _elementMemories$get;
       if (!presentElements.has(element)) return;
       cancelElementTaps(element);
       var controller = presentElements.get(element);
+      gestures.remove(element);
       cancelHoverClose(element);
-      var _iterator9 = _createForOfIteratorHelper2(controller.triggers), _step9;
+      var _iterator0 = _createForOfIteratorHelper3(controller.triggers), _step0;
       try {
-        for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
-          var button = _step9.value;
+        for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+          var button = _step0.value;
           hoveredTriggers.delete(button);
         }
       } catch (err) {
-        _iterator9.e(err);
+        _iterator0.e(err);
       } finally {
-        _iterator9.f();
+        _iterator0.f();
       }
       controller.stop();
       (_AelluxJs$waitLayout = AelluxJs.waitLayout) === null || _AelluxJs$waitLayout === void 0 || _AelluxJs$waitLayout.cancel(controller.motionId);
       element.classList.remove(className.grid);
+      element.classList.remove(className.pop, className.unpop, className.dismissed);
+      (_element$classList = element.classList).add.apply(_element$classList, _toConsumableArray3(controller.initialClasses));
       presentElements.delete(element);
       openPresentElements.delete(element);
       (_containerAriaHandler = containerAriaHandlers.get(element)) === null || _containerAriaHandler === void 0 || _containerAriaHandler.release();
@@ -1108,9 +1763,9 @@
       hoveredTriggers.delete(triggerElement);
       var target = triggerTargets.get(triggerElement);
       if (target) {
-        var _presentElements$get;
+        var _presentElements$get4;
         cancelHoverClose(target);
-        (_presentElements$get = presentElements.get(target)) === null || _presentElements$get === void 0 || _presentElements$get.triggers.delete(triggerElement);
+        (_presentElements$get4 = presentElements.get(target)) === null || _presentElements$get4 === void 0 || _presentElements$get4.triggers.delete(triggerElement);
         triggerTargets.delete(triggerElement);
       }
       unindexTriggerTarget(triggerElement);
@@ -1162,15 +1817,15 @@
       }
     }
     function refreshTriggerTargets(triggerElement) {
-      var _presentElements$get3, _triggerAriaHandlers$4;
+      var _presentElements$get6, _triggerAriaHandlers$4;
       var previousTarget = triggerTargets.get(triggerElement);
       var targetSelector = triggerElement.getAttribute(attr.target);
       var dismiss2 = triggerElement.getAttribute(attr.dismiss);
       indexTriggerTarget(triggerElement, dismiss2 || targetSelector);
       var container = triggerElement.closest(presentSelector);
       if (previousTarget) {
-        var _presentElements$get2;
-        (_presentElements$get2 = presentElements.get(previousTarget)) === null || _presentElements$get2 === void 0 || _presentElements$get2.triggers.delete(triggerElement);
+        var _presentElements$get5;
+        (_presentElements$get5 = presentElements.get(previousTarget)) === null || _presentElements$get5 === void 0 || _presentElements$get5.triggers.delete(triggerElement);
       }
       var target = null;
       if (dismiss2 || targetSelector) {
@@ -1187,7 +1842,7 @@
         return;
       }
       triggerTargets.set(triggerElement, target);
-      (_presentElements$get3 = presentElements.get(target)) === null || _presentElements$get3 === void 0 || _presentElements$get3.triggers.add(triggerElement);
+      (_presentElements$get6 = presentElements.get(target)) === null || _presentElements$get6 === void 0 || _presentElements$get6.triggers.add(triggerElement);
       var targetIds = /* @__PURE__ */ new Set([target.id]);
       var initial = (_triggerAriaHandlers$4 = triggerAriaHandlers.get(triggerElement)) === null || _triggerAriaHandlers$4 === void 0 ? void 0 : _triggerAriaHandlers$4.initial("controls");
       if (initial) {
@@ -1197,14 +1852,14 @@
       }
       updateTriggerAriaExpanded(triggerElement);
       triggerAriaHandlers.get(triggerElement).set({
-        controls: _toConsumableArray2(targetIds)
+        controls: _toConsumableArray3(targetIds)
       });
     }
     function updateTriggerAriaExpanded(triggerElement) {
-      var _presentElements$get4, _triggerAriaHandlers$5;
+      var _presentElements$get7, _triggerAriaHandlers$5;
       var target = triggerTargets.get(triggerElement);
       if (!target) return;
-      var expanded = ((_presentElements$get4 = presentElements.get(target)) === null || _presentElements$get4 === void 0 ? void 0 : _presentElements$get4.triggerExpanded) === true;
+      var expanded = ((_presentElements$get7 = presentElements.get(target)) === null || _presentElements$get7 === void 0 ? void 0 : _presentElements$get7.triggerExpanded) === true;
       (_triggerAriaHandlers$5 = triggerAriaHandlers.get(triggerElement)) === null || _triggerAriaHandlers$5 === void 0 || _triggerAriaHandlers$5.set({
         expanded: expanded
       });
@@ -1253,8 +1908,8 @@
       var properties = [];
       if (tokens.includes("opacity")) properties.push("opacity");
       if (tokens.includes("transform") && !element.hasAttribute(AelluxJs.attr("anchor"))) properties.push("transform");
-      if (tokens.includes("height")) properties.push.apply(properties, _toConsumableArray2(controller.presentMotion ? ["grid-template-rows", "height"] : ["max-height"]));
-      if (tokens.includes("width")) properties.push.apply(properties, _toConsumableArray2(controller.presentMotion ? ["grid-template-columns", "width"] : ["max-width"]));
+      if (tokens.includes("height")) properties.push.apply(properties, _toConsumableArray3(controller.presentMotion ? ["grid-template-rows", "height"] : ["max-height"]));
+      if (tokens.includes("width")) properties.push.apply(properties, _toConsumableArray3(controller.presentMotion ? ["grid-template-columns", "width"] : ["max-width"]));
       properties.push("--ae-present-pop-phase", "--ae-present-dismiss-phase", "--ae-pop-progress", "--ae-dismiss-progress", "--ae-unpop-progress");
       var computed = root.getComputedStyle(element);
       var values = properties.map(function(property) {
@@ -1274,16 +1929,16 @@
       var transition = AelluxJs.persist.element.save(element, [], ["transition-property"]);
       var freeze = function freeze2() {
         element.style.setProperty("transition-property", "none", "important");
-        var _iterator0 = _createForOfIteratorHelper2(values), _step0;
+        var _iterator1 = _createForOfIteratorHelper3(values), _step1;
         try {
-          for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
-            var _step0$value = _slicedToArray2(_step0.value, 2), property = _step0$value[0], value = _step0$value[1];
+          for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+            var _step1$value = _slicedToArray2(_step1.value, 2), property = _step1$value[0], value = _step1$value[1];
             element.style.setProperty(property, value, property.startsWith("--") ? "" : "important");
           }
         } catch (err) {
-          _iterator0.e(err);
+          _iterator1.e(err);
         } finally {
-          _iterator0.f();
+          _iterator1.f();
         }
         element.getBoundingClientRect();
       };
@@ -1300,7 +1955,7 @@
     }
     function _prepareMeasuredSize() {
       _prepareMeasuredSize = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee(element, controller, gotoVisible, previousSize, waitForPreparation) {
-        var size, computed, height, width, start;
+        var size, _element$classList2, _element$classList3, states, computed, height, width, start;
         return _regenerator().w(function(_context) {
           while (1) switch (_context.n) {
             case 0:
@@ -1316,6 +1971,10 @@
               if (gotoVisible || !previousSize) measuredMemories.get(element).restore();
               size = previousSize;
               if (gotoVisible || !size) {
+                states = [className.unpop, className.dismissed].filter(function(name) {
+                  return element.classList.contains(name);
+                });
+                if (gotoVisible) (_element$classList2 = element.classList).remove.apply(_element$classList2, _toConsumableArray3(states));
                 computed = root.getComputedStyle(element);
                 height = parseFloat(computed.height);
                 width = parseFloat(computed.width);
@@ -1323,6 +1982,7 @@
                   height: Number.isFinite(height) ? height : element.scrollHeight,
                   width: Number.isFinite(width) ? width : element.scrollWidth
                 };
+                if (gotoVisible) (_element$classList3 = element.classList).add.apply(_element$classList3, _toConsumableArray3(states));
               }
               start = previousSize || (gotoVisible ? {
                 height: 0,
@@ -1354,7 +2014,7 @@
     }
     function _presentTransition() {
       _presentTransition = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee2(element, gotoVisible) {
-        var forceRepop, groupOperation, presentationOrder, closingDirection, controller, reversing, group, groupState, groupRevision, hasCapacity, newDirection, transition, _AelluxJs$currentPref, _groups$get, revision, allowEvent, impliedReverse, reverseTracks, reusePreparation, waitForPreparation, previousSize, handoff, computed, interrupted, size, prepared, configurationDirection, duration, timeMs, applyDestination, activateTransition, advancedEase, motionOptions, completed, autoDismissValue, _duration, motionResult, ownsTransition, _controller$reverse2, _args2 = arguments, _t, _t2;
+        var forceRepop, groupOperation, presentationOrder, closingDirection, controller, gesture, reversing, group, groupState, groupRevision, hasCapacity, newDirection, transition, _AelluxJs$currentPref, _groups$get, revision, allowEvent, impliedReverse, reverseTracks, reusePreparation, waitForPreparation, previousSize, handoff, computed, interrupted, size, prepared, configurationDirection, duration, timeMs, applyDestination, activateTransition, advancedEase, motionOptions, completed, autoDismissValue, _duration, motionResult, finalVisible, _selected, active, ownsTransition, _controller$gesture, _controller$reverse2, _controller$gestureDi2, _args2 = arguments, _t, _t2;
         return _regenerator().w(function(_context2) {
           while (1) switch (_context2.p = _context2.n) {
             case 0:
@@ -1369,6 +2029,7 @@
               }
               return _context2.a(2);
             case 1:
+              gesture = controller.gestureRequest;
               reversing = closingDirection === UNPOP && gotoVisible === false;
               if (!(reversing && controller.direction === DISMISS && controller.transition)) {
                 _context2.n = 2;
@@ -1421,7 +2082,7 @@
               return _context2.a(2, false);
             case 7:
               newDirection = gotoVisible ? POP : closingDirection;
-              if (!(element.hidden && !gotoVisible || newDirection === controller.direction && !forceRepop)) {
+              if (!(controller.state !== POP && !controller.transition && !gotoVisible || newDirection === controller.direction && !forceRepop)) {
                 _context2.n = 8;
                 break;
               }
@@ -1455,7 +2116,7 @@
             case 12:
               controller.operationRevision++;
               impliedReverse = reversing && !controller.opening && !controller.transition;
-              reverseTracks = reversing && controller.motionEnabled && ((_AelluxJs$currentPref = AelluxJs.currentPreference) === null || _AelluxJs$currentPref === void 0 ? void 0 : _AelluxJs$currentPref.call(AelluxJs, "reduced-motion")) !== "reduced" ? playback.snapshot(element, controller, interpolatedProgress) : [];
+              reverseTracks = reversing && controller.motionEnabled && ((_AelluxJs$currentPref = AelluxJs.currentPreference) === null || _AelluxJs$currentPref === void 0 ? void 0 : _AelluxJs$currentPref.call(AelluxJs, "reduced-motion")) !== "reduced" ? gesture ? playback.full(element, controller, false) : playback.snapshot(element, controller, interpolatedProgress) : [];
               if (gotoVisible) controller.opening = null;
               if (gotoVisible) controller.presentationOrder = presentationOrder === void 0 ? ++presentationSequence : presentationOrder;
               if (!gotoVisible || !groupOperation) (_groups$get = groups.get(group)) === null || _groups$get === void 0 || _groups$get.reservations.delete(element);
@@ -1467,9 +2128,9 @@
                 element.getBoundingClientRect();
               }
               reusePreparation = !forceRepop && controller.motionEnabled && controller.transition !== null && controller.classList.contains(className.willChange);
-              waitForPreparation = controller.motionEnabled && !reusePreparation && !reversing;
+              waitForPreparation = !gesture && controller.motionEnabled && !reusePreparation && !reversing;
               previousSize = null;
-              handoff = !gotoVisible && controller.motionEnabled ? captureHandoff(element, controller) : null;
+              handoff = !gesture && !gotoVisible && controller.motionEnabled ? captureHandoff(element, controller) : null;
               if (handoff && (controller.measuredHeight || controller.measuredWidth)) {
                 computed = root.getComputedStyle(element);
                 previousSize = {
@@ -1484,8 +2145,10 @@
                 });
               }
               controller.handoff = handoff;
+              controller.gestureRequest = null;
+              controller.gesture = gesture;
               controller.direction = newDirection;
-              if (reversing) controller.reverse = playback.reverse(element, reverseTracks, interpolatedUnpop);
+              if (reversing) controller.reverse = gesture ? playback.control(element, reverseTracks, false, interpolatedProgress, interpolatedUnpop) : playback.reverse(element, reverseTracks, interpolatedUnpop);
               controller.setTriggerExpanded(gotoVisible);
               if (!handoff) {
                 setPhase(element, "pop", "0");
@@ -1507,6 +2170,10 @@
               interrupted.catch(function() {
               });
               element.hidden = false;
+              if (gesture && root.getComputedStyle(element).display === "none") {
+                controller.gestureDisplay = AelluxJs.persist.element.save(element, [], ["display"]);
+                element.style.setProperty("display", controller.presentMotion ? "inline-grid" : "block", "important");
+              }
               openPresentElements.add(element);
               size = null;
               if (!(!reversing && (controller.measuredHeight || controller.measuredWidth))) {
@@ -1514,7 +2181,7 @@
                 break;
               }
               _context2.n = 13;
-              return prepareMeasuredSize(element, controller, gotoVisible, previousSize, waitForPreparation);
+              return prepareMeasuredSize(element, controller, gotoVisible, previousSize, waitForPreparation || !!gesture);
             case 13:
               size = _context2.v;
             case 14:
@@ -1545,7 +2212,7 @@
               duration = root.getComputedStyle(element).getPropertyValue("--ae-".concat(configurationDirection, "-duration").toLowerCase()).trim();
               timeMs = reversing ? controller.reverse.duration : getString2Time(duration);
               applyDestination = function applyDestination2() {
-                controller.classList.remove(className.pop, className.popping, className.dismissing, className.unpopping);
+                controller.classList.remove(className.unpop, className.dismissed, className.pop, className.popping, className.dismissing, className.unpopping);
                 controller.classList.add(transition.className);
                 if (interpolatedProgress) {
                   element.style.setProperty("--ae-pop-progress", "clamp(0, var(--ae-present-pop-phase), 1)");
@@ -1564,6 +2231,64 @@
               };
               activateTransition = function activateTransition2() {
                 if (controller.transition !== transition) return;
+                if (gesture) {
+                  var _tracks;
+                  var tracks = reverseTracks;
+                  if (!reversing) {
+                    var opening = controller.opening;
+                    controller.opening = playback.capture(element, controller, applyDestination, size, gotoVisible && interpolatedProgress, gotoVisible ? "pop" : "dismiss");
+                    tracks = playback.full(element, controller, false);
+                    controller.opening = gotoVisible ? {
+                      saved: tracks,
+                      completed: true
+                    } : opening;
+                    controller.reverse = playback.control(element, tracks, gesture.dismiss, interpolatedProgress, interpolatedUnpop);
+                  }
+                  controller.classList.remove(className.pop, className.unpop, className.dismissed, className.popping, className.unpopping, className.dismissing);
+                  controller.classList.add(transition.className);
+                  controller.reverse.apply();
+                  var distance = 0;
+                  var transform = (_tracks = tracks) === null || _tracks === void 0 ? void 0 : _tracks.find(function(track) {
+                    return track.property === "transform";
+                  });
+                  if (transform) try {
+                    var frames = transform.frames;
+                    var from = new root.DOMMatrix(frames[0].transform), to = new root.DOMMatrix(frames[frames.length - 1].transform);
+                    distance = Math.abs(gesture.axis === "x" ? to.m41 - from.m41 : to.m42 - from.m42);
+                  } catch (_) {
+                  }
+                  var previous = gesture.progress;
+                  gesture.attach({
+                    seek: function seek(value2) {
+                      if (controller.transition !== transition) return;
+                      controller.reverse.seek(value2);
+                      if (!gesture.dismiss && value2 !== previous) {
+                        transition.className = value2 > previous ? className.popping : className.unpopping;
+                        controller.classList.remove(className.popping, className.unpopping);
+                        controller.classList.add(transition.className);
+                      }
+                      previous = value2;
+                      var popValue = gesture.dismiss ? 1 - value2 : value2;
+                      if (!interpolatedProgress) {
+                        setPhase(element, "pop", String(popValue));
+                        setPhase(element, "dismiss", String(gesture.dismiss ? value2 : 1 - value2));
+                        element.style.setProperty("--ae-pop-progress", String(popValue));
+                        element.style.setProperty("--ae-dismiss-progress", String(gesture.dismiss ? value2 : 1 - value2));
+                      }
+                      if (!interpolatedUnpop) element.style.setProperty("--ae-unpop-progress", String(1 - popValue));
+                    },
+                    playTo: function playTo(target) {
+                      if (controller.transition !== transition) return Promise.reject();
+                      if (!gesture.dismiss) {
+                        transition.className = target ? className.popping : className.unpopping;
+                        controller.classList.remove(className.popping, className.unpopping);
+                        controller.classList.add(transition.className);
+                      }
+                      return controller.reverse.playTo(target);
+                    }
+                  }, distance);
+                  return;
+                }
                 if (reversing) {
                   handoff === null || handoff === void 0 || handoff.memory.restore();
                   if (interpolatedProgress) element.style.setProperty("--ae-pop-progress", "clamp(0, var(--ae-present-pop-phase), 1)");
@@ -1577,7 +2302,7 @@
                   element.style.setProperty("transition-property", "none", "important");
                   applyDestination();
                   var _computed = root.getComputedStyle(element);
-                  var tracks = handoff.values.filter(function(_ref3) {
+                  var _tracks2 = handoff.values.filter(function(_ref3) {
                     var _ref4 = _slicedToArray2(_ref3, 1), property2 = _ref4[0];
                     return property2.startsWith("grid-template-") || property2 === "height" || property2 === "width";
                   }).map(function(_ref5) {
@@ -1590,17 +2315,17 @@
                   element.getBoundingClientRect();
                   handoff.memory.restore();
                   applyDestination();
-                  if (tracks.length) element.style.setProperty("transition-property", "".concat(properties, ", height, width"), "important");
-                  var _iterator18 = _createForOfIteratorHelper2(tracks), _step18;
+                  if (_tracks2.length) element.style.setProperty("transition-property", "".concat(properties, ", height, width"), "important");
+                  var _iterator19 = _createForOfIteratorHelper3(_tracks2), _step19;
                   try {
-                    for (_iterator18.s(); !(_step18 = _iterator18.n()).done; ) {
-                      var _step18$value = _slicedToArray2(_step18.value, 2), property = _step18$value[0], value = _step18$value[1];
+                    for (_iterator19.s(); !(_step19 = _iterator19.n()).done; ) {
+                      var _step19$value = _slicedToArray2(_step19.value, 2), property = _step19$value[0], value = _step19$value[1];
                       element.style.setProperty(property, value, "important");
                     }
                   } catch (err) {
-                    _iterator18.e(err);
+                    _iterator19.e(err);
                   } finally {
-                    _iterator18.f();
+                    _iterator19.f();
                   }
                 } else if (gotoVisible) {
                   controller.opening = playback.capture(element, controller, applyDestination, size, interpolatedProgress);
@@ -1619,7 +2344,7 @@
                   return controller.transition !== transition || !element.isConnected;
                 }
               };
-              completed = AelluxJs.motion ? AelluxJs.motion.run(element, motionOptions) : legacyMotionRun(motionOptions, transition);
+              completed = gesture ? (activateTransition(), gesture.settled) : AelluxJs.motion ? AelluxJs.motion.run(element, motionOptions) : legacyMotionRun(motionOptions, transition);
               AelluxJs.dispatchFrom(element, "Layout", {
                 detail: {
                   origin: "present.".concat(newDirection).toLowerCase(),
@@ -1653,12 +2378,34 @@
               return Promise.race([completed, interrupted]);
             case 19:
               motionResult = _context2.v;
-              if (!(controller.transition !== transition || motionResult && motionResult.status !== "completed")) {
+              if (!(controller.transition !== transition || gesture && !motionResult || !gesture && motionResult && motionResult.status !== "completed")) {
                 _context2.n = 20;
                 break;
               }
               return _context2.a(2);
             case 20:
+              if (!gesture) {
+                _context2.n = 21;
+                break;
+              }
+              finalVisible = motionResult === POP;
+              controller.direction = motionResult;
+              controller.setTriggerExpanded(finalVisible);
+              finishTransition(element, controller, transition, finalVisible);
+              if (groupState && groups.get(group) === groupState && !groupState.accumulating) {
+                _selected = finalVisible ? element : groupState.selected === element ? null : groupState.selected;
+                groupState.selected = _selected;
+                active = (_selected === null || _selected === void 0 ? void 0 : _selected.id) || "";
+                if (group.getAttribute(attr.active) !== active) group.setAttribute(attr.active, active);
+                publishGroup(group, groupState, _selected);
+              }
+              controller.gesture = null;
+              AelluxJs.dispatchFrom(element, motionResult, {
+                bubbles: true
+              });
+              if (finalVisible) autoDismissSchedule(element, controller);
+              return _context2.a(2);
+            case 21:
               if (gotoVisible) playback.complete(element, controller, interpolatedProgress);
               finishTransition(element, controller, transition, gotoVisible);
               if (gotoVisible && !element.hidden) {
@@ -1668,15 +2415,15 @@
                   bubbles: true
                 });
               }
-              if (!gotoVisible && element.hidden) {
+              if (!gotoVisible && controller.state !== POP) {
                 AelluxJs.dispatchFrom(element, newDirection, {
                   bubbles: true
                 });
               }
-              _context2.n = 25;
+              _context2.n = 26;
               break;
-            case 21:
-              _context2.p = 21;
+            case 22:
+              _context2.p = 22;
               _t = _context2.v;
               ownsTransition = transition && controller.transition === transition;
               if (ownsTransition && transition.timeout !== null) {
@@ -1687,44 +2434,48 @@
                 controller.classList.remove(transition.className);
               }
               _t2 = _t && _t.code;
-              _context2.n = _t2 === AelluxJs.diagnostics.WARN_INTERRUPTION.code ? 22 : 24;
+              _context2.n = _t2 === AelluxJs.diagnostics.WARN_INTERRUPTION.code ? 23 : 25;
               break;
-            case 22:
+            case 23:
               if (!(transition && transition.cancelled)) {
-                _context2.n = 23;
+                _context2.n = 24;
                 break;
               }
-              return _context2.a(3, 25);
-            case 23:
+              return _context2.a(3, 26);
+            case 24:
               AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_INTERRUPTION, {
                 cause: _t,
                 extension: extensionName,
                 element: element,
                 replacement: transition && transition.replacement === true
               });
-              return _context2.a(3, 25);
-            case 24:
+              return _context2.a(3, 26);
+            case 25:
               AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION, {
                 cause: _t,
                 extension: extensionName,
                 element: element
               });
-              return _context2.a(3, 25);
-            case 25:
-              _context2.p = 25;
+              return _context2.a(3, 26);
+            case 26:
+              _context2.p = 26;
               if (transition && controller.transition === transition) {
+                (_controller$gesture = controller.gesture) === null || _controller$gesture === void 0 || _controller$gesture.abort();
+                controller.gesture = null;
                 (_controller$reverse2 = controller.reverse) === null || _controller$reverse2 === void 0 || _controller$reverse2.cleanup();
                 controller.reverse = null;
+                (_controller$gestureDi2 = controller.gestureDisplay) === null || _controller$gestureDi2 === void 0 || _controller$gestureDi2.restore();
+                controller.gestureDisplay = null;
                 restoreHandoff(controller);
                 restoreMeasuredStyles(element, controller);
                 controller.transition = null;
                 controller.classList.remove(className.willChange);
               }
-              return _context2.f(25);
-            case 26:
+              return _context2.f(26);
+            case 27:
               return _context2.a(2);
           }
-        }, _callee2, null, [[9, 21, 25, 26]]);
+        }, _callee2, null, [[9, 22, 26, 27]]);
       }));
       return _presentTransition.apply(this, arguments);
     }
@@ -1742,21 +2493,24 @@
       });
     }
     function finishTransition(element, controller, transition, gotoVisible) {
-      var _controller$reverse;
+      var _controller$reverse, _controller$gestureDi;
       restoreHandoff(controller);
-      controller.classList.toggle(className.pop, gotoVisible);
-      controller.classList.remove(transition.className);
       var focused = !gotoVisible && element.contains(document.activeElement) ? document.activeElement : null;
-      element.hidden = gotoVisible ? false : true;
+      controller.classList.remove(className.popping, className.unpopping, className.dismissing);
+      establishState(element, controller, gotoVisible ? POP : controller.direction);
+      element.hidden = !gotoVisible && controller.legacyHidden;
       (_controller$reverse = controller.reverse) === null || _controller$reverse === void 0 || _controller$reverse.cleanup();
       controller.reverse = null;
+      (_controller$gestureDi = controller.gestureDisplay) === null || _controller$gestureDi === void 0 || _controller$gestureDi.restore();
+      controller.gestureDisplay = null;
       restoreMeasuredStyles(element, controller);
       setProgress(element, gotoVisible);
       syncAriaExpanded(element, controller);
       refreshExpandedStates();
-      if (element.hidden) openPresentElements.delete(element);
+      gestures.inspect(element);
+      if (!gotoVisible) openPresentElements.delete(element);
       else openPresentElements.add(element);
-      if (focused) {
+      if (focused && !controller.expanded) {
         if (document.activeElement === focused) focused.blur();
         if (document.activeElement !== focused) AelluxJs.dispatch("".concat(controller.direction, "FocusLost"), {
           detail: {
@@ -1767,11 +2521,17 @@
       }
       transition.timeout = null;
     }
+    function establishState(element, controller, state) {
+      controller.state = state;
+      controller.classList.toggle(className.pop, state === POP);
+      controller.classList.toggle(className.unpop, state === UNPOP);
+      controller.classList.toggle(className.dismissed, state === DISMISS);
+    }
     function autoDismissSchedule(element, controller) {
       if (!controller) return;
       cancelAutoDismiss(controller);
       var autoDismissValue = element.getAttribute(attr.autoDismiss);
-      if (element.hidden || controller.transition && !controller.classList.contains(className.pop) || !element.isConnected || !autoDismissValue) return;
+      if (controller.state !== POP || controller.transition && !controller.classList.contains(className.pop) || !element.isConnected || !autoDismissValue) return;
       var duration = getString2Time(autoDismissValue);
       if (!Number.isFinite(duration) || duration < 0) return;
       var countdown = {
@@ -1842,10 +2602,10 @@
       controller.autoCountdown = null;
     }
     function clickAutoDismiss(eventTarget, currentExceptions) {
-      var _iterator1 = _createForOfIteratorHelper2(openPresentElements), _step1;
+      var _iterator10 = _createForOfIteratorHelper3(openPresentElements), _step10;
       try {
         var _loop = function _loop2() {
-          var pContainer = _step1.value;
+          var pContainer = _step10.value;
           if (pContainer.hidden === true || currentExceptions.some(function(e) {
             return pContainer.contains(e);
           })) return 0;
@@ -1854,14 +2614,14 @@
           var inside = pContainer.contains(eventTarget);
           if (inside === (mode === "inside" || mode === "in")) dismiss(pContainer);
         }, _ret;
-        for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+        for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
           _ret = _loop();
           if (_ret === 0) continue;
         }
       } catch (err) {
-        _iterator1.e(err);
+        _iterator10.e(err);
       } finally {
-        _iterator1.f();
+        _iterator10.f();
       }
     }
     function refreshChangedTrigger(button) {
@@ -1873,20 +2633,20 @@
       var target = activationTarget(event);
       if (!target) return;
       var matched;
-      var _iterator10 = _createForOfIteratorHelper2(pendingTaps), _step10;
+      var _iterator11 = _createForOfIteratorHelper3(pendingTaps), _step11;
       try {
-        for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
+        for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
           var _pending$event$detail, _pending$event$detail2;
-          var pending = _step10.value;
+          var pending = _step11.value;
           var pointerId = event.pointerId;
           var compatibilityClick = event.pointerType === "mouse" && ["touch", "pen"].includes((_pending$event$detail = pending.event.detail) === null || _pending$event$detail === void 0 ? void 0 : _pending$event$detail.pointerType);
           if (!compatibilityClick && typeof pointerId === "number" && typeof ((_pending$event$detail2 = pending.event.detail) === null || _pending$event$detail2 === void 0 ? void 0 : _pending$event$detail2.pointerId) === "number" && pointerId !== pending.event.detail.pointerId) continue;
           if (pending.target === target || pending.target.contains(target) || target.contains(pending.target)) matched = pending;
         }
       } catch (err) {
-        _iterator10.e(err);
+        _iterator11.e(err);
       } finally {
-        _iterator10.f();
+        _iterator11.f();
       }
       if (matched) cancelPendingTap(matched);
       activate(event, target);
@@ -1923,16 +2683,16 @@
       pendingTaps.delete(pending);
     }
     function cancelElementTaps(element) {
-      var _iterator11 = _createForOfIteratorHelper2(pendingTaps), _step11;
+      var _iterator12 = _createForOfIteratorHelper3(pendingTaps), _step12;
       try {
-        for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
-          var pending = _step11.value;
+        for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
+          var pending = _step12.value;
           if (element.contains(pending.target) || pending.present === element) cancelPendingTap(pending);
         }
       } catch (err) {
-        _iterator11.e(err);
+        _iterator12.e(err);
       } finally {
-        _iterator11.f();
+        _iterator12.f();
       }
     }
     function activate(event, eventTarget, hoverSuppressed) {
@@ -2010,16 +2770,16 @@
       if (controller.expanded !== visible) controller.setAriaExpanded(String(visible));
     }
     function refreshExpandedStates() {
-      var _iterator12 = _createForOfIteratorHelper2(presentElements), _step12;
+      var _iterator13 = _createForOfIteratorHelper3(presentElements), _step13;
       try {
-        for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
-          var _step12$value = _slicedToArray2(_step12.value, 2), element = _step12$value[0], controller = _step12$value[1];
+        for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
+          var _step13$value = _slicedToArray2(_step13.value, 2), element = _step13$value[0], controller = _step13$value[1];
           if (!controller.transition) syncAriaExpanded(element, controller);
         }
       } catch (err) {
-        _iterator12.e(err);
+        _iterator13.e(err);
       } finally {
-        _iterator12.f();
+        _iterator13.f();
       }
     }
     function setProgress(element, visible) {
@@ -2035,7 +2795,7 @@
     }
     function groupMembers(group) {
       var includeUnidentified = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
-      return _toConsumableArray2(presentElements.keys()).filter(function(element) {
+      return _toConsumableArray3(presentElements.keys()).filter(function(element) {
         return element.isConnected && element !== group && (includeUnidentified || element.id) && element.closest(groupSelector) === group;
       });
     }
@@ -2058,10 +2818,11 @@
       return state.limit;
     }
     function groupMemberActive(member, state) {
-      return state.reservations.has(member) || !member.hidden && !isClosing(presentElements.get(member));
+      return state.reservations.has(member) || isPresented(member);
     }
-    function isClosing(controller) {
-      return (controller === null || controller === void 0 ? void 0 : controller.direction) === DISMISS || (controller === null || controller === void 0 ? void 0 : controller.direction) === UNPOP;
+    function isPresented(element) {
+      var controller = presentElements.get(element);
+      return controller && (controller.transition ? controller.direction === POP : controller.state === POP);
     }
     function activeGroupMembers(group, state) {
       return groupMembers(group, true).filter(function(member) {
@@ -2071,7 +2832,8 @@
     function mountGroup(group) {
       if (groups.has(group)) return;
       var visible = groupMembers(group).filter(function(member) {
-        return !member.hidden;
+        var _presentElements$get8;
+        return ((_presentElements$get8 = presentElements.get(member)) === null || _presentElements$get8 === void 0 ? void 0 : _presentElements$get8.state) === POP;
       });
       groups.set(group, {
         selected: visible.length === 1 ? visible[0] : null,
@@ -2106,16 +2868,16 @@
       state.jobs.clear();
       state.reservations.clear();
       publishGroup(group, state, null);
-      var _iterator13 = _createForOfIteratorHelper2(groupMembers(group)), _step13;
+      var _iterator14 = _createForOfIteratorHelper3(groupMembers(group)), _step14;
       try {
-        for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
-          var member = _step13.value;
+        for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
+          var member = _step14.value;
           var controller = presentElements.get(member);
           if (controller.transition) {
             var visible = controller.direction === POP;
             controller.stop();
-            member.hidden = !visible;
-            controller.classList.toggle(className.pop, visible);
+            member.hidden = !visible && controller.legacyHidden;
+            establishState(member, controller, visible ? POP : controller.direction);
             controller.setTriggerExpanded(visible);
             setProgress(member, visible);
             syncAriaExpanded(member, controller);
@@ -2123,9 +2885,9 @@
           }
         }
       } catch (err) {
-        _iterator13.e(err);
+        _iterator14.e(err);
       } finally {
-        _iterator13.f();
+        _iterator14.f();
       }
       state.memory.restore();
       if (!groups.size && groupObserver) {
@@ -2180,9 +2942,7 @@
           return token && !/\s/.test(token) && group.classList.contains(token);
         });
         if (!matches.length) {
-          var visible = members.filter(function(member) {
-            return !member.hidden && !isClosing(presentElements.get(member));
-          });
+          var visible = members.filter(isPresented);
           if (visible.length > 1) groupDiagnostic(group, "Multiple initially visible members.");
           else if (!state.selected) state.selected = visible[0] || null;
           return;
@@ -2228,7 +2988,8 @@
         return !groupMemberActive(member2, state);
       });
       var closed = inactive.filter(function(member2) {
-        return member2.hidden;
+        var _presentElements$get9;
+        return ((_presentElements$get9 = presentElements.get(member2)) === null || _presentElements$get9 === void 0 ? void 0 : _presentElements$get9.state) !== POP;
       });
       var available = closed.length ? closed : inactive;
       var candidates = active.length < limit && available.length ? available : members.filter(function(member2) {
@@ -2322,8 +3083,7 @@
       var closingDirection = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : DISMISS;
       var state = groups.get(group);
       var changes = members.filter(function(member2) {
-        var controller = presentElements.get(member2);
-        return member2 === selected2 ? member2.hidden || isClosing(controller) : !member2.hidden && !isClosing(controller);
+        return member2 === selected2 ? !isPresented(member2) : isPresented(member2);
       });
       if (state.selected === selected2 && !changes.length) {
         state.accumulating = false;
@@ -2344,10 +3104,10 @@
           return presentElements.has(member2) && member2.isConnected && member2.closest(groupSelector) === group && member2.id === ids[index] && member2.getAttribute(attr.when) === conditions[index];
         });
       };
-      var _iterator14 = _createForOfIteratorHelper2(changes), _step14;
+      var _iterator15 = _createForOfIteratorHelper3(changes), _step15;
       try {
-        for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
-          var member = _step14.value;
+        for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
+          var member = _step15.value;
           var allowed = AelluxJs.dispatchFrom(member, member === selected2 ? "BeforePop" : "".concat(BEFORE).concat(closingDirection), {
             bubbles: true,
             cancelable: true
@@ -2370,9 +3130,9 @@
           }
         }
       } catch (err) {
-        _iterator14.e(err);
+        _iterator15.e(err);
       } finally {
-        _iterator14.f();
+        _iterator15.f();
       }
       state.accumulating = false;
       state.reservations.clear();
@@ -2382,10 +3142,10 @@
         complete = resolve;
       });
       state.pending = pending;
-      var _iterator15 = _createForOfIteratorHelper2(changes), _step15;
+      var _iterator16 = _createForOfIteratorHelper3(changes), _step16;
       try {
         var _loop2 = function _loop22() {
-          var member2 = _step15.value;
+          var member2 = _step16.value;
           var job = presentTransition(member2, member2 === selected2, false, true, void 0, closingDirection);
           if (groups.get(group) !== state || state.revision !== revision) {
             complete(false);
@@ -2398,14 +3158,14 @@
             if (state.jobs.get(member2) === job) state.jobs.delete(member2);
           });
         }, _ret2;
-        for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
+        for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
           _ret2 = _loop2();
           if (_ret2) return _ret2.v;
         }
       } catch (err) {
-        _iterator15.e(err);
+        _iterator16.e(err);
       } finally {
-        _iterator15.f();
+        _iterator16.f();
       }
       publishGroup(group, state, selected2);
       Promise.all(members.map(function(member2) {
@@ -2413,7 +3173,8 @@
       })).then(function() {
         var current = groupMembers(group);
         complete(groups.get(group) === state && state.revision === revision && (!selected2 || current.includes(selected2)) && current.every(function(member2) {
-          return member2 === selected2 ? !member2.hidden : member2.hidden;
+          var _presentElements$get0, _presentElements$get1;
+          return member2 === selected2 ? ((_presentElements$get0 = presentElements.get(member2)) === null || _presentElements$get0 === void 0 ? void 0 : _presentElements$get0.state) === POP : ((_presentElements$get1 = presentElements.get(member2)) === null || _presentElements$get1 === void 0 ? void 0 : _presentElements$get1.state) !== POP;
         }));
       });
       return pending;
@@ -2425,16 +3186,16 @@
     function inHoverRegion(target, node) {
       if (!node || !node.nodeType) return false;
       if (target.contains(node)) return true;
-      var _iterator16 = _createForOfIteratorHelper2(triggerElementsSet), _step16;
+      var _iterator17 = _createForOfIteratorHelper3(triggerElementsSet), _step17;
       try {
-        for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
-          var button = _step16.value;
+        for (_iterator17.s(); !(_step17 = _iterator17.n()).done; ) {
+          var button = _step17.value;
           if (button.getAttribute(attr.triggerOn) === "hover" && triggerTargets.get(button) === target && button.contains(node)) return true;
         }
       } catch (err) {
-        _iterator16.e(err);
+        _iterator17.e(err);
       } finally {
-        _iterator16.f();
+        _iterator17.f();
       }
       return false;
     }
@@ -2462,13 +3223,13 @@
           } else hoveredTriggers.delete(button);
         }
       }
-      var _iterator17 = _createForOfIteratorHelper2(openPresentElements), _step17;
+      var _iterator18 = _createForOfIteratorHelper3(openPresentElements), _step18;
       try {
         var _loop3 = function _loop32() {
-          var target2 = _step17.value;
+          var target2 = _step18.value;
           if (!inHoverRegion(target2, event.target)) return 1;
           if (entering || inHoverRegion(target2, event.relatedTarget)) cancelHoverClose(target2);
-          else if (_toConsumableArray2(triggerElementsSet).some(function(control) {
+          else if (_toConsumableArray3(triggerElementsSet).some(function(control) {
             return triggerTargets.get(control) === target2 && control.getAttribute(attr.triggerOn) === "hover" && !["dismiss", "unpop"].includes(control.getAttribute(attr.trigger));
           })) {
             cancelHoverClose(target2);
@@ -2478,13 +3239,13 @@
             }, 120));
           }
         };
-        for (_iterator17.s(); !(_step17 = _iterator17.n()).done; ) {
+        for (_iterator18.s(); !(_step18 = _iterator18.n()).done; ) {
           if (_loop3()) continue;
         }
       } catch (err) {
-        _iterator17.e(err);
+        _iterator18.e(err);
       } finally {
-        _iterator17.f();
+        _iterator18.f();
       }
     }
     function getString2Time(string) {

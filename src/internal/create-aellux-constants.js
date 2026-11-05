@@ -98,6 +98,7 @@ export function createAelluxConstants() {
       INFO_PRESENT_MEASURED_LAYOUT: { code: 3001, message: "Present measures size transitions without a direct present-motion child; add one to use the grid layout strategy." },
       INFO_FEEDBACK_MOTION_CUSTOM: { code: 3002, message: "The requested feedback motion is not standard. Standard motions are listed in the diagnostic context." }
       ,INFO_EXTENSION_INDEX_LOADED: { code: 3003, message: "An extension manifest was loaded." }
+      ,INFO_PRESENT_GESTURE_HIDDEN: { code: 3004, message: "Gesture source is the Present element itself, but its computed display is none. The element cannot receive pointer input. Use data-ae-present-gesture-source to detect the gesture on another element." }
     },
 
     AELLUXJS_DEFAULT_INITIALIZATION_OPTIONS: {

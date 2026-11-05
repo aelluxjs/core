@@ -202,8 +202,10 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
             continue;
           }
           if (!isMounted(mountable)) {
+            const presentStates = mountable.hasAttribute(AelluxJs.attr("present"))
+              ? ["pop", "unpop", "dismissed"].map(name => AelluxJs.className(name)) : [];
             for (const name of Array.from(mountable.classList)) {
-              if (name.startsWith(classPrefix)) mountable.classList.remove(name);
+              if (name.startsWith(classPrefix) && !presentStates.includes(name)) mountable.classList.remove(name);
             }
           }
           setMounted(mountable, mountId, true, controller.priority);

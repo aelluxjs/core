@@ -529,6 +529,93 @@
       ]
     },
     {
+      "name": "data-ae-present-gesture",
+      "description": "Optional continuous pointer control of the Present opening timeline. Opposite movement reverses it with Unpop. Requires inspectable Web Animations transitions.\n\nValue syntax: enum.",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "up"
+        },
+        {
+          "name": "down"
+        },
+        {
+          "name": "left"
+        },
+        {
+          "name": "right"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-present-gesture-dismiss",
+      "description": "Optional Dismiss direction on the other axis from the Pop gesture. Conflicts disable only gesture Dismiss.\n\nValue syntax: enum.",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "up"
+        },
+        {
+          "name": "down"
+        },
+        {
+          "name": "left"
+        },
+        {
+          "name": "right"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-present-gesture-source",
+      "description": "Pop gesture source: an element ID, optionally prefixed with #, or document. Defaults to the Present itself. Unpop and Dismiss start on the Present.\n\nValue syntax: id.\n\nExamples: `handle`, `#handle`, `document`.",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "handle"
+        },
+        {
+          "name": "#handle"
+        },
+        {
+          "name": "document"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-present-gesture-unpop",
+      "description": "False disables only gesture Unpop. Programmatic Unpop remains available.\n\nValue syntax: enum.\n\nDefault behavior: \"true\".",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "true"
+        },
+        {
+          "name": "false"
+        }
+      ]
+    },
+    {
       "name": "data-ae-present-group",
       "description": "Present Group capacity: empty or 1 allows one active presentation; a positive integer sets the popNext limit. Uses closed members while capacity is available, then reuses the oldest active member without closing others. show() stays exclusive; nested groups are independent. Invalid values warn and use 1.\n\nValue syntax: positive-integer.\n\nDefault behavior: \"1\".\n\nExamples: ``, `1`, `2`, `3`.",
       "references": [

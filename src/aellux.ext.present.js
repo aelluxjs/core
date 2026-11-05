@@ -1,6 +1,7 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 import { createPresentPlayback } from "./internal/create-present-playback.js";
+import { createPresentGestures } from "./internal/create-present-gestures.js";
 
 /**
  * Present Extension
@@ -62,6 +63,8 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
     popping: AelluxJs.className("popping"),
     dismissing: AelluxJs.className("dismissing"),
     unpopping: AelluxJs.className("unpopping"),
+    unpop: AelluxJs.className("unpop"),
+    dismissed: AelluxJs.className("dismissed"),
     willChange: AelluxJs.className("will-change"),
     grid: AelluxJs.className("present-grid")
   };
@@ -106,6 +109,20 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
   let interpolatedProgress = false;
   let interpolatedUnpop = false;
   const playback = createPresentPlayback(root, AelluxJs);
+  const gestures = createPresentGestures(root, AelluxJs, {
+    state: element => presentElements.get(element)?.state,
+    busy: element => !!presentElements.get(element)?.transition,
+    order: element => presentElements.get(element)?.presentationOrder || 0,
+    begin(element, direction, gesture) {
+      const controller = presentElements.get(element);
+      controller.gestureRequest = gesture;
+      presentTransition(element, direction === POP, false, false, undefined, direction).finally(() => {
+        if (controller.gestureRequest === gesture) controller.gestureRequest = null;
+        if (controller.gesture !== gesture) gesture.abort();
+      });
+      if (!controller.transition) gesture.abort();
+    }
+  });
   let autoObserver = null;
   let presentationSequence = 0;
   const cssProperties = [
@@ -161,10 +178,17 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
     autoObserver = new root.MutationObserver(records => {
       for (const record of records) {
         const controller = presentElements.get(record.target);
-        if (controller) autoDismissSchedule(record.target, controller);
+        if (controller) {
+          if (record.attributeName !== attr.autoDismiss) gestures.update(record.target);
+          autoDismissSchedule(record.target, controller);
+        }
+      }
+      if (records.some(record => record.type === "childList" || record.attributeName === "id")) {
+        for (const element of presentElements.keys()) if (element.hasAttribute(AelluxJs.attr("present-gesture-source"))) gestures.update(element);
       }
     });
-    autoObserver.observe(document, { subtree: true, attributes: true, attributeFilter: [attr.autoDismiss] });
+    autoObserver.observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: [attr.autoDismiss, "id",
+      ...["", "-source", "-unpop", "-dismiss"].map(suffix => AelluxJs.attr(`present-gesture${suffix}`))] });
     document.addEventListener("pointerover", onHover);
     document.addEventListener("pointerout", onHover);
     AelluxJs.on("$click", OnClick);
@@ -173,6 +197,7 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
   }
 
   function destroy() {
+    gestures.destroy();
     autoObserver?.disconnect();
     autoObserver = null;
     AelluxJs.mountManager.remove({ extensionName });
@@ -204,6 +229,9 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
         "--ae-present-pop-phase", "--ae-present-dismiss-phase"]
     ));
     containerAriaHandlers.set(element, AelluxJs.aria.register(element));
+    const initialState = element.classList.contains(className.dismissed) ? DISMISS
+      : element.classList.contains(className.unpop) || element.hidden ? UNPOP : POP;
+    const legacyHidden = element.hidden || ![className.pop, className.unpop, className.dismissed].some(name => element.classList.contains(name));
     if ((element.getAttribute(attr.present) || "").trim().toLowerCase() === "all") {
       element.setAttribute(attr.present, DEFAULT_PRESENT);
     }
@@ -222,6 +250,11 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
       );
     }
     const presentController = {
+      state: initialState,
+      legacyHidden,
+      initialClasses: [className.pop, className.unpop, className.dismissed].filter(name => element.classList.contains(name)),
+      gesture: null,
+      gestureRequest: null,
       presentMotion,
       measuredHeight,
       measuredWidth,
@@ -235,10 +268,10 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
       presentationOrder: element.hidden ? 0 : ++presentationSequence,
       autoDismissTimeout: null,
       autoCountdown: null,
-      direction: null,
+      direction: initialState,
       classList: element.classList,
       triggers: new Set(),
-      triggerExpanded: !element.hidden,
+      triggerExpanded: initialState === POP,
       setAriaExpanded: function (value) {
         this.expanded = value === "true";
         containerAriaHandlers.get(element).set({ expanded: this.expanded });
@@ -248,6 +281,8 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
         this.triggers.forEach(updateTriggerAriaExpanded);
       },
       stop: function (options = {}) {
+        this.gesture?.abort();
+        this.gesture = null;
         const replacement = options.replacement === true;
         const transitionStart = options.transitionStart === true;
         const transition = this.transition;
@@ -273,6 +308,8 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
         cancelAutoDismiss(this);
         this.reverse?.cleanup();
         this.reverse = null;
+        this.gestureDisplay?.restore();
+        this.gestureDisplay = null;
         restoreHandoff(this);
         if (transitionStart) {
           this.classList.remove(className.dismissing, className.unpopping);
@@ -288,8 +325,8 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
         if (!replacement) restoreMeasuredStyles(element, this);
       }
     };
-    if (!element.hidden) {
-      presentController.classList.add(className.pop);
+    establishState(element, presentController, initialState);
+    if (initialState === POP) {
       openPresentElements.add(element);
     }
     presentElements.set(element, presentController);
@@ -307,21 +344,25 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
         refreshTriggerTargets(triggerElement);
       }
     }
-    setProgress(element, !element.hidden);
+    setProgress(element, initialState === POP);
     syncAriaExpanded(element, presentController);
     queueGroups();
     autoDismissSchedule(element, presentController);
+    gestures.update(element);
   }
 
   function unmountPresentContainer(element) {
     if (!presentElements.has(element)) return;
     cancelElementTaps(element);
     const controller = presentElements.get(element);
+    gestures.remove(element);
     cancelHoverClose(element);
     for (const button of controller.triggers) hoveredTriggers.delete(button);
     controller.stop();
     AelluxJs.waitLayout?.cancel(controller.motionId);
     element.classList.remove(className.grid);
+    element.classList.remove(className.pop, className.unpop, className.dismissed);
+    element.classList.add(...controller.initialClasses);
     presentElements.delete(element);
     openPresentElements.delete(element);
     containerAriaHandlers.get(element)?.release();
@@ -528,6 +569,8 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
     if (gotoVisible || !previousSize) measuredMemories.get(element).restore();
     let size = previousSize;
     if (gotoVisible || !size) {
+      const states = [className.unpop, className.dismissed].filter(name => element.classList.contains(name));
+      if (gotoVisible) element.classList.remove(...states);
       const computed = root.getComputedStyle(element);
       const height = parseFloat(computed.height);
       const width = parseFloat(computed.width);
@@ -535,6 +578,7 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
         height: Number.isFinite(height) ? height : element.scrollHeight,
         width: Number.isFinite(width) ? width : element.scrollWidth
       };
+      if (gotoVisible) element.classList.add(...states);
     }
     const start = previousSize || (gotoVisible
       ? { height: 0, width: 0 } : size);
@@ -553,6 +597,7 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
   async function presentTransition(element, gotoVisible, forceRepop = false, groupOperation = false, presentationOrder, closingDirection = DISMISS) {
     const controller = presentElements.get(element);
     if (!controller) return;
+    const gesture = controller.gestureRequest;
     const reversing = closingDirection === UNPOP && gotoVisible === false;
     if (reversing && controller.direction === DISMISS && controller.transition) return false;
 
@@ -582,7 +627,7 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
     if (!hasCapacity()) return false;
     const newDirection = gotoVisible ? POP : closingDirection;
 
-    if ((element.hidden && !gotoVisible)
+    if (((controller.state !== POP && !controller.transition) && !gotoVisible)
       || (newDirection === controller.direction && !forceRepop)) {
       if (!controller.transition) syncAriaExpanded(element, controller);
       return;
@@ -605,7 +650,7 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
       const impliedReverse = reversing && !controller.opening && !controller.transition;
       const reverseTracks = reversing && controller.motionEnabled &&
         AelluxJs.currentPreference?.("reduced-motion") !== "reduced"
-        ? playback.snapshot(element, controller, interpolatedProgress) : [];
+        ? (gesture ? playback.full(element, controller, false) : playback.snapshot(element, controller, interpolatedProgress)) : [];
       if (gotoVisible) controller.opening = null;
       if (gotoVisible) controller.presentationOrder = presentationOrder === undefined
         ? ++presentationSequence : presentationOrder;
@@ -622,9 +667,9 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
       const reusePreparation = !forceRepop && controller.motionEnabled &&
         controller.transition !== null &&
         controller.classList.contains(className.willChange);
-      const waitForPreparation = controller.motionEnabled && !reusePreparation && !reversing;
+      const waitForPreparation = !gesture && controller.motionEnabled && !reusePreparation && !reversing;
       let previousSize = null;
-      const handoff = !gotoVisible && controller.motionEnabled ? captureHandoff(element, controller) : null;
+      const handoff = !gesture && !gotoVisible && controller.motionEnabled ? captureHandoff(element, controller) : null;
       if (handoff && (controller.measuredHeight || controller.measuredWidth)) {
         const computed = root.getComputedStyle(element);
         previousSize = {
@@ -636,8 +681,12 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
         controller.stop({ replacement: !!handoff || reusePreparation, transitionStart: true });
       }
       controller.handoff = handoff;
+      controller.gestureRequest = null;
+      controller.gesture = gesture;
       controller.direction = newDirection;
-      if (reversing) controller.reverse = playback.reverse(element, reverseTracks, interpolatedUnpop);
+      if (reversing) controller.reverse = gesture
+        ? playback.control(element, reverseTracks, false, interpolatedProgress, interpolatedUnpop)
+        : playback.reverse(element, reverseTracks, interpolatedUnpop);
       // Triggers announce the accepted action immediately, independently of
       // the panel's effective visibility at the end of the transition.
       controller.setTriggerExpanded(gotoVisible);
@@ -662,11 +711,15 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
       interrupted.catch(() => { });
 
       element.hidden = false;
+      if (gesture && root.getComputedStyle(element).display === "none") {
+        controller.gestureDisplay = AelluxJs.persist.element.save(element, [], ["display"]);
+        element.style.setProperty("display", controller.presentMotion ? "inline-grid" : "block", "important");
+      }
       openPresentElements.add(element);
       let size = null;
       if (!reversing && (controller.measuredHeight || controller.measuredWidth))
         size = await prepareMeasuredSize(
-          element, controller, gotoVisible, previousSize, waitForPreparation
+          element, controller, gotoVisible, previousSize, waitForPreparation || !!gesture
         );
       if (controller.transition !== transition) return;
       if (controller.motionEnabled) {
@@ -691,6 +744,7 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
 
       const applyDestination = () => {
         controller.classList.remove(
+          className.unpop, className.dismissed,
           className.pop,
           className.popping,
           className.dismissing, className.unpopping
@@ -716,6 +770,57 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
       };
       const activateTransition = () => {
         if (controller.transition !== transition) return;
+        if (gesture) {
+          let tracks = reverseTracks;
+          if (!reversing) {
+            const opening = controller.opening;
+            controller.opening = playback.capture(element, controller, applyDestination, size, gotoVisible && interpolatedProgress, gotoVisible ? "pop" : "dismiss");
+            tracks = playback.full(element, controller, false);
+            controller.opening = gotoVisible ? { saved: tracks, completed: true } : opening;
+            controller.reverse = playback.control(element, tracks, gesture.dismiss, interpolatedProgress, interpolatedUnpop);
+          }
+          controller.classList.remove(className.pop, className.unpop, className.dismissed, className.popping, className.unpopping, className.dismissing);
+          controller.classList.add(transition.className);
+          controller.reverse.apply();
+          let distance = 0;
+          const transform = tracks?.find(track => track.property === "transform");
+          if (transform) try {
+            const frames = transform.frames;
+            const from = new root.DOMMatrix(frames[0].transform), to = new root.DOMMatrix(frames[frames.length - 1].transform);
+            distance = Math.abs(gesture.axis === "x" ? to.m41 - from.m41 : to.m42 - from.m42);
+          } catch (_) { /* non-matrix authored transforms use the dimension fallback */ }
+          let previous = gesture.progress;
+          gesture.attach({
+            seek(value) {
+              if (controller.transition !== transition) return;
+              controller.reverse.seek(value);
+              if (!gesture.dismiss && value !== previous) {
+                transition.className = value > previous ? className.popping : className.unpopping;
+                controller.classList.remove(className.popping, className.unpopping);
+                controller.classList.add(transition.className);
+              }
+              previous = value;
+              const popValue = gesture.dismiss ? 1 - value : value;
+              if (!interpolatedProgress) {
+                setPhase(element, "pop", String(popValue));
+                setPhase(element, "dismiss", String(gesture.dismiss ? value : 1 - value));
+                element.style.setProperty("--ae-pop-progress", String(popValue));
+                element.style.setProperty("--ae-dismiss-progress", String(gesture.dismiss ? value : 1 - value));
+              }
+              if (!interpolatedUnpop) element.style.setProperty("--ae-unpop-progress", String(1 - popValue));
+            },
+            playTo(target) {
+              if (controller.transition !== transition) return Promise.reject();
+              if (!gesture.dismiss) {
+                transition.className = target ? className.popping : className.unpopping;
+                controller.classList.remove(className.popping, className.unpopping);
+                controller.classList.add(transition.className);
+              }
+              return controller.reverse.playTo(target);
+            }
+          }, distance);
+          return;
+        }
         if (reversing) {
           handoff?.memory.restore();
           if (interpolatedProgress)
@@ -759,7 +864,7 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
         maxFPS: AelluxJs.layoutMaxFPS ? AelluxJs.layoutMaxFPS(element) : undefined,
         abort: () => controller.transition !== transition || !element.isConnected
       };
-      const completed = AelluxJs.motion
+      const completed = gesture ? (activateTransition(), gesture.settled) : AelluxJs.motion
         ? AelluxJs.motion.run(element, motionOptions)
         : legacyMotionRun(motionOptions, transition);
 
@@ -782,7 +887,25 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
       AelluxJs.dispatchFrom(element, gotoVisible ? "Popping" : reversing ? "Unpopping" : "Dismissing", { bubbles: true });
       const motionResult = await Promise.race([completed, interrupted]);
       if (controller.transition !== transition ||
-        (motionResult && motionResult.status !== "completed")) return;
+        (gesture && !motionResult) ||
+        (!gesture && motionResult && motionResult.status !== "completed")) return;
+      if (gesture) {
+        const finalVisible = motionResult === POP;
+        controller.direction = motionResult;
+        controller.setTriggerExpanded(finalVisible);
+        finishTransition(element, controller, transition, finalVisible);
+        if (groupState && groups.get(group) === groupState && !groupState.accumulating) {
+          const selected = finalVisible ? element : groupState.selected === element ? null : groupState.selected;
+          groupState.selected = selected;
+          const active = selected?.id || "";
+          if (group.getAttribute(attr.active) !== active) group.setAttribute(attr.active, active);
+          publishGroup(group, groupState, selected);
+        }
+        controller.gesture = null;
+        AelluxJs.dispatchFrom(element, motionResult, { bubbles: true });
+        if (finalVisible) autoDismissSchedule(element, controller);
+        return;
+      }
       if (gotoVisible) playback.complete(element, controller, interpolatedProgress);
       finishTransition(element, controller, transition, gotoVisible);
 
@@ -791,7 +914,7 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
         controller.classList.add(className.pop);
         AelluxJs.dispatchFrom(element, POP, { bubbles: true });
       }
-      if (!gotoVisible && element.hidden) {
+      if (!gotoVisible && controller.state !== POP) {
         AelluxJs.dispatchFrom(element, newDirection, { bubbles: true });
       }
     } catch (error) {
@@ -827,8 +950,12 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
       }
     } finally {
       if (transition && controller.transition === transition) {
+        controller.gesture?.abort();
+        controller.gesture = null;
         controller.reverse?.cleanup();
         controller.reverse = null;
+        controller.gestureDisplay?.restore();
+        controller.gestureDisplay = null;
         restoreHandoff(controller);
         restoreMeasuredStyles(element, controller);
         controller.transition = null;
@@ -849,20 +976,23 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
 
   function finishTransition(element, controller, transition, gotoVisible) {
     restoreHandoff(controller);
-    controller.classList.toggle(className.pop, gotoVisible);
-    controller.classList.remove(transition.className);
     const focused = !gotoVisible && element.contains(document.activeElement)
       ? document.activeElement : null;
-    element.hidden = gotoVisible ? false : true;
+    controller.classList.remove(className.popping, className.unpopping, className.dismissing);
+    establishState(element, controller, gotoVisible ? POP : controller.direction);
+    element.hidden = !gotoVisible && controller.legacyHidden;
     controller.reverse?.cleanup();
     controller.reverse = null;
+    controller.gestureDisplay?.restore();
+    controller.gestureDisplay = null;
     restoreMeasuredStyles(element, controller);
     setProgress(element, gotoVisible);
     syncAriaExpanded(element, controller);
     refreshExpandedStates();
-    if (element.hidden) openPresentElements.delete(element);
+    gestures.inspect(element);
+    if (!gotoVisible) openPresentElements.delete(element);
     else openPresentElements.add(element);
-    if (focused) {
+    if (focused && !controller.expanded) {
       if (document.activeElement === focused) focused.blur();
       if (document.activeElement !== focused) AelluxJs.dispatch(`${controller.direction}FocusLost`, {
         detail: { element, focused }
@@ -871,11 +1001,18 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
     transition.timeout = null;
   }
 
+  function establishState(element, controller, state) {
+    controller.state = state;
+    controller.classList.toggle(className.pop, state === POP);
+    controller.classList.toggle(className.unpop, state === UNPOP);
+    controller.classList.toggle(className.dismissed, state === DISMISS);
+  }
+
   function autoDismissSchedule(element, controller) {
     if (!controller) return;
     cancelAutoDismiss(controller);
     const autoDismissValue = element.getAttribute(attr.autoDismiss);
-    if (element.hidden || (controller.transition && !controller.classList.contains(className.pop)) ||
+    if (controller.state !== POP || (controller.transition && !controller.classList.contains(className.pop)) ||
       !element.isConnected || !autoDismissValue) return;
     const duration = getString2Time(autoDismissValue);
     if (!Number.isFinite(duration) || duration < 0) return;
@@ -1123,10 +1260,13 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
 
   function groupMemberActive(member, state) {
     return state.reservations.has(member) ||
-      (!member.hidden && !isClosing(presentElements.get(member)));
+      isPresented(member);
   }
 
-  function isClosing(controller) { return controller?.direction === DISMISS || controller?.direction === UNPOP; }
+  function isPresented(element) {
+    const controller = presentElements.get(element);
+    return controller && (controller.transition ? controller.direction === POP : controller.state === POP);
+  }
 
   function activeGroupMembers(group, state) {
     return groupMembers(group, true).filter(member => groupMemberActive(member, state));
@@ -1134,7 +1274,7 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
 
   function mountGroup(group) {
     if (groups.has(group)) return;
-    const visible = groupMembers(group).filter(member => !member.hidden);
+    const visible = groupMembers(group).filter(member => presentElements.get(member)?.state === POP);
     groups.set(group, {
       selected: visible.length === 1 ? visible[0] : null,
       accumulating: false, reservations: new Map(),
@@ -1166,8 +1306,8 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
       if (controller.transition) {
         const visible = controller.direction === POP;
         controller.stop();
-        member.hidden = !visible;
-        controller.classList.toggle(className.pop, visible);
+        member.hidden = !visible && controller.legacyHidden;
+        establishState(member, controller, visible ? POP : controller.direction);
         controller.setTriggerExpanded(visible);
         setProgress(member, visible);
         syncAriaExpanded(member, controller);
@@ -1223,8 +1363,7 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
         return token && !/\s/.test(token) && group.classList.contains(token);
       });
       if (!matches.length) {
-        const visible = members.filter(member => !member.hidden &&
-          !isClosing(presentElements.get(member)));
+        const visible = members.filter(isPresented);
         if (visible.length > 1) groupDiagnostic(group, "Multiple initially visible members.");
         else if (!state.selected) state.selected = visible[0] || null;
         return;
@@ -1269,7 +1408,7 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
     const limit = groupLimit(group, state);
     const active = activeGroupMembers(group, state);
     const inactive = members.filter(member => !groupMemberActive(member, state));
-    const closed = inactive.filter(member => member.hidden);
+    const closed = inactive.filter(member => presentElements.get(member)?.state !== POP);
     const available = closed.length ? closed : inactive;
     const candidates = active.length < limit && available.length ? available :
       members.filter(member => active.includes(member)).sort((left, right) => {
@@ -1348,11 +1487,7 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
 
   function selectGroup(group, selected, members, closingDirection = DISMISS) {
     const state = groups.get(group);
-    const changes = members.filter(member => {
-      const controller = presentElements.get(member);
-      return member === selected ? member.hidden || isClosing(controller) :
-        !member.hidden && !isClosing(controller);
-    });
+    const changes = members.filter(member => member === selected ? !isPresented(member) : isPresented(member));
     if (state.selected === selected && !changes.length) {
       state.accumulating = false;
       state.reservations.clear();
@@ -1414,7 +1549,7 @@ import { createPresentPlayback } from "./internal/create-present-playback.js";
         const current = groupMembers(group);
         complete(groups.get(group) === state && state.revision === revision &&
           (!selected || current.includes(selected)) &&
-          current.every(member => member === selected ? !member.hidden : member.hidden));
+          current.every(member => member === selected ? presentElements.get(member)?.state === POP : presentElements.get(member)?.state !== POP));
       });
     return pending;
   }

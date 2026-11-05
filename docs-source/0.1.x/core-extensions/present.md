@@ -78,9 +78,9 @@ await panel.pop();
 await panel.dismiss();
 ```
 
-Each method returns a Promise. For a transition that remains current, it resolves after preparation and cleanup, including final visibility, classes, ARIA state and completion events. An interrupted request can settle without reaching its requested endpoint; inspect the current operation or state rather than treating the earlier Promise as successful completion. Present manages `hidden`, `aria-expanded`, `ae--pop`, `ae--popping`, `ae--dismissing` and `ae--unpopping` on the main `data-ae-present` container and updates `aria-expanded` and `aria-controls` on its triggers.
+Each method returns a Promise. For a transition that remains current, it resolves after preparation and cleanup, including final visibility, classes, ARIA state and completion events. An interrupted request can settle without reaching its requested endpoint; inspect the current operation or state rather than treating the earlier Promise as successful completion. Present manages `aria-expanded`, established classes `ae--pop`, `ae--unpop`, `ae--dismissed`, and transitional classes `ae--popping`, `ae--dismissing`, `ae--unpopping` on the main container. It manages `hidden` for legacy declarations and updates `aria-expanded` and `aria-controls` on its triggers. Explicit initial state classes allow CSS-owned closed visibility as described under Interactive gestures.
 
-After a `BeforePop`, `BeforeDismiss` or `BeforeUnpop` preflight accepts the action, associated trigger, dismiss and target controls immediately receive the requested `aria-expanded` value, before preparation. The region retains its prior value during the transition and synchronizes to effective CSS visibility at completion. A closing region can therefore remain expanded while its controls already report `false`. Vetoes preserve the accepted state; reversals update controls when accepted, and closing applies `hidden` only when it finishes. CSS that overrides `hidden` can keep the region effectively visible.
+After a `BeforePop`, `BeforeDismiss` or `BeforeUnpop` preflight accepts the action, associated trigger, dismiss and target controls immediately receive the requested `aria-expanded` value, before preparation. The region retains its prior value during the transition and synchronizes to effective CSS visibility at completion. A closing region can therefore remain expanded while its controls already report `false`. Vetoes preserve the accepted state; reversals update controls when accepted, and legacy closing applies `hidden` only when it finishes. CSS that overrides `hidden` can keep the region effectively visible.
 
 Calling `pop(element)` starts a fresh opening even when the region is already open, opening or closing: **CURRENT → FROM → POP**. It interrupts any active transition, removes presentation state classes, hides the region immediately, and restarts from the configured `from` state using the pop duration and easing. `toggle(element, true)` keeps its existing idempotent behavior.
 
@@ -280,12 +280,102 @@ The closing handoff remains local to Present and adds no dependency or scheduler
 
 The Full deltas include regeneration of previously stale Scrollbox output from unchanged source, so they are net distribution changes rather than the isolated cost of Present. Only affected budgets increase: Present Modern from 24.5/8.5 to 26.25/9.125 KiB raw/gzip, Present Legacy from 33/11.25 to 35/11.75 KiB, Present CSS raw from 4 to 4.125 KiB, and Full Modern from 194/60 to 195/60.25 KiB. Full Legacy and the other stylesheet limits remain unchanged.
 
+## Interactive gestures
+
+Gestures are optional input for the existing Present transitions. Without `data-ae-present-gesture`, Present installs no gesture listeners. `pop()` presents, `unpop()` follows the opening timeline backwards, and `dismiss()` uses its independent outgoing destination. All three methods and keyboard controls remain available regardless of gesture configuration.
+
+| Attribute | Values | Default |
+| --- | --- | --- |
+| `data-ae-present-gesture` | `up`, `down`, `left`, `right`: physical movement for Pop | Disabled |
+| `data-ae-present-gesture-source` | One ID, optionally prefixed with `#`, or `document` | Present itself |
+| `data-ae-present-gesture-unpop` | `false` disables gesture Unpop; `true` enables it | `true` |
+| `data-ae-present-gesture-dismiss` | Optional direction on the other axis | Disabled |
+
+Unpop always uses the opposite of the Pop direction. Unpop and Dismiss begin on the Present itself; the configured source supplies Pop input. Changing these attributes, replacing the source ID, or adding a previously missing source refreshes the listeners. A missing source reports configuration diagnostic `2027`. An invalid direction or a Dismiss direction on the Pop/Unpop axis reports `2026`; a conflicting Dismiss disables only that gesture.
+
+| CSS property | Default | Release decision |
+| --- | --- | --- |
+| `--ae-present-pop-threshold` | `0.5` | From a closed state, Pop when progress is at or above this value |
+| `--ae-present-unpop-threshold` | `0.5` | From Pop, Unpop when progress is at or below this value |
+| `--ae-present-dismiss-threshold` | `0.5` | Dismiss when its independent progress is at or above this value |
+| `--ae-present-gesture-distance` | `auto` | Positive CSS length for one full travel |
+
+The main timeline is normalized as `0 = Unpop`, `1 = Pop`. For example, a 300px distance and a 150px opening drag produce progress `0.5`. Setting Pop to `0.6` and Unpop to `0.4` produces hysteresis: the origin determines the result between those limits. Values are read through computed style at the beginning of each gesture, including inline declarations, media queries and the cascade. Invalid thresholds use `0.5`; invalid distances use `auto`, with diagnostic `2026`. Explicit distance supports CSS lengths such as `320px`, `20rem`, `50vh` and `calc(20rem + 8px)`; percentages are not supported. Auto uses the translation difference when the captured transform endpoints resolve to matrices, otherwise the element's layout dimension on that axis, with a minimum of 1px. Rotation, scale and layout-dependent percentage transforms should use an explicit distance.
+
+After an 8px intent distance and axis predominance, the gesture pauses and seeks the same captured transition tracks used by Present playback. It does not recreate animations on pointermove. Drag scrubbing is linear with physical distance; reversing movement changes `ae--popping` to `ae--unpopping`, or vice versa, on the same effects. Dismiss retains `ae--dismissing` throughout its attempt, including return travel. Releasing resumes the original keyframes and configured easing from the corresponding rendered position. No preparation delay is added to gestures. Pointer cancellation, capture loss or an additional pointer return toward the origin. An explicit API call can replace the interaction, and unmount cancels owned work and restores temporary styles.
+
+`BeforePop`, `BeforeUnpop` and `BeforeDismiss` retain their cancelable preflight. An accepted gesture emits the corresponding transition-start event and `Layout`. Scrubbing emits no repeated completion events. Settlement emits one completion event for its actual destination: for example, a canceled Unpop returns to Pop and emits `Pop`. Programmatic replacement suppresses the superseded gesture's completion. There is no new public gesture event family. CSS progress outputs follow the controlled tracks when custom-property registration is available; without it they update during drag and settle at completion.
+
+### Semantic states and visible closed regions
+
+The established classes are `ae--pop`, `ae--unpop` and `ae--dismissed`. Temporary classes are `ae--popping`, `ae--unpopping` and `ae--dismissing`. Established classes are mutually exclusive at completion. Declaring an established state class before mounting opts into CSS-owned closed visibility: `ae--unpop` and `ae--dismissed` do not inherently mean invisibility or removal from the accessibility tree. A partially exposed region can therefore receive pointers itself. A declaration without these state classes retains legacy automatic `hidden` closing; an initially `hidden` region also retains that behavior, including when it has an explicit state class. ARIA still follows effective rendered visibility, while trigger expansion follows the accepted operation.
+
+An initially hidden region can be opened through an external source. Present removes `hidden` before preparing the captured timeline. If author CSS also computes `display:none`, gesture preparation temporarily supplies `block` (or `inline-grid` with a motion child); its original inline display and priority are restored on settlement, replacement, failure and teardown. Define the Pop state so it can render after that temporary override is released. Only Present-owned property transitions are scrubbed; independent CSS keyframe animations and arbitrary extra transition properties are not a gesture timeline.
+
+`INFO_PRESENT_GESTURE_HIDDEN` (`3004`) records when the configured source is the Present itself and its computed display is `none`. It does not block mounting or change CSS. Use an external source for such a region. The diagnostic infrastructure deduplicates equivalent situations. A rendered, partially exposed Unpop region produces no hidden-source INFO.
+
+### Bottom region with an exposed handle
+
+```html
+<button data-ae-trigger="pop" data-ae-target="bottom-region">Open</button>
+<section id="bottom-region" class="ae--unpop bottom-region"
+  data-ae-present="transform" data-ae-present-gesture="up"
+  data-ae-present-gesture-dismiss="left" data-ae-dismiss-on-click="none"
+  style="--ae-from-transform:translateY(288px);--ae-pop-transform:translateY(0px);
+    --ae-dismiss-transform:translateX(-110%);--ae-present-gesture-distance:288px;
+    --ae-present-pop-threshold:.6;--ae-present-unpop-threshold:.4">
+  <div>Drag handle</div>
+  <button data-ae-trigger="unpop">Close to handle</button>
+  <button data-ae-dismiss>Dismiss independently</button>
+</section>
+<style>
+  .bottom-region { position:fixed; bottom:0; height:320px; touch-action:none; }
+</style>
+```
+
+### Side region with an external source
+
+```html
+<div id="side-handle" style="touch-action:pan-y">Drag right</div>
+<button data-ae-trigger="pop" data-ae-target="side-region">Open side region</button>
+<aside id="side-region" class="ae--unpop" data-ae-present="transform"
+  data-ae-present-gesture="right" data-ae-present-gesture-source="side-handle"
+  data-ae-present-gesture-unpop="false" data-ae-present-gesture-dismiss="up"
+  style="--ae-from-transform:translateX(-280px);--ae-pop-transform:translateX(0px);
+    --ae-dismiss-transform:translateY(-110%);--ae-present-gesture-distance:280px;
+    width:280px;touch-action:pan-x">
+  <button data-ae-trigger="unpop">Reverse programmatically</button>
+</aside>
+```
+
+Choose touch-action on a local handle or region according to the intended gesture axes. Browsers decide native touch scrolling at pointerdown, so preventing a later pointermove cannot reclaim a gesture already assigned to scrolling. A local handle needing both axes may require `touch-action:none`; Present never sets it globally. Inputs, links, buttons, editable content and nested Scrollboxes retain their input. Nested native scroll containers take precedence when they can scroll in the requested direction. Completed drags suppress the associated compatibility click, while ordinary presses remain clicks. Shared sources choose the most specific matching region, then the most recently presented region; one pointer controls one Present. Keep keyboard buttons available and choose accessible semantics for the component built with Present.
+
+### Gesture distribution cost
+
+The gesture recognizer is private to Present and introduces no package dependency. Measurements compare the preceding build with this implementation, in bytes (gzip level 9):
+
+| Artifact | Before raw / gzip | After raw / gzip | Budget raw / gzip (KiB) |
+| --- | --- | --- | --- |
+| Present Modern | 36,995 / 12,135 | 49,367 / 16,160 | 36.25 / 12 → 48.5 / 16 |
+| Present Legacy | 50,752 / 15,735 | 67,370 / 20,466 | 49.75 / 15.5 → 66 / 20.25 |
+| Present CSS | 5,703 / 1,009 | 6,134 / 1,066 | 5.75 / 2 → 6.125 / 2 |
+| Full Modern | 215,270 / 66,267 | 227,777 / 70,378 | 210.5 / 65 → 223 / 69 |
+| Full Legacy | 545,453 / 160,895 | 562,278 / 165,753 | 533 / 157.5 → 550 / 163 |
+| Full CSS | 126,376 / 11,952 | 126,807 / 12,017 | 123.75 / 12 → 124 / 12 |
+| ESM boot | 26,971 / 9,287 | 27,220 / 9,391 | 26.5 / 9.25 → 26.75 / 9.25 |
+| Modern Orchestrator | 66,546 / 21,946 | 66,657 / 21,988 | 65 / 21.5 → 65.25 / 21.5 |
+
+The boot and Orchestrator deltas include the INFO catalog entry and preservation of authored Present state classes during mounting. Without gesture opt-in there are no gesture pointer listeners or continuous gesture scheduling loops. Discontinuous easing such as `steps()` retains linear timing on release when the authored curve cannot represent the current scrubbed value without a jump.
+
 ## Known Limits & Risks
 
 See [Core Known Limits & Risks](../runtime/known-limits-and-risks.md) for classifications and shared architecture, loading and lifecycle boundaries.
 
 | Area | Type | Description | Recommendation |
 | --- | --- | --- | --- |
+| Gesture capability | Known Limit | Interactive scrubbing requires inspectable Web Animations transitions and `setKeyframes()`. Browsers without them retain the programmatic CSS fallback and report `2026` on gesture intent. | Use programmatic and keyboard alternatives. |
+| Gesture ownership | Known Limit | New drags start from established states. Active automatic transitions retain ownership until completion or explicit API replacement. Sources use light-DOM ID lookup. | Finish or replace an operation before beginning a new gesture. |
+| Touch and distance | Potential Risk | Native touch scrolling can cancel an unconfigured axis. Auto distance is an estimate for non-translational geometry. Physical device and assistive-technology behavior needs application validation. | Set local touch-action and an explicit distance where needed; test target devices. |
 | Logical/visual state | Known Limit | <span class="large">Accepted group selection and trigger expanded state can precede visual completion. Outgoing and incoming members may be visible together; completion order is not guaranteed.</span> | <span class="large">Query selected() for logical membership and await show() for a completed current selection.</span> |
 | Interruption | Known Limit | <span class="large">Superseded transitions do not publish obsolete successful completion. Standalone pop() restarts from hidden; toggle(..., true) and group opening follow their documented idempotent behavior.</span> | <span class="large">Choose the matching API and handle false from invalid, refused or superseded group show() requests.</span> |
 | Progress | Known Limit | <span class="large">Interpolation requires successful property/phase registration and clamp support. Missing or duplicate registration selects bounded discrete endpoints while visual transitions remain available.</span> | <span class="large">Validate the registration path before requiring continuous progress; see Present Progress.</span> |

@@ -17,6 +17,8 @@ export function generatePresentCSS(AelluxJs) {
   const pop = AelluxJs.className("pop");
   const popping = AelluxJs.className("popping");
   const dismissing = AelluxJs.className("dismissing");
+  const dismissed = AelluxJs.className("dismissed");
+  const unpop = AelluxJs.className("unpop");
   const willChange = AelluxJs.className("will-change");
   const grid = AelluxJs.className("present-grid");
   const gridPresent = `${present}.${grid}`;
@@ -41,6 +43,10 @@ ${present} {
   --ae-dismiss-ease: ease-in;
   --ae-pop-duration: 300ms;
   --ae-dismiss-duration: 150ms;
+  --ae-present-pop-threshold: 0.5;
+  --ae-present-unpop-threshold: 0.5;
+  --ae-present-dismiss-threshold: 0.5;
+  --ae-present-gesture-distance: auto;
 
   transition-property: var(--ae-present-properties);
 }
@@ -104,10 +110,10 @@ ${presentOpacity}:is(.${popping}, .${pop}) {
 ${presentTransform}:is(.${popping}, .${pop}) {
   transform: var(--ae-pop-transform);
 }
-${presentOpacity}.${dismissing} {
+${presentOpacity}:is(.${dismissing}, .${dismissed}) {
   opacity: var(--ae-dismiss-opacity, 0);
 }
-${presentTransform}.${dismissing} {
+${presentTransform}:is(.${dismissing}, .${dismissed}) {
   transform: var(--ae-dismiss-transform);
 }
 ${present}.${pop}, ${present}.${popping} {
@@ -130,8 +136,10 @@ ${gridPresent}${presentWidth}.${popping}, ${gridPresent}${presentWidth}.${pop} {
 ${gridPresent}${presentHeight}.${popping}, ${gridPresent}${presentHeight}.${pop} {
   grid-template-rows: var(--ae-pop-height);
 }
-${gridPresent}${presentWidth}.${dismissing} { grid-template-columns: var(--ae-dismiss-width); }
-${gridPresent}${presentHeight}.${dismissing} { grid-template-rows: var(--ae-dismiss-height); }
+${gridPresent}${presentWidth}:is(.${dismissing}, .${dismissed}) { grid-template-columns: var(--ae-dismiss-width); }
+${gridPresent}${presentHeight}:is(.${dismissing}, .${dismissed}) { grid-template-rows: var(--ae-dismiss-height); }
+${measuredPresent}${presentHeight}:is(.${unpop}, .${dismissed}) { max-height: 0; }
+${measuredPresent}${presentWidth}:is(.${unpop}, .${dismissed}) { max-width: 0; }
 ${present}.${popping} {
   transition-property: var(--ae-present-properties), --ae-present-pop-phase;
 }

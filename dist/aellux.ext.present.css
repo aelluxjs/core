@@ -17,6 +17,10 @@
   --ae-dismiss-ease: ease-in;
   --ae-pop-duration: 300ms;
   --ae-dismiss-duration: 150ms;
+  --ae-present-pop-threshold: 0.5;
+  --ae-present-unpop-threshold: 0.5;
+  --ae-present-dismiss-threshold: 0.5;
+  --ae-present-gesture-distance: auto;
 
   transition-property: var(--ae-present-properties);
 }
@@ -80,10 +84,10 @@ html[data-ae-reduced-motion="reduced"] [data-ae-present] {
 [data-ae-present~="transform"]:not([data-ae-anchor]):is(.ae--popping, .ae--pop) {
   transform: var(--ae-pop-transform);
 }
-[data-ae-present~="opacity"].ae--dismissing {
+[data-ae-present~="opacity"]:is(.ae--dismissing, .ae--dismissed) {
   opacity: var(--ae-dismiss-opacity, 0);
 }
-[data-ae-present~="transform"]:not([data-ae-anchor]).ae--dismissing {
+[data-ae-present~="transform"]:not([data-ae-anchor]):is(.ae--dismissing, .ae--dismissed) {
   transform: var(--ae-dismiss-transform);
 }
 [data-ae-present].ae--pop, [data-ae-present].ae--popping {
@@ -106,8 +110,10 @@ html[data-ae-reduced-motion="reduced"] [data-ae-present] {
 [data-ae-present].ae--present-grid[data-ae-present~="height"].ae--popping, [data-ae-present].ae--present-grid[data-ae-present~="height"].ae--pop {
   grid-template-rows: var(--ae-pop-height);
 }
-[data-ae-present].ae--present-grid[data-ae-present~="width"].ae--dismissing { grid-template-columns: var(--ae-dismiss-width); }
-[data-ae-present].ae--present-grid[data-ae-present~="height"].ae--dismissing { grid-template-rows: var(--ae-dismiss-height); }
+[data-ae-present].ae--present-grid[data-ae-present~="width"]:is(.ae--dismissing, .ae--dismissed) { grid-template-columns: var(--ae-dismiss-width); }
+[data-ae-present].ae--present-grid[data-ae-present~="height"]:is(.ae--dismissing, .ae--dismissed) { grid-template-rows: var(--ae-dismiss-height); }
+[data-ae-present]:not(.ae--present-grid)[data-ae-present~="height"]:is(.ae--unpop, .ae--dismissed) { max-height: 0; }
+[data-ae-present]:not(.ae--present-grid)[data-ae-present~="width"]:is(.ae--unpop, .ae--dismissed) { max-width: 0; }
 [data-ae-present].ae--popping {
   transition-property: var(--ae-present-properties), --ae-present-pop-phase;
 }

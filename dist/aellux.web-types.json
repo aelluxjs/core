@@ -203,6 +203,43 @@
           }
         },
         {
+          "name": "data-ae-present-gesture",
+          "description": "Optional continuous pointer control of the Present opening timeline. Opposite movement reverses it with Unpop. Requires inspectable Web Animations transitions.\n\nValue syntax: enum.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm",
+          "value": {
+            "kind": "plain",
+            "type": "\"up\" | \"down\" | \"left\" | \"right\""
+          }
+        },
+        {
+          "name": "data-ae-present-gesture-dismiss",
+          "description": "Optional Dismiss direction on the other axis from the Pop gesture. Conflicts disable only gesture Dismiss.\n\nValue syntax: enum.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm",
+          "value": {
+            "kind": "plain",
+            "type": "\"up\" | \"down\" | \"left\" | \"right\""
+          }
+        },
+        {
+          "name": "data-ae-present-gesture-source",
+          "description": "Pop gesture source: an element ID, optionally prefixed with #, or document. Defaults to the Present itself. Unpop and Dismiss start on the Present.\n\nValue syntax: id.\n\nExamples: `handle`, `#handle`, `document`.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm",
+          "value": {
+            "kind": "plain",
+            "type": "string"
+          }
+        },
+        {
+          "name": "data-ae-present-gesture-unpop",
+          "description": "False disables only gesture Unpop. Programmatic Unpop remains available.\n\nValue syntax: enum.\n\nDefault behavior: \"true\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm",
+          "default": "true",
+          "value": {
+            "kind": "plain",
+            "type": "\"true\" | \"false\""
+          }
+        },
+        {
           "name": "data-ae-present-group",
           "description": "Present Group capacity: empty or 1 allows one active presentation; a positive integer sets the popNext limit. Uses closed members while capacity is available, then reuses the oldest active member without closing others. show() stays exclusive; nested groups are independent. Invalid values warn and use 1.\n\nValue syntax: positive-integer.\n\nDefault behavior: \"1\".\n\nExamples: ``, `1`, `2`, `3`.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm",
@@ -770,6 +807,26 @@
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         },
         {
+          "name": "--ae-present-dismiss-threshold",
+          "description": "Gesture release decision threshold in [0,1]. Pop completes at or above its threshold; Unpop completes at or below its threshold; Dismiss completes at or above its threshold.\n\nValue syntax: <number>.\n\nDefault behavior: \"0.5\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        },
+        {
+          "name": "--ae-present-gesture-distance",
+          "description": "Positive physical drag distance for full normalized travel. Auto uses reliable translation distance, otherwise the element dimension on the gesture axis. Read at the start of each gesture.\n\nValue syntax: auto | <length>.\n\nDefault behavior: \"auto\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        },
+        {
+          "name": "--ae-present-pop-threshold",
+          "description": "Gesture release decision threshold in [0,1]. Pop completes at or above its threshold; Unpop completes at or below its threshold; Dismiss completes at or above its threshold.\n\nValue syntax: <number>.\n\nDefault behavior: \"0.5\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        },
+        {
+          "name": "--ae-present-unpop-threshold",
+          "description": "Gesture release decision threshold in [0,1]. Pop completes at or above its threshold; Unpop completes at or below its threshold; Dismiss completes at or above its threshold.\n\nValue syntax: <number>.\n\nDefault behavior: \"0.5\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        },
+        {
           "name": "--ae-scroll-x-progress",
           "description": "Scroll progress on x, from 0 to 1.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
@@ -888,6 +945,11 @@
           "name": "ae--anchored",
           "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
+        },
+        {
+          "name": "ae--dismissed",
+          "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         },
         {
           "name": "ae--dismissing",
@@ -1053,6 +1115,11 @@
           "name": "ae--snap-suspended",
           "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
+        },
+        {
+          "name": "ae--unpop",
+          "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         },
         {
           "name": "ae--unpopping",

@@ -450,6 +450,50 @@
       ]
     },
     {
+      "name": "--ae-present-dismiss-threshold",
+      "description": "Gesture release decision threshold in [0,1]. Pop completes at or above its threshold; Unpop completes at or below its threshold; Dismiss completes at or above its threshold.\n\nValue syntax: <number>.\n\nDefault behavior: \"0.5\".",
+      "syntax": "<number>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-present-gesture-distance",
+      "description": "Positive physical drag distance for full normalized travel. Auto uses reliable translation distance, otherwise the element dimension on the gesture axis. Read at the start of each gesture.\n\nValue syntax: auto | <length>.\n\nDefault behavior: \"auto\".",
+      "syntax": "auto | <length>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-present-pop-threshold",
+      "description": "Gesture release decision threshold in [0,1]. Pop completes at or above its threshold; Unpop completes at or below its threshold; Dismiss completes at or above its threshold.\n\nValue syntax: <number>.\n\nDefault behavior: \"0.5\".",
+      "syntax": "<number>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-present-unpop-threshold",
+      "description": "Gesture release decision threshold in [0,1]. Pop completes at or above its threshold; Unpop completes at or below its threshold; Dismiss completes at or above its threshold.\n\nValue syntax: <number>.\n\nDefault behavior: \"0.5\".",
+      "syntax": "<number>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
       "name": "--ae-scroll-x-progress",
       "description": "Scroll progress on x, from 0 to 1.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
       "syntax": "<number>",

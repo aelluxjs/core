@@ -23020,7 +23020,7 @@
     }
     function _AelluxJsMount() {
       _AelluxJsMount = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee5(rootElement, extensionNames, newlyMounted) {
-        var AelluxJs2, filter, mounterSelectors, lazySelectors, _i2, _Object$entries2, _Object$entries2$_i, key, selectorString, _i3, _Object$entries3, _Object$entries3$_i, _key, _selectorString, candidatesByExtension, allElements, _iterator3, _step3, element, localExtensionNames, _i6, _Object$entries4, _Object$entries4$_i, _key2, _selector2, _i7, _Object$entries5, _Object$entries5$_i, _key3, _selector3, _iterator8, _step8, _extensionName2, candidates, extensions, loaded, _iterator4, _step4, result, registrations, index, _extensions$index, extensionName, mounter, _iterator5, _step5, _step5$value, selector, controller, elementsAffected, _i4, _registrations, _registrations$_i, _extensionName, _selector, _controller, mountableElements, _iterator6, _step6, mountable, mountId, pendingMount, _i5, _Array$from, name, finishPendingMount, elementController, _elementController, _iterator7, _step7, affected, _t3, _t4, _t5, _t6, _t7;
+        var AelluxJs2, filter, mounterSelectors, lazySelectors, _i2, _Object$entries2, _Object$entries2$_i, key, selectorString, _i3, _Object$entries3, _Object$entries3$_i, _key, _selectorString, candidatesByExtension, allElements, _iterator3, _step3, element, localExtensionNames, _i6, _Object$entries4, _Object$entries4$_i, _key2, _selector2, _i7, _Object$entries5, _Object$entries5$_i, _key3, _selector3, _iterator8, _step8, _extensionName2, candidates, extensions, loaded, _iterator4, _step4, result, registrations, index, _extensions$index, extensionName, mounter, _iterator5, _step5, _step5$value, selector, controller, elementsAffected, _i4, _registrations, _registrations$_i, _extensionName, _selector, _controller, mountableElements, _iterator6, _step6, mountable, mountId, pendingMount, presentStates, _i5, _Array$from, name, finishPendingMount, elementController, _elementController, _iterator7, _step7, affected, _t3, _t4, _t5, _t6, _t7;
         return _regenerator().w(function(_context5) {
           while (1) switch (_context5.p = _context5.n) {
             case 0:
@@ -23231,9 +23231,12 @@
               return _context5.a(3, 26);
             case 21:
               if (!isMounted(mountable)) {
+                presentStates = mountable.hasAttribute(AelluxJs2.attr("present")) ? ["pop", "unpop", "dismissed"].map(function(name2) {
+                  return AelluxJs2.className(name2);
+                }) : [];
                 for (_i5 = 0, _Array$from = Array.from(mountable.classList); _i5 < _Array$from.length; _i5++) {
                   name = _Array$from[_i5];
-                  if (name.startsWith(classPrefix)) mountable.classList.remove(name);
+                  if (name.startsWith(classPrefix) && !presentStates.includes(name)) mountable.classList.remove(name);
                 }
               }
               setMounted(mountable, mountId, true, _controller.priority);

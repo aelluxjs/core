@@ -8,6 +8,8 @@ Changes in this section are pending for the `0.1.0` release candidate.
 
 ### Added
 
+- Present optional interactive gestures now scrub the existing Pop/Unpop and independent Dismiss timelines, with direction/source configuration, CSS thresholds and distance, deterministic pointer ownership, cancellation and lifecycle cleanup. Explicit `ae--pop`, `ae--unpop` and `ae--dismissed` initial classes opt into CSS-owned closed visibility; legacy hidden closing is preserved. Added hidden-source INFO `3004`, editor metadata, documentation examples and browser regression coverage.
+
 - Present `unpop()` now reverses the captured opening trajectory back to `from`, including nonlinear easing and partially travelled duration, independently of `dismiss()`. Added the `unpop` trigger action, `ae--unpopping`, reverse lifecycle/focus events, `present.unpop` layout origin and bounded `--ae-unpop-progress`. Native fallback replays opening CSS with reverse direction and clipped time. Calling `unpop()` during an active independent dismissal returns false and preserves it. Default close controls, toggle/groups and automation still dismiss.
 
 - Added the homepage's four standalone interactive examples with runnable source disclosure, shared Bootstrap/homepage styling, a horizontal Viewport demo, an anchored carousel highlight, and fixed section navigation including Start.

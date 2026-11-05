@@ -4,6 +4,10 @@
 // Values on open grammars are suggestions, not a closed enum.
 const attribute = (name, extension, description, options = {}) => ({ name, extension, description, ...options });
 export const semanticAttributes = [
+  attribute("present-gesture", "present", "Optional continuous pointer control of the Present opening timeline. Opposite movement reverses it with Unpop. Requires inspectable Web Animations transitions.", { syntax: "enum", values: ["up", "down", "left", "right"] }),
+  attribute("present-gesture-source", "present", "Pop gesture source: an element ID, optionally prefixed with #, or document. Defaults to the Present itself. Unpop and Dismiss start on the Present.", { syntax: "id", examples: ["handle", "#handle", "document"] }),
+  attribute("present-gesture-unpop", "present", "False disables only gesture Unpop. Programmatic Unpop remains available.", { syntax: "enum", values: ["true", "false"], default: "true" }),
+  attribute("present-gesture-dismiss", "present", "Optional Dismiss direction on the other axis from the Pop gesture. Conflicts disable only gesture Dismiss.", { syntax: "enum", values: ["up", "down", "left", "right"] }),
   attribute("progress-target", "progress", "Existing progress producer ID, optionally prefixed with #. Consumes nonbubbling AelluxJsProgress { value, max } and scales value to the control's own max. Meter is not a temporal consumer.", { syntax: "id", tags: ["progress"] }),
   attribute("progress-fallback", "progress", "Internal Legacy fallback marker.", { role: "internal", syntax: "enum", values: ["progress", "meter"] }),
   attribute("viewport", "viewport", "Observes the nearest native scroll container, or the document. Publishes normalized position on the selected axes and a geometric visible area fraction. Empty and both select both axes; invalid values warn and fall back to both.", { syntax: "enum", values: ["", "both", "x", "y"], default: "both", doc: "core-extensions/viewport" }),
@@ -71,6 +75,8 @@ export const semanticAttributes = [
 
 const property = (name, extension, syntax, description, options = {}) => ({ name, extension, syntax, description, ...options });
 export const semanticCSSProperties = [
+  ...["pop", "unpop", "dismiss"].map(name => property(`present-${name}-threshold`, "present", "<number>", "Gesture release decision threshold in [0,1]. Pop completes at or above its threshold; Unpop completes at or below its threshold; Dismiss completes at or above its threshold.", { default: "0.5" })),
+  property("present-gesture-distance", "present", "auto | <length>", "Positive physical drag distance for full normalized travel. Auto uses reliable translation distance, otherwise the element dimension on the gesture axis. Read at the start of each gesture.", { default: "auto" }),
   property("unpop-progress", "present", "<number>", "Normalized progress of reverse playback, from 0 to 1. Hidden regions settle at 1; presented regions at 0. No independent unpop destination, duration or easing exists.", { role: "output" }),
   ...["height", "width"].map(dimension => property(`present-reverse-max-${dimension}`, "present", "<length>", "Private native reverse dimension interpolation.", { role: "internal" })),
   ...["opacity", "transform", "grid-template-rows", "grid-template-columns", "max-height", "max-width", "pop-phase"].flatMap(name =>

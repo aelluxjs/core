@@ -5669,13 +5669,13 @@
         initialValue: "0px"
       })));
     }
-    function capture(element, controller, apply, size, progress) {
+    function capture(element, controller, apply, size, progress, direction = "pop") {
       var _a, _b;
       const computed = root2.getComputedStyle(element);
       const tracks = properties(element, controller, progress).map((property) => {
         const dimension = /rows|height/.test(property) ? "height" : "width";
-        const to = property === "--ae-present-pop-phase" ? "1" : property.startsWith("max-") ? `${size[dimension]}px` : computed.getPropertyValue(`--ae-pop-${property.startsWith("grid") ? dimension : property}`).trim();
-        const from = property.startsWith("grid") ? computed.getPropertyValue(`--ae-from-${dimension}`).trim() : computed.getPropertyValue(property).trim();
+        const to = property === "--ae-present-pop-phase" ? "1" : property.startsWith("max-") ? `${direction === "pop" ? size[dimension] : 0}px` : computed.getPropertyValue(`--ae-${direction}-${property.startsWith("grid") ? dimension : property}`).trim();
+        const from = property.startsWith("grid") ? computed.getPropertyValue(`--ae-${direction === "pop" ? "from" : "pop"}-${dimension}`).trim() : computed.getPropertyValue(property).trim();
         return { property, from, to };
       });
       const before = animations(element);
@@ -5690,13 +5690,13 @@
         track.easing = index < 0 ? "linear" : easings[index % easings.length];
       }
       const after = animations(element);
-      const advanced = style.getPropertyValue("--ae-pop-aellux-ease").trim();
+      const advanced = style.getPropertyValue(`--ae-${direction}-aellux-ease`).trim();
       const curve = advanced && ((_a = api.motion) == null ? void 0 : _a.supported(element)) ? sampleCssEasing(api, advanced) : null;
       return {
         tracks,
         effects: after == null ? void 0 : after.filter((effect) => !(before == null ? void 0 : before.includes(effect)) && tracks.some((track) => track.property === effect.transitionProperty)),
         advancedEasing: curve && ((_b = root2.CSS) == null ? void 0 : _b.supports("animation-timing-function", curve)) ? curve : null,
-        nativeEasing: style.getPropertyValue("--ae-pop-ease").trim(),
+        nativeEasing: style.getPropertyValue(`--ae-${direction}-ease`).trim(),
         start: now(),
         completed: false
       };
@@ -5742,7 +5742,7 @@
       if (record.effects) {
         return record.effects.map((animation) => {
           const timing = animation.effect.getTiming();
-          if (record.advancedEasing && timing.easing.startsWith("linear(")) timing.easing = record.advancedEasing;
+          if (record.advancedEasing) timing.easing = record.advancedEasing;
           else if (/^linear\(/i.test(record.nativeEasing || "") && timing.easing.startsWith("linear(")) timing.easing = record.nativeEasing;
           const duration = Number(timing.duration);
           const time = record.completed ? duration : Math.max(0, Math.min(duration, Number(animation.currentTime) - timing.delay));
@@ -5772,7 +5772,7 @@
       const tracks = snapshot(element, controller, progress);
       controller.opening = { completed: true, start: now(), tracks: [], effects: null, saved: tracks };
     }
-    function reverse(element, tracks, progress) {
+    function reverse(element, tracks, progress, interactive = false) {
       const duration = Math.max(0, ...tracks.map((track) => track.time));
       const owned = [...new Set(tracks.map((track) => track.property))];
       const privateProperties = owned.flatMap((property) => ["from", "to"].map((phase) => `--ae-present-reverse-${phase}-${suffix(property)}`));
@@ -5804,14 +5804,15 @@
             animation.effect.setKeyframes(track.frames);
             animation.effect.updateTiming({
               duration: track.duration,
-              easing: track.timing.easing || "linear",
-              delay: track.time - track.duration,
-              direction: "reverse",
+              easing: interactive ? "linear" : track.timing.easing || "linear",
+              delay: interactive ? 0 : track.time - track.duration,
+              direction: interactive ? "normal" : "reverse",
               fill: "both",
               iterations: 1,
               iterationStart: 0,
               endDelay: 0
             });
+            if (interactive) animation.pause();
             animation.currentTime = 0;
           }
         } else {
@@ -5840,7 +5841,7 @@
           }
           animationProperties.forEach((name, index) => style.setProperty(`animation-${name}`, [previous[index], ...additions[index]].join(","), "important"));
         }
-        if (progress) {
+        if (progress && !interactive) {
           style.setProperty("--ae-unpop-progress", "0");
           element.getBoundingClientRect();
           const computed = root2.getComputedStyle(element);
@@ -5852,14 +5853,99 @@
           style.setProperty("--ae-unpop-progress", "1");
         }
       }
-      return { duration, apply, cleanup() {
-        for (const animation of effects) animation.cancel();
-        effects = [];
-        memory == null ? void 0 : memory.restore();
-        memory = null;
-      } };
+      return {
+        duration,
+        apply,
+        seek(value) {
+          for (const effect of effects) effect.currentTime = value * Number(effect.effect.getTiming().duration);
+        },
+        playTo(target) {
+          for (const animation of effects) {
+            const track = tracks.find((track2) => track2.property === animation.transitionProperty);
+            const timing = animation.effect.getTiming();
+            const value = Number(animation.currentTime) / Number(timing.duration);
+            animation.effect.updateTiming({ easing: track.timing.easing || "linear" });
+            let best = value, error = Infinity;
+            const evaluate = (fraction) => {
+              animation.currentTime = fraction * track.duration;
+              return animation.effect.getComputedTiming().progress;
+            };
+            let previous = evaluate(0), previousTime = 0;
+            for (let index = 1; index <= 120; index++) {
+              const time = index / 120, next = evaluate(time);
+              if ((previous - value) * (next - value) <= 0) {
+                let low = previousTime, high = time, lowValue = previous;
+                for (let step = 0; step < 20; step++) {
+                  const middle = (low + high) / 2, result = evaluate(middle);
+                  if ((lowValue - value) * (result - value) <= 0) high = middle;
+                  else {
+                    low = middle;
+                    lowValue = result;
+                  }
+                }
+                const candidate = (low + high) / 2;
+                if (Math.abs(candidate - value) < error) {
+                  best = candidate;
+                  error = Math.abs(candidate - value);
+                }
+              }
+              previous = next;
+              previousTime = time;
+            }
+            if (value !== 0 && value !== 1 && Math.abs(evaluate(best) - value) > 1e-4) {
+              animation.effect.updateTiming({ easing: "linear" });
+              best = value;
+            }
+            animation.currentTime = (value === 0 || value === 1 ? value : best) * track.duration;
+            animation.playbackRate = target ? 1 : -1;
+            animation.play();
+            if (value === target) animation.finish();
+          }
+          return Promise.all(effects.map((effect) => effect.finished));
+        },
+        cleanup() {
+          for (const animation of effects) animation.cancel();
+          effects = [];
+          memory == null ? void 0 : memory.restore();
+          memory = null;
+        }
+      };
     }
-    return { init, capture, snapshot: (element, controller, progress) => {
+    function full(element, controller, progress) {
+      var _a;
+      if ((_a = controller.opening) == null ? void 0 : _a.saved) return controller.opening.saved;
+      const record = controller.opening;
+      if (record) {
+        const completed = record.completed;
+        record.completed = true;
+        try {
+          return snapshot(element, controller, progress);
+        } finally {
+          record.completed = completed;
+        }
+      }
+      return snapshot(element, controller, progress);
+    }
+    function control(element, source, dismiss, progress, unpop) {
+      var _a;
+      const tracks = source.filter((track) => !track.property.startsWith("--ae-"));
+      const duration = Math.max(0, ...tracks.map((track) => track.duration));
+      const easing = ((_a = tracks[0]) == null ? void 0 : _a.timing.easing) || "linear";
+      const channels = progress ? ["--ae-present-pop-phase", "--ae-present-dismiss-phase", "--ae-pop-progress", "--ae-dismiss-progress"] : [];
+      if (unpop) channels.push("--ae-unpop-progress");
+      for (const property of channels) {
+        const forward = property.includes("dismiss") ? dismiss : property.includes("unpop") ? dismiss : !dismiss;
+        tracks.push({
+          property,
+          duration,
+          time: duration,
+          timing: { easing },
+          frames: [{ [property]: forward ? "0" : "1" }, { [property]: forward ? "1" : "0" }]
+        });
+      }
+      return reverse(element, tracks, false, true);
+    }
+    return { init, capture, full, control, snapshot: (element, controller, progress) => {
       var _a;
       return ((_a = controller.opening) == null ? void 0 : _a.saved) || snapshot(element, controller, progress);
     }, complete, reverse };
@@ -5887,11 +5973,294 @@
     }
   });
 
+  // src/internal/create-present-gestures.js
+  function createPresentGestures(root2, api, services) {
+    const entries = /* @__PURE__ */ new Map(), sources = /* @__PURE__ */ new Map();
+    let interaction = null, suppressed = null, suppressTimer = null;
+    const attribute = (name) => api.attr(`present-gesture${name ? `-${name}` : ""}`);
+    const warn = (element, name, value, reason) => api.diagnostics.warn(
+      api.diagnostics.WARN_CONFIGURATION_VALUE,
+      { extension: "present", element, attribute: name, value, reason }
+    );
+    const state = (element) => services.state(element);
+    function update(element) {
+      var _a, _b;
+      if (!element.hasAttribute(attribute(""))) {
+        remove(element);
+        return;
+      }
+      const signature = ["", "source", "unpop", "dismiss"].map((name) => element.getAttribute(attribute(name))).join("|");
+      const direction = element.getAttribute(attribute(""));
+      if (!directions[direction]) {
+        remove(element);
+        warn(element, attribute(""), direction, "Use up, down, left or right.");
+        return;
+      }
+      const value = element.getAttribute(attribute("source"));
+      const id = value == null ? void 0 : value.replace(/^#/, "");
+      const source = value === "document" ? root2.document : value ? !/[\s#]/.test(id) && root2.document.getElementById(id) : element;
+      if (((_a = entries.get(element)) == null ? void 0 : _a.signature) === signature && ((_b = entries.get(element)) == null ? void 0 : _b.source) === source) return;
+      remove(element);
+      if (!source) {
+        api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_TARGET, {
+          extension: "present",
+          element,
+          attribute: attribute("source"),
+          value,
+          reason: "Gesture source ID was not found."
+        });
+        return;
+      }
+      let dismiss = element.getAttribute(attribute("dismiss"));
+      if (dismiss && (!directions[dismiss] || directions[dismiss][0] === directions[direction][0])) {
+        warn(element, attribute("dismiss"), dismiss, "Dismiss must use a direction on the other axis.");
+        dismiss = null;
+      }
+      const unpop = element.getAttribute(attribute("unpop"));
+      if (unpop !== null && !["", "true", "false"].includes(unpop))
+        warn(element, attribute("unpop"), unpop, "Use true or false; invalid values enable gesture Unpop.");
+      const entry = { element, source, direction, dismiss, unpop: unpop !== "false", signature };
+      entries.set(element, entry);
+      for (const target of /* @__PURE__ */ new Set([source, element])) {
+        if (!sources.has(target)) {
+          sources.set(target, /* @__PURE__ */ new Set());
+          target.addEventListener("pointerdown", down);
+        }
+        sources.get(target).add(entry);
+      }
+      inspect(element);
+    }
+    function inspect(element) {
+      var _a;
+      if (((_a = entries.get(element)) == null ? void 0 : _a.source) === element && root2.getComputedStyle(element).display === "none")
+        api.diagnostics.info(api.diagnostics.INFO_PRESENT_GESTURE_HIDDEN, { extension: "present", element });
+    }
+    function remove(element) {
+      var _a;
+      const entry = entries.get(element);
+      if (!entry) return;
+      if (((_a = interaction == null ? void 0 : interaction.owner) == null ? void 0 : _a.entry) === entry || (interaction == null ? void 0 : interaction.candidates.some((candidate) => candidate.entry === entry))) cancel();
+      entries.delete(element);
+      for (const target of /* @__PURE__ */ new Set([entry.source, element])) {
+        const set = sources.get(target);
+        set.delete(entry);
+        if (!set.size) {
+          target.removeEventListener("pointerdown", down);
+          sources.delete(target);
+        }
+      }
+    }
+    function down(event) {
+      if (interaction && interaction.id !== event.pointerId) {
+        cancel();
+        return;
+      }
+      if (event.button !== 0 || event.isPrimary === false || event.defaultPrevented) return;
+      const target = event.target;
+      if (!target.closest || target.closest("input,textarea,select,button,a,[contenteditable]:not([contenteditable=false]),[data-ae-scrollbox]")) return;
+      if (!interaction) {
+        interaction = { id: event.pointerId, x: event.clientX, y: event.clientY, candidates: [], owner: null, target };
+        for (const name of ["pointermove", "pointerup", "pointercancel", "lostpointercapture"])
+          root2.document.addEventListener(name, move, { capture: true, passive: false });
+      }
+      for (const entry of sources.get(event.currentTarget) || []) {
+        if (interaction.candidates.some((candidate) => candidate.entry === entry)) continue;
+        const origin = state(entry.element);
+        const onElement = entry.element.contains(target);
+        const onSource = entry.source === root2.document || entry.source.contains(target);
+        if (services.busy(entry.element)) continue;
+        if (origin === "Pop" ? onElement : onSource)
+          interaction.candidates.push({ entry, origin });
+      }
+    }
+    function parameters(element, axis) {
+      const style = root2.getComputedStyle(element);
+      const thresholds = {};
+      for (const name of ["pop", "unpop", "dismiss"]) {
+        const property2 = `--ae-present-${name}-threshold`, raw2 = style.getPropertyValue(property2).trim();
+        const value = raw2 === "" ? 0.5 : Number(raw2);
+        thresholds[name] = Number.isFinite(value) && value >= 0 && value <= 1 ? value : 0.5;
+        if (thresholds[name] !== value) warn(element, property2, raw2, "Use a number between 0 and 1; using 0.5.");
+      }
+      const property = "--ae-present-gesture-distance", raw = style.getPropertyValue(property).trim();
+      let distance = 0;
+      if (raw && raw !== "auto") {
+        const probe = root2.document.createElement("span");
+        probe.style.cssText = "position:absolute;visibility:hidden;pointer-events:none;padding:0;border:0;min-width:0;max-width:none;height:0;";
+        probe.style.fontSize = style.fontSize;
+        probe.style.width = raw;
+        if (probe.style.width && !raw.includes("%")) {
+          element.appendChild(probe);
+          distance = parseFloat(root2.getComputedStyle(probe).width);
+          probe.remove();
+        }
+        if (!(distance > 0)) warn(element, property, raw, "Use a positive CSS length or auto; using auto.");
+      }
+      return __spreadProps(__spreadValues({}, thresholds), {
+        distance: distance > 0 ? distance : 0,
+        fallback: Math.max(1, axis === "x" ? element.offsetWidth : element.offsetHeight)
+      });
+    }
+    function move(event) {
+      var _a;
+      const current = interaction;
+      if (!current || current.id !== event.pointerId) return;
+      if (event.type !== "pointermove") {
+        release(event.type !== "pointerup");
+        return;
+      }
+      const x = event.clientX - current.x, y = event.clientY - current.y;
+      if (!current.owner) {
+        if (Math.max(Math.abs(x), Math.abs(y)) < 8) return;
+        const axis = Math.abs(x) > Math.abs(y) * 1.2 ? "x" : Math.abs(y) > Math.abs(x) * 1.2 ? "y" : null;
+        if (!axis) return;
+        const delta = axis === "x" ? x : y;
+        const candidates = current.candidates.filter((candidate2) => {
+          const { entry, origin } = candidate2;
+          if (!entry.element.isConnected || state(entry.element) !== origin || services.busy(entry.element)) return false;
+          const main = directions[entry.direction], dismiss = directions[entry.dismiss];
+          candidate2.dismiss = origin === "Pop" && (dismiss == null ? void 0 : dismiss[0]) === axis && delta * dismiss[1] > 0;
+          candidate2.sign = candidate2.dismiss ? dismiss[1] : main[1];
+          return candidate2.dismiss || main[0] === axis && (origin === "Pop" ? entry.unpop && delta * main[1] < 0 : delta * main[1] > 0);
+        });
+        candidates.sort((a, b) => {
+          const left = a.origin === "Pop" ? a.entry.element : a.entry.source;
+          const right = b.origin === "Pop" ? b.entry.element : b.entry.source;
+          if (left !== right) {
+            if (left.contains(right)) return 1;
+            if (right.contains(left)) return -1;
+          }
+          return services.order(b.entry.element) - services.order(a.entry.element);
+        });
+        const candidate = candidates[0];
+        if (!candidate || nativeScroll(current.target, candidate.entry.element, axis, delta)) {
+          clear();
+          return;
+        }
+        if (!((_a = root2.KeyframeEffect) == null ? void 0 : _a.prototype.setKeyframes) || !candidate.entry.element.getAnimations) {
+          warn(candidate.entry.element, attribute(""), candidate.entry.direction, "Interactive Present requires inspectable Web Animations transitions.");
+          clear();
+          return;
+        }
+        const params = parameters(candidate.entry.element, axis);
+        let resolve;
+        const settled = new Promise((done) => {
+          resolve = done;
+        });
+        const owner2 = current.owner = __spreadProps(__spreadValues({}, candidate), {
+          params,
+          axis,
+          displacement: 0,
+          progress: candidate.dismiss ? 0 : candidate.origin === "Pop" ? 1 : 0,
+          handle: null,
+          released: null,
+          settled,
+          attach(handle, autoDistance) {
+            this.handle = handle;
+            if (!params.distance) params.distance = autoDistance || Math.max(1, axis === "x" ? this.entry.element.offsetWidth : this.entry.element.offsetHeight);
+            this.progress = clamp(this.start + this.displacement / params.distance);
+            this.seek();
+            if (this.released !== null) this.finish(this.released);
+          },
+          seek() {
+            var _a2;
+            (_a2 = this.handle) == null ? void 0 : _a2.seek(this.progress);
+          },
+          finish(cancelled) {
+            this.released = cancelled;
+            if (!this.handle) return;
+            const target = cancelled ? this.dismiss ? 0 : this.origin === "Pop" ? 1 : 0 : this.dismiss ? +(this.progress >= params.dismiss) : this.origin === "Pop" ? +(this.progress > params.unpop) : +(this.progress >= params.pop);
+            const destination = this.dismiss ? target ? "Dismiss" : this.origin : target ? "Pop" : this.origin === "Dismiss" ? "Dismiss" : "Unpop";
+            this.handle.playTo(target).then(() => resolve(destination), () => resolve(null));
+          },
+          abort() {
+            resolve(null);
+            if ((interaction == null ? void 0 : interaction.owner) === this) clear();
+          }
+        });
+        owner2.start = owner2.progress;
+        services.begin(candidate.entry.element, candidate.dismiss ? "Dismiss" : candidate.origin === "Pop" ? "Unpop" : "Pop", owner2);
+        if (interaction !== current) return;
+        try {
+          current.target.setPointerCapture(event.pointerId);
+          current.captured = true;
+        } catch (_) {
+        }
+      }
+      const owner = current.owner;
+      const displacement = (owner.axis === "x" ? x : y) * owner.sign;
+      owner.displacement = displacement;
+      owner.progress = clamp(owner.start + displacement / (owner.params.distance || owner.params.fallback));
+      owner.seek();
+      if (event.cancelable) event.preventDefault();
+    }
+    function nativeScroll(target, element, axis, delta) {
+      for (let current = target; current && current !== element && current !== root2.document; current = current.parentElement) {
+        const style = root2.getComputedStyle(current);
+        if (!/auto|scroll/.test(axis === "x" ? style.overflowX : style.overflowY)) continue;
+        const position = axis === "x" ? current.scrollLeft : current.scrollTop;
+        const maximum = axis === "x" ? current.scrollWidth - current.clientWidth : current.scrollHeight - current.clientHeight;
+        if (maximum > 0 && (delta < 0 ? position < maximum : position > 0)) return true;
+      }
+      return false;
+    }
+    function release(cancelled) {
+      const owner = interaction == null ? void 0 : interaction.owner;
+      if (owner) {
+        owner.finish(cancelled);
+        suppressed = interaction.target;
+        clearTimeout(suppressTimer);
+        root2.document.addEventListener("click", click, true);
+        suppressTimer = setTimeout(clearClick, 500);
+      }
+      clear();
+    }
+    function click(event) {
+      if (!suppressed || !(suppressed === event.target || suppressed.contains(event.target) || event.target.contains(suppressed))) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      clearClick();
+    }
+    function clearClick() {
+      clearTimeout(suppressTimer);
+      suppressTimer = null;
+      suppressed = null;
+      root2.document.removeEventListener("click", click, true);
+    }
+    function clear() {
+      const previous = interaction;
+      interaction = null;
+      for (const name of ["pointermove", "pointerup", "pointercancel", "lostpointercapture"])
+        root2.document.removeEventListener(name, move, true);
+      if (previous == null ? void 0 : previous.captured) try {
+        previous.target.releasePointerCapture(previous.id);
+      } catch (_) {
+      }
+    }
+    function cancel() {
+      release(true);
+    }
+    return { update, remove, inspect, destroy() {
+      cancel();
+      for (const element of [...entries.keys()]) remove(element);
+      clearClick();
+    } };
+  }
+  var directions, clamp;
+  var init_create_present_gestures = __esm({
+    "src/internal/create-present-gestures.js"() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+      directions = { up: ["y", -1], down: ["y", 1], left: ["x", -1], right: ["x", 1] };
+      clamp = (value) => Math.max(0, Math.min(1, value));
+    }
+  });
+
   // src/aellux.ext.present.js
   var aellux_ext_present_exports = {};
   var init_aellux_ext_present = __esm({
     "src/aellux.ext.present.js"() {
       init_create_present_playback();
+      init_create_present_gestures();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
@@ -5921,6 +6290,8 @@
           popping: AelluxJs2.className("popping"),
           dismissing: AelluxJs2.className("dismissing"),
           unpopping: AelluxJs2.className("unpopping"),
+          unpop: AelluxJs2.className("unpop"),
+          dismissed: AelluxJs2.className("dismissed"),
           willChange: AelluxJs2.className("will-change"),
           grid: AelluxJs2.className("present-grid")
         };
@@ -5961,6 +6332,29 @@
         let interpolatedProgress = false;
         let interpolatedUnpop = false;
         const playback = createPresentPlayback(root2, AelluxJs2);
+        const gestures = createPresentGestures(root2, AelluxJs2, {
+          state: (element) => {
+            var _a;
+            return (_a = presentElements.get(element)) == null ? void 0 : _a.state;
+          },
+          busy: (element) => {
+            var _a;
+            return !!((_a = presentElements.get(element)) == null ? void 0 : _a.transition);
+          },
+          order: (element) => {
+            var _a;
+            return ((_a = presentElements.get(element)) == null ? void 0 : _a.presentationOrder) || 0;
+          },
+          begin(element, direction, gesture) {
+            const controller = presentElements.get(element);
+            controller.gestureRequest = gesture;
+            presentTransition(element, direction === POP, false, false, void 0, direction).finally(() => {
+              if (controller.gestureRequest === gesture) controller.gestureRequest = null;
+              if (controller.gesture !== gesture) gesture.abort();
+            });
+            if (!controller.transition) gesture.abort();
+          }
+        });
         let autoObserver = null;
         let presentationSequence = 0;
         const cssProperties = [
@@ -6023,10 +6417,20 @@
           autoObserver = new root2.MutationObserver((records) => {
             for (const record of records) {
               const controller = presentElements.get(record.target);
-              if (controller) autoDismissSchedule(record.target, controller);
+              if (controller) {
+                if (record.attributeName !== attr.autoDismiss) gestures.update(record.target);
+                autoDismissSchedule(record.target, controller);
+              }
+            }
+            if (records.some((record) => record.type === "childList" || record.attributeName === "id")) {
+              for (const element of presentElements.keys()) if (element.hasAttribute(AelluxJs2.attr("present-gesture-source"))) gestures.update(element);
             }
           });
-          autoObserver.observe(document, { subtree: true, attributes: true, attributeFilter: [attr.autoDismiss] });
+          autoObserver.observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: [
+            attr.autoDismiss,
+            "id",
+            ...["", "-source", "-unpop", "-dismiss"].map((suffix2) => AelluxJs2.attr(`present-gesture${suffix2}`))
+          ] });
           document.addEventListener("pointerover", onHover);
           document.addEventListener("pointerout", onHover);
           AelluxJs2.on("$click", OnClick);
@@ -6034,6 +6438,7 @@
           AelluxJs2.onEvent(root2, "$resize", refreshExpandedStates);
         }
         function destroy() {
+          gestures.destroy();
           autoObserver == null ? void 0 : autoObserver.disconnect();
           autoObserver = null;
           AelluxJs2.mountManager.remove({ extensionName });
@@ -6068,6 +6473,8 @@
             ]
           ));
           containerAriaHandlers.set(element, AelluxJs2.aria.register(element));
+          const initialState = element.classList.contains(className.dismissed) ? DISMISS : element.classList.contains(className.unpop) || element.hidden ? UNPOP : POP;
+          const legacyHidden = element.hidden || ![className.pop, className.unpop, className.dismissed].some((name) => element.classList.contains(name));
           if ((element.getAttribute(attr.present) || "").trim().toLowerCase() === "all") {
             element.setAttribute(attr.present, DEFAULT_PRESENT);
           }
@@ -6086,6 +6493,11 @@
             );
           }
           const presentController = {
+            state: initialState,
+            legacyHidden,
+            initialClasses: [className.pop, className.unpop, className.dismissed].filter((name) => element.classList.contains(name)),
+            gesture: null,
+            gestureRequest: null,
             presentMotion,
             measuredHeight,
             measuredWidth,
@@ -6099,10 +6511,10 @@
             presentationOrder: element.hidden ? 0 : ++presentationSequence,
             autoDismissTimeout: null,
             autoCountdown: null,
-            direction: null,
+            direction: initialState,
             classList: element.classList,
             triggers: /* @__PURE__ */ new Set(),
-            triggerExpanded: !element.hidden,
+            triggerExpanded: initialState === POP,
             setAriaExpanded: function(value) {
               this.expanded = value === "true";
               containerAriaHandlers.get(element).set({ expanded: this.expanded });
@@ -6112,7 +6524,9 @@
               this.triggers.forEach(updateTriggerAriaExpanded);
             },
             stop: function(options = {}) {
-              var _a;
+              var _a, _b, _c;
+              (_a = this.gesture) == null ? void 0 : _a.abort();
+              this.gesture = null;
               const replacement = options.replacement === true;
               const transitionStart = options.transitionStart === true;
               const transition = this.transition;
@@ -6136,8 +6550,10 @@
                 );
               }
               cancelAutoDismiss(this);
-              (_a = this.reverse) == null ? void 0 : _a.cleanup();
+              (_b = this.reverse) == null ? void 0 : _b.cleanup();
               this.reverse = null;
+              (_c = this.gestureDisplay) == null ? void 0 : _c.restore();
+              this.gestureDisplay = null;
               restoreHandoff(this);
               if (transitionStart) {
                 this.classList.remove(className.dismissing, className.unpopping);
@@ -6153,8 +6569,8 @@
               if (!replacement) restoreMeasuredStyles(element, this);
             }
           };
-          if (!element.hidden) {
-            presentController.classList.add(className.pop);
+          establishState(element, presentController, initialState);
+          if (initialState === POP) {
             openPresentElements.add(element);
           }
           presentElements.set(element, presentController);
@@ -6172,21 +6588,25 @@
               refreshTriggerTargets(triggerElement);
             }
           }
-          setProgress(element, !element.hidden);
+          setProgress(element, initialState === POP);
           syncAriaExpanded(element, presentController);
           queueGroups();
           autoDismissSchedule(element, presentController);
+          gestures.update(element);
         }
         function unmountPresentContainer(element) {
           var _a, _b, _c;
           if (!presentElements.has(element)) return;
           cancelElementTaps(element);
           const controller = presentElements.get(element);
+          gestures.remove(element);
           cancelHoverClose(element);
           for (const button of controller.triggers) hoveredTriggers.delete(button);
           controller.stop();
           (_a = AelluxJs2.waitLayout) == null ? void 0 : _a.cancel(controller.motionId);
           element.classList.remove(className.grid);
+          element.classList.remove(className.pop, className.unpop, className.dismissed);
+          element.classList.add(...controller.initialClasses);
           presentElements.delete(element);
           openPresentElements.delete(element);
           (_b = containerAriaHandlers.get(element)) == null ? void 0 : _b.release();
@@ -6393,6 +6813,8 @@
           if (gotoVisible || !previousSize) measuredMemories.get(element).restore();
           let size = previousSize;
           if (gotoVisible || !size) {
+            const states = [className.unpop, className.dismissed].filter((name) => element.classList.contains(name));
+            if (gotoVisible) element.classList.remove(...states);
             const computed = root2.getComputedStyle(element);
             const height = parseFloat(computed.height);
             const width = parseFloat(computed.width);
@@ -6400,6 +6822,7 @@
               height: Number.isFinite(height) ? height : element.scrollHeight,
               width: Number.isFinite(width) ? width : element.scrollWidth
             };
+            if (gotoVisible) element.classList.add(...states);
           }
           const start = previousSize || (gotoVisible ? { height: 0, width: 0 } : size);
           if (controller.measuredHeight) {
@@ -6416,9 +6839,10 @@
           return size;
         }
         async function presentTransition(element, gotoVisible, forceRepop = false, groupOperation = false, presentationOrder, closingDirection = DISMISS) {
-          var _a, _b, _c;
+          var _a, _b, _c, _d, _e;
           const controller = presentElements.get(element);
           if (!controller) return;
+          const gesture = controller.gestureRequest;
           const reversing = closingDirection === UNPOP && gotoVisible === false;
           if (reversing && controller.direction === DISMISS && controller.transition) return false;
           if (controller.direction === null)
@@ -6443,7 +6867,7 @@
           const hasCapacity = () => groupOperation || element === group || !gotoVisible || !(groupState == null ? void 0 : groupState.accumulating) || groupMemberActive(element, groupState) || activeGroupMembers(group, groupState).length < groupLimit(group, groupState);
           if (!hasCapacity()) return false;
           const newDirection = gotoVisible ? POP : closingDirection;
-          if (element.hidden && !gotoVisible || newDirection === controller.direction && !forceRepop) {
+          if (controller.state !== POP && !controller.transition && !gotoVisible || newDirection === controller.direction && !forceRepop) {
             if (!controller.transition) syncAriaExpanded(element, controller);
             return;
           }
@@ -6460,7 +6884,7 @@
             if (!hasCapacity()) return false;
             controller.operationRevision++;
             const impliedReverse = reversing && !controller.opening && !controller.transition;
-            const reverseTracks = reversing && controller.motionEnabled && ((_a = AelluxJs2.currentPreference) == null ? void 0 : _a.call(AelluxJs2, "reduced-motion")) !== "reduced" ? playback.snapshot(element, controller, interpolatedProgress) : [];
+            const reverseTracks = reversing && controller.motionEnabled && ((_a = AelluxJs2.currentPreference) == null ? void 0 : _a.call(AelluxJs2, "reduced-motion")) !== "reduced" ? gesture ? playback.full(element, controller, false) : playback.snapshot(element, controller, interpolatedProgress) : [];
             if (gotoVisible) controller.opening = null;
             if (gotoVisible) controller.presentationOrder = presentationOrder === void 0 ? ++presentationSequence : presentationOrder;
             if (!gotoVisible || !groupOperation) (_b = groups.get(group)) == null ? void 0 : _b.reservations.delete(element);
@@ -6472,9 +6896,9 @@
               element.getBoundingClientRect();
             }
             const reusePreparation = !forceRepop && controller.motionEnabled && controller.transition !== null && controller.classList.contains(className.willChange);
-            const waitForPreparation = controller.motionEnabled && !reusePreparation && !reversing;
+            const waitForPreparation = !gesture && controller.motionEnabled && !reusePreparation && !reversing;
             let previousSize = null;
-            const handoff = !gotoVisible && controller.motionEnabled ? captureHandoff(element, controller) : null;
+            const handoff = !gesture && !gotoVisible && controller.motionEnabled ? captureHandoff(element, controller) : null;
             if (handoff && (controller.measuredHeight || controller.measuredWidth)) {
               const computed = root2.getComputedStyle(element);
               previousSize = {
@@ -6486,8 +6910,10 @@
               controller.stop({ replacement: !!handoff || reusePreparation, transitionStart: true });
             }
             controller.handoff = handoff;
+            controller.gestureRequest = null;
+            controller.gesture = gesture;
             controller.direction = newDirection;
-            if (reversing) controller.reverse = playback.reverse(element, reverseTracks, interpolatedUnpop);
+            if (reversing) controller.reverse = gesture ? playback.control(element, reverseTracks, false, interpolatedProgress, interpolatedUnpop) : playback.reverse(element, reverseTracks, interpolatedUnpop);
             controller.setTriggerExpanded(gotoVisible);
             if (!handoff) {
               setPhase(element, "pop", "0");
@@ -6509,6 +6935,10 @@
             interrupted.catch(() => {
             });
             element.hidden = false;
+            if (gesture && root2.getComputedStyle(element).display === "none") {
+              controller.gestureDisplay = AelluxJs2.persist.element.save(element, [], ["display"]);
+              element.style.setProperty("display", controller.presentMotion ? "inline-grid" : "block", "important");
+            }
             openPresentElements.add(element);
             let size = null;
             if (!reversing && (controller.measuredHeight || controller.measuredWidth))
@@ -6517,7 +6947,7 @@
                 controller,
                 gotoVisible,
                 previousSize,
-                waitForPreparation
+                waitForPreparation || !!gesture
               );
             if (controller.transition !== transition) return;
             if (controller.motionEnabled) {
@@ -6538,6 +6968,8 @@
             const timeMs = reversing ? controller.reverse.duration : getString2Time(duration);
             const applyDestination = () => {
               controller.classList.remove(
+                className.unpop,
+                className.dismissed,
                 className.pop,
                 className.popping,
                 className.dismissing,
@@ -6561,6 +6993,58 @@
             };
             const activateTransition = () => {
               if (controller.transition !== transition) return;
+              if (gesture) {
+                let tracks = reverseTracks;
+                if (!reversing) {
+                  const opening = controller.opening;
+                  controller.opening = playback.capture(element, controller, applyDestination, size, gotoVisible && interpolatedProgress, gotoVisible ? "pop" : "dismiss");
+                  tracks = playback.full(element, controller, false);
+                  controller.opening = gotoVisible ? { saved: tracks, completed: true } : opening;
+                  controller.reverse = playback.control(element, tracks, gesture.dismiss, interpolatedProgress, interpolatedUnpop);
+                }
+                controller.classList.remove(className.pop, className.unpop, className.dismissed, className.popping, className.unpopping, className.dismissing);
+                controller.classList.add(transition.className);
+                controller.reverse.apply();
+                let distance = 0;
+                const transform = tracks == null ? void 0 : tracks.find((track) => track.property === "transform");
+                if (transform) try {
+                  const frames = transform.frames;
+                  const from = new root2.DOMMatrix(frames[0].transform), to = new root2.DOMMatrix(frames[frames.length - 1].transform);
+                  distance = Math.abs(gesture.axis === "x" ? to.m41 - from.m41 : to.m42 - from.m42);
+                } catch (_) {
+                }
+                let previous = gesture.progress;
+                gesture.attach({
+                  seek(value) {
+                    if (controller.transition !== transition) return;
+                    controller.reverse.seek(value);
+                    if (!gesture.dismiss && value !== previous) {
+                      transition.className = value > previous ? className.popping : className.unpopping;
+                      controller.classList.remove(className.popping, className.unpopping);
+                      controller.classList.add(transition.className);
+                    }
+                    previous = value;
+                    const popValue = gesture.dismiss ? 1 - value : value;
+                    if (!interpolatedProgress) {
+                      setPhase(element, "pop", String(popValue));
+                      setPhase(element, "dismiss", String(gesture.dismiss ? value : 1 - value));
+                      element.style.setProperty("--ae-pop-progress", String(popValue));
+                      element.style.setProperty("--ae-dismiss-progress", String(gesture.dismiss ? value : 1 - value));
+                    }
+                    if (!interpolatedUnpop) element.style.setProperty("--ae-unpop-progress", String(1 - popValue));
+                  },
+                  playTo(target) {
+                    if (controller.transition !== transition) return Promise.reject();
+                    if (!gesture.dismiss) {
+                      transition.className = target ? className.popping : className.unpopping;
+                      controller.classList.remove(className.popping, className.unpopping);
+                      controller.classList.add(transition.className);
+                    }
+                    return controller.reverse.playTo(target);
+                  }
+                }, distance);
+                return;
+              }
               if (reversing) {
                 handoff == null ? void 0 : handoff.memory.restore();
                 if (interpolatedProgress)
@@ -6599,7 +7083,7 @@
               maxFPS: AelluxJs2.layoutMaxFPS ? AelluxJs2.layoutMaxFPS(element) : void 0,
               abort: () => controller.transition !== transition || !element.isConnected
             };
-            const completed = AelluxJs2.motion ? AelluxJs2.motion.run(element, motionOptions) : legacyMotionRun(motionOptions, transition);
+            const completed = gesture ? (activateTransition(), gesture.settled) : AelluxJs2.motion ? AelluxJs2.motion.run(element, motionOptions) : legacyMotionRun(motionOptions, transition);
             AelluxJs2.dispatchFrom(element, "Layout", {
               detail: {
                 origin: `present.${newDirection}`.toLowerCase(),
@@ -6618,7 +7102,24 @@
             if (controller.transition !== transition || !element.isConnected) return;
             AelluxJs2.dispatchFrom(element, gotoVisible ? "Popping" : reversing ? "Unpopping" : "Dismissing", { bubbles: true });
             const motionResult = await Promise.race([completed, interrupted]);
-            if (controller.transition !== transition || motionResult && motionResult.status !== "completed") return;
+            if (controller.transition !== transition || gesture && !motionResult || !gesture && motionResult && motionResult.status !== "completed") return;
+            if (gesture) {
+              const finalVisible = motionResult === POP;
+              controller.direction = motionResult;
+              controller.setTriggerExpanded(finalVisible);
+              finishTransition(element, controller, transition, finalVisible);
+              if (groupState && groups.get(group) === groupState && !groupState.accumulating) {
+                const selected2 = finalVisible ? element : groupState.selected === element ? null : groupState.selected;
+                groupState.selected = selected2;
+                const active = (selected2 == null ? void 0 : selected2.id) || "";
+                if (group.getAttribute(attr.active) !== active) group.setAttribute(attr.active, active);
+                publishGroup(group, groupState, selected2);
+              }
+              controller.gesture = null;
+              AelluxJs2.dispatchFrom(element, motionResult, { bubbles: true });
+              if (finalVisible) autoDismissSchedule(element, controller);
+              return;
+            }
             if (gotoVisible) playback.complete(element, controller, interpolatedProgress);
             finishTransition(element, controller, transition, gotoVisible);
             if (gotoVisible && !element.hidden) {
@@ -6626,7 +7127,7 @@
               controller.classList.add(className.pop);
               AelluxJs2.dispatchFrom(element, POP, { bubbles: true });
             }
-            if (!gotoVisible && element.hidden) {
+            if (!gotoVisible && controller.state !== POP) {
               AelluxJs2.dispatchFrom(element, newDirection, { bubbles: true });
             }
           } catch (error) {
@@ -6660,8 +7161,12 @@
             }
           } finally {
             if (transition && controller.transition === transition) {
-              (_c = controller.reverse) == null ? void 0 : _c.cleanup();
+              (_c = controller.gesture) == null ? void 0 : _c.abort();
+              controller.gesture = null;
+              (_d = controller.reverse) == null ? void 0 : _d.cleanup();
               controller.reverse = null;
+              (_e = controller.gestureDisplay) == null ? void 0 : _e.restore();
+              controller.gestureDisplay = null;
               restoreHandoff(controller);
               restoreMeasuredStyles(element, controller);
               controller.transition = null;
@@ -6679,21 +7184,24 @@
           });
         }
         function finishTransition(element, controller, transition, gotoVisible) {
-          var _a;
+          var _a, _b;
           restoreHandoff(controller);
-          controller.classList.toggle(className.pop, gotoVisible);
-          controller.classList.remove(transition.className);
           const focused = !gotoVisible && element.contains(document.activeElement) ? document.activeElement : null;
-          element.hidden = gotoVisible ? false : true;
+          controller.classList.remove(className.popping, className.unpopping, className.dismissing);
+          establishState(element, controller, gotoVisible ? POP : controller.direction);
+          element.hidden = !gotoVisible && controller.legacyHidden;
           (_a = controller.reverse) == null ? void 0 : _a.cleanup();
           controller.reverse = null;
+          (_b = controller.gestureDisplay) == null ? void 0 : _b.restore();
+          controller.gestureDisplay = null;
           restoreMeasuredStyles(element, controller);
           setProgress(element, gotoVisible);
           syncAriaExpanded(element, controller);
           refreshExpandedStates();
-          if (element.hidden) openPresentElements.delete(element);
+          gestures.inspect(element);
+          if (!gotoVisible) openPresentElements.delete(element);
           else openPresentElements.add(element);
-          if (focused) {
+          if (focused && !controller.expanded) {
             if (document.activeElement === focused) focused.blur();
             if (document.activeElement !== focused) AelluxJs2.dispatch(`${controller.direction}FocusLost`, {
               detail: { element, focused }
@@ -6701,11 +7209,17 @@
           }
           transition.timeout = null;
         }
+        function establishState(element, controller, state) {
+          controller.state = state;
+          controller.classList.toggle(className.pop, state === POP);
+          controller.classList.toggle(className.unpop, state === UNPOP);
+          controller.classList.toggle(className.dismissed, state === DISMISS);
+        }
         function autoDismissSchedule(element, controller) {
           if (!controller) return;
           cancelAutoDismiss(controller);
           const autoDismissValue = element.getAttribute(attr.autoDismiss);
-          if (element.hidden || controller.transition && !controller.classList.contains(className.pop) || !element.isConnected || !autoDismissValue) return;
+          if (controller.state !== POP || controller.transition && !controller.classList.contains(className.pop) || !element.isConnected || !autoDismissValue) return;
           const duration = getString2Time(autoDismissValue);
           if (!Number.isFinite(duration) || duration < 0) return;
           const countdown = { start: root2.performance.now(), duration, frame: null, last: 0 };
@@ -6942,17 +7456,21 @@
           return state.limit;
         }
         function groupMemberActive(member, state) {
-          return state.reservations.has(member) || !member.hidden && !isClosing(presentElements.get(member));
+          return state.reservations.has(member) || isPresented(member);
         }
-        function isClosing(controller) {
-          return (controller == null ? void 0 : controller.direction) === DISMISS || (controller == null ? void 0 : controller.direction) === UNPOP;
+        function isPresented(element) {
+          const controller = presentElements.get(element);
+          return controller && (controller.transition ? controller.direction === POP : controller.state === POP);
         }
         function activeGroupMembers(group, state) {
           return groupMembers(group, true).filter((member) => groupMemberActive(member, state));
         }
         function mountGroup(group) {
           if (groups.has(group)) return;
-          const visible = groupMembers(group).filter((member) => !member.hidden);
+          const visible = groupMembers(group).filter((member) => {
+            var _a;
+            return ((_a = presentElements.get(member)) == null ? void 0 : _a.state) === POP;
+          });
           groups.set(group, {
             selected: visible.length === 1 ? visible[0] : null,
             accumulating: false,
@@ -6989,8 +7507,8 @@
             if (controller.transition) {
               const visible = controller.direction === POP;
               controller.stop();
-              member.hidden = !visible;
-              controller.classList.toggle(className.pop, visible);
+              member.hidden = !visible && controller.legacyHidden;
+              establishState(member, controller, visible ? POP : controller.direction);
               controller.setTriggerExpanded(visible);
               setProgress(member, visible);
               syncAriaExpanded(member, controller);
@@ -7050,7 +7568,7 @@
               return token && !/\s/.test(token) && group.classList.contains(token);
             });
             if (!matches.length) {
-              const visible = members.filter((member) => !member.hidden && !isClosing(presentElements.get(member)));
+              const visible = members.filter(isPresented);
               if (visible.length > 1) groupDiagnostic(group, "Multiple initially visible members.");
               else if (!state.selected) state.selected = visible[0] || null;
               return;
@@ -7087,7 +7605,10 @@
           const limit = groupLimit(group, state);
           const active = activeGroupMembers(group, state);
           const inactive = members.filter((member2) => !groupMemberActive(member2, state));
-          const closed = inactive.filter((member2) => member2.hidden);
+          const closed = inactive.filter((member2) => {
+            var _a;
+            return ((_a = presentElements.get(member2)) == null ? void 0 : _a.state) !== POP;
+          });
           const available = closed.length ? closed : inactive;
           const candidates = active.length < limit && available.length ? available : members.filter((member2) => active.includes(member2)).sort((left, right) => {
             const order = (member2) => {
@@ -7158,10 +7679,7 @@
         function selectGroup(group, selected2, members, closingDirection = DISMISS) {
           var _a;
           const state = groups.get(group);
-          const changes = members.filter((member) => {
-            const controller = presentElements.get(member);
-            return member === selected2 ? member.hidden || isClosing(controller) : !member.hidden && !isClosing(controller);
-          });
+          const changes = members.filter((member) => member === selected2 ? !isPresented(member) : isPresented(member));
           if (state.selected === selected2 && !changes.length) {
             state.accumulating = false;
             state.reservations.clear();
@@ -7217,7 +7735,10 @@
           publishGroup(group, state, selected2);
           Promise.all(members.map((member) => state.jobs.get(member))).then(() => {
             const current = groupMembers(group);
-            complete(groups.get(group) === state && state.revision === revision && (!selected2 || current.includes(selected2)) && current.every((member) => member === selected2 ? !member.hidden : member.hidden));
+            complete(groups.get(group) === state && state.revision === revision && (!selected2 || current.includes(selected2)) && current.every((member) => {
+              var _a2, _b;
+              return member === selected2 ? ((_a2 = presentElements.get(member)) == null ? void 0 : _a2.state) === POP : ((_b = presentElements.get(member)) == null ? void 0 : _b.state) !== POP;
+            }));
           });
           return pending;
         }
@@ -8633,8 +9154,9 @@
               continue;
             }
             if (!isMounted(mountable)) {
+              const presentStates = mountable.hasAttribute(AelluxJs2.attr("present")) ? ["pop", "unpop", "dismissed"].map((name) => AelluxJs2.className(name)) : [];
               for (const name of Array.from(mountable.classList)) {
-                if (name.startsWith(classPrefix)) mountable.classList.remove(name);
+                if (name.startsWith(classPrefix) && !presentStates.includes(name)) mountable.classList.remove(name);
               }
             }
             setMounted(mountable, mountId, true, controller.priority);
