@@ -4,7 +4,7 @@
   "globalAttributes": [
     {
       "name": "data-ae-adaptive",
-      "description": "Publishes size and shape classes, dimensions and orientation using the Extension's adaptiveParams thresholds.\n\nValue syntax: presence.",
+      "description": "Publishes width-based size classes, aspect-ratio shape classes, dimensions and orientation using the Extension's adaptiveParams thresholds.\n\nValue syntax: presence.",
       "references": [
         {
           "name": "AelluxJS adaptive",

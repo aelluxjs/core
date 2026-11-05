@@ -2339,7 +2339,7 @@
     {
       "name": "data-ae-adaptive",
       "extension": "adaptive",
-      "description": "Publishes size and shape classes, dimensions and orientation using the Extension's adaptiveParams thresholds.",
+      "description": "Publishes width-based size classes, aspect-ratio shape classes, dimensions and orientation using the Extension's adaptiveParams thresholds.",
       "syntax": "presence",
       "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/adaptive.htm"

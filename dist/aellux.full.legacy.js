@@ -34348,10 +34348,9 @@
           element.classList.toggle(modifier.shapeVertical, ratio < adaptiveParams.ratioShapes.vertical);
           element.classList.toggle(modifier.shapeHorizontal, ratio > adaptiveParams.ratioShapes.horizontal);
           element.classList.toggle(modifier.shapeSquare, ratio >= adaptiveParams.ratioShapes.vertical && ratio <= adaptiveParams.ratioShapes.horizontal);
-          var space = Math.sqrt(width * height);
           for (var i = 0; i < sizeThresholds.length; i++) {
             var threshold = sizeThresholds[i];
-            element.classList.toggle(threshold.className, space >= threshold.minimum);
+            element.classList.toggle(threshold.className, width >= threshold.minimum);
           }
           var _iterator5 = _createForOfIteratorHelper17(dimensionProperties), _step5;
           try {

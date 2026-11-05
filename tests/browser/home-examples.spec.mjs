@@ -31,6 +31,40 @@ async function openExample(page, name, extension) {
   await expect.poll(() => page.evaluate(name => !!window.$ae?.ext[name]?.initialized, extension)).toBe(true);
 }
 
+test("homepage getting started columns stay stable across zoom-equivalent viewport changes", async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto("/home/index.htm#getting-started");
+  const section = page.locator("#getting-started");
+  await expect.poll(() => page.evaluate(() => !!$ae.ext.adaptive?.initialized)).toBe(true);
+  // 1920 -> 1536 CSS pixels models the available-width change at 100% -> 125% zoom.
+  for (const width of [1920, 1536, 960, 1920]) {
+    await page.setViewportSize({ width, height: Math.round(width * 1080 / 1920) });
+    const expectedColumns = width >= 1024 ? 2 : 1;
+    await expect.poll(() => section.evaluate(element => ({
+      measuredWidth: Number(element.style.getPropertyValue("--ae-width")),
+      large: element.classList.contains("ae--fits-large")
+    }))).toEqual({ measuredWidth: width, large: expectedColumns === 2 });
+    const samples = await section.evaluate(async element => {
+      const samples = [];
+      for (let i = 0; i < 20; i++) {
+        await new Promise(requestAnimationFrame);
+        const articles = [...element.querySelectorAll("article")];
+        samples.push({
+          large: element.classList.contains("ae--fits-large"),
+          sameRow: Math.abs(articles[0].getBoundingClientRect().top - articles[1].getBoundingClientRect().top) < 1,
+          columnFraction: articles[0].getBoundingClientRect().width / articles[0].parentElement.getBoundingClientRect().width
+        });
+      }
+      return samples;
+    });
+    for (const sample of samples) {
+      expect(sample.large).toBe(expectedColumns === 2);
+      expect(sample.sameRow).toBe(expectedColumns === 2);
+      expect(sample.columnFraction).toBeCloseTo(1 / expectedColumns, 3);
+    }
+  }
+});
+
 test("brand SVGs own their styles, default to light and detect either theme attribute", async ({ page }) => {
   await page.goto("/home/index.htm");
   const result = await page.evaluate(async () => {

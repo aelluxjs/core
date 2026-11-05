@@ -5594,12 +5594,11 @@
             modifier.shapeSquare,
             ratio >= adaptiveParams.ratioShapes.vertical && ratio <= adaptiveParams.ratioShapes.horizontal
           );
-          const space = Math.sqrt(width * height);
           for (let i = 0; i < sizeThresholds.length; i++) {
             const threshold = sizeThresholds[i];
             element.classList.toggle(
               threshold.className,
-              space >= threshold.minimum
+              width >= threshold.minimum
             );
           }
           for (const name of dimensionProperties) {

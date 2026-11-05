@@ -1,5 +1,41 @@
 import { expect, test } from "@playwright/test";
 
+for (const forceLegacy of [false, true]) {
+  for (const withoutObserver of [false, true]) {
+    test(`adaptive size thresholds depend only on element width (${forceLegacy ? "Legacy" : "Modern"}, ${withoutObserver ? "resize fallback" : "ResizeObserver"})`, async ({ page }) => {
+      await page.goto("/tests/index.htm");
+      await page.evaluate(withoutObserver => {
+        if (withoutObserver) Object.defineProperty(window, "ResizeObserver", { configurable: true, value: undefined });
+        document.body.innerHTML = '<div id="adaptive" data-ae-adaptive style="width: 0; height: 0"></div>';
+      }, withoutObserver);
+      await page.addScriptTag({ url: "/dist/aellux.js" });
+      await page.evaluate(forceLegacy => AelluxJs.init({ mode: "full", forceLegacy }), forceLegacy);
+      const sizes = { compact: 0, small: 480, medium: 768, large: 1024, xl: 1280, xxl: 1600 };
+      for (const minimum of Object.values(sizes)) {
+        for (const width of minimum ? [minimum - 1, minimum] : [0]) {
+          for (const height of [0, 1800]) {
+            await page.evaluate(({ width, height, withoutObserver }) => {
+              const element = document.getElementById("adaptive");
+              element.style.width = `${width}px`;
+              element.style.height = `${height}px`;
+              if (withoutObserver) window.dispatchEvent(new Event("resize"));
+            }, { width, height, withoutObserver });
+            await expect.poll(() => page.locator("#adaptive").evaluate(element => ({
+              width: element.style.getPropertyValue("--ae-width"),
+              height: element.style.getPropertyValue("--ae-height"),
+              sizes: [...element.classList].filter(name => name.startsWith("ae--fits-")).sort()
+            }))).toEqual({
+              width: String(width), height: String(height),
+              sizes: Object.entries(sizes).filter(([, minimum]) => width >= minimum)
+                .map(([name]) => `ae--fits-${name}`).sort()
+            });
+          }
+        }
+      }
+    });
+  }
+}
+
 test("adaptive restores prior inline dimension variables on unmount", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
@@ -51,7 +87,7 @@ test("adaptive updates shape and size classes as its dimensions change", async (
   await expect(element).toHaveClass(/ae--shape-horizontal/);
   await expect(element).toHaveAttribute("aria-orientation", "horizontal");
   await expect(element).toHaveClass(/ae--fits-small/);
-  await expect(element).not.toHaveClass(/ae--fits-medium/);
+  await expect(element).toHaveClass(/ae--fits-medium/);
   await expect(element).not.toHaveClass(/ae--fits-xl/);
 
   await page.evaluate(() => {
@@ -93,6 +129,7 @@ test("adaptive uses window resize when ResizeObserver is unavailable", async ({ 
   await page.evaluate(() => AelluxJs.init({ mode: "full", forceLegacy: true }));
   const element = page.locator("#adaptive");
   await expect(element).toHaveClass(/ae--shape-horizontal/);
+  await expect(element).toHaveClass(/ae--fits-medium/);
 
   await page.evaluate(() => {
     const element = document.querySelector("#adaptive");
@@ -103,6 +140,7 @@ test("adaptive uses window resize when ResizeObserver is unavailable", async ({ 
   await expect(element).toHaveClass(/ae--shape-square/);
   await expect(element).toHaveAttribute("aria-orientation", "horizontal");
   await expect(element).not.toHaveClass(/ae--shape-horizontal/);
+  await expect(element).not.toHaveClass(/ae--fits-small/);
 });
 
 test("adaptive merges extension options with its default parameters", async ({ page }) => {
@@ -126,7 +164,7 @@ test("adaptive merges extension options with its default parameters", async ({ p
   const element = page.locator("#adaptive");
   await expect(element).toHaveClass(/ae--shape-square/);
   await expect(element).toHaveClass(/ae--fits-tiny/);
-  await expect(element).not.toHaveClass(/ae--fits-small/);
+  await expect(element).toHaveClass(/ae--fits-small/);
   const params = await page.evaluate(() => AelluxJs.ext.adaptive.adaptiveParams);
   expect(params).toEqual({
     experienceScale: { near: 1.2, far: 1.5 },

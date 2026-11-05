@@ -4,7 +4,7 @@
  * Adaptive Extension
  *
  * Purpose: observes elements marked with `data-ae-adaptive` and exposes their
- * current shape and fit ranges through Aellux Adaptive CSS classes.
+ * current shape and width-based fit ranges through Aellux Adaptive CSS classes.
  *
  * Capability profile: visual and adaptive behavior, with infrastructure for
  * resize observation.
@@ -243,12 +243,11 @@
       ratio >= adaptiveParams.ratioShapes.vertical &&
       ratio <= adaptiveParams.ratioShapes.horizontal);
 
-    const space = Math.sqrt(width * height);
     for (let i = 0; i < sizeThresholds.length; i++) {
       const threshold = sizeThresholds[i];
       element.classList.toggle(
         threshold.className,
-        space >= threshold.minimum
+        width >= threshold.minimum
       );
     }
 
