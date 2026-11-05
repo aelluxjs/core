@@ -34,23 +34,18 @@ async function openExample(page, name, extension) {
 test("homepage getting started columns stay stable across zoom-equivalent viewport changes", async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto("/home/index.htm#getting-started");
-  const section = page.locator("#getting-started");
-  await expect.poll(() => page.evaluate(() => !!$ae.ext.adaptive?.initialized)).toBe(true);
+  const container = page.locator("#getting-started > .container");
+  await expect(page.locator("[data-ae-adaptive], [data-ae-wait-mounted]")).toHaveCount(0);
   // 1920 -> 1536 CSS pixels models the available-width change at 100% -> 125% zoom.
-  for (const width of [1920, 1536, 960, 1920]) {
+  for (const width of [1920, 1536, 1000, 980, 1920]) {
     await page.setViewportSize({ width, height: Math.round(width * 1080 / 1920) });
-    const expectedColumns = width >= 1024 ? 2 : 1;
-    await expect.poll(() => section.evaluate(element => ({
-      measuredWidth: Number(element.style.getPropertyValue("--ae-width")),
-      large: element.classList.contains("ae--fits-large")
-    }))).toEqual({ measuredWidth: width, large: expectedColumns === 2 });
-    const samples = await section.evaluate(async element => {
+    const expectedColumns = width >= 992 ? 2 : 1;
+    const samples = await container.evaluate(async element => {
       const samples = [];
       for (let i = 0; i < 20; i++) {
         await new Promise(requestAnimationFrame);
         const articles = [...element.querySelectorAll("article")];
         samples.push({
-          large: element.classList.contains("ae--fits-large"),
           sameRow: Math.abs(articles[0].getBoundingClientRect().top - articles[1].getBoundingClientRect().top) < 1,
           columnFraction: articles[0].getBoundingClientRect().width / articles[0].parentElement.getBoundingClientRect().width
         });
@@ -58,7 +53,6 @@ test("homepage getting started columns stay stable across zoom-equivalent viewpo
       return samples;
     });
     for (const sample of samples) {
-      expect(sample.large).toBe(expectedColumns === 2);
       expect(sample.sameRow).toBe(expectedColumns === 2);
       expect(sample.columnFraction).toBeCloseTo(1 / expectedColumns, 3);
     }
