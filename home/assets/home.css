@@ -146,7 +146,8 @@ a { text-underline-offset: .22em; }
 #main-navigation-3D:after{
   content:" ";
   display:block;
-  background-color: rgba(var(--bs-warning-rgb), .035);
+  background-color: rgba(var(--bs-warning-rgb), 1);
+  position: absolute;
   bottom:0;
   left:0;
   width: 100%;
