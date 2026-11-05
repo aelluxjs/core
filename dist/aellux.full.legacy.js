@@ -35163,6 +35163,7 @@
     var attribute = function attribute2(name) {
       return api.attr("present-gesture".concat(name ? "-".concat(name) : ""));
     };
+    var inputExceptions = "a:not([draggable='false']),button:not([draggable='false']),input,textarea,select,[contenteditable],[draggable='true']," + "[".concat(api.attr("scrollbar-vertical"), "],[").concat(api.attr("scrollbar-horizontal"), "],[").concat(api.attr("scrollbox"), "]");
     var warn = function warn2(element, name, value, reason) {
       return api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_VALUE, {
         extension: "present",
@@ -35176,7 +35177,7 @@
       return services.state(element);
     };
     function update(element) {
-      var _entries$get, _entries$get2;
+      var _source$matches, _entries$get, _entries$get2;
       if (!element.hasAttribute(attribute(""))) {
         remove(element);
         return;
@@ -35193,6 +35194,17 @@
       var value = element.getAttribute(attribute("source"));
       var id = value === null || value === void 0 ? void 0 : value.replace(/^#/, "");
       var source = value === "document" ? root2.document : value ? !/[\s#]/.test(id) && root2.document.getElementById(id) : element;
+      if (source !== null && source !== void 0 && (_source$matches = source.matches) !== null && _source$matches !== void 0 && _source$matches.call(source, "a,button") && source.getAttribute("draggable") !== "false") {
+        api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_VALUE, {
+          extension: "present",
+          element: source,
+          attribute: "draggable",
+          value: source.getAttribute("draggable"),
+          reason: "An interactive Present gesture source requires draggable=false; applying it automatically.",
+          suggestion: 'Declare draggable="false" on the gesture source.'
+        });
+        source.setAttribute("draggable", "false");
+      }
       if (((_entries$get = entries.get(element)) === null || _entries$get === void 0 ? void 0 : _entries$get.signature) === signature && ((_entries$get2 = entries.get(element)) === null || _entries$get2 === void 0 ? void 0 : _entries$get2.source) === source) return;
       remove(element);
       if (!source) {
@@ -35277,7 +35289,7 @@
       }
       if (event.button !== 0 || event.isPrimary === false || event.defaultPrevented) return;
       var target = event.target;
-      if (!target.closest || target.closest("input,textarea,select,button,a,[contenteditable]:not([contenteditable=false]),[data-ae-scrollbox]")) return;
+      if (!target.closest || target.closest(inputExceptions)) return;
       if (!interaction) {
         interaction = {
           id: event.pointerId,

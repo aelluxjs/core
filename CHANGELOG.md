@@ -42,6 +42,9 @@ Changes in this section are pending for the `0.1.0` release candidate.
 
 ### Fixed
 
+- Present gestures now follow Scrollbox's control eligibility: links and buttons with `draggable="false"`, including their descendants, can start gestures. Presses preserve native clicks; activated drags suppress the release click. Other controls, contenteditable regions, explicitly draggable descendants and Scrollbox regions/bars remain excluded.
+- Present automatically sets `draggable="false"` on link/button gesture sources when missing or different and emits configuration warning `2026`, including sources resolved after insertion or replacement.
+
 - Anchor dimension matching compares the positioning pivot when identifying a changed destination, so intermediate inline width/height values do not interrupt an active switch.
 
 - Anchor preserves an active target-switch transition during scrolling, keeps unchanged destinations on their existing timeline, and retargets moving destinations from the rendered position. Resize still prioritizes immediate placement.

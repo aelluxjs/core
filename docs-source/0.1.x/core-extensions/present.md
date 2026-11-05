@@ -293,6 +293,8 @@ Gestures are optional input for the existing Present transitions. Without `data-
 
 Unpop always uses the opposite of the Pop direction. Unpop and Dismiss begin on the Present itself; the configured source supplies Pop input. Changing these attributes, replacing the source ID, or adding a previously missing source refreshes the listeners. A missing source reports configuration diagnostic `2027`. An invalid direction or a Dismiss direction on the Pop/Unpop axis reports `2026`; a conflicting Dismiss disables only that gesture.
 
+Links and buttons, including their descendants, can start gestures when they have an explicit `draggable="false"`, following the Scrollbox rule. An effective gesture source that is itself a link or button is automatically given `draggable="false"` when missing or different, with configuration warning `2026` identifying the source and its previous value. Declare the attribute explicitly to avoid the warning. This correction also applies when the source appears later or is replaced. Other form controls, elements with a `contenteditable` attribute, explicitly draggable descendants and Scrollbox regions/bars remain excluded.
+
 | CSS property | Default | Release decision |
 | --- | --- | --- |
 | `--ae-present-pop-threshold` | `0.5` | From a closed state, Pop when progress is at or above this value |
@@ -348,19 +350,19 @@ An initially hidden region can be opened through an external source. Present rem
 </aside>
 ```
 
-Choose touch-action on a local handle or region according to the intended gesture axes. Browsers decide native touch scrolling at pointerdown, so preventing a later pointermove cannot reclaim a gesture already assigned to scrolling. A local handle needing both axes may require `touch-action:none`; Present never sets it globally. Inputs, links, buttons, editable content and nested Scrollboxes retain their input. Nested native scroll containers take precedence when they can scroll in the requested direction. Completed drags suppress the associated compatibility click, while ordinary presses remain clicks. Shared sources choose the most specific matching region, then the most recently presented region; one pointer controls one Present. Keep keyboard buttons available and choose accessible semantics for the component built with Present.
+Choose touch-action on a local handle or region according to the intended gesture axes. Browsers decide native touch scrolling at pointerdown, so preventing a later pointermove cannot reclaim a gesture already assigned to scrolling. A local handle needing both axes may require `touch-action:none`; Present never sets it globally. Inputs, links/buttons without `draggable="false"`, contenteditable regions and nested Scrollboxes retain their input. Nested native scroll containers take precedence when they can scroll in the requested direction. Completed drags suppress the associated compatibility click, while ordinary presses remain clicks. Shared sources choose the most specific matching region, then the most recently presented region; one pointer controls one Present. Keep keyboard buttons available and choose accessible semantics for the component built with Present.
 
 ### Gesture distribution cost
 
-The gesture recognizer is private to Present and introduces no package dependency. Measurements compare the preceding build with this implementation, in bytes (gzip level 9):
+The gesture recognizer is private to Present and introduces no package dependency. Measurements compare the preceding build with this implementation, including Scrollbox-compatible controls and automatic interactive-source correction, in bytes (gzip level 9):
 
 | Artifact | Before raw / gzip | After raw / gzip | Budget raw / gzip (KiB) |
 | --- | --- | --- | --- |
-| Present Modern | 36,995 / 12,135 | 49,367 / 16,160 | 36.25 / 12 → 48.5 / 16 |
-| Present Legacy | 50,752 / 15,735 | 67,370 / 20,466 | 49.75 / 15.5 → 66 / 20.25 |
+| Present Modern | 36,995 / 12,135 | 49,932 / 16,318 | 36.25 / 12 → 49 / 16 |
+| Present Legacy | 50,752 / 15,735 | 67,972 / 20,648 | 49.75 / 15.5 → 66.5 / 20.25 |
 | Present CSS | 5,703 / 1,009 | 6,134 / 1,066 | 5.75 / 2 → 6.125 / 2 |
-| Full Modern | 215,270 / 66,267 | 227,777 / 70,378 | 210.5 / 65 → 223 / 69 |
-| Full Legacy | 545,453 / 160,895 | 562,278 / 165,753 | 533 / 157.5 → 550 / 163 |
+| Full Modern | 215,270 / 66,267 | 228,321 / 70,513 | 210.5 / 65 → 223 / 69 |
+| Full Legacy | 545,453 / 160,895 | 562,863 / 165,880 | 533 / 157.5 → 550 / 163 |
 | Full CSS | 126,376 / 11,952 | 126,807 / 12,017 | 123.75 / 12 → 124 / 12 |
 | ESM boot | 26,971 / 9,287 | 27,220 / 9,391 | 26.5 / 9.25 → 26.75 / 9.25 |
 | Modern Orchestrator | 66,546 / 21,946 | 66,657 / 21,988 | 65 / 21.5 → 65.25 / 21.5 |

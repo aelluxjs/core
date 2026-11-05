@@ -84,8 +84,9 @@ export const bundleBudget = Object.freeze([
   // Computed-state handoff for interrupted closing; byte measurements and
   // superseded limits are recorded in core-extensions/present.md.
   // Opening trajectory capture/reversal and native CSS-only playback.
-  { file: "aellux.ext.present.min.js", maxRawBytes: 48.5 * 1024, maxGzipBytes: 16 * 1024 },
-  { file: "aellux.ext.present.legacy.min.js", maxRawBytes: 66 * 1024, maxGzipBytes: 20.25 * 1024 },
+  // Scrollbox-compatible gesture controls and automatic source correction/warning.
+  { file: "aellux.ext.present.min.js", maxRawBytes: 49 * 1024, maxGzipBytes: 16 * 1024 },
+  { file: "aellux.ext.present.legacy.min.js", maxRawBytes: 66.5 * 1024, maxGzipBytes: 20.25 * 1024 },
   { file: "aellux.ext.scrollbox.min.js", maxRawBytes: 46 * 1024, maxGzipBytes: 14 * 1024 },
   // Progressive 2D overflow fade; measured deltas: core-extensions/scrollbox.md.
   { file: "aellux.ext.scrollbox.min.css", maxRawBytes: 6.5 * 1024, maxGzipBytes: 1.5 * 1024 },

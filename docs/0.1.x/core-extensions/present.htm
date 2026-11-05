@@ -990,6 +990,7 @@ await $ae(&quot;views&quot;).present.show(&quot;home&quot;);
 </tr>
 </tbody></table>
 <p>Unpop always uses the opposite of the Pop direction. Unpop and Dismiss begin on the Present itself; the configured source supplies Pop input. Changing these attributes, replacing the source ID, or adding a previously missing source refreshes the listeners. A missing source reports configuration diagnostic <code>2027</code>. An invalid direction or a Dismiss direction on the Pop/Unpop axis reports <code>2026</code>; a conflicting Dismiss disables only that gesture.</p>
+<p>Links and buttons, including their descendants, can start gestures when they have an explicit <code>draggable=&quot;false&quot;</code>, following the Scrollbox rule. An effective gesture source that is itself a link or button is automatically given <code>draggable=&quot;false&quot;</code> when missing or different, with configuration warning <code>2026</code> identifying the source and its previous value. Declare the attribute explicitly to avoid the warning. This correction also applies when the source appears later or is replaced. Other form controls, elements with a <code>contenteditable</code> attribute, explicitly draggable descendants and Scrollbox regions/bars remain excluded.</p>
 <table>
 <thead>
 <tr>
@@ -1054,9 +1055,9 @@ await $ae(&quot;views&quot;).present.show(&quot;home&quot;);
   &lt;button data-ae-trigger=&quot;unpop&quot;&gt;Reverse programmatically&lt;/button&gt;
 &lt;/aside&gt;
 </code></pre>
-<p>Choose touch-action on a local handle or region according to the intended gesture axes. Browsers decide native touch scrolling at pointerdown, so preventing a later pointermove cannot reclaim a gesture already assigned to scrolling. A local handle needing both axes may require <code>touch-action:none</code>; Present never sets it globally. Inputs, links, buttons, editable content and nested Scrollboxes retain their input. Nested native scroll containers take precedence when they can scroll in the requested direction. Completed drags suppress the associated compatibility click, while ordinary presses remain clicks. Shared sources choose the most specific matching region, then the most recently presented region; one pointer controls one Present. Keep keyboard buttons available and choose accessible semantics for the component built with Present.</p>
+<p>Choose touch-action on a local handle or region according to the intended gesture axes. Browsers decide native touch scrolling at pointerdown, so preventing a later pointermove cannot reclaim a gesture already assigned to scrolling. A local handle needing both axes may require <code>touch-action:none</code>; Present never sets it globally. Inputs, links/buttons without <code>draggable=&quot;false&quot;</code>, contenteditable regions and nested Scrollboxes retain their input. Nested native scroll containers take precedence when they can scroll in the requested direction. Completed drags suppress the associated compatibility click, while ordinary presses remain clicks. Shared sources choose the most specific matching region, then the most recently presented region; one pointer controls one Present. Keep keyboard buttons available and choose accessible semantics for the component built with Present.</p>
 <h3>Gesture distribution cost</h3>
-<p>The gesture recognizer is private to Present and introduces no package dependency. Measurements compare the preceding build with this implementation, in bytes (gzip level 9):</p>
+<p>The gesture recognizer is private to Present and introduces no package dependency. Measurements compare the preceding build with this implementation, including Scrollbox-compatible controls and automatic interactive-source correction, in bytes (gzip level 9):</p>
 <table>
 <thead>
 <tr>
@@ -1069,14 +1070,14 @@ await $ae(&quot;views&quot;).present.show(&quot;home&quot;);
 <tbody><tr>
 <td>Present Modern</td>
 <td>36,995 / 12,135</td>
-<td>49,367 / 16,160</td>
-<td>36.25 / 12 → 48.5 / 16</td>
+<td>49,932 / 16,318</td>
+<td>36.25 / 12 → 49 / 16</td>
 </tr>
 <tr>
 <td>Present Legacy</td>
 <td>50,752 / 15,735</td>
-<td>67,370 / 20,466</td>
-<td>49.75 / 15.5 → 66 / 20.25</td>
+<td>67,972 / 20,648</td>
+<td>49.75 / 15.5 → 66.5 / 20.25</td>
 </tr>
 <tr>
 <td>Present CSS</td>
@@ -1087,13 +1088,13 @@ await $ae(&quot;views&quot;).present.show(&quot;home&quot;);
 <tr>
 <td>Full Modern</td>
 <td>215,270 / 66,267</td>
-<td>227,777 / 70,378</td>
+<td>228,321 / 70,513</td>
 <td>210.5 / 65 → 223 / 69</td>
 </tr>
 <tr>
 <td>Full Legacy</td>
 <td>545,453 / 160,895</td>
-<td>562,278 / 165,753</td>
+<td>562,863 / 165,880</td>
 <td>533 / 157.5 → 550 / 163</td>
 </tr>
 <tr>

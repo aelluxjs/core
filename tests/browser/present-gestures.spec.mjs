@@ -172,11 +172,92 @@ test("without opt-in or on controls/native scrollboxes, pointer input remains na
   await page.evaluate(() => { pointer("pointerdown", 0, 200); pointer("pointermove", 0, 25); pointer("pointerup", 0, 25); });
   expect((await page.evaluate(() => read())).classes).toBe("ae--unpop");
   await page.evaluate(() => { document.getElementById("panel").setAttribute("data-ae-present-gesture", "up"); });
-  for (const markup of ['<input id="input">', '<div id="input" data-ae-scrollbox>Scroll</div>', '<button id="input">Control</button>']) {
+  for (const markup of [
+    '<input id="input" draggable="false">', '<select id="input" draggable="false"></select>',
+    '<textarea id="input" draggable="false"></textarea>', '<div id="input" data-ae-scrollbox>Scroll</div>',
+    '<button id="input">Control</button>', '<a id="input" href="#native">Link</a>',
+    '<button draggable="true"><span id="input">Control</span></button>',
+    '<a href="#native"><span id="input">Link</span></a>',
+    '<button draggable="false"><span id="input" draggable="true">Native drag</span></button>',
+    '<div contenteditable><button id="input" draggable="false">Editable</button></div>',
+    '<div contenteditable="false"><a id="input" draggable="false">Contenteditable attribute</a></div>',
+    '<div data-ae-scrollbox><button id="input" draggable="false">Scrollbox</button></div>',
+    '<div data-ae-scrollbar-vertical><button id="input" draggable="false">Scrollbar</button></div>',
+    '<div data-ae-scrollbar-horizontal><a id="input" draggable="false">Scrollbar</a></div>'
+  ]) {
     await page.evaluate(markup => { document.getElementById("panel").innerHTML = markup; pointer("pointerdown", 0, 200, "input"); pointer("pointermove", 0, 25); pointer("pointerup", 0, 25); }, markup);
     expect((await page.evaluate(() => read())).classes).toBe("ae--unpop");
   }
 });
+
+for (const forceLegacy of [false, true]) {
+  for (const tag of ["a", "button"]) {
+    test(`draggable=false ${tag} descendants scrub Pop, Unpop and Dismiss (legacy=${forceLegacy})`, async ({ page }) => {
+      await start(page, panel('class="ae--unpop" data-ae-present-gesture="up" data-ae-present-gesture-dismiss="left"')
+        .replace("Content</div>", `<${tag} draggable="false"><span id="control">Handle</span></${tag}></div>`), { forceLegacy });
+      await page.evaluate(() => { pointer("pointerdown", 0, 200, "control"); pointer("pointermove", 0, 100); });
+      expect((await page.evaluate(() => read())).y).toBeCloseTo(100, 1);
+      await page.evaluate(() => { pointer("pointermove", 0, 25); pointer("pointerup", 0, 25); });
+      await expect(page.locator("#panel")).toHaveClass(/\bae--pop\b/);
+      await page.evaluate(() => { pointer("pointerdown", 0, 0, "control"); pointer("pointermove", 0, 100); });
+      expect((await page.evaluate(() => read())).y).toBeCloseTo(100, 1);
+      await page.evaluate(() => pointer("pointercancel", 0, 100));
+      await expect(page.locator("#panel")).toHaveClass(/\bae--pop\b/);
+      await page.evaluate(() => { pointer("pointerdown", 200, 0, "control"); pointer("pointermove", 100, 0); });
+      expect((await page.evaluate(() => read())).x).toBeCloseTo(-100, 1);
+      await page.evaluate(() => { pointer("pointermove", 25, 0); pointer("pointerup", 25, 0); });
+      await expect(page.locator("#panel")).toHaveClass(/\bae--dismissed\b/);
+    });
+  }
+}
+
+for (const tag of ["a", "button"]) {
+  test(`interactive ${tag} source warns and forces draggable=false, including replacement`, async ({ page }) => {
+    await start(page, panel('class="ae--unpop" data-ae-present-gesture="up" data-ae-present-gesture-source="source"')
+      .replace('<div id="source" style="width:200px;height:40px">Handle</div>', `<${tag} id="source"><span id="control">Handle</span></${tag}>`));
+    await expect(page.locator("#source")).toHaveAttribute("draggable", "false");
+    const warnings = () => page.evaluate(() => $ae.diagnostics.showHistory().filter(entry => entry.code === 2026 && entry.context.attribute === "draggable")
+      .map(entry => ({ level: entry.level, value: entry.context.value, element: entry.context.element.id, reason: entry.context.reason })));
+    expect(await warnings()).toEqual([expect.objectContaining({ level: 1, value: null, element: "source", reason: expect.stringContaining("automatically") })]);
+    await page.evaluate(() => { pointer("pointerdown", 0, 200, "control"); pointer("pointermove", 0, 100); });
+    expect((await page.evaluate(() => read())).y).toBeCloseTo(100, 1);
+    await page.evaluate(() => { pointer("pointermove", 0, 25); pointer("pointerup", 0, 25); });
+    await expect(page.locator("#panel")).toHaveClass(/\bae--pop\b/);
+    await page.evaluate(async tag => {
+      await $ae("panel").present.unpop();
+      document.getElementById("source").outerHTML = `<${tag} id="source" draggable="true"><span id="control">Replacement</span></${tag}>`;
+    }, tag);
+    await expect(page.locator("#source")).toHaveAttribute("draggable", "false");
+    expect(await warnings()).toEqual(expect.arrayContaining([expect.objectContaining({ level: 1, value: "true", element: "source" })]));
+    await page.evaluate(() => { pointer("pointerdown", 0, 200, "control"); pointer("pointermove", 0, 25); pointer("pointerup", 0, 25); });
+    await expect(page.locator("#panel")).toHaveClass(/\bae--pop\b/);
+  });
+
+  test(`draggable=false ${tag} source preserves native activation and suppresses the drag click`, async ({ page }) => {
+    await start(page, `<form id="form">${panel('class="ae--unpop" data-ae-present-gesture="up" data-ae-present-gesture-source="source"')
+      .replace('<div id="source" style="width:200px;height:40px">Handle</div>',
+        `<${tag} id="source" draggable="false" ${tag === "a" ? 'href="#native"' : 'type="submit"'} style="display:block;width:200px;height:220px"><span id="control" style="display:block;width:100%;height:100%">Handle</span></${tag}>`)}</form>`);
+    await page.evaluate(() => {
+      window.clicks = 0; window.submits = 0;
+      document.getElementById("source").addEventListener("click", () => clicks++);
+      document.getElementById("form").addEventListener("submit", event => { event.preventDefault(); submits++; });
+    });
+    expect(await page.evaluate(() => $ae.diagnostics.showHistory().some(entry => entry.code === 2026 && entry.context.attribute === "draggable"))).toBe(false);
+    const box = await page.locator("#control").boundingBox();
+    await page.mouse.click(box.x + 20, box.y + 175);
+    expect(await page.evaluate(() => clicks)).toBe(1);
+    if (tag === "a") await expect.poll(() => page.evaluate(() => location.hash)).toBe("#native");
+    else expect(await page.evaluate(() => submits)).toBe(1);
+    await page.mouse.move(box.x + 20, box.y + 175);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 20, box.y + 25, { steps: 5 });
+    expect((await page.evaluate(() => read())).y).toBeCloseTo(50, 1);
+    await page.mouse.up();
+    await expect(page.locator("#panel")).toHaveClass(/\bae--pop\b/);
+    expect(await page.evaluate(() => clicks)).toBe(1);
+    expect(await page.evaluate(() => submits)).toBe(tag === "button" ? 1 : 0);
+  });
+}
 
 for (const easing of ["cubic-bezier(.4,.1,.8,.5)", "backOut", "steps(4)"]) {
   test(`nonlinear release keeps its rendered position (${easing})`, async ({ page }) => {

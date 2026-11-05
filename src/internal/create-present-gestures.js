@@ -8,6 +8,10 @@ export function createPresentGestures(root, api, services) {
   const entries = new Map(), sources = new Map();
   let interaction = null, suppressed = null, suppressTimer = null;
   const attribute = name => api.attr(`present-gesture${name ? `-${name}` : ""}`);
+  // Match Scrollbox's control opt-in while leaving its regions to native/PDS input.
+  const inputExceptions = "a:not([draggable='false']),button:not([draggable='false'])," +
+    "input,textarea,select,[contenteditable],[draggable='true']," +
+    `[${api.attr("scrollbar-vertical")}],[${api.attr("scrollbar-horizontal")}],[${api.attr("scrollbox")}]`;
   const warn = (element, name, value, reason) => api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_VALUE,
     { extension: "present", element, attribute: name, value, reason });
   const state = element => services.state(element);
@@ -23,6 +27,13 @@ export function createPresentGestures(root, api, services) {
     const id = value?.replace(/^#/, "");
     const source = value === "document" ? root.document : value
       ? (!/[\s#]/.test(id) && root.document.getElementById(id)) : element;
+    if (source?.matches?.("a,button") && source.getAttribute("draggable") !== "false") {
+      api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_VALUE, { extension: "present", element: source,
+        attribute: "draggable", value: source.getAttribute("draggable"),
+        reason: "An interactive Present gesture source requires draggable=false; applying it automatically.",
+        suggestion: 'Declare draggable="false" on the gesture source.' });
+      source.setAttribute("draggable", "false");
+    }
     if (entries.get(element)?.signature === signature && entries.get(element)?.source === source) return;
     remove(element);
     if (!source) {
@@ -66,7 +77,7 @@ export function createPresentGestures(root, api, services) {
     if (interaction && interaction.id !== event.pointerId) { cancel(); return; }
     if (event.button !== 0 || event.isPrimary === false || event.defaultPrevented) return;
     const target = event.target;
-    if (!target.closest || target.closest("input,textarea,select,button,a,[contenteditable]:not([contenteditable=false]),[data-ae-scrollbox]")) return;
+    if (!target.closest || target.closest(inputExceptions)) return;
     if (!interaction) {
       interaction = { id: event.pointerId, x: event.clientX, y: event.clientY, candidates: [], owner: null, target };
       for (const name of ["pointermove", "pointerup", "pointercancel", "lostpointercapture"])

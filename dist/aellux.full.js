@@ -5977,13 +5977,14 @@
     const entries = /* @__PURE__ */ new Map(), sources = /* @__PURE__ */ new Map();
     let interaction = null, suppressed = null, suppressTimer = null;
     const attribute = (name) => api.attr(`present-gesture${name ? `-${name}` : ""}`);
+    const inputExceptions = `a:not([draggable='false']),button:not([draggable='false']),input,textarea,select,[contenteditable],[draggable='true'],[${api.attr("scrollbar-vertical")}],[${api.attr("scrollbar-horizontal")}],[${api.attr("scrollbox")}]`;
     const warn = (element, name, value, reason) => api.diagnostics.warn(
       api.diagnostics.WARN_CONFIGURATION_VALUE,
       { extension: "present", element, attribute: name, value, reason }
     );
     const state = (element) => services.state(element);
     function update(element) {
-      var _a, _b;
+      var _a, _b, _c;
       if (!element.hasAttribute(attribute(""))) {
         remove(element);
         return;
@@ -5998,7 +5999,18 @@
       const value = element.getAttribute(attribute("source"));
       const id = value == null ? void 0 : value.replace(/^#/, "");
       const source = value === "document" ? root2.document : value ? !/[\s#]/.test(id) && root2.document.getElementById(id) : element;
-      if (((_a = entries.get(element)) == null ? void 0 : _a.signature) === signature && ((_b = entries.get(element)) == null ? void 0 : _b.source) === source) return;
+      if (((_a = source == null ? void 0 : source.matches) == null ? void 0 : _a.call(source, "a,button")) && source.getAttribute("draggable") !== "false") {
+        api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_VALUE, {
+          extension: "present",
+          element: source,
+          attribute: "draggable",
+          value: source.getAttribute("draggable"),
+          reason: "An interactive Present gesture source requires draggable=false; applying it automatically.",
+          suggestion: 'Declare draggable="false" on the gesture source.'
+        });
+        source.setAttribute("draggable", "false");
+      }
+      if (((_b = entries.get(element)) == null ? void 0 : _b.signature) === signature && ((_c = entries.get(element)) == null ? void 0 : _c.source) === source) return;
       remove(element);
       if (!source) {
         api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_TARGET, {
@@ -6056,7 +6068,7 @@
       }
       if (event.button !== 0 || event.isPrimary === false || event.defaultPrevented) return;
       const target = event.target;
-      if (!target.closest || target.closest("input,textarea,select,button,a,[contenteditable]:not([contenteditable=false]),[data-ae-scrollbox]")) return;
+      if (!target.closest || target.closest(inputExceptions)) return;
       if (!interaction) {
         interaction = { id: event.pointerId, x: event.clientX, y: event.clientY, candidates: [], owner: null, target };
         for (const name of ["pointermove", "pointerup", "pointercancel", "lostpointercapture"])

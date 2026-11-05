@@ -530,7 +530,7 @@
     },
     {
       "name": "data-ae-present-gesture",
-      "description": "Optional continuous pointer control of the Present opening timeline. Opposite movement reverses it with Unpop. Requires inspectable Web Animations transitions.\n\nValue syntax: enum.",
+      "description": "Optional continuous pointer control of the Present opening timeline. Opposite movement reverses it with Unpop. Links and buttons require draggable=false to start gestures, as in Scrollbox; presses retain native clicks and drags suppress the release click. Requires inspectable Web Animations transitions.\n\nValue syntax: enum.",
       "references": [
         {
           "name": "AelluxJS present",
@@ -578,7 +578,7 @@
     },
     {
       "name": "data-ae-present-gesture-source",
-      "description": "Pop gesture source: an element ID, optionally prefixed with #, or document. Defaults to the Present itself. Unpop and Dismiss start on the Present.\n\nValue syntax: id.\n\nExamples: `handle`, `#handle`, `document`.",
+      "description": "Pop gesture source: an element ID, optionally prefixed with #, or document. Defaults to the Present itself. A link/button source without draggable=false emits warning 2026 and receives that attribute automatically. Unpop and Dismiss start on the Present.\n\nValue syntax: id.\n\nExamples: `handle`, `#handle`, `document`.",
       "references": [
         {
           "name": "AelluxJS present",
