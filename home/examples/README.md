@@ -29,6 +29,10 @@ without replacing the current panel or writing a successful history entry. An
 HTTP error may appear in browser network/console tools for this deliberate action.
 Aborted and superseded requests do not produce error presentation.
 
+The homepage initializes in Full mode, using the bundled official Extensions and
+Full stylesheet. Full registers Viewport for selector-based loading; only the
+custom SVG Downloader needs explicit registration on the homepage.
+
 All examples use public `dist/` artifacts in Basic mode, explicitly registering
 only their required Extensions and Preference. The top-level boot option
 `syncBootstrapThemeTag` synchronizes each preview immediately at initialization;

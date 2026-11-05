@@ -12,11 +12,6 @@
   <title>aellux.js — UX Made Easy.</title>
   <script src="../dist/aellux.min.js"></script>
   <script>
-    $ae.ext("preference");
-    $ae.ext("present", { loadStyle: true, loadWhen: "[data-ae-present],[data-ae-present-group]" });
-    $ae.ext("scrollbox", { loadStyle: true, loadWhen: "[data-ae-scrollbox]" });
-    $ae.ext("anchor", { loadStyle: true, loadWhen: "[data-ae-anchor]" });
-    $ae.ext("viewport", { loadWhen: "[data-ae-viewport]" });
     $ae.ext(new URL("assets/aellux.ext.svg-downloader.js", document.baseURI).href, {
       builds: "modern", loadWhen: "[data-ae-svg-downloader]"
     });
@@ -48,7 +43,7 @@
       syncNavigation(main.getBoundingClientRect().top < 0);
     });
     $ae.init({
-      mode: "basic",
+      mode: "full",
       syncBootstrapThemeTag: true
     });
   </script>

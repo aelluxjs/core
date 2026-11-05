@@ -18,6 +18,8 @@ Changes in this section are pending for the `0.1.0` release candidate.
 
 ### Changed
 
+- The homepage now initializes with the Full bundle and its shared stylesheet. Standalone examples retain Basic mode with only their required Extensions and styles.
+
 - Finalized Present's prerelease closing contract as `dismiss()`: renamed trigger action, auto-dismiss/click attributes, CSS destinations/timing/progress, `ae--dismissing`, lifecycle/focus events and `present.dismiss` layout origin. Existing `data-ae-dismiss` controls, toggle/group/hover/Point/countdown behavior and rendered-state handoff are preserved. No alias retains the former `unpop()` dismissal meaning; the separate reverse-playback operation to `from` is documented in `milestones/present-unpop-reverse.md`. See the Present guide for the complete beta migration table. Package version remains unchanged; npm publication was checked and only prereleases existed on 2026-11-04.
 
 - Recurring CSS publication now follows the shared adaptive `waitLayout` update phase as an explicit authoring contract, independently of active CSS Motion and its optional fixed property FPS ceiling. Bounded synchronous setup, interruption and restoration retain their correctness requirements.

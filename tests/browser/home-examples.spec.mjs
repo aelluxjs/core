@@ -205,12 +205,29 @@ for (const theme of ["light", "dark"]) {
   }
 }
 
-test("inline head initialization publishes preferences before styles and deferred handlers", async ({ page }) => {
+test("inline head initialization publishes preferences early and loads Full only on the homepage", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("AelluxJsPreferences", "colorScheme=dark"));
   const documents = ["index", "examples/carousel", "examples/viewport", "examples/floating",
     "examples/navigation", "examples/navigation-details", "examples/navigation-activity"];
   const stylesheet = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css";
   for (const document of documents) {
+    const homepage = document === "index";
+    const extensions = homepage ? ["preference", "present", "scrollbox", "anchor", "viewport"]
+      : document === "examples/carousel" ? ["preference", "scrollbox", "scrollbox-snap", "anchor"]
+      : document === "examples/viewport" ? ["preference", "viewport"]
+      : document === "examples/floating" ? ["preference", "anchor", "present"]
+      : ["preference", "feedback", "state-navigation", "ajax-href"];
+    const styles = homepage ? ["aellux.full.css"]
+      : document === "examples/carousel" ? ["aellux.ext.scrollbox.css", "aellux.ext.anchor.css"]
+      : document === "examples/floating" ? ["aellux.ext.anchor.css", "aellux.ext.present.css"] : [];
+    const assets = [];
+    const recordAsset = request => {
+      const url = new URL(request.url());
+      if (request.frame() === page.mainFrame() && url.pathname.startsWith("/dist/")) {
+        assets.push(url.pathname.split("/").pop().replace(".min.", "."));
+      }
+    };
+    page.on("request", recordAsset);
     let release, requested;
     const gate = new Promise(resolve => { release = resolve; });
     const request = new Promise(resolve => { requested = resolve; });
@@ -227,7 +244,6 @@ test("inline head initialization publishes preferences before styles and deferre
       await expect.poll(() => page.evaluate(() => window.$ae?.options.syncBootstrapThemeTag), { timeout: 5000 }).toBe(true);
       earlyState = await page.evaluate(() => ({
         mode: $ae.options.mode,
-        preferenceRegistered: !!$ae.registry.ext.preference,
         syncBootstrapThemeTag: $ae.options.syncBootstrapThemeTag,
         colorScheme: $ae.currentPreference("color-scheme"),
         bootstrapTheme: window.document.documentElement.getAttribute("data-bs-theme"),
@@ -237,9 +253,19 @@ test("inline head initialization publishes preferences before styles and deferre
       release();
       await navigation;
     }
-    expect(earlyState).toEqual({ mode: "basic", preferenceRegistered: true, syncBootstrapThemeTag: true,
+    expect(earlyState).toEqual({ mode: homepage ? "full" : "basic", syncBootstrapThemeTag: true,
       colorScheme: "dark", bootstrapTheme: "dark", stylesheetLoaded: false });
     await expect(page.locator("html")).toHaveAttribute("data-bs-theme", "dark");
+    await expect.poll(() => page.evaluate(names => names.every(name => {
+      const key = name.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+      return !!$ae.ext[key]?.initialized;
+    }), extensions)).toBe(true);
+    expect(assets.sort()).toEqual([
+      "aellux.js", homepage ? "aellux.full.js" : "aellux.orchestrator.js",
+      ...(homepage ? ["viewport"] : extensions).map(name => `aellux.ext.${name}.js`),
+      ...styles
+    ].sort());
+    page.off("request", recordAsset);
     await page.unroute(stylesheet);
   }
 });
