@@ -3,139 +3,91 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Interactive Carousel — aellux.js</title>
+    <title>Places to pause — aellux.js</title>
     <script src="../../dist/aellux.min.js"></script>
     <script>
       $ae.ext("preference");
       $ae.ext("scrollbox", { loadStyle: true });
-      $ae.ext("scrollbox-snap");
-      $ae.ext("anchor", { loadStyle: true });
-      $ae.init({
-        mode: "basic",
-        syncBootstrapThemeTag: true
-      });
+      $ae.ext("viewport");
+      $ae.ext("point");
+      $ae.ext("present", { loadStyle: true });
+      $ae.init({ mode: "basic", useHash: false, syncBootstrapThemeTag: true });
     </script>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-      crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="../assets/home.css">
     <script src="carousel.js" defer></script>
   </head>
   <body class="p-3 small min-vh-100" style="--bs-heading-font-family: var(--bs-font-sans-serif);">
-    <main aria-label="Interactive Carousel example" style="min-width: 0;">
-      <h1 class="visually-hidden">Interactive Carousel</h1>
-      <p class="small text-body-secondary">Drag the cards, swipe on touch, or use the navigation buttons.</p>
-      <div id="carousel-stage" class="position-relative">
-        <style>
-          #gallery > [data-ae-snap-item] {
-            flex: 0 0 82%;
-            min-width: 0;
-            min-height: 15rem;
-            opacity: calc(.65 + var(--ae-snap-focus, 0) * .35);
-          }
-          #carousel-focus {
-            contain: none;
-            --ae-anchor-switch-duration: 200ms;
-            --ae-anchor-switch-ease: ease-in-out;
-          }
-
-          #carousel-focus > div {
-            animation: carousel-focus-pulse .5s ease-in-out infinite alternate;
-          }
-
-          @keyframes carousel-focus-pulse {
-            from { transform: scale(.98); }
-            to { transform: scale(.99); }
-          }
-
-          html[data-ae-reduced-motion="reduced"] #carousel-focus > div {
-            animation: none;
-          }
-        </style>
-        <div
-          id="gallery"
-          class="d-flex gap-3 overflow-x-auto p-1"
-          data-ae-scrollbox="pointer"
-          data-ae-scrollbox-snap
-          style="overscroll-behavior-x: contain;"
-          tabindex="0"
-          role="region"
-          aria-label="Behavior cards"
-          aria-roledescription="carousel">
-          <article
-            id="carousel-card-1"
-            class="card p-4"
-            data-ae-snap-item>
-            <span class="display-6 font-monospace fw-medium lh-base text-body-secondary">01</span>
-            <h2 class="h4 text-break mt-auto">Declarative.</h2>
-            <p class="text-body-secondary mb-0">
-              Start with HTML attributes. Describe what your interface should do.
-            </p>
-          </article>
-          <article
-            id="carousel-card-2"
-            class="card p-4"
-            data-ae-snap-item>
-            <span class="display-6 font-monospace fw-medium lh-base text-body-secondary">02</span>
-            <h2 class="h4 text-break mt-auto">Reusable.</h2>
-            <p class="text-body-secondary mb-0">
-              Use a focused behavior wherever the same interaction belongs.
-            </p>
-          </article>
-          <article
-            id="carousel-card-3"
-            class="card p-4"
-            data-ae-snap-item>
-            <span class="display-6 font-monospace fw-medium lh-base text-body-secondary">03</span>
-            <h2 class="h4 text-break mt-auto">Composable.</h2>
-            <p class="text-body-secondary mb-0">
-              Combine scrolling and alignment through independent Extensions.
-            </p>
-          </article>
-          <article
-            id="carousel-card-4"
-            class="card p-4"
-            data-ae-snap-item>
-            <span class="display-6 font-monospace fw-medium lh-base text-body-secondary">04</span>
-            <h2 class="h4 text-break mt-auto">Adaptable.</h2>
-            <p class="text-body-secondary mb-0">Keep native touch scrolling alongside pointer dragging.</p>
-          </article>
-          <article
-            id="carousel-card-5"
-            class="card p-4"
-            data-ae-snap-item>
-            <span class="display-6 font-monospace fw-medium lh-base text-body-secondary">05</span>
-            <h2 class="h4 text-break mt-auto">Your design.</h2>
-            <p class="text-body-secondary mb-0">AelluxJS supplies the behavior. You choose the presentation.</p>
-          </article>
-          <div
-            id="carousel-focus"
-            class="z-2 pe-none overflow-visible"
-            data-ae-anchor="center:center"
-            data-ae-anchor-match="width height"
-            data-ae-anchor-target="carousel-card-1"
-            aria-hidden="true">
-            <div class="w-100 h-100 border border-5 border-warning bg-transparent"></div>
+    <main aria-labelledby="gallery-title">
+      <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+        <div><p class="eyebrow text-body-secondary mb-1">THE WEEKEND EDIT</p><h1 id="gallery-title" class="h4 mb-1">Places to pause.</h1></div>
+        <span class="badge text-body border fw-normal">3 escapes</span>
+      </div>
+      <p id="gallery-help" class="text-body-secondary">Drag or swipe to explore. Pick a place to open its field notes.</p>
+      <style>
+        #gallery > article { flex: 0 0 78%; min-width: 0; }
+        #gallery .place-card { opacity: calc(.55 + var(--ae-viewport-visible, 0) * .45); }
+        #gallery .place-art { height: 10rem; }
+        #gallery-notes { min-height: 6.5rem; }
+        #gallery-notes > section { grid-area: 1 / 1; --ae-pop-duration: 240ms; --ae-dismiss-duration: 160ms; }
+        html[data-ae-reduced-motion="reduced"] #gallery .place-card { opacity: 1; }
+      </style>
+      <div id="gallery" class="d-flex gap-3 overflow-x-auto overflow-y-hidden pb-3"
+        data-ae-scrollbox="pointer" data-ae-scrollbar="horizontal" data-ae-scrollbox-fade="false"
+        role="region" aria-label="Weekend destinations" aria-describedby="gallery-help" tabindex="0"
+        style="overscroll-behavior-x: contain;">
+        <article data-ae-viewport="x" data-ae-viewport-target="place-01">
+          <div id="place-01" class="place-card card overflow-hidden h-100">
+            <div class="place-art demo-landscape demo-landscape-coast position-relative" aria-hidden="true"><span class="demo-sun"></span><span class="demo-ridge"></span></div>
+            <div class="p-3">
+              <span class="eyebrow text-body-secondary">01 / Golden hour</span>
+              <h2 class="h5 mt-1">The quiet coast</h2><p class="text-body-secondary small">Follow the last light along the shore.</p>
+              <button type="button" class="btn btn-sm btn-outline-secondary" data-ae-point
+                data-ae-trigger="pop" data-ae-target="notes-01">Explore <span class="visually-hidden">The quiet coast</span> ↗</button>
+            </div>
           </div>
+        </article>
+        <article data-ae-viewport="x" data-ae-viewport-target="place-02">
+          <div id="place-02" class="place-card card overflow-hidden h-100">
+            <div class="place-art demo-landscape demo-landscape-peak position-relative" aria-hidden="true"><span class="demo-sun"></span><span class="demo-ridge"></span></div>
+            <div class="p-3">
+              <span class="eyebrow text-body-secondary">02 / Higher ground</span>
+              <h2 class="h5 mt-1">Above the clouds</h2><p class="text-body-secondary small">Leave a little room for the unexpected.</p>
+              <button type="button" class="btn btn-sm btn-outline-secondary" data-ae-point
+                data-ae-trigger="pop" data-ae-target="notes-02">Explore <span class="visually-hidden">Above the clouds</span> ↗</button>
+            </div>
+          </div>
+        </article>
+        <article data-ae-viewport="x" data-ae-viewport-target="place-03">
+          <div id="place-03" class="place-card card overflow-hidden h-100">
+            <div class="place-art demo-landscape demo-landscape-dune position-relative" aria-hidden="true"><span class="demo-sun"></span><span class="demo-ridge"></span></div>
+            <div class="p-3">
+              <span class="eyebrow text-body-secondary">03 / Off the clock</span>
+              <h2 class="h5 mt-1">Into the dunes</h2><p class="text-body-secondary small">Find your own pace, far from the noise.</p>
+              <button type="button" class="btn btn-sm btn-outline-secondary" data-ae-point
+                data-ae-trigger="pop" data-ae-target="notes-03">Explore <span class="visually-hidden">Into the dunes</span> ↗</button>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="d-flex justify-content-between align-items-center gap-2 mt-2 mb-3">
+        <span class="small text-body-secondary">Take the slow route →</span>
+        <div class="d-flex gap-2">
+          <button id="previous-card" class="btn btn-sm btn-outline-secondary" type="button" aria-label="Previous places" aria-controls="gallery">←</button>
+          <button id="next-card" class="btn btn-sm btn-warning" type="button" aria-label="Next places" aria-controls="gallery">→</button>
         </div>
       </div>
-      <div class="d-flex align-items-center justify-content-between gap-2 mt-3">
-        <button
-          id="previous-card"
-          class="btn btn-sm btn-outline-secondary"
-          type="button"
-          aria-controls="gallery"
-          disabled>
-          ← Previous
-        </button>
-        <output id="carousel-position" class="small text-body-secondary" aria-live="polite">
-          Card 1 of 5
-        </output>
-        <button id="next-card" class="btn btn-sm btn-warning" type="button" aria-controls="gallery" disabled>
-          Next →
-        </button>
+      <div id="gallery-notes" class="d-grid" data-ae-present-group data-ae-present-active="notes-01" aria-live="polite">
+        <section id="notes-01" class="border-start border-3 border-warning ps-3" data-ae-present="opacity" data-ae-dismiss-on-click="false">
+          <h2 class="h6 mb-1">The quiet coast</h2><p class="text-body-secondary mb-0">A slow evening by the water. Pack a light layer and take the scenic route.</p>
+        </section>
+        <section id="notes-02" class="border-start border-3 border-warning ps-3" data-ae-present="opacity" data-ae-dismiss-on-click="false" hidden>
+          <h2 class="h6 mb-1">Above the clouds</h2><p class="text-body-secondary mb-0">An early start, a winding trail and a view worth the climb. Bring water and a curious mind.</p>
+        </section>
+        <section id="notes-03" class="border-start border-3 border-warning ps-3" data-ae-present="opacity" data-ae-dismiss-on-click="false" hidden>
+          <h2 class="h6 mb-1">Into the dunes</h2><p class="text-body-secondary mb-0">Warm sand, wide skies and no rush to be anywhere else. Stay for the changing colors.</p>
+        </section>
       </div>
     </main>
   </body>

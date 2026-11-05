@@ -207,7 +207,7 @@ html[data-ae-reduced-motion="reduced"] .hero-prism-light { display: none; animat
 .feature-symbol { display: inline-flex; align-items: center; justify-content: center; min-width: 2.5rem; height: 2rem; border-bottom: 3px solid var(--bs-warning); font-size: 1.2rem; }
 .example-card { display: flex; flex-direction: column; }
 .example-card > :first-child { min-height: 10.5rem; }
-.example-frame { display: block; width: calc(100% - 3rem); height: 27rem; margin: 0 1.5rem 1.5rem; border: 1px solid var(--bs-border-color); border-radius: var(--bs-border-radius); background: var(--bs-body-bg); }
+.example-frame { display: block; width: calc(100% - 3rem); height: 38rem; margin: 0 1.5rem 1.5rem; border: 1px solid var(--bs-border-color); border-radius: var(--bs-border-radius); background: var(--bs-body-bg); }
 .example-source { margin-top: auto; }
 .example-source, .source-file { display: flex; flex-direction: column; }
 .source-toggle { display: block; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; font-size: .875rem; text-align: left; cursor: pointer; overflow-wrap: anywhere; }
@@ -267,3 +267,14 @@ footer a { color: inherit; }
 }
 
 html[data-ae-reduced-motion="reduced"] { scroll-behavior: auto; }
+
+/* Shared artwork for the standalone destination cards. */
+.demo-landscape { overflow: hidden; isolation: isolate; background: linear-gradient(#d8ad7c, #f6dfb9 60%, #6d9693 60%); }
+.demo-landscape .demo-sun { position: absolute; width: 3rem; height: 3rem; border-radius: 50%; top: 18%; right: 22%; background: #fff0b5; }
+.demo-landscape .demo-ridge { position: absolute; inset: 45% -10% -25%; border-radius: 50% 60% 0 0; transform: rotate(-12deg); background: #4c6861; }
+.demo-landscape-peak { background: linear-gradient(#a5c4d1, #e0e4df); }
+.demo-landscape-peak .demo-ridge { inset: 30% -10% -40%; border-radius: 0; transform: rotate(45deg); background: linear-gradient(135deg, #faf2d7 25%, #647678 25%, #334d55 70%); }
+.demo-landscape-dune { background: linear-gradient(#c8ad9f, #ead0aa); }
+.demo-landscape-dune .demo-ridge { background: #b9754f; box-shadow: 2rem -1.4rem 0 #d4a078; }
+[data-ae-point][data-ae-trigger][aria-expanded="true"] { background-color: var(--bs-warning); border-color: var(--bs-warning); color: #17191c; }
+nav [aria-current="step"] { background-color: var(--bs-warning); border-color: var(--bs-warning); color: #17191c; }

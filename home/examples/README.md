@@ -1,65 +1,60 @@
 # Homepage examples
 
 Run `node tests/browser/server.mjs` from the repository root and open
-`http://127.0.0.1:4173/home/index.htm`. Serve over HTTP; Ajax Href and source viewing
-require same-origin requests. Each `.htm` file also runs as a standalone page.
+`http://127.0.0.1:4173/home/index.htm`. Serve over HTTP for runtime loading and
+same-origin source viewing. Each example also runs as a standalone page.
 
-- `carousel.htm`: Scrollbox owns pointer dragging and native touch scrolling;
-  Scrollbox Snap owns alignment, selection and controller navigation. Anchor
-  follows the focused card with an ease-in-out transition; a separate inner
-  square pulses through CSS without changing the placement transform.
-- `viewport.htm`: Viewport measures wrappers and publishes CSS values to separate
-  visual children, avoiding feedback from their scale and translation. Reduced
-  motion disables the visual effects.
-- `floating.htm`: Anchor positions an always-mounted outer wrapper; Present owns
-  the inner disclosure. Both the Anchor wrapper and its trigger share the same
-  positioning reference. The range changes application layout and announces a
-  Layout event; Anchor calculates placement and fallback within the iframe viewport.
-  The panel uses explicit dismissal so moving the range leaves it open.
-- `navigation.htm`, `navigation-details.htm`, `navigation-activity.htm`: real HTML
-  responses replace `#navigation-content` through Ajax Href. State Navigation
-  records and restores history in the preview's window. Feedback publishes and
-  renders loading, success and error messages; the example supplies CSS, focus
-  handling and a live region. Pending-request accounting keeps an obsolete
-  completion from clearing an active loading indicator.
+The four experiences use only the ten bundled primitives. They do not register
+or load optional Extensions, Bootstrap JavaScript or external image libraries.
 
-The **Try a 404** button deliberately requests the nonexistent
-`unavailable-demo.htm`. A server's genuine 404 response produces error feedback
-without replacing the current panel or writing a successful history entry. An
-HTTP error may appear in browser network/console tools for this deliberate action.
-Aborted and superseded requests do not produce error presentation.
+- `carousel.htm`: **Places to Pause** combines Scrollbox dragging/native touch,
+  Viewport visibility on separate visual children, Point-enabled native buttons
+  and an exclusive Present Group for destination field notes. The tiny script
+  only connects the previous/next buttons to native scrolling. This is free
+  scrolling; it does not load Scrollbox Snap.
+- `viewport.htm`: **A Little Space** is a horizontal visual story. Viewport
+  publishes geometry to visual children, whose scale, opacity and layered shapes
+  respond through CSS. Scrollbox supplies pointer dragging and a scrollbar.
+  Preference controls motion; reduced motion removes the effects. It has no
+  custom interaction script.
+- `floating.htm`: **Make It Yours** combines Anchor, Present, Point and Focus.
+  An always-mounted outer wrapper follows the workspace card and chooses a
+  placement in the iframe viewport; the inner editor owns visibility/motion.
+  The range changes application layout and announces Layout. Enter advances
+  through the fields, and Focus restores the previous visible target when the
+  editor closes. The script handles the range, live title and Escape only.
+- `navigation.htm`: **Your Next Big Idea** composes Present Groups, Focus,
+  Preference, Adaptive, State Navigation and Feedback into a local setup flow.
+  Native form validation and Enter navigation serve the first step. Theme
+  choices synchronize with the homepage and other previews. A range resizes
+  the workspace card; Adaptive changes its layout at a component-local 360px
+  threshold. State Navigation records the selected step; Back/Forward selects
+  the corresponding Present member and focuses its heading. Focus-only state
+  changes do not reselect the step or steal input focus. Feedback opens an
+  inline notice through Present, which owns automatic dismissal. No request
+  is made and no workspace is created on a server. Form edits stay in memory;
+  history restores navigation, not form snapshots.
 
-The homepage initializes in Full mode, using the bundled official Extensions and
-Full stylesheet. Full registers Viewport for selector-based loading; only the
-custom SVG Downloader needs explicit registration on the homepage.
+The homepage uses Full and its shared stylesheet, with an explicit registration
+for the custom SVG Downloader. Every standalone example uses Basic and registers
+only the Extensions and styles it needs, before calling `$ae.init()` inline in
+its head. The boot option `syncBootstrapThemeTag` publishes the theme before
+styles; Preference owns later changes, persistence and option-button
+`aria-pressed`. Same-origin storage events synchronize separate windows.
 
-All examples use public `dist/` artifacts in Basic mode, explicitly registering
-only their required Extensions and Preference. The top-level boot option
-`syncBootstrapThemeTag` synchronizes each preview immediately at initialization;
-Preference publishes later changes and manages option-button `aria-pressed`.
-Storage events synchronize separate windows on the same origin. Bootstrap 5.3.8
-CSS utilities provide layout, spacing, typography and visual states. Examples
-reuse `../assets/home.css` for shared colors, borders and focus indicators, with
-inline CSS only for dimensions and Extension-driven effects that Bootstrap does
-not express. There is no dedicated examples stylesheet. Bootstrap JavaScript is
-not loaded.
+Bootstrap 5.3.8 supplies layout, spacing, typography and controls. Shared
+`../assets/home.css` supplies colors, focus indicators and reusable landscape
+artwork; inline styles describe dimensions and Extension-driven effects.
+Standalone pages use system fonts. Only the homepage loads Geist.
+There is no dedicated examples stylesheet.
 
-Extension registration and `$ae.init()` are explicit inline scripts in each
-document's `<head>`, immediately after the boot script and before stylesheets.
-They do not depend on `defer` or a DOM-ready callback. Deferred scripts only
-install DOM interaction handlers before the runtime's initial mount; Viewport
-needs no separate JavaScript file. Source viewing includes each document's
-complete inline configuration.
+Source disclosures fetch the exact executed HTML and JavaScript. Shared
+`home.css` is omitted from the file list. Highlight.js loads through `$ae.dep()`
+with cached 11.12 CDN dependencies and GitHub light/dark styles. The source stays
+readable and copyable if highlighting fails. Preserve the relative `home/` and
+`dist/` structure when deploying under a repository prefix.
 
-The homepage's source disclosures fetch these exact HTML and JavaScript files;
-no separately maintained code excerpts are used.
-Highlight.js loads through `$ae.dep()`, using the same 11.12 CDN series and
-GitHub light/dark styles as Docweaver. Later files share the cached dependencies;
-Preference changes switch the active stylesheet. Highlighted markup preserves the
-original text for copying. Source remains readable if highlighting is unavailable.
-The homepage's branding and headings use Geist from Google Fonts. Standalone
-examples use Bootstrap's default system fonts and minimal presentation, without
-loading Google Fonts. Code remains monospaced. Preserve the relative
-`home/` and `dist/` structure when deploying under a repository prefix such as
-`/core/`. Viewport and Ajax Href remain unstable Extensions. Touch emulation does
-not replace checks on physical devices.
+Viewport, Point and Focus retain their documented stability status. Browser
+regressions cover core interactions, runtime assets, intermediate visual values,
+keyboard focus, touch emulation, motion preferences, reflow and runnable source.
+Touch emulation does not replace checks on physical devices.

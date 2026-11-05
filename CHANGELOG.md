@@ -20,6 +20,8 @@ Changes in this section are pending for the `0.1.0` release candidate.
 
 ### Changed
 
+- Reworked the four homepage examples into destination browsing, a horizontal visual story, a contextual workspace editor and a local setup flow. They compose all ten bundled primitives with minimal application JavaScript; optional Scrollbox Snap and Ajax Href demonstrations were removed. Runnable source, Basic registrations and browser coverage follow the new experiences.
+
 - Full now bundles only reusable primitives: Viewport joins the bundle; Overflow Marquee and Scrollbox Snap load separate signed scripts pending migration to external extensions. Marquee CSS is also excluded from Full and loads on demand. Basic registration and extension stability remain unchanged.
 
 - Adaptive now compares element width in CSS pixels against `adaptiveParams.minSizes` for `ae--fits-*` classes, replacing `sqrt(width * height)`. Height-only reflow no longer changes size breakpoints or causes columns to repeatedly switch layouts. Shape classes, orientation and dimension outputs continue to use both dimensions.

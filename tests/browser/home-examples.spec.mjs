@@ -236,18 +236,20 @@ for (const theme of ["light", "dark"]) {
 test("inline head initialization publishes preferences early and loads Full only on the homepage", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("AelluxJsPreferences", "colorScheme=dark"));
   const documents = ["index", "examples/carousel", "examples/viewport", "examples/floating",
-    "examples/navigation", "examples/navigation-details", "examples/navigation-activity"];
+    "examples/navigation"];
   const stylesheet = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css";
   for (const document of documents) {
     const homepage = document === "index";
     const extensions = homepage ? ["preference", "present", "scrollbox", "anchor", "viewport"]
-      : document === "examples/carousel" ? ["preference", "scrollbox", "scrollbox-snap", "anchor"]
-      : document === "examples/viewport" ? ["preference", "viewport"]
-      : document === "examples/floating" ? ["preference", "anchor", "present"]
-      : ["preference", "feedback", "state-navigation", "ajax-href"];
+      : document === "examples/carousel" ? ["preference", "scrollbox", "viewport", "point", "present"]
+      : document === "examples/viewport" ? ["preference", "viewport", "scrollbox"]
+      : document === "examples/floating" ? ["preference", "anchor", "present", "point", "focus"]
+      : ["preference", "state-navigation", "present", "focus", "adaptive", "feedback"];
     const styles = homepage ? ["aellux.full.css"]
-      : document === "examples/carousel" ? ["aellux.ext.scrollbox.css", "aellux.ext.anchor.css"]
-      : document === "examples/floating" ? ["aellux.ext.anchor.css", "aellux.ext.present.css"] : [];
+      : document === "examples/carousel" ? ["aellux.ext.scrollbox.css", "aellux.ext.present.css"]
+      : document === "examples/floating" ? ["aellux.ext.anchor.css", "aellux.ext.present.css"]
+      : document === "examples/viewport" ? ["aellux.ext.scrollbox.css"]
+      : ["aellux.ext.present.css", "aellux.ext.adaptive.css", "aellux.ext.feedback.css"];
     const assets = [];
     const recordAsset = request => {
       const url = new URL(request.url());
@@ -290,7 +292,7 @@ test("inline head initialization publishes preferences early and loads Full only
     }), extensions)).toBe(true);
     expect(assets.sort()).toEqual([
       "aellux.js", homepage ? "aellux.full.js" : "aellux.orchestrator.js",
-      ...(homepage ? ["viewport"] : extensions).map(name => `aellux.ext.${name}.js`),
+      ...(homepage ? [] : extensions).map(name => `aellux.ext.${name}.js`),
       ...styles
     ].sort());
     page.off("request", recordAsset);
@@ -298,79 +300,94 @@ test("inline head initialization publishes preferences early and loads Full only
   }
 });
 
-test("carousel uses real snap navigation and pointer dragging", async ({ page }) => {
-  await page.setViewportSize({ width: 520, height: 432 });
-  await openExample(page, "carousel", "scrollboxSnap");
-  await expect(page.getByRole("button", { name: "Next" })).toBeEnabled();
-  await page.getByRole("button", { name: "Next" }).click();
-  await expect(page.locator("#carousel-position")).toHaveText("Card 2 of 5");
-  await expect(page.locator("#carousel-focus")).toHaveAttribute("data-ae-anchor-target", "carousel-card-2");
-  await page.getByRole("button", { name: "Previous" }).click();
-  await expect(page.locator("#carousel-position")).toHaveText("Card 1 of 5");
+test("gallery combines native navigation, pointer dragging and exclusive field notes", async ({ page }) => {
+  await page.setViewportSize({ width: 520, height: 640 });
+  await openExample(page, "carousel", "present");
+  await page.getByRole("button", { name: "Next places" }).click();
+  await expect.poll(() => page.locator("#gallery").evaluate(e => e.scrollLeft)).toBeGreaterThan(100);
+  await page.getByRole("button", { name: "Previous places" }).click();
+  await expect.poll(() => page.locator("#gallery").evaluate(e => e.scrollLeft)).toBeLessThan(2);
   const box = await page.locator("#gallery").boundingBox();
-  await page.mouse.move(box.x + box.width - 35, box.y + box.height - 25);
+  await page.mouse.move(box.x + box.width - 35, box.y + 80);
   await page.mouse.down();
-  await page.mouse.move(box.x + 35, box.y + box.height - 25, { steps: 16 });
+  await page.mouse.move(box.x + 35, box.y + 80, { steps: 16 });
   await page.mouse.up();
-  await expect(page.locator("#carousel-position")).not.toHaveText("Card 1 of 5");
-  expect(await page.locator("#gallery").evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
-  await page.evaluate(() => $ae("gallery").scrollbox.goto(4));
-  await expect(page.locator("#carousel-position")).toHaveText("Card 5 of 5");
-  await expect(page.getByRole("button", { name: "Next" })).toBeDisabled();
-  await expect(page.locator("#carousel-focus")).toHaveAttribute("data-ae-anchor-target", "carousel-card-5");
-  await expect.poll(() => page.locator("#carousel-focus").evaluate(element => {
-    const actual = element.getBoundingClientRect();
-    const target = document.getElementById("carousel-card-5").getBoundingClientRect();
-    return Math.max(Math.abs(actual.left - target.left), Math.abs(actual.top - target.top),
-      Math.abs(actual.width - target.width), Math.abs(actual.height - target.height));
-  })).toBeLessThan(1);
+  await expect.poll(() => page.locator("#gallery").evaluate(e => e.scrollLeft)).toBeGreaterThan(50);
+  const explore = page.getByRole("button", { name: "Explore Into the dunes" });
+  await explore.scrollIntoViewIfNeeded();
+  await explore.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#gallery-notes")).toHaveAttribute("data-ae-present-active", "notes-03");
+  await expect(page.locator("#notes-01")).toBeHidden();
+  await expect(page.locator("#notes-03")).toBeVisible();
+  await expect(explore).toHaveAttribute("aria-expanded", "true");
 });
 
-test("carousel retains native touch panning", async ({ page, context, browserName }) => {
+test("gallery retains native touch panning and Point activation opens a single selection", async ({ page, context, browserName }) => {
   test.skip(browserName !== "chromium", "Native touch input is driven through Chromium CDP.");
-  await page.setViewportSize({ width: 375, height: 500 });
+  await page.setViewportSize({ width: 375, height: 640 });
   const cdp = await context.newCDPSession(page);
   await cdp.send("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 1 });
-  await openExample(page, "carousel", "scrollboxSnap");
+  await openExample(page, "carousel", "point");
   const box = await page.locator("#gallery").boundingBox();
-  const y = box.y + box.height / 2;
+  const y = box.y + 70;
   await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: box.x + box.width - 20, y }] });
   for (let i = 1; i <= 12; i++) {
     await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: box.x + box.width - 20 - i * 20, y }] });
   }
   await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
-  await expect.poll(() => page.locator("#gallery").evaluate(element => element.scrollLeft)).toBeGreaterThan(10);
+  await expect.poll(() => page.locator("#gallery").evaluate(e => e.scrollLeft)).toBeGreaterThan(10);
+  const explore = page.getByRole("button", { name: "Explore Into the dunes" });
+  await explore.scrollIntoViewIfNeeded();
+  const target = await explore.boundingBox();
+  const point = { x: target.x + target.width / 2, y: target.y + target.height / 2 };
+  await page.evaluate(() => {
+    window.galleryPops = 0;
+    $ae.onEvent(document.getElementById("notes-03"), "BeforePop", () => galleryPops++);
+  });
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [point] });
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  await expect(page.locator("#notes-03")).toHaveClass(/ae--pop/);
+  expect(await page.evaluate(() => galleryPops)).toBe(1);
   await cdp.detach();
 });
 
-test("Viewport scrolls horizontally, publishes geometry to visual children and respects reduced motion", async ({ page }) => {
-  await page.setViewportSize({ width: 520, height: 432 });
+test("Viewport publishes intermediate geometry and motion preference disables layered effects", async ({ page }) => {
+  await page.setViewportSize({ width: 520, height: 640 });
   await openExample(page, "viewport", "viewport");
   const card = page.locator("#viewport-card-3");
   await expect.poll(() => card.evaluate(e => e.style.getPropertyValue("--ae-viewport-visible"))).not.toBe("");
-  const before = await card.evaluate(e => Number(e.style.getPropertyValue("--ae-viewport-visible")));
   const scroller = page.locator(".viewport-scroll");
   await scroller.focus();
   await page.keyboard.press("ArrowRight");
   await expect.poll(() => scroller.evaluate(e => e.scrollLeft)).toBeGreaterThan(0);
-  await scroller.evaluate(e => e.scrollTo({ left: e.scrollWidth }));
-  await expect.poll(() => card.evaluate(e => Number(e.style.getPropertyValue("--ae-viewport-visible")))).toBeGreaterThan(before);
+  // Half a panel is visible: verify actual intermediate CSS, beyond endpoints.
+  await scroller.evaluate(e => e.scrollTo({ left: e.scrollWidth - e.clientWidth * 1.5, behavior: "instant" }));
+  await expect.poll(() => card.evaluate(e => Number(e.style.getPropertyValue("--ae-viewport-visible")))).toBeGreaterThan(.2);
+  const middle = await card.evaluate(e => ({ visible: Number(e.style.getPropertyValue("--ae-viewport-visible")), opacity: Number(getComputedStyle(e).opacity), scale: new DOMMatrix(getComputedStyle(e).transform).m11 }));
+  expect(middle.visible).toBeLessThan(.95);
+  expect(middle.opacity).toBeGreaterThan(.3);
+  expect(middle.opacity).toBeLessThan(.97);
+  expect(middle.scale).toBeGreaterThan(.92);
+  expect(middle.scale).toBeLessThan(1);
   expect(await scroller.evaluate(e => e.scrollTop)).toBe(0);
   expect(await scroller.evaluate(e => e.scrollHeight <= e.clientHeight)).toBe(true);
-  await expect.poll(() => card.evaluate(e => getComputedStyle(e).transform)).not.toBe("none");
   expect(await page.locator(".viewport-step").first().evaluate(e => e.style.getPropertyValue("--ae-viewport-visible"))).toBe("");
-  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.getByRole("button", { name: "Less motion" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-ae-reduced-motion", "reduced");
   await expect(card).toHaveCSS("transform", "none");
   await expect(card).toHaveCSS("opacity", "1");
+  await expect(card.locator(".story-orbit > span")).toHaveCSS("transform", "none");
+  await page.getByRole("button", { name: "System motion" }).click();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(card).toHaveCSS("transform", "none");
 });
 
-test("Anchor repositions the Present panel and keyboard dismissal restores focus", async ({ page }) => {
-  await page.setViewportSize({ width: 520, height: 432 });
-  await openExample(page, "floating", "present");
-  const trigger = page.getByRole("button", { name: "Toggle panel" });
+test("workspace editor follows its card, advances fields and restores focus on dismissal", async ({ page }) => {
+  await page.setViewportSize({ width: 520, height: 600 });
+  await openExample(page, "floating", "focus");
+  const trigger = page.getByRole("button", { name: "Edit", exact: true });
   const panel = page.locator("#floating-panel");
-  await expect(panel).toBeHidden();
   await trigger.focus();
   await page.keyboard.press("Enter");
   await expect(trigger).toHaveAttribute("aria-expanded", "true");
@@ -383,71 +400,82 @@ test("Anchor repositions the Present panel and keyboard dismissal restores focus
   });
   await expect.poll(geometry).toMatchObject({ below: true, centered: true });
   await page.locator("#trigger-position").fill("180");
-  await page.locator("#trigger-position").dispatchEvent("input");
   await expect.poll(geometry).toMatchObject({ above: true, centered: true });
-  await page.setViewportSize({ width: 375, height: 432 });
+  await page.setViewportSize({ width: 375, height: 600 });
   await expect.poll(geometry).toMatchObject({ centered: true });
-  await page.getByRole("button", { name: "Close panel" }).focus();
+  await page.getByLabel("Workspace name", { exact: true }).fill("Studio South");
+  await expect(page.locator("#floating-trigger h2")).toHaveText("Studio South");
+  await page.keyboard.press("Enter");
+  await expect(page.getByLabel("A little reminder")).toBeFocused();
+  await page.getByLabel("A little reminder").fill("A fresh start.");
+  await expect(page.locator("#workspace-reminder")).toHaveText("A fresh start.");
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("button", { name: "Done", exact: true })).toBeFocused();
   await page.keyboard.press("Escape");
+  await expect(panel).toBeHidden();
+  await expect(page.locator("#trigger-position")).toBeFocused();
+  await trigger.focus();
+  await page.keyboard.press("Enter");
+  await page.getByLabel("Workspace name", { exact: true }).focus();
+  await page.getByRole("button", { name: "Done", exact: true }).focus();
+  await page.keyboard.press("Enter");
   await expect(panel).toBeHidden();
   await expect(trigger).toBeFocused();
   await trigger.click();
-  await expect(panel).toHaveClass(/ae--pop/);
-  await page.getByRole("button", { name: "Close panel" }).click();
+  await page.getByRole("button", { name: "Close editor", exact: true }).click();
   await expect(panel).toBeHidden();
 });
 
-test("Ajax Href loads HTML with Feedback, restores browser history and reports real failures", async ({ page }) => {
-  await openExample(page, "navigation", "ajaxHref");
-  await page.evaluate(() => { window.navigationSentinel = document.getElementById("navigation-demo"); });
-  let release;
-  const gate = new Promise(resolve => { release = resolve; });
-  await page.route("**/home/examples/navigation-details.htm", async route => { await gate; await route.continue(); });
-  try {
-    await page.getByRole("link", { name: "Details", exact: true }).click();
-    await expect(page.locator("#navigation-demo")).toHaveAttribute("aria-busy", "true");
-    await expect(page.locator("#navigation-status")).toHaveText("Loading the next panel…");
-  } finally { release(); }
-  await expect(page.locator("#navigation-heading")).toHaveText("Details");
-  await expect(page.locator("#navigation-status")).toHaveText("Loaded Details.");
-  await expect(page.locator("#navigation-content")).toBeFocused();
-  await expect(page.locator("#navigation-demo")).toHaveAttribute("aria-busy", "false");
-  await page.getByRole("link", { name: "Activity", exact: true }).click();
-  await expect(page.locator("#navigation-heading")).toHaveText("Activity");
+test("local setup composes Focus, Preference, Adaptive, history and automatic Feedback", async ({ page }) => {
+  await page.setViewportSize({ width: 520, height: 640 });
+  await openExample(page, "navigation", "adaptive");
+  await page.getByLabel("Project name").fill("Good Things");
+  await page.keyboard.press("Enter");
+  await expect(page.getByLabel("Your name")).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("button", { name: "Continue" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#style")).toHaveClass(/ae--pop/);
+  await expect(page.locator("#style-heading")).toBeFocused();
+  await page.getByRole("button", { name: "Dark", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-bs-theme", "dark");
+  await expect(page.getByRole("button", { name: "Dark", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "See your workspace" }).click();
+  await expect(page.locator("#preview")).toHaveClass(/ae--pop/);
+  await expect(page.locator("#preview-name")).toHaveText("Good Things");
+  const preview = page.locator("#workspace-preview");
+  await page.locator("#preview-width").fill("220");
+  await expect(preview).not.toHaveClass(/ae--fits-small/);
+  await expect(preview.locator(".preview-layout")).toHaveCSS("flex-direction", "column");
+  await page.locator("#preview-width").fill("460");
+  // The configured small threshold is deliberately local to this component.
+  await expect(preview).toHaveClass(/ae--fits-small/);
+  await expect(preview.locator(".preview-layout")).toHaveCSS("flex-direction", "row");
+  await page.getByRole("button", { name: "2. Style" }).click();
+  await expect(page.locator("#style")).toHaveClass(/ae--pop/);
   await page.evaluate(() => history.back());
-  await expect(page.locator("#navigation-heading")).toHaveText("Details");
-  await page.evaluate(() => history.back());
-  await expect(page.locator("#navigation-heading")).toHaveText("Overview");
+  await expect(page.locator("#preview")).toHaveClass(/ae--pop/);
   await page.evaluate(() => history.forward());
-  await expect(page.locator("#navigation-heading")).toHaveText("Details");
-  expect(await page.evaluate(() => window.navigationSentinel === document.getElementById("navigation-demo"))).toBe(true);
-  const previousURL = page.url();
-  logs.get(page).allow404 = true;
-  await page.getByRole("button", { name: "Try a 404" }).click();
-  await expect(page.locator("#navigation-status")).toContainText("not found (404)");
-  await expect(page.locator("#navigation-demo")).toHaveAttribute("aria-busy", "false");
-  await expect(page.locator("#navigation-heading")).toHaveText("Details");
-  expect(page.url()).toBe(previousURL);
+  await expect(page.locator("#style")).toHaveClass(/ae--pop/);
+  await page.getByRole("button", { name: "3. Preview" }).click();
+  await page.getByRole("button", { name: "Create local preview" }).click();
+  await expect(page.locator("#setup-message")).toContainText("Your local preview is ready");
+  await expect(page.locator("#setup-notice")).toHaveClass(/ae--pop/);
+  await expect(page.locator("#setup-notice")).toBeHidden({ timeout: 8000 });
 });
 
-test("superseded Ajax navigation does not show an error or clear active loading", async ({ page }) => {
-  await openExample(page, "navigation", "ajaxHref");
-  let release;
-  const gate = new Promise(resolve => { release = resolve; });
-  await page.route("**/home/examples/navigation-details.htm", async route => {
-    await gate;
-    await route.fulfill({ path: "home/examples/navigation-details.htm", contentType: "text/html" });
+for (const name of ["carousel", "viewport", "floating", "navigation"]) {
+  test(name + " reflows at narrow widths and with enlarged text", async ({ page }) => {
+    await openExample(page, name, "preference");
+    for (const width of [240, 320, 520]) {
+      await page.setViewportSize({ width, height: 640 });
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    }
+    await page.evaluate(() => document.documentElement.style.fontSize = "200%");
+    await page.setViewportSize({ width: 320, height: 640 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });
-  try {
-    await page.getByRole("link", { name: "Details", exact: true }).click();
-    await expect(page.locator("#navigation-demo")).toHaveAttribute("aria-busy", "true");
-    await page.getByRole("link", { name: "Activity", exact: true }).click();
-    await expect(page.locator("#navigation-heading")).toHaveText("Activity");
-  } finally { release(); }
-  await expect(page.locator("#navigation-demo")).toHaveAttribute("aria-busy", "false");
-  await expect(page.locator("#navigation-status")).toHaveText("Loaded Activity.");
-  await expect(page.locator("#navigation-status")).not.toHaveClass(/ae--feedback-error/);
-});
+}
 
 for (const reducedMotion of ["no-preference", "reduce"]) {
   test(`main navigation appears when main leaves the top and hides on return (${reducedMotion})`, async ({ page }) => {
@@ -646,7 +674,7 @@ test("homepage embeds four themed demos and displays the exact runnable source",
   await page.goto("/home/index.htm");
   await expect(page.locator(".hero .eyebrow")).toContainText("UX Made Easy");
   await expect(page.locator(".brand-mark")).toHaveCSS("font-family", /Geist/);
-  await expect(page.getByRole("button", { name: "System", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", { name: "Auto", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator("iframe.example-frame")).toHaveCount(4);
   await page.locator("iframe").evaluateAll(frames => frames.forEach(frame => { frame.loading = "eager"; }));
   for (const frameElement of await page.locator("iframe").all()) {

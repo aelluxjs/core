@@ -1,58 +1,36 @@
-const boundary = document.getElementById("navigation-demo");
-const status = document.getElementById("navigation-status");
-let pending = 0;
-
-function publish(type, message) {
-  // Feedback renders the message; Bootstrap supplies the status colors.
-  status.classList.remove("ae--feedback-busy", "ae--feedback-success", "ae--feedback-error");
-  status.classList.remove("text-body-secondary", "text-success-emphasis", "text-danger-emphasis");
-  status.classList.add({ busy: "text-body-secondary", success: "text-success-emphasis", error: "text-danger-emphasis" }[type]);
-  $ae.ext.feedback.send({ type, message, target: boundary });
+const steps = document.getElementById("setup-steps");
+const names = { project: "Project", style: "Style", preview: "Preview" };
+let selectedStep;
+async function selectStep(snapshot, focus = true) {
+  const id = Object.keys(names).includes(snapshot.step) ? snapshot.step : "project";
+  if (id === selectedStep) return;
+  selectedStep = id;
+  document.getElementById("preview-name").textContent = document.getElementById("project-name").value || "Your workspace";
+  for (const button of document.querySelectorAll("nav [data-step]")) {
+    if (button.dataset.step === id) button.setAttribute("aria-current", "step");
+    else button.removeAttribute("aria-current");
+  }
+  if (await $ae(steps).present.show(id) && focus) document.querySelector("#" + id + " h2").focus({ preventScroll: true });
 }
-
-function updateNavigation() {
-  document.querySelectorAll("a[data-ae-ajax-href]").forEach(link => {
-    const current = new URL(link.href).pathname === location.pathname;
-    link.classList.toggle("btn-warning", current);
-    link.classList.toggle("btn-outline-secondary", !current);
-    if (current) link.setAttribute("aria-current", "page");
-    else link.removeAttribute("aria-current");
-  });
+function navigate(id) {
+  $ae.ext.stateNavigation.setState("step", id, names[id]).catch(console.error);
 }
-
-$ae.on("AjaxHrefStart", () => {
-  pending += 1;
-  boundary.setAttribute("aria-busy", "true");
-  document.getElementById("navigation-content").classList.add("opacity-50");
-  publish("busy", "Loading the next panel…");
-});
-$ae.on("AjaxHrefLoaded", () => {
-  updateNavigation();
-  const content = document.getElementById("navigation-content");
-  content.focus({ preventScroll: true });
-  publish("success", `Loaded ${content.querySelector("h2").textContent}.`);
-});
-$ae.on("AjaxHrefError", event => {
-  const { error, status } = event.detail;
-  if (error?.name === "AbortError") return;
-  publish("error", status === 404
-    ? "That page was not found (404). Your current panel is still here."
-    : "Unable to load this panel. Please try again.");
-});
-$ae.on("AjaxHrefComplete", () => {
-  // Completion also covers failed, aborted and superseded attempts; it is not success.
-  pending = Math.max(0, pending - 1);
-  boundary.setAttribute("aria-busy", String(pending > 0));
-  document.getElementById("navigation-content").classList.toggle("opacity-50", pending > 0);
-});
+$ae.on("SnapshotChange", event => { selectStep(event.detail.snapshot).catch(console.error); });
+$ae.on("SnapshotRestore", event => { selectStep(event.detail.snapshot).catch(console.error); });
 $ae.on("Ready", () => {
-  updateNavigation();
-  document.getElementById("navigation-error").disabled = false;
+  selectStep($ae.ext.stateNavigation.globalSnapshot, false).catch(console.error);
 });
-$ae.onEvent(document.getElementById("navigation-error"), "$click", () => {
-  // Deliberately request a nonexistent document to demonstrate a real HTTP failure.
-  const url = new URL("unavailable-demo.htm", location.href).href;
-  $ae.ext.ajaxHref.load(url, "#navigation-content", { ignoreHistory: true }).catch(() => {
-    // AjaxHrefError already forwards the original cause to the presentation above.
-  });
+document.addEventListener("click", event => {
+  const button = event.target.closest("[data-step]");
+  if (button) navigate(button.dataset.step);
+});
+document.getElementById("project-form").addEventListener("submit", event => {
+  event.preventDefault();
+  navigate("style");
+});
+document.getElementById("preview-width").addEventListener("input", event => {
+  document.getElementById("workspace-preview").style.width = event.target.value + "px";
+});
+document.getElementById("create-preview").addEventListener("click", () => {
+  $ae("setup-feedback").feedback.success("Your local preview is ready. Keep making good things.");
 });

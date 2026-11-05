@@ -3,103 +3,62 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Scroll-Driven Experience — aellux.js</title>
+    <title>A little space — aellux.js</title>
     <script src="../../dist/aellux.min.js"></script>
     <script>
       $ae.ext("preference");
       $ae.ext("viewport");
-      $ae.init({
-        mode: "basic",
-        syncBootstrapThemeTag: true
-      });
+      $ae.ext("scrollbox", { loadStyle: true });
+      $ae.init({ mode: "basic", useHash: false, syncBootstrapThemeTag: true });
     </script>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-      crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="../assets/home.css">
   </head>
   <body class="p-3 small min-vh-100" style="--bs-heading-font-family: var(--bs-font-sans-serif);">
-    <main aria-label="Scroll-Driven Experience example">
-      <h1 class="visually-hidden">Scroll-Driven Experience</h1>
-      <p id="viewport-instructions" class="small text-body-secondary">
-        Scroll horizontally inside this area. Visibility controls opacity and scale; position adds a subtle
-        horizontal shift.
-      </p>
-      <div
-        id="viewport-gallery"
-        class="viewport-scroll d-flex align-items-center gap-3 overflow-x-auto overflow-y-hidden py-3 px-2 border rounded-2 bg-body-tertiary"
-        style="height: 20rem; overscroll-behavior-x: contain;"
-        tabindex="0"
-        role="region"
-        aria-label="Scroll-reactive panels"
-        aria-describedby="viewport-instructions">
-        <style>
-          #viewport-gallery > .viewport-step {
-            flex: 0 0 82%;
-            min-width: 0;
-          }
-
-          #viewport-gallery .viewport-card {
-            min-height: 10rem;
-            opacity: var(--viewport-opacity, calc(.25 + var(--ae-viewport-visible, 0) * .75));
-            transform: var(--viewport-transform,
-              translateX(calc(var(--ae-viewport-x, 0) * .25rem))
-              scale(calc(.94 + var(--ae-viewport-visible, 0) * .06)));
-          }
-
-          html[data-ae-reduced-motion="reduced"] #viewport-gallery {
-            --viewport-opacity: 1;
-            --viewport-transform: none;
-          }
-        </style>
-        <article
-          class="viewport-step py-2"
-          data-ae-viewport="x"
-          data-ae-viewport-target="viewport-card-1">
-          <div
-            id="viewport-card-1"
-            class="viewport-card card p-4 border-start border-4 border-warning">
-            <span class="font-monospace text-body-secondary small">01 / ENTER</span>
-            <h2 class="h5 mt-3">From geometry to CSS.</h2>
-            <p class="mb-0 text-body-secondary small">
-              Viewport measures this panel relative to its nearest scroll container.
-            </p>
+    <main aria-labelledby="story-title">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+        <div><p class="eyebrow text-body-secondary mb-1">A SCROLL STORY</p><h1 id="story-title" class="h4 mb-0">A little space.</h1></div>
+        <div class="theme-controls d-flex gap-1" data-ae-preference="reduced-motion" role="group" aria-label="Motion preference">
+          <button type="button" class="btn btn-sm btn-outline-secondary" data-ae-option="auto">System motion</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" data-ae-option="reduced">Less motion</button>
+        </div>
+      </div>
+      <p id="viewport-instructions" class="text-body-secondary">Swipe, drag or use the arrow keys. Watch each world come into view.</p>
+      <style>
+        #viewport-gallery > .viewport-step { flex: 0 0 88%; min-width: 0; }
+        #viewport-gallery .viewport-card { min-height: 20rem; opacity: calc(.3 + var(--ae-viewport-visible, 0) * .7); transform: scale(calc(.92 + var(--ae-viewport-visible, 0) * .08)); }
+        #viewport-gallery .story-orbit { height: 9rem; }
+        #viewport-gallery .story-orbit > span { display: block; width: 6rem; height: 6rem; border-radius: 50%; background: var(--bs-warning); box-shadow: 1.2rem .6rem 0 rgba(var(--bs-body-color-rgb), .15); transform: translateX(calc(var(--ae-viewport-x, 0) * 2rem)) rotate(calc(var(--ae-viewport-x, 0) * 30deg)); }
+        html[data-ae-reduced-motion="reduced"] #viewport-gallery .viewport-card { opacity: 1; transform: none; }
+        html[data-ae-reduced-motion="reduced"] #viewport-gallery .story-orbit > span { transform: none; }
+      </style>
+      <div id="viewport-gallery" class="viewport-scroll d-flex gap-3 overflow-x-auto overflow-y-hidden p-2 border rounded-3 bg-body-tertiary"
+        data-ae-scrollbox="pointer" data-ae-scrollbar="horizontal" data-ae-scrollbox-fade="false"
+        style="overscroll-behavior-x: contain;" tabindex="0" role="region" aria-label="Scroll-reactive panels" aria-describedby="viewport-instructions">
+        <article class="viewport-step py-1" data-ae-viewport="x" data-ae-viewport-target="viewport-card-1">
+          <div id="viewport-card-1" class="viewport-card card p-4 h-100">
+            <span class="eyebrow text-body-secondary">01 / A LITTLE SPACE</span>
+            <div class="story-orbit d-flex justify-content-center align-items-center" aria-hidden="true"><span style="border-radius: 50%;"></span></div>
+            <h2 class="h4 mt-auto">Make room.</h2><p class="text-body-secondary mb-0">Good things start with a little breathing space.</p>
           </div>
         </article>
-        <article
-          class="viewport-step py-2"
-          data-ae-viewport="x"
-          data-ae-viewport-target="viewport-card-2">
-          <div
-            id="viewport-card-2"
-            class="viewport-card card p-4 border-start border-4 border-warning">
-            <span class="font-monospace text-body-secondary small">02 / MOVE</span>
-            <h2 class="h5 mt-3">Position keeps changing.</h2>
-            <p class="mb-0 text-body-secondary small">
-              The normalized X position stays reactive even when the panel is fully visible.
-            </p>
+        <article class="viewport-step py-1" data-ae-viewport="x" data-ae-viewport-target="viewport-card-2">
+          <div id="viewport-card-2" class="viewport-card card p-4 h-100">
+            <span class="eyebrow text-body-secondary">02 / A LITTLE SPACE</span>
+            <div class="story-orbit d-flex justify-content-center align-items-center" aria-hidden="true"><span style="border-radius: 25%;"></span></div>
+            <h2 class="h4 mt-auto">Find your orbit.</h2><p class="text-body-secondary mb-0">A different perspective can change the whole picture.</p>
           </div>
         </article>
-        <article
-          class="viewport-step py-2"
-          data-ae-viewport="x"
-          data-ae-viewport-target="viewport-card-3">
-          <div
-            id="viewport-card-3"
-            class="viewport-card card p-4 border-start border-4 border-warning">
-            <span class="font-monospace text-body-secondary small">03 / LEAVE</span>
-            <h2 class="h5 mt-3">Let the styles respond.</h2>
-            <p class="mb-0 text-body-secondary small">
-              CSS consumes the published values. No custom position loop is needed.
-            </p>
+        <article class="viewport-step py-1" data-ae-viewport="x" data-ae-viewport-target="viewport-card-3">
+          <div id="viewport-card-3" class="viewport-card card p-4 h-100">
+            <span class="eyebrow text-body-secondary">03 / A LITTLE SPACE</span>
+            <div class="story-orbit d-flex justify-content-center align-items-center" aria-hidden="true"><span style="border-radius: 0%;"></span></div>
+            <h2 class="h4 mt-auto">Keep exploring.</h2><p class="text-body-secondary mb-0">There is always something just beyond the edge.</p>
           </div>
         </article>
       </div>
-      <p class="small text-body-secondary mt-2 mb-0">
-        Reduced motion keeps the panels still and fully opaque.
-      </p>
+      <p class="small text-body-secondary mt-3 mb-0">Your motion preference travels with you across the examples.</p>
     </main>
   </body>
 </html>
