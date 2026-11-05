@@ -445,13 +445,6 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/overflow-marquee.htm" data-ae-overflow-marquee="190px">
-                                              Overflow Marquee                                            </a>
-                                          </div>
-                                                                                    <div
-                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                            style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/feedback.htm" data-ae-overflow-marquee="190px">
                                               Feedback                                            </a>
                                           </div>
@@ -494,15 +487,15 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/scrollbox-snap.htm" data-ae-overflow-marquee="190px">
-                                              Scrollbox Snap                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
+                                              State Navigation                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
-                                              State Navigation                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/viewport.htm" data-ae-overflow-marquee="190px">
+                                              Viewport                                            </a>
                                           </div>
                                                                                 </div>
                                   </div>
@@ -540,6 +533,13 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm" data-ae-overflow-marquee="190px">
+                                              Overflow Marquee                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/optional/progress.htm" data-ae-overflow-marquee="190px">
                                               Progress                                            </a>
                                           </div>
@@ -554,8 +554,8 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/optional/viewport.htm" data-ae-overflow-marquee="190px">
-                                              Viewport                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/optional/scrollbox-snap.htm" data-ae-overflow-marquee="190px">
+                                              Scrollbox Snap                                            </a>
                                           </div>
                                                                                 </div>
                                   </div>
@@ -706,7 +706,7 @@
 <p><strong>Known Limit.</strong> The ES5 boot selects Modern or Legacy using its capability catalog. Modern syntax support is only one input: available DOM APIs, Extension dependencies and the selected distribution also matter. Legacy supplies the documented shared polyfills and ES5 output; it does not establish support for every historical browser. Extensions remain responsible for APIs outside that shared contract.</p>
 <p>Feature detection establishes that a checked surface exists, not that every implementation has identical semantics, performance or integration. A polyfill can provide a useful API without reproducing every native platform feature, as with Dialog&#39;s top layer. Do not turn preliminary syntax-version references into functional support promises. See <a href="browser-support.htm">Browser support</a>, <a href="modern-legacy.htm">Modern and Legacy</a>, and <a href="es5-support.htm">ES5 support</a>.</p>
 <h3>Modular loading</h3>
-<p><strong>Known Limit.</strong> Full incorporates the eleven Bundled Extensions and registers all official Extensions. Optional Extensions (Ajax Href, Dialog, Progress, PWA and Viewport) remain separate lazy scripts. Basic starts with no Extension registrations; the host must declare each desired Extension and its loading policy. <code>$ae.wait(name)</code> requires an existing registration. Selected Extensions may declare required Extension dependencies during initialization. Bundled availability and initialization are separate: matching markup or an explicit request still determines when lazy behavior initializes.</p>
+<p><strong>Known Limit.</strong> Full incorporates the ten Bundled Extensions and registers all official Extensions. Optional Extensions (Ajax Href, Dialog, Overflow Marquee, Progress, PWA and Scrollbox Snap) remain separate lazy scripts. Basic starts with no Extension registrations; the host must declare each desired Extension and its loading policy. <code>$ae.wait(name)</code> requires an existing registration. Selected Extensions may declare required Extension dependencies during initialization. Bundled availability and initialization are separate: matching markup or an explicit request still determines when lazy behavior initializes.</p>
 <p><strong>Potential Risk.</strong> On-demand loading adds first-use network and initialization latency. Missing files, incorrect base URLs, unavailable registry metadata for a requested version, incompatible build declarations, unavailable third-party dependencies, CSP blocks or an SRI mismatch can prevent loading. The current version can reuse the boot&#39;s signed registry without fetching a manifest; custom/version-specific delivery must provide the resources its registration requires. Concurrent loads and supported retries do not guarantee eventual success while the delivery problem remains.</p>
 <p>Extension CSS has its own delivery contract. A stylesheet load warning may leave JavaScript initialized without its intended presentation. Deploy matching boot/runtime/Extension/CSS files together and verify the actual derived Modern, Legacy and minified URLs. See <a href="../extensions/official-registry.htm">Official registry</a>, <a href="../extensions/lazy-loading.htm">Lazy loading</a>, <a href="../extensions/styles.htm">Extension styles</a>, and <a href="../extensions/csp-and-trust.htm">CSP and trust</a>.</p>
 <h3>Events and observation</h3>
@@ -814,23 +814,19 @@
 </tr>
 <tr>
 <td><a href="../core-extensions/feedback.htm#known-limits-risks">Feedback</a></td>
-<td><a href="../core-extensions/optional/pwa.htm#known-limits-risks">PWA</a></td>
+<td><a href="../core-extensions/optional/overflow-marquee.htm#known-limits-risks">Overflow Marquee</a></td>
 </tr>
 <tr>
 <td><a href="../core-extensions/focus.htm#known-limits-risks">Focus</a></td>
-<td><a href="../core-extensions/optional/viewport.htm#known-limits-risks">Viewport</a></td>
-</tr>
-<tr>
-<td><a href="../core-extensions/overflow-marquee.htm#known-limits-risks">Overflow Marquee</a></td>
 <td><a href="../core-extensions/optional/progress.htm#known-limits-risks">Progress</a></td>
 </tr>
 <tr>
 <td><a href="../core-extensions/point.htm#known-limits-risks">Point</a></td>
-<td></td>
+<td><a href="../core-extensions/optional/pwa.htm#known-limits-risks">PWA</a></td>
 </tr>
 <tr>
 <td><a href="../core-extensions/preference.htm#known-limits-risks">Preference</a></td>
-<td></td>
+<td><a href="../core-extensions/optional/scrollbox-snap.htm#known-limits-risks">Scrollbox Snap</a></td>
 </tr>
 <tr>
 <td><a href="../core-extensions/present.htm#known-limits-risks">Present</a></td>
@@ -841,11 +837,11 @@
 <td></td>
 </tr>
 <tr>
-<td><a href="../core-extensions/scrollbox-snap.htm#known-limits-risks">Scrollbox Snap</a></td>
+<td><a href="../core-extensions/state-navigation.htm#known-limits-risks">State Navigation</a></td>
 <td></td>
 </tr>
 <tr>
-<td><a href="../core-extensions/state-navigation.htm#known-limits-risks">State Navigation</a></td>
+<td><a href="../core-extensions/viewport.htm#known-limits-risks">Viewport</a></td>
 <td></td>
 </tr>
 </tbody></table>

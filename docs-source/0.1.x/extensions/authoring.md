@@ -2,6 +2,16 @@
 
 An aellux.js Extension is a classic browser script that attaches one focused behavior through `AelluxJs.extAttach()`. Core and third-party Extensions follow the same naming, lifecycle, compatibility, and cleanup rules.
 
+## Primitives and Full distribution
+
+The Full bundle automatically includes all Core primitives: reusable building blocks for components and new behaviors. It does not bundle every Extension available in Core. Optional navigation and environment Extensions, such as Ajax Href and PWA, remain separate signed scripts loaded on demand. Preference is a bundled primitive and initializes automatically in Full.
+
+Dialog and Progress remain Optional Extensions because their main additional value is Legacy compatibility. Modern browsers already provide native dialog, progress and meter controls; the separate Legacy artifacts supply the missing behavior and required fallback styles without adding that compatibility code to Full.
+
+Being an official Core Extension does not imply bundle membership. Full registers the optional Core Extensions for lazy loading, while Basic requires explicit registration for every Extension. Bundled primitives may also initialize lazily when matching markup is mounted; inclusion in the bundle does not make every primitive eager. See the [Core Extensions index](../core-extensions/README.md) for the current distribution.
+
+Overflow Marquee and Scrollbox Snap are specialized behaviors and remain outside the Full JavaScript bundle pending migration to external extensions. Marquee's stylesheet also stays separate. Their current lazy registrations are transitional.
+
 The [Compatibility Commitment](../runtime/compatibility-commitment.md) defines the `0.1.x` protection of public Core integration contracts and Stable official Extensions beginning with `0.1.0`. It does not assign stability to a third-party Extension or to a Not stable official Extension.
 
 Start from [`templates/aellux.ext.template.js`](https://github.com/aelluxjs/core/blob/main/templates/aellux.ext.template.js). The scaffold contains the required structure and a compatibility summary.

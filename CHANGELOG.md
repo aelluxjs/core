@@ -20,6 +20,8 @@ Changes in this section are pending for the `0.1.0` release candidate.
 
 ### Changed
 
+- Full now bundles only reusable primitives: Viewport joins the bundle; Overflow Marquee and Scrollbox Snap load separate signed scripts pending migration to external extensions. Marquee CSS is also excluded from Full and loads on demand. Basic registration and extension stability remain unchanged.
+
 - Adaptive now compares element width in CSS pixels against `adaptiveParams.minSizes` for `ae--fits-*` classes, replacing `sqrt(width * height)`. Height-only reflow no longer changes size breakpoints or causes columns to repeatedly switch layouts. Shape classes, orientation and dimension outputs continue to use both dimensions.
 
 - Anchor target-switch transitions now use CSS Motion's shared adaptive clock for transform and matched dimensions, including the property FPS ceiling when animating width or height. Rapid replacements preserve rendered geometry and unrelated transitions; unchanged scroll destinations keep their operation. Native fallback and ordinary scheduled placement tracking remain supported. Completion and teardown cancel owned work and remove temporary state through the scheduler. Updated browser regressions, editor metadata and bundle budgets; measured artifact deltas are recorded in the Anchor guide.

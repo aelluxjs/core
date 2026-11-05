@@ -15,7 +15,7 @@ The Present dismissal rename is part of this prerelease finalization: the beta c
 | Classification | Compatibility commitment | AelluxJS examples |
 | --- | --- | --- |
 | Stable Public API | Preserved throughout `0.1.x`, subject to documented exceptional fixes. | <span class="large">Documented Core methods such as `$ae.mount()`, `BeforeMount`, and Stable Extension contracts such as Present's `pop()`, `data-ae-present`, and `--ae-pop-progress`.</span> |
-| Experimental Public API | May evolve, including incompatible changes, with appropriate documentation. | <span class="large">The Not stable Focus and Point APIs; Optional Viewport attributes, outputs and events.</span> |
+| Experimental Public API | May evolve, including incompatible changes, with appropriate documentation. | <span class="large">The Not stable Focus and Point APIs; Not stable Viewport attributes, outputs and events.</span> |
 | Internal Implementation | No compatibility guarantee. | <span class="large">Private controller maps, Marquee's generated wrapper structure, `data-ae-scrollbox-fade-state`, and `--ae-present-pop-phase`.</span> |
 
 Protection applies to documented public names, supported inputs, defaults, results and observable semantics under the documented prerequisites. It does not imply identical behavior for invalid inputs unless their handling is itself documented. Known limits, required markup, lifecycle rules, dependencies and platform capabilities remain part of each contract.
@@ -26,9 +26,10 @@ The [Core Extensions index](../core-extensions/README.md#stability) and individu
 
 | Stability | Current distribution in Full | Extensions |
 | --- | --- | --- |
-| Stable | Bundled | <span class="large">[Adaptive](../core-extensions/adaptive.md), [Anchor](../core-extensions/anchor.md), [Overflow Marquee](../core-extensions/overflow-marquee.md), [Feedback](../core-extensions/feedback.md), [Preference](../core-extensions/preference.md), [Present](../core-extensions/present.md), [Scrollbox](../core-extensions/scrollbox.md), [Scrollbox Snap](../core-extensions/scrollbox-snap.md), [State Navigation](../core-extensions/state-navigation.md).</span> |
-| Not stable | Bundled | [Focus](../core-extensions/focus.md), [Point](../core-extensions/point.md). |
-| Not stable | Optional | <span class="large">[Ajax Href](../core-extensions/optional/ajax-href.md), [Dialog](../core-extensions/optional/dialog.md), [Progress](../core-extensions/optional/progress.md), [PWA](../core-extensions/optional/pwa.md), [Viewport](../core-extensions/optional/viewport.md).</span> |
+| Stable | Bundled | <span class="large">[Adaptive](../core-extensions/adaptive.md), [Anchor](../core-extensions/anchor.md), [Feedback](../core-extensions/feedback.md), [Preference](../core-extensions/preference.md), [Present](../core-extensions/present.md), [Scrollbox](../core-extensions/scrollbox.md), [State Navigation](../core-extensions/state-navigation.md).</span> |
+| Stable | Optional | [Overflow Marquee](../core-extensions/optional/overflow-marquee.md), [Scrollbox Snap](../core-extensions/optional/scrollbox-snap.md). |
+| Not stable | Bundled | [Focus](../core-extensions/focus.md), [Point](../core-extensions/point.md), [Viewport](../core-extensions/viewport.md). |
+| Not stable | Optional | <span class="large">[Ajax Href](../core-extensions/optional/ajax-href.md), [Dialog](../core-extensions/optional/dialog.md), [Progress](../core-extensions/optional/progress.md), [PWA](../core-extensions/optional/pwa.md).</span> |
 
 All sixteen remain available during `0.1.x`. Stable Extensions receive the public-contract protection in this document. Not stable means experimental: their methods, markup, CSS and events may change incompatibly, with changelog entries and migration guidance for affected usage. Their current documentation still governs use of each published version.
 
@@ -114,7 +115,7 @@ This commitment does not guarantee undocumented event timing, exact frequency, e
 
 ## 6. Distribution & Loading Compatibility
 
-Documented loading interfaces remain supported across Basic/Full and Modern/Legacy. Basic starts with no Extension registrations; declarations through `$ae.ext(...)` or `<link rel="aelluxjs-ext">` select the desired Extensions and loading policy. Full makes all official Extensions available through automatic registration, currently embedding eleven Bundled implementations and lazily loading five Optional scripts. Registration, loading, initialization and mounting are distinct stages.
+Documented loading interfaces remain supported across Basic/Full and Modern/Legacy. Basic starts with no Extension registrations; declarations through `$ae.ext(...)` or `<link rel="aelluxjs-ext">` select the desired Extensions and loading policy. Full makes all official Extensions available through automatic registration, currently embedding ten Bundled implementations and lazily loading six Optional scripts. Registration, loading, initialization and mounting are distinct stages.
 
 Eager loading, `loadWhen`, deferred `load: false` followed by `wait()`, optional stylesheet loading, declared dependencies, `extAttach()`, and compatible build selection preserve their documented contracts. An Extension may change its internal loading or packaging strategy while maintaining documented usage, resource requirements and availability. Applications must still meet each Extension's dependency and mount requirements. See [Registration](../extensions/registration.md), [Lazy loading](../extensions/lazy-loading.md), [Styles](../extensions/styles.md) and [Authoring](../extensions/authoring.md).
 

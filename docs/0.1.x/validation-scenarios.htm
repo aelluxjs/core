@@ -445,13 +445,6 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/overflow-marquee.htm" data-ae-overflow-marquee="190px">
-                                              Overflow Marquee                                            </a>
-                                          </div>
-                                                                                    <div
-                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                            style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/feedback.htm" data-ae-overflow-marquee="190px">
                                               Feedback                                            </a>
                                           </div>
@@ -494,15 +487,15 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/scrollbox-snap.htm" data-ae-overflow-marquee="190px">
-                                              Scrollbox Snap                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
+                                              State Navigation                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
-                                              State Navigation                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/viewport.htm" data-ae-overflow-marquee="190px">
+                                              Viewport                                            </a>
                                           </div>
                                                                                 </div>
                                   </div>
@@ -540,6 +533,13 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm" data-ae-overflow-marquee="190px">
+                                              Overflow Marquee                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/optional/progress.htm" data-ae-overflow-marquee="190px">
                                               Progress                                            </a>
                                           </div>
@@ -554,8 +554,8 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/optional/viewport.htm" data-ae-overflow-marquee="190px">
-                                              Viewport                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/optional/scrollbox-snap.htm" data-ae-overflow-marquee="190px">
+                                              Scrollbox Snap                                            </a>
                                           </div>
                                                                                 </div>
                                   </div>
@@ -679,7 +679,7 @@
 npm run test:browser
 </code></pre>
 <p><code>test:browser</code> builds <code>dist/</code> before testing. Use <code>npm run test:browser -- --project=chromium</code> to run only Chromium. To use an installed Chrome or Edge instead of Playwright&#39;s Chromium, set <code>AELLUXJS_TEST_BROWSER_CHANNEL</code> to <code>chrome</code> or <code>msedge</code> and select the Chromium project. The <a href="https://getbootstrap.com/">Bootstrap</a> scenario uses the versioned local fixture <code>tests/fixtures/bootstrap-5.3.8.min.css</code> and requires no CDN or network access.</p>
-<p>To run one spec after a build, use <code>npx playwright test tests/browser/full-bundle.spec.mjs --project=chromium</code>. For a Scrollbox change, replace that path with <code>tests/browser/scrollbox-pointer.spec.mjs</code> or <code>tests/browser/scrollbox-scrollbar.spec.mjs</code>. Direct <code>npx playwright test</code> commands use the current <code>dist/</code> files; run <code>npm run build:core</code> first after changing runtime or Extension source. The full bundle spec compares the bundled, registered, and lazy Core Extensions with the explicit list in <code>src/official-extension-definitions.js</code> in the normal and minified Modern and Legacy runtimes. Extension registry tests verify that separate Scrollbox and Snap files load when needed. Run <code>npm run test:budget</code> after a build to check raw and gzip artifact limits.</p>
+<p>To run one spec after a build, use <code>npx playwright test tests/browser/full-bundle.spec.mjs --project=chromium</code>. For a Scrollbox change, replace that path with <code>tests/browser/scrollbox-pointer.spec.mjs</code> or <code>tests/browser/scrollbox-scrollbar.spec.mjs</code>. Direct <code>npx playwright test</code> commands use the current <code>dist/</code> files; run <code>npm run build:core</code> first after changing runtime or Extension source. The full bundle spec compares the bundled, registered, and lazy Core Extensions with the explicit list in <code>src/official-extension-definitions.js</code> in the normal and minified Modern and Legacy runtimes. Extension registry tests verify that Full loads the separate Snap script on demand while using bundled Scrollbox; Basic loads both separately. The Full spec also verifies bundled Viewport without separate requests and the separate signed Marquee script and stylesheet. Run <code>npm run test:budget</code> after a build to check raw and gzip artifact limits.</p>
 <h2>Browser Matrix</h2>
 <p>The Playwright configuration runs Chromium, Firefox, and WebKit. The suite covers both normal Modern selection and forced Legacy execution. Forced Legacy validates the ES5 distribution path in these current engines; it does not establish support for historical versions of those browsers.</p>
 <p>Run the complete matrix with one worker when recording a release result:</p>
@@ -780,7 +780,7 @@ npm run test:browser
 </tr>
 <tr>
 <td>Full distribution coverage</td>
-<td><span class="large">Bundled Extensions initialize from the Full runtime; Optional Extensions (Ajax Href, Dialog, Progress, PWA and Viewport) load separate compatible files on demand, without a duplicate script request or a manifest fetch for the current Core version. Modern, Legacy, normal, and minified paths are checked.</span></td>
+<td><span class="large">Bundled Extensions initialize from the Full runtime; Optional Extensions (Ajax Href, Dialog, Overflow Marquee, Progress, PWA and Scrollbox Snap) load separate compatible files on demand, without a duplicate script request or a manifest fetch for the current Core version. Modern, Legacy, normal, and minified paths are checked.</span></td>
 </tr>
 <tr>
 <td>Basic registration policy</td>

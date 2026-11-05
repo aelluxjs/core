@@ -2720,7 +2720,7 @@
       ],
       "default": "",
       "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
     },
     {
       "name": "data-ae-overflow-marquee-active",
@@ -2728,7 +2728,7 @@
       "description": "Internal Overflow Marquee wrapper or active-state marker.",
       "syntax": "presence",
       "role": "internal",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
     },
     {
       "name": "data-ae-overflow-marquee-content",
@@ -2736,7 +2736,7 @@
       "description": "Internal Overflow Marquee wrapper or active-state marker.",
       "syntax": "presence",
       "role": "internal",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
     },
     {
       "name": "data-ae-overflow-marquee-fade",
@@ -2750,7 +2750,7 @@
       ],
       "default": "true",
       "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
     },
     {
       "name": "data-ae-overflow-marquee-ready",
@@ -2758,7 +2758,7 @@
       "description": "Internal Overflow Marquee wrapper or active-state marker.",
       "syntax": "presence",
       "role": "internal",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
     },
     {
       "name": "data-ae-overflow-marquee-viewport",
@@ -2766,7 +2766,7 @@
       "description": "Internal Overflow Marquee wrapper or active-state marker.",
       "syntax": "presence",
       "role": "internal",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
     },
     {
       "name": "data-ae-point",
@@ -3162,7 +3162,7 @@
       ],
       "default": "horizontal",
       "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox-snap.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/scrollbox-snap.htm"
     },
     {
       "name": "data-ae-scrollbox-wheel-horizontal",
@@ -3194,7 +3194,7 @@
       ],
       "default": "center",
       "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox-snap.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/scrollbox-snap.htm"
     },
     {
       "name": "data-ae-target",
@@ -3275,7 +3275,7 @@
       "default": "both",
       "doc": "core-extensions/viewport",
       "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
     },
     {
       "name": "data-ae-viewport-target",
@@ -3288,7 +3288,7 @@
       ],
       "doc": "core-extensions/viewport",
       "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
     },
     {
       "name": "data-ae-wait-mounted",
@@ -3548,7 +3548,7 @@
       "description": "Overflow Marquee pause at both ends of each pass; nonnegative ms/s values. Invalid values use 1200ms.",
       "default": "1200ms",
       "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
     },
     {
       "name": "--ae-overflow-marquee-distance",
@@ -3556,7 +3556,7 @@
       "syntax": "*",
       "description": "Private Overflow Marquee mask geometry.",
       "role": "internal",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
     },
     {
       "name": "--ae-overflow-marquee-fade-size",
@@ -3570,7 +3570,7 @@
         "24px"
       ],
       "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
     },
     {
       "name": "--ae-overflow-marquee-left",
@@ -3578,7 +3578,7 @@
       "syntax": "*",
       "description": "Private Overflow Marquee mask geometry.",
       "role": "internal",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
     },
     {
       "name": "--ae-overflow-marquee-mask",
@@ -3586,7 +3586,7 @@
       "syntax": "*",
       "description": "Private Overflow Marquee mask geometry.",
       "role": "internal",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
     },
     {
       "name": "--ae-overflow-marquee-offset",
@@ -3594,7 +3594,7 @@
       "syntax": "*",
       "description": "Private Overflow Marquee mask geometry.",
       "role": "internal",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
     },
     {
       "name": "--ae-overflow-marquee-right",
@@ -3602,7 +3602,7 @@
       "syntax": "*",
       "description": "Private Overflow Marquee mask geometry.",
       "role": "internal",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
     },
     {
       "name": "--ae-overflow-marquee-size",
@@ -3610,7 +3610,7 @@
       "syntax": "*",
       "description": "Private Overflow Marquee mask geometry.",
       "role": "internal",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
     },
     {
       "name": "--ae-overflow-marquee-speed",
@@ -3619,7 +3619,7 @@
       "description": "Overflow Marquee speed in CSS pixels per second. Positive numbers only; invalid values use 30.",
       "default": "30",
       "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
     },
     {
       "name": "--ae-pop-aellux-ease",
@@ -4136,7 +4136,7 @@
       "syntax": "<number>",
       "description": "Per-item alignment proximity from 0 to 1; 1 means aligned with the requested snap position.",
       "role": "output",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox-snap.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/scrollbox-snap.htm"
     },
     {
       "name": "--ae-unpop-progress",
@@ -4154,7 +4154,7 @@
       "role": "output",
       "default": "0",
       "doc": "core-extensions/viewport",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
     },
     {
       "name": "--ae-viewport-x",
@@ -4164,7 +4164,7 @@
       "role": "output",
       "default": "0",
       "doc": "core-extensions/viewport",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
     },
     {
       "name": "--ae-viewport-y",
@@ -4174,7 +4174,7 @@
       "role": "output",
       "default": "0",
       "doc": "core-extensions/viewport",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
     },
     {
       "name": "--ae-width",

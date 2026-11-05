@@ -445,13 +445,6 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/overflow-marquee.htm" data-ae-overflow-marquee="190px">
-                                              Overflow Marquee                                            </a>
-                                          </div>
-                                                                                    <div
-                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                            style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/feedback.htm" data-ae-overflow-marquee="190px">
                                               Feedback                                            </a>
                                           </div>
@@ -494,15 +487,15 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/scrollbox-snap.htm" data-ae-overflow-marquee="190px">
-                                              Scrollbox Snap                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
+                                              State Navigation                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
-                                              State Navigation                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/viewport.htm" data-ae-overflow-marquee="190px">
+                                              Viewport                                            </a>
                                           </div>
                                                                                 </div>
                                   </div>
@@ -540,6 +533,13 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm" data-ae-overflow-marquee="190px">
+                                              Overflow Marquee                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/optional/progress.htm" data-ae-overflow-marquee="190px">
                                               Progress                                            </a>
                                           </div>
@@ -554,8 +554,8 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/optional/viewport.htm" data-ae-overflow-marquee="190px">
-                                              Viewport                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/optional/scrollbox-snap.htm" data-ae-overflow-marquee="190px">
+                                              Scrollbox Snap                                            </a>
                                           </div>
                                                                                 </div>
                                   </div>
@@ -883,7 +883,7 @@ $ae.on(&quot;ViewportError&quot;, event =&gt; {
 </code></pre>
 <p>These notifications do not roll back partially applied state or DOM changes. Exceptions thrown by application event listeners remain the application&#39;s responsibility.</p>
 <h2>Core Extension notifications</h2>
-<p>Viewport events always originate from the observed element, including when <code>data-ae-viewport-target</code> redirects CSS outputs to another element. Missing or conflicting CSS destinations do not suppress geometry events. See <a href="../core-extensions/optional/viewport.htm#publishing-on-another-element">Viewport CSS targets</a>.</p>
+<p>Viewport events always originate from the observed element, including when <code>data-ae-viewport-target</code> redirects CSS outputs to another element. Missing or conflicting CSS destinations do not suppress geometry events. See <a href="../core-extensions/viewport.htm#publishing-on-another-element">Viewport CSS targets</a>.</p>
 <p>These events are available when the corresponding Extension is loaded. Events from elements bubble to <code>document</code> unless marked otherwise.</p>
 <table>
 <thead>
@@ -906,7 +906,7 @@ $ae.on(&quot;ViewportError&quot;, event =&gt; {
 <tr>
 <td>Viewport</td>
 <td><code>AelluxJsViewportFullyInside</code>, <code>AelluxJsViewportFullyOutside</code></td>
-<td><span class="large">Same target, propagation and payload as Change. Emitted after Change only on entry into <code>inside</code> (all edges contained, inclusive) or <code>outside</code> (no positive-area intersection), including an initial matching measurable state. Unknown geometry uses null coordinates/state and never generates a Fully event; unmount/destroy do not imply FullyOutside. See <a href="../core-extensions/optional/viewport.htm#viewport-events">Viewport Events</a> for ordering, tolerance and scheduling limits.</span></td>
+<td><span class="large">Same target, propagation and payload as Change. Emitted after Change only on entry into <code>inside</code> (all edges contained, inclusive) or <code>outside</code> (no positive-area intersection), including an initial matching measurable state. Unknown geometry uses null coordinates/state and never generates a Fully event; unmount/destroy do not imply FullyOutside. See <a href="../core-extensions/viewport.htm#viewport-events">Viewport Events</a> for ordering, tolerance and scheduling limits.</span></td>
 </tr>
 <tr>
 <td>Feedback</td>

@@ -49,7 +49,7 @@ Anchor reads geometry through `$ae.waitLayout.read()` and writes CSS through `$a
 
 ## Overflow Marquee
 
-Single-line overflow animation is provided by the separate [Overflow Marquee](overflow-marquee.md) Extension. It initializes Anchor as its geometry dependency, then owns its own mount map, stylesheet and visibility-aware motion. Register `$ae.ext("overflow-marquee")`; an ordinary Anchor registration does not mount those elements.
+Single-line overflow animation is provided by the separate [Overflow Marquee](optional/overflow-marquee.md) Extension. It initializes Anchor as its geometry dependency, then owns its own mount map, stylesheet and visibility-aware motion. Register `$ae.ext("overflow-marquee")`; an ordinary Anchor registration does not mount those elements.
 
 ## Target Visibility
 
@@ -167,7 +167,7 @@ The following historical measurements describe Delivery B, before CSS was moved 
 
 The compressed increases are 1,774 and 1,925 bytes respectively. No dependency or animation scheduler is added. The new weak rules ship with Anchor rather than enlarging the boot's weak stylesheet. Boot, Full and Present remain within their existing limits.
 
-The limits remain 15/6 KiB for Modern and 23/8 KiB for Legacy (raw/gzip), increased from 9/4 and 16/6 KiB respectively. The separate [Overflow Marquee](overflow-marquee.md#distribution-cost) distribution has its own measured limits; Anchor does not include that implementation.
+The limits remain 15/6 KiB for Modern and 23/8 KiB for Legacy (raw/gzip), increased from 9/4 and 16/6 KiB respectively. The separate [Overflow Marquee](optional/overflow-marquee.md#distribution-cost) distribution has its own measured limits; Anchor does not include that implementation.
 
 ### Scroll Into View distribution cost
 

@@ -1,10 +1,10 @@
 # Scrollbox Snap Extension
 
-**Distribution:** Bundled Extension. **Stability:** Stable.
+**Distribution:** Optional Extension. **Stability:** Stable.
 
-In Basic mode, register `$ae.ext("scrollbox", { loadStyle: true })` alongside Scrollbox Snap, or supply Scrollbox CSS yourself. Full includes these styles in its shared stylesheet.
+In Basic mode, register `$ae.ext("scrollbox", { loadStyle: true })` alongside Scrollbox Snap, or supply Scrollbox CSS yourself. Full includes Scrollbox styles in its shared stylesheet, but loads the Snap implementation as a separate signed script. Its registration is temporary pending migration to an external extension.
 
-Scrollbox Snap é uma Extensão opcional que adiciona pontos de alinhamento ao [Scrollbox](scrollbox.md). Carregue somente `scrollbox-snap`; durante seu `init`, ela registra Scrollbox caso ainda não esteja registrado e aguarda `AelluxJs.wait("scrollbox")` antes de montar qualquer ponto.
+Scrollbox Snap é uma Extensão opcional que adiciona pontos de alinhamento ao [Scrollbox](../scrollbox.md). Carregue somente `scrollbox-snap`; durante seu `init`, ela registra Scrollbox caso ainda não esteja registrado e aguarda `AelluxJs.wait("scrollbox")` antes de montar qualquer ponto.
 
 ```js
 $ae.ext("scrollbox-snap");
@@ -49,7 +49,7 @@ The index is zero based. Each method returns `true` when a snap item is availabl
 
 ## Position migration
 
-`--ae-snap-viewport` has been removed. Add `data-ae-viewport="x"` or `data-ae-viewport="y"` to each item requiring position information and use `--ae-viewport-x` or `--ae-viewport-y`. The independent [Viewport Extension](optional/viewport.md) selects the nearest native scroll container, which can differ from the owning Snap box when another scroll container intervenes. Choose the relevant dimension yourself. Snap continues to publish `--ae-snap-focus` and works without Viewport.
+`--ae-snap-viewport` has been removed. Add `data-ae-viewport="x"` or `data-ae-viewport="y"` to each item requiring position information and use `--ae-viewport-x` or `--ae-viewport-y`. The independent [Viewport Extension](../viewport.md) selects the nearest native scroll container, which can differ from the owning Snap box when another scroll container intervenes. Choose the relevant dimension yourself. Snap continues to publish `--ae-snap-focus` and works without Viewport.
 
 ## Interaction hooks
 
@@ -65,7 +65,7 @@ Snap boxes use `scroll-behavior: auto` for native snap positioning. Desktop PDS 
 
 ## Known Limits & Risks
 
-See [Core Known Limits & Risks](../runtime/known-limits-and-risks.md) for classifications and shared architecture, loading and lifecycle boundaries.
+See [Core Known Limits & Risks](../../runtime/known-limits-and-risks.md) for classifications and shared architecture, loading and lifecycle boundaries.
 
 | Area | Type | Description | Recommendation |
 | --- | --- | --- | --- |

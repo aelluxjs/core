@@ -445,13 +445,6 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/overflow-marquee.htm" data-ae-overflow-marquee="190px">
-                                              Overflow Marquee                                            </a>
-                                          </div>
-                                                                                    <div
-                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                            style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/feedback.htm" data-ae-overflow-marquee="190px">
                                               Feedback                                            </a>
                                           </div>
@@ -494,15 +487,15 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/scrollbox-snap.htm" data-ae-overflow-marquee="190px">
-                                              Scrollbox Snap                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
+                                              State Navigation                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
-                                              State Navigation                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/viewport.htm" data-ae-overflow-marquee="190px">
+                                              Viewport                                            </a>
                                           </div>
                                                                                 </div>
                                   </div>
@@ -540,6 +533,13 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm" data-ae-overflow-marquee="190px">
+                                              Overflow Marquee                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/optional/progress.htm" data-ae-overflow-marquee="190px">
                                               Progress                                            </a>
                                           </div>
@@ -554,8 +554,8 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/optional/viewport.htm" data-ae-overflow-marquee="190px">
-                                              Viewport                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/optional/scrollbox-snap.htm" data-ae-overflow-marquee="190px">
+                                              Scrollbox Snap                                            </a>
                                           </div>
                                                                                 </div>
                                   </div>
@@ -668,12 +668,12 @@
         Present      </span>
     </a>
 
-                  <a href="/core/docs/0.1.x/core-extensions/scrollbox-snap.htm"
+                  <a href="/core/docs/0.1.x/core-extensions/state-navigation.htm"
             class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2" style="width: 40%;">
             <span
               class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
               style="max-width:200px" data-ae-overflow-marquee="80">
-              Scrollbox Snap            </span> →
+              State Navigation            </span> →
           </a>
           </div>          </div>
 
@@ -803,14 +803,14 @@
 </code></pre>
 <p>Scrollbox updates measurements after content mutations, box resize, or window resize. Resize updates use a 100 ms throttle.</p>
 <h2>Snap points</h2>
-<p>Snap points are provided by the optional <a href="scrollbox-snap.htm">Scrollbox Snap</a> Extension. Register <code>scrollbox-snap</code>; it registers and waits for Scrollbox before mounting. Its API, events, and interaction hooks are documented on that page.</p>
+<p>Snap points are provided by the optional <a href="optional/scrollbox-snap.htm">Scrollbox Snap</a> Extension. Register <code>scrollbox-snap</code>; it registers and waits for Scrollbox before mounting. Its API, events, and interaction hooks are documented on that page.</p>
 <p><code>AelluxJsScrollboxSnapChange</code> fires on the scrollbox when a newly selected snap point finishes settling. Its <code>detail</code> contains <code>{ item, index, previousIndex, axis }</code>; the initial selection uses <code>previousIndex: null</code>. Selecting the same item again does not emit another change.</p>
 <pre><code class="language-js">document.getElementById(&quot;gallery&quot;).addEventListener(&quot;AelluxJsScrollboxSnapChange&quot;, event =&gt; {
   const { item, index } = event.detail;
   console.log(index, item);
 });
 </code></pre>
-<p>Each <code>data-ae-snap-item</code> receives inline <code>--ae-snap-focus</code> at mount and as the box scrolls or refreshes. It uses the snap axis: <code>1</code> means aligned, falls by the alignment distance divided by the viewport size, and clamps to <code>0</code>. Prior inline values and priorities are restored on unmount. For normalized position and visible area, add <code>data-ae-viewport</code> to the item and use the independent <a href="optional/viewport.htm">Viewport Extension</a>. The former <code>--ae-snap-viewport</code> output has been removed; use <code>--ae-viewport-x</code> or <code>--ae-viewport-y</code>. Snap works without Viewport.</p>
+<p>Each <code>data-ae-snap-item</code> receives inline <code>--ae-snap-focus</code> at mount and as the box scrolls or refreshes. It uses the snap axis: <code>1</code> means aligned, falls by the alignment distance divided by the viewport size, and clamps to <code>0</code>. Prior inline values and priorities are restored on unmount. For normalized position and visible area, add <code>data-ae-viewport</code> to the item and use the independent <a href="viewport.htm">Viewport Extension</a>. The former <code>--ae-snap-viewport</code> output has been removed; use <code>--ae-viewport-x</code> or <code>--ae-viewport-y</code>. Snap works without Viewport.</p>
 <p>Place <code>data-ae-scrollbox-snap</code> on the Scrollbox itself and mark each point with <code>data-ae-snap-item</code>. An empty value or <code>horizontal</code> selects the horizontal axis; <code>vertical</code> selects the vertical axis. Without elastic, marked descendants of the scrollbox are points; with elastic, only marked descendants inside its wrapper are points. Items belonging to a nested scrollbox are excluded. If no eligible item exists, diagnostic 1121 reports the missing points and snap stays disabled. The weak CSS applies <code>scroll-snap-type: x mandatory</code> or <code>y mandatory</code> to the box. An empty <code>data-ae-snap-item</code> aligns its center; <code>start</code>, <code>left</code>, and <code>top</code> align its start, while <code>end</code>, <code>right</code>, and <code>bottom</code> align its end along the selected axis. The directional names are aliases for CSS&#39;s logical <code>start</code> and <code>end</code>. The extension toggles CSS classes to suspend snapping during PDS, elastic pressure, scrollbar thumb dragging, and wheel input beyond the first or last item. At a list end, wheel input follows native scrolling and can reach an ancestor when <code>overscroll-behavior</code> permits it. The snap rule returns 120 ms after the last edge wheel event. The focus and viewport variables keep updating while snapping is suspended. At mount, Scrollbox aligns the first point immediately. Snap does not alter the box&#39;s or items&#39; inline snap declarations.</p>
 <p>For a quick flick in desktop PDS, Scrollbox advances one point from the gesture&#39;s starting item in the gesture direction. Further pointer moves in that drag keep the same starting item. The flick must last no more than 100 ms, move more than 1 px but less than 100 px, and either finish within 50 ms or reach 0.5 px/ms. Only movement along the snap axis counts. A short desktop flick can finish within the 100 ms text-selection wait if selection did not start. Longer PDS gestures let CSS Scroll Snap choose the destination. PDS momentum does not run while snap is enabled. Touch scrolling and its momentum remain native; snap items use <code>scroll-snap-stop: always</code> to prevent a native fling from passing over an intermediate point. Touch release does not trigger scripted flick navigation.</p>
 <p>Native CSS Scroll Snap permits free scrolling within a snap point wider or taller than the viewport. Use points no larger than the viewport when every release must align to one center; flicks and controller navigation can still move between oversized points.</p>
@@ -1087,12 +1087,12 @@ gallery.previous();  // Move to the preceding point.
         Present      </span>
     </a>
 
-                  <a href="/core/docs/0.1.x/core-extensions/scrollbox-snap.htm"
+                  <a href="/core/docs/0.1.x/core-extensions/state-navigation.htm"
             class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2" style="width: 40%;">
             <span
               class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
               style="max-width:200px" data-ae-overflow-marquee="80">
-              Scrollbox Snap            </span> →
+              State Navigation            </span> →
           </a>
           </div>          </div>
 

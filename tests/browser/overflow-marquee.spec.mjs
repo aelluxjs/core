@@ -244,7 +244,7 @@ test("hover preserves the remaining end hold before the instant reset", async ({
   expect(await content.evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).m41)).toBe(0);
 });
 
-test("mounting only Anchor does not mount marquees and Full keeps the bundled extension lazy", async ({ page }) => {
+test("mounting only Anchor does not mount marquees and Full keeps the separate extension lazy", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(html => {

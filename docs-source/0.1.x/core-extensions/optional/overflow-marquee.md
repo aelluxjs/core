@@ -1,8 +1,8 @@
 # Overflow Marquee
 
-**Distribution:** Bundled Extension. **Stability:** Stable.
+**Distribution:** Optional Extension. **Stability:** Stable.
 
-`overflow-marquee` is a dedicated Extension for `[data-ae-overflow-marquee]`. In Basic, register it explicitly with `$ae.ext("overflow-marquee", { loadStyle: true })` before initialization to include its stylesheet. Add `loadWhen: "[data-ae-overflow-marquee]"` for lazy loading. During `init()`, it registers Anchor if necessary and awaits `$ae.wait("anchor")` before obtaining a placement map and registering its own mount map. Full bundles its implementation and initializes it only when matching content is mounted, without a separate script request. A mount restricted to Anchor does not mount marquee elements.
+`overflow-marquee` is a dedicated Extension for `[data-ae-overflow-marquee]`. In Basic, register it explicitly with `$ae.ext("overflow-marquee", { loadStyle: true })` before initialization to include its stylesheet. Add `loadWhen: "[data-ae-overflow-marquee]"` for lazy loading. During `init()`, it registers Anchor if necessary and awaits `$ae.wait("anchor")` before obtaining a placement map and registering its own mount map. Full loads its separate signed script and stylesheet only when matching content is mounted. Neither is included in the Full bundle. This registration is temporary pending migration to an external extension. A mount restricted to Anchor does not mount marquee elements.
 
 ```js
 $ae.ext("overflow-marquee", { loadStyle: true });
@@ -78,11 +78,11 @@ Registering Anchor alone does not download or initialize Overflow Marquee. The p
 
 The optional pixel limit adds 1,823/492 bytes in Modern, 2,087/387 bytes in Legacy and 175/24 bytes in CSS (raw/gzip), relative to the fade implementation. This includes measuring intrinsic content, skipping marquee work and styles while dormant, and restoring/reapplying the wrapper lifecycle when content crosses the limit. Its budgets increase from 12/4.5 to 13.5/5 KiB in Modern, from 23.5/8 to 25.5/8 KiB in Legacy, and from 2.5/1 to 2.75/1 KiB in CSS. Shared JavaScript limits remain unchanged.
 
-The shared CSS Motion subtree option and semantic validation for both overflow fades add 667/168 bytes to Orchestrator Modern and 667/202 bytes to Full Modern. Their gzip limits increase from 20.5 to 20.75 KiB and from 42.5 to 42.75 KiB respectively. Combined distribution costs and the remaining shared budget adjustments are recorded in [Scrollbox](scrollbox.md#distribution-cost). Anchor and Full Legacy keep their existing limits.
+The shared CSS Motion subtree option and semantic validation for both overflow fades add 667/168 bytes to Orchestrator Modern and 667/202 bytes to Full Modern. Their gzip limits increase from 20.5 to 20.75 KiB and from 42.5 to 42.75 KiB respectively. Combined distribution costs and the remaining shared budget adjustments are recorded in [Scrollbox](../scrollbox.md#distribution-cost). Anchor and Full Legacy keep their existing limits.
 
 ## Known Limits & Risks
 
-See [Core Known Limits & Risks](../runtime/known-limits-and-risks.md) for classifications and shared architecture, loading and lifecycle boundaries.
+See [Core Known Limits & Risks](../../runtime/known-limits-and-risks.md) for classifications and shared architecture, loading and lifecycle boundaries.
 
 | Area | Type | Description | Recommendation |
 | --- | --- | --- | --- |

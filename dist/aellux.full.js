@@ -2099,571 +2099,490 @@
     }
   });
 
-  // src/internal/parse-overflow-marquee-limit.js
-  function parseOverflowMarqueeLimit(value) {
-    const text = (value || "").trim();
-    if (!text) return null;
-    if (!/^(?:\d+(?:\.\d+)?|\.\d+)(?:px)?$/i.test(text)) return void 0;
-    const limit = parseFloat(text);
-    return Number.isFinite(limit) ? limit : void 0;
-  }
-  var init_parse_overflow_marquee_limit = __esm({
-    "src/internal/parse-overflow-marquee-limit.js"() {
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-    }
-  });
-
-  // src/internal/create-overflow-marquee.js
-  function createOverflowMarquee(root2, api, anchor) {
-    var _a;
-    const attribute = api.attr("overflow-marquee");
-    const contentAttribute = api.attr("overflow-marquee-content");
-    const activeAttribute = api.attr("overflow-marquee-active");
-    const readyAttribute = api.attr("overflow-marquee-ready");
-    const viewportAttribute = api.attr("overflow-marquee-viewport");
-    const fadeAttribute = api.attr("overflow-marquee-fade");
-    const offsetProperty = "--ae-overflow-marquee-offset";
-    const reducedAttribute = api.attr("reduced-motion");
-    const selector = `[${attribute}]`;
-    const states = /* @__PURE__ */ new Map();
-    const desktop = (_a = root2.matchMedia) == null ? void 0 : _a.call(root2, "(any-hover: hover) and (any-pointer: fine)");
-    let observer = null;
-    return { selector, mount, unmount, update, destroy };
-    function listenMedia(add) {
-      if (desktop == null ? void 0 : desktop.addEventListener) desktop[add ? "addEventListener" : "removeEventListener"]("change", refreshAll);
-      else if (desktop == null ? void 0 : desktop.addListener) desktop[add ? "addListener" : "removeListener"](refreshAll);
-    }
-    function refreshAll(event) {
-      for (const [element, state] of states)
-        if (state.enabled || (event == null ? void 0 : event.type) === "resize" || (event == null ? void 0 : event.type) === "loadingdone") schedule(element);
-    }
-    function motionChanged(event) {
-      for (const [element, state] of states) {
-        if (!state.enabled) continue;
-        if (event.target !== state.wrapper && event.target !== state.viewport && (event.target.contains(element) || element.contains(event.target))) schedule(element);
-      }
-    }
-    function visible(state) {
-      if (!state.element.isConnected || root2.document.hidden || state.intersecting === false || anchor.invisible(state.wrapper.isConnected ? state.wrapper : state.element)) return false;
-      const bounds = state.element.getBoundingClientRect();
-      return bounds.width > 0 && bounds.height > 0 && bounds.right > 0 && bounds.bottom > 0 && bounds.left < root2.innerWidth && bounds.top < root2.innerHeight;
-    }
-    function interacting(state) {
-      return state.element.contains(root2.document.activeElement) || !!((desktop == null ? void 0 : desktop.matches) && state.element.matches(":hover"));
-    }
-    function canRun(state) {
-      return visible(state) && !interacting(state);
-    }
-    async function mount(element) {
-      var _a2, _b;
-      if (states.has(element)) return;
-      const wrapper = root2.document.createElement("span");
-      const viewport = root2.document.createElement("span");
-      viewport.setAttribute(viewportAttribute, "");
-      wrapper.setAttribute(contentAttribute, "top-left:top-left");
-      const state = {
-        element,
-        wrapper,
-        viewport,
-        revision: 0,
-        signature: null,
-        pending: null,
-        dirty: false,
-        timer: null,
-        motionId: api.motion.id(),
-        layoutId: api.motion.id(),
-        cycleId: api.motion.id(),
-        ownedTitle: null,
-        paused: true,
-        intersecting: root2.IntersectionObserver ? false : null,
-        phase: "wait",
-        x: 0,
-        memory: api.persist.element.save(element, [activeAttribute, readyAttribute]),
-        resize: null,
-        intersection: null,
-        enabled: false,
-        probeStyle: void 0
-      };
-      states.set(element, state);
-      state.onInteraction = () => schedule(element);
-      if (states.size === 1) {
-        if (root2.MutationObserver) {
-          observer = new root2.MutationObserver((records) => {
-            for (const [host, value] of states) {
-              if (records.some((record) => {
-                const node = record.target;
-                if ((node === value.wrapper || node === value.viewport) && record.type === "attributes") return false;
-                if (record.type === "attributes" && node === host && record.attributeName === activeAttribute) return false;
-                if (record.type === "attributes" && node === host && record.attributeName === "style" && host.getAttribute("style") === value.probeStyle) return false;
-                if (!value.enabled && record.type === "attributes" && [fadeAttribute, reducedAttribute, "dir"].includes(record.attributeName)) return false;
-                return node === root2.document.documentElement || host.contains(node) || node.contains(host);
-              })) schedule(host);
-            }
-          });
-          observer.observe(root2.document, {
-            subtree: true,
-            childList: true,
-            characterData: true,
-            attributes: true,
-            attributeFilter: [attribute, fadeAttribute, reducedAttribute, "class", "style", "hidden", "dir"]
-          });
-        }
-        root2.document.addEventListener("visibilitychange", refreshAll);
-        for (const name of ["transitionend", "transitioncancel", "animationstart", "animationend", "animationcancel"])
-          root2.document.addEventListener(name, motionChanged, true);
-        root2.addEventListener("resize", refreshAll);
-        root2.addEventListener("scroll", refreshAll, { capture: true, passive: true });
-        (_b = (_a2 = root2.document.fonts) == null ? void 0 : _a2.addEventListener) == null ? void 0 : _b.call(_a2, "loadingdone", refreshAll);
-        listenMedia(true);
-      }
-      if (root2.ResizeObserver) {
-        state.resize = new root2.ResizeObserver(() => schedule(element));
-        state.resize.observe(element);
-      }
-      if (root2.IntersectionObserver) {
-        state.intersection = new root2.IntersectionObserver((entries) => {
-          const entry = entries[entries.length - 1];
-          state.intersecting = entry.isIntersecting && entry.intersectionRect.width > 0 && entry.intersectionRect.height > 0;
-          schedule(element);
-        }, { threshold: [0, 1e-6] });
-      }
-      await update(element);
-    }
-    function unwrap(state) {
-      if (state.viewport.parentNode !== state.element) return;
-      reconcile(state);
-      while (state.wrapper.firstChild) state.element.insertBefore(state.wrapper.firstChild, state.viewport);
-      state.viewport.remove();
-    }
-    function enable(state, enabled) {
-      var _a2, _b, _c, _d;
-      if (state.enabled === enabled) return;
-      state.enabled = enabled;
-      const { element, wrapper } = state;
-      for (const name of ["mouseenter", "mouseleave", "focusin", "focusout"])
-        element[enabled ? "addEventListener" : "removeEventListener"](name, state.onInteraction);
-      if (enabled) {
-        element.setAttribute(readyAttribute, "");
-        reconcile(state);
-        anchor.mount(wrapper);
-        (_a2 = state.resize) == null ? void 0 : _a2.observe(wrapper);
-        (_b = state.intersection) == null ? void 0 : _b.observe(element);
-      } else {
-        stop(state);
-        state.paused = true;
-        state.signature = null;
-        state.placements = null;
-        (_c = state.resize) == null ? void 0 : _c.unobserve(wrapper);
-        (_d = state.intersection) == null ? void 0 : _d.disconnect();
-        state.intersecting = root2.IntersectionObserver ? false : null;
-        anchor.unmount(wrapper);
-        unwrap(state);
-        tooltip(state, null);
-        element.removeAttribute(activeAttribute);
-        element.removeAttribute(readyAttribute);
-      }
-    }
-    function exceedsLimit(state, limit) {
-      const { element, wrapper } = state;
-      state.probeStyle = element.getAttribute("style");
-      try {
-        element.style.setProperty("white-space", "nowrap", "important");
-        const range = root2.document.createRange();
-        range.selectNodeContents(state.viewport.parentNode === element && wrapper.parentNode === state.viewport ? wrapper : element);
-        const bounds = range.getBoundingClientRect();
-        const lineHeight = element.textContent.trim() ? parseFloat(root2.getComputedStyle(element).lineHeight) || 0 : 0;
-        return bounds.width > limit || Math.max(bounds.height, lineHeight) > limit;
-      } finally {
-        if (state.probeStyle === null) {
-          element.getAttribute("style");
-          element.removeAttribute("style");
-        } else element.setAttribute("style", state.probeStyle);
-      }
-    }
-    function reconcile(state) {
-      const { element, wrapper, viewport } = state;
-      if (viewport.parentNode !== element) viewport.textContent = "";
-      if (viewport.parentNode !== element || wrapper.parentNode !== viewport) wrapper.textContent = "";
-      if (viewport.parentNode === element && wrapper.parentNode === viewport && element.childNodes.length === 1 && viewport.childNodes.length === 1) return;
-      const contents = root2.document.createDocumentFragment();
-      const collect = (parent) => {
-        for (const node of Array.from(parent.childNodes)) {
-          if (node === viewport || node === wrapper) collect(node);
-          else contents.appendChild(node);
-        }
-      };
-      collect(element);
-      wrapper.appendChild(contents);
-      viewport.appendChild(wrapper);
-      element.appendChild(viewport);
-    }
-    function schedule(element) {
-      const state = states.get(element);
-      if (!state) return;
-      rememberProgress(state);
-      if (state.enabled) {
-        if (!visible(state)) {
-          pause(state);
-          return;
-        }
-        if (interacting(state)) pause(state);
-      }
-      update(element).catch((cause) => api.diagnostics.error(
-        api.diagnostics.ERROR_EXTENSION_MOUNT,
-        { extension: "overflow-marquee", element, method: "update", cause }
-      ));
-    }
-    function update(element) {
-      const state = states.get(element);
-      if (!state) return Promise.resolve();
-      if (state.pending) {
-        state.dirty = true;
-        return state.pending;
-      }
-      state.pending = refresh(state).finally(() => {
-        state.pending = null;
-        if (state.dirty && states.get(element) === state) {
-          state.dirty = false;
-          schedule(element);
-        }
-      });
-      return state.pending;
-    }
-    async function refresh(state) {
-      const { element, wrapper, layoutId } = state;
-      const alive = () => states.get(element) === state;
-      rememberProgress(state);
-      if (state.enabled && !visible(state)) {
-        pause(state);
-        return;
-      }
-      const limit = parseOverflowMarqueeLimit(element.getAttribute(attribute));
-      if (limit != null) {
-        const eligible = await api.waitLayout.read(layoutId, () => alive() && exceedsLimit(state, limit));
-        if (!alive()) return;
-        if (!eligible) {
-          await api.waitLayout.update(layoutId, () => {
-            if (alive()) enable(state, false);
-          });
-          return;
-        }
-      }
-      if (!state.enabled) await api.waitLayout.update(layoutId, () => {
-        if (alive()) enable(state, true);
-      });
-      if (!alive()) return;
-      if (!visible(state)) {
-        pause(state);
-        return;
-      }
-      if (interacting(state)) pause(state);
-      await api.waitLayout.update(layoutId, () => {
-        if (alive()) reconcile(state);
-      });
-      if (!alive()) return;
-      const measured = await api.waitLayout.read(layoutId, () => {
-        const style = root2.getComputedStyle(element);
-        const padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
-        const width = element.clientWidth - padding;
-        const content = wrapper.scrollWidth;
-        const overflow = content > width + 1;
-        const reduced = api.currentPreference("reduced-motion") === "reduced";
-        const rawSpeed = Number(style.getPropertyValue("--ae-overflow-marquee-speed").trim());
-        const rawDelay = style.getPropertyValue("--ae-overflow-marquee-delay").trim();
-        const delayValue = /^(?:\d+(?:\.\d+)?|\.\d+)(ms|s)$/.exec(rawDelay);
-        return {
-          width,
-          content,
-          overflow,
-          active: overflow && !reduced,
-          fade: element.getAttribute(fadeAttribute) !== "false",
-          speed: Number.isFinite(rawSpeed) && rawSpeed > 0 ? rawSpeed : 30,
-          delay: delayValue ? parseFloat(rawDelay) * (delayValue[1] === "s" ? 1e3 : 1) : 1200,
-          direction: style.direction,
-          text: wrapper.textContent.replace(/\s+/g, " ").trim()
-        };
-      });
-      if (!alive() || !measured) return;
-      const signature = JSON.stringify(__spreadProps(__spreadValues({}, measured), { fade: void 0 }));
-      await api.waitLayout.update(layoutId, () => {
-        var _a2;
-        if (!alive()) return;
-        tooltip(state, measured.overflow && (desktop == null ? void 0 : desktop.matches) ? measured.text : null);
-        state.viewport.setAttribute(viewportAttribute, measured.overflow && measured.fade && (!measured.active || typeof ((_a2 = root2.CSS) == null ? void 0 : _a2.registerProperty) === "function") ? "fade" : "");
-        if (signature === state.signature) return;
-        stop(state);
-        state.signature = signature;
-        state.measured = measured;
-        state.placements = null;
-        state.phase = "wait";
-        state.remaining = measured.delay;
-        state.x = 0;
-        wrapper.style.transition = "none";
-        wrapper.setAttribute(contentAttribute, "top-left:top-left");
-        wrapper.style.setProperty("--ae-anchor-x", "0px");
-        state.viewport.style.transition = "none";
-        state.viewport.style.setProperty(offsetProperty, "0px");
-        state.viewport.style.setProperty("--ae-overflow-marquee-distance", `${Math.max(0, measured.content - measured.width)}px`);
-        state.viewport.setAttribute("dir", measured.direction);
-        element.toggleAttribute ? element.toggleAttribute(activeAttribute, measured.active) : measured.active ? element.setAttribute(activeAttribute, "") : element.removeAttribute(activeAttribute);
-      });
-      if (!alive() || signature !== state.signature || !measured.active || state.timer !== null || state.running) return;
-      if (!canRun(state)) {
-        pause(state);
-        return;
-      }
-      const revision = state.revision;
-      const placements = state.placements || await api.waitLayout.read(layoutId, () => {
-        const start = anchor.measure(wrapper, false);
-        const end = anchor.measure(wrapper, true);
-        if (!(start == null ? void 0 : start.valid) || !(end == null ? void 0 : end.valid)) return null;
-        const distance = Math.max(0, start.selected.x - end.selected.x);
-        const rtl = measured.direction === "rtl";
-        const placement = (base, x) => __spreadProps(__spreadValues({}, base), { selected: __spreadProps(__spreadValues({}, base.selected), { x, y: 0 }) });
-        return { start: placement(rtl ? end : start, 0), end: placement(rtl ? start : end, rtl ? distance : -distance), distance };
-      });
-      if (!alive() || revision !== state.revision || !placements) return;
-      await api.waitLayout.update(layoutId, () => {
-        if (!alive() || revision !== state.revision) return;
-        state.placements = placements;
-        state.viewport.style.setProperty("--ae-overflow-marquee-distance", `${placements.distance}px`);
-        if (!canRun(state)) {
-          pause(state);
-          return;
-        }
-        state.paused = false;
-        anchor.place(wrapper, at(state, state.x));
-        if (state.phase === "travel") cycle(state);
-        else wait(state);
-      });
-    }
-    function at(state, x) {
-      const base = state.placements.start;
-      return __spreadProps(__spreadValues({}, base), { selected: __spreadProps(__spreadValues({}, base.selected), { x }) });
-    }
-    function freezeFade(state) {
-      state.viewport.style.transition = "none";
-      state.viewport.style.setProperty(offsetProperty, `${Math.abs(state.x)}px`);
-    }
-    function wait(state) {
-      const revision = state.revision;
-      state.deadline = now() + state.remaining;
-      state.timer = root2.setTimeout(() => {
-        if (revision === state.revision && states.get(state.element) === state) cycle(state);
-      }, state.remaining);
-    }
-    function now() {
-      return root2.performance.now();
-    }
-    function rememberProgress(state) {
-      var _a2;
-      if (!state.running || state.started === void 0) return;
-      const time = (_a2 = state.animation) == null ? void 0 : _a2.currentTime;
-      if (time != null) state.elapsed = Number(time);
-      else if (!state.controlled) state.elapsed = now() - state.started;
-      const progress = state.duration > 0 ? Math.min(1, (state.elapsed || 0) / state.duration) : 1;
-      state.x = state.from + (state.placements.end.selected.x - state.from) * progress;
-    }
-    function pause(state) {
-      if (state.paused) return;
-      rememberProgress(state);
-      if (state.timer !== null) state.remaining = Math.max(0, state.deadline - now());
-      stop(state);
-      state.paused = true;
-      state.wrapper.style.transition = "none";
-      freezeFade(state);
-      if (state.placements) anchor.place(state.wrapper, at(state, state.x));
-    }
-    function tooltip(state, text) {
-      const element = state.element;
-      if (state.ownedTitle !== null && element.getAttribute("title") !== state.ownedTitle) state.ownedTitle = null;
-      if (!text) {
-        if (state.ownedTitle !== null) element.removeAttribute("title");
-        state.ownedTitle = null;
-      } else if (state.ownedTitle !== null || !element.hasAttribute("title")) {
-        if (element.getAttribute("title") !== text) element.setAttribute("title", text);
-        state.ownedTitle = text;
-      }
-    }
-    async function cycle(state) {
-      const { measured, placements } = state;
-      const revision = state.revision;
-      const current = () => states.get(state.element) === state && revision === state.revision;
-      state.timer = null;
-      if (!current()) return;
-      state.remaining = 0;
-      if (!canRun(state)) {
-        pause(state);
-        return;
-      }
-      state.running = true;
-      state.started = void 0;
-      try {
-        if (state.phase === "end") {
-          await api.waitLayout.update(state.cycleId, () => {
-            if (!current()) return;
-            state.wrapper.style.transition = "none";
-            state.wrapper.setAttribute(contentAttribute, "top-left:top-left");
-            state.x = 0;
-            freezeFade(state);
-            anchor.place(state.wrapper, placements.start);
-            state.phase = "wait";
-            state.running = false;
-            state.remaining = measured.delay;
-            if (canRun(state)) wait(state);
-            else pause(state);
-          });
-          return;
-        }
-        state.phase = "travel";
-        const duration = Math.abs(placements.end.selected.x - state.x) / measured.speed * 1e3;
-        await api.waitLayout.read(state.cycleId, () => {
-          root2.getComputedStyle(state.viewport).getPropertyValue(offsetProperty);
-          return root2.getComputedStyle(state.wrapper).transform;
-        });
-        if (!current()) return;
-        if (!canRun(state)) {
-          pause(state);
-          return;
-        }
-        state.from = state.x;
-        state.duration = duration;
-        state.elapsed = 0;
-        state.animation = null;
-        state.controlled = api.motion.supported(state.wrapper);
-        state.started = now();
-        const completion = api.motion.run(state.viewport, {
-          id: state.motionId,
-          subtree: true,
-          nativeDuration: duration,
-          maxFPS: api.layoutMaxFPS(state.element),
-          abort() {
-            rememberProgress(state);
-            return !current();
-          },
-          apply() {
-            state.wrapper.style.transition = `transform ${duration}ms linear`;
-            state.viewport.style.transition = `${offsetProperty} ${duration}ms linear`;
-            state.viewport.style.setProperty(offsetProperty, `${placements.distance}px`);
-            state.wrapper.setAttribute(contentAttribute, "bottom-right:bottom-right");
-            anchor.place(state.wrapper, placements.end);
-          }
-        });
-        await api.waitLayout.read(state.cycleId, () => {
-          var _a2, _b;
-          if (current()) state.animation = ((_b = (_a2 = state.wrapper).getAnimations) == null ? void 0 : _b.call(_a2).find((animation) => animation.transitionProperty === "transform")) || null;
-        });
-        const result = await completion;
-        if (!current() || result.status !== "completed") return;
-        await api.waitLayout.update(state.cycleId, () => {
-          if (!current()) return;
-          state.wrapper.style.transition = "none";
-          anchor.place(state.wrapper, placements.end);
-          state.running = false;
-          state.x = placements.end.selected.x;
-          freezeFade(state);
-          state.animation = null;
-          state.phase = "end";
-          state.remaining = measured.delay;
-          if (canRun(state)) wait(state);
-          else pause(state);
-        });
-      } catch (cause) {
-        if (current()) api.diagnostics.error(
-          api.diagnostics.ERROR_EXTENSION_TRANSITION,
-          { extension: "overflow-marquee", element: state.element, cause }
-        );
-      } finally {
-        if (current()) state.running = false;
-      }
-    }
-    function stop(state) {
-      state.revision++;
-      if (state.timer !== null) root2.clearTimeout(state.timer);
-      state.timer = null;
-      state.running = false;
-      api.motion.cancel(state.motionId);
-      api.waitLayout.cancel(state.cycleId);
-      state.animation = null;
-    }
-    async function unmount(element) {
-      var _a2, _b, _c, _d;
-      const state = states.get(element);
-      if (!state) return;
-      states.delete(element);
-      stop(state);
-      api.waitLayout.cancel(state.layoutId);
-      (_a2 = state.resize) == null ? void 0 : _a2.disconnect();
-      (_b = state.intersection) == null ? void 0 : _b.disconnect();
-      for (const name of ["mouseenter", "mouseleave", "focusin", "focusout"])
-        element.removeEventListener(name, state.onInteraction);
-      await anchor.unmount(state.wrapper);
-      unwrap(state);
-      tooltip(state, null);
-      state.memory.restore();
-      if (!states.size) {
-        observer == null ? void 0 : observer.disconnect();
-        observer = null;
-        root2.document.removeEventListener("visibilitychange", refreshAll);
-        for (const name of ["transitionend", "transitioncancel", "animationstart", "animationend", "animationcancel"])
-          root2.document.removeEventListener(name, motionChanged, true);
-        root2.removeEventListener("resize", refreshAll);
-        root2.removeEventListener("scroll", refreshAll, true);
-        (_d = (_c = root2.document.fonts) == null ? void 0 : _c.removeEventListener) == null ? void 0 : _d.call(_c, "loadingdone", refreshAll);
-        listenMedia(false);
-      }
-    }
-    async function destroy() {
-      for (const element of Array.from(states.keys())) await unmount(element);
-    }
-  }
-  var init_create_overflow_marquee = __esm({
-    "src/internal/create-overflow-marquee.js"() {
-      init_parse_overflow_marquee_limit();
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-    }
-  });
-
-  // src/aellux.ext.overflow-marquee.js
-  var aellux_ext_overflow_marquee_exports = {};
-  var init_aellux_ext_overflow_marquee = __esm({
-    "src/aellux.ext.overflow-marquee.js"() {
-      init_create_overflow_marquee();
+  // src/aellux.ext.viewport.js
+  var aellux_ext_viewport_exports = {};
+  var init_aellux_ext_viewport = __esm({
+    "src/aellux.ext.viewport.js"() {
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
-        const api = root2.AelluxJs;
-        const extensionName = "overflow-marquee";
-        if (!api) throw new Error("[aellux.js] Load the boot script before the overflow-marquee extension.");
-        let marquee = null, placements = null;
-        api.extAttach(extensionName, { init, destroy });
-        async function init() {
-          if (!api.registry.ext.anchor) api.ext("anchor");
-          const anchor = await api.wait("anchor");
-          if (!(anchor == null ? void 0 : anchor.createPlacementMap)) throw new Error("[aellux.js] Overflow Marquee requires Anchor's placement map.");
-          placements = anchor.createPlacementMap();
-          marquee = createOverflowMarquee(root2, api, __spreadProps(__spreadValues({}, placements), {
-            measure: (element, end) => placements.measure(element, end ? "bottom-right:bottom-right" : "top-left:top-left")
-          }));
-          api.registerCssProperty(
-            { name: "--ae-overflow-marquee-speed", syntax: "<number>", initialValue: "30" },
-            { name: "--ae-overflow-marquee-delay", syntax: "<time>", initialValue: "1200ms" },
-            { name: "--ae-overflow-marquee-fade-size", syntax: "<length>", initialValue: "16px" },
-            { name: "--ae-overflow-marquee-offset", syntax: "<length>", initialValue: "0px", inherits: false }
-          );
-          api.mountManager.add({
+        const AelluxJs2 = root2.AelluxJs;
+        if (!AelluxJs2) throw new Error("[aellux.js] Load the boot script before the viewport extension.");
+        const extensionName = "viewport";
+        const attribute = AelluxJs2.attr(extensionName);
+        const targetAttribute = AelluxJs2.attr("viewport-target");
+        const properties = ["--ae-viewport-x", "--ae-viewport-y", "--ae-viewport-visible"];
+        const EVENT_EPSILON = 1e-6;
+        const document2 = root2.document;
+        const states = /* @__PURE__ */ new Map();
+        const groups = /* @__PURE__ */ new Map();
+        const resizeTargets = /* @__PURE__ */ new Map();
+        const owners = /* @__PURE__ */ new Map();
+        const writtenStyles = /* @__PURE__ */ new WeakMap();
+        let nextLayoutId = 6e6;
+        let mutations = null, resizeObserver = null;
+        AelluxJs2.extAttach(extensionName, { init, destroy });
+        function init() {
+          AelluxJs2.registerCssProperty(...properties.map((name) => ({ name, syntax: "<number>", initialValue: "0", inherits: false })));
+          AelluxJs2.mountManager.add({
             extensionName,
-            selector: marquee.selector,
-            mount: marquee.mount,
-            unmount: marquee.unmount,
-            update: marquee.update
+            selector: `[${attribute}]`,
+            mount,
+            update,
+            unmount
           });
         }
-        async function destroy() {
-          await (marquee == null ? void 0 : marquee.destroy());
-          placements == null ? void 0 : placements.destroy();
-          api.mountManager.remove({ extensionName });
-          marquee = placements = null;
+        function destroy() {
+          for (const element of states.keys()) unmount(element);
+          AelluxJs2.mountManager.remove({ extensionName });
+        }
+        function mount(element) {
+          if (states.has(element)) return;
+          const state = {
+            element,
+            group: null,
+            configuration: null,
+            axes: "both",
+            target: null,
+            memories: [],
+            targetWarning: null,
+            conflict: null,
+            values: [],
+            snapshot: null,
+            unmountRequest: null,
+            resizeTargets: /* @__PURE__ */ new Set()
+          };
+          states.set(element, state);
+          if (states.size === 1) startObserving();
+          join(state, document2);
+          return update(element);
+        }
+        async function update(element) {
+          const state = states.get(element);
+          if (!state) return;
+          let group;
+          do {
+            group = state.group;
+            await schedule(group);
+          } while (states.get(element) === state && state.group !== group);
+        }
+        function unmount(element) {
+          const state = states.get(element);
+          if (!state) return;
+          states.delete(element);
+          leave(state);
+          observeSizes(state, /* @__PURE__ */ new Set());
+          releaseTarget(state);
+          if (!states.size) stopObserving();
+        }
+        function startObserving() {
+          AelluxJs2.onEvent(root2, "$resize", scheduleAll);
+          AelluxJs2.onEvent(document2, "$load", scheduleAll, true);
+          AelluxJs2.onEvent(document2, AelluxJs2.eventName("Layout"), onLayout);
+          AelluxJs2.onEvent(document2, AelluxJs2.eventName("BeforeUnmount"), onBeforeUnmount);
+          if (root2.ResizeObserver) resizeObserver = new root2.ResizeObserver(scheduleAll);
+          if (root2.MutationObserver) {
+            mutations = new root2.MutationObserver((records) => {
+              if (records.some((record) => {
+                return record.type !== "attributes" || record.attributeName !== "style" || !writtenStyles.has(record.target) || record.target.getAttribute("style") !== writtenStyles.get(record.target);
+              })) scheduleAll();
+            });
+            mutations.observe(document2, {
+              childList: true,
+              subtree: true,
+              characterData: true,
+              attributes: true,
+              attributeFilter: [attribute, targetAttribute, "id", "class", "style", "hidden", "open", "width", "height", "src"]
+            });
+          }
+        }
+        function stopObserving() {
+          AelluxJs2.offEvent(root2, "$resize", scheduleAll);
+          AelluxJs2.offEvent(document2, "$load", scheduleAll, true);
+          AelluxJs2.offEvent(document2, AelluxJs2.eventName("Layout"), onLayout);
+          AelluxJs2.offEvent(document2, AelluxJs2.eventName("BeforeUnmount"), onBeforeUnmount);
+          mutations == null ? void 0 : mutations.disconnect();
+          resizeObserver == null ? void 0 : resizeObserver.disconnect();
+          mutations = resizeObserver = null;
+          resizeTargets.clear();
+        }
+        function onLayout(event) {
+          var _a;
+          const duration = Number((_a = event.detail) == null ? void 0 : _a.durationMs);
+          for (const group of groups.values()) {
+            if (Number.isFinite(duration) && duration > 0)
+              group.layoutUntil = Math.max(group.layoutUntil, root2.performance.now() + duration);
+            schedule(group);
+          }
+        }
+        function onBeforeUnmount(event) {
+          const { root: subtree, extensions, detachedOnly } = event.detail;
+          if (extensions && !extensions.includes(extensionName)) return;
+          for (const state of states.values()) {
+            if (detachedOnly && state.element.isConnected) continue;
+            if (state.element === subtree || subtree.contains(state.element) || subtree === document2 && !state.element.isConnected) state.unmountRequest = event;
+          }
+        }
+        function current(state, group) {
+          return states.get(state.element) === state && state.group === group && state.element.isConnected && state.element.hasAttribute(attribute) && (!state.unmountRequest || state.unmountRequest.defaultPrevented);
+        }
+        function scheduleAll() {
+          for (const group of groups.values()) schedule(group);
+        }
+        function join(state, reference) {
+          var _a, _b;
+          if (((_a = state.group) == null ? void 0 : _a.reference) === reference) return;
+          leave(state);
+          let group = groups.get(reference);
+          if (!group) {
+            group = {
+              reference,
+              states: /* @__PURE__ */ new Set(),
+              id: nextLayoutId++,
+              active: true,
+              pending: null,
+              dirty: false,
+              timer: null,
+              layoutUntil: 0,
+              intersection: null
+            };
+            group.onScroll = () => schedule(group);
+            AelluxJs2.onEvent(reference === document2 ? root2 : reference, "$scroll", group.onScroll, { passive: true });
+            if (root2.IntersectionObserver) {
+              group.intersection = new root2.IntersectionObserver(
+                group.onScroll,
+                { root: reference === document2 ? null : reference, threshold: [0, 1e-6, 1] }
+              );
+            }
+            groups.set(reference, group);
+          }
+          state.group = group;
+          group.states.add(state);
+          (_b = group.intersection) == null ? void 0 : _b.observe(state.element);
+        }
+        function leave(state) {
+          var _a, _b;
+          const group = state.group;
+          if (!group) return;
+          group.states.delete(state);
+          (_a = group.intersection) == null ? void 0 : _a.unobserve(state.element);
+          state.group = null;
+          if (group.states.size) return;
+          group.active = false;
+          AelluxJs2.waitLayout.cancel(group.id);
+          if (group.timer !== null) root2.clearTimeout(group.timer);
+          (_b = group.intersection) == null ? void 0 : _b.disconnect();
+          AelluxJs2.offEvent(group.reference === document2 ? root2 : group.reference, "$scroll", group.onScroll);
+          groups.delete(group.reference);
+        }
+        function schedule(group) {
+          if (!(group == null ? void 0 : group.active)) return;
+          if (group.pending) {
+            group.dirty = true;
+            return group.pending;
+          }
+          group.pending = refresh(group).catch((error) => {
+            group.dirty = false;
+            group.layoutUntil = 0;
+            throw error;
+          }).finally(() => {
+            group.pending = null;
+            if (!group.active) return;
+            if (group.dirty) {
+              group.dirty = false;
+              schedule(group);
+            } else if (root2.performance.now() < group.layoutUntil && group.timer === null) {
+              group.timer = root2.setTimeout(() => {
+                group.timer = null;
+                schedule(group);
+              }, 16);
+            }
+          });
+          group.pending.catch((error) => reportError(group, "refresh", error));
+          return group.pending;
+        }
+        function reportError(group, operation, error, element = group.reference) {
+          AelluxJs2.dispatch("ViewportError", {
+            detail: {
+              error,
+              operation,
+              reference: group.reference,
+              elements: operation === "unmount" ? [element] : Array.from(group.states, (state) => state.element)
+            }
+          });
+          AelluxJs2.diagnostics.error(operation === "unmount" ? AelluxJs2.diagnostics.ERROR_EXTENSION_UNMOUNT : AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
+            extension: extensionName,
+            cause: error,
+            operation,
+            element
+          });
+        }
+        async function refresh(group) {
+          const measurements = await AelluxJs2.waitLayout.read(group.id, () => measure(group));
+          if (!group.active || !measurements) return;
+          await AelluxJs2.waitLayout.update(group.id, () => {
+            for (const { state, target, values, snapshot, changed } of measurements) {
+              if (states.get(state.element) !== state || state.group !== group) continue;
+              if (values === null) {
+                AelluxJs2.mountManager.unmount(state.element, extensionName).catch((error) => reportError(group, "unmount", error, state.element));
+                continue;
+              }
+              if (!current(state, group)) continue;
+              selectTarget(state, (target == null ? void 0 : target.isConnected) ? target : null);
+              for (let index = 0; state.target && index < properties.length; index++) {
+                if (values[index] === state.values[index]) continue;
+                if (values[index] === null) state.memories[index].restore();
+                else state.target.style.setProperty(
+                  properties[index],
+                  String(values[index]),
+                  state.memories[index].cssProperties[properties[index]].priority
+                );
+              }
+              if (state.target) {
+                state.values = values;
+                writtenStyles.set(state.target, state.target.getAttribute("style"));
+              }
+              if (changed) {
+                const previous = state.snapshot;
+                state.snapshot = snapshot;
+                const initial = previous === null;
+                const emit = (name) => AelluxJs2.dispatchFrom(state.element, name, {
+                  bubbles: true,
+                  composed: true,
+                  cancelable: false,
+                  detail: __spreadProps(__spreadValues({}, snapshot), { previous: previous && __spreadValues({}, previous), initial })
+                });
+                emit("ViewportChange");
+                if (current(state, group) && snapshot.measurable && snapshot.state !== (previous == null ? void 0 : previous.state)) {
+                  if (snapshot.state === "inside") emit("ViewportFullyInside");
+                  else if (snapshot.state === "outside") emit("ViewportFullyOutside");
+                }
+              }
+            }
+          });
+        }
+        function measure(group) {
+          const measurements = [];
+          let viewport;
+          for (const state of Array.from(group.states)) {
+            const element = state.element;
+            if (!element.isConnected) continue;
+            if (!element.hasAttribute(attribute)) {
+              measurements.push({ state, values: null });
+              continue;
+            }
+            const targets = /* @__PURE__ */ new Set([element]);
+            let reference = document2;
+            for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+              targets.add(parent);
+              for (const sibling of parent.children) targets.add(sibling);
+              const rootStyle = parent === document2.body ? root2.getComputedStyle(document2.documentElement) : null;
+              const propagatedBody = rootStyle && rootStyle.overflowX === "visible" && rootStyle.overflowY === "visible";
+              if (reference === document2 && parent !== (document2.scrollingElement || document2.documentElement) && !propagatedBody && scrollable(parent))
+                reference = parent;
+            }
+            observeSizes(state, targets);
+            configure(state);
+            if (reference !== group.reference) {
+              join(state, reference);
+              schedule(state.group);
+              continue;
+            }
+            if (!viewport) viewport = viewportRect(reference);
+            const { values, snapshot } = valuesFor(state, viewport);
+            measurements.push({
+              state,
+              target: resolveTarget(state),
+              values,
+              snapshot,
+              changed: geometryChanged(state.snapshot, snapshot)
+            });
+          }
+          return measurements;
+        }
+        function configure(state) {
+          const value = state.element.getAttribute(attribute);
+          if (value === state.configuration) return;
+          state.configuration = value;
+          state.axes = value === "x" || value === "y" ? value : "both";
+          if (value !== "" && value !== "both" && value !== "x" && value !== "y") {
+            AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CONFIGURATION_VALUE, {
+              extension: extensionName,
+              element: state.element,
+              attribute,
+              value,
+              reason: "Unknown viewport axis; using both.",
+              suggestion: 'Use an empty value, "both", "x", or "y".'
+            });
+          }
+        }
+        function resolveTarget(state) {
+          const value = state.element.getAttribute(targetAttribute);
+          if (value === null) {
+            state.targetWarning = null;
+            return state.element;
+          }
+          const id = value.trim().replace(/^#/, "");
+          const target = id && !/\s/.test(id) ? document2.getElementById(id) : null;
+          if (!target || !target.style) {
+            if (state.targetWarning !== value) AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CONFIGURATION_TARGET, {
+              extension: extensionName,
+              element: state.element,
+              attribute: targetAttribute,
+              value,
+              reason: "Viewport target does not exist or is not a styleable element ID.",
+              suggestion: "Use one existing element ID, optionally prefixed with #, or remove the target attribute."
+            });
+            state.targetWarning = value;
+            return null;
+          }
+          state.targetWarning = null;
+          return target;
+        }
+        function releaseTarget(state) {
+          if (!state.target) return;
+          for (const memory of state.memories) memory.restore();
+          writtenStyles.set(state.target, state.target.getAttribute("style"));
+          owners.delete(state.target);
+          state.target = null;
+          state.memories = [];
+          state.values = [];
+          scheduleAll();
+        }
+        function selectTarget(state, target) {
+          if (state.target === target) return;
+          releaseTarget(state);
+          const owner = owners.get(target);
+          if (owner) {
+            if (state.conflict !== owner) AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_RESOURCE_CONFLICT, {
+              extension: extensionName,
+              element: state.element,
+              attribute: targetAttribute,
+              target,
+              property: "--ae-viewport-visible",
+              writers: [owner.element, state.element],
+              reason: "Two Viewport observers publish the same CSS properties on this target.",
+              suggestion: "Use a separate target for each Viewport observer."
+            });
+            state.conflict = owner;
+            return;
+          }
+          state.conflict = null;
+          if (!target) return;
+          owners.set(target, state);
+          state.target = target;
+          state.memories = properties.map((property) => AelluxJs2.persist.element.save(target, [], [property]));
+        }
+        function scrollable(element) {
+          const style = root2.getComputedStyle(element);
+          return ["X", "Y"].some((axis) => {
+            const overflow = style["overflow" + axis];
+            return overflow === "auto" || overflow === "scroll" || overflow === "hidden" && element[axis === "X" ? "scrollWidth" : "scrollHeight"] > element[axis === "X" ? "clientWidth" : "clientHeight"];
+          });
+        }
+        function observeSizes(state, targets) {
+          if (!resizeObserver) return;
+          for (const target of state.resizeTargets) {
+            if (targets.has(target)) continue;
+            const count = resizeTargets.get(target) - 1;
+            if (count) resizeTargets.set(target, count);
+            else {
+              resizeTargets.delete(target);
+              resizeObserver.unobserve(target);
+            }
+          }
+          for (const target of targets) {
+            if (state.resizeTargets.has(target)) continue;
+            const count = resizeTargets.get(target) || 0;
+            if (!count) resizeObserver.observe(target);
+            resizeTargets.set(target, count + 1);
+          }
+          state.resizeTargets = targets;
+        }
+        function viewportRect(reference) {
+          if (reference === document2) {
+            const scrolling = document2.scrollingElement || document2.documentElement;
+            return {
+              left: 0,
+              top: 0,
+              width: document2.documentElement.clientWidth || scrolling.clientWidth || root2.innerWidth,
+              height: document2.documentElement.clientHeight || scrolling.clientHeight || root2.innerHeight
+            };
+          }
+          const rect = reference.getBoundingClientRect();
+          const style = root2.getComputedStyle(reference);
+          const borderSize = (axis) => parseFloat(style[axis]) + (style.boxSizing === "border-box" ? 0 : axis === "width" ? parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) + parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth) : parseFloat(style.paddingTop) + parseFloat(style.paddingBottom) + parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth));
+          const width = borderSize("width"), height = borderSize("height");
+          const left = parseFloat(style.borderLeftWidth), right = parseFloat(style.borderRightWidth);
+          const top = parseFloat(style.borderTopWidth), bottom = parseFloat(style.borderBottomWidth);
+          const scaleX = rect.width / width, scaleY = rect.height / height;
+          const scrollbarX = Math.max(0, reference.offsetWidth - reference.clientWidth - Math.round(left + right));
+          const scrollbarY = Math.max(0, reference.offsetHeight - reference.clientHeight - Math.round(top + bottom));
+          const leftScrollbar = Math.max(0, reference.clientLeft - Math.round(left));
+          return {
+            left: rect.left + (left + leftScrollbar) * scaleX,
+            top: rect.top + top * scaleY,
+            width: Math.max(0, width - left - right - scrollbarX) * scaleX,
+            height: Math.max(0, height - top - bottom - scrollbarY) * scaleY
+          };
+        }
+        function valuesFor(state, viewport) {
+          const rect = state.element.getBoundingClientRect();
+          let x = 0, y = 0, visible = 0;
+          const snapshot = {
+            viewport: state.group.reference,
+            x1: null,
+            y1: null,
+            x2: null,
+            y2: null,
+            x: null,
+            y: null,
+            visible,
+            state: null,
+            measurable: false
+          };
+          if ([
+            viewport.left,
+            viewport.top,
+            viewport.width,
+            viewport.height,
+            rect.left,
+            rect.top,
+            rect.right,
+            rect.bottom,
+            rect.width,
+            rect.height
+          ].every(Number.isFinite) && viewport.width > 0 && viewport.height > 0 && rect.width > 0 && rect.height > 0) {
+            const centerX = viewport.left + viewport.width / 2, centerY = viewport.top + viewport.height / 2;
+            const x1 = (rect.left - centerX) * 2 / viewport.width, x2 = (rect.right - centerX) * 2 / viewport.width;
+            const y1 = (rect.top - centerY) * 2 / viewport.height, y2 = (rect.bottom - centerY) * 2 / viewport.height;
+            if (![x1, y1, x2, y2, (x1 + x2) / 2, (y1 + y2) / 2].every(Number.isFinite))
+              return { values: [state.axes === "y" ? null : 0, state.axes === "x" ? null : 0, 0], snapshot };
+            snapshot.x1 = x1;
+            snapshot.y1 = y1;
+            snapshot.x2 = x2;
+            snapshot.y2 = y2;
+            snapshot.x = (x1 + x2) / 2;
+            snapshot.y = (y1 + y2) / 2;
+            x = clamp2(snapshot.x, -2, 2);
+            y = clamp2(snapshot.y, -2, 2);
+            const width = Math.max(0, Math.min(rect.right, viewport.left + viewport.width) - Math.max(rect.left, viewport.left));
+            const height = Math.max(0, Math.min(rect.bottom, viewport.top + viewport.height) - Math.max(rect.top, viewport.top));
+            visible = clamp2(width / rect.width * (height / rect.height), 0, 1);
+            snapshot.visible = visible;
+            snapshot.measurable = true;
+            snapshot.state = width > 0 && height > 0 ? rect.left >= viewport.left && rect.top >= viewport.top && rect.right <= viewport.left + viewport.width && rect.bottom <= viewport.top + viewport.height ? "inside" : "partial" : "outside";
+          }
+          return { values: [state.axes === "y" ? null : x, state.axes === "x" ? null : y, visible], snapshot };
+        }
+        function geometryChanged(previous, snapshot) {
+          if (!previous) return snapshot.measurable;
+          if (snapshot.viewport !== previous.viewport || snapshot.measurable !== previous.measurable || snapshot.state !== previous.state) return true;
+          if (snapshot.measurable && ["x1", "y1", "x2", "y2"].some((key) => [-1, 1].some((edge) => Math.sign(snapshot[key] - edge) !== Math.sign(previous[key] - edge)))) return true;
+          return ["x1", "y1", "x2", "y2", "x", "y", "visible"].some((key) => Math.abs(snapshot[key] - previous[key]) > EVENT_EPSILON);
+        }
+        function clamp2(value, minimum, maximum) {
+          return Math.max(minimum, Math.min(maximum, value));
         }
       })(typeof globalThis !== "undefined" ? globalThis : window);
     }
@@ -4868,506 +4787,6 @@
           if (!metrics) return;
           const factor = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? metrics.page : 1;
           chainWheel(state, event, metrics, factor, !(owner == null ? void 0 : owner.scrollbar.parent));
-        }
-      })(typeof globalThis !== "undefined" ? globalThis : window);
-    }
-  });
-
-  // src/aellux.ext.scrollbox-snap.js
-  var aellux_ext_scrollbox_snap_exports = {};
-  var init_aellux_ext_scrollbox_snap = __esm({
-    "src/aellux.ext.scrollbox-snap.js"() {
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-      (function(root2) {
-        "use strict";
-        const AelluxJs2 = root2.AelluxJs;
-        const extensionName = "scrollbox-snap";
-        if (!AelluxJs2) throw new Error("[aellux.js] Load the boot script before the scrollbox-snap extension.");
-        const POINTER = "pointer", GESTURE = "gesture", TOUCH = "touch", HORIZONTAL = "x", VERTICAL = "y", FALSE = "false", INSTANT = "instant", SMOOTH = "smooth", START = "start", END = "end", CENTER = "center", SCROLL_EVENT = "$scroll", SCROLL_END_EVENT = "$scrollend", INTERACTION_EVENT = "$AelluxJsScrollboxInteraction", SNAP_GESTURE_EVENT = "$AelluxJsScrollboxSnapGesture", SCROLLBOX_WHEEL_EVENT = "$AelluxJsScrollboxWheel", POINTER_DOWN_EVENT = "$pointerdown", POINTER_UP_EVENT = "$pointerup", POINTER_CANCEL_EVENT = "$pointercancel", TOUCH_START_EVENT = "$touchstart", TOUCH_END_EVENT = "$touchend", TOUCH_CANCEL_EVENT = "$touchcancel";
-        const SNAP_SCROLL_IDLE_MS = 120;
-        const SNAP_TARGET_IDLE_MS = 500;
-        const SNAP_RELEASE_MS = 300;
-        const SNAP_SWIPE_SPEED_PX_MS = 0.5;
-        const SNAP_FLICK_WINDOW_MS = 100;
-        const SNAP_FLICK_FAST_TIME_MS = 50;
-        const SNAP_FLICK_MAX_DISTANCE_PX = 100;
-        const SNAP_FLICK_MIN_DISTANCE_PX = 1;
-        const scrollboxAttribute = AelluxJs2.attr("scrollbox");
-        const wheelAttribute = AelluxJs2.attr("scrollbox-wheel-horizontal");
-        const snapAttribute = AelluxJs2.attr("scrollbox-snap");
-        const itemAttribute = AelluxJs2.attr("snap-item");
-        const elasticAttribute = AelluxJs2.attr("scrollbox-elastic");
-        const readyClass = AelluxJs2.className("snap-ready");
-        const suspendedClass = AelluxJs2.className("snap-suspended");
-        const properties = ["--ae-snap-focus"];
-        const states = /* @__PURE__ */ new Map();
-        let nextLayoutId = 7e6;
-        AelluxJs2.extAttach(extensionName, { init, destroy, next, previous, goto });
-        function init() {
-          if (!AelluxJs2.registry.ext.scrollbox) AelluxJs2.ext("scrollbox");
-          return AelluxJs2.wait("scrollbox").then((scrollbox) => {
-            if (!scrollbox) throw new Error("[aellux.js] Scrollbox Snap requires the Scrollbox extension.");
-            AelluxJs2.registerCssProperty(...properties.map((name) => ({ name, syntax: "<number>", initialValue: "0" })));
-            scrollbox.registerSnapController({ next, previous, goto });
-            AelluxJs2.mountManager.add({
-              extensionName,
-              selector: `[${scrollboxAttribute}][${snapAttribute}]:not([${snapAttribute}="${FALSE}"])`,
-              priority: 1,
-              mount,
-              update,
-              unmount,
-              controllers: []
-            });
-          });
-        }
-        function destroy() {
-          var _a;
-          for (const element of states.keys()) unmount(element);
-          (_a = AelluxJs2.ext.scrollbox) == null ? void 0 : _a.unregisterSnapController({ next, previous, goto });
-          AelluxJs2.mountManager.remove({ extensionName });
-        }
-        function mount(element) {
-          if (states.has(element)) return;
-          const state = {
-            element,
-            root: null,
-            index: 0,
-            notifiedItem: null,
-            notifiedIndex: null,
-            target: null,
-            targetAxis: null,
-            timeout: null,
-            wheelTimeout: null,
-            edgeWheelTimeout: null,
-            frame: null,
-            activePointers: /* @__PURE__ */ new Set(),
-            activeTouches: /* @__PURE__ */ new Set(),
-            savedItems: /* @__PURE__ */ new Map(),
-            suspensions: /* @__PURE__ */ new Set(),
-            pointerScroll: null,
-            flick: null,
-            release: false,
-            observer: null,
-            resizeObserver: null,
-            disposed: false,
-            valuesLayoutId: nextLayoutId++
-          };
-          state.onScroll = () => {
-            updateValues(state);
-            scheduleSettle(state, state.target !== null && !targetReached(state));
-          };
-          state.onScrollEnd = (event) => {
-            if (event.target !== state.element || state.target !== null && !targetReached(state)) return;
-            finish(state);
-          };
-          state.onPointerDown = (event) => beginGesture(state, POINTER, event);
-          state.onPointerEnd = (event) => endGesture(state, POINTER, event);
-          state.onTouchStart = (event) => beginGesture(state, TOUCH, event);
-          state.onTouchEnd = (event) => endGesture(state, TOUCH, event);
-          state.onBlur = () => {
-            if (!hasActiveGesture(state)) return;
-            state.activePointers.clear();
-            state.activeTouches.clear();
-            state.pointerScroll = null;
-            state.flick = null;
-            endDesktopGesture(state);
-          };
-          state.onScrollboxWheel = (event) => {
-            var _a;
-            if (handleWheel(state, (_a = event.detail) == null ? void 0 : _a.event)) event.preventDefault();
-          };
-          state.onInteraction = (event) => setSuspension(state, event.detail);
-          state.onSnapGesture = (event) => handlePointerScroll(state, event);
-          states.set(element, state);
-          AelluxJs2.onEvent(element, SCROLL_EVENT, state.onScroll, { passive: true });
-          AelluxJs2.onEvent(element, SCROLL_END_EVENT, state.onScrollEnd, { passive: true });
-          AelluxJs2.onEvent(element, POINTER_DOWN_EVENT, state.onPointerDown, true);
-          AelluxJs2.onEvent(element, TOUCH_START_EVENT, state.onTouchStart, { passive: true, capture: true });
-          AelluxJs2.onEvent(element, INTERACTION_EVENT, state.onInteraction);
-          AelluxJs2.onEvent(element, SNAP_GESTURE_EVENT, state.onSnapGesture);
-          AelluxJs2.onEvent(element, SCROLLBOX_WHEEL_EVENT, state.onScrollboxWheel);
-          AelluxJs2.onEvent(root2, POINTER_UP_EVENT, state.onPointerEnd, true);
-          AelluxJs2.onEvent(root2, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
-          AelluxJs2.onEvent(root2, TOUCH_END_EVENT, state.onTouchEnd, true);
-          AelluxJs2.onEvent(root2, TOUCH_CANCEL_EVENT, state.onTouchEnd, true);
-          AelluxJs2.onEvent(root2, "$blur", state.onBlur);
-          observe(state);
-          configure(state);
-        }
-        function update(element) {
-          const state = states.get(element);
-          if (state) configure(state);
-        }
-        function unmount(element) {
-          var _a, _b;
-          const state = states.get(element);
-          if (!state) return;
-          state.disposed = true;
-          AelluxJs2.waitLayout.cancel(state.valuesLayoutId);
-          cancelRelease(state);
-          clearTimer(state, "timeout");
-          clearTimer(state, "wheelTimeout");
-          clearTimer(state, "edgeWheelTimeout");
-          (_a = state.observer) == null ? void 0 : _a.disconnect();
-          (_b = state.resizeObserver) == null ? void 0 : _b.disconnect();
-          AelluxJs2.offEvent(element, SCROLL_EVENT, state.onScroll);
-          AelluxJs2.offEvent(element, SCROLL_END_EVENT, state.onScrollEnd);
-          AelluxJs2.offEvent(element, POINTER_DOWN_EVENT, state.onPointerDown, true);
-          AelluxJs2.offEvent(element, TOUCH_START_EVENT, state.onTouchStart, true);
-          AelluxJs2.offEvent(element, INTERACTION_EVENT, state.onInteraction);
-          AelluxJs2.offEvent(element, SNAP_GESTURE_EVENT, state.onSnapGesture);
-          AelluxJs2.offEvent(element, SCROLLBOX_WHEEL_EVENT, state.onScrollboxWheel);
-          AelluxJs2.offEvent(root2, POINTER_UP_EVENT, state.onPointerEnd, true);
-          AelluxJs2.offEvent(root2, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
-          AelluxJs2.offEvent(root2, TOUCH_END_EVENT, state.onTouchEnd, true);
-          AelluxJs2.offEvent(root2, TOUCH_CANCEL_EVENT, state.onTouchEnd, true);
-          AelluxJs2.offEvent(root2, "$blur", state.onBlur);
-          restoreItems(state);
-          element.classList.remove(readyClass, suspendedClass);
-          states.delete(element);
-        }
-        function configure(state) {
-          const nextRoot = elasticRoot(state.element);
-          if (state.root !== nextRoot) {
-            restoreItems(state);
-            state.root = nextRoot;
-            state.index = 0;
-            state.notifiedItem = null;
-            state.notifiedIndex = null;
-          }
-          const items = itemsFor(state);
-          if (state.resizeObserver) {
-            state.resizeObserver.disconnect();
-            state.resizeObserver.observe(state.element);
-            for (const item of items) state.resizeObserver.observe(item);
-          }
-          if (!items.length) {
-            AelluxJs2.diagnostics.error(
-              AelluxJs2.diagnostics.ERROR_SCROLLBOX_SNAP_ITEMS,
-              {
-                extension: extensionName,
-                element: state.element,
-                attribute: itemAttribute,
-                reason: "No eligible snap items belong to this Scrollbox.",
-                suggestion: "Add data-ae-snap-item to content items inside this Scrollbox, outside nested Scrollboxes."
-              }
-            );
-            state.element.classList.remove(readyClass, suspendedClass);
-            return;
-          }
-          state.element.classList.add(readyClass);
-          updateValues(state);
-          if (state.notifiedItem === null) goto(state.element, 0, INSTANT);
-        }
-        function observe(state) {
-          state.observer = new root2.MutationObserver(() => configure(state));
-          state.observer.observe(state.element, {
-            childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: [snapAttribute, itemAttribute, elasticAttribute]
-          });
-          if (root2.ResizeObserver) {
-            state.resizeObserver = new root2.ResizeObserver(() => updateValues(state));
-            state.resizeObserver.observe(state.element);
-          }
-        }
-        function elasticRoot(element) {
-          return Array.from(element.children).find((child) => child.hasAttribute(elasticAttribute)) || element;
-        }
-        function itemsFor(state) {
-          if (!state.root) return [];
-          return Array.from(state.root.querySelectorAll(`[${itemAttribute}]`)).filter((item) => item.closest(`[${scrollboxAttribute}]`) === state.element);
-        }
-        function axisFor(state) {
-          return state.element.getAttribute(snapAttribute) === "vertical" ? VERTICAL : HORIZONTAL;
-        }
-        function alignment(item) {
-          const value = item.getAttribute(itemAttribute);
-          if (value === START || value === "left" || value === "top") return START;
-          if (value === END || value === "right" || value === "bottom") return END;
-          return CENTER;
-        }
-        function offset(state, item, axis = axisFor(state), free, box = state.element.getBoundingClientRect(), target = item.getBoundingClientRect()) {
-          const horizontal = axis === HORIZONTAL;
-          const start = horizontal ? box.left + state.element.clientLeft : box.top + state.element.clientTop;
-          const size = horizontal ? state.element.clientWidth : state.element.clientHeight;
-          const itemStart = horizontal ? target.left : target.top;
-          const itemSize = horizontal ? target.width : target.height;
-          if (free && itemSize > size)
-            return Math.max(itemStart - start, Math.min(itemStart + itemSize - start - size, 0));
-          if (alignment(item) === START) return itemStart - start;
-          if (alignment(item) === END) return itemStart + itemSize - (start + size);
-          return itemStart + itemSize / 2 - (start + size / 2);
-        }
-        function updateValues(state) {
-          if (state.disposed) return;
-          AelluxJs2.waitLayout.sequence(state.valuesLayoutId, { read: () => {
-            const axis = axisFor(state), element = state.element, root3 = state.root;
-            const rect = element.getBoundingClientRect();
-            const size = axis === HORIZONTAL ? element.clientWidth : element.clientHeight;
-            const values = size ? itemsFor(state).map((item) => ({
-              item,
-              value: Math.max(0, 1 - Math.abs(offset(state, item, axis, false, rect, item.getBoundingClientRect())) / size)
-            })) : [];
-            return { axis, root: root3, values };
-          }, update: (measured) => {
-            if (state.root !== measured.root || axisFor(state) !== measured.axis) return;
-            for (const { item, value } of measured.values) {
-              if (!state.root.contains(item) || !item.hasAttribute(itemAttribute) || item.closest(`[${scrollboxAttribute}]`) !== state.element) continue;
-              if (!state.savedItems.has(item))
-                state.savedItems.set(item, AelluxJs2.persist.element.save(item, [], properties));
-              if (item.style.getPropertyPriority(properties[0])) item.style.removeProperty(properties[0]);
-              item.style.setProperty(properties[0], value);
-            }
-          }, abort: () => state.disposed }).catch((cause) => {
-            AelluxJs2.diagnostics.error(
-              AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
-              { cause, extension: extensionName, element: state.element, method: "update" }
-            );
-          });
-        }
-        function restoreItems(state) {
-          for (const memory of state.savedItems.values()) memory.restore();
-          state.savedItems.clear();
-        }
-        function goto(element, index, behavior = SMOOTH, free) {
-          const state = states.get(element), items = state && itemsFor(state);
-          if (!state || state.activeTouches.size || !Number.isInteger(index) || index < 0 || index >= items.length) return false;
-          const axis = axisFor(state), metrics = metricsFor(element);
-          const position = axis === HORIZONTAL ? element.scrollLeft : element.scrollTop;
-          const destination = Math.max(0, Math.min(
-            metrics[axis],
-            position + offset(state, items[index], axis, free)
-          ));
-          state.index = index;
-          state.target = destination;
-          state.targetAxis = axis;
-          cancelRelease(state);
-          if (state.release && behavior === SMOOTH) animateRelease(state, position, destination, axis);
-          else scrollTo(state, destination, axis, behavior);
-          if (targetReached(state)) {
-            cancelRelease(state);
-            finish(state);
-          }
-          return true;
-        }
-        function scrollTo(state, position, axis, behavior) {
-          state.element.scrollTo(axis === HORIZONTAL ? { left: position, behavior } : { top: position, behavior });
-        }
-        function cancelRelease(state) {
-          if (state.frame !== null) root2.cancelAnimationFrame(state.frame);
-          state.frame = null;
-        }
-        function animateRelease(state, from, to, axis) {
-          const start = root2.performance.now();
-          const step = (time) => {
-            const progress = Math.max(0, Math.min(1, (time - start) / SNAP_RELEASE_MS));
-            scrollTo(state, from + (to - from) * (1 - Math.pow(1 - progress, 3)), axis, INSTANT);
-            if (progress < 1) state.frame = root2.requestAnimationFrame(step);
-            else {
-              cancelRelease(state);
-              finish(state);
-            }
-          };
-          state.frame = root2.requestAnimationFrame(step);
-        }
-        function next(element) {
-          const state = states.get(element);
-          return state ? goto(element, Math.min(itemsFor(state).length - 1, selectedIndex(state) + 1)) : false;
-        }
-        function previous(element) {
-          const state = states.get(element);
-          return state ? goto(element, Math.max(0, selectedIndex(state) - 1)) : false;
-        }
-        function selectedIndex(state, free) {
-          const items = itemsFor(state);
-          const axis = axisFor(state), maximum = metricsFor(state.element)[axis];
-          const position = axis === HORIZONTAL ? state.element.scrollLeft : state.element.scrollTop;
-          if (items.length > 1) {
-            if (position <= 1) return 0;
-            if (maximum > 0 && position >= maximum - 1) return items.length - 1;
-          }
-          let nearest = 0, distance = Infinity;
-          for (let index = 0; index < items.length; index++) {
-            const candidate = Math.abs(Math.max(0, Math.min(
-              maximum,
-              position + offset(state, items[index], axis, free)
-            )) - position);
-            if (candidate < distance) {
-              nearest = index;
-              distance = candidate;
-            }
-          }
-          return nearest;
-        }
-        function handleWheel(state, event) {
-          if (!event || event.ctrlKey || !event.cancelable || event.defaultPrevented || event.target.closest(`[${scrollboxAttribute}]`) !== state.element) return false;
-          const axis = axisFor(state), horizontal = Math.abs(event.deltaX) > Math.abs(event.deltaY);
-          if (axis === HORIZONTAL && !horizontal && state.element.getAttribute(wheelAttribute) === FALSE) return false;
-          const delta = axis === HORIZONTAL ? horizontal ? event.deltaX : event.deltaY : horizontal ? 0 : event.deltaY;
-          if (!delta) return false;
-          const items = itemsFor(state), index = state.target !== null ? state.index : selectedIndex(state);
-          if (!items.length) return false;
-          const nextIndex = index + Math.sign(delta);
-          if (nextIndex < 0 || nextIndex >= items.length) {
-            if (state.target !== null && !targetReached(state)) {
-              event.preventDefault();
-              return true;
-            }
-            const behavior = root2.getComputedStyle(state.element)[axis === HORIZONTAL ? "overscrollBehaviorX" : "overscrollBehaviorY"];
-            if (behavior === "contain" || behavior === "none") {
-              event.preventDefault();
-              return true;
-            }
-            setSuspension(state, { reason: "wheel-edge", active: true });
-            clearTimer(state, "edgeWheelTimeout");
-            state.edgeWheelTimeout = root2.setTimeout(() => {
-              state.edgeWheelTimeout = null;
-              setSuspension(state, { reason: "wheel-edge", active: false });
-            }, SNAP_SCROLL_IDLE_MS);
-            return false;
-          }
-          event.preventDefault();
-          if (state.wheelTimeout !== null) return true;
-          state.wheelTimeout = root2.setTimeout(() => {
-            state.wheelTimeout = null;
-          }, SNAP_SCROLL_IDLE_MS);
-          goto(state.element, nextIndex);
-          return true;
-        }
-        function setSuspension(state, detail) {
-          if (!detail || !detail.reason) return;
-          if (detail.active) state.suspensions.add(detail.reason);
-          else state.suspensions.delete(detail.reason);
-          state.element.classList.toggle(suspendedClass, state.suspensions.size > 0);
-          if (!detail.active) {
-            settlePointer(state);
-            if (!state.suspensions.size) scheduleSettle(state);
-          }
-        }
-        function handlePointerScroll(state, event) {
-          var _a;
-          const detail = event.detail;
-          if (!detail || detail.axis !== axisFor(state)) return;
-          const items = itemsFor(state);
-          if (!items.length) return;
-          if (detail.phase === "start" || detail.phase === "probe") {
-            state.pointerScroll = { axis: detail.axis, index: selectedIndex(state) };
-            if (detail.phase === "start") state.flick = null;
-            else event.preventDefault();
-            return;
-          }
-          if (detail.phase !== "end") return;
-          const start = ((_a = state.pointerScroll) == null ? void 0 : _a.axis) === detail.axis ? state.pointerScroll.index : selectedIndex(state);
-          state.pointerScroll = null;
-          const flick = isFlick(detail);
-          if (!detail.moved && !flick) return;
-          event.preventDefault();
-          if (!flick) return;
-          const distance = detail.axis === HORIZONTAL ? detail.startX - detail.lastX : detail.startY - detail.lastY;
-          const index = Math.max(0, Math.min(
-            items.length - 1,
-            start + Math.sign(distance)
-          ));
-          if (index !== start) state.flick = index;
-        }
-        function isFlick(detail) {
-          const distance = detail.axis === HORIZONTAL ? detail.startX - detail.lastX : detail.startY - detail.lastY;
-          const elapsed = Math.max(1, detail.endTime - detail.startTime);
-          return elapsed <= SNAP_FLICK_WINDOW_MS && Math.abs(distance) > SNAP_FLICK_MIN_DISTANCE_PX && Math.abs(distance) < SNAP_FLICK_MAX_DISTANCE_PX && (elapsed <= SNAP_FLICK_FAST_TIME_MS || Math.abs(distance) / elapsed >= SNAP_SWIPE_SPEED_PX_MS);
-        }
-        function beginGesture(state, kind, event) {
-          const active = kind === POINTER ? state.activePointers : state.activeTouches;
-          if (kind === POINTER) active.add(event.pointerId);
-          else for (const touch of event.changedTouches) active.add(touch.identifier);
-          state.target = null;
-          state.release = false;
-          cancelRelease(state);
-          state.pointerScroll = null;
-          state.flick = null;
-          clearTimer(state, "timeout");
-          if (kind === POINTER && event.pointerType !== TOUCH) {
-            const element = state.element, left = element.scrollLeft, top = element.scrollTop;
-            setSuspension(state, { reason: GESTURE, active: true });
-            element.scrollTo({
-              left: left > 0 ? left - 1 : 1,
-              top: top > 0 ? top - 1 : 1,
-              behavior: INSTANT
-            });
-            element.scrollTo({ left, top, behavior: INSTANT });
-          } else setSuspension(state, { reason: GESTURE, active: false });
-        }
-        function endGesture(state, kind, event) {
-          const active = kind === POINTER ? state.activePointers : state.activeTouches;
-          if (kind === POINTER) active.delete(event.pointerId);
-          else for (const touch of event.changedTouches) active.delete(touch.identifier);
-          if (!hasActiveGesture(state)) endDesktopGesture(state);
-        }
-        function hasActiveGesture(state) {
-          return state.activePointers.size || state.activeTouches.size;
-        }
-        function endDesktopGesture(state) {
-          if (!state.suspensions.has(GESTURE)) {
-            scheduleSettle(state);
-            return;
-          }
-          state.release = true;
-          root2.setTimeout(() => settlePointer(state), 0);
-        }
-        function settlePointer(state) {
-          if (state.disposed || !releaseReady(state) || state.target !== null || hasActiveGesture(state)) return;
-          const flick = state.flick;
-          state.flick = null;
-          goto(
-            state.element,
-            flick !== null ? flick : selectedIndex(state, true),
-            AelluxJs2.currentPreference("reduced-motion") === "reduced" ? INSTANT : SMOOTH,
-            flick === null
-          );
-        }
-        function releaseReady(state) {
-          return state.release && state.suspensions.size === 1;
-        }
-        function scheduleSettle(state, target) {
-          if (!target && (hasActiveGesture(state) || state.suspensions.size && !state.release)) return;
-          clearTimer(state, "timeout");
-          state.timeout = root2.setTimeout(() => finish(state), target ? SNAP_TARGET_IDLE_MS : SNAP_SCROLL_IDLE_MS);
-        }
-        function finish(state) {
-          if (state.disposed || state.frame !== null || hasActiveGesture(state)) return;
-          if (state.suspensions.size) {
-            if (!releaseReady(state) || !targetReached(state)) return;
-            state.release = false;
-            setSuspension(state, { reason: GESTURE, active: false });
-          }
-          clearTimer(state, "timeout");
-          cancelRelease(state);
-          state.target = null;
-          const items = itemsFor(state), index = selectedIndex(state), item = items[index];
-          if (!item || state.notifiedItem === item && state.notifiedIndex === index) return;
-          const previousIndex = state.notifiedIndex;
-          state.index = index;
-          state.notifiedItem = item;
-          state.notifiedIndex = index;
-          AelluxJs2.dispatchFrom(state.element, "ScrollboxSnapChange", {
-            detail: { item, index, previousIndex, axis: axisFor(state) }
-          });
-        }
-        function targetReached(state) {
-          if (state.target === null) return false;
-          const position = state.targetAxis === HORIZONTAL ? state.element.scrollLeft : state.element.scrollTop;
-          return Math.abs(position - state.target) <= 1;
-        }
-        function clearTimer(state, name) {
-          if (state[name] !== null) root2.clearTimeout(state[name]);
-          state[name] = null;
-        }
-        function metricsFor(element) {
-          return {
-            x: Math.max(0, element.scrollWidth - element.clientWidth),
-            y: Math.max(0, element.scrollHeight - element.clientHeight)
-          };
         }
       })(typeof globalThis !== "undefined" ? globalThis : window);
     }
@@ -10208,13 +9627,13 @@
     Object.freeze({ name: "dialog", optional: true, style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "progress", optional: true, style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "pwa", optional: true, style: false, dependencies: Object.freeze([]) }),
-    Object.freeze({ name: "viewport", optional: true, style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "viewport", style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "point", style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "anchor", style: true, dependencies: Object.freeze([]) }),
-    Object.freeze({ name: "overflow-marquee", style: true, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "overflow-marquee", optional: true, style: true, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "ajax-href", optional: true, style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "scrollbox", style: true, dependencies: Object.freeze([]) }),
-    Object.freeze({ name: "scrollbox-snap", style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "scrollbox-snap", optional: true, style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "adaptive", style: true, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "present", style: true, dependencies: Object.freeze([]) })
   ]);
@@ -10321,7 +9740,7 @@
     function registerCoreExtensions() {
       const api = root2.AelluxJs;
       const attr = (name) => `[${api.attr(name)}]`;
-      for (const { name } of officialExtensionDefinitions) {
+      for (const { name, optional, style } of officialExtensionDefinitions) {
         const key = toCamelCase2(name);
         if (key in api.registry.ext) continue;
         let loadWhen = name === "dialog" ? "dialog" : attr(name);
@@ -10331,7 +9750,7 @@
           loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
         }
         if (name === "state-navigation" || name === "preference") loadWhen = null;
-        api.ext(name, { loadWhen, load: true });
+        api.ext(name, { loadWhen, load: true, loadStyle: !!(optional && style) });
         api.registry.ext[key].automatic = true;
       }
     }
@@ -10513,7 +9932,7 @@
         ));
       }
       const defaultStyle = data.loadStyle === true || data.loadStyle === "true";
-      const fullStyle = AelluxJs.bundledExtensions && (bundledLoader || data.official) && document.querySelector(`link[${AelluxJs.attr("full-style")}]`);
+      const fullStyle = bundledLoader && document.querySelector(`link[${AelluxJs.attr("full-style")}]`);
       if (data.loadStyle && data.loadStyle !== "false" && !(defaultStyle && fullStyle)) {
         loadPromises.push(new Promise(
           (resolve) => {
@@ -10821,9 +10240,8 @@
     "focus": () => Promise.resolve().then(() => (init_aellux_ext_focus(), aellux_ext_focus_exports)),
     "point": () => Promise.resolve().then(() => (init_aellux_ext_point(), aellux_ext_point_exports)),
     "anchor": () => Promise.resolve().then(() => (init_aellux_ext_anchor(), aellux_ext_anchor_exports)),
-    "overflowMarquee": () => Promise.resolve().then(() => (init_aellux_ext_overflow_marquee(), aellux_ext_overflow_marquee_exports)),
+    "viewport": () => Promise.resolve().then(() => (init_aellux_ext_viewport(), aellux_ext_viewport_exports)),
     "scrollbox": () => Promise.resolve().then(() => (init_aellux_ext_scrollbox(), aellux_ext_scrollbox_exports)),
-    "scrollboxSnap": () => Promise.resolve().then(() => (init_aellux_ext_scrollbox_snap(), aellux_ext_scrollbox_snap_exports)),
     "adaptive": () => Promise.resolve().then(() => (init_aellux_ext_adaptive(), aellux_ext_adaptive_exports)),
     "present": () => Promise.resolve().then(() => (init_aellux_ext_present(), aellux_ext_present_exports))
   });

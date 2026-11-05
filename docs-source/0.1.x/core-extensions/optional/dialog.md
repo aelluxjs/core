@@ -2,6 +2,8 @@
 
 **Distribution:** Optional Extension. **Stability:** Not stable.
 
+Dialog and Progress remain Optional Extensions because their main additional value is Legacy compatibility. Modern browsers already provide native dialog, progress and meter controls; the separate Legacy artifacts supply the missing behavior and required fallback styles without adding that compatibility code to Full.
+
 Dialog mounts native `<dialog>` elements without requiring `data-ae-dialog`. It exposes the standard element API through the existing Aellux controllers. It adds no animations or custom modal state.
 
 ## Loading and mounting

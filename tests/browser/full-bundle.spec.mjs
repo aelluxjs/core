@@ -45,6 +45,42 @@ for (const { boot, forceLegacy } of [
       .update(await readFile(new URL(`../../dist/${cssFilename}`, import.meta.url))).digest("base64"));
     await expect(page.locator("link[data-ae-ext-style],style[data-ae-weak-style]")).toHaveCount(0);
   });
+
+  test(`full ${boot} bundles Viewport and loads Marquee separately with forceLegacy=${forceLegacy}`, async ({ page }) => {
+    const requests = [];
+    page.on("request", request => {
+      if (/aellux\.ext\./.test(request.url())) requests.push(new URL(request.url()).pathname.split("/").pop());
+    });
+    await page.goto("/tests/index.htm");
+    await page.addScriptTag({ url: `/dist/${boot}` });
+    await page.evaluate(forceLegacy => AelluxJs.init({ mode: "full", forceLegacy }), forceLegacy);
+    await expect.poll(() => page.evaluate(() => AelluxJs.ext.preference?.initialized)).toBe(true);
+    expect(requests).toEqual([]);
+    await page.evaluate(async () => {
+      document.body.innerHTML = '<div id="observed" data-ae-viewport style="width:100px;height:50px"></div>';
+      await AelluxJs.mount(document.body);
+    });
+    await expect.poll(() => page.locator("#observed").evaluate(element =>
+      element.style.getPropertyValue("--ae-viewport-visible"))).toBe("1");
+    expect(requests).toEqual([]);
+    await page.evaluate(async () => {
+      document.body.insertAdjacentHTML("beforeend", '<div id="label" data-ae-overflow-marquee style="width:100px">A long overflowing marquee label</div>');
+      await AelluxJs.mount(document.getElementById("label"));
+    });
+    const min = boot.includes(".min.") ? ".min" : "";
+    expect(requests.sort()).toEqual([
+      `aellux.ext.overflow-marquee${min}.css`,
+      `aellux.ext.overflow-marquee${forceLegacy ? ".legacy" : ""}${min}.js`
+    ].sort());
+    await expect(page.locator("#label")).toHaveCSS("white-space", "nowrap");
+    await expect(page.locator("#label [data-ae-overflow-marquee-content]")).toHaveCount(1);
+    const style = page.locator('link[data-ae-ext-style="overflow-marquee"]');
+    expect(await style.getAttribute("integrity")).toBe("sha384-" + createHash("sha384")
+      .update(await readFile(new URL(`../../dist/aellux.ext.overflow-marquee${min}.css`, import.meta.url))).digest("base64"));
+    await page.evaluate(() => AelluxJs.destroyExtensions("overflow-marquee"));
+    await expect(style).toHaveCount(0);
+    await expect(page.locator("link[data-ae-full-style]")).toHaveCount(1);
+  });
 }
 
 test("Full waits for its shared CSS and mounts lazy extensions without separate styles", async ({ page }) => {
@@ -64,7 +100,6 @@ test("Full waits for its shared CSS and mounts lazy extensions without separate 
     document.body.innerHTML = `<section style="position:relative;width:300px;height:200px">
       <div id="anchor" data-ae-anchor="top-left:top-left">Anchor</div>
       <div id="box" data-ae-scrollbox style="width:100px;height:50px"><div style="height:300px"></div></div>
-      <div id="label" data-ae-overflow-marquee style="width:100px">A long overflowing marquee label</div>
       <div data-ae-adaptive></div><div data-ae-present="opacity"></div><div data-ae-feedback></div>
     </section>`;
     window.readyCount = 0;
@@ -79,10 +114,9 @@ test("Full waits for its shared CSS and mounts lazy extensions without separate 
   await expect.poll(() => page.evaluate(() => window.readyCount)).toBe(1);
   await expect(page.locator("#box")).toHaveCSS("overflow", "auto");
   await expect(page.locator("#anchor")).toHaveCSS("position", "absolute");
-  await expect(page.locator("#label")).toHaveCSS("white-space", "nowrap");
   await expect(page.locator("link[data-ae-ext-style],style[data-ae-weak-style],style[data-ae-anchor-style],style[data-ae-scrollbox-style],style[data-ae-overflow-marquee-style]")).toHaveCount(0);
   expect(requests).toEqual(["/dist/aellux.full.css"]);
-  await page.evaluate(() => AelluxJs.destroyExtensions(["anchor", "scrollbox", "overflow-marquee"]));
+  await page.evaluate(() => AelluxJs.destroyExtensions(["anchor", "scrollbox"]));
   await expect(page.locator("link[data-ae-full-style]")).toHaveCount(1);
   await page.evaluate(async () => {
     AelluxJs.ext("scrollbox", { loadStyle: true });

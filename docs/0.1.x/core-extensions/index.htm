@@ -445,13 +445,6 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/overflow-marquee.htm" data-ae-overflow-marquee="190px">
-                                              Overflow Marquee                                            </a>
-                                          </div>
-                                                                                    <div
-                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                            style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/feedback.htm" data-ae-overflow-marquee="190px">
                                               Feedback                                            </a>
                                           </div>
@@ -494,15 +487,15 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/scrollbox-snap.htm" data-ae-overflow-marquee="190px">
-                                              Scrollbox Snap                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
+                                              State Navigation                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
-                                              State Navigation                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/viewport.htm" data-ae-overflow-marquee="190px">
+                                              Viewport                                            </a>
                                           </div>
                                                                                 </div>
                                   </div>
@@ -540,6 +533,13 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm" data-ae-overflow-marquee="190px">
+                                              Overflow Marquee                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/optional/progress.htm" data-ae-overflow-marquee="190px">
                                               Progress                                            </a>
                                           </div>
@@ -554,8 +554,8 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/optional/viewport.htm" data-ae-overflow-marquee="190px">
-                                              Viewport                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/optional/scrollbox-snap.htm" data-ae-overflow-marquee="190px">
+                                              Scrollbox Snap                                            </a>
                                           </div>
                                                                                 </div>
                                   </div>
@@ -673,13 +673,15 @@
             ajax-load="doc-content">
             <h1>Core Extensions</h1>
 <p>Core Extensions are the sixteen official Extensions distributed with aellux.js. Each owns a focused behavior and follows the shared registration, mounting and lifecycle contract.</p>
-<p>This index groups Extensions by how their implementation is delivered in Full. Each page also declares its stability.</p>
+<p>The Full bundle automatically includes all Core primitives: reusable building blocks for components and new behaviors, covering sizing, positioning, feedback, focus, pointer state, preferences, presentation, scrolling, history and viewport geometry. It does not bundle every Extension available in Core. Optional navigation and environment Extensions, such as Ajax Href and PWA, remain separate and load on demand. Preference is bundled and initializes automatically in Full.</p>
+<p>Components and specialized behaviors load separately. Overflow Marquee and Scrollbox Snap remain registered as separate scripts temporarily, pending migration to external extensions. Each page also declares its stability.</p>
 <h2>Extension index</h2>
 <ul>
 <li><a href="#bundled-extensions">Bundled Extensions</a></li>
 <li><a href="#optional-extensions">Optional Extensions</a></li>
 </ul>
 <h2>Distribution</h2>
+<p>Dialog and Progress remain Optional Extensions because their main additional value is Legacy compatibility. Modern browsers already provide native dialog, progress and meter controls; the separate Legacy artifacts supply the missing behavior and required fallback styles without adding that compatibility code to Full.</p>
 <table>
 <thead>
 <tr>
@@ -722,10 +724,10 @@ $ae.init({ mode: &quot;basic&quot; });
 <td>Public API and behavior may change during stabilization.</td>
 </tr>
 </tbody></table>
-<p>Distribution and stability are independent. Focus and Point are included in Full and remain <strong>Not stable</strong>. Ajax Href, Dialog, Progress, PWA and Viewport are also <strong>Not stable</strong> and load separately. The other nine official Extensions are <strong>Stable</strong>.</p>
+<p>Distribution and stability are independent. Focus, Point and Viewport are included in Full and remain <strong>Not stable</strong>. Ajax Href, Dialog, Progress and PWA are also <strong>Not stable</strong> and load separately. Overflow Marquee and Scrollbox Snap remain <strong>Stable</strong> while delivered separately. Nine official Extensions are <strong>Stable</strong>.</p>
 <p>Stability appears on each Extension page and in the index below. Navigation groups follow distribution. Documented limits and compatibility requirements apply to both statuses. Each Extension&#39;s Known Limits &amp; Risks section describes its boundaries; see also the <a href="../runtime/known-limits-and-risks.htm">shared Core limits</a>.</p>
 <p>The <a href="../runtime/compatibility-commitment.htm">Compatibility Commitment</a> protects Stable public contracts from <code>0.1.0</code> throughout <code>0.1.x</code>. Not stable Extensions remain available but may change incompatibly with documented migration guidance. This policy does not change the classifications below or retroactively stabilize earlier betas.</p>
-<h2 id="bundled-extensions">Bundled Extensions</h2><p>These eleven Extensions are included in the Full JavaScript bundle.</p>
+<h2 id="bundled-extensions">Bundled Extensions</h2><p>These ten Extensions are included in the Full JavaScript bundle.</p>
 <table>
 <thead>
 <tr>
@@ -739,10 +741,6 @@ $ae.init({ mode: &quot;basic&quot; });
 </tr>
 <tr>
 <td><a href="anchor.htm">Anchor</a></td>
-<td>Stable</td>
-</tr>
-<tr>
-<td><a href="overflow-marquee.htm">Overflow Marquee</a></td>
 <td>Stable</td>
 </tr>
 <tr>
@@ -770,15 +768,15 @@ $ae.init({ mode: &quot;basic&quot; });
 <td>Stable</td>
 </tr>
 <tr>
-<td><a href="scrollbox-snap.htm">Scrollbox Snap</a></td>
-<td>Stable</td>
-</tr>
-<tr>
 <td><a href="state-navigation.htm">State Navigation</a></td>
 <td>Stable</td>
 </tr>
+<tr>
+<td><a href="viewport.htm">Viewport</a></td>
+<td>Not stable</td>
+</tr>
 </tbody></table>
-<h2 id="optional-extensions">Optional Extensions</h2><p>These five Extensions load separate signed scripts. Full registers them automatically; Basic requires an explicit declaration.</p>
+<h2 id="optional-extensions">Optional Extensions</h2><p>These six Extensions load separate signed scripts. Full registers them automatically; Basic requires an explicit declaration.</p>
 <table>
 <thead>
 <tr>
@@ -795,6 +793,10 @@ $ae.init({ mode: &quot;basic&quot; });
 <td>Not stable</td>
 </tr>
 <tr>
+<td><a href="optional/overflow-marquee.htm">Overflow Marquee</a></td>
+<td>Stable</td>
+</tr>
+<tr>
 <td><a href="optional/progress.htm">Progress</a></td>
 <td>Not stable</td>
 </tr>
@@ -803,8 +805,8 @@ $ae.init({ mode: &quot;basic&quot; });
 <td>Not stable</td>
 </tr>
 <tr>
-<td><a href="optional/viewport.htm">Viewport</a></td>
-<td>Not stable</td>
+<td><a href="optional/scrollbox-snap.htm">Scrollbox Snap</a></td>
+<td>Stable</td>
 </tr>
 </tbody></table>
           </main>

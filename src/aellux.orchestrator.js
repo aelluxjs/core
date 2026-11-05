@@ -132,7 +132,7 @@ import { officialExtensionDefinitions } from "./official-extension-definitions.j
   function registerCoreExtensions() {
     const api = root.AelluxJs;
     const attr = name => `[${api.attr(name)}]`;
-    for (const { name } of officialExtensionDefinitions) {
+    for (const { name, optional, style } of officialExtensionDefinitions) {
       const key = toCamelCase(name);
       if (key in api.registry.ext) continue;
       let loadWhen = name === "dialog" ? "dialog" : attr(name);
@@ -143,7 +143,7 @@ import { officialExtensionDefinitions } from "./official-extension-definitions.j
       }
       // Full initializes its foundational services without a DOM selector.
       if (name === "state-navigation" || name === "preference") loadWhen = null;
-      api.ext(name, { loadWhen, load: true });
+      api.ext(name, { loadWhen, load: true, loadStyle: !!(optional && style) });
       api.registry.ext[key].automatic = true;
     }
   }
@@ -360,7 +360,7 @@ import { officialExtensionDefinitions } from "./official-extension-definitions.j
     }
 
     const defaultStyle = data.loadStyle === true || data.loadStyle === "true";
-    const fullStyle = AelluxJs.bundledExtensions && (bundledLoader || data.official) &&
+    const fullStyle = bundledLoader &&
       document.querySelector(`link[${AelluxJs.attr("full-style")}]`);
     if (data.loadStyle && data.loadStyle !== "false" && !(defaultStyle && fullStyle)) {
       loadPromises.push(new Promise(

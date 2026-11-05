@@ -2,6 +2,8 @@
 
 **Distribution:** Optional Extension. **Stability:** Not stable.
 
+Dialog and Progress remain Optional Extensions because their main additional value is Legacy compatibility. Modern browsers already provide native dialog, progress and meter controls; the separate Legacy artifacts supply the missing behavior and required fallback styles without adding that compatibility code to Full.
+
 Progress mounts `progress, meter` without a `data-ae-progress` marker. `<progress>` describes task completion; omit `value` for indeterminate work. `<meter>` describes a scalar measurement in a known range, such as storage usage. It is not a task timer.
 
 ## Loading and native controls

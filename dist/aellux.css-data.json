@@ -293,7 +293,7 @@
       "references": [
         {
           "name": "AelluxJS overflow-marquee",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
         }
       ]
     },
@@ -304,7 +304,7 @@
       "references": [
         {
           "name": "AelluxJS overflow-marquee",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
         }
       ],
       "values": [
@@ -326,7 +326,7 @@
       "references": [
         {
           "name": "AelluxJS overflow-marquee",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
         }
       ]
     },
@@ -637,7 +637,7 @@
       "references": [
         {
           "name": "AelluxJS scrollbox-snap",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox-snap.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/scrollbox-snap.htm"
         }
       ]
     },
@@ -659,7 +659,7 @@
       "references": [
         {
           "name": "AelluxJS viewport",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
         }
       ]
     },
@@ -670,7 +670,7 @@
       "references": [
         {
           "name": "AelluxJS viewport",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
         }
       ]
     },
@@ -681,7 +681,7 @@
       "references": [
         {
           "name": "AelluxJS viewport",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
         }
       ]
     },

@@ -22,13 +22,13 @@ export const bundleBudget = Object.freeze([
   { file: "aellux.ext.viewport.legacy.min.js", maxRawBytes: 16.75 * 1024, maxGzipBytes: 6.5 * 1024 },
   { file: "aellux.esm.min.js", maxRawBytes: 26.75 * 1024, maxGzipBytes: 9.25 * 1024 },
   // Development source inspection and CSS resource conflict diagnostics.
-  // Also covers CSS Motion subtree capture; fade costs: core-extensions/overflow-marquee.md.
+  // Also covers CSS Motion subtree capture; fade costs: core-extensions/optional/overflow-marquee.md.
   // Measured deltas and the superseded limits: runtime/diagnostics.md.
   // Two-axis fade/scrollbar composition diagnostic; costs: core-extensions/scrollbox.md.
   { file: "aellux.orchestrator.min.js", maxRawBytes: 65.25 * 1024, maxGzipBytes: 21.5 * 1024 },
   // Dialog-specific compatibility now ships separately; costs: runtime/performance.md.
   { file: "aellux.orchestrator.legacy.min.js", maxRawBytes: 331 * 1024, maxGzipBytes: 105 * 1024 },
-  // Full uses one external stylesheet shared by all Core Extensions.
+  // Full uses one external stylesheet shared by Bundled Extensions.
   // Includes Point tap recognition and Present click-priority routing;
   // measured deltas: core-extensions/point.md and core-extensions/present.md.
   // Bundled Extensions ship inside Full; Optional Extensions stay external.
@@ -58,7 +58,7 @@ export const bundleBudget = Object.freeze([
   { file: "aellux.ext.anchor.min.css", maxRawBytes: 2 * 1024, maxGzipBytes: 1024 },
   { file: "aellux.ext.anchor.legacy.min.js", maxRawBytes: 23.5 * 1024, maxGzipBytes: 8.25 * 1024 },
   // Dedicated lazy Extension, including dormant pixel-limit lifecycle;
-  // measured costs and previous limits: core-extensions/overflow-marquee.md.
+  // measured costs and previous limits: core-extensions/optional/overflow-marquee.md.
   { file: "aellux.ext.overflow-marquee.min.js", maxRawBytes: 13.5 * 1024, maxGzipBytes: 5 * 1024 },
   { file: "aellux.ext.overflow-marquee.min.css", maxRawBytes: 2.75 * 1024, maxGzipBytes: 1024 },
   { file: "aellux.ext.overflow-marquee.legacy.min.js", maxRawBytes: 25.5 * 1024, maxGzipBytes: 8 * 1024 },

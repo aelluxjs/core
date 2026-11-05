@@ -13,7 +13,7 @@ Core sources live in `src/`, build tooling in `scripts/`, browser validation pag
 
 ## Full Mode
 
-Full mode makes the supported Core Extensions available through the boot script and the Full runtime:
+Full automatically bundles all Core primitives, the reusable building blocks for components and new behaviors. It does not embed every Extension available in Core: optional navigation and environment Extensions, such as Ajax Href and PWA, load separately on demand. Full registers them automatically through the boot script and runtime:
 
 ```html
 <script src="./dist/aellux.js"></script>
@@ -22,11 +22,11 @@ Full mode makes the supported Core Extensions available through the boot script 
 </script>
 ```
 
-The Full runtime is loaded by the aellux.js boot script. Its **Bundled Extensions** are Adaptive, Anchor, Overflow Marquee, Feedback, Focus, Point, Preference, Present, Scrollbox, Scrollbox Snap and State Navigation. Preference and State Navigation initialize at startup; the remaining implementations initialize when matching markup is mounted, without separate script requests.
+The Full runtime is loaded by the aellux.js boot script. Its **Bundled Extensions** are Adaptive, Anchor, Feedback, Focus, Point, Preference, Present, Scrollbox, State Navigation and Viewport. Preference and State Navigation initialize at startup; the remaining implementations initialize when matching markup is mounted, without separate script requests.
 
-**Optional Extensions** (Ajax Href, Dialog, Progress, PWA and Viewport) are registered but excluded from the Full JavaScript bundle. Mounting `a[data-ae-ajax-href]`, `<dialog>`, `<progress>`/`<meter>`, `[data-ae-pwa]` or `[data-ae-viewport]` loads the corresponding signed script using the official metadata embedded in the boot script. Modern/Legacy and normal/minified variants follow boot selection. The Dialog and Progress Legacy Extensions contain their own fallbacks and required styles; native controls are preserved when supported. PWA keeps its reusable Service Worker as a separate application-managed artifact and adds no shared styles. Bundled and Optional describe delivery in Full, rather than maturity or stability.
+**Optional Extensions** (Ajax Href, Dialog, Overflow Marquee, Progress, PWA and Scrollbox Snap) are registered but excluded from the Full JavaScript bundle. Mounting `a[data-ae-ajax-href]`, `<dialog>`, `<progress>`/`<meter>`, `[data-ae-pwa]`, `[data-ae-overflow-marquee]` or `[data-ae-scrollbox-snap]` loads the corresponding signed script using the official metadata embedded in the boot script. Modern/Legacy and normal/minified variants follow boot selection. The Dialog and Progress Legacy Extensions contain their own fallbacks and required styles; native controls are preserved when supported. PWA keeps its reusable Service Worker as a separate application-managed artifact and adds no shared styles. Bundled and Optional describe delivery in Full, rather than maturity or stability.
 
-Full automatically loads `aellux.full.css` (or `.min.css` with the minified boot) beside the runtime, using the configured base path. Deploy this stylesheet with the JavaScript artifacts. It includes the global defaults and all Core Extension CSS.
+Full automatically loads `aellux.full.css` (or `.min.css` with the minified boot) beside the runtime, using the configured base path. Deploy this stylesheet with the JavaScript artifacts. It includes global defaults and Bundled Extension CSS. Overflow Marquee loads its separate signed stylesheet on demand.
 
 ## Basic Mode
 

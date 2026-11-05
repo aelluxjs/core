@@ -2,7 +2,9 @@
 
 Core Extensions are the sixteen official Extensions distributed with aellux.js. Each owns a focused behavior and follows the shared registration, mounting and lifecycle contract.
 
-This index groups Extensions by how their implementation is delivered in Full. Each page also declares its stability.
+The Full bundle automatically includes all Core primitives: reusable building blocks for components and new behaviors, covering sizing, positioning, feedback, focus, pointer state, preferences, presentation, scrolling, history and viewport geometry. It does not bundle every Extension available in Core. Optional navigation and environment Extensions, such as Ajax Href and PWA, remain separate and load on demand. Preference is bundled and initializes automatically in Full.
+
+Components and specialized behaviors load separately. Overflow Marquee and Scrollbox Snap remain registered as separate scripts temporarily, pending migration to external extensions. Each page also declares its stability.
 
 ## Extension index
 
@@ -10,6 +12,8 @@ This index groups Extensions by how their implementation is delivered in Full. E
 - [Optional Extensions](#optional-extensions)
 
 ## Distribution
+
+Dialog and Progress remain Optional Extensions because their main additional value is Legacy compatibility. Modern browsers already provide native dialog, progress and meter controls; the separate Legacy artifacts supply the missing behavior and required fallback styles without adding that compatibility code to Full.
 
 | Category | Full mode | Basic mode |
 | --- | --- | --- |
@@ -34,7 +38,7 @@ State Navigation has no activation selector; register it explicitly before reque
 | Stable | Stabilized public API and behavior. |
 | Not stable (unstable) | Public API and behavior may change during stabilization. |
 
-Distribution and stability are independent. Focus and Point are included in Full and remain **Not stable**. Ajax Href, Dialog, Progress, PWA and Viewport are also **Not stable** and load separately. The other nine official Extensions are **Stable**.
+Distribution and stability are independent. Focus, Point and Viewport are included in Full and remain **Not stable**. Ajax Href, Dialog, Progress and PWA are also **Not stable** and load separately. Overflow Marquee and Scrollbox Snap remain **Stable** while delivered separately. Nine official Extensions are **Stable**.
 
 Stability appears on each Extension page and in the index below. Navigation groups follow distribution. Documented limits and compatibility requirements apply to both statuses. Each Extension's Known Limits & Risks section describes its boundaries; see also the [shared Core limits](../runtime/known-limits-and-risks.md).
 
@@ -42,30 +46,30 @@ The [Compatibility Commitment](../runtime/compatibility-commitment.md) protects 
 
 <h2 id="bundled-extensions">Bundled Extensions</h2>
 
-These eleven Extensions are included in the Full JavaScript bundle.
+These ten Extensions are included in the Full JavaScript bundle.
 
 | Extension | Stability |
 | --- | --- |
 | [Adaptive](adaptive.md) | Stable |
 | [Anchor](anchor.md) | Stable |
-| [Overflow Marquee](overflow-marquee.md) | Stable |
 | [Feedback](feedback.md) | Stable |
 | [Focus](focus.md) | Not stable |
 | [Point](point.md) | Not stable |
 | [Preference](preference.md) | Stable |
 | [Present](present.md) | Stable |
 | [Scrollbox](scrollbox.md) | Stable |
-| [Scrollbox Snap](scrollbox-snap.md) | Stable |
 | [State Navigation](state-navigation.md) | Stable |
+| [Viewport](viewport.md) | Not stable |
 
 <h2 id="optional-extensions">Optional Extensions</h2>
 
-These five Extensions load separate signed scripts. Full registers them automatically; Basic requires an explicit declaration.
+These six Extensions load separate signed scripts. Full registers them automatically; Basic requires an explicit declaration.
 
 | Extension | Stability |
 | --- | --- |
 | [Ajax Href](optional/ajax-href.md) | Not stable |
 | [Dialog](optional/dialog.md) | Not stable |
+| [Overflow Marquee](optional/overflow-marquee.md) | Stable |
 | [Progress](optional/progress.md) | Not stable |
 | [PWA](optional/pwa.md) | Not stable |
-| [Viewport](optional/viewport.md) | Not stable |
+| [Scrollbox Snap](optional/scrollbox-snap.md) | Stable |

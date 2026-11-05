@@ -14,11 +14,11 @@ In Basic mode, request each Extension stylesheet with `{ loadStyle: true }`, or 
 
 ## Full stylesheet
 
-The build generates `aellux.full.css` and `aellux.full.min.css` from the global weak CSS and every Extension CSS generator. `init({ mode: "full" })` loads the matching file through one `<link data-ae-full-style>`, using the configured base path and SHA-384 integrity. Modern and Legacy runtimes share the same CSS; a minified boot selects the minified CSS.
+The build generates `aellux.full.css` and `aellux.full.min.css` from the global weak CSS and the Bundled Extension CSS generators. `init({ mode: "full" })` loads the matching file through one `<link data-ae-full-style>`, using the configured base path and SHA-384 integrity. Modern and Legacy runtimes share the same CSS; a minified boot selects the minified CSS.
 
-The boot waits for this stylesheet before starting the Full runtime and mounting Extensions. Full does not insert the global weak inline style, request individual Core stylesheets or inject Extension style blocks. Extensions remain lazy; the shared CSS is available before any of them initialize. Explicit custom stylesheet URLs still load independently. Destroying an Extension retains the shared Full stylesheet. If Full CSS fails to load, diagnostic 2004 reports it and JavaScript startup continues.
+The boot waits for this stylesheet before starting the Full runtime and mounting Extensions. Full does not insert the global weak inline style or inject Extension style blocks. Bundled Extensions reuse the shared stylesheet; Optional Extensions with CSS, currently Overflow Marquee, load their individual signed stylesheets on demand. Extensions remain lazy; the shared CSS is available before any of them initialize. Explicit custom stylesheet URLs still load independently. Destroying an Extension retains the shared Full stylesheet. If Full CSS fails to load, diagnostic 2004 reports it and JavaScript startup continues.
 
-The combined CSS has a 121/12 KiB raw/gzip budget. Full JavaScript retains its 131/42.5 KiB Modern and 437/138 KiB Legacy limits; Scrollbox Legacy retains 44/14 KiB because CSS is external.
+The current raw/gzip limits are maintained in `scripts/bundle-budget.config.mjs`. See [Performance and Bundle Budget](../runtime/performance.md#primitives-only-full-bundle) for measured delivery costs of the primitives-only Full bundle.
 
 ## JavaScript and CSS
 

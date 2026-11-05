@@ -2445,13 +2445,13 @@
     Object.freeze({ name: "dialog", optional: true, style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "progress", optional: true, style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "pwa", optional: true, style: false, dependencies: Object.freeze([]) }),
-    Object.freeze({ name: "viewport", optional: true, style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "viewport", style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "point", style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "anchor", style: true, dependencies: Object.freeze([]) }),
-    Object.freeze({ name: "overflow-marquee", style: true, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "overflow-marquee", optional: true, style: true, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "ajax-href", optional: true, style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "scrollbox", style: true, dependencies: Object.freeze([]) }),
-    Object.freeze({ name: "scrollbox-snap", style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "scrollbox-snap", optional: true, style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "adaptive", style: true, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "present", style: true, dependencies: Object.freeze([]) })
   ]);
@@ -2558,7 +2558,7 @@
     function registerCoreExtensions() {
       const api = root.AelluxJs;
       const attr = (name) => `[${api.attr(name)}]`;
-      for (const { name } of officialExtensionDefinitions) {
+      for (const { name, optional, style } of officialExtensionDefinitions) {
         const key = toCamelCase2(name);
         if (key in api.registry.ext) continue;
         let loadWhen = name === "dialog" ? "dialog" : attr(name);
@@ -2568,7 +2568,7 @@
           loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
         }
         if (name === "state-navigation" || name === "preference") loadWhen = null;
-        api.ext(name, { loadWhen, load: true });
+        api.ext(name, { loadWhen, load: true, loadStyle: !!(optional && style) });
         api.registry.ext[key].automatic = true;
       }
     }
@@ -2750,7 +2750,7 @@
         ));
       }
       const defaultStyle = data.loadStyle === true || data.loadStyle === "true";
-      const fullStyle = AelluxJs.bundledExtensions && (bundledLoader || data.official) && document.querySelector(`link[${AelluxJs.attr("full-style")}]`);
+      const fullStyle = bundledLoader && document.querySelector(`link[${AelluxJs.attr("full-style")}]`);
       if (data.loadStyle && data.loadStyle !== "false" && !(defaultStyle && fullStyle)) {
         loadPromises.push(new Promise(
           (resolve) => {

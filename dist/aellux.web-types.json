@@ -146,7 +146,7 @@
         {
           "name": "data-ae-overflow-marquee",
           "description": "Single-line overflow marquee with equal holds at both ends. Optional nonnegative pixel limit, with or without px: considered only when the intrinsic content width or height strictly exceeds it, without setting the layout width. Empty preserves normal overflow detection. Below the limit, keeps nowrap but otherwise preserves author presentation and skips marquee checks; only content/size monitoring remains. Loads Anchor for placement. Starts only when visible; hover and focus pause in place. Root reduced motion keeps ellipsis; desktop overflow receives a native title unless authored.\n\nValue syntax: pixel-limit.\n\nDefault behavior: \"\".\n\nExamples: ``, `250`, `250px`, `250.5px`.",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm",
           "default": "",
           "value": {
             "kind": "plain",
@@ -156,7 +156,7 @@
         {
           "name": "data-ae-overflow-marquee-fade",
           "description": "Progressive overflow fade. Enabled by default; false disables it. Attribute changes reconfigure the mounted label.\n\nValue syntax: enum.\n\nDefault behavior: \"true\".",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm",
           "default": "true",
           "value": {
             "kind": "plain",
@@ -370,7 +370,7 @@
         {
           "name": "data-ae-scrollbox-snap",
           "description": "Snap axis on an element that also declares Scrollbox. Empty is horizontal; false disables Snap. Snap loads the Scrollbox dependency itself.\n\nValue syntax: enum.\n\nDefault behavior: \"horizontal\".",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox-snap.htm",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/scrollbox-snap.htm",
           "default": "horizontal",
           "value": {
             "kind": "plain",
@@ -390,7 +390,7 @@
         {
           "name": "data-ae-snap-item",
           "description": "Snap alignment for an item belonging to the nearest Scrollbox. Left/top alias start; right/bottom alias end; empty is center.\n\nValue syntax: enum.\n\nDefault behavior: \"center\".",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox-snap.htm",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/scrollbox-snap.htm",
           "default": "center",
           "value": {
             "kind": "plain",
@@ -438,7 +438,7 @@
         {
           "name": "data-ae-viewport",
           "description": "Observes the nearest native scroll container, or the document. Publishes normalized position on the selected axes and a geometric visible area fraction. Empty and both select both axes; invalid values warn and fall back to both.\n\nValue syntax: enum.\n\nDefault behavior: \"both\".",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm",
           "default": "both",
           "value": {
             "kind": "plain",
@@ -448,7 +448,7 @@
         {
           "name": "data-ae-viewport-target",
           "description": "Publishes CSS outputs on one existing element ID, optionally prefixed with #, instead of the observed element. Geometry and events remain on the observer. Retargeting restores previous inline styles; conflicting Viewport writers are rejected.\n\nValue syntax: id.\n\nExamples: `indicator`, `#indicator`.",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm",
           "value": {
             "kind": "plain",
             "type": "string"
@@ -736,12 +736,12 @@
         {
           "name": "--ae-overflow-marquee-delay",
           "description": "Overflow Marquee pause at both ends of each pass; nonnegative ms/s values. Invalid values use 1200ms.\n\nValue syntax: <time>.\n\nDefault behavior: \"1200ms\".",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
         },
         {
           "name": "--ae-overflow-marquee-fade-size",
           "description": "Maximum width of each progressive overflow fade. Zero disables the visual effect.\n\nValue syntax: <length>.\n\nDefault behavior: \"16px\".\n\nSuggested values: `0px`, `16px`, `24px`. This is an open grammar, not a closed enumeration.",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm",
           "values": [
             "0px",
             "16px",
@@ -751,7 +751,7 @@
         {
           "name": "--ae-overflow-marquee-speed",
           "description": "Overflow Marquee speed in CSS pixels per second. Positive numbers only; invalid values use 30.\n\nValue syntax: <number>.\n\nDefault behavior: \"30\".",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
         },
         {
           "name": "--ae-pop-aellux-ease",
@@ -892,7 +892,7 @@
         {
           "name": "--ae-snap-focus",
           "description": "Per-item alignment proximity from 0 to 1; 1 means aligned with the requested snap position.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox-snap.htm"
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/scrollbox-snap.htm"
         },
         {
           "name": "--ae-unpop-progress",
@@ -902,17 +902,17 @@
         {
           "name": "--ae-viewport-visible",
           "description": "Geometric visible area divided by element area, from 0 to 1, in the selected scrollport. Independent of selected position axes; ignores occlusion and CSS opacity.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.\n\nDefault behavior: \"0\".",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
         },
         {
           "name": "--ae-viewport-x",
           "description": "Element center on the x axis relative to the nearest scrollport: 0 at center, -1 at left/top, +1 at right/bottom, clamped to -2..2.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.\n\nDefault behavior: \"0\".",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
         },
         {
           "name": "--ae-viewport-y",
           "description": "Element center on the y axis relative to the nearest scrollport: 0 at center, -1 at left/top, +1 at right/bottom, clamped to -2..2.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.\n\nDefault behavior: \"0\".",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/viewport.htm"
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
         },
         {
           "name": "--ae-width",

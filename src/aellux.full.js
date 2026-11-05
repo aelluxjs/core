@@ -11,9 +11,8 @@ root.AelluxJs.bundledExtensions = Object.freeze({
   "focus": () => import("./aellux.ext.focus.js"),
   "point": () => import("./aellux.ext.point.js"),
   "anchor": () => import("./aellux.ext.anchor.js"),
-  "overflowMarquee": () => import("./aellux.ext.overflow-marquee.js"),
+  "viewport": () => import("./aellux.ext.viewport.js"),
   "scrollbox": () => import("./aellux.ext.scrollbox.js"),
-  "scrollboxSnap": () => import("./aellux.ext.scrollbox-snap.js"),
   "adaptive": () => import("./aellux.ext.adaptive.js"),
   "present": () => import("./aellux.ext.present.js")
 });
@@ -22,4 +21,5 @@ root.AelluxJs.bundledExtensions = Object.freeze({
 // Reuse it instead of embedding a second copy in both Full variants.
 
 // Full runtime startup registers the official Core selectors. Optional
-// Extensions (Ajax Href, Dialog, PWA and Viewport) resolve separate signed scripts.
+// Extensions resolve separate signed scripts, including Overflow Marquee and
+// Scrollbox Snap until their migration to external extensions.

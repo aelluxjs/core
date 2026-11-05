@@ -11,6 +11,11 @@ import {
 const version = "1.2.3";
 const sri = "sha384-" + createHash("sha384").update("artifact").digest("base64");
 
+test("Full bundles primitives and keeps specialized behaviors separate", () => {
+  assert.deepEqual(officialExtensionDefinitions.filter(entry => !entry.optional).map(entry => entry.name).sort(),
+    ["adaptive", "anchor", "feedback", "focus", "point", "preference", "present", "scrollbox", "state-navigation", "viewport"]);
+});
+
 test("Bundled and Optional documentation groups match the Full distribution", async () => {
   const { summary } = JSON.parse(await readFile(new URL("../../docs-source/0.1.x/summary.json", import.meta.url), "utf8"));
   const core = summary.find(group => group.slug === "core-extensions");

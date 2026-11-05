@@ -24956,7 +24956,6 @@
         dependencies: Object.freeze([])
       }), Object.freeze({
         name: "viewport",
-        optional: true,
         style: false,
         dependencies: Object.freeze([])
       }), Object.freeze({
@@ -24969,6 +24968,7 @@
         dependencies: Object.freeze([])
       }), Object.freeze({
         name: "overflow-marquee",
+        optional: true,
         style: true,
         dependencies: Object.freeze([])
       }), Object.freeze({
@@ -24982,6 +24982,7 @@
         dependencies: Object.freeze([])
       }), Object.freeze({
         name: "scrollbox-snap",
+        optional: true,
         style: false,
         dependencies: Object.freeze([])
       }), Object.freeze({
@@ -25393,7 +25394,7 @@
           var _iterator = _createForOfIteratorHelper8(officialExtensionDefinitions), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var name = _step.value.name;
+              var _step$value = _step.value, name = _step$value.name, optional = _step$value.optional, style = _step$value.style;
               var key = toCamelCase2(name);
               if (key in api.registry.ext) continue;
               var loadWhen = name === "dialog" ? "dialog" : attr(name);
@@ -25405,7 +25406,8 @@
               if (name === "state-navigation" || name === "preference") loadWhen = null;
               api.ext(name, {
                 loadWhen: loadWhen,
-                load: true
+                load: true,
+                loadStyle: !!(optional && style)
               });
               api.registry.ext[key].automatic = true;
             }
@@ -25739,7 +25741,7 @@
                     }));
                   }
                   defaultStyle = data.loadStyle === true || data.loadStyle === "true";
-                  fullStyle = AelluxJs.bundledExtensions && (bundledLoader || data.official) && document.querySelector("link[".concat(AelluxJs.attr("full-style"), "]"));
+                  fullStyle = bundledLoader && document.querySelector("link[".concat(AelluxJs.attr("full-style"), "]"));
                   if (data.loadStyle && data.loadStyle !== "false" && !(defaultStyle && fullStyle)) {
                     loadPromises.push(new Promise(function(resolve) {
                       var styleDefaultURL = data.loadStyle === true || data.loadStyle === "true" || data.loadStyle === "";

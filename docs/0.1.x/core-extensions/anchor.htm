@@ -445,13 +445,6 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/overflow-marquee.htm" data-ae-overflow-marquee="190px">
-                                              Overflow Marquee                                            </a>
-                                          </div>
-                                                                                    <div
-                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                            style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/feedback.htm" data-ae-overflow-marquee="190px">
                                               Feedback                                            </a>
                                           </div>
@@ -494,15 +487,15 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/scrollbox-snap.htm" data-ae-overflow-marquee="190px">
-                                              Scrollbox Snap                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
+                                              State Navigation                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
-                                              State Navigation                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/viewport.htm" data-ae-overflow-marquee="190px">
+                                              Viewport                                            </a>
                                           </div>
                                                                                 </div>
                                   </div>
@@ -540,6 +533,13 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm" data-ae-overflow-marquee="190px">
+                                              Overflow Marquee                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/optional/progress.htm" data-ae-overflow-marquee="190px">
                                               Progress                                            </a>
                                           </div>
@@ -554,8 +554,8 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/optional/viewport.htm" data-ae-overflow-marquee="190px">
-                                              Viewport                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/optional/scrollbox-snap.htm" data-ae-overflow-marquee="190px">
+                                              Scrollbox Snap                                            </a>
                                           </div>
                                                                                 </div>
                                   </div>
@@ -668,12 +668,12 @@
         Adaptive      </span>
     </a>
 
-                  <a href="/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+                  <a href="/core/docs/0.1.x/core-extensions/feedback.htm"
             class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2" style="width: 40%;">
             <span
               class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
               style="max-width:200px" data-ae-overflow-marquee="80">
-              Overflow Marquee            </span> →
+              Feedback            </span> →
           </a>
           </div>          </div>
 
@@ -711,7 +711,7 @@ await $ae.mountManager.update(anchor, &quot;anchor&quot;);
 </code></pre>
 <p>Anchor reads geometry through <code>$ae.waitLayout.read()</code> and writes CSS through <code>$ae.waitLayout.update()</code>.</p>
 <h2>Overflow Marquee</h2>
-<p>Single-line overflow animation is provided by the separate <a href="overflow-marquee.htm">Overflow Marquee</a> Extension. It initializes Anchor as its geometry dependency, then owns its own mount map, stylesheet and visibility-aware motion. Register <code>$ae.ext(&quot;overflow-marquee&quot;)</code>; an ordinary Anchor registration does not mount those elements.</p>
+<p>Single-line overflow animation is provided by the separate <a href="optional/overflow-marquee.htm">Overflow Marquee</a> Extension. It initializes Anchor as its geometry dependency, then owns its own mount map, stylesheet and visibility-aware motion. Register <code>$ae.ext(&quot;overflow-marquee&quot;)</code>; an ordinary Anchor registration does not mount those elements.</p>
 <h2>Target Visibility</h2>
 <p>Anchor uses computed CSS to decide whether its target is visible. A <code>hidden</code> attribute or an inline declaration does not suppress anchoring when the cascade overrides it. For example, a Present container with <code>hidden</code> remains an eligible target if its effective display, visibility and opacity make it visible.</p>
 <p>Computed <code>visibility:hidden</code> or <code>collapse</code> on the target deactivates the Anchor. A descendant may restore inherited visibility with <code>visibility:visible</code>. Effective <code>display:none</code>, <code>content-visibility:hidden</code> or zero opacity on the target or any ancestor also deactivates the Anchor; descendants cannot override an ancestor&#39;s zero opacity or absent display. The same checks apply to a selected Present Group member, including during transitions. These checks concern CSS visibility rather than viewport intersection or occlusion by another element.</p>
@@ -807,7 +807,7 @@ await $ae.mountManager.update(anchor, &quot;anchor&quot;);
 </tr>
 </tbody></table>
 <p>The compressed increases are 1,774 and 1,925 bytes respectively. No dependency or animation scheduler is added. The new weak rules ship with Anchor rather than enlarging the boot&#39;s weak stylesheet. Boot, Full and Present remain within their existing limits.</p>
-<p>The limits remain 15/6 KiB for Modern and 23/8 KiB for Legacy (raw/gzip), increased from 9/4 and 16/6 KiB respectively. The separate <a href="overflow-marquee.htm#distribution-cost">Overflow Marquee</a> distribution has its own measured limits; Anchor does not include that implementation.</p>
+<p>The limits remain 15/6 KiB for Modern and 23/8 KiB for Legacy (raw/gzip), increased from 9/4 and 16/6 KiB respectively. The separate <a href="optional/overflow-marquee.htm#distribution-cost">Overflow Marquee</a> distribution has its own measured limits; Anchor does not include that implementation.</p>
 <h3>Scroll Into View distribution cost</h3>
 <p>The declarative Scroll Into View option adds visibility tracking, target-scroll requests and authoring attribute recognition without another dependency or permanent polling. Compared with the build before this option, minified Modern Anchor grows from 13,863 / 5,098 to 14,909 / 5,408 bytes (raw / gzip level 9); Legacy grows from 21,303 / 7,535 to 22,524 / 7,889 bytes. Both retain their existing Extension budgets.</p>
 <p>Full Modern grows from 199,901 / 61,728 to 200,971 / 62,020 bytes, and Full Legacy from 524,208 / 155,421 to 525,445 / 155,796 bytes. Full Modern budgets move from 195.5 / 60.5 to 196.5 / 60.75 KiB, and Full Legacy&#39;s gzip budget from 152 to 152.25 KiB (raw remains 515 KiB).</p>
@@ -910,12 +910,12 @@ await $ae.mountManager.update(anchor, &quot;anchor&quot;);
         Adaptive      </span>
     </a>
 
-                  <a href="/core/docs/0.1.x/core-extensions/overflow-marquee.htm"
+                  <a href="/core/docs/0.1.x/core-extensions/feedback.htm"
             class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2" style="width: 40%;">
             <span
               class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
               style="max-width:200px" data-ae-overflow-marquee="80">
-              Overflow Marquee            </span> →
+              Feedback            </span> →
           </a>
           </div>          </div>
 

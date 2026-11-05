@@ -1105,7 +1105,7 @@
       var getOwnPropertySymbolsModule = require_object_get_own_property_symbols();
       var anObject = require_an_object();
       var concat = uncurryThis([].concat);
-      module.exports = getBuiltIn("Reflect", "ownKeys") || function ownKeys8(it) {
+      module.exports = getBuiltIn("Reflect", "ownKeys") || function ownKeys7(it) {
         var keys = getOwnPropertyNamesModule.f(anObject(it));
         var getOwnPropertySymbols = getOwnPropertySymbolsModule.f;
         return getOwnPropertySymbols ? concat(keys, getOwnPropertySymbols(it)) : keys;
@@ -1118,11 +1118,11 @@
     "node_modules/core-js/internals/copy-constructor-properties.js": function(exports, module) {
       "use strict";
       var hasOwn = require_has_own_property();
-      var ownKeys8 = require_own_keys();
+      var ownKeys7 = require_own_keys();
       var getOwnPropertyDescriptorModule = require_object_get_own_property_descriptor();
       var definePropertyModule = require_object_define_property();
       module.exports = function(target, source, exceptions) {
-        var keys = ownKeys8(source);
+        var keys = ownKeys7(source);
         var defineProperty = definePropertyModule.f;
         var getOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
         for (var i = 0; i < keys.length; i++) {
@@ -10021,7 +10021,7 @@
       "use strict";
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
-      var ownKeys8 = require_own_keys();
+      var ownKeys7 = require_own_keys();
       var toIndexedObject = require_to_indexed_object();
       var getOwnPropertyDescriptorModule = require_object_get_own_property_descriptor();
       var createProperty = require_create_property();
@@ -10029,7 +10029,7 @@
         getOwnPropertyDescriptors: function getOwnPropertyDescriptors(object) {
           var O = toIndexedObject(object);
           var getOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
-          var keys = ownKeys8(O);
+          var keys = ownKeys7(O);
           var result = {};
           var index = 0;
           var key, descriptor;
@@ -12201,9 +12201,9 @@
     "node_modules/core-js/modules/es.reflect.own-keys.js": function() {
       "use strict";
       var $ = require_export();
-      var ownKeys8 = require_own_keys();
+      var ownKeys7 = require_own_keys();
       $({ target: "Reflect", stat: true }, {
-        ownKeys: ownKeys8
+        ownKeys: ownKeys7
       });
     }
   });
@@ -22743,7 +22743,7 @@
       return this;
     }), _regeneratorDefine2(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator = function _regenerator9() {
+    }), (_regenerator = function _regenerator8() {
       return { w: i, m: f };
     })();
   }
@@ -24956,7 +24956,6 @@
         dependencies: Object.freeze([])
       }), Object.freeze({
         name: "viewport",
-        optional: true,
         style: false,
         dependencies: Object.freeze([])
       }), Object.freeze({
@@ -24969,6 +24968,7 @@
         dependencies: Object.freeze([])
       }), Object.freeze({
         name: "overflow-marquee",
+        optional: true,
         style: true,
         dependencies: Object.freeze([])
       }), Object.freeze({
@@ -24982,6 +24982,7 @@
         dependencies: Object.freeze([])
       }), Object.freeze({
         name: "scrollbox-snap",
+        optional: true,
         style: false,
         dependencies: Object.freeze([])
       }), Object.freeze({
@@ -25174,7 +25175,7 @@
       return this;
     }), _regeneratorDefine22(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator2 = function _regenerator9() {
+    }), (_regenerator2 = function _regenerator8() {
       return { w: i, m: f };
     })();
   }
@@ -25392,7 +25393,7 @@
           var _iterator = _createForOfIteratorHelper8(officialExtensionDefinitions), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var name = _step.value.name;
+              var _step$value = _step.value, name = _step$value.name, optional = _step$value.optional, style = _step$value.style;
               var key = toCamelCase2(name);
               if (key in api.registry.ext) continue;
               var loadWhen = name === "dialog" ? "dialog" : attr(name);
@@ -25404,7 +25405,8 @@
               if (name === "state-navigation" || name === "preference") loadWhen = null;
               api.ext(name, {
                 loadWhen: loadWhen,
-                load: true
+                load: true,
+                loadStyle: !!(optional && style)
               });
               api.registry.ext[key].automatic = true;
             }
@@ -25738,7 +25740,7 @@
                     }));
                   }
                   defaultStyle = data.loadStyle === true || data.loadStyle === "true";
-                  fullStyle = AelluxJs.bundledExtensions && (bundledLoader || data.official) && document.querySelector("link[".concat(AelluxJs.attr("full-style"), "]"));
+                  fullStyle = bundledLoader && document.querySelector("link[".concat(AelluxJs.attr("full-style"), "]"));
                   if (data.loadStyle && data.loadStyle !== "false" && !(defaultStyle && fullStyle)) {
                     loadPromises.push(new Promise(function(resolve) {
                       var styleDefaultURL = data.loadStyle === true || data.loadStyle === "true" || data.loadStyle === "";
@@ -26583,7 +26585,7 @@
       return this;
     }), _regeneratorDefine23(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator3 = function _regenerator9() {
+    }), (_regenerator3 = function _regenerator8() {
       return { w: i, m: f };
     })();
   }
@@ -26978,7 +26980,7 @@
       return this;
     }), _regeneratorDefine24(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator4 = function _regenerator9() {
+    }), (_regenerator4 = function _regenerator8() {
       return { w: i, m: f };
     })();
   }
@@ -28225,7 +28227,7 @@
       return this;
     }), _regeneratorDefine25(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator5 = function _regenerator9() {
+    }), (_regenerator5 = function _regenerator8() {
       return { w: i, m: f };
     })();
   }
@@ -29435,21 +29437,8 @@
     }
   });
 
-  // src/internal/parse-overflow-marquee-limit.js
-  function parseOverflowMarqueeLimit(value) {
-    var text = (value || "").trim();
-    if (!text) return null;
-    if (!/^(?:\d+(?:\.\d+)?|\.\d+)(?:px)?$/i.test(text)) return void 0;
-    var limit = parseFloat(text);
-    return Number.isFinite(limit) ? limit : void 0;
-  }
-  var init_parse_overflow_marquee_limit = __esm({
-    "src/internal/parse-overflow-marquee-limit.js": function() {
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-    }
-  });
-
-  // src/internal/create-overflow-marquee.js
+  // src/aellux.ext.viewport.js
+  var aellux_ext_viewport_exports = {};
   function _typeof8(o) {
     "@babel/helpers - typeof";
     return _typeof8 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
@@ -29457,6 +29446,44 @@
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
     }, _typeof8(o);
+  }
+  function ownKeys3(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function(r2) {
+        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
+      })), t.push.apply(t, o);
+    }
+    return t;
+  }
+  function _objectSpread3(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys3(Object(t), true).forEach(function(r2) {
+        _defineProperty3(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys3(Object(t)).forEach(function(r2) {
+        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
+      });
+    }
+    return e;
+  }
+  function _defineProperty3(e, r, t) {
+    return (r = _toPropertyKey4(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  }
+  function _toPropertyKey4(t) {
+    var i = _toPrimitive4(t, "string");
+    return "symbol" == _typeof8(i) ? i : i + "";
+  }
+  function _toPrimitive4(t, r) {
+    if ("object" != _typeof8(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r || "default");
+      if ("object" != _typeof8(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return ("string" === r ? String : Number)(t);
   }
   function _regenerator6() {
     /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
@@ -29516,7 +29543,7 @@
       return this;
     }), _regeneratorDefine26(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator6 = function _regenerator9() {
+    }), (_regenerator6 = function _regenerator8() {
       return { w: i, m: f };
     })();
   }
@@ -29535,44 +29562,6 @@
       }
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
     }, _regeneratorDefine26(e, r, n, t);
-  }
-  function ownKeys3(e, r) {
-    var t = Object.keys(e);
-    if (Object.getOwnPropertySymbols) {
-      var o = Object.getOwnPropertySymbols(e);
-      r && (o = o.filter(function(r2) {
-        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
-      })), t.push.apply(t, o);
-    }
-    return t;
-  }
-  function _objectSpread3(e) {
-    for (var r = 1; r < arguments.length; r++) {
-      var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys3(Object(t), true).forEach(function(r2) {
-        _defineProperty3(e, r2, t[r2]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys3(Object(t)).forEach(function(r2) {
-        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
-      });
-    }
-    return e;
-  }
-  function _defineProperty3(e, r, t) {
-    return (r = _toPropertyKey4(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
-  }
-  function _toPropertyKey4(t) {
-    var i = _toPrimitive4(t, "string");
-    return "symbol" == _typeof8(i) ? i : i + "";
-  }
-  function _toPrimitive4(t, r) {
-    if ("object" != _typeof8(t) || !t) return t;
-    var e = t[Symbol.toPrimitive];
-    if (void 0 !== e) {
-      var i = e.call(t, r || "default");
-      if ("object" != _typeof8(i)) return i;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return ("string" === r ? String : Number)(t);
   }
   function asyncGeneratorStep6(n, t, e, r, o, a, c) {
     try {
@@ -29596,36 +29585,6 @@
         _next(void 0);
       });
     };
-  }
-  function _slicedToArray8(r, e) {
-    return _arrayWithHoles8(r) || _iterableToArrayLimit8(r, e) || _unsupportedIterableToArray15(r, e) || _nonIterableRest8();
-  }
-  function _nonIterableRest8() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArrayLimit8(r, l) {
-    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (null != t) {
-      var e, n, i, u, a = [], f = true, o = false;
-      try {
-        if (i = (t = t.call(r)).next, 0 === l) {
-          if (Object(t) !== t) return;
-          f = false;
-        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
-      } catch (r2) {
-        o = true, n = r2;
-      } finally {
-        try {
-          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
-        } finally {
-          if (o) throw n;
-        }
-      }
-      return a;
-    }
-  }
-  function _arrayWithHoles8(r) {
-    if (Array.isArray(r)) return r;
   }
   function _createForOfIteratorHelper14(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
@@ -29658,6 +29617,12 @@
       }
     } };
   }
+  function _toConsumableArray7(r) {
+    return _arrayWithoutHoles7(r) || _iterableToArray7(r) || _unsupportedIterableToArray15(r) || _nonIterableSpread7();
+  }
+  function _nonIterableSpread7() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
   function _unsupportedIterableToArray15(r, a) {
     if (r) {
       if ("string" == typeof r) return _arrayLikeToArray15(r, a);
@@ -29665,1055 +29630,661 @@
       return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray15(r, a) : void 0;
     }
   }
+  function _iterableToArray7(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles7(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray15(r);
+  }
   function _arrayLikeToArray15(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function createOverflowMarquee(root2, api, anchor2) {
-    var _root$matchMedia;
-    var attribute = api.attr("overflow-marquee");
-    var contentAttribute = api.attr("overflow-marquee-content");
-    var activeAttribute = api.attr("overflow-marquee-active");
-    var readyAttribute = api.attr("overflow-marquee-ready");
-    var viewportAttribute = api.attr("overflow-marquee-viewport");
-    var fadeAttribute = api.attr("overflow-marquee-fade");
-    var offsetProperty = "--ae-overflow-marquee-offset";
-    var reducedAttribute = api.attr("reduced-motion");
-    var selector = "[".concat(attribute, "]");
-    var states = /* @__PURE__ */ new Map();
-    var desktop = (_root$matchMedia = root2.matchMedia) === null || _root$matchMedia === void 0 ? void 0 : _root$matchMedia.call(root2, "(any-hover: hover) and (any-pointer: fine)");
-    var observer = null;
-    return {
-      selector: selector,
-      mount: mount,
-      unmount: unmount,
-      update: update,
-      destroy: destroy
-    };
-    function listenMedia(add) {
-      if (desktop !== null && desktop !== void 0 && desktop.addEventListener) desktop[add ? "addEventListener" : "removeEventListener"]("change", refreshAll);
-      else if (desktop !== null && desktop !== void 0 && desktop.addListener) desktop[add ? "addListener" : "removeListener"](refreshAll);
-    }
-    function refreshAll(event) {
-      var _iterator = _createForOfIteratorHelper14(states), _step;
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-          var _step$value = _slicedToArray8(_step.value, 2), element = _step$value[0], state = _step$value[1];
-          if (state.enabled || (event === null || event === void 0 ? void 0 : event.type) === "resize" || (event === null || event === void 0 ? void 0 : event.type) === "loadingdone") schedule(element);
-        }
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
-      }
-    }
-    function motionChanged(event) {
-      var _iterator2 = _createForOfIteratorHelper14(states), _step2;
-      try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-          var _step2$value = _slicedToArray8(_step2.value, 2), element = _step2$value[0], state = _step2$value[1];
-          if (!state.enabled) continue;
-          if (event.target !== state.wrapper && event.target !== state.viewport && (event.target.contains(element) || element.contains(event.target))) schedule(element);
-        }
-      } catch (err) {
-        _iterator2.e(err);
-      } finally {
-        _iterator2.f();
-      }
-    }
-    function visible(state) {
-      if (!state.element.isConnected || root2.document.hidden || state.intersecting === false || anchor2.invisible(state.wrapper.isConnected ? state.wrapper : state.element)) return false;
-      var bounds = state.element.getBoundingClientRect();
-      return bounds.width > 0 && bounds.height > 0 && bounds.right > 0 && bounds.bottom > 0 && bounds.left < root2.innerWidth && bounds.top < root2.innerHeight;
-    }
-    function interacting(state) {
-      return state.element.contains(root2.document.activeElement) || !!(desktop !== null && desktop !== void 0 && desktop.matches && state.element.matches(":hover"));
-    }
-    function canRun(state) {
-      return visible(state) && !interacting(state);
-    }
-    function mount(_x) {
-      return _mount.apply(this, arguments);
-    }
-    function _mount() {
-      _mount = _asyncToGenerator6(/* @__PURE__ */ _regenerator6().m(function _callee(element) {
-        var wrapper, viewport, state, _root$document$fonts, _root$document$fonts$, _i3, _arr2, name;
-        return _regenerator6().w(function(_context) {
-          while (1) switch (_context.n) {
-            case 0:
-              if (!states.has(element)) {
-                _context.n = 1;
-                break;
-              }
-              return _context.a(2);
-            case 1:
-              wrapper = root2.document.createElement("span");
-              viewport = root2.document.createElement("span");
-              viewport.setAttribute(viewportAttribute, "");
-              wrapper.setAttribute(contentAttribute, "top-left:top-left");
-              state = {
-                element: element,
-                wrapper: wrapper,
-                viewport: viewport,
-                revision: 0,
-                signature: null,
-                pending: null,
-                dirty: false,
-                timer: null,
-                motionId: api.motion.id(),
-                layoutId: api.motion.id(),
-                cycleId: api.motion.id(),
-                ownedTitle: null,
-                paused: true,
-                intersecting: root2.IntersectionObserver ? false : null,
-                phase: "wait",
-                x: 0,
-                memory: api.persist.element.save(element, [activeAttribute, readyAttribute]),
-                resize: null,
-                intersection: null,
-                enabled: false,
-                probeStyle: void 0
-              };
-              states.set(element, state);
-              state.onInteraction = function() {
-                return schedule(element);
-              };
-              if (states.size === 1) {
-                if (root2.MutationObserver) {
-                  observer = new root2.MutationObserver(function(records) {
-                    var _iterator3 = _createForOfIteratorHelper14(states), _step3;
-                    try {
-                      var _loop = function _loop2() {
-                        var _step3$value = _slicedToArray8(_step3.value, 2), host = _step3$value[0], value = _step3$value[1];
-                        if (records.some(function(record) {
-                          var node = record.target;
-                          if ((node === value.wrapper || node === value.viewport) && record.type === "attributes") return false;
-                          if (record.type === "attributes" && node === host && record.attributeName === activeAttribute) return false;
-                          if (record.type === "attributes" && node === host && record.attributeName === "style" && host.getAttribute("style") === value.probeStyle) return false;
-                          if (!value.enabled && record.type === "attributes" && [fadeAttribute, reducedAttribute, "dir"].includes(record.attributeName)) return false;
-                          return node === root2.document.documentElement || host.contains(node) || node.contains(host);
-                        })) schedule(host);
-                      };
-                      for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-                        _loop();
-                      }
-                    } catch (err) {
-                      _iterator3.e(err);
-                    } finally {
-                      _iterator3.f();
-                    }
-                  });
-                  observer.observe(root2.document, {
-                    subtree: true,
-                    childList: true,
-                    characterData: true,
-                    attributes: true,
-                    attributeFilter: [attribute, fadeAttribute, reducedAttribute, "class", "style", "hidden", "dir"]
-                  });
-                }
-                root2.document.addEventListener("visibilitychange", refreshAll);
-                for (_i3 = 0, _arr2 = ["transitionend", "transitioncancel", "animationstart", "animationend", "animationcancel"]; _i3 < _arr2.length; _i3++) {
-                  name = _arr2[_i3];
-                  root2.document.addEventListener(name, motionChanged, true);
-                }
-                root2.addEventListener("resize", refreshAll);
-                root2.addEventListener("scroll", refreshAll, {
-                  capture: true,
-                  passive: true
-                });
-                (_root$document$fonts = root2.document.fonts) === null || _root$document$fonts === void 0 || (_root$document$fonts$ = _root$document$fonts.addEventListener) === null || _root$document$fonts$ === void 0 || _root$document$fonts$.call(_root$document$fonts, "loadingdone", refreshAll);
-                listenMedia(true);
-              }
-              if (root2.ResizeObserver) {
-                state.resize = new root2.ResizeObserver(function() {
-                  return schedule(element);
-                });
-                state.resize.observe(element);
-              }
-              if (root2.IntersectionObserver) {
-                state.intersection = new root2.IntersectionObserver(function(entries) {
-                  var entry = entries[entries.length - 1];
-                  state.intersecting = entry.isIntersecting && entry.intersectionRect.width > 0 && entry.intersectionRect.height > 0;
-                  schedule(element);
-                }, {
-                  threshold: [0, 1e-6]
-                });
-              }
-              _context.n = 2;
-              return update(element);
-            case 2:
-              return _context.a(2);
-          }
-        }, _callee);
-      }));
-      return _mount.apply(this, arguments);
-    }
-    function unwrap(state) {
-      if (state.viewport.parentNode !== state.element) return;
-      reconcile(state);
-      while (state.wrapper.firstChild) state.element.insertBefore(state.wrapper.firstChild, state.viewport);
-      state.viewport.remove();
-    }
-    function enable(state, enabled) {
-      if (state.enabled === enabled) return;
-      state.enabled = enabled;
-      var element = state.element, wrapper = state.wrapper;
-      for (var _i = 0, _arr = ["mouseenter", "mouseleave", "focusin", "focusout"]; _i < _arr.length; _i++) {
-        var name = _arr[_i];
-        element[enabled ? "addEventListener" : "removeEventListener"](name, state.onInteraction);
-      }
-      if (enabled) {
-        var _state$resize, _state$intersection;
-        element.setAttribute(readyAttribute, "");
-        reconcile(state);
-        anchor2.mount(wrapper);
-        (_state$resize = state.resize) === null || _state$resize === void 0 || _state$resize.observe(wrapper);
-        (_state$intersection = state.intersection) === null || _state$intersection === void 0 || _state$intersection.observe(element);
-      } else {
-        var _state$resize2, _state$intersection2;
-        stop(state);
-        state.paused = true;
-        state.signature = null;
-        state.placements = null;
-        (_state$resize2 = state.resize) === null || _state$resize2 === void 0 || _state$resize2.unobserve(wrapper);
-        (_state$intersection2 = state.intersection) === null || _state$intersection2 === void 0 || _state$intersection2.disconnect();
-        state.intersecting = root2.IntersectionObserver ? false : null;
-        anchor2.unmount(wrapper);
-        unwrap(state);
-        tooltip(state, null);
-        element.removeAttribute(activeAttribute);
-        element.removeAttribute(readyAttribute);
-      }
-    }
-    function exceedsLimit(state, limit) {
-      var element = state.element, wrapper = state.wrapper;
-      state.probeStyle = element.getAttribute("style");
-      try {
-        element.style.setProperty("white-space", "nowrap", "important");
-        var range = root2.document.createRange();
-        range.selectNodeContents(state.viewport.parentNode === element && wrapper.parentNode === state.viewport ? wrapper : element);
-        var bounds = range.getBoundingClientRect();
-        var lineHeight = element.textContent.trim() ? parseFloat(root2.getComputedStyle(element).lineHeight) || 0 : 0;
-        return bounds.width > limit || Math.max(bounds.height, lineHeight) > limit;
-      } finally {
-        if (state.probeStyle === null) {
-          element.getAttribute("style");
-          element.removeAttribute("style");
-        } else element.setAttribute("style", state.probeStyle);
-      }
-    }
-    function reconcile(state) {
-      var element = state.element, wrapper = state.wrapper, viewport = state.viewport;
-      if (viewport.parentNode !== element) viewport.textContent = "";
-      if (viewport.parentNode !== element || wrapper.parentNode !== viewport) wrapper.textContent = "";
-      if (viewport.parentNode === element && wrapper.parentNode === viewport && element.childNodes.length === 1 && viewport.childNodes.length === 1) return;
-      var contents = root2.document.createDocumentFragment();
-      var _collect = function collect(parent) {
-        for (var _i2 = 0, _Array$from = Array.from(parent.childNodes); _i2 < _Array$from.length; _i2++) {
-          var node = _Array$from[_i2];
-          if (node === viewport || node === wrapper) _collect(node);
-          else contents.appendChild(node);
-        }
-      };
-      _collect(element);
-      wrapper.appendChild(contents);
-      viewport.appendChild(wrapper);
-      element.appendChild(viewport);
-    }
-    function schedule(element) {
-      var state = states.get(element);
-      if (!state) return;
-      rememberProgress(state);
-      if (state.enabled) {
-        if (!visible(state)) {
-          pause(state);
-          return;
-        }
-        if (interacting(state)) pause(state);
-      }
-      update(element).catch(function(cause) {
-        return api.diagnostics.error(api.diagnostics.ERROR_EXTENSION_MOUNT, {
-          extension: "overflow-marquee",
-          element: element,
-          method: "update",
-          cause: cause
-        });
-      });
-    }
-    function update(element) {
-      var state = states.get(element);
-      if (!state) return Promise.resolve();
-      if (state.pending) {
-        state.dirty = true;
-        return state.pending;
-      }
-      state.pending = refresh(state).finally(function() {
-        state.pending = null;
-        if (state.dirty && states.get(element) === state) {
-          state.dirty = false;
-          schedule(element);
-        }
-      });
-      return state.pending;
-    }
-    function refresh(_x2) {
-      return _refresh.apply(this, arguments);
-    }
-    function _refresh() {
-      _refresh = _asyncToGenerator6(/* @__PURE__ */ _regenerator6().m(function _callee2(state) {
-        var element, wrapper, layoutId, alive, limit, eligible, measured, signature, revision, placements, _t;
-        return _regenerator6().w(function(_context2) {
-          while (1) switch (_context2.n) {
-            case 0:
-              element = state.element, wrapper = state.wrapper, layoutId = state.layoutId;
-              alive = function alive2() {
-                return states.get(element) === state;
-              };
-              rememberProgress(state);
-              if (!(state.enabled && !visible(state))) {
-                _context2.n = 1;
-                break;
-              }
-              pause(state);
-              return _context2.a(2);
-            case 1:
-              limit = parseOverflowMarqueeLimit(element.getAttribute(attribute));
-              if (!(limit != null)) {
-                _context2.n = 5;
-                break;
-              }
-              _context2.n = 2;
-              return api.waitLayout.read(layoutId, function() {
-                return alive() && exceedsLimit(state, limit);
-              });
-            case 2:
-              eligible = _context2.v;
-              if (alive()) {
-                _context2.n = 3;
-                break;
-              }
-              return _context2.a(2);
-            case 3:
-              if (eligible) {
-                _context2.n = 5;
-                break;
-              }
-              _context2.n = 4;
-              return api.waitLayout.update(layoutId, function() {
-                if (alive()) enable(state, false);
-              });
-            case 4:
-              return _context2.a(2);
-            case 5:
-              if (state.enabled) {
-                _context2.n = 6;
-                break;
-              }
-              _context2.n = 6;
-              return api.waitLayout.update(layoutId, function() {
-                if (alive()) enable(state, true);
-              });
-            case 6:
-              if (alive()) {
-                _context2.n = 7;
-                break;
-              }
-              return _context2.a(2);
-            case 7:
-              if (visible(state)) {
-                _context2.n = 8;
-                break;
-              }
-              pause(state);
-              return _context2.a(2);
-            case 8:
-              if (interacting(state)) pause(state);
-              _context2.n = 9;
-              return api.waitLayout.update(layoutId, function() {
-                if (alive()) reconcile(state);
-              });
-            case 9:
-              if (alive()) {
-                _context2.n = 10;
-                break;
-              }
-              return _context2.a(2);
-            case 10:
-              _context2.n = 11;
-              return api.waitLayout.read(layoutId, function() {
-                var style = root2.getComputedStyle(element);
-                var padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
-                var width = element.clientWidth - padding;
-                var content = wrapper.scrollWidth;
-                var overflow = content > width + 1;
-                var reduced = api.currentPreference("reduced-motion") === "reduced";
-                var rawSpeed = Number(style.getPropertyValue("--ae-overflow-marquee-speed").trim());
-                var rawDelay = style.getPropertyValue("--ae-overflow-marquee-delay").trim();
-                var delayValue = /^(?:\d+(?:\.\d+)?|\.\d+)(ms|s)$/.exec(rawDelay);
-                return {
-                  width: width,
-                  content: content,
-                  overflow: overflow,
-                  active: overflow && !reduced,
-                  fade: element.getAttribute(fadeAttribute) !== "false",
-                  speed: Number.isFinite(rawSpeed) && rawSpeed > 0 ? rawSpeed : 30,
-                  delay: delayValue ? parseFloat(rawDelay) * (delayValue[1] === "s" ? 1e3 : 1) : 1200,
-                  direction: style.direction,
-                  text: wrapper.textContent.replace(/\s+/g, " ").trim()
-                };
-              });
-            case 11:
-              measured = _context2.v;
-              if (!(!alive() || !measured)) {
-                _context2.n = 12;
-                break;
-              }
-              return _context2.a(2);
-            case 12:
-              signature = JSON.stringify(_objectSpread3(_objectSpread3({}, measured), {}, {
-                fade: void 0
-              }));
-              _context2.n = 13;
-              return api.waitLayout.update(layoutId, function() {
-                var _root$CSS;
-                if (!alive()) return;
-                tooltip(state, measured.overflow && desktop !== null && desktop !== void 0 && desktop.matches ? measured.text : null);
-                state.viewport.setAttribute(viewportAttribute, measured.overflow && measured.fade && (!measured.active || typeof ((_root$CSS = root2.CSS) === null || _root$CSS === void 0 ? void 0 : _root$CSS.registerProperty) === "function") ? "fade" : "");
-                if (signature === state.signature) return;
-                stop(state);
-                state.signature = signature;
-                state.measured = measured;
-                state.placements = null;
-                state.phase = "wait";
-                state.remaining = measured.delay;
-                state.x = 0;
-                wrapper.style.transition = "none";
-                wrapper.setAttribute(contentAttribute, "top-left:top-left");
-                wrapper.style.setProperty("--ae-anchor-x", "0px");
-                state.viewport.style.transition = "none";
-                state.viewport.style.setProperty(offsetProperty, "0px");
-                state.viewport.style.setProperty("--ae-overflow-marquee-distance", "".concat(Math.max(0, measured.content - measured.width), "px"));
-                state.viewport.setAttribute("dir", measured.direction);
-                element.toggleAttribute ? element.toggleAttribute(activeAttribute, measured.active) : measured.active ? element.setAttribute(activeAttribute, "") : element.removeAttribute(activeAttribute);
-              });
-            case 13:
-              if (!(!alive() || signature !== state.signature || !measured.active || state.timer !== null || state.running)) {
-                _context2.n = 14;
-                break;
-              }
-              return _context2.a(2);
-            case 14:
-              if (canRun(state)) {
-                _context2.n = 15;
-                break;
-              }
-              pause(state);
-              return _context2.a(2);
-            case 15:
-              revision = state.revision;
-              _t = state.placements;
-              if (_t) {
-                _context2.n = 17;
-                break;
-              }
-              _context2.n = 16;
-              return api.waitLayout.read(layoutId, function() {
-                var start = anchor2.measure(wrapper, false);
-                var end = anchor2.measure(wrapper, true);
-                if (!(start !== null && start !== void 0 && start.valid) || !(end !== null && end !== void 0 && end.valid)) return null;
-                var distance = Math.max(0, start.selected.x - end.selected.x);
-                var rtl = measured.direction === "rtl";
-                var placement = function placement2(base, x) {
-                  return _objectSpread3(_objectSpread3({}, base), {}, {
-                    selected: _objectSpread3(_objectSpread3({}, base.selected), {}, {
-                      x: x,
-                      y: 0
-                    })
-                  });
-                };
-                return {
-                  start: placement(rtl ? end : start, 0),
-                  end: placement(rtl ? start : end, rtl ? distance : -distance),
-                  distance: distance
-                };
-              });
-            case 16:
-              _t = _context2.v;
-            case 17:
-              placements = _t;
-              if (!(!alive() || revision !== state.revision || !placements)) {
-                _context2.n = 18;
-                break;
-              }
-              return _context2.a(2);
-            case 18:
-              _context2.n = 19;
-              return api.waitLayout.update(layoutId, function() {
-                if (!alive() || revision !== state.revision) return;
-                state.placements = placements;
-                state.viewport.style.setProperty("--ae-overflow-marquee-distance", "".concat(placements.distance, "px"));
-                if (!canRun(state)) {
-                  pause(state);
-                  return;
-                }
-                state.paused = false;
-                anchor2.place(wrapper, at(state, state.x));
-                if (state.phase === "travel") cycle(state);
-                else wait(state);
-              });
-            case 19:
-              return _context2.a(2);
-          }
-        }, _callee2);
-      }));
-      return _refresh.apply(this, arguments);
-    }
-    function at(state, x) {
-      var base = state.placements.start;
-      return _objectSpread3(_objectSpread3({}, base), {}, {
-        selected: _objectSpread3(_objectSpread3({}, base.selected), {}, {
-          x: x
-        })
-      });
-    }
-    function freezeFade(state) {
-      state.viewport.style.transition = "none";
-      state.viewport.style.setProperty(offsetProperty, "".concat(Math.abs(state.x), "px"));
-    }
-    function wait(state) {
-      var revision = state.revision;
-      state.deadline = now() + state.remaining;
-      state.timer = root2.setTimeout(function() {
-        if (revision === state.revision && states.get(state.element) === state) cycle(state);
-      }, state.remaining);
-    }
-    function now() {
-      return root2.performance.now();
-    }
-    function rememberProgress(state) {
-      var _state$animation;
-      if (!state.running || state.started === void 0) return;
-      var time = (_state$animation = state.animation) === null || _state$animation === void 0 ? void 0 : _state$animation.currentTime;
-      if (time != null) state.elapsed = Number(time);
-      else if (!state.controlled) state.elapsed = now() - state.started;
-      var progress = state.duration > 0 ? Math.min(1, (state.elapsed || 0) / state.duration) : 1;
-      state.x = state.from + (state.placements.end.selected.x - state.from) * progress;
-    }
-    function pause(state) {
-      if (state.paused) return;
-      rememberProgress(state);
-      if (state.timer !== null) state.remaining = Math.max(0, state.deadline - now());
-      stop(state);
-      state.paused = true;
-      state.wrapper.style.transition = "none";
-      freezeFade(state);
-      if (state.placements) anchor2.place(state.wrapper, at(state, state.x));
-    }
-    function tooltip(state, text) {
-      var element = state.element;
-      if (state.ownedTitle !== null && element.getAttribute("title") !== state.ownedTitle) state.ownedTitle = null;
-      if (!text) {
-        if (state.ownedTitle !== null) element.removeAttribute("title");
-        state.ownedTitle = null;
-      } else if (state.ownedTitle !== null || !element.hasAttribute("title")) {
-        if (element.getAttribute("title") !== text) element.setAttribute("title", text);
-        state.ownedTitle = text;
-      }
-    }
-    function cycle(_x3) {
-      return _cycle.apply(this, arguments);
-    }
-    function _cycle() {
-      _cycle = _asyncToGenerator6(/* @__PURE__ */ _regenerator6().m(function _callee3(state) {
-        var measured, placements, revision, current, duration, completion, result, _t2;
-        return _regenerator6().w(function(_context3) {
-          while (1) switch (_context3.p = _context3.n) {
-            case 0:
-              measured = state.measured, placements = state.placements;
-              revision = state.revision;
-              current = function current2() {
-                return states.get(state.element) === state && revision === state.revision;
-              };
-              state.timer = null;
-              if (current()) {
-                _context3.n = 1;
-                break;
-              }
-              return _context3.a(2);
-            case 1:
-              state.remaining = 0;
-              if (canRun(state)) {
-                _context3.n = 2;
-                break;
-              }
-              pause(state);
-              return _context3.a(2);
-            case 2:
-              state.running = true;
-              state.started = void 0;
-              _context3.p = 3;
-              if (!(state.phase === "end")) {
-                _context3.n = 5;
-                break;
-              }
-              _context3.n = 4;
-              return api.waitLayout.update(state.cycleId, function() {
-                if (!current()) return;
-                state.wrapper.style.transition = "none";
-                state.wrapper.setAttribute(contentAttribute, "top-left:top-left");
-                state.x = 0;
-                freezeFade(state);
-                anchor2.place(state.wrapper, placements.start);
-                state.phase = "wait";
-                state.running = false;
-                state.remaining = measured.delay;
-                if (canRun(state)) wait(state);
-                else pause(state);
-              });
-            case 4:
-              return _context3.a(2);
-            case 5:
-              state.phase = "travel";
-              duration = Math.abs(placements.end.selected.x - state.x) / measured.speed * 1e3;
-              _context3.n = 6;
-              return api.waitLayout.read(state.cycleId, function() {
-                root2.getComputedStyle(state.viewport).getPropertyValue(offsetProperty);
-                return root2.getComputedStyle(state.wrapper).transform;
-              });
-            case 6:
-              if (current()) {
-                _context3.n = 7;
-                break;
-              }
-              return _context3.a(2);
-            case 7:
-              if (canRun(state)) {
-                _context3.n = 8;
-                break;
-              }
-              pause(state);
-              return _context3.a(2);
-            case 8:
-              state.from = state.x;
-              state.duration = duration;
-              state.elapsed = 0;
-              state.animation = null;
-              state.controlled = api.motion.supported(state.wrapper);
-              state.started = now();
-              completion = api.motion.run(state.viewport, {
-                id: state.motionId,
-                subtree: true,
-                nativeDuration: duration,
-                maxFPS: api.layoutMaxFPS(state.element),
-                abort: function abort() {
-                  rememberProgress(state);
-                  return !current();
-                },
-                apply: function apply() {
-                  state.wrapper.style.transition = "transform ".concat(duration, "ms linear");
-                  state.viewport.style.transition = "".concat(offsetProperty, " ").concat(duration, "ms linear");
-                  state.viewport.style.setProperty(offsetProperty, "".concat(placements.distance, "px"));
-                  state.wrapper.setAttribute(contentAttribute, "bottom-right:bottom-right");
-                  anchor2.place(state.wrapper, placements.end);
-                }
-              });
-              _context3.n = 9;
-              return api.waitLayout.read(state.cycleId, function() {
-                var _state$wrapper$getAni, _state$wrapper;
-                if (current()) state.animation = ((_state$wrapper$getAni = (_state$wrapper = state.wrapper).getAnimations) === null || _state$wrapper$getAni === void 0 ? void 0 : _state$wrapper$getAni.call(_state$wrapper).find(function(animation) {
-                  return animation.transitionProperty === "transform";
-                })) || null;
-              });
-            case 9:
-              _context3.n = 10;
-              return completion;
-            case 10:
-              result = _context3.v;
-              if (!(!current() || result.status !== "completed")) {
-                _context3.n = 11;
-                break;
-              }
-              return _context3.a(2);
-            case 11:
-              _context3.n = 12;
-              return api.waitLayout.update(state.cycleId, function() {
-                if (!current()) return;
-                state.wrapper.style.transition = "none";
-                anchor2.place(state.wrapper, placements.end);
-                state.running = false;
-                state.x = placements.end.selected.x;
-                freezeFade(state);
-                state.animation = null;
-                state.phase = "end";
-                state.remaining = measured.delay;
-                if (canRun(state)) wait(state);
-                else pause(state);
-              });
-            case 12:
-              _context3.n = 14;
-              break;
-            case 13:
-              _context3.p = 13;
-              _t2 = _context3.v;
-              if (current()) api.diagnostics.error(api.diagnostics.ERROR_EXTENSION_TRANSITION, {
-                extension: "overflow-marquee",
-                element: state.element,
-                cause: _t2
-              });
-            case 14:
-              _context3.p = 14;
-              if (current()) state.running = false;
-              return _context3.f(14);
-            case 15:
-              return _context3.a(2);
-          }
-        }, _callee3, null, [[3, 13, 14, 15]]);
-      }));
-      return _cycle.apply(this, arguments);
-    }
-    function stop(state) {
-      state.revision++;
-      if (state.timer !== null) root2.clearTimeout(state.timer);
-      state.timer = null;
-      state.running = false;
-      api.motion.cancel(state.motionId);
-      api.waitLayout.cancel(state.cycleId);
-      state.animation = null;
-    }
-    function unmount(_x4) {
-      return _unmount.apply(this, arguments);
-    }
-    function _unmount() {
-      _unmount = _asyncToGenerator6(/* @__PURE__ */ _regenerator6().m(function _callee4(element) {
-        var _state$resize3, _state$intersection3;
-        var state, _i4, _arr3, name, _observer, _root$document$fonts2, _root$document$fonts3, _i5, _arr4, _name;
-        return _regenerator6().w(function(_context4) {
-          while (1) switch (_context4.n) {
-            case 0:
-              state = states.get(element);
-              if (state) {
-                _context4.n = 1;
-                break;
-              }
-              return _context4.a(2);
-            case 1:
-              states.delete(element);
-              stop(state);
-              api.waitLayout.cancel(state.layoutId);
-              (_state$resize3 = state.resize) === null || _state$resize3 === void 0 || _state$resize3.disconnect();
-              (_state$intersection3 = state.intersection) === null || _state$intersection3 === void 0 || _state$intersection3.disconnect();
-              for (_i4 = 0, _arr3 = ["mouseenter", "mouseleave", "focusin", "focusout"]; _i4 < _arr3.length; _i4++) {
-                name = _arr3[_i4];
-                element.removeEventListener(name, state.onInteraction);
-              }
-              _context4.n = 2;
-              return anchor2.unmount(state.wrapper);
-            case 2:
-              unwrap(state);
-              tooltip(state, null);
-              state.memory.restore();
-              if (!states.size) {
-                (_observer = observer) === null || _observer === void 0 || _observer.disconnect();
-                observer = null;
-                root2.document.removeEventListener("visibilitychange", refreshAll);
-                for (_i5 = 0, _arr4 = ["transitionend", "transitioncancel", "animationstart", "animationend", "animationcancel"]; _i5 < _arr4.length; _i5++) {
-                  _name = _arr4[_i5];
-                  root2.document.removeEventListener(_name, motionChanged, true);
-                }
-                root2.removeEventListener("resize", refreshAll);
-                root2.removeEventListener("scroll", refreshAll, true);
-                (_root$document$fonts2 = root2.document.fonts) === null || _root$document$fonts2 === void 0 || (_root$document$fonts3 = _root$document$fonts2.removeEventListener) === null || _root$document$fonts3 === void 0 || _root$document$fonts3.call(_root$document$fonts2, "loadingdone", refreshAll);
-                listenMedia(false);
-              }
-            case 3:
-              return _context4.a(2);
-          }
-        }, _callee4);
-      }));
-      return _unmount.apply(this, arguments);
-    }
-    function destroy() {
-      return _destroy.apply(this, arguments);
-    }
-    function _destroy() {
-      _destroy = _asyncToGenerator6(/* @__PURE__ */ _regenerator6().m(function _callee5() {
-        var _i6, _Array$from2, _element;
-        return _regenerator6().w(function(_context5) {
-          while (1) switch (_context5.n) {
-            case 0:
-              _i6 = 0, _Array$from2 = Array.from(states.keys());
-            case 1:
-              if (!(_i6 < _Array$from2.length)) {
-                _context5.n = 3;
-                break;
-              }
-              _element = _Array$from2[_i6];
-              _context5.n = 2;
-              return unmount(_element);
-            case 2:
-              _i6++;
-              _context5.n = 1;
-              break;
-            case 3:
-              return _context5.a(2);
-          }
-        }, _callee5);
-      }));
-      return _destroy.apply(this, arguments);
-    }
-  }
-  var init_create_overflow_marquee = __esm({
-    "src/internal/create-overflow-marquee.js": function() {
-      init_parse_overflow_marquee_limit();
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-    }
-  });
-
-  // src/aellux.ext.overflow-marquee.js
-  var aellux_ext_overflow_marquee_exports = {};
-  function _typeof9(o) {
-    "@babel/helpers - typeof";
-    return _typeof9 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
-      return typeof o2;
-    } : function(o2) {
-      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof9(o);
-  }
-  function _regenerator7() {
-    /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
-    var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag";
-    function i(r2, n2, o2, i2) {
-      var c2 = n2 && n2.prototype instanceof Generator ? n2 : Generator, u2 = Object.create(c2.prototype);
-      return _regeneratorDefine27(u2, "_invoke", (function(r3, n3, o3) {
-        var i3, c3, u3, f2 = 0, p = o3 || [], y = false, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d2(t2, r4) {
-          return i3 = t2, c3 = 0, u3 = e, G.n = r4, a;
-        } };
-        function d(r4, n4) {
-          for (c3 = r4, u3 = n4, t = 0; !y && f2 && !o4 && t < p.length; t++) {
-            var o4, i4 = p[t], d2 = G.p, l = i4[2];
-            r4 > 3 ? (o4 = l === n4) && (u3 = i4[(c3 = i4[4]) ? 5 : (c3 = 3, 3)], i4[4] = i4[5] = e) : i4[0] <= d2 && ((o4 = r4 < 2 && d2 < i4[1]) ? (c3 = 0, G.v = n4, G.n = i4[1]) : d2 < l && (o4 = r4 < 3 || i4[0] > n4 || n4 > l) && (i4[4] = r4, i4[5] = n4, G.n = l, c3 = 0));
-          }
-          if (o4 || r4 > 1) return a;
-          throw y = true, n4;
-        }
-        return function(o4, p2, l) {
-          if (f2 > 1) throw TypeError("Generator is already running");
-          for (y && 1 === p2 && d(p2, l), c3 = p2, u3 = l; (t = c3 < 2 ? e : u3) || !y; ) {
-            i3 || (c3 ? c3 < 3 ? (c3 > 1 && (G.n = -1), d(c3, u3)) : G.n = u3 : G.v = u3);
-            try {
-              if (f2 = 2, i3) {
-                if (c3 || (o4 = "next"), t = i3[o4]) {
-                  if (!(t = t.call(i3, u3))) throw TypeError("iterator result is not an object");
-                  if (!t.done) return t;
-                  u3 = t.value, c3 < 2 && (c3 = 0);
-                } else 1 === c3 && (t = i3.return) && t.call(i3), c3 < 2 && (u3 = TypeError("The iterator does not provide a '" + o4 + "' method"), c3 = 1);
-                i3 = e;
-              } else if ((t = (y = G.n < 0) ? u3 : r3.call(n3, G)) !== a) break;
-            } catch (t2) {
-              i3 = e, c3 = 1, u3 = t2;
-            } finally {
-              f2 = 1;
-            }
-          }
-          return { value: t, done: y };
-        };
-      })(r2, o2, i2), true), u2;
-    }
-    var a = {};
-    function Generator() {
-    }
-    function GeneratorFunction() {
-    }
-    function GeneratorFunctionPrototype() {
-    }
-    t = Object.getPrototypeOf;
-    var c = [][n] ? t(t([][n]())) : (_regeneratorDefine27(t = {}, n, function() {
-      return this;
-    }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c);
-    function f(e2) {
-      return Object.setPrototypeOf ? Object.setPrototypeOf(e2, GeneratorFunctionPrototype) : (e2.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine27(e2, o, "GeneratorFunction")), e2.prototype = Object.create(u), e2;
-    }
-    return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine27(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine27(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine27(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine27(u), _regeneratorDefine27(u, o, "Generator"), _regeneratorDefine27(u, n, function() {
-      return this;
-    }), _regeneratorDefine27(u, "toString", function() {
-      return "[object Generator]";
-    }), (_regenerator7 = function _regenerator9() {
-      return { w: i, m: f };
-    })();
-  }
-  function _regeneratorDefine27(e, r, n, t) {
-    var i = Object.defineProperty;
-    try {
-      i({}, "", {});
-    } catch (e2) {
-      i = 0;
-    }
-    _regeneratorDefine27 = function _regeneratorDefine(e2, r2, n2, t2) {
-      function o(r3, n3) {
-        _regeneratorDefine27(e2, r3, function(e3) {
-          return this._invoke(r3, n3, e3);
-        });
-      }
-      r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
-    }, _regeneratorDefine27(e, r, n, t);
-  }
-  function ownKeys4(e, r) {
-    var t = Object.keys(e);
-    if (Object.getOwnPropertySymbols) {
-      var o = Object.getOwnPropertySymbols(e);
-      r && (o = o.filter(function(r2) {
-        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
-      })), t.push.apply(t, o);
-    }
-    return t;
-  }
-  function _objectSpread4(e) {
-    for (var r = 1; r < arguments.length; r++) {
-      var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys4(Object(t), true).forEach(function(r2) {
-        _defineProperty4(e, r2, t[r2]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys4(Object(t)).forEach(function(r2) {
-        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
-      });
-    }
-    return e;
-  }
-  function _defineProperty4(e, r, t) {
-    return (r = _toPropertyKey5(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
-  }
-  function _toPropertyKey5(t) {
-    var i = _toPrimitive5(t, "string");
-    return "symbol" == _typeof9(i) ? i : i + "";
-  }
-  function _toPrimitive5(t, r) {
-    if ("object" != _typeof9(t) || !t) return t;
-    var e = t[Symbol.toPrimitive];
-    if (void 0 !== e) {
-      var i = e.call(t, r || "default");
-      if ("object" != _typeof9(i)) return i;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return ("string" === r ? String : Number)(t);
-  }
-  function asyncGeneratorStep7(n, t, e, r, o, a, c) {
-    try {
-      var i = n[a](c), u = i.value;
-    } catch (n2) {
-      return void e(n2);
-    }
-    i.done ? t(u) : Promise.resolve(u).then(r, o);
-  }
-  function _asyncToGenerator7(n) {
-    return function() {
-      var t = this, e = arguments;
-      return new Promise(function(r, o) {
-        var a = n.apply(t, e);
-        function _next(n2) {
-          asyncGeneratorStep7(a, r, o, _next, _throw, "next", n2);
-        }
-        function _throw(n2) {
-          asyncGeneratorStep7(a, r, o, _next, _throw, "throw", n2);
-        }
-        _next(void 0);
-      });
-    };
-  }
-  var init_aellux_ext_overflow_marquee = __esm({
-    "src/aellux.ext.overflow-marquee.js": function() {
-      init_create_overflow_marquee();
+  var init_aellux_ext_viewport = __esm({
+    "src/aellux.ext.viewport.js": function() {
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
-        var api = root2.AelluxJs;
-        var extensionName = "overflow-marquee";
-        if (!api) throw new Error("[aellux.js] Load the boot script before the overflow-marquee extension.");
-        var marquee = null, placements = null;
-        api.extAttach(extensionName, {
+        var AelluxJs2 = root2.AelluxJs;
+        if (!AelluxJs2) throw new Error("[aellux.js] Load the boot script before the viewport extension.");
+        var extensionName = "viewport";
+        var attribute = AelluxJs2.attr(extensionName);
+        var targetAttribute = AelluxJs2.attr("viewport-target");
+        var properties = ["--ae-viewport-x", "--ae-viewport-y", "--ae-viewport-visible"];
+        var EVENT_EPSILON = 1e-6;
+        var document2 = root2.document;
+        var states = /* @__PURE__ */ new Map();
+        var groups = /* @__PURE__ */ new Map();
+        var resizeTargets = /* @__PURE__ */ new Map();
+        var owners = /* @__PURE__ */ new Map();
+        var writtenStyles = /* @__PURE__ */ new WeakMap();
+        var nextLayoutId = 6e6;
+        var mutations = null, resizeObserver = null;
+        AelluxJs2.extAttach(extensionName, {
           init: init,
           destroy: destroy
         });
         function init() {
-          return _init.apply(this, arguments);
+          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray7(properties.map(function(name) {
+            return {
+              name: name,
+              syntax: "<number>",
+              initialValue: "0",
+              inherits: false
+            };
+          })));
+          AelluxJs2.mountManager.add({
+            extensionName: extensionName,
+            selector: "[".concat(attribute, "]"),
+            mount: mount,
+            update: update,
+            unmount: unmount
+          });
         }
-        function _init() {
-          _init = _asyncToGenerator7(/* @__PURE__ */ _regenerator7().m(function _callee() {
-            var anchor2;
-            return _regenerator7().w(function(_context) {
+        function destroy() {
+          var _iterator = _createForOfIteratorHelper14(states.keys()), _step;
+          try {
+            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+              var element = _step.value;
+              unmount(element);
+            }
+          } catch (err) {
+            _iterator.e(err);
+          } finally {
+            _iterator.f();
+          }
+          AelluxJs2.mountManager.remove({
+            extensionName: extensionName
+          });
+        }
+        function mount(element) {
+          if (states.has(element)) return;
+          var state = {
+            element: element,
+            group: null,
+            configuration: null,
+            axes: "both",
+            target: null,
+            memories: [],
+            targetWarning: null,
+            conflict: null,
+            values: [],
+            snapshot: null,
+            unmountRequest: null,
+            resizeTargets: /* @__PURE__ */ new Set()
+          };
+          states.set(element, state);
+          if (states.size === 1) startObserving();
+          join(state, document2);
+          return update(element);
+        }
+        function update(_x) {
+          return _update.apply(this, arguments);
+        }
+        function _update() {
+          _update = _asyncToGenerator6(/* @__PURE__ */ _regenerator6().m(function _callee(element) {
+            var state, group;
+            return _regenerator6().w(function(_context) {
               while (1) switch (_context.n) {
                 case 0:
-                  if (!api.registry.ext.anchor) api.ext("anchor");
-                  _context.n = 1;
-                  return api.wait("anchor");
-                case 1:
-                  anchor2 = _context.v;
-                  if (anchor2 !== null && anchor2 !== void 0 && anchor2.createPlacementMap) {
-                    _context.n = 2;
+                  state = states.get(element);
+                  if (state) {
+                    _context.n = 1;
                     break;
                   }
-                  throw new Error("[aellux.js] Overflow Marquee requires Anchor's placement map.");
+                  return _context.a(2);
+                case 1:
+                  group = state.group;
+                  _context.n = 2;
+                  return schedule(group);
                 case 2:
-                  placements = anchor2.createPlacementMap();
-                  marquee = createOverflowMarquee(root2, api, _objectSpread4(_objectSpread4({}, placements), {}, {
-                    measure: function measure(element, end) {
-                      return placements.measure(element, end ? "bottom-right:bottom-right" : "top-left:top-left");
-                    }
-                  }));
-                  api.registerCssProperty({
-                    name: "--ae-overflow-marquee-speed",
-                    syntax: "<number>",
-                    initialValue: "30"
-                  }, {
-                    name: "--ae-overflow-marquee-delay",
-                    syntax: "<time>",
-                    initialValue: "1200ms"
-                  }, {
-                    name: "--ae-overflow-marquee-fade-size",
-                    syntax: "<length>",
-                    initialValue: "16px"
-                  }, {
-                    name: "--ae-overflow-marquee-offset",
-                    syntax: "<length>",
-                    initialValue: "0px",
-                    inherits: false
-                  });
-                  api.mountManager.add({
-                    extensionName: extensionName,
-                    selector: marquee.selector,
-                    mount: marquee.mount,
-                    unmount: marquee.unmount,
-                    update: marquee.update
-                  });
+                  if (states.get(element) === state && state.group !== group) {
+                    _context.n = 1;
+                    break;
+                  }
                 case 3:
                   return _context.a(2);
               }
             }, _callee);
           }));
-          return _init.apply(this, arguments);
+          return _update.apply(this, arguments);
         }
-        function destroy() {
-          return _destroy.apply(this, arguments);
+        function unmount(element) {
+          var state = states.get(element);
+          if (!state) return;
+          states.delete(element);
+          leave(state);
+          observeSizes(state, /* @__PURE__ */ new Set());
+          releaseTarget(state);
+          if (!states.size) stopObserving();
         }
-        function _destroy() {
-          _destroy = _asyncToGenerator7(/* @__PURE__ */ _regenerator7().m(function _callee2() {
-            var _marquee, _placements;
-            return _regenerator7().w(function(_context2) {
+        function startObserving() {
+          AelluxJs2.onEvent(root2, "$resize", scheduleAll);
+          AelluxJs2.onEvent(document2, "$load", scheduleAll, true);
+          AelluxJs2.onEvent(document2, AelluxJs2.eventName("Layout"), onLayout);
+          AelluxJs2.onEvent(document2, AelluxJs2.eventName("BeforeUnmount"), onBeforeUnmount);
+          if (root2.ResizeObserver) resizeObserver = new root2.ResizeObserver(scheduleAll);
+          if (root2.MutationObserver) {
+            mutations = new root2.MutationObserver(function(records) {
+              if (records.some(function(record) {
+                return record.type !== "attributes" || record.attributeName !== "style" || !writtenStyles.has(record.target) || record.target.getAttribute("style") !== writtenStyles.get(record.target);
+              })) scheduleAll();
+            });
+            mutations.observe(document2, {
+              childList: true,
+              subtree: true,
+              characterData: true,
+              attributes: true,
+              attributeFilter: [attribute, targetAttribute, "id", "class", "style", "hidden", "open", "width", "height", "src"]
+            });
+          }
+        }
+        function stopObserving() {
+          var _mutations, _resizeObserver;
+          AelluxJs2.offEvent(root2, "$resize", scheduleAll);
+          AelluxJs2.offEvent(document2, "$load", scheduleAll, true);
+          AelluxJs2.offEvent(document2, AelluxJs2.eventName("Layout"), onLayout);
+          AelluxJs2.offEvent(document2, AelluxJs2.eventName("BeforeUnmount"), onBeforeUnmount);
+          (_mutations = mutations) === null || _mutations === void 0 || _mutations.disconnect();
+          (_resizeObserver = resizeObserver) === null || _resizeObserver === void 0 || _resizeObserver.disconnect();
+          mutations = resizeObserver = null;
+          resizeTargets.clear();
+        }
+        function onLayout(event) {
+          var _event$detail;
+          var duration = Number((_event$detail = event.detail) === null || _event$detail === void 0 ? void 0 : _event$detail.durationMs);
+          var _iterator2 = _createForOfIteratorHelper14(groups.values()), _step2;
+          try {
+            for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+              var group = _step2.value;
+              if (Number.isFinite(duration) && duration > 0) group.layoutUntil = Math.max(group.layoutUntil, root2.performance.now() + duration);
+              schedule(group);
+            }
+          } catch (err) {
+            _iterator2.e(err);
+          } finally {
+            _iterator2.f();
+          }
+        }
+        function onBeforeUnmount(event) {
+          var _event$detail2 = event.detail, subtree = _event$detail2.root, extensions = _event$detail2.extensions, detachedOnly = _event$detail2.detachedOnly;
+          if (extensions && !extensions.includes(extensionName)) return;
+          var _iterator3 = _createForOfIteratorHelper14(states.values()), _step3;
+          try {
+            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+              var state = _step3.value;
+              if (detachedOnly && state.element.isConnected) continue;
+              if (state.element === subtree || subtree.contains(state.element) || subtree === document2 && !state.element.isConnected) state.unmountRequest = event;
+            }
+          } catch (err) {
+            _iterator3.e(err);
+          } finally {
+            _iterator3.f();
+          }
+        }
+        function current(state, group) {
+          return states.get(state.element) === state && state.group === group && state.element.isConnected && state.element.hasAttribute(attribute) && (!state.unmountRequest || state.unmountRequest.defaultPrevented);
+        }
+        function scheduleAll() {
+          var _iterator4 = _createForOfIteratorHelper14(groups.values()), _step4;
+          try {
+            for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+              var group = _step4.value;
+              schedule(group);
+            }
+          } catch (err) {
+            _iterator4.e(err);
+          } finally {
+            _iterator4.f();
+          }
+        }
+        function join(state, reference) {
+          var _state$group, _group$intersection;
+          if (((_state$group = state.group) === null || _state$group === void 0 ? void 0 : _state$group.reference) === reference) return;
+          leave(state);
+          var group = groups.get(reference);
+          if (!group) {
+            group = {
+              reference: reference,
+              states: /* @__PURE__ */ new Set(),
+              id: nextLayoutId++,
+              active: true,
+              pending: null,
+              dirty: false,
+              timer: null,
+              layoutUntil: 0,
+              intersection: null
+            };
+            group.onScroll = function() {
+              return schedule(group);
+            };
+            AelluxJs2.onEvent(reference === document2 ? root2 : reference, "$scroll", group.onScroll, {
+              passive: true
+            });
+            if (root2.IntersectionObserver) {
+              group.intersection = new root2.IntersectionObserver(group.onScroll, {
+                root: reference === document2 ? null : reference,
+                threshold: [0, 1e-6, 1]
+              });
+            }
+            groups.set(reference, group);
+          }
+          state.group = group;
+          group.states.add(state);
+          (_group$intersection = group.intersection) === null || _group$intersection === void 0 || _group$intersection.observe(state.element);
+        }
+        function leave(state) {
+          var _group$intersection2, _group$intersection3;
+          var group = state.group;
+          if (!group) return;
+          group.states.delete(state);
+          (_group$intersection2 = group.intersection) === null || _group$intersection2 === void 0 || _group$intersection2.unobserve(state.element);
+          state.group = null;
+          if (group.states.size) return;
+          group.active = false;
+          AelluxJs2.waitLayout.cancel(group.id);
+          if (group.timer !== null) root2.clearTimeout(group.timer);
+          (_group$intersection3 = group.intersection) === null || _group$intersection3 === void 0 || _group$intersection3.disconnect();
+          AelluxJs2.offEvent(group.reference === document2 ? root2 : group.reference, "$scroll", group.onScroll);
+          groups.delete(group.reference);
+        }
+        function schedule(group) {
+          if (!(group !== null && group !== void 0 && group.active)) return;
+          if (group.pending) {
+            group.dirty = true;
+            return group.pending;
+          }
+          group.pending = refresh(group).catch(function(error) {
+            group.dirty = false;
+            group.layoutUntil = 0;
+            throw error;
+          }).finally(function() {
+            group.pending = null;
+            if (!group.active) return;
+            if (group.dirty) {
+              group.dirty = false;
+              schedule(group);
+            } else if (root2.performance.now() < group.layoutUntil && group.timer === null) {
+              group.timer = root2.setTimeout(function() {
+                group.timer = null;
+                schedule(group);
+              }, 16);
+            }
+          });
+          group.pending.catch(function(error) {
+            return reportError(group, "refresh", error);
+          });
+          return group.pending;
+        }
+        function reportError(group, operation, error) {
+          var element = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : group.reference;
+          AelluxJs2.dispatch("ViewportError", {
+            detail: {
+              error: error,
+              operation: operation,
+              reference: group.reference,
+              elements: operation === "unmount" ? [element] : Array.from(group.states, function(state) {
+                return state.element;
+              })
+            }
+          });
+          AelluxJs2.diagnostics.error(operation === "unmount" ? AelluxJs2.diagnostics.ERROR_EXTENSION_UNMOUNT : AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
+            extension: extensionName,
+            cause: error,
+            operation: operation,
+            element: element
+          });
+        }
+        function refresh(_x2) {
+          return _refresh.apply(this, arguments);
+        }
+        function _refresh() {
+          _refresh = _asyncToGenerator6(/* @__PURE__ */ _regenerator6().m(function _callee2(group) {
+            var measurements;
+            return _regenerator6().w(function(_context2) {
               while (1) switch (_context2.n) {
                 case 0:
                   _context2.n = 1;
-                  return (_marquee = marquee) === null || _marquee === void 0 ? void 0 : _marquee.destroy();
-                case 1:
-                  (_placements = placements) === null || _placements === void 0 || _placements.destroy();
-                  api.mountManager.remove({
-                    extensionName: extensionName
+                  return AelluxJs2.waitLayout.read(group.id, function() {
+                    return measure(group);
                   });
-                  marquee = placements = null;
+                case 1:
+                  measurements = _context2.v;
+                  if (!(!group.active || !measurements)) {
+                    _context2.n = 2;
+                    break;
+                  }
+                  return _context2.a(2);
                 case 2:
+                  _context2.n = 3;
+                  return AelluxJs2.waitLayout.update(group.id, function() {
+                    var _iterator9 = _createForOfIteratorHelper14(measurements), _step9;
+                    try {
+                      var _loop = function _loop2() {
+                        var _step9$value = _step9.value, state = _step9$value.state, target = _step9$value.target, values = _step9$value.values, snapshot = _step9$value.snapshot, changed = _step9$value.changed;
+                        if (states.get(state.element) !== state || state.group !== group) return 0;
+                        if (values === null) {
+                          AelluxJs2.mountManager.unmount(state.element, extensionName).catch(function(error) {
+                            return reportError(group, "unmount", error, state.element);
+                          });
+                          return 0;
+                        }
+                        if (!current(state, group)) return 0;
+                        selectTarget(state, target !== null && target !== void 0 && target.isConnected ? target : null);
+                        for (var index = 0; state.target && index < properties.length; index++) {
+                          if (values[index] === state.values[index]) continue;
+                          if (values[index] === null) state.memories[index].restore();
+                          else state.target.style.setProperty(properties[index], String(values[index]), state.memories[index].cssProperties[properties[index]].priority);
+                        }
+                        if (state.target) {
+                          state.values = values;
+                          writtenStyles.set(state.target, state.target.getAttribute("style"));
+                        }
+                        if (changed) {
+                          var previous = state.snapshot;
+                          state.snapshot = snapshot;
+                          var initial = previous === null;
+                          var emit = function emit2(name) {
+                            return AelluxJs2.dispatchFrom(state.element, name, {
+                              bubbles: true,
+                              composed: true,
+                              cancelable: false,
+                              detail: _objectSpread3(_objectSpread3({}, snapshot), {}, {
+                                previous: previous && _objectSpread3({}, previous),
+                                initial: initial
+                              })
+                            });
+                          };
+                          emit("ViewportChange");
+                          if (current(state, group) && snapshot.measurable && snapshot.state !== (previous === null || previous === void 0 ? void 0 : previous.state)) {
+                            if (snapshot.state === "inside") emit("ViewportFullyInside");
+                            else if (snapshot.state === "outside") emit("ViewportFullyOutside");
+                          }
+                        }
+                      }, _ret;
+                      for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+                        _ret = _loop();
+                        if (_ret === 0) continue;
+                      }
+                    } catch (err) {
+                      _iterator9.e(err);
+                    } finally {
+                      _iterator9.f();
+                    }
+                  });
+                case 3:
                   return _context2.a(2);
               }
             }, _callee2);
           }));
-          return _destroy.apply(this, arguments);
+          return _refresh.apply(this, arguments);
+        }
+        function measure(group) {
+          var measurements = [];
+          var viewport2;
+          for (var _i = 0, _Array$from = Array.from(group.states); _i < _Array$from.length; _i++) {
+            var state = _Array$from[_i];
+            var element = state.element;
+            if (!element.isConnected) continue;
+            if (!element.hasAttribute(attribute)) {
+              measurements.push({
+                state: state,
+                values: null
+              });
+              continue;
+            }
+            var targets = /* @__PURE__ */ new Set([element]);
+            var reference = document2;
+            for (var parent = element.parentElement; parent; parent = parent.parentElement) {
+              targets.add(parent);
+              var _iterator5 = _createForOfIteratorHelper14(parent.children), _step5;
+              try {
+                for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+                  var sibling = _step5.value;
+                  targets.add(sibling);
+                }
+              } catch (err) {
+                _iterator5.e(err);
+              } finally {
+                _iterator5.f();
+              }
+              var rootStyle = parent === document2.body ? root2.getComputedStyle(document2.documentElement) : null;
+              var propagatedBody = rootStyle && rootStyle.overflowX === "visible" && rootStyle.overflowY === "visible";
+              if (reference === document2 && parent !== (document2.scrollingElement || document2.documentElement) && !propagatedBody && scrollable(parent)) reference = parent;
+            }
+            observeSizes(state, targets);
+            configure(state);
+            if (reference !== group.reference) {
+              join(state, reference);
+              schedule(state.group);
+              continue;
+            }
+            if (!viewport2) viewport2 = viewportRect(reference);
+            var _valuesFor = valuesFor(state, viewport2), values = _valuesFor.values, snapshot = _valuesFor.snapshot;
+            measurements.push({
+              state: state,
+              target: resolveTarget(state),
+              values: values,
+              snapshot: snapshot,
+              changed: geometryChanged(state.snapshot, snapshot)
+            });
+          }
+          return measurements;
+        }
+        function configure(state) {
+          var value = state.element.getAttribute(attribute);
+          if (value === state.configuration) return;
+          state.configuration = value;
+          state.axes = value === "x" || value === "y" ? value : "both";
+          if (value !== "" && value !== "both" && value !== "x" && value !== "y") {
+            AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CONFIGURATION_VALUE, {
+              extension: extensionName,
+              element: state.element,
+              attribute: attribute,
+              value: value,
+              reason: "Unknown viewport axis; using both.",
+              suggestion: 'Use an empty value, "both", "x", or "y".'
+            });
+          }
+        }
+        function resolveTarget(state) {
+          var value = state.element.getAttribute(targetAttribute);
+          if (value === null) {
+            state.targetWarning = null;
+            return state.element;
+          }
+          var id = value.trim().replace(/^#/, "");
+          var target = id && !/\s/.test(id) ? document2.getElementById(id) : null;
+          if (!target || !target.style) {
+            if (state.targetWarning !== value) AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CONFIGURATION_TARGET, {
+              extension: extensionName,
+              element: state.element,
+              attribute: targetAttribute,
+              value: value,
+              reason: "Viewport target does not exist or is not a styleable element ID.",
+              suggestion: "Use one existing element ID, optionally prefixed with #, or remove the target attribute."
+            });
+            state.targetWarning = value;
+            return null;
+          }
+          state.targetWarning = null;
+          return target;
+        }
+        function releaseTarget(state) {
+          if (!state.target) return;
+          var _iterator6 = _createForOfIteratorHelper14(state.memories), _step6;
+          try {
+            for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+              var memory = _step6.value;
+              memory.restore();
+            }
+          } catch (err) {
+            _iterator6.e(err);
+          } finally {
+            _iterator6.f();
+          }
+          writtenStyles.set(state.target, state.target.getAttribute("style"));
+          owners.delete(state.target);
+          state.target = null;
+          state.memories = [];
+          state.values = [];
+          scheduleAll();
+        }
+        function selectTarget(state, target) {
+          if (state.target === target) return;
+          releaseTarget(state);
+          var owner = owners.get(target);
+          if (owner) {
+            if (state.conflict !== owner) AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_RESOURCE_CONFLICT, {
+              extension: extensionName,
+              element: state.element,
+              attribute: targetAttribute,
+              target: target,
+              property: "--ae-viewport-visible",
+              writers: [owner.element, state.element],
+              reason: "Two Viewport observers publish the same CSS properties on this target.",
+              suggestion: "Use a separate target for each Viewport observer."
+            });
+            state.conflict = owner;
+            return;
+          }
+          state.conflict = null;
+          if (!target) return;
+          owners.set(target, state);
+          state.target = target;
+          state.memories = properties.map(function(property) {
+            return AelluxJs2.persist.element.save(target, [], [property]);
+          });
+        }
+        function scrollable(element) {
+          var style = root2.getComputedStyle(element);
+          return ["X", "Y"].some(function(axis) {
+            var overflow = style["overflow" + axis];
+            return overflow === "auto" || overflow === "scroll" || overflow === "hidden" && element[axis === "X" ? "scrollWidth" : "scrollHeight"] > element[axis === "X" ? "clientWidth" : "clientHeight"];
+          });
+        }
+        function observeSizes(state, targets) {
+          if (!resizeObserver) return;
+          var _iterator7 = _createForOfIteratorHelper14(state.resizeTargets), _step7;
+          try {
+            for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+              var target = _step7.value;
+              if (targets.has(target)) continue;
+              var count = resizeTargets.get(target) - 1;
+              if (count) resizeTargets.set(target, count);
+              else {
+                resizeTargets.delete(target);
+                resizeObserver.unobserve(target);
+              }
+            }
+          } catch (err) {
+            _iterator7.e(err);
+          } finally {
+            _iterator7.f();
+          }
+          var _iterator8 = _createForOfIteratorHelper14(targets), _step8;
+          try {
+            for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+              var _target = _step8.value;
+              if (state.resizeTargets.has(_target)) continue;
+              var _count = resizeTargets.get(_target) || 0;
+              if (!_count) resizeObserver.observe(_target);
+              resizeTargets.set(_target, _count + 1);
+            }
+          } catch (err) {
+            _iterator8.e(err);
+          } finally {
+            _iterator8.f();
+          }
+          state.resizeTargets = targets;
+        }
+        function viewportRect(reference) {
+          if (reference === document2) {
+            var scrolling = document2.scrollingElement || document2.documentElement;
+            return {
+              left: 0,
+              top: 0,
+              width: document2.documentElement.clientWidth || scrolling.clientWidth || root2.innerWidth,
+              height: document2.documentElement.clientHeight || scrolling.clientHeight || root2.innerHeight
+            };
+          }
+          var rect = reference.getBoundingClientRect();
+          var style = root2.getComputedStyle(reference);
+          var borderSize = function borderSize2(axis) {
+            return parseFloat(style[axis]) + (style.boxSizing === "border-box" ? 0 : axis === "width" ? parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) + parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth) : parseFloat(style.paddingTop) + parseFloat(style.paddingBottom) + parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth));
+          };
+          var width = borderSize("width"), height = borderSize("height");
+          var left = parseFloat(style.borderLeftWidth), right = parseFloat(style.borderRightWidth);
+          var top = parseFloat(style.borderTopWidth), bottom = parseFloat(style.borderBottomWidth);
+          var scaleX = rect.width / width, scaleY = rect.height / height;
+          var scrollbarX = Math.max(0, reference.offsetWidth - reference.clientWidth - Math.round(left + right));
+          var scrollbarY = Math.max(0, reference.offsetHeight - reference.clientHeight - Math.round(top + bottom));
+          var leftScrollbar = Math.max(0, reference.clientLeft - Math.round(left));
+          return {
+            left: rect.left + (left + leftScrollbar) * scaleX,
+            top: rect.top + top * scaleY,
+            width: Math.max(0, width - left - right - scrollbarX) * scaleX,
+            height: Math.max(0, height - top - bottom - scrollbarY) * scaleY
+          };
+        }
+        function valuesFor(state, viewport2) {
+          var rect = state.element.getBoundingClientRect();
+          var x = 0, y = 0, visible = 0;
+          var snapshot = {
+            viewport: state.group.reference,
+            x1: null,
+            y1: null,
+            x2: null,
+            y2: null,
+            x: null,
+            y: null,
+            visible: visible,
+            state: null,
+            measurable: false
+          };
+          if ([viewport2.left, viewport2.top, viewport2.width, viewport2.height, rect.left, rect.top, rect.right, rect.bottom, rect.width, rect.height].every(Number.isFinite) && viewport2.width > 0 && viewport2.height > 0 && rect.width > 0 && rect.height > 0) {
+            var centerX = viewport2.left + viewport2.width / 2, centerY = viewport2.top + viewport2.height / 2;
+            var x1 = (rect.left - centerX) * 2 / viewport2.width, x2 = (rect.right - centerX) * 2 / viewport2.width;
+            var y1 = (rect.top - centerY) * 2 / viewport2.height, y2 = (rect.bottom - centerY) * 2 / viewport2.height;
+            if (![x1, y1, x2, y2, (x1 + x2) / 2, (y1 + y2) / 2].every(Number.isFinite)) return {
+              values: [state.axes === "y" ? null : 0, state.axes === "x" ? null : 0, 0],
+              snapshot: snapshot
+            };
+            snapshot.x1 = x1;
+            snapshot.y1 = y1;
+            snapshot.x2 = x2;
+            snapshot.y2 = y2;
+            snapshot.x = (x1 + x2) / 2;
+            snapshot.y = (y1 + y2) / 2;
+            x = clamp3(snapshot.x, -2, 2);
+            y = clamp3(snapshot.y, -2, 2);
+            var width = Math.max(0, Math.min(rect.right, viewport2.left + viewport2.width) - Math.max(rect.left, viewport2.left));
+            var height = Math.max(0, Math.min(rect.bottom, viewport2.top + viewport2.height) - Math.max(rect.top, viewport2.top));
+            visible = clamp3(width / rect.width * (height / rect.height), 0, 1);
+            snapshot.visible = visible;
+            snapshot.measurable = true;
+            snapshot.state = width > 0 && height > 0 ? rect.left >= viewport2.left && rect.top >= viewport2.top && rect.right <= viewport2.left + viewport2.width && rect.bottom <= viewport2.top + viewport2.height ? "inside" : "partial" : "outside";
+          }
+          return {
+            values: [state.axes === "y" ? null : x, state.axes === "x" ? null : y, visible],
+            snapshot: snapshot
+          };
+        }
+        function geometryChanged(previous, snapshot) {
+          if (!previous) return snapshot.measurable;
+          if (snapshot.viewport !== previous.viewport || snapshot.measurable !== previous.measurable || snapshot.state !== previous.state) return true;
+          if (snapshot.measurable && ["x1", "y1", "x2", "y2"].some(function(key) {
+            return [-1, 1].some(function(edge) {
+              return Math.sign(snapshot[key] - edge) !== Math.sign(previous[key] - edge);
+            });
+          })) return true;
+          return ["x1", "y1", "x2", "y2", "x", "y", "visible"].some(function(key) {
+            return Math.abs(snapshot[key] - previous[key]) > EVENT_EPSILON;
+          });
+        }
+        function clamp3(value, minimum, maximum) {
+          return Math.max(minimum, Math.min(maximum, value));
         }
       })(typeof globalThis !== "undefined" ? globalThis : window);
     }
@@ -30721,25 +30292,25 @@
 
   // src/aellux.ext.scrollbox.js
   var aellux_ext_scrollbox_exports = {};
-  function _toConsumableArray7(r) {
-    return _arrayWithoutHoles7(r) || _iterableToArray7(r) || _unsupportedIterableToArray16(r) || _nonIterableSpread7();
+  function _toConsumableArray8(r) {
+    return _arrayWithoutHoles8(r) || _iterableToArray8(r) || _unsupportedIterableToArray16(r) || _nonIterableSpread8();
   }
-  function _nonIterableSpread7() {
+  function _nonIterableSpread8() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray7(r) {
+  function _iterableToArray8(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles7(r) {
+  function _arrayWithoutHoles8(r) {
     if (Array.isArray(r)) return _arrayLikeToArray16(r);
   }
-  function _slicedToArray9(r, e) {
-    return _arrayWithHoles9(r) || _iterableToArrayLimit9(r, e) || _unsupportedIterableToArray16(r, e) || _nonIterableRest9();
+  function _slicedToArray8(r, e) {
+    return _arrayWithHoles8(r) || _iterableToArrayLimit8(r, e) || _unsupportedIterableToArray16(r, e) || _nonIterableRest8();
   }
-  function _nonIterableRest9() {
+  function _nonIterableRest8() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArrayLimit9(r, l) {
+  function _iterableToArrayLimit8(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -30760,7 +30331,7 @@
       return a;
     }
   }
-  function _arrayWithHoles9(r) {
+  function _arrayWithHoles8(r) {
     if (Array.isArray(r)) return r;
   }
   function _createForOfIteratorHelper15(r, e) {
@@ -30880,7 +30451,7 @@
           var _iterator = _createForOfIteratorHelper15(entries), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var _step$value = _slicedToArray9(_step.value, 3), event = _step$value[0], handler = _step$value[1], options = _step$value[2];
+              var _step$value = _slicedToArray8(_step.value, 3), event = _step$value[0], handler = _step$value[1], options = _step$value[2];
               method(target, "$".concat(event), owner[handler], active ? options : options === true || !!(options !== null && options !== void 0 && options.capture));
             }
           } catch (err) {
@@ -30935,13 +30506,13 @@
           layoutEvents.forEach(function(name) {
             return onEvent(root2.document, name, onLayout);
           });
-          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray7(properties.map(function(name) {
+          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray8(properties.map(function(name) {
             return {
               name: name,
               syntax: "<number>",
               initialValue: "0"
             };
-          })).concat(_toConsumableArray7(fadeProperties.map(function(name) {
+          })).concat(_toConsumableArray8(fadeProperties.map(function(name) {
             return {
               name: name,
               syntax: "<length>",
@@ -30952,7 +30523,7 @@
             name: "--ae-scrollbox-fade-size",
             syntax: "<length>",
             initialValue: "16px"
-          }], _toConsumableArray7(scrollbarProperties.map(function(name, index) {
+          }], _toConsumableArray8(scrollbarProperties.map(function(name, index) {
             return {
               name: name,
               syntax: index === 5 ? "block | none" : "<length>",
@@ -31065,7 +30636,7 @@
         }
         function mountScrollbox(element) {
           if (scrollboxes.has(element)) return;
-          elementMemories.set(element, AelluxJs2.persist.element.save(element, [fadeStateAttribute], [].concat(properties, _toConsumableArray7(fadeProperties))));
+          elementMemories.set(element, AelluxJs2.persist.element.save(element, [fadeStateAttribute], [].concat(properties, _toConsumableArray8(fadeProperties))));
           cursorMemories.set(element, AelluxJs2.persist.element.save(element, [], ["cursor"]));
           var elastic = {
             wrapper: null,
@@ -31458,7 +31029,7 @@
           }
           var marker = owned ? null : root2.document.createComment("scrollbar position");
           if (marker) scrollbarElement.before(marker);
-          if (!owned) scrollbarMemories.set(scrollbarElement, AelluxJs2.persist.element.save(scrollbarElement, [], [].concat(scrollbarProperties, _toConsumableArray7(scrollbarThemeProperties))));
+          if (!owned) scrollbarMemories.set(scrollbarElement, AelluxJs2.persist.element.save(scrollbarElement, [], [].concat(scrollbarProperties, _toConsumableArray8(scrollbarThemeProperties))));
           var record = {
             element: scrollbarElement,
             owned: owned,
@@ -32525,7 +32096,7 @@
           var _iterator17 = _createForOfIteratorHelper15(touch.scrollBehaviors), _step17;
           try {
             for (_iterator17.s(); !(_step17 = _iterator17.n()).done; ) {
-              var _step17$value = _slicedToArray9(_step17.value, 2), element = _step17$value[0], _step17$value$ = _step17$value[1], value = _step17$value$.value, priority = _step17$value$.priority;
+              var _step17$value = _slicedToArray8(_step17.value, 2), element = _step17$value[0], _step17$value$ = _step17$value[1], value = _step17$value$.value, priority = _step17$value$.priority;
               if (value) element.style.setProperty("scroll-behavior", value, priority);
               else element.style.removeProperty("scroll-behavior");
             }
@@ -33245,8 +32816,8 @@
     }
   });
 
-  // src/aellux.ext.scrollbox-snap.js
-  var aellux_ext_scrollbox_snap_exports = {};
+  // src/aellux.ext.adaptive.js
+  var aellux_ext_adaptive_exports = {};
   function _createForOfIteratorHelper16(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -33278,711 +32849,7 @@
       }
     } };
   }
-  function _toConsumableArray8(r) {
-    return _arrayWithoutHoles8(r) || _iterableToArray8(r) || _unsupportedIterableToArray17(r) || _nonIterableSpread8();
-  }
-  function _nonIterableSpread8() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _unsupportedIterableToArray17(r, a) {
-    if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray17(r, a);
-      var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray17(r, a) : void 0;
-    }
-  }
-  function _iterableToArray8(r) {
-    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
-  }
-  function _arrayWithoutHoles8(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray17(r);
-  }
-  function _arrayLikeToArray17(r, a) {
-    (null == a || a > r.length) && (a = r.length);
-    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
-    return n;
-  }
-  var init_aellux_ext_scrollbox_snap = __esm({
-    "src/aellux.ext.scrollbox-snap.js": function() {
-      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-      (function(root2) {
-        "use strict";
-        var AelluxJs2 = root2.AelluxJs;
-        var extensionName = "scrollbox-snap";
-        if (!AelluxJs2) throw new Error("[aellux.js] Load the boot script before the scrollbox-snap extension.");
-        var POINTER = "pointer", GESTURE = "gesture", TOUCH = "touch", HORIZONTAL = "x", VERTICAL = "y", FALSE = "false", INSTANT = "instant", SMOOTH = "smooth", START = "start", END = "end", CENTER = "center", SCROLL_EVENT = "$scroll", SCROLL_END_EVENT = "$scrollend", INTERACTION_EVENT = "$AelluxJsScrollboxInteraction", SNAP_GESTURE_EVENT = "$AelluxJsScrollboxSnapGesture", SCROLLBOX_WHEEL_EVENT = "$AelluxJsScrollboxWheel", POINTER_DOWN_EVENT = "$pointerdown", POINTER_UP_EVENT = "$pointerup", POINTER_CANCEL_EVENT = "$pointercancel", TOUCH_START_EVENT = "$touchstart", TOUCH_END_EVENT = "$touchend", TOUCH_CANCEL_EVENT = "$touchcancel";
-        var SNAP_SCROLL_IDLE_MS = 120;
-        var SNAP_TARGET_IDLE_MS = 500;
-        var SNAP_RELEASE_MS = 300;
-        var SNAP_SWIPE_SPEED_PX_MS = 0.5;
-        var SNAP_FLICK_WINDOW_MS = 100;
-        var SNAP_FLICK_FAST_TIME_MS = 50;
-        var SNAP_FLICK_MAX_DISTANCE_PX = 100;
-        var SNAP_FLICK_MIN_DISTANCE_PX = 1;
-        var scrollboxAttribute = AelluxJs2.attr("scrollbox");
-        var wheelAttribute = AelluxJs2.attr("scrollbox-wheel-horizontal");
-        var snapAttribute = AelluxJs2.attr("scrollbox-snap");
-        var itemAttribute = AelluxJs2.attr("snap-item");
-        var elasticAttribute = AelluxJs2.attr("scrollbox-elastic");
-        var readyClass = AelluxJs2.className("snap-ready");
-        var suspendedClass = AelluxJs2.className("snap-suspended");
-        var properties = ["--ae-snap-focus"];
-        var states = /* @__PURE__ */ new Map();
-        var nextLayoutId = 7e6;
-        AelluxJs2.extAttach(extensionName, {
-          init: init,
-          destroy: destroy,
-          next: next,
-          previous: previous,
-          goto: goto
-        });
-        function init() {
-          if (!AelluxJs2.registry.ext.scrollbox) AelluxJs2.ext("scrollbox");
-          return AelluxJs2.wait("scrollbox").then(function(scrollbox2) {
-            if (!scrollbox2) throw new Error("[aellux.js] Scrollbox Snap requires the Scrollbox extension.");
-            AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray8(properties.map(function(name) {
-              return {
-                name: name,
-                syntax: "<number>",
-                initialValue: "0"
-              };
-            })));
-            scrollbox2.registerSnapController({
-              next: next,
-              previous: previous,
-              goto: goto
-            });
-            AelluxJs2.mountManager.add({
-              extensionName: extensionName,
-              selector: "[".concat(scrollboxAttribute, "][").concat(snapAttribute, "]:not([").concat(snapAttribute, '="').concat(FALSE, '"])'),
-              priority: 1,
-              mount: mount,
-              update: update,
-              unmount: unmount,
-              controllers: []
-            });
-          });
-        }
-        function destroy() {
-          var _AelluxJs$ext$scrollb;
-          var _iterator = _createForOfIteratorHelper16(states.keys()), _step;
-          try {
-            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var element = _step.value;
-              unmount(element);
-            }
-          } catch (err) {
-            _iterator.e(err);
-          } finally {
-            _iterator.f();
-          }
-          (_AelluxJs$ext$scrollb = AelluxJs2.ext.scrollbox) === null || _AelluxJs$ext$scrollb === void 0 || _AelluxJs$ext$scrollb.unregisterSnapController({
-            next: next,
-            previous: previous,
-            goto: goto
-          });
-          AelluxJs2.mountManager.remove({
-            extensionName: extensionName
-          });
-        }
-        function mount(element) {
-          if (states.has(element)) return;
-          var state = {
-            element: element,
-            root: null,
-            index: 0,
-            notifiedItem: null,
-            notifiedIndex: null,
-            target: null,
-            targetAxis: null,
-            timeout: null,
-            wheelTimeout: null,
-            edgeWheelTimeout: null,
-            frame: null,
-            activePointers: /* @__PURE__ */ new Set(),
-            activeTouches: /* @__PURE__ */ new Set(),
-            savedItems: /* @__PURE__ */ new Map(),
-            suspensions: /* @__PURE__ */ new Set(),
-            pointerScroll: null,
-            flick: null,
-            release: false,
-            observer: null,
-            resizeObserver: null,
-            disposed: false,
-            valuesLayoutId: nextLayoutId++
-          };
-          state.onScroll = function() {
-            updateValues(state);
-            scheduleSettle(state, state.target !== null && !targetReached(state));
-          };
-          state.onScrollEnd = function(event) {
-            if (event.target !== state.element || state.target !== null && !targetReached(state)) return;
-            finish(state);
-          };
-          state.onPointerDown = function(event) {
-            return beginGesture(state, POINTER, event);
-          };
-          state.onPointerEnd = function(event) {
-            return endGesture(state, POINTER, event);
-          };
-          state.onTouchStart = function(event) {
-            return beginGesture(state, TOUCH, event);
-          };
-          state.onTouchEnd = function(event) {
-            return endGesture(state, TOUCH, event);
-          };
-          state.onBlur = function() {
-            if (!hasActiveGesture(state)) return;
-            state.activePointers.clear();
-            state.activeTouches.clear();
-            state.pointerScroll = null;
-            state.flick = null;
-            endDesktopGesture(state);
-          };
-          state.onScrollboxWheel = function(event) {
-            var _event$detail;
-            if (handleWheel(state, (_event$detail = event.detail) === null || _event$detail === void 0 ? void 0 : _event$detail.event)) event.preventDefault();
-          };
-          state.onInteraction = function(event) {
-            return setSuspension(state, event.detail);
-          };
-          state.onSnapGesture = function(event) {
-            return handlePointerScroll(state, event);
-          };
-          states.set(element, state);
-          AelluxJs2.onEvent(element, SCROLL_EVENT, state.onScroll, {
-            passive: true
-          });
-          AelluxJs2.onEvent(element, SCROLL_END_EVENT, state.onScrollEnd, {
-            passive: true
-          });
-          AelluxJs2.onEvent(element, POINTER_DOWN_EVENT, state.onPointerDown, true);
-          AelluxJs2.onEvent(element, TOUCH_START_EVENT, state.onTouchStart, {
-            passive: true,
-            capture: true
-          });
-          AelluxJs2.onEvent(element, INTERACTION_EVENT, state.onInteraction);
-          AelluxJs2.onEvent(element, SNAP_GESTURE_EVENT, state.onSnapGesture);
-          AelluxJs2.onEvent(element, SCROLLBOX_WHEEL_EVENT, state.onScrollboxWheel);
-          AelluxJs2.onEvent(root2, POINTER_UP_EVENT, state.onPointerEnd, true);
-          AelluxJs2.onEvent(root2, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
-          AelluxJs2.onEvent(root2, TOUCH_END_EVENT, state.onTouchEnd, true);
-          AelluxJs2.onEvent(root2, TOUCH_CANCEL_EVENT, state.onTouchEnd, true);
-          AelluxJs2.onEvent(root2, "$blur", state.onBlur);
-          observe(state);
-          configure(state);
-        }
-        function update(element) {
-          var state = states.get(element);
-          if (state) configure(state);
-        }
-        function unmount(element) {
-          var _state$observer, _state$resizeObserver;
-          var state = states.get(element);
-          if (!state) return;
-          state.disposed = true;
-          AelluxJs2.waitLayout.cancel(state.valuesLayoutId);
-          cancelRelease(state);
-          clearTimer(state, "timeout");
-          clearTimer(state, "wheelTimeout");
-          clearTimer(state, "edgeWheelTimeout");
-          (_state$observer = state.observer) === null || _state$observer === void 0 || _state$observer.disconnect();
-          (_state$resizeObserver = state.resizeObserver) === null || _state$resizeObserver === void 0 || _state$resizeObserver.disconnect();
-          AelluxJs2.offEvent(element, SCROLL_EVENT, state.onScroll);
-          AelluxJs2.offEvent(element, SCROLL_END_EVENT, state.onScrollEnd);
-          AelluxJs2.offEvent(element, POINTER_DOWN_EVENT, state.onPointerDown, true);
-          AelluxJs2.offEvent(element, TOUCH_START_EVENT, state.onTouchStart, true);
-          AelluxJs2.offEvent(element, INTERACTION_EVENT, state.onInteraction);
-          AelluxJs2.offEvent(element, SNAP_GESTURE_EVENT, state.onSnapGesture);
-          AelluxJs2.offEvent(element, SCROLLBOX_WHEEL_EVENT, state.onScrollboxWheel);
-          AelluxJs2.offEvent(root2, POINTER_UP_EVENT, state.onPointerEnd, true);
-          AelluxJs2.offEvent(root2, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
-          AelluxJs2.offEvent(root2, TOUCH_END_EVENT, state.onTouchEnd, true);
-          AelluxJs2.offEvent(root2, TOUCH_CANCEL_EVENT, state.onTouchEnd, true);
-          AelluxJs2.offEvent(root2, "$blur", state.onBlur);
-          restoreItems(state);
-          element.classList.remove(readyClass, suspendedClass);
-          states.delete(element);
-        }
-        function configure(state) {
-          var nextRoot = elasticRoot(state.element);
-          if (state.root !== nextRoot) {
-            restoreItems(state);
-            state.root = nextRoot;
-            state.index = 0;
-            state.notifiedItem = null;
-            state.notifiedIndex = null;
-          }
-          var items = itemsFor(state);
-          if (state.resizeObserver) {
-            state.resizeObserver.disconnect();
-            state.resizeObserver.observe(state.element);
-            var _iterator2 = _createForOfIteratorHelper16(items), _step2;
-            try {
-              for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-                var item = _step2.value;
-                state.resizeObserver.observe(item);
-              }
-            } catch (err) {
-              _iterator2.e(err);
-            } finally {
-              _iterator2.f();
-            }
-          }
-          if (!items.length) {
-            AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_SCROLLBOX_SNAP_ITEMS, {
-              extension: extensionName,
-              element: state.element,
-              attribute: itemAttribute,
-              reason: "No eligible snap items belong to this Scrollbox.",
-              suggestion: "Add data-ae-snap-item to content items inside this Scrollbox, outside nested Scrollboxes."
-            });
-            state.element.classList.remove(readyClass, suspendedClass);
-            return;
-          }
-          state.element.classList.add(readyClass);
-          updateValues(state);
-          if (state.notifiedItem === null) goto(state.element, 0, INSTANT);
-        }
-        function observe(state) {
-          state.observer = new root2.MutationObserver(function() {
-            return configure(state);
-          });
-          state.observer.observe(state.element, {
-            childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: [snapAttribute, itemAttribute, elasticAttribute]
-          });
-          if (root2.ResizeObserver) {
-            state.resizeObserver = new root2.ResizeObserver(function() {
-              return updateValues(state);
-            });
-            state.resizeObserver.observe(state.element);
-          }
-        }
-        function elasticRoot(element) {
-          return Array.from(element.children).find(function(child) {
-            return child.hasAttribute(elasticAttribute);
-          }) || element;
-        }
-        function itemsFor(state) {
-          if (!state.root) return [];
-          return Array.from(state.root.querySelectorAll("[".concat(itemAttribute, "]"))).filter(function(item) {
-            return item.closest("[".concat(scrollboxAttribute, "]")) === state.element;
-          });
-        }
-        function axisFor(state) {
-          return state.element.getAttribute(snapAttribute) === "vertical" ? VERTICAL : HORIZONTAL;
-        }
-        function alignment(item) {
-          var value = item.getAttribute(itemAttribute);
-          if (value === START || value === "left" || value === "top") return START;
-          if (value === END || value === "right" || value === "bottom") return END;
-          return CENTER;
-        }
-        function offset(state, item) {
-          var axis = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : axisFor(state);
-          var free = arguments.length > 3 ? arguments[3] : void 0;
-          var box = arguments.length > 4 && arguments[4] !== void 0 ? arguments[4] : state.element.getBoundingClientRect();
-          var target = arguments.length > 5 && arguments[5] !== void 0 ? arguments[5] : item.getBoundingClientRect();
-          var horizontal = axis === HORIZONTAL;
-          var start = horizontal ? box.left + state.element.clientLeft : box.top + state.element.clientTop;
-          var size = horizontal ? state.element.clientWidth : state.element.clientHeight;
-          var itemStart = horizontal ? target.left : target.top;
-          var itemSize = horizontal ? target.width : target.height;
-          if (free && itemSize > size) return Math.max(itemStart - start, Math.min(itemStart + itemSize - start - size, 0));
-          if (alignment(item) === START) return itemStart - start;
-          if (alignment(item) === END) return itemStart + itemSize - (start + size);
-          return itemStart + itemSize / 2 - (start + size / 2);
-        }
-        function updateValues(state) {
-          if (state.disposed) return;
-          AelluxJs2.waitLayout.sequence(state.valuesLayoutId, {
-            read: function read() {
-              var axis = axisFor(state), element = state.element, root3 = state.root;
-              var rect = element.getBoundingClientRect();
-              var size = axis === HORIZONTAL ? element.clientWidth : element.clientHeight;
-              var values = size ? itemsFor(state).map(function(item) {
-                return {
-                  item: item,
-                  value: Math.max(0, 1 - Math.abs(offset(state, item, axis, false, rect, item.getBoundingClientRect())) / size)
-                };
-              }) : [];
-              return {
-                axis: axis,
-                root: root3,
-                values: values
-              };
-            },
-            update: function update2(measured) {
-              if (state.root !== measured.root || axisFor(state) !== measured.axis) return;
-              var _iterator3 = _createForOfIteratorHelper16(measured.values), _step3;
-              try {
-                for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-                  var _step3$value = _step3.value, item = _step3$value.item, value = _step3$value.value;
-                  if (!state.root.contains(item) || !item.hasAttribute(itemAttribute) || item.closest("[".concat(scrollboxAttribute, "]")) !== state.element) continue;
-                  if (!state.savedItems.has(item)) state.savedItems.set(item, AelluxJs2.persist.element.save(item, [], properties));
-                  if (item.style.getPropertyPriority(properties[0])) item.style.removeProperty(properties[0]);
-                  item.style.setProperty(properties[0], value);
-                }
-              } catch (err) {
-                _iterator3.e(err);
-              } finally {
-                _iterator3.f();
-              }
-            },
-            abort: function abort() {
-              return state.disposed;
-            }
-          }).catch(function(cause) {
-            AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
-              cause: cause,
-              extension: extensionName,
-              element: state.element,
-              method: "update"
-            });
-          });
-        }
-        function restoreItems(state) {
-          var _iterator4 = _createForOfIteratorHelper16(state.savedItems.values()), _step4;
-          try {
-            for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-              var memory = _step4.value;
-              memory.restore();
-            }
-          } catch (err) {
-            _iterator4.e(err);
-          } finally {
-            _iterator4.f();
-          }
-          state.savedItems.clear();
-        }
-        function goto(element, index) {
-          var behavior = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : SMOOTH;
-          var free = arguments.length > 3 ? arguments[3] : void 0;
-          var state = states.get(element), items = state && itemsFor(state);
-          if (!state || state.activeTouches.size || !Number.isInteger(index) || index < 0 || index >= items.length) return false;
-          var axis = axisFor(state), metrics = metricsFor(element);
-          var position = axis === HORIZONTAL ? element.scrollLeft : element.scrollTop;
-          var destination = Math.max(0, Math.min(metrics[axis], position + offset(state, items[index], axis, free)));
-          state.index = index;
-          state.target = destination;
-          state.targetAxis = axis;
-          cancelRelease(state);
-          if (state.release && behavior === SMOOTH) animateRelease(state, position, destination, axis);
-          else scrollTo(state, destination, axis, behavior);
-          if (targetReached(state)) {
-            cancelRelease(state);
-            finish(state);
-          }
-          return true;
-        }
-        function scrollTo(state, position, axis, behavior) {
-          state.element.scrollTo(axis === HORIZONTAL ? {
-            left: position,
-            behavior: behavior
-          } : {
-            top: position,
-            behavior: behavior
-          });
-        }
-        function cancelRelease(state) {
-          if (state.frame !== null) root2.cancelAnimationFrame(state.frame);
-          state.frame = null;
-        }
-        function animateRelease(state, from, to, axis) {
-          var start = root2.performance.now();
-          var _step5 = function step(time) {
-            var progress = Math.max(0, Math.min(1, (time - start) / SNAP_RELEASE_MS));
-            scrollTo(state, from + (to - from) * (1 - Math.pow(1 - progress, 3)), axis, INSTANT);
-            if (progress < 1) state.frame = root2.requestAnimationFrame(_step5);
-            else {
-              cancelRelease(state);
-              finish(state);
-            }
-          };
-          state.frame = root2.requestAnimationFrame(_step5);
-        }
-        function next(element) {
-          var state = states.get(element);
-          return state ? goto(element, Math.min(itemsFor(state).length - 1, selectedIndex(state) + 1)) : false;
-        }
-        function previous(element) {
-          var state = states.get(element);
-          return state ? goto(element, Math.max(0, selectedIndex(state) - 1)) : false;
-        }
-        function selectedIndex(state, free) {
-          var items = itemsFor(state);
-          var axis = axisFor(state), maximum = metricsFor(state.element)[axis];
-          var position = axis === HORIZONTAL ? state.element.scrollLeft : state.element.scrollTop;
-          if (items.length > 1) {
-            if (position <= 1) return 0;
-            if (maximum > 0 && position >= maximum - 1) return items.length - 1;
-          }
-          var nearest = 0, distance = Infinity;
-          for (var index = 0; index < items.length; index++) {
-            var candidate = Math.abs(Math.max(0, Math.min(maximum, position + offset(state, items[index], axis, free))) - position);
-            if (candidate < distance) {
-              nearest = index;
-              distance = candidate;
-            }
-          }
-          return nearest;
-        }
-        function handleWheel(state, event) {
-          if (!event || event.ctrlKey || !event.cancelable || event.defaultPrevented || event.target.closest("[".concat(scrollboxAttribute, "]")) !== state.element) return false;
-          var axis = axisFor(state), horizontal = Math.abs(event.deltaX) > Math.abs(event.deltaY);
-          if (axis === HORIZONTAL && !horizontal && state.element.getAttribute(wheelAttribute) === FALSE) return false;
-          var delta = axis === HORIZONTAL ? horizontal ? event.deltaX : event.deltaY : horizontal ? 0 : event.deltaY;
-          if (!delta) return false;
-          var items = itemsFor(state), index = state.target !== null ? state.index : selectedIndex(state);
-          if (!items.length) return false;
-          var nextIndex = index + Math.sign(delta);
-          if (nextIndex < 0 || nextIndex >= items.length) {
-            if (state.target !== null && !targetReached(state)) {
-              event.preventDefault();
-              return true;
-            }
-            var behavior = root2.getComputedStyle(state.element)[axis === HORIZONTAL ? "overscrollBehaviorX" : "overscrollBehaviorY"];
-            if (behavior === "contain" || behavior === "none") {
-              event.preventDefault();
-              return true;
-            }
-            setSuspension(state, {
-              reason: "wheel-edge",
-              active: true
-            });
-            clearTimer(state, "edgeWheelTimeout");
-            state.edgeWheelTimeout = root2.setTimeout(function() {
-              state.edgeWheelTimeout = null;
-              setSuspension(state, {
-                reason: "wheel-edge",
-                active: false
-              });
-            }, SNAP_SCROLL_IDLE_MS);
-            return false;
-          }
-          event.preventDefault();
-          if (state.wheelTimeout !== null) return true;
-          state.wheelTimeout = root2.setTimeout(function() {
-            state.wheelTimeout = null;
-          }, SNAP_SCROLL_IDLE_MS);
-          goto(state.element, nextIndex);
-          return true;
-        }
-        function setSuspension(state, detail) {
-          if (!detail || !detail.reason) return;
-          if (detail.active) state.suspensions.add(detail.reason);
-          else state.suspensions.delete(detail.reason);
-          state.element.classList.toggle(suspendedClass, state.suspensions.size > 0);
-          if (!detail.active) {
-            settlePointer(state);
-            if (!state.suspensions.size) scheduleSettle(state);
-          }
-        }
-        function handlePointerScroll(state, event) {
-          var _state$pointerScroll;
-          var detail = event.detail;
-          if (!detail || detail.axis !== axisFor(state)) return;
-          var items = itemsFor(state);
-          if (!items.length) return;
-          if (detail.phase === "start" || detail.phase === "probe") {
-            state.pointerScroll = {
-              axis: detail.axis,
-              index: selectedIndex(state)
-            };
-            if (detail.phase === "start") state.flick = null;
-            else event.preventDefault();
-            return;
-          }
-          if (detail.phase !== "end") return;
-          var start = ((_state$pointerScroll = state.pointerScroll) === null || _state$pointerScroll === void 0 ? void 0 : _state$pointerScroll.axis) === detail.axis ? state.pointerScroll.index : selectedIndex(state);
-          state.pointerScroll = null;
-          var flick = isFlick(detail);
-          if (!detail.moved && !flick) return;
-          event.preventDefault();
-          if (!flick) return;
-          var distance = detail.axis === HORIZONTAL ? detail.startX - detail.lastX : detail.startY - detail.lastY;
-          var index = Math.max(0, Math.min(items.length - 1, start + Math.sign(distance)));
-          if (index !== start) state.flick = index;
-        }
-        function isFlick(detail) {
-          var distance = detail.axis === HORIZONTAL ? detail.startX - detail.lastX : detail.startY - detail.lastY;
-          var elapsed = Math.max(1, detail.endTime - detail.startTime);
-          return elapsed <= SNAP_FLICK_WINDOW_MS && Math.abs(distance) > SNAP_FLICK_MIN_DISTANCE_PX && Math.abs(distance) < SNAP_FLICK_MAX_DISTANCE_PX && (elapsed <= SNAP_FLICK_FAST_TIME_MS || Math.abs(distance) / elapsed >= SNAP_SWIPE_SPEED_PX_MS);
-        }
-        function beginGesture(state, kind, event) {
-          var active = kind === POINTER ? state.activePointers : state.activeTouches;
-          if (kind === POINTER) active.add(event.pointerId);
-          else {
-            var _iterator5 = _createForOfIteratorHelper16(event.changedTouches), _step6;
-            try {
-              for (_iterator5.s(); !(_step6 = _iterator5.n()).done; ) {
-                var touch = _step6.value;
-                active.add(touch.identifier);
-              }
-            } catch (err) {
-              _iterator5.e(err);
-            } finally {
-              _iterator5.f();
-            }
-          }
-          state.target = null;
-          state.release = false;
-          cancelRelease(state);
-          state.pointerScroll = null;
-          state.flick = null;
-          clearTimer(state, "timeout");
-          if (kind === POINTER && event.pointerType !== TOUCH) {
-            var element = state.element, left = element.scrollLeft, top = element.scrollTop;
-            setSuspension(state, {
-              reason: GESTURE,
-              active: true
-            });
-            element.scrollTo({
-              left: left > 0 ? left - 1 : 1,
-              top: top > 0 ? top - 1 : 1,
-              behavior: INSTANT
-            });
-            element.scrollTo({
-              left: left,
-              top: top,
-              behavior: INSTANT
-            });
-          } else setSuspension(state, {
-            reason: GESTURE,
-            active: false
-          });
-        }
-        function endGesture(state, kind, event) {
-          var active = kind === POINTER ? state.activePointers : state.activeTouches;
-          if (kind === POINTER) active.delete(event.pointerId);
-          else {
-            var _iterator6 = _createForOfIteratorHelper16(event.changedTouches), _step7;
-            try {
-              for (_iterator6.s(); !(_step7 = _iterator6.n()).done; ) {
-                var touch = _step7.value;
-                active.delete(touch.identifier);
-              }
-            } catch (err) {
-              _iterator6.e(err);
-            } finally {
-              _iterator6.f();
-            }
-          }
-          if (!hasActiveGesture(state)) endDesktopGesture(state);
-        }
-        function hasActiveGesture(state) {
-          return state.activePointers.size || state.activeTouches.size;
-        }
-        function endDesktopGesture(state) {
-          if (!state.suspensions.has(GESTURE)) {
-            scheduleSettle(state);
-            return;
-          }
-          state.release = true;
-          root2.setTimeout(function() {
-            return settlePointer(state);
-          }, 0);
-        }
-        function settlePointer(state) {
-          if (state.disposed || !releaseReady(state) || state.target !== null || hasActiveGesture(state)) return;
-          var flick = state.flick;
-          state.flick = null;
-          goto(state.element, flick !== null ? flick : selectedIndex(state, true), AelluxJs2.currentPreference("reduced-motion") === "reduced" ? INSTANT : SMOOTH, flick === null);
-        }
-        function releaseReady(state) {
-          return state.release && state.suspensions.size === 1;
-        }
-        function scheduleSettle(state, target) {
-          if (!target && (hasActiveGesture(state) || state.suspensions.size && !state.release)) return;
-          clearTimer(state, "timeout");
-          state.timeout = root2.setTimeout(function() {
-            return finish(state);
-          }, target ? SNAP_TARGET_IDLE_MS : SNAP_SCROLL_IDLE_MS);
-        }
-        function finish(state) {
-          if (state.disposed || state.frame !== null || hasActiveGesture(state)) return;
-          if (state.suspensions.size) {
-            if (!releaseReady(state) || !targetReached(state)) return;
-            state.release = false;
-            setSuspension(state, {
-              reason: GESTURE,
-              active: false
-            });
-          }
-          clearTimer(state, "timeout");
-          cancelRelease(state);
-          state.target = null;
-          var items = itemsFor(state), index = selectedIndex(state), item = items[index];
-          if (!item || state.notifiedItem === item && state.notifiedIndex === index) return;
-          var previousIndex = state.notifiedIndex;
-          state.index = index;
-          state.notifiedItem = item;
-          state.notifiedIndex = index;
-          AelluxJs2.dispatchFrom(state.element, "ScrollboxSnapChange", {
-            detail: {
-              item: item,
-              index: index,
-              previousIndex: previousIndex,
-              axis: axisFor(state)
-            }
-          });
-        }
-        function targetReached(state) {
-          if (state.target === null) return false;
-          var position = state.targetAxis === HORIZONTAL ? state.element.scrollLeft : state.element.scrollTop;
-          return Math.abs(position - state.target) <= 1;
-        }
-        function clearTimer(state, name) {
-          if (state[name] !== null) root2.clearTimeout(state[name]);
-          state[name] = null;
-        }
-        function metricsFor(element) {
-          return {
-            x: Math.max(0, element.scrollWidth - element.clientWidth),
-            y: Math.max(0, element.scrollHeight - element.clientHeight)
-          };
-        }
-      })(typeof globalThis !== "undefined" ? globalThis : window);
-    }
-  });
-
-  // src/aellux.ext.adaptive.js
-  var aellux_ext_adaptive_exports = {};
-  function _createForOfIteratorHelper17(r, e) {
-    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray18(r)) || e && r && "number" == typeof r.length) {
-        t && (r = t);
-        var _n = 0, F = function F2() {
-        };
-        return { s: F, n: function n() {
-          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
-        }, e: function e2(r2) {
-          throw r2;
-        }, f: F };
-      }
-      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-    }
-    var o, a = true, u = false;
-    return { s: function s() {
-      t = t.call(r);
-    }, n: function n() {
-      var r2 = t.next();
-      return a = r2.done, r2;
-    }, e: function e2(r2) {
-      u = true, o = r2;
-    }, f: function f() {
-      try {
-        a || null == t.return || t.return();
-      } finally {
-        if (u) throw o;
-      }
-    } };
-  }
-  function ownKeys5(e, r) {
+  function ownKeys4(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -33992,53 +32859,53 @@
     }
     return t;
   }
-  function _objectSpread5(e) {
+  function _objectSpread4(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys5(Object(t), true).forEach(function(r2) {
-        _defineProperty5(e, r2, t[r2]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys5(Object(t)).forEach(function(r2) {
+      r % 2 ? ownKeys4(Object(t), true).forEach(function(r2) {
+        _defineProperty4(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys4(Object(t)).forEach(function(r2) {
         Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
       });
     }
     return e;
   }
-  function _defineProperty5(e, r, t) {
-    return (r = _toPropertyKey6(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  function _defineProperty4(e, r, t) {
+    return (r = _toPropertyKey5(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
   }
-  function _toPropertyKey6(t) {
-    var i = _toPrimitive6(t, "string");
-    return "symbol" == _typeof10(i) ? i : i + "";
+  function _toPropertyKey5(t) {
+    var i = _toPrimitive5(t, "string");
+    return "symbol" == _typeof9(i) ? i : i + "";
   }
-  function _toPrimitive6(t, r) {
-    if ("object" != _typeof10(t) || !t) return t;
+  function _toPrimitive5(t, r) {
+    if ("object" != _typeof9(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof10(i)) return i;
+      if ("object" != _typeof9(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
   }
-  function _slicedToArray10(r, e) {
-    return _arrayWithHoles10(r) || _iterableToArrayLimit10(r, e) || _unsupportedIterableToArray18(r, e) || _nonIterableRest10();
+  function _slicedToArray9(r, e) {
+    return _arrayWithHoles9(r) || _iterableToArrayLimit9(r, e) || _unsupportedIterableToArray17(r, e) || _nonIterableRest9();
   }
-  function _nonIterableRest10() {
+  function _nonIterableRest9() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray18(r, a) {
+  function _unsupportedIterableToArray17(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray18(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray17(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray18(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray17(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray18(r, a) {
+  function _arrayLikeToArray17(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _iterableToArrayLimit10(r, l) {
+  function _iterableToArrayLimit9(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -34059,16 +32926,16 @@
       return a;
     }
   }
-  function _arrayWithHoles10(r) {
+  function _arrayWithHoles9(r) {
     if (Array.isArray(r)) return r;
   }
-  function _typeof10(o) {
+  function _typeof9(o) {
     "@babel/helpers - typeof";
-    return _typeof10 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof9 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof10(o);
+    }, _typeof9(o);
   }
   var init_aellux_ext_adaptive = __esm({
     "src/aellux.ext.adaptive.js": function() {
@@ -34135,19 +33002,19 @@
             initialValue: "0"
           });
           var overrides = options.adaptiveParams === void 0 ? {} : options.adaptiveParams;
-          if (!overrides || _typeof10(overrides) !== "object" || Array.isArray(overrides)) {
+          if (!overrides || _typeof9(overrides) !== "object" || Array.isArray(overrides)) {
             parameterDiagnostic("", overrides, "Expected an object of Adaptive parameter groups; using defaults.");
             overrides = {};
           }
           for (var _i = 0, _Object$keys = Object.keys(adaptiveParams); _i < _Object$keys.length; _i++) {
             var group = _Object$keys[_i];
-            if (group in overrides && (!overrides[group] || _typeof10(overrides[group]) !== "object" || Array.isArray(overrides[group]))) {
+            if (group in overrides && (!overrides[group] || _typeof9(overrides[group]) !== "object" || Array.isArray(overrides[group]))) {
               parameterDiagnostic(group, overrides[group], "Expected a parameter group object; using defaults.");
               continue;
             }
-            if (overrides[group] && _typeof10(overrides[group]) === "object") {
+            if (overrides[group] && _typeof9(overrides[group]) === "object") {
               for (var _i2 = 0, _Object$entries = Object.entries(overrides[group]); _i2 < _Object$entries.length; _i2++) {
-                var _Object$entries$_i = _slicedToArray10(_Object$entries[_i2], 2), key = _Object$entries$_i[0], value = _Object$entries$_i[1];
+                var _Object$entries$_i = _slicedToArray9(_Object$entries[_i2], 2), key = _Object$entries$_i[0], value = _Object$entries$_i[1];
                 if (typeof value !== "number" || !Number.isFinite(value) || (group === "minSizes" ? value < 0 : value <= 0)) {
                   parameterDiagnostic("".concat(group, ".").concat(key), value, "Expected a finite positive number (zero is allowed for minimum sizes).");
                   continue;
@@ -34157,9 +33024,9 @@
             }
           }
           for (var _i3 = 0, _arr = [["ratioShapes", "vertical", "horizontal", [0.8, 1.25]], ["experienceScale", "near", "far", [1, 1.5]]]; _i3 < _arr.length; _i3++) {
-            var _arr$_i = _slicedToArray10(_arr[_i3], 4), _group = _arr$_i[0], lower = _arr$_i[1], upper = _arr$_i[2], fallback = _arr$_i[3];
+            var _arr$_i = _slicedToArray9(_arr[_i3], 4), _group = _arr$_i[0], lower = _arr$_i[1], upper = _arr$_i[2], fallback = _arr$_i[3];
             if (adaptiveParams[_group][lower] >= adaptiveParams[_group][upper]) {
-              parameterDiagnostic(_group, _objectSpread5({}, adaptiveParams[_group]), "The lower boundary must be less than the upper boundary; using defaults.");
+              parameterDiagnostic(_group, _objectSpread4({}, adaptiveParams[_group]), "The lower boundary must be less than the upper boundary; using defaults.");
               adaptiveParams[_group][lower] = fallback[0];
               adaptiveParams[_group][upper] = fallback[1];
             }
@@ -34167,7 +33034,7 @@
           var orderedSizes = ["compact", "small", "medium", "large", "xl", "xxl"];
           if (orderedSizes.some(function(name, index) {
             return index > 0 && adaptiveParams.minSizes[name] < adaptiveParams.minSizes[orderedSizes[index - 1]];
-          })) parameterDiagnostic("minSizes", _objectSpread5({}, adaptiveParams.minSizes), "Named minimum sizes are out of order; the configured thresholds are preserved.");
+          })) parameterDiagnostic("minSizes", _objectSpread4({}, adaptiveParams.minSizes), "Named minimum sizes are out of order; the configured thresholds are preserved.");
           managedClasses = getManagedClasses();
           for (var _i4 = 0, _Object$keys2 = Object.keys(adaptiveParams); _i4 < _Object$keys2.length; _i4++) {
             var _group2 = _Object$keys2[_i4];
@@ -34186,7 +33053,7 @@
           var classes = [modifier.shapeHorizontal, modifier.shapeVertical, modifier.shapeSquare];
           sizeThresholds = [];
           for (var _i5 = 0, _Object$entries2 = Object.entries(adaptiveParams.minSizes); _i5 < _Object$entries2.length; _i5++) {
-            var _Object$entries2$_i = _slicedToArray10(_Object$entries2[_i5], 2), size = _Object$entries2$_i[0], minimum = _Object$entries2$_i[1];
+            var _Object$entries2$_i = _slicedToArray9(_Object$entries2[_i5], 2), size = _Object$entries2$_i[0], minimum = _Object$entries2$_i[1];
             var className = AelluxJs2.className("fits-" + size);
             sizeThresholds.push({
               className: className,
@@ -34208,7 +33075,7 @@
         function destroy() {
           pendingResizeEntries.clear();
           pendingResizeElements.clear();
-          var _iterator = _createForOfIteratorHelper17(adaptiveElements), _step;
+          var _iterator = _createForOfIteratorHelper16(adaptiveElements), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
               var element = _step.value;
@@ -34246,7 +33113,7 @@
           layoutIds.delete(element);
           if (resizeObserver) resizeObserver.unobserve(element);
           else if (adaptiveElements.size === 0) AelluxJs2.offEvent(root2, "$resize", onWindowResize);
-          var _iterator2 = _createForOfIteratorHelper17(managedClasses), _step2;
+          var _iterator2 = _createForOfIteratorHelper16(managedClasses), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
               var name = _step2.value;
@@ -34263,7 +33130,7 @@
           elementMemories.delete(element);
         }
         function onResize(entries) {
-          var _iterator3 = _createForOfIteratorHelper17(entries), _step3;
+          var _iterator3 = _createForOfIteratorHelper16(entries), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
               var entry = _step3.value;
@@ -34279,7 +33146,7 @@
           scheduleUpdate();
         }
         function onWindowResize() {
-          var _iterator4 = _createForOfIteratorHelper17(adaptiveElements), _step4;
+          var _iterator4 = _createForOfIteratorHelper16(adaptiveElements), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
               var element = _step4.value;
@@ -34300,7 +33167,7 @@
           var entries = Array.from(pendingResizeEntries.entries());
           pendingResizeEntries.clear();
           for (var _i6 = 0, _entries = entries; _i6 < _entries.length; _i6++) {
-            var _entries$_i = _slicedToArray10(_entries[_i6], 2), element = _entries$_i[0], entry = _entries$_i[1];
+            var _entries$_i = _slicedToArray9(_entries[_i6], 2), element = _entries$_i[0], entry = _entries$_i[1];
             scheduleElement(element, entry.contentRect);
           }
           var elements = Array.from(pendingResizeElements);
@@ -34352,7 +33219,7 @@
             var threshold = sizeThresholds[i];
             element.classList.toggle(threshold.className, width >= threshold.minimum);
           }
-          var _iterator5 = _createForOfIteratorHelper17(dimensionProperties), _step5;
+          var _iterator5 = _createForOfIteratorHelper16(dimensionProperties), _step5;
           try {
             for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
               var name = _step5.value;
@@ -34401,21 +33268,21 @@
   });
 
   // src/internal/create-present-playback.js
-  function _typeof11(o) {
+  function _typeof10(o) {
     "@babel/helpers - typeof";
-    return _typeof11 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof10 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof11(o);
+    }, _typeof10(o);
   }
-  function _slicedToArray11(r, e) {
-    return _arrayWithHoles11(r) || _iterableToArrayLimit11(r, e) || _unsupportedIterableToArray19(r, e) || _nonIterableRest11();
+  function _slicedToArray10(r, e) {
+    return _arrayWithHoles10(r) || _iterableToArrayLimit10(r, e) || _unsupportedIterableToArray18(r, e) || _nonIterableRest10();
   }
-  function _nonIterableRest11() {
+  function _nonIterableRest10() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArrayLimit11(r, l) {
+  function _iterableToArrayLimit10(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -34436,10 +33303,10 @@
       return a;
     }
   }
-  function _arrayWithHoles11(r) {
+  function _arrayWithHoles10(r) {
     if (Array.isArray(r)) return r;
   }
-  function ownKeys6(e, r) {
+  function ownKeys5(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -34449,12 +33316,12 @@
     }
     return t;
   }
-  function _objectSpread6(e) {
+  function _objectSpread5(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys6(Object(t), true).forEach(function(r2) {
-        _defineProperty6(e, r2, t[r2]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys6(Object(t)).forEach(function(r2) {
+      r % 2 ? ownKeys5(Object(t), true).forEach(function(r2) {
+        _defineProperty5(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys5(Object(t)).forEach(function(r2) {
         Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
       });
     }
@@ -34478,27 +33345,27 @@
     }
     return t;
   }
-  function _defineProperty6(e, r, t) {
-    return (r = _toPropertyKey7(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  function _defineProperty5(e, r, t) {
+    return (r = _toPropertyKey6(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
   }
-  function _toPropertyKey7(t) {
-    var i = _toPrimitive7(t, "string");
-    return "symbol" == _typeof11(i) ? i : i + "";
+  function _toPropertyKey6(t) {
+    var i = _toPrimitive6(t, "string");
+    return "symbol" == _typeof10(i) ? i : i + "";
   }
-  function _toPrimitive7(t, r) {
-    if ("object" != _typeof11(t) || !t) return t;
+  function _toPrimitive6(t, r) {
+    if ("object" != _typeof10(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof11(i)) return i;
+      if ("object" != _typeof10(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
   }
-  function _createForOfIteratorHelper18(r, e) {
+  function _createForOfIteratorHelper17(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray19(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray18(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -34527,25 +33394,25 @@
     } };
   }
   function _toConsumableArray9(r) {
-    return _arrayWithoutHoles9(r) || _iterableToArray9(r) || _unsupportedIterableToArray19(r) || _nonIterableSpread9();
+    return _arrayWithoutHoles9(r) || _iterableToArray9(r) || _unsupportedIterableToArray18(r) || _nonIterableSpread9();
   }
   function _nonIterableSpread9() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray19(r, a) {
+  function _unsupportedIterableToArray18(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray19(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray18(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray19(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray18(r, a) : void 0;
     }
   }
   function _iterableToArray9(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles9(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray19(r);
+    if (Array.isArray(r)) return _arrayLikeToArray18(r);
   }
-  function _arrayLikeToArray19(r, a) {
+  function _arrayLikeToArray18(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -34599,7 +33466,7 @@
       apply();
       var style = root2.getComputedStyle(element);
       var names = list(style.transitionProperty), durations = list(style.transitionDuration), delays = list(style.transitionDelay), easings = list(style.transitionTimingFunction);
-      var _iterator = _createForOfIteratorHelper18(tracks), _step;
+      var _iterator = _createForOfIteratorHelper17(tracks), _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
           var track = _step.value;
@@ -34695,7 +33562,7 @@
           var source = record.tracks.find(function(track) {
             return track.property === animation.transitionProperty;
           });
-          var frames = source.property.startsWith("grid") ? [_defineProperty6({}, camel(source.property), source.from), _defineProperty6({}, camel(source.property), source.to)] : animation.effect.getKeyframes().map(function(_ref3) {
+          var frames = source.property.startsWith("grid") ? [_defineProperty5({}, camel(source.property), source.from), _defineProperty5({}, camel(source.property), source.to)] : animation.effect.getKeyframes().map(function(_ref3) {
             var computedOffset = _ref3.computedOffset, frame = _objectWithoutProperties(_ref3, _excluded);
             return frame;
           });
@@ -34711,8 +33578,8 @@
         });
       }
       return record.tracks.map(function(track) {
-        return _objectSpread6(_objectSpread6({}, track), {}, {
-          frames: [_defineProperty6({}, camel(track.property), track.from), _defineProperty6({}, camel(track.property), track.to)],
+        return _objectSpread5(_objectSpread5({}, track), {}, {
+          frames: [_defineProperty5({}, camel(track.property), track.from), _defineProperty5({}, camel(track.property), track.to)],
           timing: {
             easing: /^linear\(/i.test(record.nativeEasing || "") ? record.nativeEasing : track.easing
           },
@@ -34765,7 +33632,7 @@
         if (inspectable) {
           var _animations;
           style.setProperty("transition-property", "none", "important");
-          var _iterator2 = _createForOfIteratorHelper18(tracks), _step2;
+          var _iterator2 = _createForOfIteratorHelper17(tracks), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
               var track = _step2.value;
@@ -34783,7 +33650,7 @@
           }).join(","), "important");
           style.setProperty("transition-delay", "0ms", "important");
           style.setProperty("transition-timing-function", "linear", "important");
-          var _iterator3 = _createForOfIteratorHelper18(tracks), _step3;
+          var _iterator3 = _createForOfIteratorHelper17(tracks), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
               var _track = _step3.value;
@@ -34797,7 +33664,7 @@
           effects = ((_animations = animations(element)) === null || _animations === void 0 ? void 0 : _animations.filter(function(animation) {
             return owned.includes(animation.transitionProperty);
           })) || [];
-          var _iterator4 = _createForOfIteratorHelper18(effects), _step4;
+          var _iterator4 = _createForOfIteratorHelper17(effects), _step4;
           try {
             var _loop = function _loop3() {
               var animation = _step4.value;
@@ -34832,7 +33699,7 @@
             return computed.getPropertyValue("animation-".concat(name2));
           });
           var additions = [[], [], [], [], [], [], [], []];
-          var _iterator5 = _createForOfIteratorHelper18(tracks), _step5;
+          var _iterator5 = _createForOfIteratorHelper17(tracks), _step5;
           try {
             for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
               var _track2 = _step5.value;
@@ -34864,7 +33731,7 @@
           var durations = list(_computed.transitionDuration), delays = list(_computed.transitionDelay), easings = list(_computed.transitionTimingFunction);
           style.setProperty("transition-property", [].concat(_toConsumableArray9(_previous), ["--ae-unpop-progress"]).join(","), "important");
           var _loop2 = function _loop22() {
-            var _arr$_i = _slicedToArray11(_arr[_i], 3), name2 = _arr$_i[0], values2 = _arr$_i[1], extra = _arr$_i[2];
+            var _arr$_i = _slicedToArray10(_arr[_i], 3), name2 = _arr$_i[0], values2 = _arr$_i[1], extra = _arr$_i[2];
             style.setProperty("transition-".concat(name2), [].concat(_toConsumableArray9(_previous.map(function(_, index) {
               return values2[index % values2.length];
             })), [extra]).join(","), "important");
@@ -34879,7 +33746,7 @@
         duration: duration,
         apply: apply,
         seek: function seek(value) {
-          var _iterator6 = _createForOfIteratorHelper18(effects), _step6;
+          var _iterator6 = _createForOfIteratorHelper17(effects), _step6;
           try {
             for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
               var effect = _step6.value;
@@ -34892,7 +33759,7 @@
           }
         },
         playTo: function playTo(target) {
-          var _iterator7 = _createForOfIteratorHelper18(effects), _step7;
+          var _iterator7 = _createForOfIteratorHelper17(effects), _step7;
           try {
             var _loop3 = function _loop32() {
               var animation = _step7.value;
@@ -34956,7 +33823,7 @@
         },
         cleanup: function cleanup() {
           var _memory;
-          var _iterator8 = _createForOfIteratorHelper18(effects), _step8;
+          var _iterator8 = _createForOfIteratorHelper17(effects), _step8;
           try {
             for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
               var animation = _step8.value;
@@ -35009,7 +33876,7 @@
           timing: {
             easing: easing
           },
-          frames: [_defineProperty6({}, property, forward ? "0" : "1"), _defineProperty6({}, property, forward ? "1" : "0")]
+          frames: [_defineProperty5({}, property, forward ? "0" : "1"), _defineProperty5({}, property, forward ? "1" : "0")]
         });
       }
       return reverse(element, tracks, false, true);
@@ -35056,16 +33923,16 @@
   });
 
   // src/internal/create-present-gestures.js
-  function _typeof12(o) {
+  function _typeof11(o) {
     "@babel/helpers - typeof";
-    return _typeof12 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof11 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof12(o);
+    }, _typeof11(o);
   }
   function _toConsumableArray10(r) {
-    return _arrayWithoutHoles10(r) || _iterableToArray10(r) || _unsupportedIterableToArray20(r) || _nonIterableSpread10();
+    return _arrayWithoutHoles10(r) || _iterableToArray10(r) || _unsupportedIterableToArray19(r) || _nonIterableSpread10();
   }
   function _nonIterableSpread10() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -35074,9 +33941,9 @@
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles10(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray20(r);
+    if (Array.isArray(r)) return _arrayLikeToArray19(r);
   }
-  function ownKeys7(e, r) {
+  function ownKeys6(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -35086,38 +33953,38 @@
     }
     return t;
   }
-  function _objectSpread7(e) {
+  function _objectSpread6(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys7(Object(t), true).forEach(function(r2) {
-        _defineProperty7(e, r2, t[r2]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys7(Object(t)).forEach(function(r2) {
+      r % 2 ? ownKeys6(Object(t), true).forEach(function(r2) {
+        _defineProperty6(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys6(Object(t)).forEach(function(r2) {
         Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
       });
     }
     return e;
   }
-  function _defineProperty7(e, r, t) {
-    return (r = _toPropertyKey8(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  function _defineProperty6(e, r, t) {
+    return (r = _toPropertyKey7(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
   }
-  function _toPropertyKey8(t) {
-    var i = _toPrimitive8(t, "string");
-    return "symbol" == _typeof12(i) ? i : i + "";
+  function _toPropertyKey7(t) {
+    var i = _toPrimitive7(t, "string");
+    return "symbol" == _typeof11(i) ? i : i + "";
   }
-  function _toPrimitive8(t, r) {
-    if ("object" != _typeof12(t) || !t) return t;
+  function _toPrimitive7(t, r) {
+    if ("object" != _typeof11(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof12(i)) return i;
+      if ("object" != _typeof11(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
   }
-  function _createForOfIteratorHelper19(r, e) {
+  function _createForOfIteratorHelper18(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray20(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray19(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -35145,14 +34012,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray20(r, a) {
+  function _unsupportedIterableToArray19(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray20(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray19(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray20(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray19(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray20(r, a) {
+  function _arrayLikeToArray19(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -35233,7 +34100,7 @@
         signature: signature
       };
       entries.set(element, entry);
-      var _iterator = _createForOfIteratorHelper19(/* @__PURE__ */ new Set([source, element])), _step;
+      var _iterator = _createForOfIteratorHelper18(/* @__PURE__ */ new Set([source, element])), _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
           var target = _step.value;
@@ -35265,7 +34132,7 @@
         return candidate.entry === entry;
       })) cancel();
       entries.delete(element);
-      var _iterator2 = _createForOfIteratorHelper19(/* @__PURE__ */ new Set([entry.source, element])), _step2;
+      var _iterator2 = _createForOfIteratorHelper18(/* @__PURE__ */ new Set([entry.source, element])), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
           var target = _step2.value;
@@ -35307,7 +34174,7 @@
           });
         }
       }
-      var _iterator3 = _createForOfIteratorHelper19(sources.get(event.currentTarget) || []), _step3;
+      var _iterator3 = _createForOfIteratorHelper18(sources.get(event.currentTarget) || []), _step3;
       try {
         var _loop = function _loop2() {
           var entry = _step3.value;
@@ -35357,7 +34224,7 @@
         }
         if (!(distance > 0)) warn(element, property, raw, "Use a positive CSS length or auto; using auto.");
       }
-      return _objectSpread7(_objectSpread7({}, thresholds), {}, {
+      return _objectSpread6(_objectSpread6({}, thresholds), {}, {
         distance: distance > 0 ? distance : 0,
         fallback: Math.max(1, axis === "x" ? element.offsetWidth : element.offsetHeight)
       });
@@ -35408,7 +34275,7 @@
         var settled = new Promise(function(done) {
           resolve = done;
         });
-        var _owner = current.owner = _objectSpread7(_objectSpread7({}, candidate), {}, {
+        var _owner = current.owner = _objectSpread6(_objectSpread6({}, candidate), {}, {
           params: params,
           axis: axis,
           displacement: 0,
@@ -35541,12 +34408,12 @@
 
   // src/aellux.ext.present.js
   var aellux_ext_present_exports = {};
-  function _regenerator8() {
+  function _regenerator7() {
     /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
     var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag";
     function i(r2, n2, o2, i2) {
       var c2 = n2 && n2.prototype instanceof Generator ? n2 : Generator, u2 = Object.create(c2.prototype);
-      return _regeneratorDefine28(u2, "_invoke", (function(r3, n3, o3) {
+      return _regeneratorDefine27(u2, "_invoke", (function(r3, n3, o3) {
         var i3, c3, u3, f2 = 0, p = o3 || [], y = false, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d2(t2, r4) {
           return i3 = t2, c3 = 0, u3 = e, G.n = r4, a;
         } };
@@ -35589,37 +34456,37 @@
     function GeneratorFunctionPrototype() {
     }
     t = Object.getPrototypeOf;
-    var c = [][n] ? t(t([][n]())) : (_regeneratorDefine28(t = {}, n, function() {
+    var c = [][n] ? t(t([][n]())) : (_regeneratorDefine27(t = {}, n, function() {
       return this;
     }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c);
     function f(e2) {
-      return Object.setPrototypeOf ? Object.setPrototypeOf(e2, GeneratorFunctionPrototype) : (e2.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine28(e2, o, "GeneratorFunction")), e2.prototype = Object.create(u), e2;
+      return Object.setPrototypeOf ? Object.setPrototypeOf(e2, GeneratorFunctionPrototype) : (e2.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine27(e2, o, "GeneratorFunction")), e2.prototype = Object.create(u), e2;
     }
-    return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine28(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine28(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine28(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine28(u), _regeneratorDefine28(u, o, "Generator"), _regeneratorDefine28(u, n, function() {
+    return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine27(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine27(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine27(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine27(u), _regeneratorDefine27(u, o, "Generator"), _regeneratorDefine27(u, n, function() {
       return this;
-    }), _regeneratorDefine28(u, "toString", function() {
+    }), _regeneratorDefine27(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator8 = function _regenerator9() {
+    }), (_regenerator7 = function _regenerator8() {
       return { w: i, m: f };
     })();
   }
-  function _regeneratorDefine28(e, r, n, t) {
+  function _regeneratorDefine27(e, r, n, t) {
     var i = Object.defineProperty;
     try {
       i({}, "", {});
     } catch (e2) {
       i = 0;
     }
-    _regeneratorDefine28 = function _regeneratorDefine(e2, r2, n2, t2) {
+    _regeneratorDefine27 = function _regeneratorDefine(e2, r2, n2, t2) {
       function o(r3, n3) {
-        _regeneratorDefine28(e2, r3, function(e3) {
+        _regeneratorDefine27(e2, r3, function(e3) {
           return this._invoke(r3, n3, e3);
         });
       }
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
-    }, _regeneratorDefine28(e, r, n, t);
+    }, _regeneratorDefine27(e, r, n, t);
   }
-  function asyncGeneratorStep8(n, t, e, r, o, a, c) {
+  function asyncGeneratorStep7(n, t, e, r, o, a, c) {
     try {
       var i = n[a](c), u = i.value;
     } catch (n2) {
@@ -35627,25 +34494,25 @@
     }
     i.done ? t(u) : Promise.resolve(u).then(r, o);
   }
-  function _asyncToGenerator8(n) {
+  function _asyncToGenerator7(n) {
     return function() {
       var t = this, e = arguments;
       return new Promise(function(r, o) {
         var a = n.apply(t, e);
         function _next(n2) {
-          asyncGeneratorStep8(a, r, o, _next, _throw, "next", n2);
+          asyncGeneratorStep7(a, r, o, _next, _throw, "next", n2);
         }
         function _throw(n2) {
-          asyncGeneratorStep8(a, r, o, _next, _throw, "throw", n2);
+          asyncGeneratorStep7(a, r, o, _next, _throw, "throw", n2);
         }
         _next(void 0);
       });
     };
   }
-  function _createForOfIteratorHelper20(r, e) {
+  function _createForOfIteratorHelper19(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray21(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray20(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -35674,7 +34541,7 @@
     } };
   }
   function _toConsumableArray11(r) {
-    return _arrayWithoutHoles11(r) || _iterableToArray11(r) || _unsupportedIterableToArray21(r) || _nonIterableSpread11();
+    return _arrayWithoutHoles11(r) || _iterableToArray11(r) || _unsupportedIterableToArray20(r) || _nonIterableSpread11();
   }
   function _nonIterableSpread11() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -35683,27 +34550,27 @@
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles11(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray21(r);
+    if (Array.isArray(r)) return _arrayLikeToArray20(r);
   }
-  function _slicedToArray12(r, e) {
-    return _arrayWithHoles12(r) || _iterableToArrayLimit12(r, e) || _unsupportedIterableToArray21(r, e) || _nonIterableRest12();
+  function _slicedToArray11(r, e) {
+    return _arrayWithHoles11(r) || _iterableToArrayLimit11(r, e) || _unsupportedIterableToArray20(r, e) || _nonIterableRest11();
   }
-  function _nonIterableRest12() {
+  function _nonIterableRest11() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray21(r, a) {
+  function _unsupportedIterableToArray20(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray21(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray20(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray21(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray20(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray21(r, a) {
+  function _arrayLikeToArray20(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  function _iterableToArrayLimit12(r, l) {
+  function _iterableToArrayLimit11(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -35724,7 +34591,7 @@
       return a;
     }
   }
-  function _arrayWithHoles12(r) {
+  function _arrayWithHoles11(r) {
     if (Array.isArray(r)) return r;
   }
   var init_aellux_ext_present = __esm({
@@ -35831,7 +34698,7 @@
         function init(options) {
           playback.init();
           var descriptors = cssProperties.map(function(_ref) {
-            var _ref2 = _slicedToArray12(_ref, 3), name = _ref2[0], syntax = _ref2[1], initialValue = _ref2[2];
+            var _ref2 = _slicedToArray11(_ref, 3), name = _ref2[0], syntax = _ref2[1], initialValue = _ref2[2];
             return {
               name: "--ae-".concat(name),
               syntax: syntax,
@@ -35873,7 +34740,7 @@
             controllers: ["show", "selected", "popNext"]
           });
           autoObserver = new root2.MutationObserver(function(records) {
-            var _iterator = _createForOfIteratorHelper20(records), _step;
+            var _iterator = _createForOfIteratorHelper19(records), _step;
             try {
               for (_iterator.s(); !(_step = _iterator.n()).done; ) {
                 var record = _step.value;
@@ -35891,7 +34758,7 @@
             if (records.some(function(record2) {
               return record2.type === "childList" || record2.attributeName === "id";
             })) {
-              var _iterator2 = _createForOfIteratorHelper20(presentElements.keys()), _step2;
+              var _iterator2 = _createForOfIteratorHelper19(presentElements.keys()), _step2;
               try {
                 for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
                   var element = _step2.value;
@@ -35928,7 +34795,7 @@
           });
           AelluxJs2.off("$click", OnClick);
           AelluxJs2.off("tap", onTap);
-          var _iterator3 = _createForOfIteratorHelper20(pendingTaps), _step3;
+          var _iterator3 = _createForOfIteratorHelper19(pendingTaps), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
               var pending = _step3.value;
@@ -35942,7 +34809,7 @@
           AelluxJs2.offEvent(root2, "$resize", refreshExpandedStates);
           document.removeEventListener("pointerover", onHover);
           document.removeEventListener("pointerout", onHover);
-          var _iterator4 = _createForOfIteratorHelper20(groups.keys()), _step4;
+          var _iterator4 = _createForOfIteratorHelper19(groups.keys()), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
               var group = _step4.value;
@@ -35953,7 +34820,7 @@
           } finally {
             _iterator4.f();
           }
-          var _iterator5 = _createForOfIteratorHelper20(hoverTimers.keys()), _step5;
+          var _iterator5 = _createForOfIteratorHelper19(hoverTimers.keys()), _step5;
           try {
             for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
               var target = _step5.value;
@@ -35965,7 +34832,7 @@
             _iterator5.f();
           }
           hoveredTriggers.clear();
-          var _iterator6 = _createForOfIteratorHelper20(triggerElementsSet), _step6;
+          var _iterator6 = _createForOfIteratorHelper19(triggerElementsSet), _step6;
           try {
             for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
               var triggerElement = _step6.value;
@@ -35976,7 +34843,7 @@
           } finally {
             _iterator6.f();
           }
-          var _iterator7 = _createForOfIteratorHelper20(presentElements.keys()), _step7;
+          var _iterator7 = _createForOfIteratorHelper19(presentElements.keys()), _step7;
           try {
             for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
               var element = _step7.value;
@@ -36093,7 +34960,7 @@
             openPresentElements.add(element);
           }
           presentElements.set(element, presentController);
-          var _iterator8 = _createForOfIteratorHelper20(element.querySelectorAll("[".concat(attr.trigger, "],[").concat(attr.dismiss, "],[").concat(attr.target, "]"))), _step8;
+          var _iterator8 = _createForOfIteratorHelper19(element.querySelectorAll("[".concat(attr.trigger, "],[").concat(attr.dismiss, "],[").concat(attr.target, "]"))), _step8;
           try {
             for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
               var _triggerElement = _step8.value;
@@ -36109,7 +34976,7 @@
           }
           var idTriggers = triggersByTargetId.get(element.id);
           if (idTriggers) {
-            var _iterator9 = _createForOfIteratorHelper20(idTriggers), _step9;
+            var _iterator9 = _createForOfIteratorHelper19(idTriggers), _step9;
             try {
               for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
                 var triggerElement = _step9.value;
@@ -36134,7 +35001,7 @@
           var controller = presentElements.get(element);
           gestures.remove(element);
           cancelHoverClose(element);
-          var _iterator0 = _createForOfIteratorHelper20(controller.triggers), _step0;
+          var _iterator0 = _createForOfIteratorHelper19(controller.triggers), _step0;
           try {
             for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
               var button = _step0.value;
@@ -36338,10 +35205,10 @@
           var transition = AelluxJs2.persist.element.save(element, [], ["transition-property"]);
           var freeze = function freeze2() {
             element.style.setProperty("transition-property", "none", "important");
-            var _iterator1 = _createForOfIteratorHelper20(values), _step1;
+            var _iterator1 = _createForOfIteratorHelper19(values), _step1;
             try {
               for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
-                var _step1$value = _slicedToArray12(_step1.value, 2), property = _step1$value[0], value = _step1$value[1];
+                var _step1$value = _slicedToArray11(_step1.value, 2), property = _step1$value[0], value = _step1$value[1];
                 element.style.setProperty(property, value, property.startsWith("--") ? "" : "important");
               }
             } catch (err) {
@@ -36363,9 +35230,9 @@
           return _prepareMeasuredSize.apply(this, arguments);
         }
         function _prepareMeasuredSize() {
-          _prepareMeasuredSize = _asyncToGenerator8(/* @__PURE__ */ _regenerator8().m(function _callee(element, controller, gotoVisible, previousSize, waitForPreparation) {
+          _prepareMeasuredSize = _asyncToGenerator7(/* @__PURE__ */ _regenerator7().m(function _callee(element, controller, gotoVisible, previousSize, waitForPreparation) {
             var size, _element$classList2, _element$classList3, states, computed, height, width, start;
-            return _regenerator8().w(function(_context) {
+            return _regenerator7().w(function(_context) {
               while (1) switch (_context.n) {
                 case 0:
                   if (!(!controller.measuredHeight && !controller.measuredWidth)) {
@@ -36422,9 +35289,9 @@
           return _presentTransition.apply(this, arguments);
         }
         function _presentTransition() {
-          _presentTransition = _asyncToGenerator8(/* @__PURE__ */ _regenerator8().m(function _callee2(element, gotoVisible) {
+          _presentTransition = _asyncToGenerator7(/* @__PURE__ */ _regenerator7().m(function _callee2(element, gotoVisible) {
             var forceRepop, groupOperation, presentationOrder, closingDirection, controller, gesture, reversing, group, groupState, groupRevision, hasCapacity, newDirection, transition, _AelluxJs$currentPref, _groups$get, revision, allowEvent, impliedReverse, reverseTracks, reusePreparation, waitForPreparation, previousSize, handoff, computed, interrupted, size, prepared, configurationDirection, duration, timeMs, applyDestination, activateTransition, advancedEase, motionOptions, completed, autoDismissValue, _duration, motionResult, finalVisible, _selected, active, ownsTransition, _controller$gesture, _controller$reverse2, _controller$gestureDi2, _args2 = arguments, _t, _t2;
-            return _regenerator8().w(function(_context2) {
+            return _regenerator7().w(function(_context2) {
               while (1) switch (_context2.p = _context2.n) {
                 case 0:
                   forceRepop = _args2.length > 2 && _args2[2] !== void 0 ? _args2[2] : false;
@@ -36712,10 +35579,10 @@
                       applyDestination();
                       var _computed = root2.getComputedStyle(element);
                       var _tracks2 = handoff.values.filter(function(_ref3) {
-                        var _ref4 = _slicedToArray12(_ref3, 1), property2 = _ref4[0];
+                        var _ref4 = _slicedToArray11(_ref3, 1), property2 = _ref4[0];
                         return property2.startsWith("grid-template-") || property2 === "height" || property2 === "width";
                       }).map(function(_ref5) {
-                        var _ref6 = _slicedToArray12(_ref5, 1), property2 = _ref6[0];
+                        var _ref6 = _slicedToArray11(_ref5, 1), property2 = _ref6[0];
                         return [property2, _computed.getPropertyValue(property2)];
                       });
                       handoff.freeze();
@@ -36725,10 +35592,10 @@
                       handoff.memory.restore();
                       applyDestination();
                       if (_tracks2.length) element.style.setProperty("transition-property", "".concat(properties, ", height, width"), "important");
-                      var _iterator19 = _createForOfIteratorHelper20(_tracks2), _step19;
+                      var _iterator19 = _createForOfIteratorHelper19(_tracks2), _step19;
                       try {
                         for (_iterator19.s(); !(_step19 = _iterator19.n()).done; ) {
-                          var _step19$value = _slicedToArray12(_step19.value, 2), property = _step19$value[0], value = _step19$value[1];
+                          var _step19$value = _slicedToArray11(_step19.value, 2), property = _step19$value[0], value = _step19$value[1];
                           element.style.setProperty(property, value, "important");
                         }
                       } catch (err) {
@@ -37011,7 +35878,7 @@
           controller.autoCountdown = null;
         }
         function clickAutoDismiss(eventTarget, currentExceptions) {
-          var _iterator10 = _createForOfIteratorHelper20(openPresentElements), _step10;
+          var _iterator10 = _createForOfIteratorHelper19(openPresentElements), _step10;
           try {
             var _loop = function _loop2() {
               var pContainer = _step10.value;
@@ -37042,7 +35909,7 @@
           var target = activationTarget(event);
           if (!target) return;
           var matched;
-          var _iterator11 = _createForOfIteratorHelper20(pendingTaps), _step11;
+          var _iterator11 = _createForOfIteratorHelper19(pendingTaps), _step11;
           try {
             for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
               var _pending$event$detail, _pending$event$detail2;
@@ -37092,7 +35959,7 @@
           pendingTaps.delete(pending);
         }
         function cancelElementTaps(element) {
-          var _iterator12 = _createForOfIteratorHelper20(pendingTaps), _step12;
+          var _iterator12 = _createForOfIteratorHelper19(pendingTaps), _step12;
           try {
             for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
               var pending = _step12.value;
@@ -37179,10 +36046,10 @@
           if (controller.expanded !== visible) controller.setAriaExpanded(String(visible));
         }
         function refreshExpandedStates() {
-          var _iterator13 = _createForOfIteratorHelper20(presentElements), _step13;
+          var _iterator13 = _createForOfIteratorHelper19(presentElements), _step13;
           try {
             for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
-              var _step13$value = _slicedToArray12(_step13.value, 2), element = _step13$value[0], controller = _step13$value[1];
+              var _step13$value = _slicedToArray11(_step13.value, 2), element = _step13$value[0], controller = _step13$value[1];
               if (!controller.transition) syncAriaExpanded(element, controller);
             }
           } catch (err) {
@@ -37277,7 +36144,7 @@
           state.jobs.clear();
           state.reservations.clear();
           publishGroup(group, state, null);
-          var _iterator14 = _createForOfIteratorHelper20(groupMembers(group)), _step14;
+          var _iterator14 = _createForOfIteratorHelper19(groupMembers(group)), _step14;
           try {
             for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
               var member = _step14.value;
@@ -37513,7 +36380,7 @@
               return presentElements.has(member2) && member2.isConnected && member2.closest(groupSelector) === group && member2.id === ids[index] && member2.getAttribute(attr.when) === conditions[index];
             });
           };
-          var _iterator15 = _createForOfIteratorHelper20(changes), _step15;
+          var _iterator15 = _createForOfIteratorHelper19(changes), _step15;
           try {
             for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
               var member = _step15.value;
@@ -37551,7 +36418,7 @@
             complete = resolve;
           });
           state.pending = pending;
-          var _iterator16 = _createForOfIteratorHelper20(changes), _step16;
+          var _iterator16 = _createForOfIteratorHelper19(changes), _step16;
           try {
             var _loop2 = function _loop22() {
               var member2 = _step16.value;
@@ -37595,7 +36462,7 @@
         function inHoverRegion(target, node) {
           if (!node || !node.nodeType) return false;
           if (target.contains(node)) return true;
-          var _iterator17 = _createForOfIteratorHelper20(triggerElementsSet), _step17;
+          var _iterator17 = _createForOfIteratorHelper19(triggerElementsSet), _step17;
           try {
             for (_iterator17.s(); !(_step17 = _iterator17.n()).done; ) {
               var button = _step17.value;
@@ -37632,7 +36499,7 @@
               } else hoveredTriggers.delete(button);
             }
           }
-          var _iterator18 = _createForOfIteratorHelper20(openPresentElements), _step18;
+          var _iterator18 = _createForOfIteratorHelper19(openPresentElements), _step18;
           try {
             var _loop3 = function _loop32() {
               var target2 = _step18.value;
@@ -37706,19 +36573,14 @@
             return init_aellux_ext_anchor(), aellux_ext_anchor_exports;
           });
         },
-        "overflowMarquee": function overflowMarquee() {
+        "viewport": function viewport() {
           return Promise.resolve().then(function() {
-            return init_aellux_ext_overflow_marquee(), aellux_ext_overflow_marquee_exports;
+            return init_aellux_ext_viewport(), aellux_ext_viewport_exports;
           });
         },
         "scrollbox": function scrollbox() {
           return Promise.resolve().then(function() {
             return init_aellux_ext_scrollbox(), aellux_ext_scrollbox_exports;
-          });
-        },
-        "scrollboxSnap": function scrollboxSnap() {
-          return Promise.resolve().then(function() {
-            return init_aellux_ext_scrollbox_snap(), aellux_ext_scrollbox_snap_exports;
           });
         },
         "adaptive": function adaptive() {

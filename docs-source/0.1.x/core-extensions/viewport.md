@@ -1,8 +1,8 @@
 # Viewport Extension
 
-**Distribution:** Optional Extension. **Stability:** Not stable.
+**Distribution:** Bundled Extension. **Stability:** Not stable.
 
-Viewport is an official **Optional Extension** that publishes an element's position and geometric visible area relative to its nearest native scroll container. It works with ordinary HTML/CSS, independently of Scrollbox, Snap and Present. It never changes scroll, presentation, focus or DOM structure.
+Viewport is an official **Bundled Extension** that publishes an element's position and geometric visible area relative to its nearest native scroll container. It works with ordinary HTML/CSS, independently of Scrollbox, Snap and Present. It never changes scroll, presentation, focus or DOM structure.
 
 ```html
 <div style="height:400px;overflow:auto">
@@ -13,7 +13,7 @@ Viewport is an official **Optional Extension** that publishes an element's posit
 
 ## Loading
 
-Full automatically registers `[data-ae-viewport]` for lazy loading without bundling the implementation. Basic requires an explicit registration, as below. With this lazy selector, absent matching mounted markup there is no Viewport download, initialization, observer or scroll listener. No stylesheet, extra dependency or global polyfill is required. Modern and Legacy scripts are distributed separately, including minified variants.
+Full bundles the implementation and registers `[data-ae-viewport]` for lazy initialization without a separate script request. Basic requires an explicit registration, as below. With this lazy selector, absent matching mounted markup there is no Viewport initialization, observer or scroll listener. Basic downloads its separate script only when matching markup is mounted. No stylesheet, extra dependency or global polyfill is required. Modern and Legacy scripts are distributed separately, including minified variants.
 
 ```js
 $ae.ext("viewport", { loadWhen: "[data-ae-viewport]" });
@@ -162,7 +162,7 @@ Measured raw/gzip level 9 bytes, compared with the implementation before these e
 | Legacy | 25,775 / 6,758 | 32,441 / 8,273 | +6,666 / +1,515 |
 | Legacy minified | 11,883 / 4,860 | 15,084 / 5,959 | +3,201 / +1,099 |
 
-These measurements describe the event addition before CSS targeting. Viewport remains an Optional Extension, external and lazy.
+These measurements describe the event addition before CSS targeting. Viewport is now bundled in Full; Basic still loads its separate script with explicit registration.
 
 ### CSS target delivery cost
 
@@ -175,7 +175,7 @@ Measured raw/gzip level 9 bytes against the version immediately before `data-ae-
 | Legacy | 32,441 / 8,273 | 35,097 / 8,851 | +2,656 / +578 |
 | Legacy minified | 15,084 / 5,959 | 16,406 / 6,420 | +1,322 / +461 |
 
-The four Viewport raw/gzip budgets are now 21/5.5 KiB (Modern), 10.25/4.25 KiB (Modern minified), 34.5/8.75 KiB (Legacy) and 16.25/6.5 KiB (Legacy minified). Other budgets are unchanged. Global runtimes include the declaration catalog entry, while Viewport's implementation remains external.
+The four Viewport raw/gzip budgets are now 21/5.5 KiB (Modern), 10.25/4.25 KiB (Modern minified), 34.5/8.75 KiB (Legacy) and 16.25/6.5 KiB (Legacy minified). Other budgets are unchanged. These historical measurements precede the primitives-only revision. Viewport's implementation is now bundled in Full and remains separate in Basic.
 
 ## Scrollbox Snap and migration
 
@@ -231,11 +231,11 @@ An element can declare both `data-ae-viewport` and `data-ae-present="opacity tra
 
 Use the normal mount, update, unmount and destroy APIs, including subtree mounting. Viewport saves prior inline output values and priorities on the CSS destination through `persist.element.save()` when acquiring it. Unmounting the observed source removes it from observation, invalidates its pending writes and restores the destination's saved values, including when the destination is outside the source subtree. Retargeting also releases and restores the previous destination. The last element leaving a reference releases the group's listener, observer, timer and scheduler tasks. Removing mounted elements uses mountManager's detached cleanup. Destroy releases all Extension resources; remounting creates fresh observation without duplicate listeners.
 
-Scheduled refresh failures emit `ViewportError` on `document` with the original error, the scroll reference and the observed sources. Automatic observer work records a diagnostic and stops retrying for the current Layout transition; a new external update can retry. The pending refresh still rejects for direct callers. See [Asynchronous failures](../../runtime/events.md#asynchronous-failures).
+Scheduled refresh failures emit `ViewportError` on `document` with the original error, the scroll reference and the observed sources. Automatic observer work records a diagnostic and stops retrying for the current Layout transition; a new external update can retry. The pending refresh still rejects for direct callers. See [Asynchronous failures](../runtime/events.md#asynchronous-failures).
 
 ## Known Limits & Risks
 
-See [Core Known Limits & Risks](../../runtime/known-limits-and-risks.md) for the shared architecture and classification convention. **Known Limit** means a confirmed implementation or contract restriction. **Potential Risk** describes an outcome that may occur under the stated conditions, without identifying a confirmed defect. **Validation Gap** means the available tests do not establish reliability for that scenario. **Known Issue** is reserved for a reproducible defect. Evaluate these boundaries before depending on Viewport geometry for interactions or animations. The [implementation](https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.viewport.js) and the linked spec below provide the evidence for this section.
+See [Core Known Limits & Risks](../runtime/known-limits-and-risks.md) for the shared architecture and classification convention. **Known Limit** means a confirmed implementation or contract restriction. **Potential Risk** describes an outcome that may occur under the stated conditions, without identifying a confirmed defect. **Validation Gap** means the available tests do not establish reliability for that scenario. **Known Issue** is reserved for a reproducible defect. Evaluate these boundaries before depending on Viewport geometry for interactions or animations. The [implementation](https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.viewport.js) and the linked spec below provide the evidence for this section.
 
 ### Known Limits
 
@@ -269,7 +269,7 @@ These are **Potential Risks**, not measured performance regressions or numerical
 
 While elements are mounted, MutationObserver watches the document subtree for child, text and selected attribute changes. Viewport filters out style notifications matching its own last publication, but unrelated application changes can still schedule all groups. Dynamic rendering, long lists and repeated class/style updates can amplify this work.
 
-The [shared scheduler](../../runtime/wait-layout.md) batches reads and writes, and unchanged outputs are not rewritten. This reduces redundant work without eliminating measurements or guaranteeing constant cost as the document grows. There is no continuous idle animation loop; continuous scroll and layout notifications can still request frequent updates. A finite positive `Layout` duration requests repeated checks only for that interval. Enable `data-ae-viewport` selectively and profile representative workloads. [Bundle budgets](../../runtime/performance.md#scope-and-limitations) measure delivery size, not runtime speed or memory use.
+The [shared scheduler](../runtime/wait-layout.md) batches reads and writes, and unchanged outputs are not rewritten. This reduces redundant work without eliminating measurements or guaranteeing constant cost as the document grows. There is no continuous idle animation loop; continuous scroll and layout notifications can still request frequent updates. A finite positive `Layout` duration requests repeated checks only for that interval. Enable `data-ae-viewport` selectively and profile representative workloads. [Bundle budgets](../runtime/performance.md#scope-and-limitations) measure delivery size, not runtime speed or memory use.
 
 ### Behavioral Risks
 
@@ -277,7 +277,7 @@ The following are **Potential Risks** with implementation-based conditions, rath
 
 **R1: Geometric feedback.** Using an observed element's own outputs to drive its transform changes the rectangle measured on later updates. This can produce oscillation, visual instability or recurring updates; timing may vary across engines. Observe a stable structural wrapper and animate a descendant instead. The [wrapper and child example](#transforms-and-present) also shows the explicit inheritance required when CSS properties are registered.
 
-**R2: Delayed geometry.** Outputs describe the last processed scheduler cycle, which can temporarily trail rapid scrolling or animation in the compositor. Scheduler throttling and hidden-page suspension also affect publication timing. Do not treat the values as a guarantee of frame-perfect synchronization; see [waitLayout](../../runtime/wait-layout.md).
+**R2: Delayed geometry.** Outputs describe the last processed scheduler cycle, which can temporarily trail rapid scrolling or animation in the compositor. Scheduler throttling and hidden-page suspension also affect publication timing. Do not treat the values as a guarantee of frame-perfect synchronization; see [waitLayout](../runtime/wait-layout.md).
 
 **R3: Changes without notifications.** CSS-only position or transform changes may produce neither size changes nor relevant mutation/intersection notifications. Detection depends on the available APIs and triggers; not every geometric change is automatically observed. After an otherwise undetected change, request publication explicitly:
 
@@ -291,7 +291,7 @@ For an application-controlled transition, a bubbling `Layout` notification can a
 $ae.dispatchFrom(element, "Layout", { detail: { durationMs: 250 } });
 ```
 
-Use the transition's expected duration; this requests scheduled checks rather than compositor synchronization. See [Events](../../runtime/events.md) for the shared event contract.
+Use the transition's expected duration; this requests scheduled checks rather than compositor synchronization. See [Events](../runtime/events.md) for the shared event contract.
 
 **R4: Changing scroll containers.** Reparenting or changing CSS overflow can change the selected reference. Relevant updates rediscover the nearest container and transfer the element to its group, but previously published values can remain until the new group's publication. Await an explicit update when subsequent application work depends on the new reference.
 
@@ -310,9 +310,9 @@ Use the transition's expected duration; this requests scheduled checks rather th
 | `MutationObserver` | <span class="large">The Extension's document mutation trigger is absent. Remaining notifications and explicit mount/update calls must cover application changes; automatic discovery of every DOM/style change is not guaranteed.</span> |
 | `CSS.registerProperty` | <span class="large">Outputs are still written inline, but unregistered custom properties use native inheritance rather than registered `inherits: false` behavior. Descendant styles must account for this difference.</span> |
 
-Update coverage and freshness depend on the available triggers. Legacy syntax and shared polyfills do not establish support for every historical browser. Forced Legacy execution in current engines is distinct from testing old browsers directly; see [Browser support](../../runtime/browser-support.md#legacy-scope).
+Update coverage and freshness depend on the available triggers. Legacy syntax and shared polyfills do not establish support for every historical browser. Forced Legacy execution in current engines is distinct from testing old browsers directly; see [Browser support](../runtime/browser-support.md#legacy-scope).
 
-**Coverage boundaries (Validation Gaps).** The existing [Viewport spec](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/viewport.spec.mjs) defines Modern and forced Legacy cases for the desktop engine matrix. Its presence establishes the scope of automated checks, not a new test-run result. See [Validation scenarios](../../validation-scenarios.md#core-contract-regression-matrix) for the broader contract matrix.
+**Coverage boundaries (Validation Gaps).** The existing [Viewport spec](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/viewport.spec.mjs) defines Modern and forced Legacy cases for the desktop engine matrix. Its presence establishes the scope of automated checks, not a new test-run result. See [Validation scenarios](../validation-scenarios.md#core-contract-regression-matrix) for the broader contract matrix.
 
 | Area | Existing checks | Additional validation needed |
 | --- | --- | --- |

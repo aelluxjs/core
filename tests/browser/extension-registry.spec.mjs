@@ -119,7 +119,7 @@ for (const boot of ["aellux.js", "aellux.min.js"]) {
       });
       expect(result).toEqual({ base: true, snap: true, navigated: true, legacy: forceLegacy });
       expect(requests.filter(file => /^aellux\.ext\.scrollbox(?:-snap)?(?:\.legacy)?(?:\.min)?\.js$/.test(file)).sort())
-        .toEqual([]);
+        .toEqual([`aellux.ext.scrollbox-snap${forceLegacy ? ".legacy" : ""}${boot.includes(".min.") ? ".min" : ""}.js`]);
       expect(requests).not.toContain("aellux.extensions.min.json");
     });
   }

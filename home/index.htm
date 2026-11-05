@@ -329,7 +329,7 @@ AelluxJs.attr("preference");</code></pre>
               <div class="example-footer border-top px-4 py-3 d-flex flex-wrap justify-content-between gap-2 small">
                 <span class="text-body-secondary">Preview → Source → Documentation</span>
                 <div class="d-flex gap-3"><a href="../docs/0.1.x/core-extensions/scrollbox.htm">Scrollbox <span
-                      aria-hidden="true">↗</span></a><a href="../docs/0.1.x/core-extensions/scrollbox-snap.htm">Snap
+                      aria-hidden="true">↗</span></a><a href="../docs/0.1.x/core-extensions/optional/scrollbox-snap.htm">Snap
                     <span aria-hidden="true">↗</span></a></div>
               </div>
             </div>
@@ -355,7 +355,7 @@ AelluxJs.attr("preference");</code></pre>
               </div>
               <div class="example-footer border-top px-4 py-3 d-flex flex-wrap justify-content-between gap-2 small">
                 <span class="text-body-secondary">Preview → Source → Documentation</span><a
-                  href="../docs/0.1.x/core-extensions/optional/viewport.htm">Viewport <span
+                  href="../docs/0.1.x/core-extensions/viewport.htm">Viewport <span
                     aria-hidden="true">↗</span></a>
               </div>
             </div>
@@ -425,16 +425,20 @@ AelluxJs.attr("preference");</code></pre>
           <div class="col-lg-7">
             <p class="eyebrow text-body-secondary">04 <span class="opacity-50" aria-hidden="true">▪</span> The toolkit
             </p>
-            <h2 id="extensions-title" class="section-title mb-0">One responsibility.<br>Each Extension.</h2>
+            <h2 id="extensions-title" class="section-title mb-0">Primitives to compose.<br>Extensions to add.</h2>
           </div>
           <div class="col-lg-5">
-            <p class="text-body-secondary mb-0">Sixteen official Core Extensions. Compose the behaviors your interface
-              needs, on your terms.</p>
+            <p class="text-body-secondary mb-0">Build components and new behaviors with bundled primitives. Add optional navigation, environment and
+              compatibility Extensions when your interface needs them.</p>
           </div>
         </div>
-        <p class="small text-body-secondary mb-4">Bundled / Optional describes delivery in Full mode. Stability is
-          marked separately; Extensions without an Unstable label are stable.</p>
-        <h3 class="h6 text-body-secondary mb-3">Presentation &amp; interaction</h3>
+        <p class="small text-body-secondary mb-4">Full includes all Core primitives automatically, but does not bundle
+          every Core Extension. Optional Extensions load separately on demand. Stability is marked independently;
+          Extensions without an Unstable label are stable.</p>
+        <h3 class="h6 text-body-secondary mb-2">Bundled primitives</h3>
+        <p class="small text-body-secondary mb-3">All ten primitives are included automatically in Full. Compose them to build components and new
+          behaviors; Preference and State Navigation initialize at startup, while the others initialize when
+          needed.</p>
         <div class="row g-3 mb-4">
           <article class="col-sm-6 col-xl-3">
             <div class="extension-link bg-body border rounded-2">
@@ -527,31 +531,6 @@ AelluxJs.attr("preference");</code></pre>
           <article class="col-sm-6 col-xl-3">
             <div class="extension-link bg-body border rounded-2">
               <h4 class="h6 mb-0">
-                <button type="button" class="extension-trigger" data-ae-trigger="pop" data-ae-target="#extension-dialog"
-                  aria-controls="extension-dialog" aria-expanded="false">
-                  <span class="d-flex justify-content-between gap-2"><span>Dialog</span><span
-                      class="extension-indicator" aria-hidden="true">+</span></span>
-                  <span class="extension-meta">Optional <span class="badge text-body border ms-1">Unstable</span></span>
-                </button>
-              </h4>
-              <div id="extension-dialog" class="w-100" data-ae-present="height opacity" data-ae-dismiss-on-click="false"
-                hidden>
-                <div class="extension-motion" data-ae-present-motion>
-                  <div class="px-4 pb-4">
-                    <p>Dialog behaviors with native compatibility support.</p>
-                    <a href="../docs/0.1.x/core-extensions/optional/dialog.htm">Read documentation <span
-                        aria-hidden="true">↗</span></a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </article>
-        </div>
-        <h3 class="h6 text-body-secondary mb-3">Scroll &amp; geometry</h3>
-        <div class="row g-3 mb-4">
-          <article class="col-sm-6 col-xl-3">
-            <div class="extension-link bg-body border rounded-2">
-              <h4 class="h6 mb-0">
                 <button type="button" class="extension-trigger" data-ae-trigger="pop"
                   data-ae-target="#extension-scrollbox" aria-controls="extension-scrollbox" aria-expanded="false">
                   <span class="d-flex justify-content-between gap-2"><span>Scrollbox</span><span
@@ -575,33 +554,10 @@ AelluxJs.attr("preference");</code></pre>
             <div class="extension-link bg-body border rounded-2">
               <h4 class="h6 mb-0">
                 <button type="button" class="extension-trigger" data-ae-trigger="pop"
-                  data-ae-target="#extension-scrollbox-snap" aria-controls="extension-scrollbox-snap"
-                  aria-expanded="false">
-                  <span class="d-flex justify-content-between gap-2"><span>Scrollbox Snap</span><span
-                      class="extension-indicator" aria-hidden="true">+</span></span>
-                  <span class="extension-meta">Bundled</span>
-                </button>
-              </h4>
-              <div id="extension-scrollbox-snap" class="w-100" data-ae-present="height opacity"
-                data-ae-dismiss-on-click="false" hidden>
-                <div class="extension-motion" data-ae-present-motion>
-                  <div class="px-4 pb-4">
-                    <p>Snap alignment and navigation for Scrollbox.</p>
-                    <a href="../docs/0.1.x/core-extensions/scrollbox-snap.htm">Read documentation <span
-                        aria-hidden="true">↗</span></a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </article>
-          <article class="col-sm-6 col-xl-3">
-            <div class="extension-link bg-body border rounded-2">
-              <h4 class="h6 mb-0">
-                <button type="button" class="extension-trigger" data-ae-trigger="pop"
                   data-ae-target="#extension-viewport" aria-controls="extension-viewport" aria-expanded="false">
                   <span class="d-flex justify-content-between gap-2"><span>Viewport</span><span
                       class="extension-indicator" aria-hidden="true">+</span></span>
-                  <span class="extension-meta">Optional <span class="badge text-body border ms-1">Unstable</span></span>
+                  <span class="extension-meta">Bundled <span class="badge text-body border ms-1">Unstable</span></span>
                 </button>
               </h4>
               <div id="extension-viewport" class="w-100" data-ae-present="height opacity"
@@ -609,55 +565,7 @@ AelluxJs.attr("preference");</code></pre>
                 <div class="extension-motion" data-ae-present-motion>
                   <div class="px-4 pb-4">
                     <p>Publish relative position and visibility as CSS values.</p>
-                    <a href="../docs/0.1.x/core-extensions/optional/viewport.htm">Read documentation <span
-                        aria-hidden="true">↗</span></a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </article>
-          <article class="col-sm-6 col-xl-3">
-            <div class="extension-link bg-body border rounded-2">
-              <h4 class="h6 mb-0">
-                <button type="button" class="extension-trigger" data-ae-trigger="pop"
-                  data-ae-target="#extension-overflow-marquee" aria-controls="extension-overflow-marquee"
-                  aria-expanded="false">
-                  <span class="d-flex justify-content-between gap-2"><span>Overflow Marquee</span><span
-                      class="extension-indicator" aria-hidden="true">+</span></span>
-                  <span class="extension-meta">Bundled</span>
-                </button>
-              </h4>
-              <div id="extension-overflow-marquee" class="w-100" data-ae-present="height opacity"
-                data-ae-dismiss-on-click="false" hidden>
-                <div class="extension-motion" data-ae-present-motion>
-                  <div class="px-4 pb-4">
-                    <p>Reveal overflowing single-line content with motion.</p>
-                    <a href="../docs/0.1.x/core-extensions/overflow-marquee.htm">Read documentation <span
-                        aria-hidden="true">↗</span></a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </article>
-        </div>
-        <h3 class="h6 text-body-secondary mb-3">Navigation &amp; feedback</h3>
-        <div class="row g-3 mb-4">
-          <article class="col-sm-6 col-xl-3">
-            <div class="extension-link bg-body border rounded-2">
-              <h4 class="h6 mb-0">
-                <button type="button" class="extension-trigger" data-ae-trigger="pop"
-                  data-ae-target="#extension-ajax-href" aria-controls="extension-ajax-href" aria-expanded="false">
-                  <span class="d-flex justify-content-between gap-2"><span>Ajax Href</span><span
-                      class="extension-indicator" aria-hidden="true">+</span></span>
-                  <span class="extension-meta">Optional <span class="badge text-body border ms-1">Unstable</span></span>
-                </button>
-              </h4>
-              <div id="extension-ajax-href" class="w-100" data-ae-present="height opacity"
-                data-ae-dismiss-on-click="false" hidden>
-                <div class="extension-motion" data-ae-present-motion>
-                  <div class="px-4 pb-4">
-                    <p>Replace matching HTML regions from local responses.</p>
-                    <a href="../docs/0.1.x/core-extensions/optional/ajax-href.htm">Read documentation <span
+                    <a href="../docs/0.1.x/core-extensions/viewport.htm">Read documentation <span
                         aria-hidden="true">↗</span></a>
                   </div>
                 </div>
@@ -713,31 +621,6 @@ AelluxJs.attr("preference");</code></pre>
             <div class="extension-link bg-body border rounded-2">
               <h4 class="h6 mb-0">
                 <button type="button" class="extension-trigger" data-ae-trigger="pop"
-                  data-ae-target="#extension-progress" aria-controls="extension-progress" aria-expanded="false">
-                  <span class="d-flex justify-content-between gap-2"><span>Progress</span><span
-                      class="extension-indicator" aria-hidden="true">+</span></span>
-                  <span class="extension-meta">Optional <span class="badge text-body border ms-1">Unstable</span></span>
-                </button>
-              </h4>
-              <div id="extension-progress" class="w-100" data-ae-present="height opacity"
-                data-ae-dismiss-on-click="false" hidden>
-                <div class="extension-motion" data-ae-present-motion>
-                  <div class="px-4 pb-4">
-                    <p>Connect native progress and meter controls to events.</p>
-                    <a href="../docs/0.1.x/core-extensions/optional/progress.htm">Read documentation <span
-                        aria-hidden="true">↗</span></a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </article>
-        </div>
-        <h3 class="h6 text-body-secondary mb-3">Environment &amp; adaptation</h3>
-        <div class="row g-3">
-          <article class="col-sm-6 col-xl-3">
-            <div class="extension-link bg-body border rounded-2">
-              <h4 class="h6 mb-0">
-                <button type="button" class="extension-trigger" data-ae-trigger="pop"
                   data-ae-target="#extension-adaptive" aria-controls="extension-adaptive" aria-expanded="false">
                   <span class="d-flex justify-content-between gap-2"><span>Adaptive</span><span
                       class="extension-indicator" aria-hidden="true">+</span></span>
@@ -778,6 +661,34 @@ AelluxJs.attr("preference");</code></pre>
               </div>
             </div>
           </article>
+        </div>
+        <h3 class="h6 text-body-secondary mb-2">Optional Core Extensions</h3>
+        <p class="small text-body-secondary mb-3">Add navigation with Ajax Href or environment integration with PWA. Dialog and Progress mainly provide
+          Legacy compatibility while preserving native controls in modern browsers. Full loads their separate
+          scripts on demand.</p>
+        <div class="row g-3 mb-4">
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop"
+                  data-ae-target="#extension-ajax-href" aria-controls="extension-ajax-href" aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>Ajax Href</span><span
+                      class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Optional <span class="badge text-body border ms-1">Unstable</span></span>
+                </button>
+              </h4>
+              <div id="extension-ajax-href" class="w-100" data-ae-present="height opacity"
+                data-ae-dismiss-on-click="false" hidden>
+                <div class="extension-motion" data-ae-present-motion>
+                  <div class="px-4 pb-4">
+                    <p>Replace matching HTML regions from same-origin responses.</p>
+                    <a href="../docs/0.1.x/core-extensions/optional/ajax-href.htm">Read documentation <span
+                        aria-hidden="true">↗</span></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
           <article class="col-sm-6 col-xl-3">
             <div class="extension-link bg-body border rounded-2">
               <h4 class="h6 mb-0">
@@ -794,6 +705,101 @@ AelluxJs.attr("preference");</code></pre>
                   <div class="px-4 pb-4">
                     <p>Installation guidance and Service Worker registration.</p>
                     <a href="../docs/0.1.x/core-extensions/optional/pwa.htm">Read documentation <span
+                        aria-hidden="true">↗</span></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop" data-ae-target="#extension-dialog"
+                  aria-controls="extension-dialog" aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>Dialog</span><span
+                      class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Optional <span class="badge text-body border ms-1">Unstable</span></span>
+                </button>
+              </h4>
+              <div id="extension-dialog" class="w-100" data-ae-present="height opacity" data-ae-dismiss-on-click="false"
+                hidden>
+                <div class="extension-motion" data-ae-present-motion>
+                  <div class="px-4 pb-4">
+                    <p>Use native dialogs with compatibility fallbacks for Legacy browsers.</p>
+                    <a href="../docs/0.1.x/core-extensions/optional/dialog.htm">Read documentation <span
+                        aria-hidden="true">↗</span></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop"
+                  data-ae-target="#extension-progress" aria-controls="extension-progress" aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>Progress</span><span
+                      class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Optional <span class="badge text-body border ms-1">Unstable</span></span>
+                </button>
+              </h4>
+              <div id="extension-progress" class="w-100" data-ae-present="height opacity"
+                data-ae-dismiss-on-click="false" hidden>
+                <div class="extension-motion" data-ae-present-motion>
+                  <div class="px-4 pb-4">
+                    <p>Connect native progress and meter controls to events, with Legacy fallbacks.</p>
+                    <a href="../docs/0.1.x/core-extensions/optional/progress.htm">Read documentation <span
+                        aria-hidden="true">↗</span></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+        <h3 class="h6 text-body-secondary mb-2">Additional behaviors</h3>
+        <p class="small text-body-secondary mb-3">Overflow Marquee and Scrollbox Snap load separately from Full. Their current registrations remain
+          available while they move to external extensions.</p>
+        <div class="row g-3">
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop"
+                  data-ae-target="#extension-overflow-marquee" aria-controls="extension-overflow-marquee"
+                  aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>Overflow Marquee</span><span
+                      class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Optional</span>
+                </button>
+              </h4>
+              <div id="extension-overflow-marquee" class="w-100" data-ae-present="height opacity"
+                data-ae-dismiss-on-click="false" hidden>
+                <div class="extension-motion" data-ae-present-motion>
+                  <div class="px-4 pb-4">
+                    <p>Reveal overflowing single-line content with motion.</p>
+                    <a href="../docs/0.1.x/core-extensions/optional/overflow-marquee.htm">Read documentation <span
+                        aria-hidden="true">↗</span></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article class="col-sm-6 col-xl-3">
+            <div class="extension-link bg-body border rounded-2">
+              <h4 class="h6 mb-0">
+                <button type="button" class="extension-trigger" data-ae-trigger="pop"
+                  data-ae-target="#extension-scrollbox-snap" aria-controls="extension-scrollbox-snap"
+                  aria-expanded="false">
+                  <span class="d-flex justify-content-between gap-2"><span>Scrollbox Snap</span><span
+                      class="extension-indicator" aria-hidden="true">+</span></span>
+                  <span class="extension-meta">Optional</span>
+                </button>
+              </h4>
+              <div id="extension-scrollbox-snap" class="w-100" data-ae-present="height opacity"
+                data-ae-dismiss-on-click="false" hidden>
+                <div class="extension-motion" data-ae-present-motion>
+                  <div class="px-4 pb-4">
+                    <p>Snap alignment and navigation for Scrollbox.</p>
+                    <a href="../docs/0.1.x/core-extensions/optional/scrollbox-snap.htm">Read documentation <span
                         aria-hidden="true">↗</span></a>
                   </div>
                 </div>

@@ -13,9 +13,21 @@ npm run test:budget
 
 The CI workflow runs the same command after `npm run build`. A pull request fails if an artifact exceeds either limit. Review the generated artifact and its delivery cost before changing a limit.
 
+## Primitives-only Full bundle
+
+Full automatically includes all Core primitives, including Preference and Viewport. It does not embed every available Core Extension: optional navigation, environment and Legacy compatibility extensions remain separate. Overflow Marquee and Scrollbox Snap now load signed scripts on demand pending migration to external extensions. Marquee CSS also loads separately; Scrollbox retains its existing native snap rules for compatibility. Compared with the preceding checked-in artifacts, minified raw/gzip level 9 bytes are:
+
+| Artifact | Before raw / gzip bytes | After raw / gzip bytes |
+| --- | --- | --- |
+| aellux.full.min.js | 228,321 / 70,513 | 214,313 / 66,682 |
+| aellux.full.legacy.min.js | 562,863 / 165,880 | 540,520 / 161,215 |
+| aellux.full.min.css | 126,807 / 12,017 | 124,146 / 11,648 |
+
+All existing artifact budgets pass without increasing their limits. These measurements describe delivery size, not runtime performance.
+
 ## Limits
 
-[`scripts/bundle-budget.config.mjs`](https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs) is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The `test:budget` command prints each artifact's measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates eleven Bundled Extensions. Only the Optional Extensions (Ajax Href, Dialog, Progress, PWA and Viewport) use separate on-demand scripts in Full. Basic loads separately the Extensions explicitly registered by the developer and their declared dependencies.
+[`scripts/bundle-budget.config.mjs`](https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs) is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The `test:budget` command prints each artifact's measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates ten Bundled Extensions. Only the Optional Extensions (Ajax Href, Dialog, Overflow Marquee, Progress, PWA and Scrollbox Snap) use separate on-demand scripts in Full. Basic loads separately the Extensions explicitly registered by the developer and their declared dependencies.
 
 ## Adaptive CSS publication
 
@@ -48,7 +60,7 @@ The boot measurements include the current signed Viewport registry entries. The 
 
 ## Core delivery split
 
-Bundled Extensions ship inside Full, while Optional Extensions (Ajax Href, Dialog, Progress, PWA and Viewport) remain external. Basic embeds no Extension implementations and starts with no registrations. The following measurements record the earlier Full delivery split; they are not updated measurements for later registration changes. Measured minified raw/gzip level 9 bytes and revised limits:
+Bundled Extensions ship inside Full, while Optional Extensions (Ajax Href, Dialog, Overflow Marquee, Progress, PWA and Scrollbox Snap) remain external. Basic embeds no Extension implementations and starts with no registrations. The following measurements record the earlier Full delivery split; they are not updated measurements for later registration changes. Measured minified raw/gzip level 9 bytes and revised limits:
 
 | Artifact | Before raw / gzip bytes | After raw / gzip bytes | Limits raw / gzip KiB |
 | --- | --- | --- | --- |
@@ -61,7 +73,7 @@ The Full increase includes Scrollbox, Snap and Overflow Marquee and removes Ajax
 
 ## Viewport delivery
 
-The optional [Viewport Extension](../core-extensions/optional/viewport.md) ships independently, without CSS, dependencies or implementation code in Full/Orchestrator. The following sizes use raw bytes and gzip level 9, compared with the preceding checked-in artifacts:
+The [Viewport Extension](../core-extensions/viewport.md) now ships inside Full, without CSS or additional dependencies; Basic retains separate artifacts. The following historical sizes record its initial separate delivery, before the primitives-only bundle revision, using raw bytes and gzip level 9:
 
 | Artifact | Before raw / gzip bytes | After raw / gzip bytes |
 | --- | --- | --- |

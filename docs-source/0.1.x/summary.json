@@ -54,15 +54,14 @@
           "children": [
             { "label": "Adaptive", "href": "core-extensions/adaptive.md" },
             { "label": "Anchor", "href": "core-extensions/anchor.md" },
-            { "label": "Overflow Marquee", "href": "core-extensions/overflow-marquee.md" },
             { "label": "Feedback", "href": "core-extensions/feedback.md" },
             { "label": "Focus", "href": "core-extensions/focus.md" },
             { "label": "Point", "href": "core-extensions/point.md" },
             { "label": "Preference", "href": "core-extensions/preference.md" },
             { "label": "Present", "href": "core-extensions/present.md" },
             { "label": "Scrollbox", "href": "core-extensions/scrollbox.md" },
-            { "label": "Scrollbox Snap", "href": "core-extensions/scrollbox-snap.md" },
-            { "label": "State Navigation", "href": "core-extensions/state-navigation.md" }
+            { "label": "State Navigation", "href": "core-extensions/state-navigation.md" },
+            { "label": "Viewport", "href": "core-extensions/viewport.md" }
           ]
         },
         {
@@ -71,9 +70,10 @@
           "children": [
             { "label": "Ajax Href", "href": "core-extensions/optional/ajax-href.md" },
             { "label": "Dialog", "href": "core-extensions/optional/dialog.md" },
+            { "label": "Overflow Marquee", "href": "core-extensions/optional/overflow-marquee.md" },
             { "label": "Progress", "href": "core-extensions/optional/progress.md" },
             { "label": "PWA", "href": "core-extensions/optional/pwa.md" },
-            { "label": "Viewport", "href": "core-extensions/optional/viewport.md" }
+            { "label": "Scrollbox Snap", "href": "core-extensions/optional/scrollbox-snap.md" }
           ]
         }
       ]

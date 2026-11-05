@@ -445,13 +445,6 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/overflow-marquee.htm" data-ae-overflow-marquee="190px">
-                                              Overflow Marquee                                            </a>
-                                          </div>
-                                                                                    <div
-                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
-                                            style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/feedback.htm" data-ae-overflow-marquee="190px">
                                               Feedback                                            </a>
                                           </div>
@@ -494,15 +487,15 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/scrollbox-snap.htm" data-ae-overflow-marquee="190px">
-                                              Scrollbox Snap                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
+                                              State Navigation                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
-                                              State Navigation                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/viewport.htm" data-ae-overflow-marquee="190px">
+                                              Viewport                                            </a>
                                           </div>
                                                                                 </div>
                                   </div>
@@ -540,6 +533,13 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                              href="/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm" data-ae-overflow-marquee="190px">
+                                              Overflow Marquee                                            </a>
+                                          </div>
+                                                                                    <div
+                                            class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                            style="flex:0">
+                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/optional/progress.htm" data-ae-overflow-marquee="190px">
                                               Progress                                            </a>
                                           </div>
@@ -554,8 +554,8 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/optional/viewport.htm" data-ae-overflow-marquee="190px">
-                                              Viewport                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/optional/scrollbox-snap.htm" data-ae-overflow-marquee="190px">
+                                              Scrollbox Snap                                            </a>
                                           </div>
                                                                                 </div>
                                   </div>
@@ -683,8 +683,35 @@
 npm run test:budget
 </code></pre>
 <p>The CI workflow runs the same command after <code>npm run build</code>. A pull request fails if an artifact exceeds either limit. Review the generated artifact and its delivery cost before changing a limit.</p>
+<h2>Primitives-only Full bundle</h2>
+<p>Full automatically includes all Core primitives, including Preference and Viewport. It does not embed every available Core Extension: optional navigation, environment and Legacy compatibility extensions remain separate. Overflow Marquee and Scrollbox Snap now load signed scripts on demand pending migration to external extensions. Marquee CSS also loads separately; Scrollbox retains its existing native snap rules for compatibility. Compared with the preceding checked-in artifacts, minified raw/gzip level 9 bytes are:</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Before raw / gzip bytes</th>
+<th>After raw / gzip bytes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>aellux.full.min.js</td>
+<td>228,321 / 70,513</td>
+<td>214,313 / 66,682</td>
+</tr>
+<tr>
+<td>aellux.full.legacy.min.js</td>
+<td>562,863 / 165,880</td>
+<td>540,520 / 161,215</td>
+</tr>
+<tr>
+<td>aellux.full.min.css</td>
+<td>126,807 / 12,017</td>
+<td>124,146 / 11,648</td>
+</tr>
+</tbody></table>
+<p>All existing artifact budgets pass without increasing their limits. These measurements describe delivery size, not runtime performance.</p>
 <h2>Limits</h2>
-<p><a href="https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs"><code>scripts/bundle-budget.config.mjs</code></a> is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The <code>test:budget</code> command prints each artifact&#39;s measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates eleven Bundled Extensions. Only the Optional Extensions (Ajax Href, Dialog, Progress, PWA and Viewport) use separate on-demand scripts in Full. Basic loads separately the Extensions explicitly registered by the developer and their declared dependencies.</p>
+<p><a href="https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs"><code>scripts/bundle-budget.config.mjs</code></a> is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The <code>test:budget</code> command prints each artifact&#39;s measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates ten Bundled Extensions. Only the Optional Extensions (Ajax Href, Dialog, Overflow Marquee, Progress, PWA and Scrollbox Snap) use separate on-demand scripts in Full. Basic loads separately the Extensions explicitly registered by the developer and their declared dependencies.</p>
 <h2>Adaptive CSS publication</h2>
 <p>Scrollbox custom scrollbar geometry, Snap focus, elastic styles and Legacy Progress fallback rendering use the shared adaptive update phase. This adds replaceable Snap measurement/publication and cancellable coalesced updates while preserving independent scrolling and gesture calculations. Compared with the preceding checked-in artifacts, minified raw/gzip level 9 sizes are:</p>
 <table>
@@ -770,7 +797,7 @@ npm run test:budget
 </tbody></table>
 <p>The boot measurements include the current signed Viewport registry entries. The boot gzip limit increases from 16 to 16.5 KiB, and the ESM limits increase from 25/8.5 to 26.5/9.25 KiB. Ajax Href&#39;s limits remain unchanged. Sharing the parser reduces the separate Ajax Href scripts while adding the public capability to every core entry.</p>
 <h2>Core delivery split</h2>
-<p>Bundled Extensions ship inside Full, while Optional Extensions (Ajax Href, Dialog, Progress, PWA and Viewport) remain external. Basic embeds no Extension implementations and starts with no registrations. The following measurements record the earlier Full delivery split; they are not updated measurements for later registration changes. Measured minified raw/gzip level 9 bytes and revised limits:</p>
+<p>Bundled Extensions ship inside Full, while Optional Extensions (Ajax Href, Dialog, Overflow Marquee, Progress, PWA and Scrollbox Snap) remain external. Basic embeds no Extension implementations and starts with no registrations. The following measurements record the earlier Full delivery split; they are not updated measurements for later registration changes. Measured minified raw/gzip level 9 bytes and revised limits:</p>
 <table>
 <thead>
 <tr>
@@ -807,7 +834,7 @@ npm run test:budget
 </tbody></table>
 <p>The Full increase includes Scrollbox, Snap and Overflow Marquee and removes Ajax Href. The two existing standalone Ajax Href budget excesses are unchanged by this delivery split.</p>
 <h2>Viewport delivery</h2>
-<p>The optional <a href="../core-extensions/optional/viewport.htm">Viewport Extension</a> ships independently, without CSS, dependencies or implementation code in Full/Orchestrator. The following sizes use raw bytes and gzip level 9, compared with the preceding checked-in artifacts:</p>
+<p>The <a href="../core-extensions/viewport.htm">Viewport Extension</a> now ships inside Full, without CSS or additional dependencies; Basic retains separate artifacts. The following historical sizes record its initial separate delivery, before the primitives-only bundle revision, using raw bytes and gzip level 9:</p>
 <table>
 <thead>
 <tr>

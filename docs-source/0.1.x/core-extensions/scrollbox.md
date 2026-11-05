@@ -179,7 +179,7 @@ Scrollbox updates measurements after content mutations, box resize, or window re
 
 ## Snap points
 
-Snap points are provided by the optional [Scrollbox Snap](scrollbox-snap.md) Extension. Register `scrollbox-snap`; it registers and waits for Scrollbox before mounting. Its API, events, and interaction hooks are documented on that page.
+Snap points are provided by the optional [Scrollbox Snap](optional/scrollbox-snap.md) Extension. Register `scrollbox-snap`; it registers and waits for Scrollbox before mounting. Its API, events, and interaction hooks are documented on that page.
 
 `AelluxJsScrollboxSnapChange` fires on the scrollbox when a newly selected snap point finishes settling. Its `detail` contains `{ item, index, previousIndex, axis }`; the initial selection uses `previousIndex: null`. Selecting the same item again does not emit another change.
 
@@ -190,7 +190,7 @@ document.getElementById("gallery").addEventListener("AelluxJsScrollboxSnapChange
 });
 ```
 
-Each `data-ae-snap-item` receives inline `--ae-snap-focus` at mount and as the box scrolls or refreshes. It uses the snap axis: `1` means aligned, falls by the alignment distance divided by the viewport size, and clamps to `0`. Prior inline values and priorities are restored on unmount. For normalized position and visible area, add `data-ae-viewport` to the item and use the independent [Viewport Extension](optional/viewport.md). The former `--ae-snap-viewport` output has been removed; use `--ae-viewport-x` or `--ae-viewport-y`. Snap works without Viewport.
+Each `data-ae-snap-item` receives inline `--ae-snap-focus` at mount and as the box scrolls or refreshes. It uses the snap axis: `1` means aligned, falls by the alignment distance divided by the viewport size, and clamps to `0`. Prior inline values and priorities are restored on unmount. For normalized position and visible area, add `data-ae-viewport` to the item and use the independent [Viewport Extension](viewport.md). The former `--ae-snap-viewport` output has been removed; use `--ae-viewport-x` or `--ae-viewport-y`. Snap works without Viewport.
 
 Place `data-ae-scrollbox-snap` on the Scrollbox itself and mark each point with `data-ae-snap-item`. An empty value or `horizontal` selects the horizontal axis; `vertical` selects the vertical axis. Without elastic, marked descendants of the scrollbox are points; with elastic, only marked descendants inside its wrapper are points. Items belonging to a nested scrollbox are excluded. If no eligible item exists, diagnostic 1121 reports the missing points and snap stays disabled. The weak CSS applies `scroll-snap-type: x mandatory` or `y mandatory` to the box. An empty `data-ae-snap-item` aligns its center; `start`, `left`, and `top` align its start, while `end`, `right`, and `bottom` align its end along the selected axis. The directional names are aliases for CSS's logical `start` and `end`. The extension toggles CSS classes to suspend snapping during PDS, elastic pressure, scrollbar thumb dragging, and wheel input beyond the first or last item. At a list end, wheel input follows native scrolling and can reach an ancestor when `overscroll-behavior` permits it. The snap rule returns 120 ms after the last edge wheel event. The focus and viewport variables keep updating while snapping is suspended. At mount, Scrollbox aligns the first point immediately. Snap does not alter the box's or items' inline snap declarations.
 
