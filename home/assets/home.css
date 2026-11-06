@@ -34,6 +34,7 @@ body:after {
   --bs-link-hover-color: #493600;
   --bs-link-hover-color-rgb: 73, 54, 0;
   --bs-body-font-weight:300!important;
+  --bs-border-color: #eaecff!important;
 }
 
 [data-bs-theme="dark"] {
@@ -44,6 +45,7 @@ body:after {
   --bs-link-color-rgb: 255, 193, 7;
   --bs-link-hover-color: #ffda6a;
   --bs-link-hover-color-rgb: 255, 218, 106;
+  --bs-border-color: #303140!important
 }
 
 h1, h2, h3, h4, h5, h6 { font-family: var(--bs-heading-font-family) !important; }
