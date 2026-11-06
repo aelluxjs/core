@@ -91,8 +91,9 @@ body, main > section, body > footer {
     transparent 55%,
     rgba(var(--bs-body-color-rgb), .025) 100%);
   background-attachment: fixed;
-  background-position: center;
+  background-position: bottom;
   background-size: 100vw 100vh;
+  background-size: 100dvw 100dvh;
   background-repeat: no-repeat;
 }
 section.bg-body-tertiary {
@@ -101,8 +102,9 @@ section.bg-body-tertiary {
     transparent 50%,
     rgba(0, 62, 248, .05) 100%);
   background-attachment: fixed;
-  background-position: center;
+  background-position: bottom;
   background-size: 100vw 100vh;
+  background-size: 100dvw 100dvh;
   background-repeat: no-repeat;
 }
 section[id] { scroll-margin-top: 1.5rem; }

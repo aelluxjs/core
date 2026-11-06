@@ -1,9 +1,30 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 /**
- * Viewport observes geometry only. The nearest native scroll container is the
- * reference for both axes; no Scrollbox or presentation extension is required.
- * Reads and writes are batched per reference through the shared scheduler.
+ * Viewport Extension
+ *
+ * Purpose: observes element position and visible area relative to the nearest
+ * native scroll container, using that reference for both axes and falling back
+ * to the document viewport. No Scrollbox or presentation Extension is required.
+ *
+ * Capability profile: geometry observation and visual-state publication.
+ *
+ * Inputs and activation: mounts `[data-ae-viewport]`; x, y or both select the
+ * published axes. `data-ae-viewport-target` optionally redirects CSS output to
+ * another element by ID. Scroll, resize, content changes and Aellux Layout
+ * events schedule fresh measurements.
+ *
+ * Outputs and owned state: publishes `--ae-viewport-x`, `--ae-viewport-y` and
+ * `--ae-viewport-visible` on the resolved target, and dispatches
+ * `AelluxJsViewportChange` with normalized geometry and containment state.
+ *
+ * Lifecycle: batches reads and writes per reference through waitLayout,
+ * re-resolves scroll containers and targets as layout changes, and releases
+ * scheduled work, listeners and observations when no longer needed. Unmount
+ * restores the target's original inline CSS values.
+ *
+ * Accessibility: leaves focus, scrolling and presentation decisions to
+ * consumers; geometry events alone do not hide content or announce changes.
  */
 (function (root) {
   "use strict";

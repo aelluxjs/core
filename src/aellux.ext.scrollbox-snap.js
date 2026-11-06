@@ -3,9 +3,30 @@
 /**
  * Scrollbox Snap Extension
  *
- * Adds snap points to an already mounted Scrollbox. The extension deliberately
- * loads Scrollbox from its own init function: a snap declaration is meaningful
- * only when the base scrolling extension is available.
+ * Purpose: adds item alignment and navigation to a mounted Scrollbox while
+ * coordinating native snap behavior with wheel, pointer and elastic interaction.
+ *
+ * Capability profile: interaction and input, native scrolling, and motion and
+ * timing for desktop gesture settling.
+ *
+ * Inputs and activation: loads and awaits Scrollbox during initialization, then
+ * mounts `[data-ae-scrollbox][data-ae-scrollbox-snap]` unless snap is `false`.
+ * The default axis is horizontal; `vertical` selects the other axis. Eligible
+ * `[data-ae-snap-item]` descendants declare alignment; nested Scrollboxes keep
+ * their own items. Navigation uses next(), previous() and goto().
+ *
+ * Outputs and owned state: owns `ae--snap-ready` and `ae--snap-suspended`,
+ * publishes `--ae-snap-focus` on items, and dispatches
+ * `AelluxJsScrollboxSnapChange` when scrolling settles on a new selection.
+ *
+ * Lifecycle: observes item membership and sizes, batches focus publication
+ * through waitLayout, and suspends snap during conflicting interactions.
+ * Unmount cancels pending work and release animation, removes listeners and
+ * observers, restores item CSS values and removes owned classes.
+ *
+ * Accessibility: keeps native touch scrolling and momentum. Applications supply
+ * accessible navigation controls and item labels; reduced motion skips the
+ * desktop release animation.
  */
 
 (function (root) {

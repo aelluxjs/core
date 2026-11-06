@@ -2,8 +2,33 @@
 
 import { createOverflowMarquee } from "./internal/create-overflow-marquee.js";
 
-// This Extension owns the content wrapper and visibility-aware
-// lifecycle. Anchor supplies geometry through data-only communication requests.
+/**
+ * Overflow Marquee Extension
+ *
+ * Purpose: reveals overflowing single-line content through repeated horizontal
+ * motion, using Anchor geometry through data-only communication requests.
+ *
+ * Capability profile: visual overflow presentation, layout observation, and
+ * motion and timing.
+ *
+ * Inputs and activation: mounts `[data-ae-overflow-marquee]` after loading and
+ * awaiting Anchor. An optional pixel limit gates activation without setting
+ * layout width. CSS properties configure speed, delay and fading; size, content,
+ * visibility and interaction changes update the behavior.
+ *
+ * Outputs and owned state: moves original nodes into generated viewport/content
+ * layers when enabled, owns readiness and activity attributes, animates the
+ * content offset, and supplies a desktop tooltip for overflowing text.
+ *
+ * Lifecycle: pauses motion while hidden or interacting. Unmount cancels motion
+ * and scheduled work, releases observations and Anchor placement, unwraps the
+ * original nodes and restores owned attributes and tooltip state.
+ *
+ * Accessibility: pauses on focus and desktop hover and suppresses motion for
+ * the reduced-motion preference. Applications keep full text accessible without
+ * requiring animation or a desktop tooltip.
+ */
+
 (function (root) {
   "use strict";
   const api = root.AelluxJs;

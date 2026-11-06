@@ -2,6 +2,35 @@
 
 import { parseShortcuts, shortcutLabel } from "./internal/input-shortcuts.js";
 
+/**
+ * Input Extension
+ *
+ * Purpose: captures physical input through adapters and produces normalized
+ * commands, routing each device synchronously to a logical Focus context.
+ *
+ * Capability profile: interaction and input, device routing, and shortcut-hint
+ * presentation.
+ *
+ * Inputs and activation: mounts `[data-ae-point]`, `[data-ae-inputs]` and
+ * `[data-ae-shortcut-hint]`. Inherited `data-ae-inputs` values select adapters;
+ * point and keyboard are enabled by default, while gamepad requires opt-in.
+ * Shortcut declarations and per-context device state supply hint labels.
+ *
+ * Outputs and owned state: exposes pointer and device records, dispatches
+ * `AelluxJsBeforeInputCommand`, `AelluxJsInputCommand`, blocked-command and
+ * device events, and publishes root input/device attributes and hint metadata.
+ * Focus consumes commands through the shared communication channel.
+ *
+ * Lifecycle: loads selected adapter assets on demand and observes configuration
+ * changes. Unmount releases element routers and hints; destruction disconnects
+ * observation, destroys active adapters, clears routers and restores owned
+ * root attributes and hint values.
+ *
+ * Accessibility: native defaults are prevented only for commands handled by
+ * Focus. Applications provide semantic controls and accessible names, keeping
+ * shortcut hints supplementary to the control's label.
+ */
+
 (function (root) {
   "use strict";
   const api = root.AelluxJs;

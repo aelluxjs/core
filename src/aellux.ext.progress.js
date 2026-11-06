@@ -3,10 +3,25 @@
 /**
  * Progress Extension
  *
- * Mounts native progress and meter controls. Progress controls can consume
- * AelluxJsProgress from an existing producer ID through data-ae-progress-target.
- * Preserves native ranges, reconnects changed targets and restores values on
- * unmount. Only the Legacy distribution installs unsupported-control fallbacks.
+ * Purpose: enhances native progress and meter controls, optionally connecting
+ * progress values to an existing producer's progress events.
+ *
+ * Capability profile: structure and state, with event-driven value updates and
+ * Legacy fallbacks for unsupported native controls.
+ *
+ * Inputs and activation: mounts `progress, meter`. A progress element with
+ * `data-ae-progress-target` subscribes to `AelluxJsProgress` on the referenced
+ * producer ID and reconnects when that target attribute changes.
+ *
+ * Outputs and owned state: maps valid producer value/max ratios into the native
+ * progress range, preserving the control's authored range. Only the Legacy
+ * distribution installs unsupported-control fallbacks.
+ *
+ * Lifecycle: disconnects target listeners and attribute observation, restores
+ * the original value attribute and destroys element-local fallbacks on unmount.
+ *
+ * Accessibility: retains native progress and meter semantics; applications
+ * provide accessible labels and meaningful range and value descriptions.
  */
 import { installProgressFallback } from "./internal/install-progress-fallback.js";
 
