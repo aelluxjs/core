@@ -39,6 +39,12 @@ async function updateCoreCdnVersion(directory) {
 }
 await updateCoreCdnVersion(outputPath);
 
+// Preserve the former Point documentation URL while Input owns the content.
+await writeFile(path.join(outputPath, "0.1.x", "core-extensions", "point.htm"),
+  '<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><title>Input Extension</title>' +
+  '<meta http-equiv="refresh" content="0;url=input.htm"><link rel="canonical" href="input.htm"></head>' +
+  '<body><a href="input.htm">Input Extension documentation</a></body></html>\n', "utf8");
+
 const docweaverAssetPath = path.join(outputPath, "assets", "docweaver");
 // Docweaver copies its default assets before overlaying the local theme.
 // Ajax Href is now supplied by Core, so discard the upstream standalone copy.

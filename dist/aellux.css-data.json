@@ -631,6 +631,61 @@
       ]
     },
     {
+      "name": "--ae-shortcut-anchor",
+      "description": "Optional CSS anchor name for positioned shortcut hints.\n\nValue syntax: <dashed-ident>.\n\nDefault behavior: \"--ae-shortcut\".",
+      "syntax": "<dashed-ident>",
+      "references": [
+        {
+          "name": "AelluxJS input",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-shortcut-hint-background",
+      "description": "CSS-only shortcut hint presentation override.\n\nValue syntax: *.",
+      "syntax": "*",
+      "references": [
+        {
+          "name": "AelluxJS input",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-shortcut-hint-border",
+      "description": "CSS-only shortcut hint presentation override.\n\nValue syntax: *.",
+      "syntax": "*",
+      "references": [
+        {
+          "name": "AelluxJS input",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-shortcut-hint-color",
+      "description": "CSS-only shortcut hint presentation override.\n\nValue syntax: *.",
+      "syntax": "*",
+      "references": [
+        {
+          "name": "AelluxJS input",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        }
+      ]
+    },
+    {
+      "name": "--ae-shortcut-hint-radius",
+      "description": "CSS-only shortcut hint presentation override.\n\nValue syntax: *.",
+      "syntax": "*",
+      "references": [
+        {
+          "name": "AelluxJS input",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        }
+      ]
+    },
+    {
       "name": "--ae-snap-focus",
       "description": "Per-item alignment proximity from 0 to 1; 1 means aligned with the requested snap position.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
       "syntax": "<number>",

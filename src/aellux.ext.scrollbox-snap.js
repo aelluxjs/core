@@ -62,12 +62,14 @@
 
   function init() {
     if (!AelluxJs.registry.ext.scrollbox) AelluxJs.ext("scrollbox");
-    return AelluxJs.wait("scrollbox").then(scrollbox => {
-      if (!scrollbox) throw new Error("[aellux.js] Scrollbox Snap requires the Scrollbox extension.");
+    return AelluxJs.wait("scrollbox").then(loaded => {
+      if (!loaded) throw new Error("[aellux.js] Scrollbox Snap requires the Scrollbox extension.");
 
       AelluxJs.registerCssProperty(...properties.map(name =>
         ({ name, syntax: "<number>", initialValue: "0" })));
-      scrollbox.registerSnapController({ next, previous, goto });
+      for (const [name, method] of Object.entries({ next, previous, goto }))
+        AelluxJs.comm.handle("scrollbox-snap." + name,
+          ({ element, index, behavior }) => method(element, index, behavior), { owner: extensionName });
       AelluxJs.mountManager.add({
         extensionName,
         selector: `[${scrollboxAttribute}][${snapAttribute}]:not([${snapAttribute}="${FALSE}"])`,
@@ -80,7 +82,7 @@
 
   function destroy() {
     for (const element of states.keys()) unmount(element);
-    AelluxJs.ext.scrollbox?.unregisterSnapController({ next, previous, goto });
+    AelluxJs.comm.removeOwner(extensionName);
     AelluxJs.mountManager.remove({ extensionName });
   }
 

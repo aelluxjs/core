@@ -45,10 +45,12 @@
     const anchors = /* @__PURE__ */ new Map();
     const elementMemories = /* @__PURE__ */ new WeakMap();
     const placementMaps = /* @__PURE__ */ new Set();
+    const requestedMaps = /* @__PURE__ */ new Map();
     let nextLayoutId = 2e6;
     let mutations = null;
     AelluxJs.extAttach(extensionName, { init, destroy, createPlacementMap });
     function init() {
+      AelluxJs.comm.handle("anchor.placement", placementRequest, { owner: extensionName });
       AelluxJs.registerCssProperty(
         { name: "--ae-anchor-x", syntax: "<length>", initialValue: "0px" },
         { name: "--ae-anchor-y", syntax: "<length>", initialValue: "0px" },
@@ -69,9 +71,30 @@
       });
     }
     async function destroy() {
+      AelluxJs.comm.removeOwner(extensionName);
       for (const map of placementMaps) map.destroy();
+      requestedMaps.clear();
       await Promise.all(Array.from(anchors.keys(), unmountAnchor));
       AelluxJs.mountManager.remove({ extensionName });
+    }
+    function placementRequest({ action, owner, element, pairs, target, placement }) {
+      if (action === "invisible") return isInvisible(element);
+      let map = requestedMaps.get(owner);
+      if (action === "dispose") {
+        map == null ? void 0 : map.destroy();
+        requestedMaps.delete(owner);
+        return true;
+      }
+      if (action === "mount" && !map) {
+        map = createPlacementMap();
+        requestedMaps.set(owner, map);
+      }
+      if (!map) return null;
+      if (action === "mount") return map.mount(element);
+      if (action === "unmount") return map.unmount(element);
+      if (action === "measure") return map.measure(element, pairs, target);
+      if (action === "place") return map.place(element, placement);
+      return null;
     }
     function createPlacementMap() {
       const memories = /* @__PURE__ */ new Map();
@@ -252,11 +275,10 @@
       );
     }
     function effectiveTarget(element, state) {
-      var _a, _b;
       const value = element.getAttribute(targetAttribute);
       const target = value && value.trim() ? resolveElement(value) : element.offsetParent;
       state.group = value && value.trim() && (target == null ? void 0 : target.hasAttribute(groupAttribute)) ? target : null;
-      return state.group ? ((_b = (_a = AelluxJs.ext.present) == null ? void 0 : _a.selected) == null ? void 0 : _b.call(_a, state.group)) || null : target;
+      return state.group ? AelluxJs.comm.request("present.selection", { group: state.group }).value || null : target;
     }
     function circularTarget(element, target) {
       const visited = /* @__PURE__ */ new Set([element]);

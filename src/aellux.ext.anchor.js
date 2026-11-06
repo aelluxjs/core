@@ -72,11 +72,13 @@
   const anchors = new Map();
   const elementMemories = new WeakMap();
   const placementMaps = new Set();
+  const requestedMaps = new Map();
   let nextLayoutId = 2000000;
   let mutations = null;
   AelluxJs.extAttach(extensionName, { init, destroy, createPlacementMap });
 
   function init() {
+    AelluxJs.comm.handle("anchor.placement", placementRequest, { owner: extensionName });
     AelluxJs.registerCssProperty(
       { name: "--ae-anchor-x", syntax: "<length>", initialValue: "0px" },
       { name: "--ae-anchor-y", syntax: "<length>", initialValue: "0px" },
@@ -96,13 +98,32 @@
   }
 
   async function destroy() {
+    AelluxJs.comm.removeOwner(extensionName);
     for (const map of placementMaps) map.destroy();
+    requestedMaps.clear();
     await Promise.all(Array.from(anchors.keys(), unmountAnchor));
     AelluxJs.mountManager.remove({ extensionName });
   }
 
-  // Other Extensions can own wrapping, observation and timing while reusing
-  // Anchor geometry. These maps never join ordinary Anchor tracking.
+  function placementRequest({ action, owner, element, pairs, target, placement }) {
+    if (action === "invisible") return isInvisible(element);
+    let map = requestedMaps.get(owner);
+    if (action === "dispose") {
+      map?.destroy(); requestedMaps.delete(owner); return true;
+    }
+    if (action === "mount" && !map) {
+      map = createPlacementMap(); requestedMaps.set(owner, map);
+    }
+    if (!map) return null;
+    if (action === "mount") return map.mount(element);
+    if (action === "unmount") return map.unmount(element);
+    if (action === "measure") return map.measure(element, pairs, target);
+    if (action === "place") return map.place(element, placement);
+    return null;
+  }
+
+  // Public application API. Extension consumers use data-only comm requests;
+  // the owned maps never join ordinary Anchor tracking.
   function createPlacementMap() {
     const memories = new Map();
     let disposed = false;
@@ -262,7 +283,7 @@
     const value = element.getAttribute(targetAttribute);
     const target = value && value.trim() ? resolveElement(value) : element.offsetParent;
     state.group = value && value.trim() && target?.hasAttribute(groupAttribute) ? target : null;
-    return state.group ? AelluxJs.ext.present?.selected?.(state.group) || null : target;
+    return state.group ? AelluxJs.comm.request("present.selection", { group: state.group }).value || null : target;
   }
 
   function circularTarget(element, target) {

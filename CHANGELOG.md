@@ -8,6 +8,11 @@ Changes in this section are pending for the `0.1.0` release candidate.
 
 ### Added
 
+- Added `$ae.comm` to the ES5 boot: named synchronous commands/queries, ordered notifications, explicit unavailable/value responses, async results, duplicate-provider diagnostics and cleanup by owner or AbortSignal. Runtime startup preserves the boot instance; failed initialization and destruction release owned records.
+
+- Input normalizes and synchronously routes device commands with deterministic priorities, explicit blocking, owned-router teardown and default logical focus 1. Independently loaded Point/Keyboard/Gamepad adapters have Modern and Legacy variants; gamepad sessions are separate from browser indices.
+- Focus supports independent logical contexts, per-context classes and scoped shortcuts while preserving DOM focus, editing, history and native activation. Shortcut actions reuse native click, registered handlers or existing Present methods. Input owns CSS-only per-context hints and input/device metadata. Multiplayer remains external.
+
 - Present optional interactive gestures now scrub the existing Pop/Unpop and independent Dismiss timelines, with direction/source configuration, CSS thresholds and distance, deterministic pointer ownership, cancellation and lifecycle cleanup. Explicit `ae--pop`, `ae--unpop` and `ae--dismissed` initial classes opt into CSS-owned closed visibility; legacy hidden closing is preserved. Added hidden-source INFO `3004`, editor metadata, documentation examples and browser regression coverage.
 
 - Present `unpop()` now reverses the captured opening trajectory back to `from`, including nonlinear easing and partially travelled duration, independently of `dismiss()`. Added the `unpop` trigger action, `ae--unpopping`, reverse lifecycle/focus events, `present.unpop` layout origin and bounded `--ae-unpop-progress`. Native fallback replays opening CSS with reverse direction and clipped time. Calling `unpop()` during an active independent dismissal returns false and preserves it. Default close controls, toggle/groups and automation still dismiss.
@@ -19,6 +24,10 @@ Changes in this section are pending for the `0.1.0` release candidate.
 - Added the Compatibility Commitment for AelluxJS `0.1.x`, effective from `0.1.0`, covering Stable public JavaScript, HTML, CSS, events, loading and integration contracts. Linked it from the documentation navigation and reference pages; recorded pending support policies and contract discrepancies separately for maintainer review without changing Extension stability or runtime behavior.
 
 ### Changed
+
+- Migrated internal Input/Focus, Focus/Present, Feedback/Present, Anchor/Present, Marquee/Anchor, Scrollbox/Snap and PWA/Dialog API connections to named communication contracts. Feedback prepares reserved Present members through a data contract before opening. Removed the provisional `inputCommands` channel and internal Scrollbox controller-registration hooks; public Extension operations and DOM events remain available.
+
+- Replace the public Point Extension and `aellux.ext.point*.js` artifacts with Input. Register `input` and use `.input.pointers()`; `data-ae-point` and Pointer/Tap events remain compatible. Deploy the boot/runtime and new `aellux.input.*` adapter artifacts together.
 
 - Reworked the four homepage examples into destination browsing, a horizontal visual story, a contextual workspace editor and a local setup flow. They compose all ten bundled primitives with minimal application JavaScript; optional Scrollbox Snap and Ajax Href demonstrations were removed. Runnable source, Basic registrations and browser coverage follow the new experiences.
 

@@ -241,9 +241,9 @@ test("inline head initialization publishes preferences early and loads Full only
   for (const document of documents) {
     const homepage = document === "index";
     const extensions = homepage ? ["preference", "present", "scrollbox", "anchor", "viewport"]
-      : document === "examples/carousel" ? ["preference", "scrollbox", "viewport", "point", "present"]
+      : document === "examples/carousel" ? ["preference", "scrollbox", "viewport", "input", "present"]
       : document === "examples/viewport" ? ["preference", "viewport", "scrollbox"]
-      : document === "examples/floating" ? ["preference", "anchor", "present", "point", "focus"]
+      : document === "examples/floating" ? ["preference", "anchor", "present", "input", "focus"]
       : ["preference", "state-navigation", "present", "focus", "adaptive", "feedback"];
     const styles = homepage ? ["aellux.full.css"]
       : document === "examples/carousel" ? ["aellux.ext.scrollbox.css", "aellux.ext.present.css"]
@@ -293,6 +293,7 @@ test("inline head initialization publishes preferences early and loads Full only
     expect(assets.sort()).toEqual([
       "aellux.js", homepage ? "aellux.full.js" : "aellux.orchestrator.js",
       ...(homepage ? [] : extensions).map(name => `aellux.ext.${name}.js`),
+      ...(extensions.includes("input") ? ["aellux.input.point.js", "aellux.input.keyboard.js"] : []),
       ...styles
     ].sort());
     page.off("request", recordAsset);
@@ -328,7 +329,7 @@ test("gallery retains native touch panning and Point activation opens a single s
   await page.setViewportSize({ width: 375, height: 640 });
   const cdp = await context.newCDPSession(page);
   await cdp.send("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 1 });
-  await openExample(page, "carousel", "point");
+  await openExample(page, "carousel", "input");
   const box = await page.locator("#gallery").boundingBox();
   const y = box.y + 70;
   await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: box.x + box.width - 20, y }] });

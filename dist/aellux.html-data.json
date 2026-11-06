@@ -3,6 +3,27 @@
   "version": 1.1,
   "globalAttributes": [
     {
+      "name": "data-ae-active-input",
+      "description": "Input presentation state. Gamepad presence is independent of the last intentionally used modality.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
+      "references": [
+        {
+          "name": "AelluxJS input",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "point"
+        },
+        {
+          "name": "keyboard"
+        },
+        {
+          "name": "gamepad"
+        }
+      ]
+    },
+    {
       "name": "data-ae-adaptive",
       "description": "Publishes width-based size classes, aspect-ratio shape classes, dimensions and orientation using the Extension's adaptiveParams thresholds.\n\nValue syntax: presence.",
       "references": [
@@ -221,6 +242,93 @@
       ]
     },
     {
+      "name": "data-ae-focus-scope",
+      "description": "Isolated navigation and shortcut scope. Logical contexts can be restricted to this container.\n\nValue syntax: presence.",
+      "references": [
+        {
+          "name": "AelluxJS focus",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
+        }
+      ],
+      "valueSet": "v"
+    },
+    {
+      "name": "data-ae-gamepad",
+      "description": "Input presentation state. Gamepad presence is independent of the last intentionally used modality.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
+      "references": [
+        {
+          "name": "AelluxJS input",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "true"
+        },
+        {
+          "name": "false"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-gamepad-family",
+      "description": "Input presentation state. Gamepad presence is independent of the last intentionally used modality.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
+      "references": [
+        {
+          "name": "AelluxJS input",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "generic"
+        },
+        {
+          "name": "xbox"
+        },
+        {
+          "name": "playstation"
+        },
+        {
+          "name": "nintendo"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-gamepad-model",
+      "description": "Input hint presentation metadata.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: string.",
+      "references": [
+        {
+          "name": "AelluxJS input",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-inputs",
+      "description": "Enabled Input adapters inherited by descendants. Omitted defaults to point keyboard. An empty list disables adapters in this scope; gamepad is opt-in.\n\nValue syntax: token-list.\n\nDefault behavior: \"point keyboard\".\n\nSuggested values: `point`, `keyboard`, `gamepad`, `point keyboard gamepad`. This is an open grammar, not a closed enumeration.",
+      "references": [
+        {
+          "name": "AelluxJS input",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "point"
+        },
+        {
+          "name": "keyboard"
+        },
+        {
+          "name": "gamepad"
+        },
+        {
+          "name": "point keyboard gamepad"
+        }
+      ]
+    },
+    {
       "name": "data-ae-label",
       "description": "Shown when this value matches the enclosing preference; otherwise hidden. It does not copy text into another element.\n\nValue syntax: string.\n\nExamples: `auto`, `light`, `dark`.",
       "references": [
@@ -392,8 +500,8 @@
       "description": "Maximum simultaneously associated pointers. Empty defaults to 1; a nonnegative integer is expected, and 0 disables association.\n\nValue syntax: integer.\n\nDefault behavior: \"1\".\n\nExamples: `0`, `1`, `2`.",
       "references": [
         {
-          "name": "AelluxJS point",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/point.htm"
+          "name": "AelluxJS input",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
         }
       ],
       "values": [
@@ -914,6 +1022,136 @@
         },
         {
           "name": "false"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-shortcut",
+      "description": "Contextual physical shortcuts, separated by semicolons. Exact modifiers use Ctrl/Alt/Shift/Meta+code. Focus chooses the closest eligible action in the active scope.\n\nValue syntax: string.\n\nExamples: `keyboard:KeyI; gamepad:north`, `keyboard:Ctrl+KeyI`.",
+      "references": [
+        {
+          "name": "AelluxJS focus",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "keyboard:KeyI; gamepad:north"
+        },
+        {
+          "name": "keyboard:Ctrl+KeyI"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-shortcut-action",
+      "description": "Action invoked by a shortcut: click, a registered action, or Present pop/unpop/dismiss.\n\nValue syntax: string.\n\nDefault behavior: \"click\".\n\nSuggested values: `click`, `pop`, `unpop`, `dismiss`. This is an open grammar, not a closed enumeration.",
+      "references": [
+        {
+          "name": "AelluxJS focus",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "click"
+        },
+        {
+          "name": "pop"
+        },
+        {
+          "name": "unpop"
+        },
+        {
+          "name": "dismiss"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-shortcut-code",
+      "description": "Input hint presentation metadata.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: string.",
+      "references": [
+        {
+          "name": "AelluxJS input",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-shortcut-focus",
+      "description": "Logical context used for this hint's presentation metadata. Defaults to 1.\n\nValue syntax: positive-integer.\n\nDefault behavior: \"1\".",
+      "references": [
+        {
+          "name": "AelluxJS input",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-shortcut-hint",
+      "description": "CSS hint descriptor. Empty inherits data-ae-shortcut from the nearest ancestor; an explicit descriptor works without Focus.\n\nValue syntax: string.",
+      "references": [
+        {
+          "name": "AelluxJS input",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-shortcut-hint-position",
+      "description": "Inline by default. Anchor uses optional CSS Anchor Positioning with inline fallback.\n\nValue syntax: enum.\n\nDefault behavior: \"inline\".",
+      "references": [
+        {
+          "name": "AelluxJS input",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "inline"
+        },
+        {
+          "name": "anchor"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-shortcut-label",
+      "description": "Input hint presentation metadata.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: string.",
+      "references": [
+        {
+          "name": "AelluxJS input",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-shortcut-priority",
+      "description": "Numeric priority breaking equal DOM-distance shortcut ties. Higher values win; final ties follow DOM order.\n\nValue syntax: number.\n\nDefault behavior: \"0\".",
+      "references": [
+        {
+          "name": "AelluxJS focus",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-shortcut-source",
+      "description": "Input hint presentation metadata.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: string.",
+      "references": [
+        {
+          "name": "AelluxJS input",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-shortcut-target",
+      "description": "Present action target ID, optionally prefixed by #. Omitted uses the shortcut element.\n\nValue syntax: id.",
+      "references": [
+        {
+          "name": "AelluxJS focus",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
         }
       ]
     },

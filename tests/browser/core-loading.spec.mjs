@@ -39,15 +39,15 @@ for (const boot of ["aellux.js", "aellux.min.js"]) for (const forceLegacy of [fa
         </div>`;
         await AelluxJs.mount(document.getElementById("scope"));
       });
-      const loaded = ["point", "preference", "present", "scrollbox", "scrollboxSnap", "ajaxHref", "dialog", "progress", "pwa", "viewport"];
+      const loaded = ["input", "preference", "present", "scrollbox", "scrollboxSnap", "ajaxHref", "dialog", "progress", "pwa", "viewport"];
       if (mode === "basic") {
         expect(scripts).toEqual([]);
         expect(await page.evaluate(() => Object.keys(AelluxJs.registry.ext))).toEqual([]);
         expect(await page.evaluate(() => Object.keys(AelluxJs.ext))).toEqual([]);
-        expect(await page.evaluate(async () => AelluxJs.wait("point").catch(error => error.code))).toBe(1110);
+        expect(await page.evaluate(async () => AelluxJs.wait("input").catch(error => error.code))).toBe(1110);
         await page.evaluate(async () => {
           for (const [name, loadWhen] of [
-            ["point", "[data-ae-point]"], ["preference", "[data-ae-preference]"],
+            ["input", "[data-ae-point]"], ["preference", "[data-ae-preference]"],
             ["present", "[data-ae-trigger]"], ["scrollbox", "[data-ae-scrollbox]"],
             ["scrollbox-snap", "[data-ae-scrollbox-snap]"], ["ajax-href", "a[data-ae-ajax-href]"],
             ["dialog", "dialog"], ["progress", "progress, meter"], ["pwa", "[data-ae-pwa]"], ["viewport", "[data-ae-viewport]"]
@@ -58,8 +58,8 @@ for (const boot of ["aellux.js", "aellux.min.js"]) for (const forceLegacy of [fa
       }
       expect(await page.evaluate(loaded => loaded.filter(key => !AelluxJs.ext[key]?.initialized), loaded)).toEqual([]);
       const suffix = `${forceLegacy ? ".legacy" : ""}${boot.includes(".min.") ? ".min" : ""}.js`;
-      const external = mode === "full" ? ["ajax-href", "dialog", "progress", "pwa", "viewport"] :
-        ["point", "preference", "present", "scrollbox", "scrollbox-snap", "ajax-href", "dialog", "progress", "pwa", "viewport"];
+      const external = mode === "full" ? ["ajax-href", "dialog", "progress", "pwa", "scrollbox-snap"] :
+        ["input", "preference", "present", "scrollbox", "scrollbox-snap", "ajax-href", "dialog", "progress", "pwa", "viewport"];
       expect(scripts.sort()).toEqual(external.map(name => `aellux.ext.${name}${suffix}`).sort());
       await page.evaluate(() => AelluxJs.mount(document.getElementById("scope")));
       expect(scripts).toHaveLength(external.length);

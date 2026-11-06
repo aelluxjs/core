@@ -10,6 +10,7 @@ import { createPreferenceHtmlHelper } from "./create-preference-html-helper.js";
 import { assetLoadHelper } from "./asset-load-helper.js";
 import { resolveElementOrId } from "./resolve-element-or-id.js";
 import { createSelectorHelper, validateSelector } from "./create-selector-helper.js";
+import { createCommunication } from "./create-communication.js";
 
 // Build-time imports aside, keep this factory ES5-compatible for the boot bundle.
 // The caller publishes the returned function and replaces init with the boot loader.
@@ -38,6 +39,7 @@ export function createAelluxApi(root, constants) {
     waitLayout: null,
     motion: null,
     mountManager: null,
+    comm: createCommunication(diagnostics),
     init: function () { throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED); },
     persist: {
       local: buildPersistMemory(root, "localStorage", null, diagnostics),

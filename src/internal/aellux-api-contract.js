@@ -71,6 +71,7 @@ var diagnosticDefinition = Object.freeze({
 });
 
 var diagnosticNames = [
+  "ERROR_COMM_DUPLICATE", "ERROR_COMM_CALLBACK",
   "WARN_ATTRIBUTE_UNKNOWN",
   "WARN_ATTRIBUTE_DUPLICATE",
   "WARN_EXTENSION_REQUIRED",
@@ -192,6 +193,9 @@ var bootstrapProperties = Object.freeze({
   waitLayout: Object.freeze({ type: "null" }),
   motion: Object.freeze({ type: "null" }),
   mountManager: Object.freeze({ type: "null" }),
+  comm: Object.freeze({ type: "object", properties: Object.freeze({
+    handle: method, request: method, has: method, on: method, emit: method, removeOwner: method, clear: method
+  }) }),
   init: method,
   persist: Object.freeze({
     type: "object",

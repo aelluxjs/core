@@ -30,7 +30,7 @@ $ae.ext.pwa.install();
 $ae(button).pwa.install(); // Mounted data-ae-pwa control
 ```
 
-Both share one implementation. Declarative controls use native `click` only, including Enter and Space on a button; Point is unnecessary. Repeated mounting does not duplicate listeners. Prefer a native `<button type="button">`.
+Both share one implementation. Declarative controls use native `click` only, including Enter and Space on a button; Input is unnecessary. Repeated mounting does not duplicate listeners. Prefer a native `<button type="button">`.
 
 `install(options)` returns a Promise with `{ outcome, status }`. Outcomes include `accepted`, `dismissed`, `manual`, `custom`, `unknown` and `unavailable`. Native acceptance does not confirm installation. A captured `beforeinstallprompt` is consumed once; `prompt()` runs synchronously before application events or asynchronous work. Concurrent native requests share the result. An `appinstalled` event or positive standalone signal confirms the observed installed/running state.
 

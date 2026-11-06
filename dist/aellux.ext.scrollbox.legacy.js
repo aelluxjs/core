@@ -197,16 +197,13 @@
     var inlineMemories = /* @__PURE__ */ new WeakMap();
     var elasticMemories = /* @__PURE__ */ new WeakMap();
     var pointerScrollMemories = /* @__PURE__ */ new WeakMap();
-    var snapController = null;
     var activePointerScrollState = null;
     AelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
       next: next,
       previous: previous,
-      goto: goto,
-      registerSnapController: registerSnapController,
-      unregisterSnapController: unregisterSnapController
+      goto: goto
     });
     function init() {
       layoutEvents.forEach(function(name) {
@@ -290,23 +287,22 @@
         extensionName: extensionName
       });
     }
-    function registerSnapController(controller) {
-      snapController = controller;
-    }
-    function unregisterSnapController(controller) {
-      if (snapController === controller) snapController = null;
-    }
     function goto(element, index, behavior) {
-      var _snapController;
-      return ((_snapController = snapController) === null || _snapController === void 0 ? void 0 : _snapController.goto(element, index, behavior)) || false;
+      return AelluxJs.comm.request("scrollbox-snap.goto", {
+        element: element,
+        index: index,
+        behavior: behavior
+      }).value || false;
     }
     function next(element) {
-      var _snapController2;
-      return ((_snapController2 = snapController) === null || _snapController2 === void 0 ? void 0 : _snapController2.next(element)) || false;
+      return AelluxJs.comm.request("scrollbox-snap.next", {
+        element: element
+      }).value || false;
     }
     function previous(element) {
-      var _snapController3;
-      return ((_snapController3 = snapController) === null || _snapController3 === void 0 ? void 0 : _snapController3.previous(element)) || false;
+      return AelluxJs.comm.request("scrollbox-snap.previous", {
+        element: element
+      }).value || false;
     }
     function dispatchInteraction(state, reason, active) {
       AelluxJs.dispatchFrom(state.element, "ScrollboxInteraction", {

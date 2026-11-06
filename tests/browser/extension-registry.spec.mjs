@@ -18,17 +18,17 @@ test("basic uses the embedded official manifest and supplies integrity metadata"
   expect(manifestRequests).toBe(0);
   const result = await page.evaluate(async () => {
     AelluxJs.ext("preference");
-    AelluxJs.ext("point");
-    await Promise.all([AelluxJs.wait("preference"), AelluxJs.wait("point")]);
+    AelluxJs.ext("input");
+    await Promise.all([AelluxJs.wait("preference"), AelluxJs.wait("input")]);
     return {
       preference: AelluxJs.registry.ext.preference,
-      point: AelluxJs.registry.ext.point
+      input: AelluxJs.registry.ext.input
     };
   });
   expect(manifestRequests).toBe(0);
   expect(result.preference.official).toBe(true);
   expect(result.preference.artifacts.modern.integrity).toMatch(/^sha384-/);
-  expect(result.point.coreCompatibility).toBe("0.1.0-beta.10");
+  expect(result.input.coreCompatibility).toBe("0.1.0-beta.10");
 });
 
 test("full initializes a lazy bundled extension on demand without a network request", async ({ page }) => {
@@ -128,13 +128,13 @@ for (const boot of ["aellux.js", "aellux.min.js"]) {
 test("the official manifest selects the Legacy artifact for a Legacy runtime", async ({ page }) => {
   await startBasic(page, { forceLegacy: true });
   const artifact = await page.evaluate(async () => {
-    AelluxJs.ext("point");
-    await AelluxJs.wait("point");
-    return AelluxJs.registry.ext.point.artifacts.legacy;
+    AelluxJs.ext("input");
+    await AelluxJs.wait("input");
+    return AelluxJs.registry.ext.input.artifacts.legacy;
   });
   // The non-minified boot script selects the matching non-minified Legacy
   // artifact; only a .min boot script selects the .legacy.min variant.
-  expect(artifact.url).toMatch(/aellux\.ext\.point\.legacy\.js$/);
+  expect(artifact.url).toMatch(/aellux\.ext\.input\.legacy\.js$/);
   expect(artifact.integrity).toMatch(/^sha384-/);
 });
 
@@ -213,8 +213,8 @@ test("official entries win over a custom fallback and invalid fallback data is d
   await startBasic(page, { environment: "development", verboseLevel: 2 });
   const result = await page.evaluate(async () => {
     AelluxJs.extIndex.setFallback("/invalid-index.json");
-    AelluxJs.ext("point");
-    const official = await AelluxJs.wait("point");
+    AelluxJs.ext("input");
+    const official = await AelluxJs.wait("input");
     AelluxJs.ext("missing-from-both-indexes");
     const missing = await AelluxJs.wait("missing-from-both-indexes");
     return {

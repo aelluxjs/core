@@ -6,7 +6,7 @@ async function openTap(page, forceLegacy, markup = '<button id="control" data-ae
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(({ forceLegacy, markup, extensions }) => new Promise(resolve => {
     document.body.innerHTML = markup;
-    AelluxJs.ext("point");
+    AelluxJs.ext("input");
     for (const extension of extensions) AelluxJs.ext(extension, { loadStyle: true });
     AelluxJs.on("Ready", resolve, { once: true });
     AelluxJs.init({ mode: "basic", forceLegacy, skipGlobalMount: true });
@@ -66,10 +66,10 @@ for (const forceLegacy of [false, true]) {
         <button id="zero" data-ae-point="0">Zero</button>
         <button id="control" data-ae-point>Unmounted</button>`);
       const result = await page.evaluate(async () => {
-        await AelluxJs.unmount("control", "point");
+        await AelluxJs.unmount("control", "input");
         for (const id of ["plain", "div", "input", "zero", "control"]) shortPress(id);
         const before = taps.slice();
-        await AelluxJs.mount("control", "point");
+        await AelluxJs.mount("control", "input");
         shortPress("control");
         return { before, targets: taps.map(tap => tap.target) };
       });
@@ -273,15 +273,15 @@ for (const forceLegacy of [false, true]) {
       await openTap(page, forceLegacy);
       const result = await page.evaluate(async () => {
         emitPointPointer("control", "pointerdown");
-        await AelluxJs.unmount("control", "point");
-        await AelluxJs.mount("control", "point");
+        await AelluxJs.unmount("control", "input");
+        await AelluxJs.mount("control", "input");
         emitPointPointer("control", "pointerup");
         const afterPending = taps.length;
         for (let index = 0; index < 3; index++) {
-          await AelluxJs.unmount("control", "point");
+          await AelluxJs.unmount("control", "input");
           shortPress("control");
-          await AelluxJs.mount("control", "point");
-          await AelluxJs.mount("control", "point");
+          await AelluxJs.mount("control", "input");
+          await AelluxJs.mount("control", "input");
           shortPress("control");
         }
         const dynamic = document.createElement("button");
@@ -289,12 +289,12 @@ for (const forceLegacy of [false, true]) {
         dynamic.setAttribute(AelluxJs.attr("point"), "");
         document.body.append(dynamic);
         shortPress(dynamic);
-        await AelluxJs.mount(dynamic, "point");
+        await AelluxJs.mount(dynamic, "input");
         shortPress(dynamic);
         emitPointPointer(dynamic, "pointerdown");
-        const point = AelluxJs.ext.point;
+        const point = AelluxJs.ext.input;
         const record = point.pointers(dynamic)[0];
-        await AelluxJs.destroyExtensions("point");
+        await AelluxJs.destroyExtensions("input");
         emitPointPointer(dynamic, "pointerup");
         shortPress("control");
         return { afterPending, targets: taps.map(tap => tap.target),
@@ -312,7 +312,7 @@ for (const forceLegacy of [false, true]) {
         const shadow = host.attachShadow({ mode: "open" });
         shadow.innerHTML = '<button data-ae-point>Shadow</button>';
         const control = shadow.querySelector("button");
-        await AelluxJs.mount(control, "point");
+        await AelluxJs.mount(control, "input");
         const eventName = AelluxJs.eventName;
         const names = [];
         AelluxJs.eventName = function (name) {

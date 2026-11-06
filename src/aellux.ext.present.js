@@ -18,7 +18,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
  * tokens during mount. A direct `[data-ae-present-motion]` child enables grid
  * size transitions; without it, size transitions measure the container.
  * Trigger and dismiss relationships use extension data attributes and may
- * target a region by ID, with or without a leading #. Point tap notifications
+ * target a region by ID, with or without a leading #. Input tap notifications
  * share click activation; a matching native click takes priority over a queued tap.
  *
  * Outputs and owned state: owns presentation and will-change classes plus its
@@ -144,6 +144,18 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
   ];
 
   function init(options) {
+    const communication = { owner: extensionName };
+    for (const [name, method] of Object.entries({ pop, unpop, dismiss }))
+      AelluxJs.comm.handle("present." + name, ({ element }) => method(element), communication);
+    AelluxJs.comm.handle("present.toggle", ({ element, goto }) => toggle(element, goto), communication);
+    AelluxJs.comm.handle("present.show", ({ group, member }) => show(group, member), communication);
+    AelluxJs.comm.handle("present.selection", ({ group }) => selected(group), communication);
+    AelluxJs.comm.handle("present.pop-next", request => popNext(request.group, member => {
+      if (request.preparation) {
+        const result = AelluxJs.comm.request(request.preparation.contract, { ...request.preparation.payload, element: member });
+        if (!result.handled || result.value === false) throw new Error("Present preparation is unavailable.");
+      }
+    }), communication);
     playback.init();
     const descriptors = cssProperties.map(([name, syntax, initialValue]) =>
       ({ name: `--ae-${name}`, syntax, initialValue }));
@@ -197,6 +209,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
   }
 
   function destroy() {
+    AelluxJs.comm.removeOwner(extensionName);
     gestures.destroy();
     autoObserver?.disconnect();
     autoObserver = null;
@@ -1114,7 +1127,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
     const pending = {
       event, target, hoverSuppressed: control && suppressHoverClick(control, event),
       present: triggerTargets.get(control),
-      point: AelluxJs.mountManager.controller(target)?.point,
+      input: AelluxJs.comm.request("input.mount-token", { element: target }).value,
       timer: null
     };
     pendingTaps.add(pending);
@@ -1123,7 +1136,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
     pending.timer = setTimeout(() => {
       pendingTaps.delete(pending);
       if (!target.isConnected ||
-        (pending.point && AelluxJs.mountManager.controller(target)?.point !== pending.point)) return;
+        (pending.input && AelluxJs.comm.request("input.mount-token", { element: target }).value !== pending.input)) return;
       activate(event, target, pending.hoverSuppressed);
     }, TAP_CLICK_WAIT_TIME);
   }

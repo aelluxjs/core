@@ -608,6 +608,131 @@ function createSelectorHelper(document2) {
   return { isValidSelector, parseSelectors };
 }
 
+// src/internal/create-communication.js
+/*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+function createCommunication(diagnostics) {
+  var commands = /* @__PURE__ */ Object.create(null);
+  var listeners = /* @__PURE__ */ Object.create(null);
+  var order = 0;
+  var api = {
+    handle,
+    request,
+    has,
+    on,
+    emit,
+    removeOwner,
+    clear
+  };
+  return api;
+  function validate(name, callback, options) {
+    if (typeof name !== "string" || !name.trim() || typeof callback !== "function" || options.priority !== void 0 && (typeof options.priority !== "number" || !isFinite(options.priority))) {
+      throw new TypeError("Communication requires a nonempty contract, a function and a finite priority.");
+    }
+  }
+  function register(name, callback, options, command) {
+    options = options || {};
+    validate(name, callback, options);
+    var signal = options.signal;
+    if (signal && (typeof signal.addEventListener !== "function" || typeof signal.removeEventListener !== "function")) {
+      throw new TypeError("Communication signal must support abort listeners.");
+    }
+    if (signal && signal.aborted) return function() {
+    };
+    if (command && commands[name]) {
+      var context = { contract: name, owner: options.owner, registeredOwner: commands[name].owner };
+      throw diagnostics ? diagnostics.error(diagnostics.ERROR_COMM_DUPLICATE, context) : new Error("Communication contract already handled: " + name);
+    }
+    var entry = {
+      callback,
+      owner: options.owner,
+      priority: options.priority || 0,
+      order: order++,
+      active: true,
+      remove
+    };
+    if (command) commands[name] = entry;
+    else {
+      if (!listeners[name]) listeners[name] = [];
+      listeners[name].push(entry);
+      listeners[name].sort(function(a, b) {
+        return b.priority - a.priority || a.order - b.order;
+      });
+    }
+    if (signal) signal.addEventListener("abort", remove, { once: true });
+    return remove;
+    function remove() {
+      if (!entry.active) return;
+      entry.active = false;
+      if (command) {
+        if (commands[name] === entry) delete commands[name];
+      } else {
+        var list = listeners[name];
+        var index = list ? list.indexOf(entry) : -1;
+        if (index !== -1) list.splice(index, 1);
+        if (list && !list.length) delete listeners[name];
+      }
+      if (signal) signal.removeEventListener("abort", remove);
+    }
+  }
+  function handle(name, callback, options) {
+    return register(name, callback, options, true);
+  }
+  function on(name, callback, options) {
+    return register(name, callback, options, false);
+  }
+  function has(name) {
+    return Object.prototype.hasOwnProperty.call(commands, name);
+  }
+  function request(name, payload) {
+    var entry = commands[name];
+    return entry ? { handled: true, value: entry.callback(payload) } : { handled: false, value: void 0 };
+  }
+  function report(cause, name, owner) {
+    if (diagnostics) diagnostics.error(diagnostics.ERROR_COMM_CALLBACK, { cause, contract: name, owner });
+  }
+  function emit(name, payload) {
+    var snapshot = listeners[name] ? listeners[name].slice() : [];
+    var count = 0;
+    for (var i = 0; i < snapshot.length; i++) {
+      var entry = snapshot[i];
+      if (!entry.active) continue;
+      count++;
+      try {
+        var result = entry.callback(payload);
+        if (result && typeof result.then === "function") {
+          result.then(null, /* @__PURE__ */ (function(owner) {
+            return function(cause) {
+              report(cause, name, owner);
+            };
+          })(entry.owner));
+        }
+      } catch (cause) {
+        report(cause, name, entry.owner);
+      }
+    }
+    return count;
+  }
+  function entries() {
+    var all = Object.keys(commands).map(function(name) {
+      return commands[name];
+    });
+    Object.keys(listeners).forEach(function(name) {
+      all = all.concat(listeners[name]);
+    });
+    return all;
+  }
+  function removeOwner(owner) {
+    entries().forEach(function(entry) {
+      if (entry.owner === owner) entry.remove();
+    });
+  }
+  function clear() {
+    entries().forEach(function(entry) {
+      entry.remove();
+    });
+  }
+}
+
 // src/internal/aellux-api-integration.js
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 function createAelluxApi(root2, constants) {
@@ -635,6 +760,7 @@ function createAelluxApi(root2, constants) {
     waitLayout: null,
     motion: null,
     mountManager: null,
+    comm: createCommunication(diagnostics),
     init: function() {
       throw diagnostics.create(diagnostics.ERROR_NOT_INITIALIZED);
     },
@@ -1014,6 +1140,8 @@ function createAelluxConstants() {
       ERROR_EXTENSION_VARIANT_UNAVAILABLE: { code: 1127, message: "The extension manifest has no compatible runtime variant." },
       ERROR_INVALID_ENVIRONMENT: { code: 1128, message: AELLUX + "environment must be production or development." },
       ERROR_EXTENSION_INDEX_NOT_FOUND: { code: 1129, message: "The requested Extension was not found in an extension manifest." },
+      ERROR_COMM_DUPLICATE: { code: 1130, message: "A communication contract already has a handler." },
+      ERROR_COMM_CALLBACK: { code: 1131, message: "A communication notification callback failed." },
       ERROR_LEGACY_RUNTIME_START: { code: 1201, message: LEGACY_RUNTIME + "failed to start." },
       ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: LEGACY_RUNTIME + "could not be loaded." },
       ERROR_MODERN_RUNTIME_START: { code: 1203, message: MODERN_RUNTIME + "failed to start; trying Legacy runtime." },

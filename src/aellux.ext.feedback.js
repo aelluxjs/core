@@ -48,8 +48,14 @@
   const transformTargetAttribute = AelluxJs.attr("transformTarget");
   const presentTargetAttribute = AelluxJs.attr("presentTarget");
   const presentSelector = `[${AelluxJs.attr("present")}]`;
+  const mountedFeedback = new Set();
 
   function init() {
+    AelluxJs.comm.handle("feedback.prepare", ({ boundary, feedback, element }) => {
+      if (!mountedFeedback.has(boundary) || !boundary.isConnected) return false;
+      applyFeedback(boundary, feedback, element);
+      return true;
+    }, { owner: extensionName });
     AelluxJs.mountManager.add({
       extensionName, selector: `[${feedbackAttribute}]`, priority: 0,
       mount: mountFeedback, unmount: unmountFeedback,
@@ -58,6 +64,8 @@
   }
 
   async function destroy() {
+    AelluxJs.comm.removeOwner(extensionName);
+    mountedFeedback.clear();
     AelluxJs.mountManager.remove({ extensionName });
     for (const operation of motionOperations.values()) AelluxJs.motion.cancel(operation.id);
     motionOperations.clear();
@@ -65,10 +73,12 @@
   }
 
   function mountFeedback(element) {
+    mountedFeedback.add(element);
     AelluxJs.onEvent(element, "Feedback", onFeedback);
   }
 
   function unmountFeedback(element) {
+    mountedFeedback.delete(element);
     AelluxJs.offEvent(element, "Feedback", onFeedback);
   }
 
@@ -87,20 +97,23 @@
     event.stopPropagation();
     if (!event.detail) return;
     const presentTarget = element.getAttribute(presentTargetAttribute);
-    const present = AelluxJs.ext.present;
-    const presentElement = presentTarget !== null && presentTarget.trim() && present?.initialized
+    const presentElement = presentTarget !== null && presentTarget.trim() &&
+      (AelluxJs.comm.has("present.pop") || AelluxJs.comm.has("present.pop-next"))
       ? AelluxJs.elementOrId(presentTarget) : null;
     if (presentElement?.hasAttribute(AelluxJs.attr("present-group"))) {
-      present.popNext(presentElement, member => applyFeedback(element, event.detail, member))
-        .catch(cause => AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION,
+      const result = AelluxJs.comm.request("present.pop-next", { group: presentElement,
+        preparation: { contract: "feedback.prepare", payload: { boundary: element, feedback: event.detail } } });
+      if (result.handled) {
+        Promise.resolve(result.value).catch(cause => AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION,
           { cause, extension: extensionName, element: presentElement }));
-      return;
+        return;
+      }
     }
     applyFeedback(element, event.detail, element, (messageElement, transformElement) => {
-      if (presentTarget !== null && present?.initialized) {
+      if (presentTarget !== null) {
         const target = presentElement || (!presentTarget.trim() &&
           (messageElement?.closest(presentSelector) || transformElement?.closest(presentSelector)));
-        if (target) present.pop(target);
+        if (target) AelluxJs.comm.request("present.pop", { element: target });
       }
     });
   }

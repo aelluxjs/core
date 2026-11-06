@@ -777,8 +777,8 @@
     "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
     scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-parent scrollbar-vertical scrollbar-horizontal",
     "scrollbox-snap": "scrollbox-snap snap-item",
-    focus: "focus",
-    point: "point",
+    focus: "focus focus-scope shortcut shortcut-priority shortcut-action shortcut-target",
+    input: "point inputs shortcut-hint shortcut-focus shortcut-hint-position shortcut-label shortcut-source shortcut-code gamepad gamepad-family gamepad-model active-input",
     adaptive: "adaptive",
     "ajax-href": "ajax-href",
     viewport: "viewport viewport-target",
@@ -793,8 +793,8 @@
     "overflow-marquee": "overflow-marquee",
     scrollbox: "scrollbox",
     "scrollbox-snap": "scrollbox-snap",
-    focus: "focus",
-    point: "point",
+    focus: "focus focus-scope shortcut",
+    input: "point inputs shortcut-hint",
     adaptive: "adaptive",
     "ajax-href": "ajax-href",
     viewport: "viewport",
@@ -867,7 +867,7 @@
           });
         }
       }, validateAnchor = function() {
-        var _a2, _b2, _c;
+        var _a2;
         const pivots = new Set("top-left top-center top-right center-left center center-right bottom-left bottom-center bottom-right".split(" "));
         const pairs = has("anchor") ? value("anchor").split(",") : [];
         if (has("anchor") && !pairs.every((token) => {
@@ -887,7 +887,7 @@
         if (target == null ? void 0 : target.hasAttribute(attr("present-group"))) {
           if (!((_a2 = api.ext.present) == null ? void 0 : _a2.initialized))
             report("WARN_EXTENSION_REQUIRED", "present", "anchor-target", "A Present Group target requires Present.", "Register and initialize Present before mounting the group and its Anchors.");
-          target = (_c = (_b2 = api.ext.present) == null ? void 0 : _b2.selected) == null ? void 0 : _c.call(_b2, target);
+          target = api.comm.request("present.selection", { group: target }).value;
           if (!target) return;
         }
         if (!target) invalid("anchor", "anchor-target", "Anchor target does not exist or the selector is invalid.", "Use an existing target ID or a valid CSS selector.", "WARN_CONFIGURATION_TARGET");
@@ -1039,7 +1039,7 @@
           if (value("focus") === "next" && !element.matches("input:not([type]),input[type=text],input[type=search],input[type=email],input[type=url],input[type=tel],input[type=password],input[type=number],textarea,[contenteditable]:not([contenteditable=false])"))
             invalid(extension, "focus", "Enter navigation is declared on a non-text-entry element.", "Apply data-ae-focus=next to a text input, textarea or editable element.");
         }
-        if (extension === "point" && value("point") !== "" && (!/^\d+$/.test(value("point")) || !Number.isSafeInteger(Number(value("point")))))
+        if (extension === "input" && value("point") !== "" && element.hasAttribute(attr("point")) && (!/^\d+$/.test(value("point")) || !Number.isSafeInteger(Number(value("point")))))
           invalid(extension, "point", "Pointer count must be a nonnegative integer.", "Use an integer such as 1; 0 disables pointer association.");
         if (extension === "ajax-href") {
           const selectors = api.parseSelectors(value("ajax-href").trim() || "title,body");
@@ -1512,11 +1512,11 @@
         }
       }
       AelluxJs2.dispatch(toCapitalized2(method), {
-        detail: {
+        detail: __spreadValues({
           root: rootElement,
           extensions: selectedNames ? Array.from(selectedNames) : null,
           elements: Array.from(affected)
-        }
+        }, detachedOnly ? { detachedOnly: true } : {})
       });
       return true;
     }
@@ -2446,7 +2446,7 @@
     Object.freeze({ name: "progress", optional: true, style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "pwa", optional: true, style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "viewport", style: false, dependencies: Object.freeze([]) }),
-    Object.freeze({ name: "point", style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "input", style: true, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "anchor", style: true, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "overflow-marquee", optional: true, style: true, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "ajax-href", optional: true, style: false, dependencies: Object.freeze([]) }),
@@ -2523,6 +2523,7 @@
           if (await destroyExtensions(null, () => AelluxJs.waitLayout.clear()) === false)
             return false;
           mountManager.destroy();
+          AelluxJs.comm.clear();
         },
         async destroyExtensions(extensionNames) {
           return destroyExtensions(extensionNames);
@@ -2567,6 +2568,8 @@
         if (name === "present") {
           loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
         }
+        if (name === "input") loadWhen = ["point", "inputs", "shortcut", "shortcut-hint"].map(attr).join(",");
+        if (name === "focus") loadWhen = ["focus", "focus-scope", "shortcut"].map(attr).join(",");
         if (name === "state-navigation" || name === "preference") loadWhen = null;
         api.ext(name, { loadWhen, load: true, loadStyle: !!(optional && style) });
         api.registry.ext[key].automatic = true;
@@ -2598,6 +2601,10 @@
             { cause: error, extension: extensionName }
           );
         } finally {
+          AelluxJs.comm.removeOwner(extensionName);
+          if (key !== extensionName) AelluxJs.comm.removeOwner(key);
+          AelluxJs.comm.emit("extension.destroyed", { extension: extensionName });
+          AelluxJs.dispatch("ExtensionDestroy", { detail: { extension: extensionName } });
           delete AelluxJs.ext[key];
           delete extensionPromises[key];
           delete AelluxJs.registry.ext[key];
@@ -2708,7 +2715,13 @@
         }
       }
       const options = AelluxJs.options.extensions[key] || {};
-      await AelluxJs.ext[key].init(options);
+      try {
+        await AelluxJs.ext[key].init(options);
+      } catch (cause) {
+        AelluxJs.comm.removeOwner(extensionName);
+        if (key !== extensionName) AelluxJs.comm.removeOwner(key);
+        throw cause;
+      }
       AelluxJs.ext[key].initialized = true;
       delete AelluxJs.registry.lazyExtSelectors[key];
       return AelluxJs.ext[key];

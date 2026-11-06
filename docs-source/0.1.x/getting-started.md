@@ -22,7 +22,7 @@ Full automatically bundles all Core primitives, the reusable building blocks for
 </script>
 ```
 
-The Full runtime is loaded by the aellux.js boot script. Its **Bundled Extensions** are Adaptive, Anchor, Feedback, Focus, Point, Preference, Present, Scrollbox, State Navigation and Viewport. Preference and State Navigation initialize at startup; the remaining implementations initialize when matching markup is mounted, without separate script requests.
+The Full runtime is loaded by the aellux.js boot script. Its **Bundled Extensions** are Adaptive, Anchor, Feedback, Focus, Input, Preference, Present, Scrollbox, State Navigation and Viewport. Preference and State Navigation initialize at startup; the remaining implementations initialize when matching markup is mounted, without separate script requests.
 
 **Optional Extensions** (Ajax Href, Dialog, Overflow Marquee, Progress, PWA and Scrollbox Snap) are registered but excluded from the Full JavaScript bundle. Mounting `a[data-ae-ajax-href]`, `<dialog>`, `<progress>`/`<meter>`, `[data-ae-pwa]`, `[data-ae-overflow-marquee]` or `[data-ae-scrollbox-snap]` loads the corresponding signed script using the official metadata embedded in the boot script. Modern/Legacy and normal/minified variants follow boot selection. The Dialog and Progress Legacy Extensions contain their own fallbacks and required styles; native controls are preserved when supported. PWA keeps its reusable Service Worker as a separate application-managed artifact and adds no shared styles. Bundled and Optional describe delivery in Full, rather than maturity or stability.
 

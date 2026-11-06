@@ -263,6 +263,13 @@
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/communication.htm" data-ae-overflow-marquee="190px">
+                                        Shared Communication                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/modern-legacy.htm" data-ae-overflow-marquee="190px">
                                         Modern &amp; Legacy                                      </a>
                                     </div>
@@ -459,8 +466,8 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/point.htm" data-ae-overflow-marquee="190px">
-                                              Point                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/input.htm" data-ae-overflow-marquee="190px">
+                                              Input                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -698,7 +705,7 @@ $ae.init({ mode: &quot;basic&quot; });
 <pre><code class="language-js">$ae.ext.pwa.install();
 $ae(button).pwa.install(); // Mounted data-ae-pwa control
 </code></pre>
-<p>Both share one implementation. Declarative controls use native <code>click</code> only, including Enter and Space on a button; Point is unnecessary. Repeated mounting does not duplicate listeners. Prefer a native <code>&lt;button type=&quot;button&quot;&gt;</code>.</p>
+<p>Both share one implementation. Declarative controls use native <code>click</code> only, including Enter and Space on a button; Input is unnecessary. Repeated mounting does not duplicate listeners. Prefer a native <code>&lt;button type=&quot;button&quot;&gt;</code>.</p>
 <p><code>install(options)</code> returns a Promise with <code>{ outcome, status }</code>. Outcomes include <code>accepted</code>, <code>dismissed</code>, <code>manual</code>, <code>custom</code>, <code>unknown</code> and <code>unavailable</code>. Native acceptance does not confirm installation. A captured <code>beforeinstallprompt</code> is consumed once; <code>prompt()</code> runs synchronously before application events or asynchronous work. Concurrent native requests share the result. An <code>appinstalled</code> event or positive standalone signal confirms the observed installed/running state.</p>
 <p>An event emitted <strong>before this lazy Extension loads may be missed</strong>. There is no early bootstrap listener. Prompt availability and eligibility are browser decisions. There is no synthetic native installation prompt.</p>
 <h2>State and fallback</h2>

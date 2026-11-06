@@ -50,18 +50,18 @@ When an Extension needs another aellux.js Extension, declare and await that Exte
 
 ```js
 async function init() {
-  if (!AelluxJs.registry.ext.point)
-    AelluxJs.ext("point");
+  if (!AelluxJs.registry.ext.input)
+    AelluxJs.ext("input");
 
-  const point = await AelluxJs.wait("point");
-  if (!point) throw new Error("The Point extension could not initialize.");
+  const input = await AelluxJs.wait("input");
+  if (!input) throw new Error("The Input extension could not initialize.");
 
-  // Point is loaded and initialized here.
-  // It is safe to use point.pointers(...) or subscribe to its events.
+  // Input is loaded and initialized here.
+  // It is safe to use input.pointers(...) or subscribe to its events.
 }
 ```
 
-`$ae.ext("point")` records the dependency only when the host has not already declared it. `$ae.wait("point")` shares any pending load, selects the compatible Modern or Legacy artifact, runs the dependency's `init()`, and resolves to its attached API. The dependent Extension's `init()` remains pending until that Promise settles. This same pattern works with official registry entries, bundled Extensions, and custom registrations.
+`$ae.ext("input")` records the dependency only when the host has not already declared it. `$ae.wait("input")` shares any pending load, selects the compatible Modern or Legacy artifact, runs the dependency's `init()`, and resolves to its attached API. The dependent Extension's `init()` remains pending until that Promise settles. This same pattern works with official registry entries, bundled Extensions, and custom registrations.
 
 ## Shared script and stylesheet dependencies
 

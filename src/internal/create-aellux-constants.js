@@ -57,6 +57,8 @@ export function createAelluxConstants() {
       ERROR_EXTENSION_VARIANT_UNAVAILABLE: { code: 1127, message: "The extension manifest has no compatible runtime variant." },
       ERROR_INVALID_ENVIRONMENT: { code: 1128, message: AELLUX + "environment must be production or development." },
       ERROR_EXTENSION_INDEX_NOT_FOUND: { code: 1129, message: "The requested Extension was not found in an extension manifest." },
+      ERROR_COMM_DUPLICATE: { code: 1130, message: "A communication contract already has a handler." },
+      ERROR_COMM_CALLBACK: { code: 1131, message: "A communication notification callback failed." },
       ERROR_LEGACY_RUNTIME_START: { code: 1201, message: LEGACY_RUNTIME + "failed to start." },
       ERROR_LEGACY_RUNTIME_LOAD: { code: 1202, message: LEGACY_RUNTIME + "could not be loaded." },
       ERROR_MODERN_RUNTIME_START: { code: 1203, message: MODERN_RUNTIME + "failed to start; trying Legacy runtime." },

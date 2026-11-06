@@ -1,13 +1,8 @@
 (() => {
-  // src/aellux.ext.point.js
+  // src/internal/create-input-point.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  (function(root) {
-    "use strict";
-    const AelluxJs = root.AelluxJs;
-    const extensionName = "point";
-    if (!AelluxJs) {
-      throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
-    }
+  function createPointAdapter(AelluxJs, root, emit, accepts) {
+    const extensionName = "input";
     const POINTER = "pointer";
     const trackedPointers = /* @__PURE__ */ new Map();
     const pointableElements = /* @__PURE__ */ new Set();
@@ -23,25 +18,11 @@
       ["over", onPointerOver],
       ["out", onPointerOut]
     ];
-    AelluxJs.extAttach(extensionName, {
-      init,
-      destroy,
-      pointers
-    });
     function init() {
-      AelluxJs.mountManager.add({
-        extensionName,
-        selector: pointableSelector,
-        priority: 0,
-        mount: mountPointable,
-        unmount: unmountPointable,
-        controllers: ["pointers"]
-      });
       for (const [suffix, handler] of pointerEvents)
         AelluxJs.on(`$${POINTER}${suffix}`, handler, true);
     }
     function destroy() {
-      AelluxJs.mountManager.remove({ extensionName });
       for (const [suffix, handler] of pointerEvents)
         AelluxJs.off(`$${POINTER}${suffix}`, handler, true);
       trackedPointers.clear();
@@ -75,7 +56,7 @@
     function targetFor(target, pointer) {
       let element = target && target.nodeType === 1 ? target : target && target.parentElement;
       while (element) {
-        if (pointableElements.has(element) && element.hasAttribute(pointableAttribute)) {
+        if (pointableElements.has(element) && element.hasAttribute(pointableAttribute) && accepts("point", element)) {
           let occupied = 0;
           for (const other of trackedPointers.values()) {
             if (other !== pointer && other.target === element) occupied++;
@@ -182,6 +163,8 @@
       return pointer;
     }
     function onPointerDown(event) {
+      if (!accepts("point", event.target)) return;
+      command(event, "press");
       let pointer = trackedPointers.get(event.pointerId);
       const wasPressed = pointer && pointer.pressed;
       pointer = pointer || addPointer(event, true, canHover(event));
@@ -199,6 +182,8 @@
       dispatchToTarget("PointerDown", pointer, event);
     }
     function onPointerMove(event) {
+      if (!accepts("point", event.target)) return;
+      command(event, "move");
       let pointer = trackedPointers.get(event.pointerId);
       if (!pointer) {
         if (!canHover(event)) return;
@@ -209,6 +194,7 @@
       dispatchToTarget("PointerMove", pointer, event);
     }
     function onPointerUp(event) {
+      command(event, "release");
       const pointer = trackedPointers.get(event.pointerId);
       if (!pointer) return;
       pointer.update(event);
@@ -225,6 +211,7 @@
       if (!pointer.hover) trackedPointers.delete(event.pointerId);
     }
     function onPointerCancel(event) {
+      command(event, "cancel");
       const pointer = trackedPointers.get(event.pointerId);
       if (pointer) {
         pointer.tap = null;
@@ -237,6 +224,7 @@
       trackedPointers.delete(event.pointerId);
     }
     function onPointerOver(event) {
+      if (!accepts("point", event.target)) return;
       if (!canHover(event)) return;
       const pointer = trackedPointers.get(event.pointerId) || addPointer(event, false, true);
       pointer.update(event);
@@ -254,6 +242,21 @@
         pointer.target = null;
       }
       if (!pointer.pressed && !pointer.hover) trackedPointers.delete(event.pointerId);
+    }
+    function command(event, phase) {
+      emit({
+        deviceId: "point:" + (event.pointerType || "mouse"),
+        source: "point",
+        code: "button" + Math.max(0, event.button),
+        phase,
+        contactId: event.pointerId,
+        pointerType: event.pointerType,
+        x: event.clientX,
+        y: event.clientY,
+        originalEvent: event,
+        target: event.target,
+        intentional: event.isTrusted && phase === "press"
+      });
     }
     class AePointer {
       constructor(event, pressed, hover) {
@@ -314,6 +317,13 @@
         this.lastDispatched.y = this.current.y;
       }
     }
-  })(typeof globalThis !== "undefined" ? globalThis : window);
+    return { init, destroy, pointers, mount: mountPointable, unmount: unmountPointable };
+  }
+
+  // src/aellux.input.point.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  var api = (typeof globalThis !== "undefined" ? globalThis : window).AelluxJs;
+  api.registry.inputAdapters = api.registry.inputAdapters || {};
+  api.registry.inputAdapters.point = ({ root, emit, accepts }) => createPointAdapter(api, root, emit, accepts);
 })();
-//# sourceMappingURL=aellux.ext.point.js.map
+//# sourceMappingURL=aellux.input.point.js.map

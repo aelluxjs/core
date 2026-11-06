@@ -188,11 +188,11 @@ CSS Motion integration, rendered-frame handoff and scheduled completion change t
 
 Anchor Modern's raw budget moves from 15 to 16 KiB (gzip stays 6 KiB); Anchor Legacy moves from 23 / 8 to 23.5 / 8.25 KiB. Full Modern moves from 209.5 / 64.75 to 210.5 / 65 KiB, and Full Legacy from 531.75 / 157 to 533 / 157.5 KiB.
 
-## Placement maps for dependent Extensions
+## Application placement maps and Extension communication
 
 `$ae.ext.anchor.createPlacementMap()` creates an independently owned set of placements. Wait for Anchor initialization before calling it. The map exposes `mount(element)`, `measure(element, pairs, target = element.parentElement)`, `place(element, placement)`, `unmount(element)`, `invisible(element)` and `destroy()`. Pivot strings use the same `target:self` syntax as declarative Anchors. An invalid or unmounted measurement returns `null`; check `placement.valid` before using its geometry. `invisible()` checks computed CSS, without viewport intersection.
 
-The consumer owns its mount selector, wrapping, positioning CSS, observers and timing. The map saves the owned styles and class on mount and restores them on unmount or destruction. Use `waitLayout.read()` for measurement and `waitLayout.update()` for placement. Elements in this map need no `data-ae-anchor` and do not install ordinary Anchor tracking. Overflow Marquee uses this API for its generated wrappers. Destroying Anchor disposes any remaining placement maps.
+The application owns its mount selector, wrapping, positioning CSS, observers and timing. The map saves owned styles and class on mount and restores them on unmount or destruction. Use `waitLayout.read()` for measurement and `waitLayout.update()` for placement. Elements in this map need no `data-ae-anchor` and do not install ordinary Anchor tracking. Extension consumers such as Overflow Marquee request geometry through the data-only `anchor.placement` [communication contract](../runtime/communication.md), without receiving the placement map API. Destroying Anchor disposes all remaining maps.
 
 ## Known Limits & Risks
 

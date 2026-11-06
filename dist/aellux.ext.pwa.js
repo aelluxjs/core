@@ -236,9 +236,9 @@
     async function showGuide(options, context, token) {
       var _a;
       if (guide == null ? void 0 : guide.open) return;
-      const dialogAPI = await api.wait("dialog");
+      await api.wait("dialog");
       if (!active || token !== revision) return;
-      if (!dialogAPI) throw new Error("Dialog could not be loaded for the installation guide.");
+      if (!api.comm.has("dialog.showModal")) throw new Error("Dialog could not be loaded for the installation guide.");
       removeGuide();
       const language = options.language || root.document.documentElement.lang || ((_a = root.navigator) == null ? void 0 : _a.language) || "en";
       const copy = __spreadValues(__spreadValues({}, texts[/^pt(-BR)?$/i.test(language) ? "pt-BR" : "en"]), options.texts);
@@ -280,7 +280,7 @@
         return;
       }
       try {
-        dialogAPI.showModal(dialog);
+        if (!api.comm.request("dialog.showModal", { element: dialog }).handled) throw new Error("Dialog is unavailable.");
       } catch (error) {
         removeGuide();
         throw error;

@@ -109,8 +109,9 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
       if (request.resourceType() === "script" && request.url().includes("aellux.ext.overflow-marquee")) requests.push(request.url());
     });
     await start(page, markup(), { mode, forceLegacy });
-    expect(requests).toHaveLength(mode === "basic" ? 1 : 0);
-    if (mode === "basic") expect(requests[0]).toContain(forceLegacy ? "aellux.ext.overflow-marquee.legacy.js" : "aellux.ext.overflow-marquee.js");
+    // Overflow Marquee is Optional in both distributions; Anchor is bundled in Full.
+    expect(requests).toHaveLength(1);
+    expect(requests[0]).toContain(forceLegacy ? "aellux.ext.overflow-marquee.legacy.js" : "aellux.ext.overflow-marquee.js");
     expect(await page.evaluate(() => document.querySelector("#label [data-ae-anchor]"))).toBeNull();
     const host = page.locator("#label");
     const content = host.locator("[data-ae-overflow-marquee-content]");

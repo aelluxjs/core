@@ -2,6 +2,8 @@
 
 The browser distribution exposes `AelluxJs` and its short alias `$ae` on the global object.
 
+`$ae.comm` is the boot-level [shared communication mediator](communication.md): named commands/queries through `handle` / `request`, notifications through `on` / `emit`, availability checks and owned cleanup. Extensions exchange data contracts while application code retains access to public Extension APIs.
+
 The [Compatibility Commitment](compatibility-commitment.md) defines preservation and evolution of documented public contracts from `0.1.0` through `0.1.x`. Individual Extension stability and documented limits still apply.
 
 Modules can import the shared API through `@aelluxjs/core`:

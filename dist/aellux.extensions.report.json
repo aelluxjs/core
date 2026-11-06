@@ -44,9 +44,9 @@
       "artifacts": 2
     },
     {
-      "name": "point",
+      "name": "input",
       "status": "valid",
-      "artifacts": 2
+      "artifacts": 3
     },
     {
       "name": "anchor",

@@ -1148,6 +1148,14 @@
   }
 
   // src/src/aellux.ext.present.js
+  function _typeof3(o) {
+    "@babel/helpers - typeof";
+    return _typeof3 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof3(o);
+  }
   function _regenerator() {
     /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
     var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag";
@@ -1292,6 +1300,44 @@
   function _arrayWithoutHoles3(r) {
     if (Array.isArray(r)) return _arrayLikeToArray3(r);
   }
+  function ownKeys3(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function(r2) {
+        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
+      })), t.push.apply(t, o);
+    }
+    return t;
+  }
+  function _objectSpread3(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys3(Object(t), true).forEach(function(r2) {
+        _defineProperty3(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys3(Object(t)).forEach(function(r2) {
+        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
+      });
+    }
+    return e;
+  }
+  function _defineProperty3(e, r, t) {
+    return (r = _toPropertyKey3(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  }
+  function _toPropertyKey3(t) {
+    var i = _toPrimitive3(t, "string");
+    return "symbol" == _typeof3(i) ? i : i + "";
+  }
+  function _toPrimitive3(t, r) {
+    if ("object" != _typeof3(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r || "default");
+      if ("object" != _typeof3(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return ("string" === r ? String : Number)(t);
+  }
   function _slicedToArray2(r, e) {
     return _arrayWithHoles2(r) || _iterableToArrayLimit2(r, e) || _unsupportedIterableToArray3(r, e) || _nonIterableRest2();
   }
@@ -1432,9 +1478,48 @@
     var presentationSequence = 0;
     var cssProperties = [["pop-progress", "<number>", "0"], ["dismiss-progress", "<number>", "1"], ["present-pop-phase", "<number>", "0"], ["present-dismiss-phase", "<number>", "1"], ["from-opacity", OPACITY_SYNTAX, "0"], ["pop-opacity", OPACITY_SYNTAX, "1"], ["dismiss-opacity", OPACITY_SYNTAX, "0"], ["from-transform", TRANSFORM_SYNTAX, "scale(0.5)"], ["pop-transform", TRANSFORM_SYNTAX, "scale(1)"], ["dismiss-transform", TRANSFORM_SYNTAX, "scale(1.2)"], ["from-height", "*", "0fr"], ["pop-height", "*", "1fr"], ["dismiss-height", "*", "0fr"], ["from-width", "*", "0fr"], ["pop-width", "*", "1fr"], ["dismiss-width", "*", "0fr"], ["pop-ease", "*", "ease-out"], ["dismiss-ease", "*", "ease-in"], ["pop-duration", "<time>", "250ms"], ["dismiss-duration", "<time>", "250ms"]];
     function init(options) {
+      var communication = {
+        owner: extensionName
+      };
+      var _loop = function _loop2() {
+        var _Object$entries$_i = _slicedToArray2(_Object$entries[_i], 2), name = _Object$entries$_i[0], method = _Object$entries$_i[1];
+        AelluxJs.comm.handle("present." + name, function(_ref) {
+          var element = _ref.element;
+          return method(element);
+        }, communication);
+      };
+      for (var _i = 0, _Object$entries = Object.entries({
+        pop: pop,
+        unpop: unpop,
+        dismiss: dismiss
+      }); _i < _Object$entries.length; _i++) {
+        _loop();
+      }
+      AelluxJs.comm.handle("present.toggle", function(_ref2) {
+        var element = _ref2.element, goto = _ref2.goto;
+        return toggle(element, goto);
+      }, communication);
+      AelluxJs.comm.handle("present.show", function(_ref3) {
+        var group = _ref3.group, member = _ref3.member;
+        return show(group, member);
+      }, communication);
+      AelluxJs.comm.handle("present.selection", function(_ref4) {
+        var group = _ref4.group;
+        return selected(group);
+      }, communication);
+      AelluxJs.comm.handle("present.pop-next", function(request) {
+        return popNext(request.group, function(member) {
+          if (request.preparation) {
+            var result = AelluxJs.comm.request(request.preparation.contract, _objectSpread3(_objectSpread3({}, request.preparation.payload), {}, {
+              element: member
+            }));
+            if (!result.handled || result.value === false) throw new Error("Present preparation is unavailable.");
+          }
+        });
+      }, communication);
       playback.init();
-      var descriptors = cssProperties.map(function(_ref) {
-        var _ref2 = _slicedToArray2(_ref, 3), name = _ref2[0], syntax = _ref2[1], initialValue = _ref2[2];
+      var descriptors = cssProperties.map(function(_ref5) {
+        var _ref6 = _slicedToArray2(_ref5, 3), name = _ref6[0], syntax = _ref6[1], initialValue = _ref6[2];
         return {
           name: "--ae-".concat(name),
           syntax: syntax,
@@ -1523,6 +1608,7 @@
     }
     function destroy() {
       var _autoObserver;
+      AelluxJs.comm.removeOwner(extensionName);
       gestures.destroy();
       (_autoObserver = autoObserver) === null || _autoObserver === void 0 || _autoObserver.disconnect();
       autoObserver = null;
@@ -2314,11 +2400,11 @@
                   element.style.setProperty("transition-property", "none", "important");
                   applyDestination();
                   var _computed = root.getComputedStyle(element);
-                  var _tracks2 = handoff.values.filter(function(_ref3) {
-                    var _ref4 = _slicedToArray2(_ref3, 1), property2 = _ref4[0];
+                  var _tracks2 = handoff.values.filter(function(_ref7) {
+                    var _ref8 = _slicedToArray2(_ref7, 1), property2 = _ref8[0];
                     return property2.startsWith("grid-template-") || property2 === "height" || property2 === "width";
-                  }).map(function(_ref5) {
-                    var _ref6 = _slicedToArray2(_ref5, 1), property2 = _ref6[0];
+                  }).map(function(_ref9) {
+                    var _ref0 = _slicedToArray2(_ref9, 1), property2 = _ref0[0];
                     return [property2, _computed.getPropertyValue(property2)];
                   });
                   handoff.freeze();
@@ -2616,7 +2702,7 @@
     function clickAutoDismiss(eventTarget, currentExceptions) {
       var _iterator10 = _createForOfIteratorHelper3(openPresentElements), _step10;
       try {
-        var _loop = function _loop2() {
+        var _loop2 = function _loop22() {
           var pContainer = _step10.value;
           if (pContainer.hidden === true || currentExceptions.some(function(e) {
             return pContainer.contains(e);
@@ -2627,7 +2713,7 @@
           if (inside === (mode === "inside" || mode === "in")) dismiss(pContainer);
         }, _ret;
         for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
-          _ret = _loop();
+          _ret = _loop2();
           if (_ret === 0) continue;
         }
       } catch (err) {
@@ -2669,7 +2755,6 @@
       return target !== null && target !== void 0 && target.closest ? target : null;
     }
     function onTap(event) {
-      var _AelluxJs$mountManage;
       var target = activationTarget(event);
       if (!target) return;
       var control = target.closest("[".concat(attr.trigger, "],[").concat(attr.dismiss, "]"));
@@ -2679,14 +2764,17 @@
         target: target,
         hoverSuppressed: control && suppressHoverClick(control, event),
         present: triggerTargets.get(control),
-        point: (_AelluxJs$mountManage = AelluxJs.mountManager.controller(target)) === null || _AelluxJs$mountManage === void 0 ? void 0 : _AelluxJs$mountManage.point,
+        input: AelluxJs.comm.request("input.mount-token", {
+          element: target
+        }).value,
         timer: null
       };
       pendingTaps.add(pending);
       pending.timer = setTimeout(function() {
-        var _AelluxJs$mountManage2;
         pendingTaps.delete(pending);
-        if (!target.isConnected || pending.point && ((_AelluxJs$mountManage2 = AelluxJs.mountManager.controller(target)) === null || _AelluxJs$mountManage2 === void 0 ? void 0 : _AelluxJs$mountManage2.point) !== pending.point) return;
+        if (!target.isConnected || pending.input && AelluxJs.comm.request("input.mount-token", {
+          element: target
+        }).value !== pending.input) return;
         activate(event, target, pending.hoverSuppressed);
       }, TAP_CLICK_WAIT_TIME);
     }
@@ -3156,7 +3244,7 @@
       state.pending = pending;
       var _iterator16 = _createForOfIteratorHelper3(changes), _step16;
       try {
-        var _loop2 = function _loop22() {
+        var _loop3 = function _loop32() {
           var member2 = _step16.value;
           var job = presentTransition(member2, member2 === selected2, false, true, void 0, closingDirection);
           if (groups.get(group) !== state || state.revision !== revision) {
@@ -3171,7 +3259,7 @@
           });
         }, _ret2;
         for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
-          _ret2 = _loop2();
+          _ret2 = _loop3();
           if (_ret2) return _ret2.v;
         }
       } catch (err) {
@@ -3237,7 +3325,7 @@
       }
       var _iterator18 = _createForOfIteratorHelper3(openPresentElements), _step18;
       try {
-        var _loop3 = function _loop32() {
+        var _loop4 = function _loop42() {
           var target2 = _step18.value;
           if (!inHoverRegion(target2, event.target)) return 1;
           if (entering || inHoverRegion(target2, event.relatedTarget)) cancelHoverClose(target2);
@@ -3252,7 +3340,7 @@
           }
         };
         for (_iterator18.s(); !(_step18 = _iterator18.n()).done; ) {
-          if (_loop3()) continue;
+          if (_loop4()) continue;
         }
       } catch (err) {
         _iterator18.e(err);

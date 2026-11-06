@@ -263,6 +263,13 @@
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/communication.htm" data-ae-overflow-marquee="190px">
+                                        Shared Communication                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/modern-legacy.htm" data-ae-overflow-marquee="190px">
                                         Modern &amp; Legacy                                      </a>
                                     </div>
@@ -459,8 +466,8 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/point.htm" data-ae-overflow-marquee="190px">
-                                              Point                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/input.htm" data-ae-overflow-marquee="190px">
+                                              Input                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -848,9 +855,9 @@ await $ae.mountManager.update(anchor, &quot;anchor&quot;);
 </tr>
 </tbody></table>
 <p>Anchor Modern&#39;s raw budget moves from 15 to 16 KiB (gzip stays 6 KiB); Anchor Legacy moves from 23 / 8 to 23.5 / 8.25 KiB. Full Modern moves from 209.5 / 64.75 to 210.5 / 65 KiB, and Full Legacy from 531.75 / 157 to 533 / 157.5 KiB.</p>
-<h2>Placement maps for dependent Extensions</h2>
+<h2>Application placement maps and Extension communication</h2>
 <p><code>$ae.ext.anchor.createPlacementMap()</code> creates an independently owned set of placements. Wait for Anchor initialization before calling it. The map exposes <code>mount(element)</code>, <code>measure(element, pairs, target = element.parentElement)</code>, <code>place(element, placement)</code>, <code>unmount(element)</code>, <code>invisible(element)</code> and <code>destroy()</code>. Pivot strings use the same <code>target:self</code> syntax as declarative Anchors. An invalid or unmounted measurement returns <code>null</code>; check <code>placement.valid</code> before using its geometry. <code>invisible()</code> checks computed CSS, without viewport intersection.</p>
-<p>The consumer owns its mount selector, wrapping, positioning CSS, observers and timing. The map saves the owned styles and class on mount and restores them on unmount or destruction. Use <code>waitLayout.read()</code> for measurement and <code>waitLayout.update()</code> for placement. Elements in this map need no <code>data-ae-anchor</code> and do not install ordinary Anchor tracking. Overflow Marquee uses this API for its generated wrappers. Destroying Anchor disposes any remaining placement maps.</p>
+<p>The application owns its mount selector, wrapping, positioning CSS, observers and timing. The map saves owned styles and class on mount and restores them on unmount or destruction. Use <code>waitLayout.read()</code> for measurement and <code>waitLayout.update()</code> for placement. Elements in this map need no <code>data-ae-anchor</code> and do not install ordinary Anchor tracking. Extension consumers such as Overflow Marquee request geometry through the data-only <code>anchor.placement</code> <a href="../runtime/communication.htm">communication contract</a>, without receiving the placement map API. Destroying Anchor disposes all remaining maps.</p>
 <h2>Known Limits &amp; Risks</h2>
 <p>See <a href="../runtime/known-limits-and-risks.htm">Core Known Limits &amp; Risks</a> for classifications and shared architecture, loading and lifecycle boundaries.</p>
 <table>

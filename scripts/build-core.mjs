@@ -16,6 +16,7 @@ import { generateScrollboxCSS } from "../src/aellux.ext.scrollbox.css.js";
 import { generateAnchorCSS } from "../src/aellux.ext.anchor.css.js";
 import { generateOverflowMarqueeCSS } from "../src/aellux.ext.overflow-marquee.css.js";
 import { generateFullCSS } from "../src/aellux.full.css.js";
+import { generateInputCSS } from "../src/aellux.ext.input.css.js";
 import { officialExtensionDefinitions } from "../src/official-extension-definitions.js";
 import { createOfficialExtensionManifest } from "./extension-manifest.mjs";
 import { normalizeSourceMapText } from "./normalize-source-map.mjs";
@@ -46,7 +47,7 @@ const dialogThirdPartyBanner =
 const legacySourceFiles = sourceFiles.filter(sourceFile => {
   const filename = basename(sourceFile);
   return filename === "aellux.orchestrator.js" ||
-    /^aellux\.ext\.[\w-]+\.js$/.test(filename);
+    /^aellux\.ext\.[\w-]+\.js$/.test(filename) || /^aellux\.input\.[\w-]+\.js$/.test(filename);
 });
 const legacyPolyfills = `
 require("core-js/stable");
@@ -123,6 +124,7 @@ await buildGeneratedStylesheet(
   generateOverflowMarqueeCSS(bootstrapContext.AelluxJs)
 );
 await buildGeneratedStylesheet("aellux.full.css", generateFullCSS(bootstrapContext.AelluxJs));
+await buildGeneratedStylesheet("aellux.ext.input.css", generateInputCSS(bootstrapContext.AelluxJs));
 
 async function buildGeneratedStylesheet(filename, contents) {
   const outputPath = join(outputDirectory, filename);

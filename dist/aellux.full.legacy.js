@@ -386,11 +386,11 @@
       var isCallable = require_is_callable();
       var isObject = require_is_object();
       var $TypeError = TypeError;
-      module.exports = function(input, pref) {
+      module.exports = function(input2, pref) {
         var fn, val;
-        if (pref === "string" && isCallable(fn = input.toString) && !isObject(val = call(fn, input))) return val;
-        if (isCallable(fn = input.valueOf) && !isObject(val = call(fn, input))) return val;
-        if (pref !== "string" && isCallable(fn = input.toString) && !isObject(val = call(fn, input))) return val;
+        if (pref === "string" && isCallable(fn = input2.toString) && !isObject(val = call(fn, input2))) return val;
+        if (isCallable(fn = input2.valueOf) && !isObject(val = call(fn, input2))) return val;
+        if (pref !== "string" && isCallable(fn = input2.toString) && !isObject(val = call(fn, input2))) return val;
         throw new $TypeError("Can't convert object to primitive value");
       };
     }
@@ -525,18 +525,18 @@
       var wellKnownSymbol = require_well_known_symbol();
       var $TypeError = TypeError;
       var TO_PRIMITIVE = wellKnownSymbol("toPrimitive");
-      module.exports = function(input, pref) {
-        if (!isObject(input) || isSymbol(input)) return input;
-        var exoticToPrim = getMethod(input, TO_PRIMITIVE);
+      module.exports = function(input2, pref) {
+        if (!isObject(input2) || isSymbol(input2)) return input2;
+        var exoticToPrim = getMethod(input2, TO_PRIMITIVE);
         var result;
         if (exoticToPrim) {
           if (pref === void 0) pref = "default";
-          result = call(exoticToPrim, input, pref);
+          result = call(exoticToPrim, input2, pref);
           if (!isObject(result) || isSymbol(result)) return result;
           throw new $TypeError("Can't convert object to primitive value");
         }
         if (pref === void 0) pref = "number";
-        return ordinaryToPrimitive(input, pref);
+        return ordinaryToPrimitive(input2, pref);
       };
     }
   });
@@ -1105,7 +1105,7 @@
       var getOwnPropertySymbolsModule = require_object_get_own_property_symbols();
       var anObject = require_an_object();
       var concat = uncurryThis([].concat);
-      module.exports = getBuiltIn("Reflect", "ownKeys") || function ownKeys7(it) {
+      module.exports = getBuiltIn("Reflect", "ownKeys") || function ownKeys11(it) {
         var keys = getOwnPropertyNamesModule.f(anObject(it));
         var getOwnPropertySymbols = getOwnPropertySymbolsModule.f;
         return getOwnPropertySymbols ? concat(keys, getOwnPropertySymbols(it)) : keys;
@@ -1118,11 +1118,11 @@
     "node_modules/core-js/internals/copy-constructor-properties.js": function(exports, module) {
       "use strict";
       var hasOwn = require_has_own_property();
-      var ownKeys7 = require_own_keys();
+      var ownKeys11 = require_own_keys();
       var getOwnPropertyDescriptorModule = require_object_get_own_property_descriptor();
       var definePropertyModule = require_object_define_property();
       module.exports = function(target, source, exceptions) {
-        var keys = ownKeys7(source);
+        var keys = ownKeys11(source);
         var defineProperty = definePropertyModule.f;
         var getOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
         for (var i = 0; i < keys.length; i++) {
@@ -10021,7 +10021,7 @@
       "use strict";
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
-      var ownKeys7 = require_own_keys();
+      var ownKeys11 = require_own_keys();
       var toIndexedObject = require_to_indexed_object();
       var getOwnPropertyDescriptorModule = require_object_get_own_property_descriptor();
       var createProperty = require_create_property();
@@ -10029,7 +10029,7 @@
         getOwnPropertyDescriptors: function getOwnPropertyDescriptors(object) {
           var O = toIndexedObject(object);
           var getOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
-          var keys = ownKeys7(O);
+          var keys = ownKeys11(O);
           var result = {};
           var index = 0;
           var key, descriptor;
@@ -12201,9 +12201,9 @@
     "node_modules/core-js/modules/es.reflect.own-keys.js": function() {
       "use strict";
       var $ = require_export();
-      var ownKeys7 = require_own_keys();
+      var ownKeys11 = require_own_keys();
       $({ target: "Reflect", stat: true }, {
-        ownKeys: ownKeys7
+        ownKeys: ownKeys11
       });
     }
   });
@@ -13771,11 +13771,11 @@
         var state = getInternalState(this);
         var string = state.string;
         var index = state.index;
-        var point2;
+        var point;
         if (index >= string.length) return createIterResultObject(void 0, true);
-        point2 = charAt(string, index);
-        state.index += point2.length;
-        return createIterResultObject(point2, false);
+        point = charAt(string, index);
+        state.index += point.length;
+        return createIterResultObject(point, false);
       });
     }
   });
@@ -18056,16 +18056,16 @@
         }
         return floor(k + (baseMinusTMin + 1) * delta / (delta + skew));
       };
-      var encode = function(input) {
+      var encode = function(input2) {
         var output = [];
-        input = ucs2decode(input);
-        var inputLength = input.length;
+        input2 = ucs2decode(input2);
+        var inputLength = input2.length;
         var n = initialN;
         var delta = 0;
         var bias = initialBias;
         var i, currentValue;
-        for (i = 0; i < input.length; i++) {
-          currentValue = input[i];
+        for (i = 0; i < input2.length; i++) {
+          currentValue = input2[i];
           if (currentValue < 128) {
             push(output, fromCharCode(currentValue));
           }
@@ -18077,8 +18077,8 @@
         }
         while (handledCPCount < inputLength) {
           var m = maxInt;
-          for (i = 0; i < input.length; i++) {
-            currentValue = input[i];
+          for (i = 0; i < input2.length; i++) {
+            currentValue = input2[i];
             if (currentValue >= n && currentValue < m) {
               m = currentValue;
             }
@@ -18089,8 +18089,8 @@
           }
           delta += (m - n) * handledCPCountPlusOne;
           n = m;
-          for (i = 0; i < input.length; i++) {
-            currentValue = input[i];
+          for (i = 0; i < input2.length; i++) {
+            currentValue = input2[i];
             if (currentValue < n && ++delta > maxInt) {
               throw new $RangeError(OVERFLOW_ERROR);
             }
@@ -18117,9 +18117,9 @@
         }
         return join(output, "");
       };
-      module.exports = function(input) {
+      module.exports = function(input2) {
         var encoded = [];
-        var labels = split(replace(toLowerCase(input), regexSeparators, "."), ".");
+        var labels = split(replace(toLowerCase(input2), regexSeparators, "."), ".");
         var i, label;
         for (i = 0; i < labels.length; i++) {
           label = labels[i];
@@ -18184,19 +18184,19 @@
       var replaceLoneSurrogate = function(chunk) {
         return chunk.length === 2 ? chunk : FALLBACK_REPLACER;
       };
-      var decode = function(input) {
-        var length = input.length;
+      var decode = function(input2) {
+        var length = input2.length;
         var result = "";
         var i = 0;
         while (i < length) {
-          var decodedChar = charAt(input, i);
+          var decodedChar = charAt(input2, i);
           if (decodedChar === "%") {
-            if (charAt(input, i + 1) === "%" || i + 3 > length) {
+            if (charAt(input2, i + 1) === "%" || i + 3 > length) {
               result += "%";
               i++;
               continue;
             }
-            var octet = parseHexOctet(input, i + 1);
+            var octet = parseHexOctet(input2, i + 1);
             if (octet !== octet) {
               result += decodedChar;
               i++;
@@ -18216,8 +18216,8 @@
               var sequenceIndex = 1;
               while (sequenceIndex < byteSequenceLength) {
                 i++;
-                if (i + 3 > length || charAt(input, i) !== "%") break;
-                var nextByte = parseHexOctet(input, i + 1);
+                if (i + 3 > length || charAt(input2, i) !== "%") break;
+                var nextByte = parseHexOctet(input2, i + 1);
                 if (nextByte !== nextByte || nextByte > 191 || nextByte < 128) break;
                 if (sequenceIndex === 1) {
                   if (octet === 224 && nextByte < 160) break;
@@ -18248,11 +18248,11 @@
         }
         return result;
       };
-      var encode = function(input) {
+      var encode = function(input2) {
         try {
-          return $encodeURIComponent(input);
+          return $encodeURIComponent(input2);
         } catch (error) {
-          return $encodeURIComponent(replace(input, SURROGATE, replaceLoneSurrogate));
+          return $encodeURIComponent(replace(input2, SURROGATE, replaceLoneSurrogate));
         }
       };
       module.exports = {
@@ -18320,8 +18320,8 @@
       var split = uncurryThis("".split);
       var stringSlice = uncurryThis("".slice);
       var plus = /\+/g;
-      var decodeQueryComponent = function(input) {
-        return percentDecode(replace(input, plus, " "));
+      var decodeQueryComponent = function(input2) {
+        return percentDecode(replace(input2, plus, " "));
       };
       var find = /[!'()~]|%20/g;
       var replacements = {
@@ -18601,15 +18601,15 @@
         };
         if (isCallable(nativeFetch)) {
           $({ global: true, enumerable: true, dontCallGetSet: true, forced: true }, {
-            fetch: function fetch2(input) {
-              return nativeFetch(input, arguments.length > 1 ? wrapRequestOptions(arguments[1]) : {});
+            fetch: function fetch2(input2) {
+              return nativeFetch(input2, arguments.length > 1 ? wrapRequestOptions(arguments[1]) : {});
             }
           });
         }
         if (isCallable(NativeRequest)) {
-          RequestConstructor = function Request(input) {
+          RequestConstructor = function Request(input2) {
             anInstance(this, RequestPrototype);
-            return new NativeRequest(input, arguments.length > 1 ? wrapRequestOptions(arguments[1]) : {});
+            return new NativeRequest(input2, arguments.length > 1 ? wrapRequestOptions(arguments[1]) : {});
           };
           RequestPrototype.constructor = RequestConstructor;
           RequestConstructor.prototype = RequestPrototype;
@@ -18726,8 +18726,8 @@
         }
         return result === "" ? null : toASCII(result);
       };
-      var endsInNumber = function(input) {
-        var parts = split(input, ".");
+      var endsInNumber = function(input2) {
+        var parts = split(input2, ".");
         var last, hexPart;
         if (parts[parts.length - 1] === "") {
           if (parts.length === 1) return false;
@@ -18741,8 +18741,8 @@
         }
         return false;
       };
-      var parseIPv4 = function(input) {
-        var parts = split(input, ".");
+      var parseIPv4 = function(input2) {
+        var parts = split(input2, ".");
         var partsLength, numbers, index, part, radix, number, ipv4;
         if (parts.length && parts[parts.length - 1] === "") {
           parts.length--;
@@ -18778,17 +18778,17 @@
         }
         return ipv4;
       };
-      var parseIPv6 = function(input) {
+      var parseIPv6 = function(input2) {
         var address = [0, 0, 0, 0, 0, 0, 0, 0];
         var pieceIndex = 0;
         var compress = null;
         var pointer = 0;
         var value, length, numbersSeen, ipv4Piece, number, swaps, swap;
         var chr = function() {
-          return charAt(input, pointer);
+          return charAt(input2, pointer);
         };
         if (chr() === ":") {
-          if (charAt(input, 1) !== ":") return;
+          if (charAt(input2, 1) !== ":") return;
           pointer += 2;
           pieceIndex++;
           compress = pieceIndex;
@@ -19005,7 +19005,7 @@
         type: "URL",
         // https://url.spec.whatwg.org/#url-parsing
         // eslint-disable-next-line max-statements -- TODO
-        parse: function(input, stateOverride, base) {
+        parse: function(input2, stateOverride, base) {
           var url = this;
           var state = stateOverride || SCHEME_START;
           var pointer = 0;
@@ -19014,7 +19014,7 @@
           var seenBracket = false;
           var seenPasswordToken = false;
           var codePoints, chr, bufferCodePoints, failure;
-          input = $toString(input);
+          input2 = $toString(input2);
           if (!stateOverride) {
             url.scheme = "";
             url.username = "";
@@ -19025,11 +19025,11 @@
             url.query = null;
             url.fragment = null;
             url.cannotBeABaseURL = false;
-            input = replace(input, LEADING_C0_CONTROL_OR_SPACE, "");
-            input = replace(input, TRAILING_C0_CONTROL_OR_SPACE, "$1");
+            input2 = replace(input2, LEADING_C0_CONTROL_OR_SPACE, "");
+            input2 = replace(input2, TRAILING_C0_CONTROL_OR_SPACE, "$1");
           }
-          input = replace(input, TAB_AND_NEW_LINE, "");
-          codePoints = arrayFrom(input);
+          input2 = replace(input2, TAB_AND_NEW_LINE, "");
+          codePoints = arrayFrom(input2);
           while (pointer <= codePoints.length) {
             chr = codePoints[pointer];
             switch (state) {
@@ -19382,30 +19382,30 @@
           }
         },
         // https://url.spec.whatwg.org/#host-parsing
-        parseHost: function(input) {
+        parseHost: function(input2) {
           var result, codePoints, index;
-          if (charAt(input, 0) === "[") {
-            if (charAt(input, input.length - 1) !== "]") return INVALID_HOST;
-            result = parseIPv6(stringSlice(input, 1, -1));
+          if (charAt(input2, 0) === "[") {
+            if (charAt(input2, input2.length - 1) !== "]") return INVALID_HOST;
+            result = parseIPv6(stringSlice(input2, 1, -1));
             if (!result) return INVALID_HOST;
             this.host = result;
           } else if (!this.isSpecial()) {
-            if (exec(FORBIDDEN_HOST_CODE_POINT, input)) return INVALID_HOST;
+            if (exec(FORBIDDEN_HOST_CODE_POINT, input2)) return INVALID_HOST;
             result = "";
-            codePoints = arrayFrom(input);
+            codePoints = arrayFrom(input2);
             for (index = 0; index < codePoints.length; index++) {
               result += utf8PercentEncode(codePoints[index], C0ControlPercentEncodeSet);
             }
             this.host = result;
           } else {
-            input = domainToASCII(percentDecode(input));
-            if (input === null || exec(FORBIDDEN_DOMAIN_CODE_POINT, input)) return INVALID_HOST;
-            if (endsInNumber(input)) {
-              result = parseIPv4(input);
+            input2 = domainToASCII(percentDecode(input2));
+            if (input2 === null || exec(FORBIDDEN_DOMAIN_CODE_POINT, input2)) return INVALID_HOST;
+            if (endsInNumber(input2)) {
+              result = parseIPv4(input2);
               if (result === null) return INVALID_HOST;
               this.host = result;
             } else {
-              this.host = input;
+              this.host = input2;
             }
           }
         },
@@ -20622,30 +20622,30 @@
           var upcased = method.toUpperCase();
           return methods.indexOf(upcased) > -1 ? upcased : method;
         }
-        function Request(input, options) {
+        function Request(input2, options) {
           if (!(this instanceof Request)) {
             throw new TypeError('Please use the "new" operator, this DOM object constructor cannot be called as a function.');
           }
           options = options || {};
           var body = options.body;
-          if (input instanceof Request) {
-            if (input.bodyUsed) {
+          if (input2 instanceof Request) {
+            if (input2.bodyUsed) {
               throw new TypeError("Already read");
             }
-            this.url = input.url;
-            this.credentials = input.credentials;
+            this.url = input2.url;
+            this.credentials = input2.credentials;
             if (!options.headers) {
-              this.headers = new Headers(input.headers);
+              this.headers = new Headers(input2.headers);
             }
-            this.method = input.method;
-            this.mode = input.mode;
-            this.signal = input.signal;
-            if (!body && input._bodyInit != null) {
-              body = input._bodyInit;
-              input.bodyUsed = true;
+            this.method = input2.method;
+            this.mode = input2.mode;
+            this.signal = input2.signal;
+            if (!body && input2._bodyInit != null) {
+              body = input2._bodyInit;
+              input2.bodyUsed = true;
             }
           } else {
-            this.url = String(input);
+            this.url = String(input2);
           }
           this.credentials = options.credentials || this.credentials || "same-origin";
           if (options.headers || !this.headers) {
@@ -20765,9 +20765,9 @@
           exports2.DOMException.prototype = Object.create(Error.prototype);
           exports2.DOMException.prototype.constructor = exports2.DOMException;
         }
-        function fetch2(input, init) {
+        function fetch2(input2, init) {
           return new Promise(function(resolve, reject) {
-            var request = new Request(input, init);
+            var request = new Request(input2, init);
             if (request.signal && request.signal.aborted) {
               return reject(new exports2.DOMException("Aborted", "AbortError"));
             }
@@ -21546,9 +21546,9 @@
           finishSequence(owner, null, error);
           return;
         }
-        return config.update ? queueTask("update", function(input) {
+        return config.update ? queueTask("update", function(input2) {
           if (checkAbort(owner, config)) return;
-          return config.update(input);
+          return config.update(input2);
         }, [value], owner.group.id, owner) : void 0;
       }).then(function() {
         if (owner.active) completeIteration(owner, config);
@@ -22211,7 +22211,7 @@
             if (value("focus") && value("focus") !== "next") invalid(_extension, "focus", "Unknown Focus mode.", "Use next for Enter navigation, or remove the attribute.");
             if (value("focus") === "next" && !element.matches("input:not([type]),input[type=text],input[type=search],input[type=email],input[type=url],input[type=tel],input[type=password],input[type=number],textarea,[contenteditable]:not([contenteditable=false])")) invalid(_extension, "focus", "Enter navigation is declared on a non-text-entry element.", "Apply data-ae-focus=next to a text input, textarea or editable element.");
           }
-          if (_extension === "point" && value("point") !== "" && (!/^\d+$/.test(value("point")) || !Number.isSafeInteger(Number(value("point"))))) invalid(_extension, "point", "Pointer count must be a nonnegative integer.", "Use an integer such as 1; 0 disables pointer association.");
+          if (_extension === "input" && value("point") !== "" && element.hasAttribute(attr("point")) && (!/^\d+$/.test(value("point")) || !Number.isSafeInteger(Number(value("point"))))) invalid(_extension, "point", "Pointer count must be a nonnegative integer.", "Use an integer such as 1; 0 disables pointer association.");
           if (_extension === "ajax-href") {
             var selectors = api.parseSelectors(value("ajax-href").trim() || "title,body");
             if (!selectors) {
@@ -22294,9 +22294,11 @@
           } catch (_) {
           }
           if ((_target = target) !== null && _target !== void 0 && _target.hasAttribute(attr("present-group"))) {
-            var _api$ext$present, _api$ext$present2, _api$ext$present2$sel;
+            var _api$ext$present;
             if (!((_api$ext$present = api.ext.present) !== null && _api$ext$present !== void 0 && _api$ext$present.initialized)) report("WARN_EXTENSION_REQUIRED", "present", "anchor-target", "A Present Group target requires Present.", "Register and initialize Present before mounting the group and its Anchors.");
-            target = (_api$ext$present2 = api.ext.present) === null || _api$ext$present2 === void 0 || (_api$ext$present2$sel = _api$ext$present2.selected) === null || _api$ext$present2$sel === void 0 ? void 0 : _api$ext$present2$sel.call(_api$ext$present2, target);
+            target = api.comm.request("present.selection", {
+              group: target
+            }).value;
             if (!target) return;
           }
           if (!target) invalid("anchor", "anchor-target", "Anchor target does not exist or the selector is invalid.", "Use an existing target ID or a valid CSS selector.", "WARN_CONFIGURATION_TARGET");
@@ -22443,7 +22445,7 @@
     return false;
   }
   function transformOwners(api, element) {
-    var _api$ext$anchor, _api$ext$scrollbox, _api$ext$present3, _element$getAttribute;
+    var _api$ext$anchor, _api$ext$scrollbox, _api$ext$present2, _element$getAttribute;
     var owners = [];
     if ((_api$ext$anchor = api.ext.anchor) !== null && _api$ext$anchor !== void 0 && _api$ext$anchor.initialized && element.classList.contains(api.className("anchored"))) owners.push("anchor");
     var parent = element.parentElement;
@@ -22453,7 +22455,7 @@
       });
       if (children.length === 1) owners.push("scrollbox-elastic");
     }
-    if ((_api$ext$present3 = api.ext.present) !== null && _api$ext$present3 !== void 0 && _api$ext$present3.initialized && !element.hasAttribute(api.attr("anchor")) && (_element$getAttribute = element.getAttribute(api.attr("present"))) !== null && _element$getAttribute !== void 0 && _element$getAttribute.split(/\s+/).includes("transform")) owners.push("present");
+    if ((_api$ext$present2 = api.ext.present) !== null && _api$ext$present2 !== void 0 && _api$ext$present2.initialized && !element.hasAttribute(api.attr("anchor")) && (_element$getAttribute = element.getAttribute(api.attr("present"))) !== null && _element$getAttribute !== void 0 && _element$getAttribute.split(/\s+/).includes("transform")) owners.push("present");
     return owners;
   }
   function diagnoseResource(api, element, property, writers) {
@@ -22584,8 +22586,8 @@
         "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
         scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-parent scrollbar-vertical scrollbar-horizontal",
         "scrollbox-snap": "scrollbox-snap snap-item",
-        focus: "focus",
-        point: "point",
+        focus: "focus focus-scope shortcut shortcut-priority shortcut-action shortcut-target",
+        input: "point inputs shortcut-hint shortcut-focus shortcut-hint-position shortcut-label shortcut-source shortcut-code gamepad gamepad-family gamepad-model active-input",
         adaptive: "adaptive",
         "ajax-href": "ajax-href",
         viewport: "viewport viewport-target",
@@ -22600,8 +22602,8 @@
         "overflow-marquee": "overflow-marquee",
         scrollbox: "scrollbox",
         "scrollbox-snap": "scrollbox-snap",
-        focus: "focus",
-        point: "point",
+        focus: "focus focus-scope shortcut",
+        input: "point inputs shortcut-hint",
         adaptive: "adaptive",
         "ajax-href": "ajax-href",
         viewport: "viewport",
@@ -22612,6 +22614,52 @@
   });
 
   // src/internal/create-mount-helper.js
+  function _typeof3(o) {
+    "@babel/helpers - typeof";
+    return _typeof3 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof3(o);
+  }
+  function ownKeys2(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function(r2) {
+        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
+      })), t.push.apply(t, o);
+    }
+    return t;
+  }
+  function _objectSpread2(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys2(Object(t), true).forEach(function(r2) {
+        _defineProperty2(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys2(Object(t)).forEach(function(r2) {
+        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
+      });
+    }
+    return e;
+  }
+  function _defineProperty2(e, r, t) {
+    return (r = _toPropertyKey2(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  }
+  function _toPropertyKey2(t) {
+    var i = _toPrimitive2(t, "string");
+    return "symbol" == _typeof3(i) ? i : i + "";
+  }
+  function _toPrimitive2(t, r) {
+    if ("object" != _typeof3(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r || "default");
+      if ("object" != _typeof3(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return ("string" === r ? String : Number)(t);
+  }
   function _slicedToArray2(r, e) {
     return _arrayWithHoles2(r) || _iterableToArrayLimit2(r, e) || _unsupportedIterableToArray4(r, e) || _nonIterableRest2();
   }
@@ -22743,7 +22791,7 @@
       return this;
     }), _regeneratorDefine2(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator = function _regenerator8() {
+    }), (_regenerator = function _regenerator9() {
       return { w: i, m: f };
     })();
   }
@@ -23503,11 +23551,13 @@
               return _context6.f(18);
             case 19:
               AelluxJs2.dispatch(toCapitalized2(method), {
-                detail: {
+                detail: _objectSpread2({
                   root: rootElement,
                   extensions: selectedNames ? Array.from(selectedNames) : null,
                   elements: Array.from(affected)
-                }
+                }, detachedOnly ? {
+                  detachedOnly: true
+                } : {})
               });
               return _context6.a(2, true);
           }
@@ -23777,13 +23827,13 @@
   function _arrayWithoutHoles3(r) {
     if (Array.isArray(r)) return _arrayLikeToArray5(r);
   }
-  function _typeof3(o) {
+  function _typeof4(o) {
     "@babel/helpers - typeof";
-    return _typeof3 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof4 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof3(o);
+    }, _typeof4(o);
   }
   function _createForOfIteratorHelper5(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
@@ -23950,7 +24000,7 @@
         });
         return false;
       }
-      if (!options || _typeof3(options) !== "object" || Array.isArray(options)) return reject("options");
+      if (!options || _typeof4(options) !== "object" || Array.isArray(options)) return reject("options");
       var extensionName = options.extensionName, selector = options.selector, mount = options.mount, unmount = options.unmount, update = options.update, controllers = options.controllers;
       var priority = options.priority === void 0 ? 0 : options.priority;
       if (typeof extensionName !== "string" || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$|^[a-z][a-zA-Z0-9]*$/.test(extensionName)) return reject("extensionName");
@@ -24094,13 +24144,13 @@
   function _arrayWithHoles3(r) {
     if (Array.isArray(r)) return r;
   }
-  function _typeof4(o) {
+  function _typeof5(o) {
     "@babel/helpers - typeof";
-    return _typeof4 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof5 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof4(o);
+    }, _typeof5(o);
   }
   function createAriaHelper() {
     var elements = /* @__PURE__ */ new WeakMap();
@@ -24175,7 +24225,7 @@
       return {
         set: function set(values) {
           if (released) return false;
-          if (!values || _typeof4(values) !== "object") {
+          if (!values || _typeof5(values) !== "object") {
             throw new TypeError("Invalid ARIA values");
           }
           var updates = Object.entries(values).map(function(_ref) {
@@ -24959,8 +25009,8 @@
         style: false,
         dependencies: Object.freeze([])
       }), Object.freeze({
-        name: "point",
-        style: false,
+        name: "input",
+        style: true,
         dependencies: Object.freeze([])
       }), Object.freeze({
         name: "anchor",
@@ -24998,7 +25048,7 @@
   });
 
   // src/aellux.orchestrator.js
-  function ownKeys2(e, r) {
+  function ownKeys3(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -25008,30 +25058,30 @@
     }
     return t;
   }
-  function _objectSpread2(e) {
+  function _objectSpread3(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys2(Object(t), true).forEach(function(r2) {
-        _defineProperty2(e, r2, t[r2]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys2(Object(t)).forEach(function(r2) {
+      r % 2 ? ownKeys3(Object(t), true).forEach(function(r2) {
+        _defineProperty3(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys3(Object(t)).forEach(function(r2) {
         Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
       });
     }
     return e;
   }
-  function _defineProperty2(e, r, t) {
-    return (r = _toPropertyKey2(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  function _defineProperty3(e, r, t) {
+    return (r = _toPropertyKey3(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
   }
-  function _toPropertyKey2(t) {
-    var i = _toPrimitive2(t, "string");
-    return "symbol" == _typeof5(i) ? i : i + "";
+  function _toPropertyKey3(t) {
+    var i = _toPrimitive3(t, "string");
+    return "symbol" == _typeof6(i) ? i : i + "";
   }
-  function _toPrimitive2(t, r) {
-    if ("object" != _typeof5(t) || !t) return t;
+  function _toPrimitive3(t, r) {
+    if ("object" != _typeof6(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof5(i)) return i;
+      if ("object" != _typeof6(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -25066,13 +25116,13 @@
   function _arrayWithHoles4(r) {
     if (Array.isArray(r)) return r;
   }
-  function _typeof5(o) {
+  function _typeof6(o) {
     "@babel/helpers - typeof";
-    return _typeof5 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof6 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof5(o);
+    }, _typeof6(o);
   }
   function _createForOfIteratorHelper8(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
@@ -25175,7 +25225,7 @@
       return this;
     }), _regeneratorDefine22(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator2 = function _regenerator8() {
+    }), (_regenerator2 = function _regenerator9() {
       return { w: i, m: f };
     })();
   }
@@ -25347,6 +25397,7 @@
                     return _context4.a(2, false);
                   case 2:
                     mountManager.destroy();
+                    AelluxJs.comm.clear();
                   case 3:
                     return _context4.a(2);
                 }
@@ -25402,6 +25453,8 @@
               if (name === "present") {
                 loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
               }
+              if (name === "input") loadWhen = ["point", "inputs", "shortcut", "shortcut-hint"].map(attr).join(",");
+              if (name === "focus") loadWhen = ["focus", "focus-scope", "shortcut"].map(attr).join(",");
               if (name === "state-navigation" || name === "preference") loadWhen = null;
               api.ext(name, {
                 loadWhen: loadWhen,
@@ -25492,6 +25545,16 @@
                   });
                 case 13:
                   _context7.p = 13;
+                  AelluxJs.comm.removeOwner(extensionName);
+                  if (key !== extensionName) AelluxJs.comm.removeOwner(key);
+                  AelluxJs.comm.emit("extension.destroyed", {
+                    extension: extensionName
+                  });
+                  AelluxJs.dispatch("ExtensionDestroy", {
+                    detail: {
+                      extension: extensionName
+                    }
+                  });
                   delete AelluxJs.ext[key];
                   delete extensionPromises[key];
                   delete AelluxJs.registry.ext[key];
@@ -25626,9 +25689,9 @@
         }
         function _extensionInitialize() {
           _extensionInitialize = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee8(extensionName) {
-            var key, registration, context, _error, options;
+            var key, registration, context, _error, options, _t6;
             return _regenerator2().w(function(_context8) {
-              while (1) switch (_context8.n) {
+              while (1) switch (_context8.p = _context8.n) {
                 case 0:
                   extensionName = fromCamelCase2(extensionName);
                   key = toCamelCase2(extensionName);
@@ -25646,7 +25709,7 @@
                     _context8.n = 1;
                     break;
                   }
-                  AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_EXTENSION_COMPATIBILITY_SKIPPED, _objectSpread2(_objectSpread2({}, context), {}, {
+                  AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_EXTENSION_COMPATIBILITY_SKIPPED, _objectSpread3(_objectSpread3({}, context), {}, {
                     explicitlySkipped: true
                   }));
                   _context8.n = 2;
@@ -25657,14 +25720,24 @@
                   throw _error;
                 case 2:
                   options = AelluxJs.options.extensions[key] || {};
-                  _context8.n = 3;
+                  _context8.p = 3;
+                  _context8.n = 4;
                   return AelluxJs.ext[key].init(options);
-                case 3:
+                case 4:
+                  _context8.n = 6;
+                  break;
+                case 5:
+                  _context8.p = 5;
+                  _t6 = _context8.v;
+                  AelluxJs.comm.removeOwner(extensionName);
+                  if (key !== extensionName) AelluxJs.comm.removeOwner(key);
+                  throw _t6;
+                case 6:
                   AelluxJs.ext[key].initialized = true;
                   delete AelluxJs.registry.lazyExtSelectors[key];
                   return _context8.a(2, AelluxJs.ext[key]);
               }
-            }, _callee8);
+            }, _callee8, null, [[3, 5]]);
           }));
           return _extensionInitialize.apply(this, arguments);
         }
@@ -25673,7 +25746,7 @@
         }
         function _appendExtensionAssets() {
           _appendExtensionAssets = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee9(extensionName) {
-            var bundledLoader, key, data, useLegacyBuild, artifact, url, scriptURL, minifiedScript, scriptVariant, loadPromises, _iterator4, _step4, dependency, defaultStyle, fullStyle, _args9 = arguments, _t6;
+            var bundledLoader, key, data, useLegacyBuild, artifact, url, scriptURL, minifiedScript, scriptVariant, loadPromises, _iterator4, _step4, dependency, defaultStyle, fullStyle, _args9 = arguments, _t7;
             return _regenerator2().w(function(_context9) {
               while (1) switch (_context9.p = _context9.n) {
                 case 0:
@@ -25715,8 +25788,8 @@
                   break;
                 case 6:
                   _context9.p = 6;
-                  _t6 = _context9.v;
-                  _iterator4.e(_t6);
+                  _t7 = _context9.v;
+                  _iterator4.e(_t7);
                 case 7:
                   _context9.p = 7;
                   _iterator4.f();
@@ -25807,7 +25880,7 @@
         }
         function _resolveImplicitRegistration() {
           _resolveImplicitRegistration = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee0(extensionName, registration) {
-            var requestedVersion, officialURL, requestedURL, entry, sourceURL, embeddedOfficial, embeddedEntry, official, fallback, _args0 = arguments, _t7, _t8, _t9, _t0;
+            var requestedVersion, officialURL, requestedURL, entry, sourceURL, embeddedOfficial, embeddedEntry, official, fallback, _args0 = arguments, _t8, _t9, _t0, _t1;
             return _regenerator2().w(function(_context0) {
               while (1) switch (_context0.p = _context0.n) {
                 case 0:
@@ -25823,23 +25896,23 @@
                     _context0.n = 2;
                     break;
                   }
-                  _t7 = embeddedOfficial;
+                  _t8 = embeddedOfficial;
                   _context0.n = 4;
                   break;
                 case 2:
                   _context0.n = 3;
                   return loadExtensionIndex(requestedVersion ? "official@".concat(requestedVersion) : "official", requestedURL);
                 case 3:
-                  _t7 = _context0.v;
+                  _t8 = _context0.v;
                 case 4:
-                  official = _t7;
+                  official = _t8;
                   entry = official.extensions[extensionName] || null;
                   _context0.n = 6;
                   break;
                 case 5:
                   _context0.p = 5;
-                  _t8 = _context0.v;
-                  reportIndexFailure(_t8, "official", requestedURL);
+                  _t9 = _context0.v;
+                  reportIndexFailure(_t9, "official", requestedURL);
                 case 6:
                   if (!(!entry && AelluxJs.extIndex.fallbackURL)) {
                     _context0.n = 11;
@@ -25847,24 +25920,24 @@
                   }
                   sourceURL = AelluxJs.extIndex.fallbackURL;
                   _context0.p = 7;
-                  _t9 = AelluxJs.extIndex.fallback;
-                  if (_t9) {
+                  _t0 = AelluxJs.extIndex.fallback;
+                  if (_t0) {
                     _context0.n = 9;
                     break;
                   }
                   _context0.n = 8;
                   return loadExtensionIndex("fallback", sourceURL);
                 case 8:
-                  _t9 = _context0.v;
+                  _t0 = _context0.v;
                 case 9:
-                  fallback = _t9;
+                  fallback = _t0;
                   entry = fallback.extensions[extensionName] || null;
                   _context0.n = 11;
                   break;
                 case 10:
                   _context0.p = 10;
-                  _t0 = _context0.v;
-                  reportIndexFailure(_t0, "custom", sourceURL);
+                  _t1 = _context0.v;
+                  reportIndexFailure(_t1, "custom", sourceURL);
                 case 11:
                   if (entry) {
                     _context0.n = 12;
@@ -25913,7 +25986,7 @@
           }
         }
         function validateExtensionIndex(index, kind, url) {
-          if (!index || index.schemaVersion !== 1 || typeof index.coreVersion !== "string" || !index.extensions || _typeof5(index.extensions) !== "object" || Array.isArray(index.extensions)) {
+          if (!index || index.schemaVersion !== 1 || typeof index.coreVersion !== "string" || !index.extensions || _typeof6(index.extensions) !== "object" || Array.isArray(index.extensions)) {
             throw manifestError(kind, url, "schemaVersion 1, coreVersion, and extensions object");
           }
           if (index.coreVersion !== AelluxJs.version) {
@@ -25921,7 +25994,7 @@
           }
           for (var _i = 0, _Object$entries = Object.entries(index.extensions); _i < _Object$entries.length; _i++) {
             var _Object$entries$_i = _slicedToArray4(_Object$entries[_i], 2), name = _Object$entries$_i[0], entry = _Object$entries$_i[1];
-            if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(name) || !entry || typeof entry.coreCompatibility !== "string" || !entry.builds || _typeof5(entry.builds) !== "object") {
+            if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(name) || !entry || typeof entry.coreCompatibility !== "string" || !entry.builds || _typeof6(entry.builds) !== "object") {
               throw manifestError(kind, url, "valid metadata for ".concat(name));
             }
             for (var _i2 = 0, _arr = ["modern", "legacy"]; _i2 < _arr.length; _i2++) {
@@ -26025,7 +26098,7 @@
           if (selected) registration.url = selected.url;
           registration.coreCompatibility = entry.coreCompatibility;
           registration.dependencies = (entry.dependencies || []).map(function(dependency) {
-            return typeof dependency === "string" ? dependency : _objectSpread2(_objectSpread2({}, dependency), {}, {
+            return typeof dependency === "string" ? dependency : _objectSpread3(_objectSpread3({}, dependency), {}, {
               url: new URL(dependency.url, base).href
             });
           });
@@ -26585,7 +26658,7 @@
       return this;
     }), _regeneratorDefine23(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator3 = function _regenerator8() {
+    }), (_regenerator3 = function _regenerator9() {
       return { w: i, m: f };
     })();
   }
@@ -26605,13 +26678,13 @@
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
     }, _regeneratorDefine23(e, r, n, t);
   }
-  function _typeof6(o) {
+  function _typeof7(o) {
     "@babel/helpers - typeof";
-    return _typeof6 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof7 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof6(o);
+    }, _typeof7(o);
   }
   function asyncGeneratorStep3(n, t, e, r, o, a, c) {
     try {
@@ -26793,11 +26866,11 @@
           AelluxJs2.dispatch(name, options);
         }
         function copyHistoryState(state) {
-          if (!state || _typeof6(state) !== "object") return state;
+          if (!state || _typeof7(state) !== "object") return state;
           if (typeof root2.structuredClone === "function") return root2.structuredClone(state);
           var copy = Array.isArray(state) ? state.slice() : Object.assign({}, state);
-          if (state.snapshot && _typeof6(state.snapshot) === "object") copy.snapshot = Object.assign({}, state.snapshot);
-          if (state.ajaxReplace && _typeof6(state.ajaxReplace) === "object") {
+          if (state.snapshot && _typeof7(state.snapshot) === "object") copy.snapshot = Object.assign({}, state.snapshot);
+          if (state.ajaxReplace && _typeof7(state.ajaxReplace) === "object") {
             copy.ajaxReplace = Object.assign({}, state.ajaxReplace);
             if (Array.isArray(state.ajaxReplace.selectors)) copy.ajaxReplace.selectors = state.ajaxReplace.selectors.slice();
           }
@@ -26847,13 +26920,13 @@
         }
         function mergeHistoryState(state) {
           var currentState = history.state;
-          if (!currentState || _typeof6(currentState) !== "object" || Array.isArray(currentState)) return state;
+          if (!currentState || _typeof7(currentState) !== "object" || Array.isArray(currentState)) return state;
           return Object.assign({}, currentState, state);
         }
         function OnPushState(event) {
           try {
             var detail = event && event.detail;
-            if (!detail || _typeof6(detail) !== "object" || typeof detail.key !== "string" || !detail.key.trim() || typeof detail.value !== "string" || !detail.value.trim() || detail.title !== void 0 && typeof detail.title !== "string") {
+            if (!detail || _typeof7(detail) !== "object" || typeof detail.key !== "string" || !detail.key.trim() || typeof detail.value !== "string" || !detail.value.trim() || detail.title !== void 0 && typeof detail.title !== "string") {
               AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
                 extension: extensionName,
                 event: "PushState",
@@ -26879,7 +26952,7 @@
         function OnPushAjaxReplace(event) {
           try {
             var detail = event && event.detail;
-            if (!detail || _typeof6(detail) !== "object" || typeof detail.url !== "string" || !detail.url.trim() || !Object.prototype.hasOwnProperty.call(detail, "selectors") || detail.selectors == null) {
+            if (!detail || _typeof7(detail) !== "object" || typeof detail.url !== "string" || !detail.url.trim() || !Object.prototype.hasOwnProperty.call(detail, "selectors") || detail.selectors == null) {
               AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
                 extension: extensionName,
                 event: PUSH_AJAX_REPLACE,
@@ -26899,7 +26972,7 @@
         function OnUpdateBaseTitle(event) {
           try {
             var detail = event && event.detail;
-            if (!detail || _typeof6(detail) !== "object" || !Object.prototype.hasOwnProperty.call(detail, "title") || typeof detail.title !== "string") {
+            if (!detail || _typeof7(detail) !== "object" || !Object.prototype.hasOwnProperty.call(detail, "title") || typeof detail.title !== "string") {
               AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
                 extension: extensionName,
                 event: UPDATE_BASE_TITLE,
@@ -26980,7 +27053,7 @@
       return this;
     }), _regeneratorDefine24(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator4 = function _regenerator8() {
+    }), (_regenerator4 = function _regenerator9() {
       return { w: i, m: f };
     })();
   }
@@ -27100,7 +27173,16 @@
         var transformTargetAttribute = AelluxJs2.attr("transformTarget");
         var presentTargetAttribute = AelluxJs2.attr("presentTarget");
         var presentSelector = "[".concat(AelluxJs2.attr("present"), "]");
+        var mountedFeedback = /* @__PURE__ */ new Set();
         function init() {
+          AelluxJs2.comm.handle("feedback.prepare", function(_ref) {
+            var boundary = _ref.boundary, feedback2 = _ref.feedback, element = _ref.element;
+            if (!mountedFeedback.has(boundary) || !boundary.isConnected) return false;
+            applyFeedback(boundary, feedback2, element);
+            return true;
+          }, {
+            owner: extensionName
+          });
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
             selector: "[".concat(feedbackAttribute, "]"),
@@ -27119,6 +27201,8 @@
             return _regenerator4().w(function(_context) {
               while (1) switch (_context.n) {
                 case 0:
+                  AelluxJs2.comm.removeOwner(extensionName);
+                  mountedFeedback.clear();
                   AelluxJs2.mountManager.remove({
                     extensionName: extensionName
                   });
@@ -27143,9 +27227,11 @@
           return _destroy.apply(this, arguments);
         }
         function mountFeedback(element) {
+          mountedFeedback.add(element);
           AelluxJs2.onEvent(element, "Feedback", onFeedback);
         }
         function unmountFeedback(element) {
+          mountedFeedback.delete(element);
           AelluxJs2.offEvent(element, "Feedback", onFeedback);
         }
         function onFeedback(event) {
@@ -27163,29 +27249,40 @@
           event.stopPropagation();
           if (!event.detail) return;
           var presentTarget = element.getAttribute(presentTargetAttribute);
-          var present2 = AelluxJs2.ext.present;
-          var presentElement = presentTarget !== null && presentTarget.trim() && present2 !== null && present2 !== void 0 && present2.initialized ? AelluxJs2.elementOrId(presentTarget) : null;
+          var presentElement = presentTarget !== null && presentTarget.trim() && (AelluxJs2.comm.has("present.pop") || AelluxJs2.comm.has("present.pop-next")) ? AelluxJs2.elementOrId(presentTarget) : null;
           if (presentElement !== null && presentElement !== void 0 && presentElement.hasAttribute(AelluxJs2.attr("present-group"))) {
-            present2.popNext(presentElement, function(member) {
-              return applyFeedback(element, event.detail, member);
-            }).catch(function(cause) {
-              return AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_TRANSITION, {
-                cause: cause,
-                extension: extensionName,
-                element: presentElement
-              });
+            var result = AelluxJs2.comm.request("present.pop-next", {
+              group: presentElement,
+              preparation: {
+                contract: "feedback.prepare",
+                payload: {
+                  boundary: element,
+                  feedback: event.detail
+                }
+              }
             });
-            return;
+            if (result.handled) {
+              Promise.resolve(result.value).catch(function(cause) {
+                return AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_TRANSITION, {
+                  cause: cause,
+                  extension: extensionName,
+                  element: presentElement
+                });
+              });
+              return;
+            }
           }
           applyFeedback(element, event.detail, element, function(messageElement, transformElement) {
-            if (presentTarget !== null && present2 !== null && present2 !== void 0 && present2.initialized) {
+            if (presentTarget !== null) {
               var target = presentElement || !presentTarget.trim() && ((messageElement === null || messageElement === void 0 ? void 0 : messageElement.closest(presentSelector)) || (transformElement === null || transformElement === void 0 ? void 0 : transformElement.closest(presentSelector)));
-              if (target) present2.pop(target);
+              if (target) AelluxJs2.comm.request("present.pop", {
+                element: target
+              });
             }
           });
         }
-        function applyFeedback(element, _ref) {
-          var message = _ref.message, type = _ref.type, motion = _ref.motion;
+        function applyFeedback(element, _ref2) {
+          var message = _ref2.message, type = _ref2.type, motion = _ref2.motion;
           var defaultElement = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : element;
           var presentRequest = arguments.length > 3 ? arguments[3] : void 0;
           var messageTarget = element.getAttribute(messageTargetAttribute);
@@ -27333,9 +27430,9 @@
             motion: motion
           });
         }
-        function send(input, payload) {
-          var _ref2 = payload || input, type = _ref2.type, message = _ref2.message, value = _ref2.value, target = _ref2.target, motion = _ref2.motion;
-          if (input && input.nodeType === 1) target = input;
+        function send(input2, payload) {
+          var _ref3 = payload || input2, type = _ref3.type, message = _ref3.message, value = _ref3.value, target = _ref3.target, motion = _ref3.motion;
+          if (input2 && input2.nodeType === 1) target = input2;
           if (typeof message !== "string") {
             reportInvalidArgument("message", message);
             return;
@@ -27416,38 +27513,12 @@
     }
   });
 
-  // src/aellux.ext.focus.js
-  var aellux_ext_focus_exports = {};
-  function _createForOfIteratorHelper11(r, e) {
-    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray12(r)) || e && r && "number" == typeof r.length) {
-        t && (r = t);
-        var _n = 0, F = function F2() {
-        };
-        return { s: F, n: function n() {
-          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
-        }, e: function e2(r2) {
-          throw r2;
-        }, f: F };
-      }
-      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-    }
-    var o, a = true, u = false;
-    return { s: function s() {
-      t = t.call(r);
-    }, n: function n() {
-      var r2 = t.next();
-      return a = r2.done, r2;
-    }, e: function e2(r2) {
-      u = true, o = r2;
-    }, f: function f() {
-      try {
-        a || null == t.return || t.return();
-      } finally {
-        if (u) throw o;
-      }
-    } };
+  // src/internal/input-shortcuts.js
+  function _toConsumableArray6(r) {
+    return _arrayWithoutHoles6(r) || _iterableToArray6(r) || _unsupportedIterableToArray12(r) || _nonIterableSpread6();
+  }
+  function _nonIterableSpread6() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
   function _unsupportedIterableToArray12(r, a) {
     if (r) {
@@ -27456,266 +27527,137 @@
       return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray12(r, a) : void 0;
     }
   }
+  function _iterableToArray6(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles6(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray12(r);
+  }
   function _arrayLikeToArray12(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  var init_aellux_ext_focus = __esm({
-    "src/aellux.ext.focus.js": function() {
+  function parseShortcuts(value) {
+    return String(value || "").split(";").map(function(part) {
+      var match = part.trim().match(/^([a-z][a-z0-9-]*):([^:;\s]+)$/i);
+      if (!match) return null;
+      var tokens = match[2].split("+");
+      var code = tokens.pop();
+      var modifiers = tokens.map(function(token) {
+        return token.toLowerCase();
+      }).sort();
+      if (!code || modifiers.some(function(token) {
+        return !["alt", "ctrl", "meta", "shift"].includes(token);
+      }) || new Set(modifiers).size !== modifiers.length) return null;
+      return Object.freeze({
+        source: match[1].toLowerCase(),
+        code: code,
+        modifiers: Object.freeze(modifiers)
+      });
+    }).filter(Boolean);
+  }
+  function matchesShortcut(shortcut, command) {
+    var modifiers = command.modifiers || {};
+    return shortcut.source === command.source && shortcut.code === command.code && ["alt", "ctrl", "meta", "shift"].every(function(name) {
+      return !!modifiers[name] === shortcut.modifiers.includes(name);
+    });
+  }
+  function shortcutLabel(shortcut) {
+    var family = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : "generic";
+    if (!shortcut) return "";
+    var faces = {
+      xbox: {
+        south: "A",
+        east: "B",
+        west: "X",
+        north: "Y"
+      },
+      playstation: {
+        south: "\xD7",
+        east: "\u25CB",
+        west: "\u25A1",
+        north: "\u25B3"
+      },
+      nintendo: {
+        south: "B",
+        east: "A",
+        west: "Y",
+        north: "X"
+      }
+    };
+    var label = shortcut.source === "keyboard" ? shortcut.code.replace(/^Key(?=[A-Z]$)|^Digit(?=\d$)/g, "") : faces[family] && faces[family][shortcut.code] || shortcut.code;
+    return [].concat(_toConsumableArray6(shortcut.modifiers.map(function(name) {
+      return name[0].toUpperCase() + name.slice(1);
+    })), [label]).join("+");
+  }
+  var init_input_shortcuts = __esm({
+    "src/internal/input-shortcuts.js": function() {
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-      (function(root2) {
-        "use strict";
-        var AelluxJs2 = root2.AelluxJs;
-        var extensionName = "focus";
-        if (!AelluxJs2) {
-          throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
-        }
-        AelluxJs2.extAttach(extensionName, {
-          init: init,
-          destroy: destroy,
-          restoreLastFocus: restoreLastFocus
-        });
-        var attribute = AelluxJs2.attr(extensionName);
-        var snapshotKey = "ae-focus";
-        var entries = [];
-        var hintMemories = /* @__PURE__ */ new WeakMap();
-        var nextElements = /* @__PURE__ */ new WeakSet();
-        var textEntrySelector = "input:not([type]), input[type=text], input[type=search], input[type=email], input[type=url], input[type=tel], input[type=password], input[type=number], textarea, [contenteditable]:not([contenteditable=false])";
-        var focusableSelector = "a[href], area[href], button, input, select, textarea, [tabindex], [contenteditable]:not([contenteditable=false])";
-        var current = null, restoring = false;
-        function init() {
-          AelluxJs2.mountManager.add({
-            extensionName: extensionName,
-            selector: "[".concat(attribute, "]"),
-            priority: 0,
-            mount: mountFocusElement,
-            unmount: unmountFocusElement
-          });
-          AelluxJs2.on("$focusin", onFocusIn, true);
-          AelluxJs2.on("$focus", onFocusChange, true);
-          AelluxJs2.on("$blur", onBlur, true);
-          AelluxJs2.onEvent(root2, "$focus", onWindowFocus);
-          AelluxJs2.onEvent(root2, "$blur", onWindowBlur);
-          AelluxJs2.on("SnapshotRestore", onSnapshotRestore);
-          AelluxJs2.on("DismissFocusLost", onDismissFocusLost);
-          AelluxJs2.on("UnpopFocusLost", onDismissFocusLost);
-          remember(document.activeElement, false);
-        }
-        function destroy() {
-          AelluxJs2.off("$focusin", onFocusIn, true);
-          AelluxJs2.off("$focus", onFocusChange, true);
-          AelluxJs2.off("$blur", onBlur, true);
-          AelluxJs2.offEvent(root2, "$focus", onWindowFocus);
-          AelluxJs2.offEvent(root2, "$blur", onWindowBlur);
-          AelluxJs2.off("SnapshotRestore", onSnapshotRestore);
-          AelluxJs2.off("DismissFocusLost", onDismissFocusLost);
-          AelluxJs2.off("UnpopFocusLost", onDismissFocusLost);
-          AelluxJs2.mountManager.remove({
-            extensionName: extensionName
-          });
-          entries.length = 0;
-          current = null;
-        }
-        function mountFocusElement(element) {
-          var type = element.getAttribute(attribute);
-          switch (type) {
-            case "next":
-              AelluxJs2.onEvent(element, "$keydown", onNextKeyDown);
-              nextElements.add(element);
-              if (!element.hasAttribute("enterkeyhint") && element.matches(textEntrySelector)) {
-                hintMemories.set(element, AelluxJs2.persist.element.save(element, ["enterkeyhint"], []));
-                element.setAttribute("enterkeyhint", "next");
-              }
-              break;
-          }
-        }
-        function unmountFocusElement(element) {
-          var _hintMemories$get;
-          if (nextElements.delete(element)) AelluxJs2.offEvent(element, "$keydown", onNextKeyDown);
-          (_hintMemories$get = hintMemories.get(element)) === null || _hintMemories$get === void 0 || _hintMemories$get.restore();
-          hintMemories.delete(element);
-        }
-        function onNextKeyDown(event) {
-          if (event.key !== "Enter" || event.isComposing || event.repeat || event.defaultPrevented || event.target !== event.currentTarget && event.target.closest(focusableSelector) !== event.currentTarget) return;
-          var elements = document.querySelectorAll(focusableSelector);
-          var foundCurrent = false;
-          var _iterator = _createForOfIteratorHelper11(elements), _step;
-          try {
-            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var element = _step.value;
-              if (element === event.currentTarget) {
-                foundCurrent = true;
-              } else if (foundCurrent && element.tabIndex >= 0 && isValid(element)) {
-                event.preventDefault();
-                element.focus();
-                return;
-              }
-            }
-          } catch (err) {
-            _iterator.e(err);
-          } finally {
-            _iterator.f();
-          }
-        }
-        function isValid(element) {
-          if (!element || element === document.body || element === document.documentElement || !element.isConnected || typeof element.focus !== "function" || element.matches(":disabled, [hidden], [inert]")) return false;
-          for (var node = element; node && node.nodeType === 1; node = node.parentElement) {
-            if (node.hidden || node.hasAttribute("inert")) return false;
-            var style = root2.getComputedStyle(node);
-            if (style.display === "none" || style.visibility === "hidden" || style.visibility === "collapse") return false;
-          }
-          return element.getClientRects().length > 0;
-        }
-        function remember(element, push) {
-          if (!isValid(element) || current && current.element === element) return;
-          var entry = {
-            element: element
-          };
-          entries.push(entry);
-          if (entries.length > 100) entries.shift();
-          current = entry;
-          if (!push || !stateNavigationEligible(element) || !element.id || !element.id.trim()) return;
-          AelluxJs2.dispatch("PushState", {
-            detail: {
-              key: snapshotKey,
-              value: element.id
-            }
-          });
-        }
-        function stateNavigationEligible(element) {
-          if (element.hasAttribute(attribute)) return true;
-          var name = element.tagName && element.tagName.toLowerCase();
-          if (name === "textarea" || name === "select") return true;
-          if (name === "input") return String(element.type || "text").toLowerCase() !== "hidden";
-          return element.isContentEditable || element.hasAttribute("contenteditable") && element.getAttribute("contenteditable") !== "false";
-        }
-        function onFocusIn(event) {
-          if (!restoring) remember(event.target, true);
-        }
-        function onFocusChange(event) {
-          if (!restoring) remember(event.target, true);
-        }
-        function onBlur(event) {
-          if (!restoring) remember(event.target, false);
-        }
-        function onWindowFocus() {
-          if (!restoring) remember(document.activeElement, true);
-        }
-        function onWindowBlur() {
-          if (!restoring) remember(document.activeElement, false);
-        }
-        function restore(entry) {
-          if (!entry || !isValid(entry.element)) return false;
-          restoring = true;
-          try {
-            entry.element.focus();
-          } finally {
-            restoring = false;
-          }
-          if (document.activeElement !== entry.element) return false;
-          current = entry;
-          return true;
-        }
-        function restoreLastFocus() {
-          var index = entries.indexOf(current);
-          var start = (index < 0 ? entries.length : index) - 1;
-          for (var i = start; i >= 0; i--) {
-            if (restore(entries[i])) return true;
-          }
-          return false;
-        }
-        function onDismissFocusLost() {
-          restoreLastFocus();
-        }
-        function onSnapshotRestore(event) {
-          var snapshot = event.detail && event.detail.snapshot;
-          if (!snapshot || !Object.prototype.hasOwnProperty.call(snapshot, snapshotKey)) return;
-          var target = document.getElementById(snapshot[snapshotKey]);
-          if (target && stateNavigationEligible(target)) {
-            for (var i = entries.length - 1; i >= 0; i--) {
-              if (entries[i].element === target) {
-                if (!restore(entries[i])) restoreLastFocus();
-                return;
-              }
-            }
-            if (restore({
-              element: target
-            })) return;
-          }
-          restoreLastFocus();
-        }
-      })(typeof globalThis !== "undefined" ? globalThis : window);
     }
   });
 
-  // src/aellux.ext.point.js
-  var aellux_ext_point_exports = {};
-  function _typeof7(o) {
+  // src/aellux.ext.focus.js
+  var aellux_ext_focus_exports = {};
+  function _typeof8(o) {
     "@babel/helpers - typeof";
-    return _typeof7 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof8 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof7(o);
+    }, _typeof8(o);
   }
-  function _classCallCheck(a, n) {
-    if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function");
+  function _toConsumableArray7(r) {
+    return _arrayWithoutHoles7(r) || _iterableToArray7(r) || _unsupportedIterableToArray13(r) || _nonIterableSpread7();
   }
-  function _defineProperties(e, r) {
-    for (var t = 0; t < r.length; t++) {
-      var o = r[t];
-      o.enumerable = o.enumerable || false, o.configurable = true, "value" in o && (o.writable = true), Object.defineProperty(e, _toPropertyKey3(o.key), o);
+  function _nonIterableSpread7() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArray7(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles7(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray13(r);
+  }
+  function ownKeys4(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function(r2) {
+        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
+      })), t.push.apply(t, o);
     }
+    return t;
   }
-  function _createClass(e, r, t) {
-    return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: false }), e;
+  function _objectSpread4(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys4(Object(t), true).forEach(function(r2) {
+        _defineProperty4(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys4(Object(t)).forEach(function(r2) {
+        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
+      });
+    }
+    return e;
   }
-  function _toPropertyKey3(t) {
-    var i = _toPrimitive3(t, "string");
-    return "symbol" == _typeof7(i) ? i : i + "";
+  function _defineProperty4(e, r, t) {
+    return (r = _toPropertyKey4(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
   }
-  function _toPrimitive3(t, r) {
-    if ("object" != _typeof7(t) || !t) return t;
+  function _toPropertyKey4(t) {
+    var i = _toPrimitive4(t, "string");
+    return "symbol" == _typeof8(i) ? i : i + "";
+  }
+  function _toPrimitive4(t, r) {
+    if ("object" != _typeof8(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof7(i)) return i;
+      if ("object" != _typeof8(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
   }
-  function _slicedToArray6(r, e) {
-    return _arrayWithHoles6(r) || _iterableToArrayLimit6(r, e) || _unsupportedIterableToArray13(r, e) || _nonIterableRest6();
-  }
-  function _nonIterableRest6() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArrayLimit6(r, l) {
-    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (null != t) {
-      var e, n, i, u, a = [], f = true, o = false;
-      try {
-        if (i = (t = t.call(r)).next, 0 === l) {
-          if (Object(t) !== t) return;
-          f = false;
-        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
-      } catch (r2) {
-        o = true, n = r2;
-      } finally {
-        try {
-          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
-        } finally {
-          if (o) throw n;
-        }
-      }
-      return a;
-    }
-  }
-  function _arrayWithHoles6(r) {
-    if (Array.isArray(r)) return r;
-  }
-  function _createForOfIteratorHelper12(r, e) {
+  function _createForOfIteratorHelper11(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
       if (Array.isArray(r) || (t = _unsupportedIterableToArray13(r)) || e && r && "number" == typeof r.length) {
@@ -27758,417 +27700,574 @@
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
   }
-  var init_aellux_ext_point = __esm({
-    "src/aellux.ext.point.js": function() {
+  var init_aellux_ext_focus = __esm({
+    "src/aellux.ext.focus.js": function() {
+      init_input_shortcuts();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
         var AelluxJs2 = root2.AelluxJs;
-        var extensionName = "point";
+        var extensionName = "focus";
         if (!AelluxJs2) {
           throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
         }
-        var POINTER = "pointer";
-        var trackedPointers = /* @__PURE__ */ new Map();
-        var pointableElements = /* @__PURE__ */ new Set();
-        var pointableAttribute = AelluxJs2.attr("point");
-        var pointableSelector = "[".concat(pointableAttribute, "]");
-        var tapSelector = 'button, a, [role="button"]';
-        var tapDuration = 300;
-        var pointerEvents = [["down", onPointerDown], ["move", onPointerMove], ["up", onPointerUp], ["cancel", onPointerCancel], ["over", onPointerOver], ["out", onPointerOut]];
         AelluxJs2.extAttach(extensionName, {
           init: init,
           destroy: destroy,
-          pointers: pointers
+          restoreLastFocus: restoreLastFocus,
+          createContext: createContext,
+          destroyContext: destroyContext,
+          getContext: getContext,
+          setFocus: setFocus,
+          updateContext: updateContext,
+          eligibleShortcuts: eligibleShortcuts,
+          registerShortcutAction: registerShortcutAction
         });
+        var attribute = AelluxJs2.attr(extensionName);
+        var snapshotKey = "ae-focus";
+        var entries = [];
+        var hintMemories = /* @__PURE__ */ new WeakMap();
+        var nextElements = /* @__PURE__ */ new WeakSet();
+        var textEntrySelector = "input:not([type]), input[type=text], input[type=search], input[type=email], input[type=url], input[type=tel], input[type=password], input[type=number], textarea, [contenteditable]:not([contenteditable=false])";
+        var focusableSelector = "a[href], area[href], button, input, select, textarea, [tabindex], [contenteditable]:not([contenteditable=false])";
+        var current = null, restoring = false;
+        var contexts = /* @__PURE__ */ new Map();
+        var shortcutActions = /* @__PURE__ */ new Map();
+        var contextObserver = null;
+        var scopeSelector = "[".concat(AelluxJs2.attr("focus-scope"), '], dialog, [aria-modal="true"]');
+        var focusClasses = [null, AelluxJs2.className("focus-player1"), AelluxJs2.className("focus-player2"), AelluxJs2.className("focus-player3")];
+        var focusClass = function focusClass2(id) {
+          return focusClasses[id] || AelluxJs2.className("focus-player" + id);
+        };
         function init() {
+          createContext(1);
+          AelluxJs2.comm.handle("focus.command", consumeCommand, {
+            owner: extensionName
+          });
+          AelluxJs2.comm.handle("focus.context", function(_ref) {
+            var focusId = _ref.focusId;
+            return getContext(focusId);
+          }, {
+            owner: extensionName
+          });
+          contextObserver = new root2.MutationObserver(function(records) {
+            if (records.some(function(record) {
+              return Array.from(contexts.values()).some(function(context) {
+                return !context.scope.isConnected || context.element && (record.type === "attributes" && record.target.contains(context.element) || record.type === "childList" && Array.from(record.removedNodes).some(function(node) {
+                  return node.contains(context.element);
+                }));
+              });
+            })) pruneContexts();
+          });
+          contextObserver.observe(document.documentElement, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ["hidden", "inert", "disabled", "aria-disabled", "class", "style"]
+          });
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
-            selector: pointableSelector,
+            selector: "[".concat(attribute, "]"),
             priority: 0,
-            mount: mountPointable,
-            unmount: unmountPointable,
-            controllers: ["pointers"]
+            mount: mountFocusElement,
+            unmount: unmountFocusElement
           });
-          var _iterator = _createForOfIteratorHelper12(pointerEvents), _step;
+          AelluxJs2.on("$focusin", onFocusIn, true);
+          AelluxJs2.on("$focus", onFocusChange, true);
+          AelluxJs2.on("$blur", onBlur, true);
+          AelluxJs2.onEvent(root2, "$focus", onWindowFocus);
+          AelluxJs2.onEvent(root2, "$blur", onWindowBlur);
+          AelluxJs2.on("SnapshotRestore", onSnapshotRestore);
+          AelluxJs2.on("DismissFocusLost", onDismissFocusLost);
+          AelluxJs2.on("UnpopFocusLost", onDismissFocusLost);
+          AelluxJs2.on("Unmount", onContextUnmount);
+          AelluxJs2.on("Mount", onContextMount);
+          remember(document.activeElement, false);
+          syncNative(document.activeElement);
+        }
+        function destroy() {
+          var _contextObserver;
+          AelluxJs2.comm.removeOwner(extensionName);
+          (_contextObserver = contextObserver) === null || _contextObserver === void 0 || _contextObserver.disconnect();
+          contextObserver = null;
+          var _iterator = _createForOfIteratorHelper11(contexts.values()), _step;
           try {
             for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-              var _step$value = _slicedToArray6(_step.value, 2), suffix3 = _step$value[0], handler = _step$value[1];
-              AelluxJs2.on("$".concat(POINTER).concat(suffix3), handler, true);
+              var context = _step.value;
+              clearContext(context);
             }
           } catch (err) {
             _iterator.e(err);
           } finally {
             _iterator.f();
           }
-        }
-        function destroy() {
+          contexts.clear();
+          shortcutActions.clear();
+          AelluxJs2.off("$focusin", onFocusIn, true);
+          AelluxJs2.off("$focus", onFocusChange, true);
+          AelluxJs2.off("$blur", onBlur, true);
+          AelluxJs2.offEvent(root2, "$focus", onWindowFocus);
+          AelluxJs2.offEvent(root2, "$blur", onWindowBlur);
+          AelluxJs2.off("SnapshotRestore", onSnapshotRestore);
+          AelluxJs2.off("DismissFocusLost", onDismissFocusLost);
+          AelluxJs2.off("UnpopFocusLost", onDismissFocusLost);
+          AelluxJs2.off("Unmount", onContextUnmount);
+          AelluxJs2.off("Mount", onContextMount);
           AelluxJs2.mountManager.remove({
             extensionName: extensionName
           });
-          var _iterator2 = _createForOfIteratorHelper12(pointerEvents), _step2;
+          entries.length = 0;
+          current = null;
+        }
+        function mountFocusElement(element) {
+          var type = element.getAttribute(attribute);
+          switch (type) {
+            case "next":
+              AelluxJs2.onEvent(element, "$keydown", onNextKeyDown);
+              nextElements.add(element);
+              if (!element.hasAttribute("enterkeyhint") && element.matches(textEntrySelector)) {
+                hintMemories.set(element, AelluxJs2.persist.element.save(element, ["enterkeyhint"], []));
+                element.setAttribute("enterkeyhint", "next");
+              }
+              break;
+          }
+        }
+        function unmountFocusElement(element) {
+          var _hintMemories$get;
+          if (nextElements.delete(element)) AelluxJs2.offEvent(element, "$keydown", onNextKeyDown);
+          (_hintMemories$get = hintMemories.get(element)) === null || _hintMemories$get === void 0 || _hintMemories$get.restore();
+          hintMemories.delete(element);
+        }
+        function onNextKeyDown(event) {
+          if (event.key !== "Enter" || event.isComposing || event.repeat || event.defaultPrevented || event.target !== event.currentTarget && event.target.closest(focusableSelector) !== event.currentTarget) return;
+          var elements = document.querySelectorAll(focusableSelector);
+          var foundCurrent = false;
+          var _iterator2 = _createForOfIteratorHelper11(elements), _step2;
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
-              var _step2$value = _slicedToArray6(_step2.value, 2), suffix3 = _step2$value[0], handler = _step2$value[1];
-              AelluxJs2.off("$".concat(POINTER).concat(suffix3), handler, true);
+              var element = _step2.value;
+              if (element === event.currentTarget) {
+                foundCurrent = true;
+              } else if (foundCurrent && element.tabIndex >= 0 && isValid(element)) {
+                event.preventDefault();
+                element.focus();
+                return;
+              }
             }
           } catch (err) {
             _iterator2.e(err);
           } finally {
             _iterator2.f();
           }
-          trackedPointers.clear();
-          pointableElements.clear();
         }
-        function mountPointable(element) {
-          pointableElements.add(element);
+        function isValid(element) {
+          if (!element || element === document.body || element === document.documentElement || !element.isConnected || typeof element.focus !== "function" || element.matches(":disabled, [disabled], [hidden], [inert]") || element.closest('[aria-disabled="true"]')) return false;
+          for (var node = element; node && node.nodeType === 1; node = node.parentElement) {
+            if (node.hidden || node.hasAttribute("inert")) return false;
+            var style = root2.getComputedStyle(node);
+            if (style.display === "none" || style.visibility === "hidden" || style.visibility === "collapse") return false;
+          }
+          return element.getClientRects().length > 0;
         }
-        function unmountPointable(element) {
-          pointableElements.delete(element);
-          var _iterator3 = _createForOfIteratorHelper12(trackedPointers.values()), _step3;
+        function remember(element, push) {
+          if (!isValid(element) || current && current.element === element) return;
+          var entry = {
+            element: element
+          };
+          entries.push(entry);
+          if (entries.length > 100) entries.shift();
+          current = entry;
+          if (!push || !stateNavigationEligible(element) || !element.id || !element.id.trim()) return;
+          AelluxJs2.dispatch("PushState", {
+            detail: {
+              key: snapshotKey,
+              value: element.id
+            }
+          });
+        }
+        function stateNavigationEligible(element) {
+          if (element.hasAttribute(attribute)) return true;
+          var name = element.tagName && element.tagName.toLowerCase();
+          if (name === "textarea" || name === "select") return true;
+          if (name === "input") return String(element.type || "text").toLowerCase() !== "hidden";
+          return element.isContentEditable || element.hasAttribute("contenteditable") && element.getAttribute("contenteditable") !== "false";
+        }
+        function onFocusIn(event) {
+          syncNative(event.target);
+          if (!restoring) remember(event.target, true);
+        }
+        function onFocusChange(event) {
+          syncNative(event.target);
+          if (!restoring) remember(event.target, true);
+        }
+        function onBlur(event) {
+          if (!restoring) remember(event.target, false);
+          Promise.resolve().then(function() {
+            return syncNative(document.activeElement);
+          });
+        }
+        function onWindowFocus() {
+          if (!restoring) remember(document.activeElement, true);
+        }
+        function onWindowBlur() {
+          if (!restoring) remember(document.activeElement, false);
+        }
+        function restore(entry) {
+          if (!entry || !isValid(entry.element)) return false;
+          restoring = true;
+          try {
+            entry.element.focus();
+          } finally {
+            restoring = false;
+          }
+          if (document.activeElement !== entry.element) return false;
+          current = entry;
+          syncNative(entry.element);
+          return true;
+        }
+        function restoreLastFocus() {
+          var index = entries.indexOf(current);
+          var start = (index < 0 ? entries.length : index) - 1;
+          for (var i = start; i >= 0; i--) {
+            if (restore(entries[i])) return true;
+          }
+          return false;
+        }
+        function onDismissFocusLost() {
+          restoreLastFocus();
+        }
+        function onSnapshotRestore(event) {
+          var snapshot = event.detail && event.detail.snapshot;
+          if (!snapshot || !Object.prototype.hasOwnProperty.call(snapshot, snapshotKey)) return;
+          var target = document.getElementById(snapshot[snapshotKey]);
+          if (target && stateNavigationEligible(target)) {
+            for (var i = entries.length - 1; i >= 0; i--) {
+              if (entries[i].element === target) {
+                if (!restore(entries[i])) restoreLastFocus();
+                return;
+              }
+            }
+            if (restore({
+              element: target
+            })) return;
+          }
+          restoreLastFocus();
+        }
+        function warn(reason) {
+          var extra = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
+          AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CONFIGURATION_VALUE, _objectSpread4({
+            extension: extensionName,
+            reason: reason
+          }, extra));
+        }
+        function getContext() {
+          var focusId = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : 1;
+          var context = contexts.get(focusId);
+          return context ? Object.freeze(_objectSpread4({}, context)) : null;
+        }
+        function createContext(focusId) {
+          var _ref2 = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {}, _ref2$scope = _ref2.scope, scope = _ref2$scope === void 0 ? document.body : _ref2$scope, _ref2$syncDOM = _ref2.syncDOM, syncDOM = _ref2$syncDOM === void 0 ? focusId === 1 : _ref2$syncDOM;
+          if (!Number.isSafeInteger(focusId) || focusId < 1 || contexts.has(focusId) || !scope || scope.nodeType !== 1 || !scope.isConnected || focusId !== 1 && syncDOM) return false;
+          contexts.set(focusId, {
+            focusId: focusId,
+            element: null,
+            scope: scope,
+            syncDOM: !!syncDOM
+          });
+          return getContext(focusId);
+        }
+        function clearContext(context) {
+          var previous = context.element;
+          context.element = null;
+          previous === null || previous === void 0 || previous.classList.remove(focusClass(context.focusId));
+          if (previous) publishFocus({
+            focusId: context.focusId,
+            element: null,
+            previous: previous
+          });
+        }
+        function publishFocus(detail) {
+          AelluxJs2.comm.emit("focus.changed", detail);
+          AelluxJs2.dispatch("FocusChange", {
+            detail: detail
+          });
+        }
+        function destroyContext(focusId) {
+          if (focusId === 1 || !contexts.has(focusId)) return false;
+          clearContext(contexts.get(focusId));
+          contexts.delete(focusId);
+          AelluxJs2.comm.emit("focus.context-destroyed", {
+            focusId: focusId
+          });
+          AelluxJs2.dispatch("FocusContextDestroy", {
+            detail: {
+              focusId: focusId
+            }
+          });
+          return true;
+        }
+        function updateContext(focusId) {
+          var _ref3 = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {}, scope = _ref3.scope, syncDOM = _ref3.syncDOM;
+          var context = contexts.get(focusId);
+          if (!context || scope && (scope.nodeType !== 1 || !scope.isConnected) || focusId !== 1 && syncDOM) return false;
+          if (scope) context.scope = scope;
+          if (syncDOM !== void 0) context.syncDOM = !!syncDOM;
+          if (context.element && !context.scope.contains(context.element)) clearContext(context);
+          if (context.syncDOM) syncNative(document.activeElement);
+          return getContext(focusId);
+        }
+        function assign(context, element) {
+          if (context.element === element) return true;
+          var previous = context.element;
+          previous === null || previous === void 0 || previous.classList.remove(focusClass(context.focusId));
+          context.element = element;
+          element === null || element === void 0 || element.classList.add(focusClass(context.focusId));
+          publishFocus({
+            focusId: context.focusId,
+            element: element,
+            previous: previous
+          });
+          return true;
+        }
+        function setFocus(focusId, elementOrId) {
+          var _context$element;
+          var context = contexts.get(focusId);
+          var element = typeof elementOrId === "string" ? document.getElementById(elementOrId.replace(/^#/, "")) : elementOrId;
+          if (!context || element !== null && (!isValid(element) || !context.scope.contains(element))) return false;
+          if (element && context.syncDOM) {
+            element.focus();
+            if (document.activeElement !== element) return false;
+          }
+          if (!element && context.syncDOM) (_context$element = context.element) === null || _context$element === void 0 || _context$element.blur();
+          return assign(context, element);
+        }
+        function syncNative(element) {
+          var context = contexts.get(1);
+          if (context !== null && context !== void 0 && context.syncDOM) assign(context, isValid(element) && context.scope.contains(element) ? element : null);
+        }
+        function pruneContexts() {
+          var _iterator3 = _createForOfIteratorHelper11(contexts.values()), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-              var pointer = _step3.value;
-              if (pointer.target === element) pointer.target = null;
-              if (pointer.pressStart === element) pointer.pressStart = null;
-              if (pointer.tap && pointer.tap.element === element) pointer.tap = null;
+              var context = _step3.value;
+              if (!context.scope.isConnected && context.focusId !== 1) {
+                destroyContext(context.focusId);
+                continue;
+              }
+              if (context.element && (!isValid(context.element) || !context.scope.contains(context.element))) clearContext(context);
             }
           } catch (err) {
             _iterator3.e(err);
           } finally {
             _iterator3.f();
           }
+          for (var index = entries.length - 1; index >= 0; index--) if (!entries[index].element.isConnected) entries.splice(index, 1);
+          if (current && !current.element.isConnected) current = null;
         }
-        function pointers(element) {
-          var result = [];
-          var _iterator4 = _createForOfIteratorHelper12(trackedPointers.values()), _step4;
+        function onContextUnmount(event) {
+          var _event$detail = event.detail, scope = _event$detail.root, extensions = _event$detail.extensions;
+          if (extensions && !extensions.includes(extensionName)) return;
+          if (event.detail.detachedOnly) {
+            pruneContexts();
+            return;
+          }
+          var _iterator4 = _createForOfIteratorHelper11(contexts.values()), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
-              var pointer = _step4.value;
-              if (pointer.target === element) result.push(pointer);
+              var context = _step4.value;
+              if (context.focusId !== 1 && scope.contains(context.scope)) destroyContext(context.focusId);
+              else if (context.element && scope.contains(context.element)) clearContext(context);
             }
           } catch (err) {
             _iterator4.e(err);
           } finally {
             _iterator4.f();
           }
-          return result;
+          for (var index = entries.length - 1; index >= 0; index--) if (scope.contains(entries[index].element)) entries.splice(index, 1);
+          if (current && scope.contains(current.element)) current = null;
         }
-        function limitFor(element) {
-          var value = element.getAttribute(pointableAttribute);
-          if (value === null || !value.trim()) return 1;
-          var trimmed = value.trim();
-          var limit = Number(trimmed);
-          return /^\d+$/.test(trimmed) && Number.isSafeInteger(limit) ? limit : 1;
-        }
-        function targetFor(target, pointer) {
-          var element = target && target.nodeType === 1 ? target : target && target.parentElement;
-          while (element) {
-            if (pointableElements.has(element) && element.hasAttribute(pointableAttribute)) {
-              var occupied = 0;
-              var _iterator5 = _createForOfIteratorHelper12(trackedPointers.values()), _step5;
-              try {
-                for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
-                  var other = _step5.value;
-                  if (other !== pointer && other.target === element) occupied++;
-                }
-              } catch (err) {
-                _iterator5.e(err);
-              } finally {
-                _iterator5.f();
-              }
-              if (occupied < limitFor(element)) return element;
+        function onContextMount() {
+          syncNative(document.activeElement);
+          var _iterator5 = _createForOfIteratorHelper11(contexts.values()), _step5;
+          try {
+            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+              var context = _step5.value;
+              if (context.element && isValid(context.element)) context.element.classList.add(focusClass(context.focusId));
             }
-            element = element.parentElement;
+          } catch (err) {
+            _iterator5.e(err);
+          } finally {
+            _iterator5.f();
           }
-          return null;
         }
-        function dispatchPointer(name, pointer, originalEvent, recipient, hover) {
-          var target = arguments.length > 5 && arguments[5] !== void 0 ? arguments[5] : pointer.target;
-          var pressStart = arguments.length > 6 && arguments[6] !== void 0 ? arguments[6] : pointer.pressStart;
-          if (!recipient) return;
-          AelluxJs2.dispatchFrom(recipient, name, {
-            bubbles: false,
-            detail: {
-              pointer: pointer,
-              target: target,
-              pressStart: pressStart,
-              originalEvent: originalEvent,
-              hover: hover
-            }
-          });
-        }
-        function dispatchToTarget(name, pointer, originalEvent) {
-          if (!pointer.target) return;
-          pointer.beforeDispatch();
-          dispatchPointer(name, pointer, originalEvent, pointer.target);
-        }
-        function dispatchRelease(name, pointer, originalEvent) {
-          var target = pointer.target;
-          var pressStart = pointer.pressStart;
-          if (!target && !pressStart) return;
-          pointer.beforeDispatch();
-          dispatchPointer(name, pointer, originalEvent, target, void 0, target, pressStart);
-          if (pressStart !== target) dispatchPointer(name, pointer, originalEvent, pressStart, void 0, target, pressStart);
-        }
-        function updateHoverTarget(pointer, event, nextTarget) {
-          var previousTarget = pointer.target;
-          if (previousTarget === nextTarget) return;
-          if (previousTarget || nextTarget) pointer.beforeDispatch();
-          dispatchPointer("PointerHover", pointer, event, previousTarget, false);
-          pointer.target = nextTarget;
-          dispatchPointer("PointerHover", pointer, event, nextTarget, true);
-        }
-        function canHover(event) {
-          return event.pointerType === "mouse" || event.pointerType === "pen";
-        }
-        function canTap(element) {
-          return element && pointableElements.has(element) && element.isConnected && element.hasAttribute(pointableAttribute) && limitFor(element) > 0 && element.matches(tapSelector) && !element.matches(":disabled, [disabled]") && !element.closest('[aria-disabled="true"], [inert]');
-        }
-        function startTap(pointer, event, wasPressed) {
-          pointer.tap = null;
-          var multitouch = false;
-          if (event.pointerType === "touch") {
-            var _iterator6 = _createForOfIteratorHelper12(trackedPointers.values()), _step6;
+        function activeScope(context) {
+          var _context$element2;
+          var nearest = (_context$element2 = context.element) === null || _context$element2 === void 0 ? void 0 : _context$element2.closest(scopeSelector);
+          var scope = nearest && context.scope.contains(nearest) ? nearest : context.scope;
+          var modal = Array.from(document.querySelectorAll('dialog[open], [aria-modal="true"]')).reverse().find(function(element) {
             try {
-              for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
-                var other = _step6.value;
-                if (other !== pointer && other.pressed && other.pointerType === "touch") {
-                  other.tap = null;
-                  multitouch = true;
-                }
-              }
-            } catch (err) {
-              _iterator6.e(err);
-            } finally {
-              _iterator6.f();
+              return element.matches(":modal") || element.getAttribute("aria-modal") === "true";
+            } catch (_) {
+              return element.getAttribute("aria-modal") === "true";
             }
-          }
-          if (wasPressed || multitouch || !event.isPrimary || event.button !== 0) return;
-          var origin = event.composedPath ? event.composedPath()[0] : event.target;
-          var element = targetFor(origin, pointer);
-          if (!canTap(element)) return;
-          var scrollOffsets = [];
-          var ancestor = element;
-          while (ancestor) {
-            scrollOffsets.push({
-              element: ancestor,
-              x: ancestor.scrollLeft,
-              y: ancestor.scrollTop
-            });
-            ancestor = ancestor.parentElement || ancestor.getRootNode && ancestor.getRootNode().host;
-          }
-          pointer.tap = {
-            element: element,
-            distance: 0,
-            limit: event.pointerType === "mouse" ? 4 : 10,
-            bounds: element.getBoundingClientRect(),
-            scrollOffsets: scrollOffsets
-          };
-        }
-        function finishTap(pointer, event) {
-          var tap = pointer.tap;
-          pointer.tap = null;
-          if (!tap || !event.isPrimary || event.button !== 0 || event.pointerType !== pointer.pointerType || pointer.deltaTime > tapDuration || !canTap(tap.element)) return null;
-          var path = event.composedPath ? event.composedPath() : [];
-          var target = path[0] || event.target;
-          var captured = target && target.hasPointerCapture && target.hasPointerCapture(event.pointerId);
-          if (captured || !path.includes(tap.element) && !tap.element.contains(target)) {
-            var bounds = tap.bounds;
-            if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) return null;
-            if (!captured && !tap.scrollOffsets.some(function(offset) {
-              return offset.element.scrollLeft !== offset.x || offset.element.scrollTop !== offset.y;
-            })) return null;
-          }
-          return {
-            element: tap.element,
-            detail: {
-              pointerType: pointer.pointerType,
-              pointerId: pointer.pointerId,
-              duration: pointer.deltaTime,
-              distance: tap.distance,
-              originalEvent: event
-            }
-          };
-        }
-        function addPointer(event, pressed, hover) {
-          var pointer = new AePointer(event, pressed, hover);
-          trackedPointers.set(event.pointerId, pointer);
-          return pointer;
-        }
-        function onPointerDown(event) {
-          var pointer = trackedPointers.get(event.pointerId);
-          var wasPressed = pointer && pointer.pressed;
-          pointer = pointer || addPointer(event, true, canHover(event));
-          pointer.tap = null;
-          pointer.initial.x = event.clientX;
-          pointer.initial.y = event.clientY;
-          pointer.pointerType = event.pointerType;
-          pointer.pressed = true;
-          pointer.startPress();
-          pointer.hover = canHover(event);
-          pointer.update(event);
-          pointer.target = targetFor(event.target, pointer);
-          pointer.pressStart = pointer.target;
-          startTap(pointer, event, wasPressed);
-          dispatchToTarget("PointerDown", pointer, event);
-        }
-        function onPointerMove(event) {
-          var pointer = trackedPointers.get(event.pointerId);
-          if (!pointer) {
-            if (!canHover(event)) return;
-            pointer = addPointer(event, false, true);
-          }
-          pointer.update(event);
-          pointer.target = targetFor(event.target, pointer);
-          dispatchToTarget("PointerMove", pointer, event);
-        }
-        function onPointerUp(event) {
-          var pointer = trackedPointers.get(event.pointerId);
-          if (!pointer) return;
-          pointer.update(event);
-          pointer.pressed = false;
-          pointer.endPress();
-          pointer.target = targetFor(event.target, pointer);
-          var tap = finishTap(pointer, event);
-          dispatchRelease("PointerUp", pointer, event);
-          if (tap && canTap(tap.element)) AelluxJs2.dispatchFrom(tap.element, "tap", {
-            bubbles: true,
-            composed: true,
-            detail: tap.detail
           });
-          if (!pointer.hover) trackedPointers.delete(event.pointerId);
+          if (modal && !modal.contains(context.element)) return null;
+          return scope;
         }
-        function onPointerCancel(event) {
-          var pointer = trackedPointers.get(event.pointerId);
-          if (pointer) {
-            pointer.tap = null;
-            pointer.update(event);
-            pointer.pressed = false;
-            pointer.endPress();
-            pointer.target = targetFor(event.target, pointer);
-            dispatchRelease("PointerCancel", pointer, event);
+        function available(element, scope) {
+          if (!isValid(element) || !scope.contains(element)) return false;
+          var nearest = element.closest(scopeSelector);
+          return !nearest || nearest === scope || !scope.contains(nearest);
+        }
+        function distance(a, b, scope) {
+          var ancestors = /* @__PURE__ */ new Map();
+          var depth = 0;
+          for (var node = a; node; node = node.parentElement) {
+            ancestors.set(node, depth++);
+            if (node === scope) break;
           }
-          trackedPointers.delete(event.pointerId);
-        }
-        function onPointerOver(event) {
-          if (!canHover(event)) return;
-          var pointer = trackedPointers.get(event.pointerId) || addPointer(event, false, true);
-          pointer.update(event);
-          pointer.hover = true;
-          updateHoverTarget(pointer, event, targetFor(event.target, pointer));
-        }
-        function onPointerOut(event) {
-          var pointer = trackedPointers.get(event.pointerId);
-          if (!pointer) return;
-          var relatedTarget = event.relatedTarget;
-          pointer.update(event);
-          updateHoverTarget(pointer, event, targetFor(relatedTarget, pointer));
-          if (!relatedTarget || !relatedTarget.nodeType || !document.contains(relatedTarget)) {
-            pointer.hover = false;
-            pointer.target = null;
+          depth = 0;
+          for (var _node = b; _node; _node = _node.parentElement) {
+            if (ancestors.has(_node)) return depth + ancestors.get(_node);
+            if (_node === scope) break;
+            depth++;
           }
-          if (!pointer.pressed && !pointer.hover) trackedPointers.delete(event.pointerId);
+          return Infinity;
         }
-        var AePointer = /* @__PURE__ */ (function() {
-          function AePointer2(event, pressed, hover) {
-            _classCallCheck(this, AePointer2);
-            var x = event.clientX;
-            var y = event.clientY;
-            this.pointerId = event.pointerId;
-            this.pointerType = event.pointerType;
-            this.initial = {
-              x: x,
-              y: y
+        function eligibleShortcuts() {
+          var focusId = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : 1;
+          var command = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : null;
+          var context = contexts.get(focusId);
+          if (!context || !context.element || !isValid(context.element)) return [];
+          var scope = activeScope(context);
+          if (!scope) return [];
+          var shortcutAttribute = AelluxJs2.attr("shortcut");
+          var candidates = [scope].concat(_toConsumableArray7(scope.querySelectorAll("[".concat(shortcutAttribute, "]")))).filter(function(element) {
+            return element.hasAttribute(shortcutAttribute) && available(element, scope);
+          });
+          return candidates.map(function(element, order) {
+            return {
+              element: element,
+              order: order,
+              shortcuts: parseShortcuts(element.getAttribute(shortcutAttribute)),
+              distance: distance(context.element, element, scope),
+              priority: Number(element.getAttribute(AelluxJs2.attr("shortcut-priority"))) || 0
             };
-            this.current = {
-              x: x,
-              y: y
-            };
-            this.delta = {
-              x: 0,
-              y: 0
-            };
-            this.movement = {
-              x: 0,
-              y: 0
-            };
-            this.lastDispatched = {
-              x: x,
-              y: y
-            };
-            this.time = {
-              pressStart: null,
-              pressEnd: null
-            };
-            this.buttons = event.buttons;
-            this.pressed = pressed;
-            this.hover = hover;
-            this.target = null;
-            this.pressStart = null;
-            this.tap = null;
+          }).filter(function(item) {
+            return !command || item.shortcuts.some(function(shortcut) {
+              return matchesShortcut(shortcut, command);
+            });
+          }).sort(function(a, b) {
+            return a.distance - b.distance || b.priority - a.priority || a.order - b.order;
+          });
+        }
+        function registerShortcutAction(name, handler) {
+          var _ref4 = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : {}, signal = _ref4.signal;
+          if (!/^[a-z][a-z0-9-]*$/.test(name) || typeof handler !== "function" || shortcutActions.has(name)) throw new TypeError("Invalid or duplicate shortcut action.");
+          var _remove = function remove() {
+            if (shortcutActions.get(name) === handler) shortcutActions.delete(name);
+            signal === null || signal === void 0 || signal.removeEventListener("abort", _remove);
+          };
+          if (!(signal !== null && signal !== void 0 && signal.aborted)) {
+            shortcutActions.set(name, handler);
+            signal === null || signal === void 0 || signal.addEventListener("abort", _remove, {
+              once: true
+            });
           }
-          return _createClass(AePointer2, [{
-            key: "deltaTime",
-            get: function get() {
-              var _this$time$pressEnd;
-              if (this.time.pressStart === null) return 0;
-              return ((_this$time$pressEnd = this.time.pressEnd) !== null && _this$time$pressEnd !== void 0 ? _this$time$pressEnd : root2.performance.now()) - this.time.pressStart;
+          return _remove;
+        }
+        function executeShortcut(element, command) {
+          var action = element.getAttribute(AelluxJs2.attr("shortcut-action")) || "click";
+          if (!AelluxJs2.dispatchFrom(element, "BeforeShortcut", {
+            cancelable: true,
+            detail: {
+              command: command,
+              action: action
             }
-          }, {
-            key: "startPress",
-            value: function startPress() {
-              this.time.pressStart = root2.performance.now();
-              this.time.pressEnd = null;
+          })) return false;
+          if (action === "click") element.click();
+          else {
+            var handler = shortcutActions.get(action);
+            if (handler) {
+              if (handler(element, command) === false) return false;
+            } else if (["pop", "unpop", "dismiss"].includes(action)) {
+              var id = element.getAttribute(AelluxJs2.attr("shortcut-target"));
+              var target = id ? document.getElementById(id.replace(/^#/, "")) : element;
+              if (!target) return false;
+              var response = AelluxJs2.comm.request("present." + action, {
+                element: target
+              });
+              if (!response.handled) return false;
+            } else {
+              warn("Unknown shortcut action.", {
+                value: action,
+                element: element
+              });
+              return false;
             }
-          }, {
-            key: "endPress",
-            value: function endPress() {
-              if (this.time.pressStart !== null && this.time.pressEnd === null) this.time.pressEnd = root2.performance.now();
+          }
+          AelluxJs2.dispatchFrom(element, "Shortcut", {
+            detail: {
+              command: command,
+              action: action
             }
-          }, {
-            key: "update",
-            value: function update(event) {
-              this.current.x = event.clientX;
-              this.current.y = event.clientY;
-              this.delta.x = this.current.x - this.initial.x;
-              this.delta.y = this.current.y - this.initial.y;
-              this.buttons = event.buttons;
-              if (this.tap) {
-                var distance = Math.hypot(this.delta.x, this.delta.y);
-                if (event.getCoalescedEvents) {
-                  var _iterator7 = _createForOfIteratorHelper12(event.getCoalescedEvents()), _step7;
-                  try {
-                    for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
-                      var sample = _step7.value;
-                      distance = Math.max(distance, Math.hypot(sample.clientX - this.initial.x, sample.clientY - this.initial.y));
-                    }
-                  } catch (err) {
-                    _iterator7.e(err);
-                  } finally {
-                    _iterator7.f();
-                  }
-                }
-                this.tap.distance = Math.max(this.tap.distance, distance);
-                if (distance > this.tap.limit) this.tap = null;
-              }
-            }
-          }, {
-            key: "beforeDispatch",
-            value: function beforeDispatch() {
-              this.movement.x = this.current.x - this.lastDispatched.x;
-              this.movement.y = this.current.y - this.lastDispatched.y;
-              this.lastDispatched.x = this.current.x;
-              this.lastDispatched.y = this.current.y;
-            }
-          }]);
-        })();
+          });
+          return true;
+        }
+        function consumeCommand(command) {
+          var _command$originalEven, _command$originalEven2, _command$modifiers, _command$modifiers2, _command$modifiers3, _command$action;
+          var context = contexts.get(command.focusId);
+          if (!context) {
+            warn("Input command refers to an unknown focus context; command blocked.", {
+              focusId: command.focusId
+            });
+            return false;
+          }
+          if (!["press", "repeat"].includes(command.phase) || (_command$originalEven = command.originalEvent) !== null && _command$originalEven !== void 0 && _command$originalEven.defaultPrevented) return false;
+          if (command.source === "point") return false;
+          var focused = context.element;
+          var inputScope = (focused || context.scope).closest("[".concat(AelluxJs2.attr("inputs"), "]"));
+          if (inputScope && !inputScope.getAttribute(AelluxJs2.attr("inputs")).split(/\s+/).includes(command.source)) return false;
+          var origin = (_command$originalEven2 = command.originalEvent) === null || _command$originalEven2 === void 0 ? void 0 : _command$originalEven2.target;
+          var editable = function editable2(element) {
+            return element === null || element === void 0 ? void 0 : element.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]');
+          };
+          var reserved = ((_command$modifiers = command.modifiers) === null || _command$modifiers === void 0 ? void 0 : _command$modifiers.meta) || ((_command$modifiers2 = command.modifiers) === null || _command$modifiers2 === void 0 ? void 0 : _command$modifiers2.ctrl) && ["KeyW", "KeyT", "KeyN", "KeyR", "KeyL", "KeyF", "KeyP", "KeyS", "KeyC", "KeyV", "KeyX", "KeyA", "KeyZ", "KeyY"].includes(command.code) || ((_command$modifiers3 = command.modifiers) === null || _command$modifiers3 === void 0 ? void 0 : _command$modifiers3.alt) && ["ArrowLeft", "ArrowRight", "F4"].includes(command.code);
+          if (command.source === "keyboard" && (editable(origin) || editable(focused) || command.code === "Tab" || reserved)) return false;
+          var candidate = eligibleShortcuts(command.focusId, command)[0];
+          if (candidate && command.phase === "press") return executeShortcut(candidate.element, command);
+          if (context.syncDOM && command.source === "keyboard") return false;
+          var scope = activeScope(context);
+          if (!scope) return false;
+          if (command.action === "confirm" && command.phase === "press" && focused && available(focused, scope)) {
+            focused.click();
+            return true;
+          }
+          if (!((_command$action = command.action) !== null && _command$action !== void 0 && _command$action.startsWith("navigate-"))) return false;
+          var elements = Array.from(scope.querySelectorAll(focusableSelector)).filter(function(element) {
+            return element.tabIndex >= 0 && available(element, scope);
+          });
+          if (!elements.length) return false;
+          var index = elements.indexOf(focused);
+          var direction = command.action.slice(9);
+          var step = direction === "left" || direction === "up" ? -1 : 1;
+          var next = index < 0 ? step > 0 ? 0 : elements.length - 1 : Math.max(0, Math.min(elements.length - 1, index + step));
+          return setFocus(command.focusId, elements[next]);
+        }
       })(typeof globalThis !== "undefined" ? globalThis : window);
     }
   });
 
-  // src/aellux.ext.anchor.js
-  var aellux_ext_anchor_exports = {};
+  // src/aellux.ext.input.js
+  var aellux_ext_input_exports = {};
+  function _typeof9(o) {
+    "@babel/helpers - typeof";
+    return _typeof9 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof9(o);
+  }
   function _regenerator5() {
     /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
     var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag";
@@ -28227,7 +28326,7 @@
       return this;
     }), _regeneratorDefine25(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator5 = function _regenerator8() {
+    }), (_regenerator5 = function _regenerator9() {
       return { w: i, m: f };
     })();
   }
@@ -28247,25 +28346,13 @@
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
     }, _regeneratorDefine25(e, r, n, t);
   }
-  function _toConsumableArray6(r) {
-    return _arrayWithoutHoles6(r) || _iterableToArray6(r) || _unsupportedIterableToArray14(r) || _nonIterableSpread6();
+  function _slicedToArray6(r, e) {
+    return _arrayWithHoles6(r) || _iterableToArrayLimit6(r, e) || _unsupportedIterableToArray14(r, e) || _nonIterableRest6();
   }
-  function _nonIterableSpread6() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArray6(r) {
-    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
-  }
-  function _arrayWithoutHoles6(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray14(r);
-  }
-  function _slicedToArray7(r, e) {
-    return _arrayWithHoles7(r) || _iterableToArrayLimit7(r, e) || _unsupportedIterableToArray14(r, e) || _nonIterableRest7();
-  }
-  function _nonIterableRest7() {
+  function _nonIterableRest6() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArrayLimit7(r, l) {
+  function _iterableToArrayLimit6(r, l) {
     var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (null != t) {
       var e, n, i, u, a = [], f = true, o = false;
@@ -28286,10 +28373,10 @@
       return a;
     }
   }
-  function _arrayWithHoles7(r) {
+  function _arrayWithHoles6(r) {
     if (Array.isArray(r)) return r;
   }
-  function _createForOfIteratorHelper13(r, e) {
+  function _createForOfIteratorHelper12(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
       if (Array.isArray(r) || (t = _unsupportedIterableToArray14(r)) || e && r && "number" == typeof r.length) {
@@ -28355,6 +28442,980 @@
       });
     };
   }
+  function ownKeys5(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function(r2) {
+        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
+      })), t.push.apply(t, o);
+    }
+    return t;
+  }
+  function _objectSpread5(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys5(Object(t), true).forEach(function(r2) {
+        _defineProperty5(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys5(Object(t)).forEach(function(r2) {
+        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
+      });
+    }
+    return e;
+  }
+  function _defineProperty5(e, r, t) {
+    return (r = _toPropertyKey5(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  }
+  function _toPropertyKey5(t) {
+    var i = _toPrimitive5(t, "string");
+    return "symbol" == _typeof9(i) ? i : i + "";
+  }
+  function _toPrimitive5(t, r) {
+    if ("object" != _typeof9(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r || "default");
+      if ("object" != _typeof9(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return ("string" === r ? String : Number)(t);
+  }
+  var init_aellux_ext_input = __esm({
+    "src/aellux.ext.input.js": function() {
+      init_input_shortcuts();
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+      (function(root2) {
+        "use strict";
+        var api = root2.AelluxJs;
+        if (!api) throw new Error("[aellux.js] Load the boot script before Input.");
+        var extensionName = "input", attr = function attr2(name) {
+          return api.attr(name);
+        };
+        var mounted = /* @__PURE__ */ new Set(), adapters = /* @__PURE__ */ new Map(), active = /* @__PURE__ */ new Map(), routers = [], families = [];
+        var hintContexts = /* @__PURE__ */ new Map(), hints = /* @__PURE__ */ new Map();
+        var loading = /* @__PURE__ */ new Map();
+        var mountTokens = /* @__PURE__ */ new WeakMap();
+        var outputs = ["gamepad", "active-input", "gamepad-family", "gamepad-model"];
+        var actionMaps = {
+          keyboard: {
+            Enter: "confirm",
+            Space: "confirm",
+            Escape: "cancel",
+            ArrowLeft: "navigate-left",
+            ArrowRight: "navigate-right",
+            ArrowUp: "navigate-up",
+            ArrowDown: "navigate-down"
+          },
+          gamepad: {
+            "dpad-left": "navigate-left",
+            "dpad-right": "navigate-right",
+            "dpad-up": "navigate-up",
+            "dpad-down": "navigate-down"
+          }
+        };
+        var running = false, observer = null, rootMemory = null, routerOrder = 0, familyOrder = 0;
+        var _loop = function _loop2() {
+          var name = _arr[_i];
+          adapters.set(name, function() {
+            return loadAdapter(name);
+          });
+        };
+        for (var _i = 0, _arr = ["point", "keyboard", "gamepad"]; _i < _arr.length; _i++) {
+          _loop();
+        }
+        api.extAttach(extensionName, {
+          init: init,
+          destroy: destroy,
+          pointers: function pointers(element) {
+            var _active$get;
+            return ((_active$get = active.get("point")) === null || _active$get === void 0 ? void 0 : _active$get.pointers(element)) || [];
+          },
+          registerRouter: registerRouter,
+          removeRouters: removeRouters,
+          resolveFocusId: resolveFocusId,
+          dispatchCommand: dispatchCommand,
+          registerAdapter: registerAdapter,
+          registerGamepadFamily: registerGamepadFamily,
+          devices: function devices() {
+            var _active$get2;
+            return ((_active$get2 = active.get("gamepad")) === null || _active$get2 === void 0 ? void 0 : _active$get2.devices()) || [];
+          },
+          setActionMap: setActionMap,
+          setHintContext: setHintContext,
+          describeShortcuts: parseShortcuts,
+          refresh: refresh
+        });
+        function warn(reason) {
+          var extra = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
+          api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_VALUE, _objectSpread5({
+            extension: extensionName,
+            reason: reason
+          }, extra));
+        }
+        function modalities(element) {
+          var scope = element && element.nodeType === 1 ? element.closest("[".concat(attr("inputs"), "]")) : null;
+          var value = scope ? scope.getAttribute(attr("inputs")) : root2.document.documentElement.getAttribute(attr("inputs"));
+          return new Set(value === null ? ["point", "keyboard"] : value.trim().split(/\s+/).filter(Boolean));
+        }
+        function accepts(source, element) {
+          return modalities(element).has(source);
+        }
+        function init() {
+          return _init.apply(this, arguments);
+        }
+        function _init() {
+          _init = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee() {
+            var _t;
+            return _regenerator5().w(function(_context) {
+              while (1) switch (_context.p = _context.n) {
+                case 0:
+                  if (!running) {
+                    _context.n = 1;
+                    break;
+                  }
+                  return _context.a(2);
+                case 1:
+                  running = true;
+                  rootMemory = api.persist.element.save(root2.document.documentElement, outputs.map(attr), []);
+                  root2.document.documentElement.setAttribute(attr("gamepad"), "false");
+                  api.mountManager.add({
+                    extensionName: extensionName,
+                    selector: ["point", "inputs", "shortcut-hint"].map(function(name) {
+                      return "[".concat(attr(name), "]");
+                    }).join(","),
+                    mount: mount,
+                    unmount: unmount,
+                    update: refresh,
+                    controllers: ["pointers"]
+                  });
+                  api.comm.on("extension.destroyed", extensionDestroyed, {
+                    owner: extensionName
+                  });
+                  api.comm.on("focus.context-destroyed", contextDestroyed, {
+                    owner: extensionName
+                  });
+                  api.comm.handle("input.mount-token", function(_ref3) {
+                    var element = _ref3.element;
+                    return mountTokens.get(element) || null;
+                  }, {
+                    owner: extensionName
+                  });
+                  api.on("Unmount", onUnmount);
+                  observer = new root2.MutationObserver(function(records) {
+                    if (records.some(function(record) {
+                      return record.type === "attributes" || record.removedNodes.length || record.addedNodes.length;
+                    })) refresh().catch(function(cause) {
+                      return warn("Input adapter refresh failed.", {
+                        cause: cause
+                      });
+                    });
+                  });
+                  observer.observe(root2.document.documentElement, {
+                    subtree: true,
+                    childList: true,
+                    attributes: true,
+                    attributeFilter: ["inputs", "shortcut", "shortcut-hint", "shortcut-focus"].map(attr)
+                  });
+                  _context.p = 2;
+                  _context.n = 3;
+                  return refresh();
+                case 3:
+                  _context.n = 5;
+                  break;
+                case 4:
+                  _context.p = 4;
+                  _t = _context.v;
+                  destroy();
+                  throw _t;
+                case 5:
+                  return _context.a(2);
+              }
+            }, _callee, null, [[2, 4]]);
+          }));
+          return _init.apply(this, arguments);
+        }
+        function mount(element) {
+          var _active$get3;
+          if (!mounted.has(element)) mountTokens.set(element, {});
+          mounted.add(element);
+          if (element.hasAttribute(attr("point"))) (_active$get3 = active.get("point")) === null || _active$get3 === void 0 || _active$get3.mount(element);
+          return refresh();
+        }
+        function unmount(element) {
+          var _active$get4;
+          mounted.delete(element);
+          mountTokens.delete(element);
+          (_active$get4 = active.get("point")) === null || _active$get4 === void 0 || _active$get4.unmount(element);
+          restoreHint(element);
+          removeRouters(element);
+          return refresh();
+        }
+        function loadAdapter(_x) {
+          return _loadAdapter.apply(this, arguments);
+        }
+        function _loadAdapter() {
+          _loadAdapter = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee2(name) {
+            var _api$registry$inputAd, _api$registry$inputAd2;
+            var filename, _api$coreAssetIntegri, factory;
+            return _regenerator5().w(function(_context2) {
+              while (1) switch (_context2.n) {
+                case 0:
+                  filename = "aellux.input.".concat(name).concat(api.diagnostics.legacy ? ".legacy" : "").concat(api.minified ? ".min" : "", ".js");
+                  if ((_api$registry$inputAd = api.registry.inputAdapters) !== null && _api$registry$inputAd !== void 0 && _api$registry$inputAd[name]) {
+                    _context2.n = 1;
+                    break;
+                  }
+                  _context2.n = 1;
+                  return api.dep("aellux-input-" + filename, "./" + filename, (_api$coreAssetIntegri = api.coreAssetIntegrity) === null || _api$coreAssetIntegri === void 0 ? void 0 : _api$coreAssetIntegri[filename]);
+                case 1:
+                  factory = (_api$registry$inputAd2 = api.registry.inputAdapters) === null || _api$registry$inputAd2 === void 0 ? void 0 : _api$registry$inputAd2[name];
+                  if (factory) {
+                    _context2.n = 2;
+                    break;
+                  }
+                  throw new Error("Input adapter did not register: " + name);
+                case 2:
+                  return _context2.a(2, factory({
+                    root: root2,
+                    emit: dispatchCommand,
+                    accepts: accepts,
+                    changed: deviceChanged,
+                    identify: identifyFamily
+                  }));
+              }
+            }, _callee2);
+          }));
+          return _loadAdapter.apply(this, arguments);
+        }
+        function refresh() {
+          return _refresh.apply(this, arguments);
+        }
+        function _refresh() {
+          _refresh = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee5() {
+            var requested, _iterator12, _step12, element, _iterator18, _step18, name, _iterator13, _step13, _name, _iterator14, _step14, _step14$value, _name2, adapter, _iterator16, _step16, entry, _iterator17, _step17, _step17$value, id;
+            return _regenerator5().w(function(_context5) {
+              while (1) switch (_context5.n) {
+                case 0:
+                  if (running) {
+                    _context5.n = 1;
+                    break;
+                  }
+                  return _context5.a(2);
+                case 1:
+                  requested = modalities(root2.document.documentElement);
+                  _iterator12 = _createForOfIteratorHelper12(mounted);
+                  try {
+                    for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
+                      element = _step12.value;
+                      if (element.isConnected && element.hasAttribute(attr("inputs"))) {
+                        _iterator18 = _createForOfIteratorHelper12(modalities(element));
+                        try {
+                          for (_iterator18.s(); !(_step18 = _iterator18.n()).done; ) {
+                            name = _step18.value;
+                            requested.add(name);
+                          }
+                        } catch (err) {
+                          _iterator18.e(err);
+                        } finally {
+                          _iterator18.f();
+                        }
+                      }
+                    }
+                  } catch (err) {
+                    _iterator12.e(err);
+                  } finally {
+                    _iterator12.f();
+                  }
+                  _iterator13 = _createForOfIteratorHelper12(requested);
+                  try {
+                    for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
+                      _name = _step13.value;
+                      if (!adapters.has(_name)) warn("Unknown Input adapter.", {
+                        value: _name
+                      });
+                    }
+                  } catch (err) {
+                    _iterator13.e(err);
+                  } finally {
+                    _iterator13.f();
+                  }
+                  _iterator14 = _createForOfIteratorHelper12(active);
+                  try {
+                    for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
+                      _step14$value = _slicedToArray6(_step14.value, 2), _name2 = _step14$value[0], adapter = _step14$value[1];
+                      if (!requested.has(_name2)) {
+                        active.delete(_name2);
+                        adapter.destroy();
+                      }
+                    }
+                  } catch (err) {
+                    _iterator14.e(err);
+                  } finally {
+                    _iterator14.f();
+                  }
+                  _context5.n = 2;
+                  return Promise.all(Array.from(requested).filter(function(name2) {
+                    return adapters.has(name2);
+                  }).map(/* @__PURE__ */ (function() {
+                    var _ref4 = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee4(name2) {
+                      return _regenerator5().w(function(_context4) {
+                        while (1) switch (_context4.n) {
+                          case 0:
+                            if (!active.has(name2)) {
+                              _context4.n = 1;
+                              break;
+                            }
+                            return _context4.a(2);
+                          case 1:
+                            if (!loading.has(name2)) loading.set(name2, Promise.resolve().then(function() {
+                              return adapters.get(name2)();
+                            }).then(/* @__PURE__ */ (function() {
+                              var _ref5 = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee3(adapter2) {
+                                var _iterator15, _step15, element2;
+                                return _regenerator5().w(function(_context3) {
+                                  while (1) switch (_context3.n) {
+                                    case 0:
+                                      if (!(!running || !adapters.has(name2) || !requestedModalities().has(name2))) {
+                                        _context3.n = 1;
+                                        break;
+                                      }
+                                      return _context3.a(2);
+                                    case 1:
+                                      active.set(name2, adapter2);
+                                      _context3.n = 2;
+                                      return adapter2.init();
+                                    case 2:
+                                      if (!(!running || !adapters.has(name2) || !requestedModalities().has(name2))) {
+                                        _context3.n = 3;
+                                        break;
+                                      }
+                                      if (active.get(name2) === adapter2) active.delete(name2);
+                                      adapter2.destroy();
+                                      return _context3.a(2);
+                                    case 3:
+                                      if (name2 === "point") {
+                                        _iterator15 = _createForOfIteratorHelper12(mounted);
+                                        try {
+                                          for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
+                                            element2 = _step15.value;
+                                            if (element2.hasAttribute(attr("point"))) adapter2.mount(element2);
+                                          }
+                                        } catch (err) {
+                                          _iterator15.e(err);
+                                        } finally {
+                                          _iterator15.f();
+                                        }
+                                      }
+                                    case 4:
+                                      return _context3.a(2);
+                                  }
+                                }, _callee3);
+                              }));
+                              return function(_x3) {
+                                return _ref5.apply(this, arguments);
+                              };
+                            })()).finally(function() {
+                              return loading.delete(name2);
+                            }));
+                            _context4.n = 2;
+                            return loading.get(name2);
+                          case 2:
+                            return _context4.a(2);
+                        }
+                      }, _callee4);
+                    }));
+                    return function(_x2) {
+                      return _ref4.apply(this, arguments);
+                    };
+                  })()));
+                case 2:
+                  _iterator16 = _createForOfIteratorHelper12(routers.slice());
+                  try {
+                    for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
+                      entry = _step16.value;
+                      if (entry.owner && entry.owner.nodeType && !entry.owner.isConnected) entry.remove();
+                    }
+                  } catch (err) {
+                    _iterator16.e(err);
+                  } finally {
+                    _iterator16.f();
+                  }
+                  _iterator17 = _createForOfIteratorHelper12(hintContexts);
+                  try {
+                    for (_iterator17.s(); !(_step17 = _iterator17.n()).done; ) {
+                      _step17$value = _slicedToArray6(_step17.value, 1), id = _step17$value[0];
+                      if (!Number.isSafeInteger(id)) hintContexts.delete(id);
+                    }
+                  } catch (err) {
+                    _iterator17.e(err);
+                  } finally {
+                    _iterator17.f();
+                  }
+                  updateHints();
+                case 3:
+                  return _context5.a(2);
+              }
+            }, _callee5);
+          }));
+          return _refresh.apply(this, arguments);
+        }
+        function requestedModalities() {
+          var names = modalities(root2.document.documentElement);
+          var _iterator = _createForOfIteratorHelper12(mounted), _step;
+          try {
+            for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+              var element = _step.value;
+              if (element.isConnected && element.hasAttribute(attr("inputs"))) {
+                var _iterator2 = _createForOfIteratorHelper12(modalities(element)), _step2;
+                try {
+                  for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+                    var name = _step2.value;
+                    names.add(name);
+                  }
+                } catch (err) {
+                  _iterator2.e(err);
+                } finally {
+                  _iterator2.f();
+                }
+              }
+            }
+          } catch (err) {
+            _iterator.e(err);
+          } finally {
+            _iterator.f();
+          }
+          return names;
+        }
+        function destroy() {
+          var _observer, _rootMemory;
+          running = false;
+          (_observer = observer) === null || _observer === void 0 || _observer.disconnect();
+          observer = null;
+          api.comm.removeOwner(extensionName);
+          var _iterator3 = _createForOfIteratorHelper12(mounted), _step3;
+          try {
+            for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+              var element = _step3.value;
+              mountTokens.delete(element);
+            }
+          } catch (err) {
+            _iterator3.e(err);
+          } finally {
+            _iterator3.f();
+          }
+          api.off("Unmount", onUnmount);
+          var _iterator4 = _createForOfIteratorHelper12(active.values()), _step4;
+          try {
+            for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+              var adapter = _step4.value;
+              adapter.destroy();
+            }
+          } catch (err) {
+            _iterator4.e(err);
+          } finally {
+            _iterator4.f();
+          }
+          active.clear();
+          mounted.clear();
+          var _iterator5 = _createForOfIteratorHelper12(routers.slice()), _step5;
+          try {
+            for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+              var entry = _step5.value;
+              entry.remove();
+            }
+          } catch (err) {
+            _iterator5.e(err);
+          } finally {
+            _iterator5.f();
+          }
+          var _iterator6 = _createForOfIteratorHelper12(hints.keys()), _step6;
+          try {
+            for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
+              var _element = _step6.value;
+              restoreHint(_element);
+            }
+          } catch (err) {
+            _iterator6.e(err);
+          } finally {
+            _iterator6.f();
+          }
+          hintContexts.clear();
+          families.length = 0;
+          (_rootMemory = rootMemory) === null || _rootMemory === void 0 || _rootMemory.restore();
+          rootMemory = null;
+          api.mountManager.remove({
+            extensionName: extensionName
+          });
+        }
+        function registerAdapter(name, factory) {
+          if (!/^[a-z][a-z0-9-]*$/.test(name) || typeof factory !== "function" || adapters.has(name)) throw new TypeError("Invalid or duplicate Input adapter.");
+          adapters.set(name, factory);
+          refresh().catch(function(cause) {
+            return warn("Input adapter refresh failed.", {
+              cause: cause
+            });
+          });
+          return function() {
+            var _active$get5;
+            (_active$get5 = active.get(name)) === null || _active$get5 === void 0 || _active$get5.destroy();
+            active.delete(name);
+            adapters.delete(name);
+          };
+        }
+        function registerRouter(resolve) {
+          var _ref = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {}, _ref$priority = _ref.priority, priority = _ref$priority === void 0 ? 0 : _ref$priority, _ref$owner = _ref.owner, owner = _ref$owner === void 0 ? null : _ref$owner, signal = _ref.signal;
+          if (typeof resolve !== "function" || !Number.isFinite(priority)) throw new TypeError("A router requires a synchronous function and a finite priority.");
+          if (signal !== null && signal !== void 0 && signal.aborted) return function() {
+          };
+          var entry = {
+            resolve: resolve,
+            priority: priority,
+            owner: owner,
+            order: routerOrder++,
+            remove: function remove() {
+              var index = routers.indexOf(entry);
+              if (index !== -1) routers.splice(index, 1);
+              signal === null || signal === void 0 || signal.removeEventListener("abort", entry.remove);
+            }
+          };
+          routers.push(entry);
+          routers.sort(function(a, b) {
+            return b.priority - a.priority || a.order - b.order;
+          });
+          signal === null || signal === void 0 || signal.addEventListener("abort", entry.remove, {
+            once: true
+          });
+          return entry.remove;
+        }
+        function removeRouters(owner) {
+          var _iterator7 = _createForOfIteratorHelper12(routers.slice()), _step7;
+          try {
+            for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
+              var entry = _step7.value;
+              if (entry.owner === owner) entry.remove();
+            }
+          } catch (err) {
+            _iterator7.e(err);
+          } finally {
+            _iterator7.f();
+          }
+        }
+        function extensionDestroyed(detail) {
+          removeRouters(detail.extension);
+        }
+        function contextDestroyed(detail) {
+          hintContexts.delete(detail.focusId);
+          updateHints();
+        }
+        function onUnmount(event) {
+          var _event$detail = event.detail, scope = _event$detail.root, extensions = _event$detail.extensions, detachedOnly = _event$detail.detachedOnly;
+          if (extensions && !extensions.includes(extensionName)) return;
+          var _iterator8 = _createForOfIteratorHelper12(routers.slice()), _step8;
+          try {
+            for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
+              var _entry$owner;
+              var entry = _step8.value;
+              if ((_entry$owner = entry.owner) !== null && _entry$owner !== void 0 && _entry$owner.nodeType && (detachedOnly ? !entry.owner.isConnected : scope.contains(entry.owner))) entry.remove();
+            }
+          } catch (err) {
+            _iterator8.e(err);
+          } finally {
+            _iterator8.f();
+          }
+        }
+        function resolveFocusId(command) {
+          var _iterator9 = _createForOfIteratorHelper12(routers.slice()), _step9;
+          try {
+            for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
+              var _entry$owner2;
+              var entry = _step9.value;
+              if (!routers.includes(entry)) continue;
+              if ((_entry$owner2 = entry.owner) !== null && _entry$owner2 !== void 0 && _entry$owner2.nodeType && !entry.owner.isConnected) {
+                entry.remove();
+                continue;
+              }
+              var id = void 0;
+              try {
+                id = entry.resolve(command);
+              } catch (cause) {
+                warn("Input router failed; command blocked.", {
+                  cause: cause,
+                  deviceId: command.deviceId
+                });
+                return null;
+              }
+              if (id === void 0) continue;
+              if (id === null) return null;
+              if (Number.isSafeInteger(id) && id > 0) return id;
+              if (id && typeof id.then === "function") Promise.resolve(id).catch(function() {
+              });
+              warn("Invalid focus association; command blocked.", {
+                value: id,
+                deviceId: command.deviceId
+              });
+              return null;
+            }
+          } catch (err) {
+            _iterator9.e(err);
+          } finally {
+            _iterator9.f();
+          }
+          return 1;
+        }
+        function dispatchCommand(value) {
+          var _actionMaps$value$sou, _command$originalEven;
+          if (!running || !value || typeof value.deviceId !== "string" || !value.deviceId || typeof value.source !== "string" || typeof value.code !== "string" || !["press", "release", "repeat", "move", "cancel"].includes(value.phase)) return false;
+          if (!active.has(value.source) || value.target && !accepts(value.source, value.target)) return false;
+          var normalized = Object.freeze(_objectSpread5(_objectSpread5({}, value), {}, {
+            modifiers: Object.freeze(_objectSpread5({}, value.modifiers)),
+            action: value.action || ((_actionMaps$value$sou = actionMaps[value.source]) === null || _actionMaps$value$sou === void 0 ? void 0 : _actionMaps$value$sou[value.code]) || null,
+            timestamp: root2.performance.now()
+          }));
+          var focusId = resolveFocusId(normalized);
+          if (focusId === null) {
+            api.dispatch("InputBlocked", {
+              detail: {
+                command: normalized
+              }
+            });
+            return false;
+          }
+          var command = Object.freeze(_objectSpread5(_objectSpread5({}, normalized), {}, {
+            focusId: focusId
+          }));
+          if (command.intentional && (command.phase === "press" || command.phase === "repeat")) {
+            setHintContext(focusId, {
+              source: command.source,
+              family: command.family || "generic",
+              model: command.model || "",
+              deviceId: command.deviceId
+            });
+            var html = root2.document.documentElement;
+            html.setAttribute(attr("active-input"), command.source);
+            if (command.source === "gamepad") {
+              html.setAttribute(attr("gamepad-family"), command.family);
+              html.setAttribute(attr("gamepad-model"), command.model);
+            }
+          }
+          if (!api.dispatch("BeforeInputCommand", {
+            cancelable: true,
+            detail: {
+              command: command
+            }
+          })) return false;
+          var response = api.comm.request("focus.command", command);
+          var handled = response.handled && response.value === true;
+          if (handled && (_command$originalEven = command.originalEvent) !== null && _command$originalEven !== void 0 && _command$originalEven.cancelable) command.originalEvent.preventDefault();
+          api.dispatch("InputCommand", {
+            detail: {
+              command: command,
+              handled: handled
+            }
+          });
+          return handled;
+        }
+        function setActionMap(source, mapping) {
+          actionMaps[source] = _objectSpread5(_objectSpread5({}, actionMaps[source]), mapping);
+        }
+        function registerGamepadFamily(identify) {
+          var _ref2 = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {}, _ref2$priority = _ref2.priority, priority = _ref2$priority === void 0 ? 0 : _ref2$priority;
+          if (typeof identify !== "function" || !Number.isFinite(priority)) throw new TypeError("Invalid gamepad family detector.");
+          var entry = {
+            identify: identify,
+            priority: priority,
+            order: familyOrder++
+          };
+          families.push(entry);
+          families.sort(function(a, b) {
+            return b.priority - a.priority || a.order - b.order;
+          });
+          return function() {
+            var index = families.indexOf(entry);
+            if (index !== -1) families.splice(index, 1);
+          };
+        }
+        function identifyFamily(id) {
+          var _iterator0 = _createForOfIteratorHelper12(families), _step0;
+          try {
+            for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
+              var entry = _step0.value;
+              var result = entry.identify(id);
+              if (result) return result;
+            }
+          } catch (err) {
+            _iterator0.e(err);
+          } finally {
+            _iterator0.f();
+          }
+          return null;
+        }
+        function deviceChanged(device, connected, operational) {
+          if (running) root2.document.documentElement.setAttribute(attr("gamepad"), String(operational));
+          if (!connected) {
+            var _iterator1 = _createForOfIteratorHelper12(hintContexts), _step1;
+            try {
+              for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
+                var _step1$value = _slicedToArray6(_step1.value, 2), id = _step1$value[0], context = _step1$value[1];
+                if (context.deviceId === device.deviceId) hintContexts.delete(id);
+              }
+            } catch (err) {
+              _iterator1.e(err);
+            } finally {
+              _iterator1.f();
+            }
+          }
+          api.dispatch(connected ? "InputDeviceConnected" : "InputDeviceDisconnected", {
+            detail: {
+              device: device
+            }
+          });
+          updateHints();
+        }
+        function setHintContext(focusId, context) {
+          if (!Number.isSafeInteger(focusId) || focusId < 1) throw new TypeError("Invalid hint focusId.");
+          hintContexts.set(focusId, Object.freeze(_objectSpread5({}, context)));
+          updateHints();
+        }
+        function restoreHint(element) {
+          var _hints$get;
+          (_hints$get = hints.get(element)) === null || _hints$get === void 0 || _hints$get.restore();
+          hints.delete(element);
+        }
+        function updateHints() {
+          var _iterator10 = _createForOfIteratorHelper12(hints.keys()), _step10;
+          try {
+            for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
+              var element = _step10.value;
+              if (!element.isConnected || !element.hasAttribute(attr("shortcut-hint"))) restoreHint(element);
+            }
+          } catch (err) {
+            _iterator10.e(err);
+          } finally {
+            _iterator10.f();
+          }
+          var _iterator11 = _createForOfIteratorHelper12(mounted), _step11;
+          try {
+            var _loop2 = function _loop22() {
+              var element2 = _step11.value;
+              if (!element2.isConnected || !element2.hasAttribute(attr("shortcut-hint"))) return 1;
+              if (!hints.has(element2)) hints.set(element2, api.persist.element.save(element2, ["shortcut-label", "shortcut-source", "gamepad-family", "shortcut-code", "gamepad-model"].map(attr), []));
+              var explicit = element2.getAttribute(attr("shortcut-hint"));
+              var owner = element2.closest("[".concat(attr("shortcut"), "]"));
+              var descriptions = parseShortcuts(explicit || (owner === null || owner === void 0 ? void 0 : owner.getAttribute(attr("shortcut"))));
+              var id = Number(element2.getAttribute(attr("shortcut-focus")) || 1);
+              var context = hintContexts.get(id) || {
+                source: "keyboard",
+                family: "generic"
+              };
+              var description = descriptions.find(function(item) {
+                return item.source === context.source;
+              }) || descriptions[0];
+              for (var _i2 = 0, _arr2 = [["shortcut-label", shortcutLabel(description, context.family)], ["shortcut-source", (description === null || description === void 0 ? void 0 : description.source) || ""], ["shortcut-code", (description === null || description === void 0 ? void 0 : description.code) || ""], ["gamepad-family", context.family || "generic"], ["gamepad-model", context.model || ""]]; _i2 < _arr2.length; _i2++) {
+                var _arr2$_i = _slicedToArray6(_arr2[_i2], 2), name = _arr2$_i[0], value = _arr2$_i[1];
+                element2.setAttribute(attr(name), value);
+              }
+            };
+            for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
+              if (_loop2()) continue;
+            }
+          } catch (err) {
+            _iterator11.e(err);
+          } finally {
+            _iterator11.f();
+          }
+        }
+      })(typeof globalThis !== "undefined" ? globalThis : window);
+    }
+  });
+
+  // src/aellux.ext.anchor.js
+  var aellux_ext_anchor_exports = {};
+  function _regenerator6() {
+    /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
+    var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag";
+    function i(r2, n2, o2, i2) {
+      var c2 = n2 && n2.prototype instanceof Generator ? n2 : Generator, u2 = Object.create(c2.prototype);
+      return _regeneratorDefine26(u2, "_invoke", (function(r3, n3, o3) {
+        var i3, c3, u3, f2 = 0, p = o3 || [], y = false, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d2(t2, r4) {
+          return i3 = t2, c3 = 0, u3 = e, G.n = r4, a;
+        } };
+        function d(r4, n4) {
+          for (c3 = r4, u3 = n4, t = 0; !y && f2 && !o4 && t < p.length; t++) {
+            var o4, i4 = p[t], d2 = G.p, l = i4[2];
+            r4 > 3 ? (o4 = l === n4) && (u3 = i4[(c3 = i4[4]) ? 5 : (c3 = 3, 3)], i4[4] = i4[5] = e) : i4[0] <= d2 && ((o4 = r4 < 2 && d2 < i4[1]) ? (c3 = 0, G.v = n4, G.n = i4[1]) : d2 < l && (o4 = r4 < 3 || i4[0] > n4 || n4 > l) && (i4[4] = r4, i4[5] = n4, G.n = l, c3 = 0));
+          }
+          if (o4 || r4 > 1) return a;
+          throw y = true, n4;
+        }
+        return function(o4, p2, l) {
+          if (f2 > 1) throw TypeError("Generator is already running");
+          for (y && 1 === p2 && d(p2, l), c3 = p2, u3 = l; (t = c3 < 2 ? e : u3) || !y; ) {
+            i3 || (c3 ? c3 < 3 ? (c3 > 1 && (G.n = -1), d(c3, u3)) : G.n = u3 : G.v = u3);
+            try {
+              if (f2 = 2, i3) {
+                if (c3 || (o4 = "next"), t = i3[o4]) {
+                  if (!(t = t.call(i3, u3))) throw TypeError("iterator result is not an object");
+                  if (!t.done) return t;
+                  u3 = t.value, c3 < 2 && (c3 = 0);
+                } else 1 === c3 && (t = i3.return) && t.call(i3), c3 < 2 && (u3 = TypeError("The iterator does not provide a '" + o4 + "' method"), c3 = 1);
+                i3 = e;
+              } else if ((t = (y = G.n < 0) ? u3 : r3.call(n3, G)) !== a) break;
+            } catch (t2) {
+              i3 = e, c3 = 1, u3 = t2;
+            } finally {
+              f2 = 1;
+            }
+          }
+          return { value: t, done: y };
+        };
+      })(r2, o2, i2), true), u2;
+    }
+    var a = {};
+    function Generator() {
+    }
+    function GeneratorFunction() {
+    }
+    function GeneratorFunctionPrototype() {
+    }
+    t = Object.getPrototypeOf;
+    var c = [][n] ? t(t([][n]())) : (_regeneratorDefine26(t = {}, n, function() {
+      return this;
+    }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c);
+    function f(e2) {
+      return Object.setPrototypeOf ? Object.setPrototypeOf(e2, GeneratorFunctionPrototype) : (e2.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine26(e2, o, "GeneratorFunction")), e2.prototype = Object.create(u), e2;
+    }
+    return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine26(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine26(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine26(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine26(u), _regeneratorDefine26(u, o, "Generator"), _regeneratorDefine26(u, n, function() {
+      return this;
+    }), _regeneratorDefine26(u, "toString", function() {
+      return "[object Generator]";
+    }), (_regenerator6 = function _regenerator9() {
+      return { w: i, m: f };
+    })();
+  }
+  function _regeneratorDefine26(e, r, n, t) {
+    var i = Object.defineProperty;
+    try {
+      i({}, "", {});
+    } catch (e2) {
+      i = 0;
+    }
+    _regeneratorDefine26 = function _regeneratorDefine(e2, r2, n2, t2) {
+      function o(r3, n3) {
+        _regeneratorDefine26(e2, r3, function(e3) {
+          return this._invoke(r3, n3, e3);
+        });
+      }
+      r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
+    }, _regeneratorDefine26(e, r, n, t);
+  }
+  function _toConsumableArray8(r) {
+    return _arrayWithoutHoles8(r) || _iterableToArray8(r) || _unsupportedIterableToArray15(r) || _nonIterableSpread8();
+  }
+  function _nonIterableSpread8() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArray8(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles8(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray15(r);
+  }
+  function _slicedToArray7(r, e) {
+    return _arrayWithHoles7(r) || _iterableToArrayLimit7(r, e) || _unsupportedIterableToArray15(r, e) || _nonIterableRest7();
+  }
+  function _nonIterableRest7() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit7(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles7(r) {
+    if (Array.isArray(r)) return r;
+  }
+  function _createForOfIteratorHelper13(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray15(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _unsupportedIterableToArray15(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray15(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray15(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray15(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
+  function asyncGeneratorStep6(n, t, e, r, o, a, c) {
+    try {
+      var i = n[a](c), u = i.value;
+    } catch (n2) {
+      return void e(n2);
+    }
+    i.done ? t(u) : Promise.resolve(u).then(r, o);
+  }
+  function _asyncToGenerator6(n) {
+    return function() {
+      var t = this, e = arguments;
+      return new Promise(function(r, o) {
+        var a = n.apply(t, e);
+        function _next(n2) {
+          asyncGeneratorStep6(a, r, o, _next, _throw, "next", n2);
+        }
+        function _throw(n2) {
+          asyncGeneratorStep6(a, r, o, _next, _throw, "throw", n2);
+        }
+        _next(void 0);
+      });
+    };
+  }
   var init_aellux_ext_anchor = __esm({
     "src/aellux.ext.anchor.js": function() {
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
@@ -28391,6 +29452,7 @@
         var anchors = /* @__PURE__ */ new Map();
         var elementMemories = /* @__PURE__ */ new WeakMap();
         var placementMaps = /* @__PURE__ */ new Set();
+        var requestedMaps = /* @__PURE__ */ new Map();
         var nextLayoutId = 2e6;
         var mutations = null;
         AelluxJs2.extAttach(extensionName, {
@@ -28399,6 +29461,9 @@
           createPlacementMap: createPlacementMap
         });
         function init() {
+          AelluxJs2.comm.handle("anchor.placement", placementRequest, {
+            owner: extensionName
+          });
           AelluxJs2.registerCssProperty({
             name: "--ae-anchor-x",
             syntax: "<length>",
@@ -28447,11 +29512,12 @@
           return _destroy.apply(this, arguments);
         }
         function _destroy() {
-          _destroy = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee() {
+          _destroy = _asyncToGenerator6(/* @__PURE__ */ _regenerator6().m(function _callee() {
             var _iterator11, _step11, map;
-            return _regenerator5().w(function(_context) {
+            return _regenerator6().w(function(_context) {
               while (1) switch (_context.n) {
                 case 0:
+                  AelluxJs2.comm.removeOwner(extensionName);
                   _iterator11 = _createForOfIteratorHelper13(placementMaps);
                   try {
                     for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
@@ -28463,6 +29529,7 @@
                   } finally {
                     _iterator11.f();
                   }
+                  requestedMaps.clear();
                   _context.n = 1;
                   return Promise.all(Array.from(anchors.keys(), unmountAnchor));
                 case 1:
@@ -28475,6 +29542,27 @@
             }, _callee);
           }));
           return _destroy.apply(this, arguments);
+        }
+        function placementRequest(_ref) {
+          var action = _ref.action, owner = _ref.owner, element = _ref.element, pairs = _ref.pairs, target = _ref.target, placement = _ref.placement;
+          if (action === "invisible") return isInvisible(element);
+          var map = requestedMaps.get(owner);
+          if (action === "dispose") {
+            var _map;
+            (_map = map) === null || _map === void 0 || _map.destroy();
+            requestedMaps.delete(owner);
+            return true;
+          }
+          if (action === "mount" && !map) {
+            map = createPlacementMap();
+            requestedMaps.set(owner, map);
+          }
+          if (!map) return null;
+          if (action === "mount") return map.mount(element);
+          if (action === "unmount") return map.unmount(element);
+          if (action === "measure") return map.measure(element, pairs, target);
+          if (action === "place") return map.place(element, placement);
+          return null;
         }
         function createPlacementMap() {
           var memories = /* @__PURE__ */ new Map();
@@ -28594,9 +29682,9 @@
           return _unmountAnchor.apply(this, arguments);
         }
         function _unmountAnchor() {
-          _unmountAnchor = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee2(element) {
+          _unmountAnchor = _asyncToGenerator6(/* @__PURE__ */ _regenerator6().m(function _callee2(element) {
             var state, memory;
-            return _regenerator5().w(function(_context2) {
+            return _regenerator6().w(function(_context2) {
               while (1) switch (_context2.n) {
                 case 0:
                   state = anchors.get(element);
@@ -28723,11 +29811,12 @@
           });
         }
         function effectiveTarget(element, state) {
-          var _AelluxJs$ext$present, _AelluxJs$ext$present2;
           var value = element.getAttribute(targetAttribute);
           var target = value && value.trim() ? resolveElement(value) : element.offsetParent;
           state.group = value && value.trim() && target !== null && target !== void 0 && target.hasAttribute(groupAttribute) ? target : null;
-          return state.group ? ((_AelluxJs$ext$present = AelluxJs2.ext.present) === null || _AelluxJs$ext$present === void 0 || (_AelluxJs$ext$present2 = _AelluxJs$ext$present.selected) === null || _AelluxJs$ext$present2 === void 0 ? void 0 : _AelluxJs$ext$present2.call(_AelluxJs$ext$present, state.group)) || null : target;
+          return state.group ? AelluxJs2.comm.request("present.selection", {
+            group: state.group
+          }).value || null : target;
         }
         function circularTarget(element, target) {
           var visited = /* @__PURE__ */ new Set([element]);
@@ -28868,9 +29957,9 @@
           return _updateAnchor.apply(this, arguments);
         }
         function _updateAnchor() {
-          _updateAnchor = _asyncToGenerator5(/* @__PURE__ */ _regenerator5().m(function _callee3(element) {
+          _updateAnchor = _asyncToGenerator6(/* @__PURE__ */ _regenerator6().m(function _callee3(element) {
             var ensureLatest, state, revision, current, retry, target, candidates, placement, applied, visible, _args3 = arguments;
-            return _regenerator5().w(function(_context3) {
+            return _regenerator6().w(function(_context3) {
               while (1) switch (_context3.n) {
                 case 0:
                   ensureLatest = _args3.length > 1 && _args3[1] !== void 0 ? _args3[1] : false;
@@ -29225,7 +30314,7 @@
             scrollRevision: ((_anchors$get2 = anchors.get(element)) === null || _anchors$get2 === void 0 ? void 0 : _anchors$get2.scrollRevision) || 0,
             width: targetRect.width,
             height: targetRect.height,
-            signature: [].concat(position, [targetRect.width, targetRect.height], _toConsumableArray6(selected.self)).join("/")
+            signature: [].concat(position, [targetRect.width, targetRect.height], _toConsumableArray8(selected.self)).join("/")
           };
         }
         function writePlacement(element, placement) {
@@ -29330,7 +30419,7 @@
         function startSwitch(element, state, placement) {
           var handoff = null;
           if (state.switchOperation) {
-            var properties = ["transform"].concat(_toConsumableArray6((element.getAttribute(matchAttribute) || "").split(/\s+/).filter(function(property2) {
+            var properties = ["transform"].concat(_toConsumableArray8((element.getAttribute(matchAttribute) || "").split(/\s+/).filter(function(property2) {
               return property2 === "width" || property2 === "height";
             })));
             var computed = root2.getComputedStyle(element);
@@ -29346,7 +30435,7 @@
             }).filter(function(property2) {
               return !properties.includes(property2);
             });
-            handoff = AelluxJs2.persist.element.save(element, [], [].concat(_toConsumableArray6(properties), ["transition-property"]));
+            handoff = AelluxJs2.persist.element.save(element, [], [].concat(_toConsumableArray8(properties), ["transition-property"]));
             element.style.setProperty("transition-property", transitions.join(",") || "none", "important");
             var _iterator1 = _createForOfIteratorHelper13(values), _step1;
             try {
@@ -29439,15 +30528,15 @@
 
   // src/aellux.ext.viewport.js
   var aellux_ext_viewport_exports = {};
-  function _typeof8(o) {
+  function _typeof10(o) {
     "@babel/helpers - typeof";
-    return _typeof8 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof10 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof8(o);
+    }, _typeof10(o);
   }
-  function ownKeys3(e, r) {
+  function ownKeys6(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -29457,40 +30546,40 @@
     }
     return t;
   }
-  function _objectSpread3(e) {
+  function _objectSpread6(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys3(Object(t), true).forEach(function(r2) {
-        _defineProperty3(e, r2, t[r2]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys3(Object(t)).forEach(function(r2) {
+      r % 2 ? ownKeys6(Object(t), true).forEach(function(r2) {
+        _defineProperty6(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys6(Object(t)).forEach(function(r2) {
         Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
       });
     }
     return e;
   }
-  function _defineProperty3(e, r, t) {
-    return (r = _toPropertyKey4(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  function _defineProperty6(e, r, t) {
+    return (r = _toPropertyKey6(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
   }
-  function _toPropertyKey4(t) {
-    var i = _toPrimitive4(t, "string");
-    return "symbol" == _typeof8(i) ? i : i + "";
+  function _toPropertyKey6(t) {
+    var i = _toPrimitive6(t, "string");
+    return "symbol" == _typeof10(i) ? i : i + "";
   }
-  function _toPrimitive4(t, r) {
-    if ("object" != _typeof8(t) || !t) return t;
+  function _toPrimitive6(t, r) {
+    if ("object" != _typeof10(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof8(i)) return i;
+      if ("object" != _typeof10(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
   }
-  function _regenerator6() {
+  function _regenerator7() {
     /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
     var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag";
     function i(r2, n2, o2, i2) {
       var c2 = n2 && n2.prototype instanceof Generator ? n2 : Generator, u2 = Object.create(c2.prototype);
-      return _regeneratorDefine26(u2, "_invoke", (function(r3, n3, o3) {
+      return _regeneratorDefine27(u2, "_invoke", (function(r3, n3, o3) {
         var i3, c3, u3, f2 = 0, p = o3 || [], y = false, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d2(t2, r4) {
           return i3 = t2, c3 = 0, u3 = e, G.n = r4, a;
         } };
@@ -29533,37 +30622,37 @@
     function GeneratorFunctionPrototype() {
     }
     t = Object.getPrototypeOf;
-    var c = [][n] ? t(t([][n]())) : (_regeneratorDefine26(t = {}, n, function() {
+    var c = [][n] ? t(t([][n]())) : (_regeneratorDefine27(t = {}, n, function() {
       return this;
     }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c);
     function f(e2) {
-      return Object.setPrototypeOf ? Object.setPrototypeOf(e2, GeneratorFunctionPrototype) : (e2.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine26(e2, o, "GeneratorFunction")), e2.prototype = Object.create(u), e2;
+      return Object.setPrototypeOf ? Object.setPrototypeOf(e2, GeneratorFunctionPrototype) : (e2.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine27(e2, o, "GeneratorFunction")), e2.prototype = Object.create(u), e2;
     }
-    return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine26(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine26(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine26(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine26(u), _regeneratorDefine26(u, o, "Generator"), _regeneratorDefine26(u, n, function() {
+    return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine27(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine27(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine27(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine27(u), _regeneratorDefine27(u, o, "Generator"), _regeneratorDefine27(u, n, function() {
       return this;
-    }), _regeneratorDefine26(u, "toString", function() {
+    }), _regeneratorDefine27(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator6 = function _regenerator8() {
+    }), (_regenerator7 = function _regenerator9() {
       return { w: i, m: f };
     })();
   }
-  function _regeneratorDefine26(e, r, n, t) {
+  function _regeneratorDefine27(e, r, n, t) {
     var i = Object.defineProperty;
     try {
       i({}, "", {});
     } catch (e2) {
       i = 0;
     }
-    _regeneratorDefine26 = function _regeneratorDefine(e2, r2, n2, t2) {
+    _regeneratorDefine27 = function _regeneratorDefine(e2, r2, n2, t2) {
       function o(r3, n3) {
-        _regeneratorDefine26(e2, r3, function(e3) {
+        _regeneratorDefine27(e2, r3, function(e3) {
           return this._invoke(r3, n3, e3);
         });
       }
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
-    }, _regeneratorDefine26(e, r, n, t);
+    }, _regeneratorDefine27(e, r, n, t);
   }
-  function asyncGeneratorStep6(n, t, e, r, o, a, c) {
+  function asyncGeneratorStep7(n, t, e, r, o, a, c) {
     try {
       var i = n[a](c), u = i.value;
     } catch (n2) {
@@ -29571,16 +30660,16 @@
     }
     i.done ? t(u) : Promise.resolve(u).then(r, o);
   }
-  function _asyncToGenerator6(n) {
+  function _asyncToGenerator7(n) {
     return function() {
       var t = this, e = arguments;
       return new Promise(function(r, o) {
         var a = n.apply(t, e);
         function _next(n2) {
-          asyncGeneratorStep6(a, r, o, _next, _throw, "next", n2);
+          asyncGeneratorStep7(a, r, o, _next, _throw, "next", n2);
         }
         function _throw(n2) {
-          asyncGeneratorStep6(a, r, o, _next, _throw, "throw", n2);
+          asyncGeneratorStep7(a, r, o, _next, _throw, "throw", n2);
         }
         _next(void 0);
       });
@@ -29589,7 +30678,7 @@
   function _createForOfIteratorHelper14(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray15(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray16(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -29617,26 +30706,26 @@
       }
     } };
   }
-  function _toConsumableArray7(r) {
-    return _arrayWithoutHoles7(r) || _iterableToArray7(r) || _unsupportedIterableToArray15(r) || _nonIterableSpread7();
+  function _toConsumableArray9(r) {
+    return _arrayWithoutHoles9(r) || _iterableToArray9(r) || _unsupportedIterableToArray16(r) || _nonIterableSpread9();
   }
-  function _nonIterableSpread7() {
+  function _nonIterableSpread9() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray15(r, a) {
+  function _unsupportedIterableToArray16(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray15(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray16(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray15(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray16(r, a) : void 0;
     }
   }
-  function _iterableToArray7(r) {
+  function _iterableToArray9(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles7(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray15(r);
+  function _arrayWithoutHoles9(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray16(r);
   }
-  function _arrayLikeToArray15(r, a) {
+  function _arrayLikeToArray16(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -29666,7 +30755,7 @@
           destroy: destroy
         });
         function init() {
-          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray7(properties.map(function(name) {
+          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray9(properties.map(function(name) {
             return {
               name: name,
               syntax: "<number>",
@@ -29723,9 +30812,9 @@
           return _update.apply(this, arguments);
         }
         function _update() {
-          _update = _asyncToGenerator6(/* @__PURE__ */ _regenerator6().m(function _callee(element) {
+          _update = _asyncToGenerator7(/* @__PURE__ */ _regenerator7().m(function _callee(element) {
             var state, group;
-            return _regenerator6().w(function(_context) {
+            return _regenerator7().w(function(_context) {
               while (1) switch (_context.n) {
                 case 0:
                   state = states.get(element);
@@ -29940,9 +31029,9 @@
           return _refresh.apply(this, arguments);
         }
         function _refresh() {
-          _refresh = _asyncToGenerator6(/* @__PURE__ */ _regenerator6().m(function _callee2(group) {
+          _refresh = _asyncToGenerator7(/* @__PURE__ */ _regenerator7().m(function _callee2(group) {
             var measurements;
-            return _regenerator6().w(function(_context2) {
+            return _regenerator7().w(function(_context2) {
               while (1) switch (_context2.n) {
                 case 0:
                   _context2.n = 1;
@@ -29990,8 +31079,8 @@
                               bubbles: true,
                               composed: true,
                               cancelable: false,
-                              detail: _objectSpread3(_objectSpread3({}, snapshot), {}, {
-                                previous: previous && _objectSpread3({}, previous),
+                              detail: _objectSpread6(_objectSpread6({}, snapshot), {}, {
+                                previous: previous && _objectSpread6({}, previous),
                                 initial: initial
                               })
                             });
@@ -30292,20 +31381,20 @@
 
   // src/aellux.ext.scrollbox.js
   var aellux_ext_scrollbox_exports = {};
-  function _toConsumableArray8(r) {
-    return _arrayWithoutHoles8(r) || _iterableToArray8(r) || _unsupportedIterableToArray16(r) || _nonIterableSpread8();
+  function _toConsumableArray10(r) {
+    return _arrayWithoutHoles10(r) || _iterableToArray10(r) || _unsupportedIterableToArray17(r) || _nonIterableSpread10();
   }
-  function _nonIterableSpread8() {
+  function _nonIterableSpread10() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray8(r) {
+  function _iterableToArray10(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles8(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray16(r);
+  function _arrayWithoutHoles10(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray17(r);
   }
   function _slicedToArray8(r, e) {
-    return _arrayWithHoles8(r) || _iterableToArrayLimit8(r, e) || _unsupportedIterableToArray16(r, e) || _nonIterableRest8();
+    return _arrayWithHoles8(r) || _iterableToArrayLimit8(r, e) || _unsupportedIterableToArray17(r, e) || _nonIterableRest8();
   }
   function _nonIterableRest8() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -30337,7 +31426,7 @@
   function _createForOfIteratorHelper15(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray16(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray17(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -30365,14 +31454,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray16(r, a) {
+  function _unsupportedIterableToArray17(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray16(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray17(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray16(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray17(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray16(r, a) {
+  function _arrayLikeToArray17(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -30491,28 +31580,25 @@
         var inlineMemories = /* @__PURE__ */ new WeakMap();
         var elasticMemories = /* @__PURE__ */ new WeakMap();
         var pointerScrollMemories = /* @__PURE__ */ new WeakMap();
-        var snapController = null;
         var activePointerScrollState = null;
         AelluxJs2.extAttach(extensionName, {
           init: init,
           destroy: destroy,
           next: next,
           previous: previous,
-          goto: goto,
-          registerSnapController: registerSnapController,
-          unregisterSnapController: unregisterSnapController
+          goto: goto
         });
         function init() {
           layoutEvents.forEach(function(name) {
             return onEvent(root2.document, name, onLayout);
           });
-          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray8(properties.map(function(name) {
+          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray10(properties.map(function(name) {
             return {
               name: name,
               syntax: "<number>",
               initialValue: "0"
             };
-          })).concat(_toConsumableArray8(fadeProperties.map(function(name) {
+          })).concat(_toConsumableArray10(fadeProperties.map(function(name) {
             return {
               name: name,
               syntax: "<length>",
@@ -30523,7 +31609,7 @@
             name: "--ae-scrollbox-fade-size",
             syntax: "<length>",
             initialValue: "16px"
-          }], _toConsumableArray8(scrollbarProperties.map(function(name, index) {
+          }], _toConsumableArray10(scrollbarProperties.map(function(name, index) {
             return {
               name: name,
               syntax: index === 5 ? "block | none" : "<length>",
@@ -30584,23 +31670,22 @@
             extensionName: extensionName
           });
         }
-        function registerSnapController(controller) {
-          snapController = controller;
-        }
-        function unregisterSnapController(controller) {
-          if (snapController === controller) snapController = null;
-        }
         function goto(element, index, behavior) {
-          var _snapController;
-          return ((_snapController = snapController) === null || _snapController === void 0 ? void 0 : _snapController.goto(element, index, behavior)) || false;
+          return AelluxJs2.comm.request("scrollbox-snap.goto", {
+            element: element,
+            index: index,
+            behavior: behavior
+          }).value || false;
         }
         function next(element) {
-          var _snapController2;
-          return ((_snapController2 = snapController) === null || _snapController2 === void 0 ? void 0 : _snapController2.next(element)) || false;
+          return AelluxJs2.comm.request("scrollbox-snap.next", {
+            element: element
+          }).value || false;
         }
         function previous(element) {
-          var _snapController3;
-          return ((_snapController3 = snapController) === null || _snapController3 === void 0 ? void 0 : _snapController3.previous(element)) || false;
+          return AelluxJs2.comm.request("scrollbox-snap.previous", {
+            element: element
+          }).value || false;
         }
         function dispatchInteraction(state, reason, active) {
           AelluxJs2.dispatchFrom(state.element, "ScrollboxInteraction", {
@@ -30636,7 +31721,7 @@
         }
         function mountScrollbox(element) {
           if (scrollboxes.has(element)) return;
-          elementMemories.set(element, AelluxJs2.persist.element.save(element, [fadeStateAttribute], [].concat(properties, _toConsumableArray8(fadeProperties))));
+          elementMemories.set(element, AelluxJs2.persist.element.save(element, [fadeStateAttribute], [].concat(properties, _toConsumableArray10(fadeProperties))));
           cursorMemories.set(element, AelluxJs2.persist.element.save(element, [], ["cursor"]));
           var elastic = {
             wrapper: null,
@@ -31029,7 +32114,7 @@
           }
           var marker = owned ? null : root2.document.createComment("scrollbar position");
           if (marker) scrollbarElement.before(marker);
-          if (!owned) scrollbarMemories.set(scrollbarElement, AelluxJs2.persist.element.save(scrollbarElement, [], [].concat(scrollbarProperties, _toConsumableArray8(scrollbarThemeProperties))));
+          if (!owned) scrollbarMemories.set(scrollbarElement, AelluxJs2.persist.element.save(scrollbarElement, [], [].concat(scrollbarProperties, _toConsumableArray10(scrollbarThemeProperties))));
           var record = {
             element: scrollbarElement,
             owned: owned,
@@ -32821,7 +33906,7 @@
   function _createForOfIteratorHelper16(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray17(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray18(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -32849,7 +33934,7 @@
       }
     } };
   }
-  function ownKeys4(e, r) {
+  function ownKeys7(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -32859,48 +33944,48 @@
     }
     return t;
   }
-  function _objectSpread4(e) {
+  function _objectSpread7(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys4(Object(t), true).forEach(function(r2) {
-        _defineProperty4(e, r2, t[r2]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys4(Object(t)).forEach(function(r2) {
+      r % 2 ? ownKeys7(Object(t), true).forEach(function(r2) {
+        _defineProperty7(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys7(Object(t)).forEach(function(r2) {
         Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
       });
     }
     return e;
   }
-  function _defineProperty4(e, r, t) {
-    return (r = _toPropertyKey5(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  function _defineProperty7(e, r, t) {
+    return (r = _toPropertyKey7(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
   }
-  function _toPropertyKey5(t) {
-    var i = _toPrimitive5(t, "string");
-    return "symbol" == _typeof9(i) ? i : i + "";
+  function _toPropertyKey7(t) {
+    var i = _toPrimitive7(t, "string");
+    return "symbol" == _typeof11(i) ? i : i + "";
   }
-  function _toPrimitive5(t, r) {
-    if ("object" != _typeof9(t) || !t) return t;
+  function _toPrimitive7(t, r) {
+    if ("object" != _typeof11(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof9(i)) return i;
+      if ("object" != _typeof11(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
   }
   function _slicedToArray9(r, e) {
-    return _arrayWithHoles9(r) || _iterableToArrayLimit9(r, e) || _unsupportedIterableToArray17(r, e) || _nonIterableRest9();
+    return _arrayWithHoles9(r) || _iterableToArrayLimit9(r, e) || _unsupportedIterableToArray18(r, e) || _nonIterableRest9();
   }
   function _nonIterableRest9() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray17(r, a) {
+  function _unsupportedIterableToArray18(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray17(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray18(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray17(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray18(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray17(r, a) {
+  function _arrayLikeToArray18(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -32929,13 +34014,13 @@
   function _arrayWithHoles9(r) {
     if (Array.isArray(r)) return r;
   }
-  function _typeof9(o) {
+  function _typeof11(o) {
     "@babel/helpers - typeof";
-    return _typeof9 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof11 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof9(o);
+    }, _typeof11(o);
   }
   var init_aellux_ext_adaptive = __esm({
     "src/aellux.ext.adaptive.js": function() {
@@ -33002,17 +34087,17 @@
             initialValue: "0"
           });
           var overrides = options.adaptiveParams === void 0 ? {} : options.adaptiveParams;
-          if (!overrides || _typeof9(overrides) !== "object" || Array.isArray(overrides)) {
+          if (!overrides || _typeof11(overrides) !== "object" || Array.isArray(overrides)) {
             parameterDiagnostic("", overrides, "Expected an object of Adaptive parameter groups; using defaults.");
             overrides = {};
           }
           for (var _i = 0, _Object$keys = Object.keys(adaptiveParams); _i < _Object$keys.length; _i++) {
             var group = _Object$keys[_i];
-            if (group in overrides && (!overrides[group] || _typeof9(overrides[group]) !== "object" || Array.isArray(overrides[group]))) {
+            if (group in overrides && (!overrides[group] || _typeof11(overrides[group]) !== "object" || Array.isArray(overrides[group]))) {
               parameterDiagnostic(group, overrides[group], "Expected a parameter group object; using defaults.");
               continue;
             }
-            if (overrides[group] && _typeof9(overrides[group]) === "object") {
+            if (overrides[group] && _typeof11(overrides[group]) === "object") {
               for (var _i2 = 0, _Object$entries = Object.entries(overrides[group]); _i2 < _Object$entries.length; _i2++) {
                 var _Object$entries$_i = _slicedToArray9(_Object$entries[_i2], 2), key = _Object$entries$_i[0], value = _Object$entries$_i[1];
                 if (typeof value !== "number" || !Number.isFinite(value) || (group === "minSizes" ? value < 0 : value <= 0)) {
@@ -33026,7 +34111,7 @@
           for (var _i3 = 0, _arr = [["ratioShapes", "vertical", "horizontal", [0.8, 1.25]], ["experienceScale", "near", "far", [1, 1.5]]]; _i3 < _arr.length; _i3++) {
             var _arr$_i = _slicedToArray9(_arr[_i3], 4), _group = _arr$_i[0], lower = _arr$_i[1], upper = _arr$_i[2], fallback = _arr$_i[3];
             if (adaptiveParams[_group][lower] >= adaptiveParams[_group][upper]) {
-              parameterDiagnostic(_group, _objectSpread4({}, adaptiveParams[_group]), "The lower boundary must be less than the upper boundary; using defaults.");
+              parameterDiagnostic(_group, _objectSpread7({}, adaptiveParams[_group]), "The lower boundary must be less than the upper boundary; using defaults.");
               adaptiveParams[_group][lower] = fallback[0];
               adaptiveParams[_group][upper] = fallback[1];
             }
@@ -33034,7 +34119,7 @@
           var orderedSizes = ["compact", "small", "medium", "large", "xl", "xxl"];
           if (orderedSizes.some(function(name, index) {
             return index > 0 && adaptiveParams.minSizes[name] < adaptiveParams.minSizes[orderedSizes[index - 1]];
-          })) parameterDiagnostic("minSizes", _objectSpread4({}, adaptiveParams.minSizes), "Named minimum sizes are out of order; the configured thresholds are preserved.");
+          })) parameterDiagnostic("minSizes", _objectSpread7({}, adaptiveParams.minSizes), "Named minimum sizes are out of order; the configured thresholds are preserved.");
           managedClasses = getManagedClasses();
           for (var _i4 = 0, _Object$keys2 = Object.keys(adaptiveParams); _i4 < _Object$keys2.length; _i4++) {
             var _group2 = _Object$keys2[_i4];
@@ -33268,16 +34353,16 @@
   });
 
   // src/internal/create-present-playback.js
-  function _typeof10(o) {
+  function _typeof12(o) {
     "@babel/helpers - typeof";
-    return _typeof10 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof12 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof10(o);
+    }, _typeof12(o);
   }
   function _slicedToArray10(r, e) {
-    return _arrayWithHoles10(r) || _iterableToArrayLimit10(r, e) || _unsupportedIterableToArray18(r, e) || _nonIterableRest10();
+    return _arrayWithHoles10(r) || _iterableToArrayLimit10(r, e) || _unsupportedIterableToArray19(r, e) || _nonIterableRest10();
   }
   function _nonIterableRest10() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -33306,7 +34391,7 @@
   function _arrayWithHoles10(r) {
     if (Array.isArray(r)) return r;
   }
-  function ownKeys5(e, r) {
+  function ownKeys8(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -33316,12 +34401,12 @@
     }
     return t;
   }
-  function _objectSpread5(e) {
+  function _objectSpread8(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys5(Object(t), true).forEach(function(r2) {
-        _defineProperty5(e, r2, t[r2]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys5(Object(t)).forEach(function(r2) {
+      r % 2 ? ownKeys8(Object(t), true).forEach(function(r2) {
+        _defineProperty8(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys8(Object(t)).forEach(function(r2) {
         Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
       });
     }
@@ -33345,19 +34430,19 @@
     }
     return t;
   }
-  function _defineProperty5(e, r, t) {
-    return (r = _toPropertyKey6(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  function _defineProperty8(e, r, t) {
+    return (r = _toPropertyKey8(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
   }
-  function _toPropertyKey6(t) {
-    var i = _toPrimitive6(t, "string");
-    return "symbol" == _typeof10(i) ? i : i + "";
+  function _toPropertyKey8(t) {
+    var i = _toPrimitive8(t, "string");
+    return "symbol" == _typeof12(i) ? i : i + "";
   }
-  function _toPrimitive6(t, r) {
-    if ("object" != _typeof10(t) || !t) return t;
+  function _toPrimitive8(t, r) {
+    if ("object" != _typeof12(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof10(i)) return i;
+      if ("object" != _typeof12(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -33365,7 +34450,7 @@
   function _createForOfIteratorHelper17(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray18(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray19(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -33393,26 +34478,26 @@
       }
     } };
   }
-  function _toConsumableArray9(r) {
-    return _arrayWithoutHoles9(r) || _iterableToArray9(r) || _unsupportedIterableToArray18(r) || _nonIterableSpread9();
+  function _toConsumableArray11(r) {
+    return _arrayWithoutHoles11(r) || _iterableToArray11(r) || _unsupportedIterableToArray19(r) || _nonIterableSpread11();
   }
-  function _nonIterableSpread9() {
+  function _nonIterableSpread11() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray18(r, a) {
+  function _unsupportedIterableToArray19(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray18(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray19(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray18(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray19(r, a) : void 0;
     }
   }
-  function _iterableToArray9(r) {
+  function _iterableToArray11(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles9(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray18(r);
+  function _arrayWithoutHoles11(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray19(r);
   }
-  function _arrayLikeToArray18(r, a) {
+  function _arrayLikeToArray19(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -33440,7 +34525,7 @@
       });
     };
     function init() {
-      interpolatedSizes = !!api.registerCssProperty.apply(api, _toConsumableArray9(["height", "width"].map(function(dimension) {
+      interpolatedSizes = !!api.registerCssProperty.apply(api, _toConsumableArray11(["height", "width"].map(function(dimension) {
         return {
           name: "--ae-present-reverse-max-".concat(dimension),
           syntax: "<length>",
@@ -33523,7 +34608,7 @@
         try {
           var _element$classList;
           element.style.setProperty("transition-property", "none", "important");
-          (_element$classList = element.classList).remove.apply(_element$classList, _toConsumableArray9(classes));
+          (_element$classList = element.classList).remove.apply(_element$classList, _toConsumableArray11(classes));
           if (controller.measuredHeight) element.style.setProperty("max-height", "0px", "important");
           if (controller.measuredWidth) element.style.setProperty("max-width", "0px", "important");
           if (progress) element.style.setProperty("--ae-present-pop-phase", "0");
@@ -33546,7 +34631,7 @@
           };
         } finally {
           var _element$classList2;
-          (_element$classList2 = element.classList).add.apply(_element$classList2, _toConsumableArray9(classes));
+          (_element$classList2 = element.classList).add.apply(_element$classList2, _toConsumableArray11(classes));
           memory.restore();
           element.getBoundingClientRect();
           transition.restore();
@@ -33562,7 +34647,7 @@
           var source = record.tracks.find(function(track) {
             return track.property === animation.transitionProperty;
           });
-          var frames = source.property.startsWith("grid") ? [_defineProperty5({}, camel(source.property), source.from), _defineProperty5({}, camel(source.property), source.to)] : animation.effect.getKeyframes().map(function(_ref3) {
+          var frames = source.property.startsWith("grid") ? [_defineProperty8({}, camel(source.property), source.from), _defineProperty8({}, camel(source.property), source.to)] : animation.effect.getKeyframes().map(function(_ref3) {
             var computedOffset = _ref3.computedOffset, frame = _objectWithoutProperties(_ref3, _excluded);
             return frame;
           });
@@ -33578,8 +34663,8 @@
         });
       }
       return record.tracks.map(function(track) {
-        return _objectSpread5(_objectSpread5({}, track), {}, {
-          frames: [_defineProperty5({}, camel(track.property), track.from), _defineProperty5({}, camel(track.property), track.to)],
+        return _objectSpread8(_objectSpread8({}, track), {}, {
+          frames: [_defineProperty8({}, camel(track.property), track.from), _defineProperty8({}, camel(track.property), track.to)],
           timing: {
             easing: /^linear\(/i.test(record.nativeEasing || "") ? record.nativeEasing : track.easing
           },
@@ -33603,10 +34688,10 @@
     }
     function reverse(element, tracks, progress) {
       var interactive = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : false;
-      var duration = Math.max.apply(Math, [0].concat(_toConsumableArray9(tracks.map(function(track) {
+      var duration = Math.max.apply(Math, [0].concat(_toConsumableArray11(tracks.map(function(track) {
         return track.time;
       }))));
-      var owned = _toConsumableArray9(new Set(tracks.map(function(track) {
+      var owned = _toConsumableArray11(new Set(tracks.map(function(track) {
         return track.property;
       })));
       var privateProperties = owned.flatMap(function(property) {
@@ -33614,7 +34699,7 @@
           return "--ae-present-reverse-".concat(phase, "-").concat(suffix(property));
         });
       });
-      privateProperties.push.apply(privateProperties, _toConsumableArray9(owned.filter(function(property) {
+      privateProperties.push.apply(privateProperties, _toConsumableArray11(owned.filter(function(property) {
         return property.startsWith("max-");
       }).map(function(property) {
         return "--ae-present-reverse-".concat(property);
@@ -33622,9 +34707,9 @@
       var memory = null, effects = [];
       var inspectable = typeof element.getAnimations === "function" && root2.KeyframeEffect && typeof root2.KeyframeEffect.prototype.setKeyframes === "function";
       function apply() {
-        memory = api.persist.element.save(element, [], [].concat(_toConsumableArray9(owned), _toConsumableArray9(privateProperties), _toConsumableArray9(transitionProperties.map(function(name2) {
+        memory = api.persist.element.save(element, [], [].concat(_toConsumableArray11(owned), _toConsumableArray11(privateProperties), _toConsumableArray11(transitionProperties.map(function(name2) {
           return "transition-".concat(name2);
-        })), _toConsumableArray9(animationProperties.map(function(name2) {
+        })), _toConsumableArray11(animationProperties.map(function(name2) {
           return "animation-".concat(name2);
         }))));
         var style = element.style;
@@ -33720,7 +34805,7 @@
             _iterator5.f();
           }
           animationProperties.forEach(function(name2, index) {
-            return style.setProperty("animation-".concat(name2), [previous[index]].concat(_toConsumableArray9(additions[index])).join(","), "important");
+            return style.setProperty("animation-".concat(name2), [previous[index]].concat(_toConsumableArray11(additions[index])).join(","), "important");
           });
         }
         if (progress && !interactive) {
@@ -33729,10 +34814,10 @@
           var _computed = root2.getComputedStyle(element);
           var _previous = list(_computed.transitionProperty);
           var durations = list(_computed.transitionDuration), delays = list(_computed.transitionDelay), easings = list(_computed.transitionTimingFunction);
-          style.setProperty("transition-property", [].concat(_toConsumableArray9(_previous), ["--ae-unpop-progress"]).join(","), "important");
+          style.setProperty("transition-property", [].concat(_toConsumableArray11(_previous), ["--ae-unpop-progress"]).join(","), "important");
           var _loop2 = function _loop22() {
             var _arr$_i = _slicedToArray10(_arr[_i], 3), name2 = _arr$_i[0], values2 = _arr$_i[1], extra = _arr$_i[2];
-            style.setProperty("transition-".concat(name2), [].concat(_toConsumableArray9(_previous.map(function(_, index) {
+            style.setProperty("transition-".concat(name2), [].concat(_toConsumableArray11(_previous.map(function(_, index) {
               return values2[index % values2.length];
             })), [extra]).join(","), "important");
           };
@@ -33860,7 +34945,7 @@
       var tracks = source.filter(function(track) {
         return !track.property.startsWith("--ae-");
       });
-      var duration = Math.max.apply(Math, [0].concat(_toConsumableArray9(tracks.map(function(track) {
+      var duration = Math.max.apply(Math, [0].concat(_toConsumableArray11(tracks.map(function(track) {
         return track.duration;
       }))));
       var easing = ((_tracks$ = tracks[0]) === null || _tracks$ === void 0 ? void 0 : _tracks$.timing.easing) || "linear";
@@ -33876,7 +34961,7 @@
           timing: {
             easing: easing
           },
-          frames: [_defineProperty5({}, property, forward ? "0" : "1"), _defineProperty5({}, property, forward ? "1" : "0")]
+          frames: [_defineProperty8({}, property, forward ? "0" : "1"), _defineProperty8({}, property, forward ? "1" : "0")]
         });
       }
       return reverse(element, tracks, false, true);
@@ -33923,27 +35008,27 @@
   });
 
   // src/internal/create-present-gestures.js
-  function _typeof11(o) {
+  function _typeof13(o) {
     "@babel/helpers - typeof";
-    return _typeof11 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof13 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof11(o);
+    }, _typeof13(o);
   }
-  function _toConsumableArray10(r) {
-    return _arrayWithoutHoles10(r) || _iterableToArray10(r) || _unsupportedIterableToArray19(r) || _nonIterableSpread10();
+  function _toConsumableArray12(r) {
+    return _arrayWithoutHoles12(r) || _iterableToArray12(r) || _unsupportedIterableToArray20(r) || _nonIterableSpread12();
   }
-  function _nonIterableSpread10() {
+  function _nonIterableSpread12() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray10(r) {
+  function _iterableToArray12(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles10(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray19(r);
+  function _arrayWithoutHoles12(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray20(r);
   }
-  function ownKeys6(e, r) {
+  function ownKeys9(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -33953,30 +35038,30 @@
     }
     return t;
   }
-  function _objectSpread6(e) {
+  function _objectSpread9(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys6(Object(t), true).forEach(function(r2) {
-        _defineProperty6(e, r2, t[r2]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys6(Object(t)).forEach(function(r2) {
+      r % 2 ? ownKeys9(Object(t), true).forEach(function(r2) {
+        _defineProperty9(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys9(Object(t)).forEach(function(r2) {
         Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
       });
     }
     return e;
   }
-  function _defineProperty6(e, r, t) {
-    return (r = _toPropertyKey7(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  function _defineProperty9(e, r, t) {
+    return (r = _toPropertyKey9(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
   }
-  function _toPropertyKey7(t) {
-    var i = _toPrimitive7(t, "string");
-    return "symbol" == _typeof11(i) ? i : i + "";
+  function _toPropertyKey9(t) {
+    var i = _toPrimitive9(t, "string");
+    return "symbol" == _typeof13(i) ? i : i + "";
   }
-  function _toPrimitive7(t, r) {
-    if ("object" != _typeof11(t) || !t) return t;
+  function _toPrimitive9(t, r) {
+    if ("object" != _typeof13(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof11(i)) return i;
+      if ("object" != _typeof13(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -33984,7 +35069,7 @@
   function _createForOfIteratorHelper18(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray19(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray20(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -34012,14 +35097,14 @@
       }
     } };
   }
-  function _unsupportedIterableToArray19(r, a) {
+  function _unsupportedIterableToArray20(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray19(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray20(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray19(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray20(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray19(r, a) {
+  function _arrayLikeToArray20(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -34224,7 +35309,7 @@
         }
         if (!(distance > 0)) warn(element, property, raw, "Use a positive CSS length or auto; using auto.");
       }
-      return _objectSpread6(_objectSpread6({}, thresholds), {}, {
+      return _objectSpread9(_objectSpread9({}, thresholds), {}, {
         distance: distance > 0 ? distance : 0,
         fallback: Math.max(1, axis === "x" ? element.offsetWidth : element.offsetHeight)
       });
@@ -34275,7 +35360,7 @@
         var settled = new Promise(function(done) {
           resolve = done;
         });
-        var _owner = current.owner = _objectSpread6(_objectSpread6({}, candidate), {}, {
+        var _owner = current.owner = _objectSpread9(_objectSpread9({}, candidate), {}, {
           params: params,
           axis: axis,
           displacement: 0,
@@ -34382,7 +35467,7 @@
       inspect: inspect,
       destroy: function destroy() {
         cancel();
-        for (var _i4 = 0, _arr4 = _toConsumableArray10(entries.keys()); _i4 < _arr4.length; _i4++) {
+        for (var _i4 = 0, _arr4 = _toConsumableArray12(entries.keys()); _i4 < _arr4.length; _i4++) {
           var element = _arr4[_i4];
           remove(element);
         }
@@ -34408,12 +35493,20 @@
 
   // src/aellux.ext.present.js
   var aellux_ext_present_exports = {};
-  function _regenerator7() {
+  function _typeof14(o) {
+    "@babel/helpers - typeof";
+    return _typeof14 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof14(o);
+  }
+  function _regenerator8() {
     /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
     var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag";
     function i(r2, n2, o2, i2) {
       var c2 = n2 && n2.prototype instanceof Generator ? n2 : Generator, u2 = Object.create(c2.prototype);
-      return _regeneratorDefine27(u2, "_invoke", (function(r3, n3, o3) {
+      return _regeneratorDefine28(u2, "_invoke", (function(r3, n3, o3) {
         var i3, c3, u3, f2 = 0, p = o3 || [], y = false, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d2(t2, r4) {
           return i3 = t2, c3 = 0, u3 = e, G.n = r4, a;
         } };
@@ -34456,37 +35549,37 @@
     function GeneratorFunctionPrototype() {
     }
     t = Object.getPrototypeOf;
-    var c = [][n] ? t(t([][n]())) : (_regeneratorDefine27(t = {}, n, function() {
+    var c = [][n] ? t(t([][n]())) : (_regeneratorDefine28(t = {}, n, function() {
       return this;
     }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c);
     function f(e2) {
-      return Object.setPrototypeOf ? Object.setPrototypeOf(e2, GeneratorFunctionPrototype) : (e2.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine27(e2, o, "GeneratorFunction")), e2.prototype = Object.create(u), e2;
+      return Object.setPrototypeOf ? Object.setPrototypeOf(e2, GeneratorFunctionPrototype) : (e2.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine28(e2, o, "GeneratorFunction")), e2.prototype = Object.create(u), e2;
     }
-    return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine27(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine27(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine27(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine27(u), _regeneratorDefine27(u, o, "Generator"), _regeneratorDefine27(u, n, function() {
+    return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine28(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine28(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine28(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine28(u), _regeneratorDefine28(u, o, "Generator"), _regeneratorDefine28(u, n, function() {
       return this;
-    }), _regeneratorDefine27(u, "toString", function() {
+    }), _regeneratorDefine28(u, "toString", function() {
       return "[object Generator]";
-    }), (_regenerator7 = function _regenerator8() {
+    }), (_regenerator8 = function _regenerator9() {
       return { w: i, m: f };
     })();
   }
-  function _regeneratorDefine27(e, r, n, t) {
+  function _regeneratorDefine28(e, r, n, t) {
     var i = Object.defineProperty;
     try {
       i({}, "", {});
     } catch (e2) {
       i = 0;
     }
-    _regeneratorDefine27 = function _regeneratorDefine(e2, r2, n2, t2) {
+    _regeneratorDefine28 = function _regeneratorDefine(e2, r2, n2, t2) {
       function o(r3, n3) {
-        _regeneratorDefine27(e2, r3, function(e3) {
+        _regeneratorDefine28(e2, r3, function(e3) {
           return this._invoke(r3, n3, e3);
         });
       }
       r2 ? i ? i(e2, r2, { value: n2, enumerable: !t2, configurable: !t2, writable: !t2 }) : e2[r2] = n2 : (o("next", 0), o("throw", 1), o("return", 2));
-    }, _regeneratorDefine27(e, r, n, t);
+    }, _regeneratorDefine28(e, r, n, t);
   }
-  function asyncGeneratorStep7(n, t, e, r, o, a, c) {
+  function asyncGeneratorStep8(n, t, e, r, o, a, c) {
     try {
       var i = n[a](c), u = i.value;
     } catch (n2) {
@@ -34494,16 +35587,16 @@
     }
     i.done ? t(u) : Promise.resolve(u).then(r, o);
   }
-  function _asyncToGenerator7(n) {
+  function _asyncToGenerator8(n) {
     return function() {
       var t = this, e = arguments;
       return new Promise(function(r, o) {
         var a = n.apply(t, e);
         function _next(n2) {
-          asyncGeneratorStep7(a, r, o, _next, _throw, "next", n2);
+          asyncGeneratorStep8(a, r, o, _next, _throw, "next", n2);
         }
         function _throw(n2) {
-          asyncGeneratorStep7(a, r, o, _next, _throw, "throw", n2);
+          asyncGeneratorStep8(a, r, o, _next, _throw, "throw", n2);
         }
         _next(void 0);
       });
@@ -34512,7 +35605,7 @@
   function _createForOfIteratorHelper19(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray20(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray21(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -34540,32 +35633,70 @@
       }
     } };
   }
-  function _toConsumableArray11(r) {
-    return _arrayWithoutHoles11(r) || _iterableToArray11(r) || _unsupportedIterableToArray20(r) || _nonIterableSpread11();
+  function _toConsumableArray13(r) {
+    return _arrayWithoutHoles13(r) || _iterableToArray13(r) || _unsupportedIterableToArray21(r) || _nonIterableSpread13();
   }
-  function _nonIterableSpread11() {
+  function _nonIterableSpread13() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _iterableToArray11(r) {
+  function _iterableToArray13(r) {
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
-  function _arrayWithoutHoles11(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray20(r);
+  function _arrayWithoutHoles13(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray21(r);
+  }
+  function ownKeys10(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function(r2) {
+        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
+      })), t.push.apply(t, o);
+    }
+    return t;
+  }
+  function _objectSpread10(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys10(Object(t), true).forEach(function(r2) {
+        _defineProperty10(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys10(Object(t)).forEach(function(r2) {
+        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
+      });
+    }
+    return e;
+  }
+  function _defineProperty10(e, r, t) {
+    return (r = _toPropertyKey10(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  }
+  function _toPropertyKey10(t) {
+    var i = _toPrimitive10(t, "string");
+    return "symbol" == _typeof14(i) ? i : i + "";
+  }
+  function _toPrimitive10(t, r) {
+    if ("object" != _typeof14(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r || "default");
+      if ("object" != _typeof14(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return ("string" === r ? String : Number)(t);
   }
   function _slicedToArray11(r, e) {
-    return _arrayWithHoles11(r) || _iterableToArrayLimit11(r, e) || _unsupportedIterableToArray20(r, e) || _nonIterableRest11();
+    return _arrayWithHoles11(r) || _iterableToArrayLimit11(r, e) || _unsupportedIterableToArray21(r, e) || _nonIterableRest11();
   }
   function _nonIterableRest11() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray20(r, a) {
+  function _unsupportedIterableToArray21(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray20(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray21(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray20(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray21(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray20(r, a) {
+  function _arrayLikeToArray21(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -34696,23 +35827,62 @@
         var presentationSequence = 0;
         var cssProperties = [["pop-progress", "<number>", "0"], ["dismiss-progress", "<number>", "1"], ["present-pop-phase", "<number>", "0"], ["present-dismiss-phase", "<number>", "1"], ["from-opacity", OPACITY_SYNTAX, "0"], ["pop-opacity", OPACITY_SYNTAX, "1"], ["dismiss-opacity", OPACITY_SYNTAX, "0"], ["from-transform", TRANSFORM_SYNTAX, "scale(0.5)"], ["pop-transform", TRANSFORM_SYNTAX, "scale(1)"], ["dismiss-transform", TRANSFORM_SYNTAX, "scale(1.2)"], ["from-height", "*", "0fr"], ["pop-height", "*", "1fr"], ["dismiss-height", "*", "0fr"], ["from-width", "*", "0fr"], ["pop-width", "*", "1fr"], ["dismiss-width", "*", "0fr"], ["pop-ease", "*", "ease-out"], ["dismiss-ease", "*", "ease-in"], ["pop-duration", "<time>", "250ms"], ["dismiss-duration", "<time>", "250ms"]];
         function init(options) {
+          var communication = {
+            owner: extensionName
+          };
+          var _loop = function _loop2() {
+            var _Object$entries$_i = _slicedToArray11(_Object$entries[_i], 2), name = _Object$entries$_i[0], method = _Object$entries$_i[1];
+            AelluxJs2.comm.handle("present." + name, function(_ref) {
+              var element = _ref.element;
+              return method(element);
+            }, communication);
+          };
+          for (var _i = 0, _Object$entries = Object.entries({
+            pop: pop,
+            unpop: unpop,
+            dismiss: dismiss
+          }); _i < _Object$entries.length; _i++) {
+            _loop();
+          }
+          AelluxJs2.comm.handle("present.toggle", function(_ref2) {
+            var element = _ref2.element, goto = _ref2.goto;
+            return toggle(element, goto);
+          }, communication);
+          AelluxJs2.comm.handle("present.show", function(_ref3) {
+            var group = _ref3.group, member = _ref3.member;
+            return show(group, member);
+          }, communication);
+          AelluxJs2.comm.handle("present.selection", function(_ref4) {
+            var group = _ref4.group;
+            return selected(group);
+          }, communication);
+          AelluxJs2.comm.handle("present.pop-next", function(request) {
+            return popNext(request.group, function(member) {
+              if (request.preparation) {
+                var result = AelluxJs2.comm.request(request.preparation.contract, _objectSpread10(_objectSpread10({}, request.preparation.payload), {}, {
+                  element: member
+                }));
+                if (!result.handled || result.value === false) throw new Error("Present preparation is unavailable.");
+              }
+            });
+          }, communication);
           playback.init();
-          var descriptors = cssProperties.map(function(_ref) {
-            var _ref2 = _slicedToArray11(_ref, 3), name = _ref2[0], syntax = _ref2[1], initialValue = _ref2[2];
+          var descriptors = cssProperties.map(function(_ref5) {
+            var _ref6 = _slicedToArray11(_ref5, 3), name = _ref6[0], syntax = _ref6[1], initialValue = _ref6[2];
             return {
               name: "--ae-".concat(name),
               syntax: syntax,
               initialValue: initialValue
             };
           });
-          var progressRegistered = AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray11(descriptors.slice(0, 4)));
+          var progressRegistered = AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray13(descriptors.slice(0, 4)));
           interpolatedProgress = !!(progressRegistered && root2.CSS.supports && root2.CSS.supports("opacity", "clamp(0, 0.5, 1)"));
           interpolatedUnpop = !!AelluxJs2.registerCssProperty({
             name: "--ae-unpop-progress",
             syntax: "<number>",
             initialValue: "1"
           });
-          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray11(descriptors.slice(4)));
+          AelluxJs2.registerCssProperty.apply(AelluxJs2, _toConsumableArray13(descriptors.slice(4)));
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
             selector: presentSelector,
@@ -34775,7 +35945,7 @@
             subtree: true,
             childList: true,
             attributes: true,
-            attributeFilter: [attr.autoDismiss, "id"].concat(_toConsumableArray11(["", "-source", "-unpop", "-dismiss"].map(function(suffix3) {
+            attributeFilter: [attr.autoDismiss, "id"].concat(_toConsumableArray13(["", "-source", "-unpop", "-dismiss"].map(function(suffix3) {
               return AelluxJs2.attr("present-gesture".concat(suffix3));
             })))
           });
@@ -34787,6 +35957,7 @@
         }
         function destroy() {
           var _autoObserver;
+          AelluxJs2.comm.removeOwner(extensionName);
           gestures.destroy();
           (_autoObserver = autoObserver) === null || _autoObserver === void 0 || _autoObserver.disconnect();
           autoObserver = null;
@@ -35016,7 +36187,7 @@
           (_AelluxJs$waitLayout = AelluxJs2.waitLayout) === null || _AelluxJs$waitLayout === void 0 || _AelluxJs$waitLayout.cancel(controller.motionId);
           element.classList.remove(className.grid);
           element.classList.remove(className.pop, className.unpop, className.dismissed);
-          (_element$classList = element.classList).add.apply(_element$classList, _toConsumableArray11(controller.initialClasses));
+          (_element$classList = element.classList).add.apply(_element$classList, _toConsumableArray13(controller.initialClasses));
           presentElements.delete(element);
           openPresentElements.delete(element);
           (_containerAriaHandler = containerAriaHandlers.get(element)) === null || _containerAriaHandler === void 0 || _containerAriaHandler.release();
@@ -35128,7 +36299,7 @@
           }
           updateTriggerAriaExpanded(triggerElement);
           triggerAriaHandlers.get(triggerElement).set({
-            controls: _toConsumableArray11(targetIds)
+            controls: _toConsumableArray13(targetIds)
           });
         }
         function updateTriggerAriaExpanded(triggerElement) {
@@ -35184,8 +36355,8 @@
           var properties = [];
           if (tokens.includes("opacity")) properties.push("opacity");
           if (tokens.includes("transform") && !element.hasAttribute(AelluxJs2.attr("anchor"))) properties.push("transform");
-          if (tokens.includes("height")) properties.push.apply(properties, _toConsumableArray11(controller.presentMotion ? ["grid-template-rows", "height"] : ["max-height"]));
-          if (tokens.includes("width")) properties.push.apply(properties, _toConsumableArray11(controller.presentMotion ? ["grid-template-columns", "width"] : ["max-width"]));
+          if (tokens.includes("height")) properties.push.apply(properties, _toConsumableArray13(controller.presentMotion ? ["grid-template-rows", "height"] : ["max-height"]));
+          if (tokens.includes("width")) properties.push.apply(properties, _toConsumableArray13(controller.presentMotion ? ["grid-template-columns", "width"] : ["max-width"]));
           properties.push("--ae-present-pop-phase", "--ae-present-dismiss-phase", "--ae-pop-progress", "--ae-dismiss-progress", "--ae-unpop-progress");
           var computed = root2.getComputedStyle(element);
           var values = properties.map(function(property) {
@@ -35230,9 +36401,9 @@
           return _prepareMeasuredSize.apply(this, arguments);
         }
         function _prepareMeasuredSize() {
-          _prepareMeasuredSize = _asyncToGenerator7(/* @__PURE__ */ _regenerator7().m(function _callee(element, controller, gotoVisible, previousSize, waitForPreparation) {
+          _prepareMeasuredSize = _asyncToGenerator8(/* @__PURE__ */ _regenerator8().m(function _callee(element, controller, gotoVisible, previousSize, waitForPreparation) {
             var size, _element$classList2, _element$classList3, states, computed, height, width, start;
-            return _regenerator7().w(function(_context) {
+            return _regenerator8().w(function(_context) {
               while (1) switch (_context.n) {
                 case 0:
                   if (!(!controller.measuredHeight && !controller.measuredWidth)) {
@@ -35250,7 +36421,7 @@
                     states = [className.unpop, className.dismissed].filter(function(name) {
                       return element.classList.contains(name);
                     });
-                    if (gotoVisible) (_element$classList2 = element.classList).remove.apply(_element$classList2, _toConsumableArray11(states));
+                    if (gotoVisible) (_element$classList2 = element.classList).remove.apply(_element$classList2, _toConsumableArray13(states));
                     computed = root2.getComputedStyle(element);
                     height = parseFloat(computed.height);
                     width = parseFloat(computed.width);
@@ -35258,7 +36429,7 @@
                       height: Number.isFinite(height) ? height : element.scrollHeight,
                       width: Number.isFinite(width) ? width : element.scrollWidth
                     };
-                    if (gotoVisible) (_element$classList3 = element.classList).add.apply(_element$classList3, _toConsumableArray11(states));
+                    if (gotoVisible) (_element$classList3 = element.classList).add.apply(_element$classList3, _toConsumableArray13(states));
                   }
                   start = previousSize || (gotoVisible ? {
                     height: 0,
@@ -35289,9 +36460,9 @@
           return _presentTransition.apply(this, arguments);
         }
         function _presentTransition() {
-          _presentTransition = _asyncToGenerator7(/* @__PURE__ */ _regenerator7().m(function _callee2(element, gotoVisible) {
+          _presentTransition = _asyncToGenerator8(/* @__PURE__ */ _regenerator8().m(function _callee2(element, gotoVisible) {
             var forceRepop, groupOperation, presentationOrder, closingDirection, controller, gesture, reversing, group, groupState, groupRevision, hasCapacity, newDirection, transition, _AelluxJs$currentPref, _groups$get, revision, allowEvent, impliedReverse, reverseTracks, reusePreparation, waitForPreparation, previousSize, handoff, computed, interrupted, size, prepared, configurationDirection, duration, timeMs, applyDestination, activateTransition, advancedEase, motionOptions, completed, autoDismissValue, _duration, motionResult, finalVisible, _selected, active, ownsTransition, _controller$gesture, _controller$reverse2, _controller$gestureDi2, _args2 = arguments, _t, _t2;
-            return _regenerator7().w(function(_context2) {
+            return _regenerator8().w(function(_context2) {
               while (1) switch (_context2.p = _context2.n) {
                 case 0:
                   forceRepop = _args2.length > 2 && _args2[2] !== void 0 ? _args2[2] : false;
@@ -35578,11 +36749,11 @@
                       element.style.setProperty("transition-property", "none", "important");
                       applyDestination();
                       var _computed = root2.getComputedStyle(element);
-                      var _tracks2 = handoff.values.filter(function(_ref3) {
-                        var _ref4 = _slicedToArray11(_ref3, 1), property2 = _ref4[0];
+                      var _tracks2 = handoff.values.filter(function(_ref7) {
+                        var _ref8 = _slicedToArray11(_ref7, 1), property2 = _ref8[0];
                         return property2.startsWith("grid-template-") || property2 === "height" || property2 === "width";
-                      }).map(function(_ref5) {
-                        var _ref6 = _slicedToArray11(_ref5, 1), property2 = _ref6[0];
+                      }).map(function(_ref9) {
+                        var _ref0 = _slicedToArray11(_ref9, 1), property2 = _ref0[0];
                         return [property2, _computed.getPropertyValue(property2)];
                       });
                       handoff.freeze();
@@ -35880,7 +37051,7 @@
         function clickAutoDismiss(eventTarget, currentExceptions) {
           var _iterator10 = _createForOfIteratorHelper19(openPresentElements), _step10;
           try {
-            var _loop = function _loop2() {
+            var _loop2 = function _loop22() {
               var pContainer = _step10.value;
               if (pContainer.hidden === true || currentExceptions.some(function(e) {
                 return pContainer.contains(e);
@@ -35891,7 +37062,7 @@
               if (inside === (mode === "inside" || mode === "in")) dismiss(pContainer);
             }, _ret;
             for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
-              _ret = _loop();
+              _ret = _loop2();
               if (_ret === 0) continue;
             }
           } catch (err) {
@@ -35933,7 +37104,6 @@
           return target !== null && target !== void 0 && target.closest ? target : null;
         }
         function onTap(event) {
-          var _AelluxJs$mountManage;
           var target = activationTarget(event);
           if (!target) return;
           var control = target.closest("[".concat(attr.trigger, "],[").concat(attr.dismiss, "]"));
@@ -35943,14 +37113,17 @@
             target: target,
             hoverSuppressed: control && suppressHoverClick(control, event),
             present: triggerTargets.get(control),
-            point: (_AelluxJs$mountManage = AelluxJs2.mountManager.controller(target)) === null || _AelluxJs$mountManage === void 0 ? void 0 : _AelluxJs$mountManage.point,
+            input: AelluxJs2.comm.request("input.mount-token", {
+              element: target
+            }).value,
             timer: null
           };
           pendingTaps.add(pending);
           pending.timer = setTimeout(function() {
-            var _AelluxJs$mountManage2;
             pendingTaps.delete(pending);
-            if (!target.isConnected || pending.point && ((_AelluxJs$mountManage2 = AelluxJs2.mountManager.controller(target)) === null || _AelluxJs$mountManage2 === void 0 ? void 0 : _AelluxJs$mountManage2.point) !== pending.point) return;
+            if (!target.isConnected || pending.input && AelluxJs2.comm.request("input.mount-token", {
+              element: target
+            }).value !== pending.input) return;
             activate(event, target, pending.hoverSuppressed);
           }, TAP_CLICK_WAIT_TIME);
         }
@@ -36071,7 +37244,7 @@
         }
         function groupMembers(group) {
           var includeUnidentified = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
-          return _toConsumableArray11(presentElements.keys()).filter(function(element) {
+          return _toConsumableArray13(presentElements.keys()).filter(function(element) {
             return element.isConnected && element !== group && (includeUnidentified || element.id) && element.closest(groupSelector) === group;
           });
         }
@@ -36420,7 +37593,7 @@
           state.pending = pending;
           var _iterator16 = _createForOfIteratorHelper19(changes), _step16;
           try {
-            var _loop2 = function _loop22() {
+            var _loop3 = function _loop32() {
               var member2 = _step16.value;
               var job = presentTransition(member2, member2 === selected2, false, true, void 0, closingDirection);
               if (groups.get(group) !== state || state.revision !== revision) {
@@ -36435,7 +37608,7 @@
               });
             }, _ret2;
             for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
-              _ret2 = _loop2();
+              _ret2 = _loop3();
               if (_ret2) return _ret2.v;
             }
           } catch (err) {
@@ -36501,11 +37674,11 @@
           }
           var _iterator18 = _createForOfIteratorHelper19(openPresentElements), _step18;
           try {
-            var _loop3 = function _loop32() {
+            var _loop4 = function _loop42() {
               var target2 = _step18.value;
               if (!inHoverRegion(target2, event.target)) return 1;
               if (entering || inHoverRegion(target2, event.relatedTarget)) cancelHoverClose(target2);
-              else if (_toConsumableArray11(triggerElementsSet).some(function(control) {
+              else if (_toConsumableArray13(triggerElementsSet).some(function(control) {
                 return triggerTargets.get(control) === target2 && control.getAttribute(attr.triggerOn) === "hover" && !["dismiss", "unpop"].includes(control.getAttribute(attr.trigger));
               })) {
                 cancelHoverClose(target2);
@@ -36516,7 +37689,7 @@
               }
             };
             for (_iterator18.s(); !(_step18 = _iterator18.n()).done; ) {
-              if (_loop3()) continue;
+              if (_loop4()) continue;
             }
           } catch (err) {
             _iterator18.e(err);
@@ -36563,9 +37736,9 @@
             return init_aellux_ext_focus(), aellux_ext_focus_exports;
           });
         },
-        "point": function point() {
+        "input": function input() {
           return Promise.resolve().then(function() {
-            return init_aellux_ext_point(), aellux_ext_point_exports;
+            return init_aellux_ext_input(), aellux_ext_input_exports;
           });
         },
         "anchor": function anchor() {

@@ -125,7 +125,7 @@ for (const forceLegacy of [false, true]) {
       await page.keyboard.press("Enter");
       await expect.poll(() => page.evaluate(() => notifications.length)).toBe(2);
       expect(await page.evaluate(() => ({ calls: promptCalls, inClick: promptInClick, prevented: promptPrevented,
-        installed: $ae.ext.pwa.status().installed, point: !!$ae.ext.point }))).toEqual({ calls: 1, inClick: true, prevented: true, installed: null, point: false });
+        installed: $ae.ext.pwa.status().installed, point: !!$ae.ext.input }))).toEqual({ calls: 1, inClick: true, prevented: true, installed: null, point: false });
       // userActivation is supplied by the real browser while the prompt API is controlled.
       expect(await page.evaluate(() => promptActivation)).toBe(true);
       await page.evaluate(async () => {

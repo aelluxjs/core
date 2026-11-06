@@ -53,7 +53,7 @@ test("focus hashes element IDs and keeps ID-less targets in local history only",
     document.addEventListener("AelluxJsPushState", event => window.focusPushes.push(event.detail));
   });
   await page.addScriptTag({ url: "/src/aellux.ext.state-navigation.js" });
-  await page.addScriptTag({ url: "/src/aellux.ext.focus.js" });
+  await page.addScriptTag({ url: "/dist/aellux.ext.focus.js" });
   await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.focus?.initialized)).toBe(true);
   await page.evaluate(() => AelluxJs.wait("state-navigation"));

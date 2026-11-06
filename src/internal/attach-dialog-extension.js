@@ -10,6 +10,8 @@ export function attachDialogExtension(root, prepareDialog = () => {}) {
   AelluxJs.extAttach(extensionName, { init, destroy, show, showModal, close });
 
   function init() {
+    for (const [name, method] of Object.entries({ show, showModal, close }))
+      AelluxJs.comm.handle("dialog." + name, ({ element, args = [] }) => method(element, ...args), { owner: extensionName });
     AelluxJs.mountManager.add({
       // Lower priorities mount first, before ordinary consuming Extensions.
       extensionName, selector: "dialog", priority: -1,
@@ -19,6 +21,7 @@ export function attachDialogExtension(root, prepareDialog = () => {}) {
   }
 
   function destroy() {
+    AelluxJs.comm.removeOwner(extensionName);
     AelluxJs.mountManager.remove({ extensionName });
   }
 

@@ -784,6 +784,18 @@
       ["dismiss-duration", "<time>", "250ms"]
     ];
     function init(options) {
+      const communication = { owner: extensionName };
+      for (const [name, method] of Object.entries({ pop, unpop, dismiss }))
+        AelluxJs.comm.handle("present." + name, ({ element }) => method(element), communication);
+      AelluxJs.comm.handle("present.toggle", ({ element, goto }) => toggle(element, goto), communication);
+      AelluxJs.comm.handle("present.show", ({ group, member }) => show(group, member), communication);
+      AelluxJs.comm.handle("present.selection", ({ group }) => selected(group), communication);
+      AelluxJs.comm.handle("present.pop-next", (request) => popNext(request.group, (member) => {
+        if (request.preparation) {
+          const result = AelluxJs.comm.request(request.preparation.contract, __spreadProps(__spreadValues({}, request.preparation.payload), { element: member }));
+          if (!result.handled || result.value === false) throw new Error("Present preparation is unavailable.");
+        }
+      }), communication);
       playback.init();
       const descriptors = cssProperties.map(([name, syntax, initialValue]) => ({ name: `--ae-${name}`, syntax, initialValue }));
       const progressRegistered = AelluxJs.registerCssProperty(...descriptors.slice(0, 4));
@@ -842,6 +854,7 @@
       AelluxJs.onEvent(root, "$resize", refreshExpandedStates);
     }
     function destroy() {
+      AelluxJs.comm.removeOwner(extensionName);
       gestures.destroy();
       autoObserver == null ? void 0 : autoObserver.disconnect();
       autoObserver = null;
@@ -1719,7 +1732,6 @@
       return (target == null ? void 0 : target.closest) ? target : null;
     }
     function onTap(event) {
-      var _a;
       const target = activationTarget(event);
       if (!target) return;
       const control = target.closest(`[${attr.trigger}],[${attr.dismiss}]`);
@@ -1729,14 +1741,13 @@
         target,
         hoverSuppressed: control && suppressHoverClick(control, event),
         present: triggerTargets.get(control),
-        point: (_a = AelluxJs.mountManager.controller(target)) == null ? void 0 : _a.point,
+        input: AelluxJs.comm.request("input.mount-token", { element: target }).value,
         timer: null
       };
       pendingTaps.add(pending);
       pending.timer = setTimeout(() => {
-        var _a2;
         pendingTaps.delete(pending);
-        if (!target.isConnected || pending.point && ((_a2 = AelluxJs.mountManager.controller(target)) == null ? void 0 : _a2.point) !== pending.point) return;
+        if (!target.isConnected || pending.input && AelluxJs.comm.request("input.mount-token", { element: target }).value !== pending.input) return;
         activate(event, target, pending.hoverSuppressed);
       }, TAP_CLICK_WAIT_TIME);
     }

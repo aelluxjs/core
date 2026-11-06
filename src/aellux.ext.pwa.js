@@ -196,9 +196,9 @@ import { validatePWAManifest } from "./internal/development-helpers.js";
   async function showGuide(options, context, token) {
     if (guide?.open) return;
     // Reuse Dialog's native / Legacy contract only when the guide is requested.
-    const dialogAPI = await api.wait("dialog");
+    await api.wait("dialog");
     if (!active || token !== revision) return;
-    if (!dialogAPI) throw new Error("Dialog could not be loaded for the installation guide.");
+    if (!api.comm.has("dialog.showModal")) throw new Error("Dialog could not be loaded for the installation guide.");
     removeGuide();
     const language = options.language || root.document.documentElement.lang || root.navigator?.language || "en";
     const copy = { ...texts[/^pt(-BR)?$/i.test(language) ? "pt-BR" : "en"], ...options.texts };
@@ -234,7 +234,9 @@ import { validatePWAManifest } from "./internal/development-helpers.js";
     const mounted = await api.mount(dialog, "dialog");
     if (!active || token !== revision || guide !== dialog || !dialog.isConnected) return;
     if (mounted === false) { removeGuide(); return; }
-    try { dialogAPI.showModal(dialog); }
+    try {
+      if (!api.comm.request("dialog.showModal", { element: dialog }).handled) throw new Error("Dialog is unavailable.");
+    }
     catch (error) { removeGuide(); throw error; }
   }
   function removeGuide() {

@@ -262,6 +262,13 @@
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/communication.htm" data-ae-overflow-marquee="190px">
+                                        Shared Communication                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/modern-legacy.htm" data-ae-overflow-marquee="190px">
                                         Modern &amp; Legacy                                      </a>
                                     </div>
@@ -459,8 +466,8 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/point.htm" data-ae-overflow-marquee="190px">
-                                              Point                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/input.htm" data-ae-overflow-marquee="190px">
+                                              Input                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -700,7 +707,7 @@
 <tr>
 <td>Experimental Public API</td>
 <td>May evolve, including incompatible changes, with appropriate documentation.</td>
-<td><span class="large">The Not stable Focus and Point APIs; Not stable Viewport attributes, outputs and events.</span></td>
+<td><span class="large">The Not stable Focus and Input APIs; Not stable Viewport attributes, outputs and events.</span></td>
 </tr>
 <tr>
 <td>Internal Implementation</td>
@@ -732,7 +739,7 @@
 <tr>
 <td>Not stable</td>
 <td>Bundled</td>
-<td><a href="../core-extensions/focus.htm">Focus</a>, <a href="../core-extensions/point.htm">Point</a>, <a href="../core-extensions/viewport.htm">Viewport</a>.</td>
+<td><a href="../core-extensions/focus.htm">Focus</a>, <a href="../core-extensions/input.htm">Input</a>, <a href="../core-extensions/viewport.htm">Viewport</a>.</td>
 </tr>
 <tr>
 <td>Not stable</td>
@@ -822,7 +829,7 @@
 <p>For example, lifecycle before/completion events originate on <code>document</code>; canceling a mount suppresses <code>Mount</code> but does not prevent startup from emitting <code>Ready</code>. <code>Ready</code> does not guarantee that every element mounted successfully. Present emits its before-event before transition-start and current completion notifications; interrupted requests must not publish an obsolete successful completion. See <a href="events.htm#runtime-lifecycle">Runtime lifecycle</a> and <a href="../core-extensions/present.htm">Present</a> for the precise exceptions and payloads.</p>
 <p>Required event fields cannot be removed or incompatibly retyped. Optional fields may be added without changing existing meaning. Consumers should tolerate additional fields. Payload ownership and snapshot guarantees apply only where the producer documents them; event detail is not universally immutable.</p>
 <p>Generic <code>AelluxJsProgress</code> is nonbubbling and noncancelable and must be observed on the producer. It does not require the experimental Progress Extension. <code>feedback.progress()</code> continues to emit the distinct, cancelable <code>AelluxJsFeedback</code> contract, including boundary handling. These channels are not interchangeable.</p>
-<p>Notifications from Not stable Extensions, such as Point&#39;s <code>Tap</code> and Viewport&#39;s geometry events, remain experimental even though listed in the shared reference. Application-defined events and Docweaver theme events do not acquire Core stability from using the same naming helpers.</p>
+<p>Notifications from Not stable Extensions, such as Input&#39;s <code>Tap</code> and Viewport&#39;s geometry events, remain experimental even though listed in the shared reference. Application-defined events and Docweaver theme events do not acquire Core stability from using the same naming helpers.</p>
 <p>This commitment does not guarantee undocumented event timing, exact frequency, event counts per frame, compositor synchronization, or a total order across unrelated operations. Cancellation must be synchronous; a Promise returned by an event listener does not delay dispatch. Scheduler and browser throttling remain applicable.</p>
 <h2>6. Distribution &amp; Loading Compatibility</h2>
 <p>Documented loading interfaces remain supported across Basic/Full and Modern/Legacy. Basic starts with no Extension registrations; declarations through <code>$ae.ext(...)</code> or <code>&lt;link rel=&quot;aelluxjs-ext&quot;&gt;</code> select the desired Extensions and loading policy. Full makes all official Extensions available through automatic registration, currently embedding ten Bundled implementations and lazily loading six Optional scripts. Registration, loading, initialization and mounting are distinct stages.</p>

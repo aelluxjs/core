@@ -38,7 +38,7 @@ State Navigation has no activation selector; register it explicitly before reque
 | Stable | Stabilized public API and behavior. |
 | Not stable (unstable) | Public API and behavior may change during stabilization. |
 
-Distribution and stability are independent. Focus, Point and Viewport are included in Full and remain **Not stable**. Ajax Href, Dialog, Progress and PWA are also **Not stable** and load separately. Overflow Marquee and Scrollbox Snap remain **Stable** while delivered separately. Nine official Extensions are **Stable**.
+Distribution and stability are independent. Focus, Input and Viewport are included in Full and remain **Not stable**. Ajax Href, Dialog, Progress and PWA are also **Not stable** and load separately. Overflow Marquee and Scrollbox Snap remain **Stable** while delivered separately. Nine official Extensions are **Stable**.
 
 Stability appears on each Extension page and in the index below. Navigation groups follow distribution. Documented limits and compatibility requirements apply to both statuses. Each Extension's Known Limits & Risks section describes its boundaries; see also the [shared Core limits](../runtime/known-limits-and-risks.md).
 
@@ -54,7 +54,7 @@ These ten Extensions are included in the Full JavaScript bundle.
 | [Anchor](anchor.md) | Stable |
 | [Feedback](feedback.md) | Stable |
 | [Focus](focus.md) | Not stable |
-| [Point](point.md) | Not stable |
+| [Input](input.md) | Not stable |
 | [Preference](preference.md) | Stable |
 | [Present](present.md) | Stable |
 | [Scrollbox](scrollbox.md) | Stable |

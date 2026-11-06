@@ -262,6 +262,13 @@
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/communication.htm" data-ae-overflow-marquee="190px">
+                                        Shared Communication                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/modern-legacy.htm" data-ae-overflow-marquee="190px">
                                         Modern &amp; Legacy                                      </a>
                                     </div>
@@ -459,8 +466,8 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/point.htm" data-ae-overflow-marquee="190px">
-                                              Point                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/input.htm" data-ae-overflow-marquee="190px">
+                                              Input                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -677,6 +684,7 @@
             ajax-load="doc-content">
             <h1>Runtime API</h1>
 <p>The browser distribution exposes <code>AelluxJs</code> and its short alias <code>$ae</code> on the global object.</p>
+<p><code>$ae.comm</code> is the boot-level <a href="communication.htm">shared communication mediator</a>: named commands/queries through <code>handle</code> / <code>request</code>, notifications through <code>on</code> / <code>emit</code>, availability checks and owned cleanup. Extensions exchange data contracts while application code retains access to public Extension APIs.</p>
 <p>The <a href="compatibility-commitment.htm">Compatibility Commitment</a> defines preservation and evolution of documented public contracts from <code>0.1.0</code> through <code>0.1.x</code>. Individual Extension stability and documented limits still apply.</p>
 <p>Modules can import the shared API through <code>@aelluxjs/core</code>:</p>
 <pre><code class="language-js">import AelluxJs from &quot;@aelluxjs/core&quot;;

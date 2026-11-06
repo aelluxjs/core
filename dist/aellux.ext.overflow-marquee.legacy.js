@@ -1189,7 +1189,7 @@
     }
     function _init() {
       _init = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee() {
-        var anchor;
+        var owner, request;
         return _regenerator2().w(function(_context) {
           while (1) switch (_context.n) {
             case 0:
@@ -1197,19 +1197,53 @@
               _context.n = 1;
               return api.wait("anchor");
             case 1:
-              anchor = _context.v;
-              if (anchor !== null && anchor !== void 0 && anchor.createPlacementMap) {
+              if (api.comm.has("anchor.placement")) {
                 _context.n = 2;
                 break;
               }
-              throw new Error("[aellux.js] Overflow Marquee requires Anchor's placement map.");
+              throw new Error("[aellux.js] Overflow Marquee requires Anchor geometry.");
             case 2:
-              placements = anchor.createPlacementMap();
-              marquee = createOverflowMarquee(root, api, _objectSpread2(_objectSpread2({}, placements), {}, {
+              owner = {};
+              request = function request2(action, payload) {
+                return api.comm.request("anchor.placement", _objectSpread2({
+                  action: action,
+                  owner: owner
+                }, payload));
+              };
+              placements = {
+                mount: function mount(element) {
+                  return request("mount", {
+                    element: element
+                  });
+                },
+                unmount: function unmount(element) {
+                  return request("unmount", {
+                    element: element
+                  });
+                },
                 measure: function measure(element, end) {
-                  return placements.measure(element, end ? "bottom-right:bottom-right" : "top-left:top-left");
+                  return request("measure", {
+                    element: element,
+                    pairs: end ? "bottom-right:bottom-right" : "top-left:top-left"
+                  }).value;
+                },
+                place: function place(element, placement) {
+                  return request("place", {
+                    element: element,
+                    placement: placement
+                  });
+                },
+                invisible: function invisible(element) {
+                  var result = request("invisible", {
+                    element: element
+                  });
+                  return !result.handled || result.value;
+                },
+                destroy: function destroy2() {
+                  return request("dispose");
                 }
-              }));
+              };
+              marquee = createOverflowMarquee(root, api, placements);
               api.registerCssProperty({
                 name: "--ae-overflow-marquee-speed",
                 syntax: "<number>",

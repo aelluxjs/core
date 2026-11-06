@@ -154,10 +154,10 @@ test("Point tracking coexists with Scrollbox pointer dragging", async ({ page })
       clientX: rect.left + x, clientY: rect.top + 40 }));
     emit("pointerdown", 200);
     emit("pointermove", 100);
-    const pointers = AelluxJs.ext.point.pointers(box);
+    const pointers = AelluxJs.ext.input.pointers(box);
     const held = { scroll: box.scrollLeft, pointers: pointers.length, pressed: pointers[0]?.pressed };
     emit("pointerup", 100);
-    return { held, released: AelluxJs.ext.point.pointers(box).filter(pointer => pointer.pressed).length };
+    return { held, released: AelluxJs.ext.input.pointers(box).filter(pointer => pointer.pressed).length };
   });
   expect(result).toEqual({ held: { scroll: 100, pointers: 1, pressed: true }, released: 0 });
 });

@@ -483,7 +483,7 @@
     function _showGuide() {
       _showGuide = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee(options, context, token) {
         var _guide, _root$navigator4;
-        var dialogAPI, language, copy, dialog, content, title, intro, list, _iterator3, _step3, step, item, _i, _arr, child, close, mounted2, _t;
+        var language, copy, dialog, content, title, intro, list, _iterator3, _step3, step, item, _i, _arr, child, close, mounted2, _t;
         return _regenerator().w(function(_context) {
           while (1) switch (_context.p = _context.n) {
             case 0:
@@ -496,14 +496,13 @@
               _context.n = 2;
               return api.wait("dialog");
             case 2:
-              dialogAPI = _context.v;
               if (!(!active || token !== revision)) {
                 _context.n = 3;
                 break;
               }
               return _context.a(2);
             case 3:
-              if (dialogAPI) {
+              if (api.comm.has("dialog.showModal")) {
                 _context.n = 4;
                 break;
               }
@@ -578,18 +577,25 @@
               return _context.a(2);
             case 7:
               _context.p = 7;
-              dialogAPI.showModal(dialog);
-              _context.n = 9;
-              break;
+              if (api.comm.request("dialog.showModal", {
+                element: dialog
+              }).handled) {
+                _context.n = 8;
+                break;
+              }
+              throw new Error("Dialog is unavailable.");
             case 8:
-              _context.p = 8;
+              _context.n = 10;
+              break;
+            case 9:
+              _context.p = 9;
               _t = _context.v;
               removeGuide();
               throw _t;
-            case 9:
+            case 10:
               return _context.a(2);
           }
-        }, _callee, null, [[7, 8]]);
+        }, _callee, null, [[7, 9]]);
       }));
       return _showGuide.apply(this, arguments);
     }

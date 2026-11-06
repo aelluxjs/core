@@ -47,7 +47,19 @@ export const semanticAttributes = [
   attribute("snap-item", "scrollbox-snap", "Snap alignment for an item belonging to the nearest Scrollbox. Left/top alias start; right/bottom alias end; empty is center.", { syntax: "enum", values: ["", "start", "center", "end", "left", "right", "top", "bottom"], default: "center" }),
   attribute("adaptive", "adaptive", "Publishes width-based size classes, aspect-ratio shape classes, dimensions and orientation using the Extension's adaptiveParams thresholds.", { syntax: "presence" }),
   attribute("focus", "focus", "Enter navigation on a text-entry control. Next supplies enterkeyhint when absent and focuses the next available control.", { syntax: "enum", values: ["next"] }),
-  attribute("point", "point", "Maximum simultaneously associated pointers. Empty defaults to 1; a nonnegative integer is expected, and 0 disables association.", { syntax: "integer", default: "1", examples: ["0", "1", "2"] }),
+  attribute("point", "input", "Maximum simultaneously associated pointers. Empty defaults to 1; a nonnegative integer is expected, and 0 disables association.", { syntax: "integer", default: "1", examples: ["0", "1", "2"] }),
+  attribute("inputs", "input", "Enabled Input adapters inherited by descendants. Omitted defaults to point keyboard. An empty list disables adapters in this scope; gamepad is opt-in.", { syntax: "token-list", values: ["point", "keyboard", "gamepad", "point keyboard gamepad"], default: "point keyboard" }),
+  attribute("focus-scope", "focus", "Isolated navigation and shortcut scope. Logical contexts can be restricted to this container.", { syntax: "presence" }),
+  attribute("shortcut", "focus", "Contextual physical shortcuts, separated by semicolons. Exact modifiers use Ctrl/Alt/Shift/Meta+code. Focus chooses the closest eligible action in the active scope.", { syntax: "string", examples: ["keyboard:KeyI; gamepad:north", "keyboard:Ctrl+KeyI"] }),
+  attribute("shortcut-priority", "focus", "Numeric priority breaking equal DOM-distance shortcut ties. Higher values win; final ties follow DOM order.", { syntax: "number", default: "0" }),
+  attribute("shortcut-action", "focus", "Action invoked by a shortcut: click, a registered action, or Present pop/unpop/dismiss.", { syntax: "string", values: ["click", "pop", "unpop", "dismiss"], default: "click" }),
+  attribute("shortcut-target", "focus", "Present action target ID, optionally prefixed by #. Omitted uses the shortcut element.", { syntax: "id" }),
+  attribute("shortcut-hint", "input", "CSS hint descriptor. Empty inherits data-ae-shortcut from the nearest ancestor; an explicit descriptor works without Focus.", { syntax: "string" }),
+  attribute("shortcut-focus", "input", "Logical context used for this hint's presentation metadata. Defaults to 1.", { syntax: "positive-integer", default: "1" }),
+  attribute("shortcut-hint-position", "input", "Inline by default. Anchor uses optional CSS Anchor Positioning with inline fallback.", { syntax: "enum", values: ["inline", "anchor"], default: "inline" }),
+  ...[["gamepad", ["true", "false"]], ["active-input", ["point", "keyboard", "gamepad"]], ["gamepad-family", ["generic", "xbox", "playstation", "nintendo"]]].map(([name, values]) =>
+    attribute(name, "input", "Input presentation state. Gamepad presence is independent of the last intentionally used modality.", { syntax: "enum", values, role: "output" })),
+  ...["gamepad-model", "shortcut-label", "shortcut-source", "shortcut-code"].map(name => attribute(name, "input", "Input hint presentation metadata.", { syntax: "string", role: "output" })),
   attribute("ajax-href", "ajax-href", "CSS selectors for regions replaced from a same-origin HTML response. Defaults to title,body when empty. Each selector uses its first match; current and response documents must contain the region.", { syntax: "selector-list", tags: ["a"], examples: ["title,body", "title,#content"] }),
   attribute("preference", "preference", "Preference controlled by descendant option/label/next/previous controls. CamelCase and kebab-case preference names are accepted.", { syntax: "string", values: ["colorScheme", "contrast", "reducedMotion", "reducedTransparency", "forcedColors", "textScale", "interfaceScale", "extendedTiming", "largeTargets", "haptics", "sound", "color-scheme", "reduced-motion", "reduced-transparency", "forced-colors", "text-scale", "interface-scale", "extended-timing", "large-targets"] }),
   attribute("option", "preference", "Sets a value of the enclosing preference. Button options receive synchronized aria-pressed, restored on unmount; labels and checked inputs retain their own semantics. Values depend on that preference; application-defined values remain possible.", { syntax: "string", values: ["auto", "light", "dark", "no-preference", "more", "less", "reduced", "active", "on", "off", "low", "1", "1.5", "0.8"] }),
@@ -75,6 +87,8 @@ export const semanticAttributes = [
 
 const property = (name, extension, syntax, description, options = {}) => ({ name, extension, syntax, description, ...options });
 export const semanticCSSProperties = [
+  ...["border", "radius", "color", "background"].map(name => property(`shortcut-hint-${name}`, "input", "*", "CSS-only shortcut hint presentation override.")),
+  property("shortcut-anchor", "input", "<dashed-ident>", "Optional CSS anchor name for positioned shortcut hints.", { default: "--ae-shortcut" }),
   ...["pop", "unpop", "dismiss"].map(name => property(`present-${name}-threshold`, "present", "<number>", "Gesture release decision threshold in [0,1]. Pop completes at or above its threshold; Unpop completes at or below its threshold; Dismiss completes at or above its threshold.", { default: "0.5" })),
   property("present-gesture-distance", "present", "auto | <length>", "Positive physical drag distance for full normalized travel. Auto uses reliable translation distance, otherwise the element dimension on the gesture axis. Read at the start of each gesture.", { default: "auto" }),
   property("unpop-progress", "present", "<number>", "Normalized progress of reverse playback, from 0 to 1. Hidden regions settle at 1; presented regions at 0. No independent unpop destination, duration or easing exists.", { role: "output" }),
@@ -120,6 +134,38 @@ export const semanticCSSProperties = [
 ];
 
 export const semanticMethods = [
+  ...[
+    ["handle", "handle(name, handler, { owner, signal }) registers one command/query provider and returns its remover. Duplicate providers diagnose and throw."],
+    ["request", "request(name, payload) synchronously returns { handled, value }. Missing providers have handled=false; async operations return a Promise in value."],
+    ["has", "has(name) probes command/query availability without loading Extensions."],
+    ["on", "on(name, handler, { owner, signal, priority }) subscribes to notifications with deterministic priority/order."],
+    ["emit", "emit(name, payload) synchronously notifies active subscribers and returns their count. Listener failures diagnose independently."],
+    ["removeOwner", "removeOwner(owner) releases one owner's handlers and listeners; Extension lifecycle also removes its records."],
+    ["clear", "clear() removes all communication handlers and listeners."]
+  ].map(([name, description]) => ({ name: `comm.${name}`, extension: "core", description, doc: "runtime/communication" })),
+  ...[
+    ["registerRouter", "registerRouter(resolve, { priority, owner, signal }) returns a remover. Undefined abstains; null blocks; a positive safe integer routes."],
+    ["removeRouters", "removeRouters(owner) releases all routers owned by an Extension name or element."],
+    ["resolveFocusId", "resolveFocusId(command) synchronously returns a logical ID (default 1) or null for a blocked/invalid association."],
+    ["dispatchCommand", "dispatchCommand(command) normalizes, routes and synchronously submits an enabled source. Returns whether consumed."],
+    ["devices", "devices() returns current gamepad session descriptors; session deviceId is independent of browser index."],
+    ["pointers", "pointers(element) preserves pointer tracking. Mounted controller: $ae(element).input.pointers()."],
+    ["setHintContext", "setHintContext(focusId, metadata) updates only that focus's hint source/family/model."],
+    ["setActionMap", "setActionMap(source, mapping) sets application semantic actions independently of physical codes."],
+    ["registerAdapter", "registerAdapter(name, factory) adds a selectively loaded/initialized modality and returns a remover."],
+    ["registerGamepadFamily", "registerGamepadFamily(detector, { priority }) adds a presentation-family detector and returns a remover."],
+    ["describeShortcuts", "describeShortcuts(value) returns shared physical shortcut descriptors without executing actions."],
+    ["refresh", "refresh() awaits adapters requested by current mounted scopes and updates hint metadata."]
+  ].map(([name, description]) => ({ name: `input.${name}`, extension: "input", description })),
+  ...[
+    ["createContext", "createContext(id, { scope, syncDOM }) creates an independent logical context. Only default context 1 may synchronize with the DOM."],
+    ["destroyContext", "destroyContext(id) clears its class/reference and removes the context. Context 1 cannot be independently destroyed."],
+    ["getContext", "getContext(id=1) returns an immutable logical context snapshot or null."],
+    ["setFocus", "setFocus(id, elementOrId) validates scope/visibility and updates the logical focus; null clears it."],
+    ["updateContext", "updateContext(id, options) changes scope or context 1 DOM synchronization."],
+    ["eligibleShortcuts", "eligibleShortcuts(id=1, command?) returns contextual shortcuts sorted by proximity, priority and DOM order."],
+    ["registerShortcutAction", "registerShortcutAction(name, handler, { signal }) registers a contextual component action and returns a remover."]
+  ].map(([name, description]) => ({ name: `focus.${name}`, extension: "focus", description })),
   { name: "present.unpop", extension: "present", description: "unpop(element) reverses the captured opening trajectory and its easing back to from, using only its travelled time. Returns false during independent dismissal without interrupting it. Mounted controller: $ae(element).present.unpop()." },
   { name: "present.pop", extension: "present", description: "pop(element) restarts opening from the configured from state. Mounted controller: $ae(element).present.pop()." },
   { name: "present.dismiss", extension: "present", description: "dismiss(element) closes from the current rendered state toward the independent dismiss destination using dismiss timing/easing. Repeated dismissal is idempotent; BeforeDismiss can veto without changing current motion. Mounted controller: $ae(element).present.dismiss()." },
@@ -144,8 +190,17 @@ export const semanticEvents = [
       `Transition to ${name === "ViewportFullyInside" ? "complete containment" : "zero positive-area intersection"}, including an initial matching measurable state`}. Bubbling, composed and noncancelable on the observed element. detail: { viewport, x1, y1, x2, y2, x, y, visible, state, measurable, previous, initial }. Coordinates are unclamped physical values; CSS position outputs stay in -2..2. Unknown geometry uses null coordinates/state and visible: 0; only Change reports its loss after a valid publication. previous is an independent snapshot of the last published geometry.`
   })),
   { name: "Feedback", extension: "feedback", description: "Cancelable feedback event. detail: { type, message, value, target, motion }; handled boundaries stop propagation.", cancelable: true },
-  ...["Down", "Move", "Up", "Cancel", "Hover"].map(name => ({ name: `Pointer${name}`, extension: "point", bubbles: false, description: "Selected element's pointer notification. Does not bubble; detail includes pointer, target, pressStart, originalEvent and hover." })),
-  { name: "Tap", extension: "point", composed: true, description: "Short primary pointer activation of an eligible mounted Point control. Bubbles across shadow boundaries; detail: { pointerType, pointerId, duration, distance, originalEvent }. Independent of native click and scroll." },
+  ...["Down", "Move", "Up", "Cancel", "Hover"].map(name => ({ name: `Pointer${name}`, extension: "input", bubbles: false, description: "Selected element's pointer notification. Does not bubble; detail includes pointer, target, pressStart, originalEvent and hover." })),
+  { name: "Tap", extension: "input", composed: true, description: "Short primary pointer activation of an eligible mounted Input control. Bubbles across shadow boundaries; detail: { pointerType, pointerId, duration, distance, originalEvent }. Independent of native click and scroll." },
+  { name: "BeforeInputCommand", extension: "input", cancelable: true, description: "Cancel processing of an immutable routed command before Focus consumes it. detail: { command }." },
+  { name: "InputCommand", extension: "input", description: "Observation after synchronous command processing. detail: { command, handled }." },
+  { name: "InputBlocked", extension: "input", description: "Router explicitly blocked a command or supplied an invalid association. detail: { command }." },
+  ...["Connected", "Disconnected"].map(name => ({ name: `InputDevice${name}`, extension: "input", description: "Gamepad session lifecycle. detail: { device }." })),
+  { name: "FocusChange", extension: "focus", description: "Logical focus changed. detail: { focusId, element, previous }." },
+  { name: "FocusContextDestroy", extension: "focus", description: "Logical context ended. detail: { focusId }." },
+  { name: "BeforeShortcut", extension: "focus", cancelable: true, description: "Cancel the selected contextual action. detail: { command, action }." },
+  { name: "Shortcut", extension: "focus", description: "Selected contextual action executed. detail: { command, action }." },
+  { name: "ExtensionDestroy", extension: "core", description: "Extension teardown notification; owned Input routers are released. detail: { extension }." },
   { name: "PreferencesChange", extension: "preference", description: "Preference update on document. detail: { changed, preferences }; changed may be empty. Option-button aria-pressed is synchronized before dispatch. The boot preference publisher synchronizes root data-bs-theme when the top-level syncBootstrapThemeTag option is enabled." },
   ...["BeforePop", "BeforeDismiss", "BeforeUnpop", "Popping", "Dismissing", "Unpopping", "Pop", "Dismiss", "Unpop"].map(name => ({ name, extension: "present", cancelable: name.startsWith("Before"), description: `${name} notification on the Present element.${name.startsWith("Before") ? " Cancel to veto the transition." : ""}` })),
   { name: "Layout", extension: "present", description: "Bubbling layout change announcement; detail: { origin, durationMs }. Anchor tracks the announced finite duration." },

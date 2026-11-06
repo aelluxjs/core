@@ -31,6 +31,36 @@
       }
     } };
   }
+  function _slicedToArray(r, e) {
+    return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
+  }
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e, n, i, u, a = [], f = true, o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) {
+          if (Object(t) !== t) return;
+          f = false;
+        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = true) ;
+      } catch (r2) {
+        o = true, n = r2;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles(r) {
+    if (Array.isArray(r)) return r;
+  }
   function _toConsumableArray(r) {
     return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread();
   }
@@ -89,8 +119,8 @@
     });
     function init() {
       if (!AelluxJs.registry.ext.scrollbox) AelluxJs.ext("scrollbox");
-      return AelluxJs.wait("scrollbox").then(function(scrollbox) {
-        if (!scrollbox) throw new Error("[aellux.js] Scrollbox Snap requires the Scrollbox extension.");
+      return AelluxJs.wait("scrollbox").then(function(loaded) {
+        if (!loaded) throw new Error("[aellux.js] Scrollbox Snap requires the Scrollbox extension.");
         AelluxJs.registerCssProperty.apply(AelluxJs, _toConsumableArray(properties.map(function(name) {
           return {
             name: name,
@@ -98,11 +128,22 @@
             initialValue: "0"
           };
         })));
-        scrollbox.registerSnapController({
+        var _loop = function _loop2() {
+          var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), name = _Object$entries$_i[0], method = _Object$entries$_i[1];
+          AelluxJs.comm.handle("scrollbox-snap." + name, function(_ref) {
+            var element = _ref.element, index = _ref.index, behavior = _ref.behavior;
+            return method(element, index, behavior);
+          }, {
+            owner: extensionName
+          });
+        };
+        for (var _i = 0, _Object$entries = Object.entries({
           next: next,
           previous: previous,
           goto: goto
-        });
+        }); _i < _Object$entries.length; _i++) {
+          _loop();
+        }
         AelluxJs.mountManager.add({
           extensionName: extensionName,
           selector: "[".concat(scrollboxAttribute, "][").concat(snapAttribute, "]:not([").concat(snapAttribute, '="').concat(FALSE, '"])'),
@@ -115,7 +156,6 @@
       });
     }
     function destroy() {
-      var _AelluxJs$ext$scrollb;
       var _iterator = _createForOfIteratorHelper(states.keys()), _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
@@ -127,11 +167,7 @@
       } finally {
         _iterator.f();
       }
-      (_AelluxJs$ext$scrollb = AelluxJs.ext.scrollbox) === null || _AelluxJs$ext$scrollb === void 0 || _AelluxJs$ext$scrollb.unregisterSnapController({
-        next: next,
-        previous: previous,
-        goto: goto
-      });
+      AelluxJs.comm.removeOwner(extensionName);
       AelluxJs.mountManager.remove({
         extensionName: extensionName
       });

@@ -13,7 +13,7 @@ const sri = "sha384-" + createHash("sha384").update("artifact").digest("base64")
 
 test("Full bundles primitives and keeps specialized behaviors separate", () => {
   assert.deepEqual(officialExtensionDefinitions.filter(entry => !entry.optional).map(entry => entry.name).sort(),
-    ["adaptive", "anchor", "feedback", "focus", "point", "preference", "present", "scrollbox", "state-navigation", "viewport"]);
+    ["adaptive", "anchor", "feedback", "focus", "input", "preference", "present", "scrollbox", "state-navigation", "viewport"]);
 });
 
 test("Bundled and Optional documentation groups match the Full distribution", async () => {

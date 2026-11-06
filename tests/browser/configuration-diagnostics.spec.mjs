@@ -213,7 +213,7 @@ test("scoped mounts validate only the requested Extensions", async ({ page }) =>
   await start(page, "");
   await page.evaluate(async () => {
     document.body.innerHTML = '<div data-ae-presnt></div><div data-ae-point="bad"></div><input data-ae-focus="wrong">';
-    await AelluxJs.mount(document, "point");
+    await AelluxJs.mount(document, "input");
   });
   const entries = (await diagnostics(page)).filter(entry => entry.code >= 2024 && entry.code <= 2030);
   expect(entries).toHaveLength(1);

@@ -220,6 +220,7 @@
     var anchors = /* @__PURE__ */ new Map();
     var elementMemories = /* @__PURE__ */ new WeakMap();
     var placementMaps = /* @__PURE__ */ new Set();
+    var requestedMaps = /* @__PURE__ */ new Map();
     var nextLayoutId = 2e6;
     var mutations = null;
     AelluxJs.extAttach(extensionName, {
@@ -228,6 +229,9 @@
       createPlacementMap: createPlacementMap
     });
     function init() {
+      AelluxJs.comm.handle("anchor.placement", placementRequest, {
+        owner: extensionName
+      });
       AelluxJs.registerCssProperty({
         name: "--ae-anchor-x",
         syntax: "<length>",
@@ -281,6 +285,7 @@
         return _regenerator().w(function(_context) {
           while (1) switch (_context.n) {
             case 0:
+              AelluxJs.comm.removeOwner(extensionName);
               _iterator11 = _createForOfIteratorHelper(placementMaps);
               try {
                 for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
@@ -292,6 +297,7 @@
               } finally {
                 _iterator11.f();
               }
+              requestedMaps.clear();
               _context.n = 1;
               return Promise.all(Array.from(anchors.keys(), unmountAnchor));
             case 1:
@@ -304,6 +310,27 @@
         }, _callee);
       }));
       return _destroy.apply(this, arguments);
+    }
+    function placementRequest(_ref) {
+      var action = _ref.action, owner = _ref.owner, element = _ref.element, pairs = _ref.pairs, target = _ref.target, placement = _ref.placement;
+      if (action === "invisible") return isInvisible(element);
+      var map = requestedMaps.get(owner);
+      if (action === "dispose") {
+        var _map;
+        (_map = map) === null || _map === void 0 || _map.destroy();
+        requestedMaps.delete(owner);
+        return true;
+      }
+      if (action === "mount" && !map) {
+        map = createPlacementMap();
+        requestedMaps.set(owner, map);
+      }
+      if (!map) return null;
+      if (action === "mount") return map.mount(element);
+      if (action === "unmount") return map.unmount(element);
+      if (action === "measure") return map.measure(element, pairs, target);
+      if (action === "place") return map.place(element, placement);
+      return null;
     }
     function createPlacementMap() {
       var memories = /* @__PURE__ */ new Map();
@@ -552,11 +579,12 @@
       });
     }
     function effectiveTarget(element, state) {
-      var _AelluxJs$ext$present, _AelluxJs$ext$present2;
       var value = element.getAttribute(targetAttribute);
       var target = value && value.trim() ? resolveElement(value) : element.offsetParent;
       state.group = value && value.trim() && target !== null && target !== void 0 && target.hasAttribute(groupAttribute) ? target : null;
-      return state.group ? ((_AelluxJs$ext$present = AelluxJs.ext.present) === null || _AelluxJs$ext$present === void 0 || (_AelluxJs$ext$present2 = _AelluxJs$ext$present.selected) === null || _AelluxJs$ext$present2 === void 0 ? void 0 : _AelluxJs$ext$present2.call(_AelluxJs$ext$present, state.group)) || null : target;
+      return state.group ? AelluxJs.comm.request("present.selection", {
+        group: state.group
+      }).value || null : target;
     }
     function circularTarget(element, target) {
       var visited = /* @__PURE__ */ new Set([element]);

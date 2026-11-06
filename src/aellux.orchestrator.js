@@ -96,6 +96,7 @@ import { officialExtensionDefinitions } from "./official-extension-definitions.j
         if (await destroyExtensions(null, () => AelluxJs.waitLayout.clear()) === false)
           return false;
         mountManager.destroy();
+        AelluxJs.comm.clear();
       },
       async destroyExtensions(extensionNames) {
         return destroyExtensions(extensionNames);
@@ -141,6 +142,8 @@ import { officialExtensionDefinitions } from "./official-extension-definitions.j
       if (name === "present") {
         loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
       }
+      if (name === "input") loadWhen = ["point", "inputs", "shortcut", "shortcut-hint"].map(attr).join(",");
+      if (name === "focus") loadWhen = ["focus", "focus-scope", "shortcut"].map(attr).join(",");
       // Full initializes its foundational services without a DOM selector.
       if (name === "state-navigation" || name === "preference") loadWhen = null;
       api.ext(name, { loadWhen, load: true, loadStyle: !!(optional && style) });
@@ -176,6 +179,10 @@ import { officialExtensionDefinitions } from "./official-extension-definitions.j
           { cause: error, extension: extensionName }
         );
       } finally {
+        AelluxJs.comm.removeOwner(extensionName);
+        if (key !== extensionName) AelluxJs.comm.removeOwner(key);
+        AelluxJs.comm.emit("extension.destroyed", { extension: extensionName });
+        AelluxJs.dispatch("ExtensionDestroy", { detail: { extension: extensionName } });
         delete AelluxJs.ext[key];
         delete extensionPromises[key];
         delete AelluxJs.registry.ext[key];
@@ -308,7 +315,12 @@ import { officialExtensionDefinitions } from "./official-extension-definitions.j
     }
 
     const options = AelluxJs.options.extensions[key] || {};
-    await AelluxJs.ext[key].init(options);
+    try { await AelluxJs.ext[key].init(options); }
+    catch (cause) {
+      AelluxJs.comm.removeOwner(extensionName);
+      if (key !== extensionName) AelluxJs.comm.removeOwner(key);
+      throw cause;
+    }
     AelluxJs.ext[key].initialized = true;
 
     //Clean lazy registry

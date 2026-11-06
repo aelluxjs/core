@@ -176,7 +176,16 @@
     var transformTargetAttribute = AelluxJs.attr("transformTarget");
     var presentTargetAttribute = AelluxJs.attr("presentTarget");
     var presentSelector = "[".concat(AelluxJs.attr("present"), "]");
+    var mountedFeedback = /* @__PURE__ */ new Set();
     function init() {
+      AelluxJs.comm.handle("feedback.prepare", function(_ref) {
+        var boundary = _ref.boundary, feedback = _ref.feedback, element = _ref.element;
+        if (!mountedFeedback.has(boundary) || !boundary.isConnected) return false;
+        applyFeedback(boundary, feedback, element);
+        return true;
+      }, {
+        owner: extensionName
+      });
       AelluxJs.mountManager.add({
         extensionName: extensionName,
         selector: "[".concat(feedbackAttribute, "]"),
@@ -195,6 +204,8 @@
         return _regenerator().w(function(_context) {
           while (1) switch (_context.n) {
             case 0:
+              AelluxJs.comm.removeOwner(extensionName);
+              mountedFeedback.clear();
               AelluxJs.mountManager.remove({
                 extensionName: extensionName
               });
@@ -219,9 +230,11 @@
       return _destroy.apply(this, arguments);
     }
     function mountFeedback(element) {
+      mountedFeedback.add(element);
       AelluxJs.onEvent(element, "Feedback", onFeedback);
     }
     function unmountFeedback(element) {
+      mountedFeedback.delete(element);
       AelluxJs.offEvent(element, "Feedback", onFeedback);
     }
     function onFeedback(event) {
@@ -239,29 +252,40 @@
       event.stopPropagation();
       if (!event.detail) return;
       var presentTarget = element.getAttribute(presentTargetAttribute);
-      var present = AelluxJs.ext.present;
-      var presentElement = presentTarget !== null && presentTarget.trim() && present !== null && present !== void 0 && present.initialized ? AelluxJs.elementOrId(presentTarget) : null;
+      var presentElement = presentTarget !== null && presentTarget.trim() && (AelluxJs.comm.has("present.pop") || AelluxJs.comm.has("present.pop-next")) ? AelluxJs.elementOrId(presentTarget) : null;
       if (presentElement !== null && presentElement !== void 0 && presentElement.hasAttribute(AelluxJs.attr("present-group"))) {
-        present.popNext(presentElement, function(member) {
-          return applyFeedback(element, event.detail, member);
-        }).catch(function(cause) {
-          return AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION, {
-            cause: cause,
-            extension: extensionName,
-            element: presentElement
-          });
+        var result = AelluxJs.comm.request("present.pop-next", {
+          group: presentElement,
+          preparation: {
+            contract: "feedback.prepare",
+            payload: {
+              boundary: element,
+              feedback: event.detail
+            }
+          }
         });
-        return;
+        if (result.handled) {
+          Promise.resolve(result.value).catch(function(cause) {
+            return AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION, {
+              cause: cause,
+              extension: extensionName,
+              element: presentElement
+            });
+          });
+          return;
+        }
       }
       applyFeedback(element, event.detail, element, function(messageElement, transformElement) {
-        if (presentTarget !== null && present !== null && present !== void 0 && present.initialized) {
+        if (presentTarget !== null) {
           var target = presentElement || !presentTarget.trim() && ((messageElement === null || messageElement === void 0 ? void 0 : messageElement.closest(presentSelector)) || (transformElement === null || transformElement === void 0 ? void 0 : transformElement.closest(presentSelector)));
-          if (target) present.pop(target);
+          if (target) AelluxJs.comm.request("present.pop", {
+            element: target
+          });
         }
       });
     }
-    function applyFeedback(element, _ref) {
-      var message = _ref.message, type = _ref.type, motion = _ref.motion;
+    function applyFeedback(element, _ref2) {
+      var message = _ref2.message, type = _ref2.type, motion = _ref2.motion;
       var defaultElement = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : element;
       var presentRequest = arguments.length > 3 ? arguments[3] : void 0;
       var messageTarget = element.getAttribute(messageTargetAttribute);
@@ -410,7 +434,7 @@
       });
     }
     function send(input, payload) {
-      var _ref2 = payload || input, type = _ref2.type, message = _ref2.message, value = _ref2.value, target = _ref2.target, motion = _ref2.motion;
+      var _ref3 = payload || input, type = _ref3.type, message = _ref3.message, value = _ref3.value, target = _ref3.target, motion = _ref3.motion;
       if (input && input.nodeType === 1) target = input;
       if (typeof message !== "string") {
         reportInvalidArgument("message", message);

@@ -1105,7 +1105,7 @@
       var getOwnPropertySymbolsModule = require_object_get_own_property_symbols();
       var anObject = require_an_object();
       var concat = uncurryThis([].concat);
-      module.exports = getBuiltIn("Reflect", "ownKeys") || function ownKeys3(it) {
+      module.exports = getBuiltIn("Reflect", "ownKeys") || function ownKeys4(it) {
         var keys = getOwnPropertyNamesModule.f(anObject(it));
         var getOwnPropertySymbols = getOwnPropertySymbolsModule.f;
         return getOwnPropertySymbols ? concat(keys, getOwnPropertySymbols(it)) : keys;
@@ -1118,11 +1118,11 @@
     "node_modules/core-js/internals/copy-constructor-properties.js": function(exports, module) {
       "use strict";
       var hasOwn = require_has_own_property();
-      var ownKeys3 = require_own_keys();
+      var ownKeys4 = require_own_keys();
       var getOwnPropertyDescriptorModule = require_object_get_own_property_descriptor();
       var definePropertyModule = require_object_define_property();
       module.exports = function(target, source, exceptions) {
-        var keys = ownKeys3(source);
+        var keys = ownKeys4(source);
         var defineProperty = definePropertyModule.f;
         var getOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
         for (var i = 0; i < keys.length; i++) {
@@ -10021,7 +10021,7 @@
       "use strict";
       var $ = require_export();
       var DESCRIPTORS = require_descriptors();
-      var ownKeys3 = require_own_keys();
+      var ownKeys4 = require_own_keys();
       var toIndexedObject = require_to_indexed_object();
       var getOwnPropertyDescriptorModule = require_object_get_own_property_descriptor();
       var createProperty = require_create_property();
@@ -10029,7 +10029,7 @@
         getOwnPropertyDescriptors: function getOwnPropertyDescriptors(object) {
           var O = toIndexedObject(object);
           var getOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
-          var keys = ownKeys3(O);
+          var keys = ownKeys4(O);
           var result = {};
           var index = 0;
           var key, descriptor;
@@ -12201,9 +12201,9 @@
     "node_modules/core-js/modules/es.reflect.own-keys.js": function() {
       "use strict";
       var $ = require_export();
-      var ownKeys3 = require_own_keys();
+      var ownKeys4 = require_own_keys();
       $({ target: "Reflect", stat: true }, {
-        ownKeys: ownKeys3
+        ownKeys: ownKeys4
       });
     }
   });
@@ -22211,7 +22211,7 @@
             if (value("focus") && value("focus") !== "next") invalid(_extension, "focus", "Unknown Focus mode.", "Use next for Enter navigation, or remove the attribute.");
             if (value("focus") === "next" && !element.matches("input:not([type]),input[type=text],input[type=search],input[type=email],input[type=url],input[type=tel],input[type=password],input[type=number],textarea,[contenteditable]:not([contenteditable=false])")) invalid(_extension, "focus", "Enter navigation is declared on a non-text-entry element.", "Apply data-ae-focus=next to a text input, textarea or editable element.");
           }
-          if (_extension === "point" && value("point") !== "" && (!/^\d+$/.test(value("point")) || !Number.isSafeInteger(Number(value("point"))))) invalid(_extension, "point", "Pointer count must be a nonnegative integer.", "Use an integer such as 1; 0 disables pointer association.");
+          if (_extension === "input" && value("point") !== "" && element.hasAttribute(attr("point")) && (!/^\d+$/.test(value("point")) || !Number.isSafeInteger(Number(value("point"))))) invalid(_extension, "point", "Pointer count must be a nonnegative integer.", "Use an integer such as 1; 0 disables pointer association.");
           if (_extension === "ajax-href") {
             var selectors = api.parseSelectors(value("ajax-href").trim() || "title,body");
             if (!selectors) {
@@ -22294,9 +22294,11 @@
           } catch (_) {
           }
           if ((_target = target) !== null && _target !== void 0 && _target.hasAttribute(attr("present-group"))) {
-            var _api$ext$present, _api$ext$present2, _api$ext$present2$sel;
+            var _api$ext$present;
             if (!((_api$ext$present = api.ext.present) !== null && _api$ext$present !== void 0 && _api$ext$present.initialized)) report("WARN_EXTENSION_REQUIRED", "present", "anchor-target", "A Present Group target requires Present.", "Register and initialize Present before mounting the group and its Anchors.");
-            target = (_api$ext$present2 = api.ext.present) === null || _api$ext$present2 === void 0 || (_api$ext$present2$sel = _api$ext$present2.selected) === null || _api$ext$present2$sel === void 0 ? void 0 : _api$ext$present2$sel.call(_api$ext$present2, target);
+            target = api.comm.request("present.selection", {
+              group: target
+            }).value;
             if (!target) return;
           }
           if (!target) invalid("anchor", "anchor-target", "Anchor target does not exist or the selector is invalid.", "Use an existing target ID or a valid CSS selector.", "WARN_CONFIGURATION_TARGET");
@@ -22443,7 +22445,7 @@
     return false;
   }
   function transformOwners(api, element) {
-    var _api$ext$anchor, _api$ext$scrollbox, _api$ext$present3, _element$getAttribute;
+    var _api$ext$anchor, _api$ext$scrollbox, _api$ext$present2, _element$getAttribute;
     var owners = [];
     if ((_api$ext$anchor = api.ext.anchor) !== null && _api$ext$anchor !== void 0 && _api$ext$anchor.initialized && element.classList.contains(api.className("anchored"))) owners.push("anchor");
     var parent = element.parentElement;
@@ -22453,7 +22455,7 @@
       });
       if (children.length === 1) owners.push("scrollbox-elastic");
     }
-    if ((_api$ext$present3 = api.ext.present) !== null && _api$ext$present3 !== void 0 && _api$ext$present3.initialized && !element.hasAttribute(api.attr("anchor")) && (_element$getAttribute = element.getAttribute(api.attr("present"))) !== null && _element$getAttribute !== void 0 && _element$getAttribute.split(/\s+/).includes("transform")) owners.push("present");
+    if ((_api$ext$present2 = api.ext.present) !== null && _api$ext$present2 !== void 0 && _api$ext$present2.initialized && !element.hasAttribute(api.attr("anchor")) && (_element$getAttribute = element.getAttribute(api.attr("present"))) !== null && _element$getAttribute !== void 0 && _element$getAttribute.split(/\s+/).includes("transform")) owners.push("present");
     return owners;
   }
   function diagnoseResource(api, element, property, writers) {
@@ -22584,8 +22586,8 @@
         "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
         scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-parent scrollbar-vertical scrollbar-horizontal",
         "scrollbox-snap": "scrollbox-snap snap-item",
-        focus: "focus",
-        point: "point",
+        focus: "focus focus-scope shortcut shortcut-priority shortcut-action shortcut-target",
+        input: "point inputs shortcut-hint shortcut-focus shortcut-hint-position shortcut-label shortcut-source shortcut-code gamepad gamepad-family gamepad-model active-input",
         adaptive: "adaptive",
         "ajax-href": "ajax-href",
         viewport: "viewport viewport-target",
@@ -22600,8 +22602,8 @@
         "overflow-marquee": "overflow-marquee",
         scrollbox: "scrollbox",
         "scrollbox-snap": "scrollbox-snap",
-        focus: "focus",
-        point: "point",
+        focus: "focus focus-scope shortcut",
+        input: "point inputs shortcut-hint",
         adaptive: "adaptive",
         "ajax-href": "ajax-href",
         viewport: "viewport",
@@ -22612,6 +22614,52 @@
   });
 
   // src/internal/create-mount-helper.js
+  function _typeof3(o) {
+    "@babel/helpers - typeof";
+    return _typeof3 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof3(o);
+  }
+  function ownKeys2(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function(r2) {
+        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
+      })), t.push.apply(t, o);
+    }
+    return t;
+  }
+  function _objectSpread2(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys2(Object(t), true).forEach(function(r2) {
+        _defineProperty2(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys2(Object(t)).forEach(function(r2) {
+        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
+      });
+    }
+    return e;
+  }
+  function _defineProperty2(e, r, t) {
+    return (r = _toPropertyKey2(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  }
+  function _toPropertyKey2(t) {
+    var i = _toPrimitive2(t, "string");
+    return "symbol" == _typeof3(i) ? i : i + "";
+  }
+  function _toPrimitive2(t, r) {
+    if ("object" != _typeof3(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r || "default");
+      if ("object" != _typeof3(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return ("string" === r ? String : Number)(t);
+  }
   function _slicedToArray2(r, e) {
     return _arrayWithHoles2(r) || _iterableToArrayLimit2(r, e) || _unsupportedIterableToArray4(r, e) || _nonIterableRest2();
   }
@@ -23503,11 +23551,13 @@
               return _context6.f(18);
             case 19:
               AelluxJs2.dispatch(toCapitalized2(method), {
-                detail: {
+                detail: _objectSpread2({
                   root: rootElement,
                   extensions: selectedNames ? Array.from(selectedNames) : null,
                   elements: Array.from(affected)
-                }
+                }, detachedOnly ? {
+                  detachedOnly: true
+                } : {})
               });
               return _context6.a(2, true);
           }
@@ -23777,13 +23827,13 @@
   function _arrayWithoutHoles3(r) {
     if (Array.isArray(r)) return _arrayLikeToArray5(r);
   }
-  function _typeof3(o) {
+  function _typeof4(o) {
     "@babel/helpers - typeof";
-    return _typeof3 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof4 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof3(o);
+    }, _typeof4(o);
   }
   function _createForOfIteratorHelper5(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
@@ -23950,7 +24000,7 @@
         });
         return false;
       }
-      if (!options || _typeof3(options) !== "object" || Array.isArray(options)) return reject("options");
+      if (!options || _typeof4(options) !== "object" || Array.isArray(options)) return reject("options");
       var extensionName = options.extensionName, selector = options.selector, mount = options.mount, unmount = options.unmount, update = options.update, controllers = options.controllers;
       var priority = options.priority === void 0 ? 0 : options.priority;
       if (typeof extensionName !== "string" || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$|^[a-z][a-zA-Z0-9]*$/.test(extensionName)) return reject("extensionName");
@@ -24094,13 +24144,13 @@
   function _arrayWithHoles3(r) {
     if (Array.isArray(r)) return r;
   }
-  function _typeof4(o) {
+  function _typeof5(o) {
     "@babel/helpers - typeof";
-    return _typeof4 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof5 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof4(o);
+    }, _typeof5(o);
   }
   function createAriaHelper() {
     var elements = /* @__PURE__ */ new WeakMap();
@@ -24175,7 +24225,7 @@
       return {
         set: function set(values) {
           if (released) return false;
-          if (!values || _typeof4(values) !== "object") {
+          if (!values || _typeof5(values) !== "object") {
             throw new TypeError("Invalid ARIA values");
           }
           var updates = Object.entries(values).map(function(_ref) {
@@ -24959,8 +25009,8 @@
         style: false,
         dependencies: Object.freeze([])
       }), Object.freeze({
-        name: "point",
-        style: false,
+        name: "input",
+        style: true,
         dependencies: Object.freeze([])
       }), Object.freeze({
         name: "anchor",
@@ -24999,7 +25049,7 @@
 
   // src/aellux.orchestrator.js
   var aellux_orchestrator_exports = {};
-  function ownKeys2(e, r) {
+  function ownKeys3(e, r) {
     var t = Object.keys(e);
     if (Object.getOwnPropertySymbols) {
       var o = Object.getOwnPropertySymbols(e);
@@ -25009,30 +25059,30 @@
     }
     return t;
   }
-  function _objectSpread2(e) {
+  function _objectSpread3(e) {
     for (var r = 1; r < arguments.length; r++) {
       var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys2(Object(t), true).forEach(function(r2) {
-        _defineProperty2(e, r2, t[r2]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys2(Object(t)).forEach(function(r2) {
+      r % 2 ? ownKeys3(Object(t), true).forEach(function(r2) {
+        _defineProperty3(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys3(Object(t)).forEach(function(r2) {
         Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
       });
     }
     return e;
   }
-  function _defineProperty2(e, r, t) {
-    return (r = _toPropertyKey2(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  function _defineProperty3(e, r, t) {
+    return (r = _toPropertyKey3(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
   }
-  function _toPropertyKey2(t) {
-    var i = _toPrimitive2(t, "string");
-    return "symbol" == _typeof5(i) ? i : i + "";
+  function _toPropertyKey3(t) {
+    var i = _toPrimitive3(t, "string");
+    return "symbol" == _typeof6(i) ? i : i + "";
   }
-  function _toPrimitive2(t, r) {
-    if ("object" != _typeof5(t) || !t) return t;
+  function _toPrimitive3(t, r) {
+    if ("object" != _typeof6(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof5(i)) return i;
+      if ("object" != _typeof6(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -25067,13 +25117,13 @@
   function _arrayWithHoles4(r) {
     if (Array.isArray(r)) return r;
   }
-  function _typeof5(o) {
+  function _typeof6(o) {
     "@babel/helpers - typeof";
-    return _typeof5 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof6 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof5(o);
+    }, _typeof6(o);
   }
   function _createForOfIteratorHelper8(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
@@ -25348,6 +25398,7 @@
                     return _context4.a(2, false);
                   case 2:
                     mountManager.destroy();
+                    AelluxJs.comm.clear();
                   case 3:
                     return _context4.a(2);
                 }
@@ -25403,6 +25454,8 @@
               if (name === "present") {
                 loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
               }
+              if (name === "input") loadWhen = ["point", "inputs", "shortcut", "shortcut-hint"].map(attr).join(",");
+              if (name === "focus") loadWhen = ["focus", "focus-scope", "shortcut"].map(attr).join(",");
               if (name === "state-navigation" || name === "preference") loadWhen = null;
               api.ext(name, {
                 loadWhen: loadWhen,
@@ -25493,6 +25546,16 @@
                   });
                 case 13:
                   _context7.p = 13;
+                  AelluxJs.comm.removeOwner(extensionName);
+                  if (key !== extensionName) AelluxJs.comm.removeOwner(key);
+                  AelluxJs.comm.emit("extension.destroyed", {
+                    extension: extensionName
+                  });
+                  AelluxJs.dispatch("ExtensionDestroy", {
+                    detail: {
+                      extension: extensionName
+                    }
+                  });
                   delete AelluxJs.ext[key];
                   delete extensionPromises[key];
                   delete AelluxJs.registry.ext[key];
@@ -25627,9 +25690,9 @@
         }
         function _extensionInitialize() {
           _extensionInitialize = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee8(extensionName) {
-            var key, registration, context, _error, options;
+            var key, registration, context, _error, options, _t6;
             return _regenerator2().w(function(_context8) {
-              while (1) switch (_context8.n) {
+              while (1) switch (_context8.p = _context8.n) {
                 case 0:
                   extensionName = fromCamelCase2(extensionName);
                   key = toCamelCase2(extensionName);
@@ -25647,7 +25710,7 @@
                     _context8.n = 1;
                     break;
                   }
-                  AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_EXTENSION_COMPATIBILITY_SKIPPED, _objectSpread2(_objectSpread2({}, context), {}, {
+                  AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_EXTENSION_COMPATIBILITY_SKIPPED, _objectSpread3(_objectSpread3({}, context), {}, {
                     explicitlySkipped: true
                   }));
                   _context8.n = 2;
@@ -25658,14 +25721,24 @@
                   throw _error;
                 case 2:
                   options = AelluxJs.options.extensions[key] || {};
-                  _context8.n = 3;
+                  _context8.p = 3;
+                  _context8.n = 4;
                   return AelluxJs.ext[key].init(options);
-                case 3:
+                case 4:
+                  _context8.n = 6;
+                  break;
+                case 5:
+                  _context8.p = 5;
+                  _t6 = _context8.v;
+                  AelluxJs.comm.removeOwner(extensionName);
+                  if (key !== extensionName) AelluxJs.comm.removeOwner(key);
+                  throw _t6;
+                case 6:
                   AelluxJs.ext[key].initialized = true;
                   delete AelluxJs.registry.lazyExtSelectors[key];
                   return _context8.a(2, AelluxJs.ext[key]);
               }
-            }, _callee8);
+            }, _callee8, null, [[3, 5]]);
           }));
           return _extensionInitialize.apply(this, arguments);
         }
@@ -25674,7 +25747,7 @@
         }
         function _appendExtensionAssets() {
           _appendExtensionAssets = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee9(extensionName) {
-            var bundledLoader, key, data, useLegacyBuild, artifact, url, scriptURL, minifiedScript, scriptVariant, loadPromises, _iterator4, _step4, dependency, defaultStyle, fullStyle, _args9 = arguments, _t6;
+            var bundledLoader, key, data, useLegacyBuild, artifact, url, scriptURL, minifiedScript, scriptVariant, loadPromises, _iterator4, _step4, dependency, defaultStyle, fullStyle, _args9 = arguments, _t7;
             return _regenerator2().w(function(_context9) {
               while (1) switch (_context9.p = _context9.n) {
                 case 0:
@@ -25716,8 +25789,8 @@
                   break;
                 case 6:
                   _context9.p = 6;
-                  _t6 = _context9.v;
-                  _iterator4.e(_t6);
+                  _t7 = _context9.v;
+                  _iterator4.e(_t7);
                 case 7:
                   _context9.p = 7;
                   _iterator4.f();
@@ -25808,7 +25881,7 @@
         }
         function _resolveImplicitRegistration() {
           _resolveImplicitRegistration = _asyncToGenerator2(/* @__PURE__ */ _regenerator2().m(function _callee0(extensionName, registration) {
-            var requestedVersion, officialURL, requestedURL, entry, sourceURL, embeddedOfficial, embeddedEntry, official, fallback, _args0 = arguments, _t7, _t8, _t9, _t0;
+            var requestedVersion, officialURL, requestedURL, entry, sourceURL, embeddedOfficial, embeddedEntry, official, fallback, _args0 = arguments, _t8, _t9, _t0, _t1;
             return _regenerator2().w(function(_context0) {
               while (1) switch (_context0.p = _context0.n) {
                 case 0:
@@ -25824,23 +25897,23 @@
                     _context0.n = 2;
                     break;
                   }
-                  _t7 = embeddedOfficial;
+                  _t8 = embeddedOfficial;
                   _context0.n = 4;
                   break;
                 case 2:
                   _context0.n = 3;
                   return loadExtensionIndex(requestedVersion ? "official@".concat(requestedVersion) : "official", requestedURL);
                 case 3:
-                  _t7 = _context0.v;
+                  _t8 = _context0.v;
                 case 4:
-                  official = _t7;
+                  official = _t8;
                   entry = official.extensions[extensionName] || null;
                   _context0.n = 6;
                   break;
                 case 5:
                   _context0.p = 5;
-                  _t8 = _context0.v;
-                  reportIndexFailure(_t8, "official", requestedURL);
+                  _t9 = _context0.v;
+                  reportIndexFailure(_t9, "official", requestedURL);
                 case 6:
                   if (!(!entry && AelluxJs.extIndex.fallbackURL)) {
                     _context0.n = 11;
@@ -25848,24 +25921,24 @@
                   }
                   sourceURL = AelluxJs.extIndex.fallbackURL;
                   _context0.p = 7;
-                  _t9 = AelluxJs.extIndex.fallback;
-                  if (_t9) {
+                  _t0 = AelluxJs.extIndex.fallback;
+                  if (_t0) {
                     _context0.n = 9;
                     break;
                   }
                   _context0.n = 8;
                   return loadExtensionIndex("fallback", sourceURL);
                 case 8:
-                  _t9 = _context0.v;
+                  _t0 = _context0.v;
                 case 9:
-                  fallback = _t9;
+                  fallback = _t0;
                   entry = fallback.extensions[extensionName] || null;
                   _context0.n = 11;
                   break;
                 case 10:
                   _context0.p = 10;
-                  _t0 = _context0.v;
-                  reportIndexFailure(_t0, "custom", sourceURL);
+                  _t1 = _context0.v;
+                  reportIndexFailure(_t1, "custom", sourceURL);
                 case 11:
                   if (entry) {
                     _context0.n = 12;
@@ -25914,7 +25987,7 @@
           }
         }
         function validateExtensionIndex(index, kind, url) {
-          if (!index || index.schemaVersion !== 1 || typeof index.coreVersion !== "string" || !index.extensions || _typeof5(index.extensions) !== "object" || Array.isArray(index.extensions)) {
+          if (!index || index.schemaVersion !== 1 || typeof index.coreVersion !== "string" || !index.extensions || _typeof6(index.extensions) !== "object" || Array.isArray(index.extensions)) {
             throw manifestError(kind, url, "schemaVersion 1, coreVersion, and extensions object");
           }
           if (index.coreVersion !== AelluxJs.version) {
@@ -25922,7 +25995,7 @@
           }
           for (var _i = 0, _Object$entries = Object.entries(index.extensions); _i < _Object$entries.length; _i++) {
             var _Object$entries$_i = _slicedToArray4(_Object$entries[_i], 2), name = _Object$entries$_i[0], entry = _Object$entries$_i[1];
-            if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(name) || !entry || typeof entry.coreCompatibility !== "string" || !entry.builds || _typeof5(entry.builds) !== "object") {
+            if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(name) || !entry || typeof entry.coreCompatibility !== "string" || !entry.builds || _typeof6(entry.builds) !== "object") {
               throw manifestError(kind, url, "valid metadata for ".concat(name));
             }
             for (var _i2 = 0, _arr = ["modern", "legacy"]; _i2 < _arr.length; _i2++) {
@@ -26026,7 +26099,7 @@
           if (selected) registration.url = selected.url;
           registration.coreCompatibility = entry.coreCompatibility;
           registration.dependencies = (entry.dependencies || []).map(function(dependency) {
-            return typeof dependency === "string" ? dependency : _objectSpread2(_objectSpread2({}, dependency), {}, {
+            return typeof dependency === "string" ? dependency : _objectSpread3(_objectSpread3({}, dependency), {}, {
               url: new URL(dependency.url, base).href
             });
           });

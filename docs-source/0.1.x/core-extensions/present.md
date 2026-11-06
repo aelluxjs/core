@@ -54,17 +54,17 @@ A trigger or dismiss control with neither an ID nor a containing `data-ae-presen
 
 ## Tap and native click
 
-Present also consumes Point's `AelluxJsTap` notifications through the same trigger, dismiss and outside-activation routing as native click. Add `data-ae-point` to an eligible button, link or role button and mount it with Point. Full registers Point and Present automatically; Basic requires explicit declarations for both Extensions.
+Present also consumes Input's `AelluxJsTap` notifications through the same trigger, dismiss and outside-activation routing as native click. Add `data-ae-point` to an eligible button, link or role button and mount it with Input. Full registers Input and Present automatically; Basic requires explicit declarations for both Extensions.
 
 ```html
 <button type="button" data-ae-point data-ae-trigger="toggle" data-ae-target="details">Details</button>
 ```
 
-Click keeps priority: Present queues a tap fallback with a 32 ms grace period, allowing touch compatibility clicks delivered in a later input task to arrive first. A click reaching Present before that fallback, on the same control or its descendants and with the same pointer ID when reported consistently, cancels the pending tap and performs the action immediately. WebKit can report a touch/pen compatibility click as mouse input with another ID; that pair is matched by its target within the same grace period. A tap without that click performs the action once when its fallback runs. Different controls and different IDs of the same pointer type remain independent, and a later gesture is accepted normally. This deduplication belongs to Present; Point continues to emit tap immediately and native click remains unchanged.
+Click keeps priority: Present queues a tap fallback with a 32 ms grace period, allowing touch compatibility clicks delivered in a later input task to arrive first. A click reaching Present before that fallback, on the same control or its descendants and with the same pointer ID when reported consistently, cancels the pending tap and performs the action immediately. WebKit can report a touch/pen compatibility click as mouse input with another ID; that pair is matched by its target within the same grace period. A tap without that click performs the action once when its fallback runs. Different controls and different IDs of the same pointer type remain independent, and a later gesture is accepted normally. This deduplication belongs to Present; Input continues to emit tap immediately and native click remains unchanged.
 
-Keyboard clicks keep their normal path. Mouse taps on an already hovered trigger respect the existing hover suppression; touch taps retain their configured action. Unmounting a related Present target or control, unmounting/remounting its Point controller, or destroying Present cancels the pending fallback. Destroy also removes the tap listener.
+Keyboard clicks keep their normal path. Mouse taps on an already hovered trigger respect the existing hover suppression; touch taps retain their configured action. Unmounting a related Present target or control, unmounting/remounting its Input controller, or destroying Present cancels the pending fallback. Destroy also removes the tap listener.
 
-The integration adds no dependencies. Minified Present grows from 18,858 to 20,037 bytes (gzip: 6,727 to 7,124), and Legacy Present from 26,358 to 27,825 bytes (gzip: 9,329 to 9,760). Budgets change from 18.5 / 6.5 KiB to 20 / 7.25 KiB for Modern and from 26 / 9 KiB to 28 / 9.75 KiB for Legacy. Both preceding gzip artifacts already exceeded their old limits. Combined Full costs are recorded in [Point](point.md#bundle-cost).
+The integration adds no dependencies. Minified Present grows from 18,858 to 20,037 bytes (gzip: 6,727 to 7,124), and Legacy Present from 26,358 to 27,825 bytes (gzip: 9,329 to 9,760). Budgets change from 18.5 / 6.5 KiB to 20 / 7.25 KiB for Modern and from 26 / 9 KiB to 28 / 9.75 KiB for Legacy. Both preceding gzip artifacts already exceeded their old limits. Combined Full costs are recorded in [Input](input.md#bundle-cost).
 
 ## Motion and state
 
@@ -114,7 +114,7 @@ The `--ae-from-height`, `--ae-pop-height`, and `--ae-dismiss-height` properties 
 
 When an `dismiss` hides a region containing the active element, Present releases focus if the browser has not already done so, then dispatches `DismissFocusLost` through `AelluxJs.dispatch`. If the active element is outside the region at the time it becomes hidden, no focus event is dispatched.
 
-`data-ae-auto-dismiss` specifies a delay before closing an open container. `data-ae-dismiss-on-click` controls click dismissal: `outside` (default) or `out` closes on outside clicks; `inside` or `in` closes on clicks within the container; `false` or `none` disables click dismissal. Trigger and dismiss controls retain their explicit action without a second automatic action on the same target. This option also applies to Point tap activation. On unmount, Present restores the attributes it changes on each container and trigger control, including `data-ae-present`, `data-ae-present-motion`, `aria-expanded`, `aria-controls`, and `hidden` where applicable.
+`data-ae-auto-dismiss` specifies a delay before closing an open container. `data-ae-dismiss-on-click` controls click dismissal: `outside` (default) or `out` closes on outside clicks; `inside` or `in` closes on clicks within the container; `false` or `none` disables click dismissal. Trigger and dismiss controls retain their explicit action without a second automatic action on the same target. This option also applies to Input tap activation. On unmount, Present restores the attributes it changes on each container and trigger control, including `data-ae-present`, `data-ae-present-motion`, `aria-expanded`, `aria-controls`, and `hidden` where applicable.
 
 ### Click dismissal
 
@@ -137,7 +137,7 @@ Set `data-ae-dismiss-on-click` on the Present container:
 </div>
 ```
 
-This replaces `data-ae-unpop-on-outside`; the old attribute is no longer read. Replace `data-ae-unpop-on-outside="false"` with `data-ae-dismiss-on-click="false"`. For the previous default behavior, omit the new attribute or use `outside`. Point taps use the same policy, and explicit trigger/dismiss actions are not followed by a second automatic dismissal on the same target. The setting does not change hover dismissal.
+This replaces `data-ae-unpop-on-outside`; the old attribute is no longer read. Replace `data-ae-unpop-on-outside="false"` with `data-ae-dismiss-on-click="false"`. For the previous default behavior, omit the new attribute or use `outside`. Input taps use the same policy, and explicit trigger/dismiss actions are not followed by a second automatic dismissal on the same target. The setting does not change hover dismissal.
 
 ## Present Progress
 

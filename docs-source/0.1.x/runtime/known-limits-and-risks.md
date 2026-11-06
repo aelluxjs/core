@@ -107,7 +107,7 @@ The [official catalog](https://github.com/aelluxjs/core/blob/update/beta.10/src/
 | [Anchor](../core-extensions/anchor.md#known-limits-risks) | [Dialog](../core-extensions/optional/dialog.md#known-limits-risks) |
 | [Feedback](../core-extensions/feedback.md#known-limits-risks) | [Overflow Marquee](../core-extensions/optional/overflow-marquee.md#known-limits-risks) |
 | [Focus](../core-extensions/focus.md#known-limits-risks) | [Progress](../core-extensions/optional/progress.md#known-limits-risks) |
-| [Point](../core-extensions/point.md#known-limits-risks) | [PWA](../core-extensions/optional/pwa.md#known-limits-risks) |
+| [Input](../core-extensions/input.md#known-limits-risks) | [PWA](../core-extensions/optional/pwa.md#known-limits-risks) |
 | [Preference](../core-extensions/preference.md#known-limits-risks) | [Scrollbox Snap](../core-extensions/optional/scrollbox-snap.md#known-limits-risks) |
 | [Present](../core-extensions/present.md#known-limits-risks) |  |
 | [Scrollbox](../core-extensions/scrollbox.md#known-limits-risks) |  |

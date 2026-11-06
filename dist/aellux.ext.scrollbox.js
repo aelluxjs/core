@@ -167,16 +167,13 @@
     const inlineMemories = /* @__PURE__ */ new WeakMap();
     const elasticMemories = /* @__PURE__ */ new WeakMap();
     const pointerScrollMemories = /* @__PURE__ */ new WeakMap();
-    let snapController = null;
     let activePointerScrollState = null;
     AelluxJs.extAttach(extensionName, {
       init,
       destroy,
       next,
       previous,
-      goto,
-      registerSnapController,
-      unregisterSnapController
+      goto
     });
     function init() {
       layoutEvents.forEach((name) => onEvent(root.document, name, onLayout));
@@ -216,20 +213,14 @@
       for (const element of scrollboxes.keys()) unmountScrollbox(element);
       AelluxJs.mountManager.remove({ extensionName });
     }
-    function registerSnapController(controller) {
-      snapController = controller;
-    }
-    function unregisterSnapController(controller) {
-      if (snapController === controller) snapController = null;
-    }
     function goto(element, index, behavior) {
-      return (snapController == null ? void 0 : snapController.goto(element, index, behavior)) || false;
+      return AelluxJs.comm.request("scrollbox-snap.goto", { element, index, behavior }).value || false;
     }
     function next(element) {
-      return (snapController == null ? void 0 : snapController.next(element)) || false;
+      return AelluxJs.comm.request("scrollbox-snap.next", { element }).value || false;
     }
     function previous(element) {
-      return (snapController == null ? void 0 : snapController.previous(element)) || false;
+      return AelluxJs.comm.request("scrollbox-snap.previous", { element }).value || false;
     }
     function dispatchInteraction(state, reason, active) {
       AelluxJs.dispatchFrom(state.element, "ScrollboxInteraction", {

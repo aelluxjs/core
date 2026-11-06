@@ -8,7 +8,7 @@ The four experiences use only the ten bundled primitives. They do not register
 or load optional Extensions, Bootstrap JavaScript or external image libraries.
 
 - `carousel.htm`: **Places to Pause** combines Scrollbox dragging/native touch,
-  Viewport visibility on separate visual children, Point-enabled native buttons
+  Viewport visibility on separate visual children, Input-enabled native buttons
   and an exclusive Present Group for destination field notes. The tiny script
   only connects the previous/next buttons to native scrolling. This is free
   scrolling; it does not load Scrollbox Snap.
@@ -17,7 +17,7 @@ or load optional Extensions, Bootstrap JavaScript or external image libraries.
   respond through CSS. Scrollbox supplies pointer dragging and a scrollbar.
   Preference controls motion; reduced motion removes the effects. It has no
   custom interaction script.
-- `floating.htm`: **Make It Yours** combines Anchor, Present, Point and Focus.
+- `floating.htm`: **Make It Yours** combines Anchor, Present, Input and Focus.
   An always-mounted outer wrapper follows the workspace card and chooses a
   placement in the iframe viewport; the inner editor owns visibility/motion.
   The range changes application layout and announces Layout. Enter advances
@@ -54,7 +54,7 @@ with cached 11.12 CDN dependencies and GitHub light/dark styles. The source stay
 readable and copyable if highlighting fails. Preserve the relative `home/` and
 `dist/` structure when deploying under a repository prefix.
 
-Viewport, Point and Focus retain their documented stability status. Browser
+Viewport, Input and Focus retain their documented stability status. Browser
 regressions cover core interactions, runtime assets, intermediate visual values,
 keyboard focus, touch emulation, motion preferences, reflow and runnable source.
 Touch emulation does not replace checks on physical devices.

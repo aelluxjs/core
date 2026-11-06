@@ -17,7 +17,7 @@
     "progress",
     "pwa",
     "viewport",
-    "point",
+    "input",
     "anchor",
     "overflow-marquee",
     "ajax-href",
@@ -101,6 +101,28 @@
             },
             "notAvailable": {
               "type": "array"
+            },
+            "ERROR_COMM_DUPLICATE": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            },
+            "ERROR_COMM_CALLBACK": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
             },
             "WARN_ATTRIBUTE_UNKNOWN": {
               "type": "object",
@@ -872,6 +894,32 @@
         "mountManager": {
           "type": "null"
         },
+        "comm": {
+          "type": "object",
+          "properties": {
+            "handle": {
+              "type": "function"
+            },
+            "request": {
+              "type": "function"
+            },
+            "has": {
+              "type": "function"
+            },
+            "on": {
+              "type": "function"
+            },
+            "emit": {
+              "type": "function"
+            },
+            "removeOwner": {
+              "type": "function"
+            },
+            "clear": {
+              "type": "function"
+            }
+          }
+        },
         "init": {
           "type": "function"
         },
@@ -1221,6 +1269,28 @@
             },
             "notAvailable": {
               "type": "array"
+            },
+            "ERROR_COMM_DUPLICATE": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            },
+            "ERROR_COMM_CALLBACK": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
             },
             "WARN_ATTRIBUTE_UNKNOWN": {
               "type": "object",
@@ -2043,6 +2113,32 @@
             }
           }
         },
+        "comm": {
+          "type": "object",
+          "properties": {
+            "handle": {
+              "type": "function"
+            },
+            "request": {
+              "type": "function"
+            },
+            "has": {
+              "type": "function"
+            },
+            "on": {
+              "type": "function"
+            },
+            "emit": {
+              "type": "function"
+            },
+            "removeOwner": {
+              "type": "function"
+            },
+            "clear": {
+              "type": "function"
+            }
+          }
+        },
         "init": {
           "type": "function"
         },
@@ -2337,6 +2433,19 @@
   },
   "attributes": [
     {
+      "name": "data-ae-active-input",
+      "extension": "input",
+      "description": "Input presentation state. Gamepad presence is independent of the last intentionally used modality.",
+      "syntax": "enum",
+      "values": [
+        "point",
+        "keyboard",
+        "gamepad"
+      ],
+      "role": "output",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
       "name": "data-ae-adaptive",
       "extension": "adaptive",
       "description": "Publishes width-based size classes, aspect-ratio shape classes, dimensions and orientation using the Extension's adaptiveParams thresholds.",
@@ -2573,6 +2682,14 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
     },
     {
+      "name": "data-ae-focus-scope",
+      "extension": "focus",
+      "description": "Isolated navigation and shortcut scope. Logical contexts can be restricted to this container.",
+      "syntax": "presence",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
+    },
+    {
       "name": "data-ae-forced-colors",
       "extension": "preference",
       "description": "Resolved root preference published by the runtime. Use in CSS selectors; configure choices through Preference.",
@@ -2595,6 +2712,55 @@
       "role": "internal",
       "doc": "runtime/api",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/api.htm"
+    },
+    {
+      "name": "data-ae-gamepad",
+      "extension": "input",
+      "description": "Input presentation state. Gamepad presence is independent of the last intentionally used modality.",
+      "syntax": "enum",
+      "values": [
+        "true",
+        "false"
+      ],
+      "role": "output",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "data-ae-gamepad-family",
+      "extension": "input",
+      "description": "Input presentation state. Gamepad presence is independent of the last intentionally used modality.",
+      "syntax": "enum",
+      "values": [
+        "generic",
+        "xbox",
+        "playstation",
+        "nintendo"
+      ],
+      "role": "output",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "data-ae-gamepad-model",
+      "extension": "input",
+      "description": "Input hint presentation metadata.",
+      "syntax": "string",
+      "role": "output",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "data-ae-inputs",
+      "extension": "input",
+      "description": "Enabled Input adapters inherited by descendants. Omitted defaults to point keyboard. An empty list disables adapters in this scope; gamepad is opt-in.",
+      "syntax": "token-list",
+      "values": [
+        "point",
+        "keyboard",
+        "gamepad",
+        "point keyboard gamepad"
+      ],
+      "default": "point keyboard",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
     },
     {
       "name": "data-ae-label",
@@ -2770,7 +2936,7 @@
     },
     {
       "name": "data-ae-point",
-      "extension": "point",
+      "extension": "input",
       "description": "Maximum simultaneously associated pointers. Empty defaults to 1; a nonnegative integer is expected, and 0 disables association.",
       "syntax": "integer",
       "default": "1",
@@ -2780,7 +2946,7 @@
         "2"
       ],
       "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/point.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
     },
     {
       "name": "data-ae-preference",
@@ -3176,6 +3342,104 @@
       "default": "true",
       "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
+    },
+    {
+      "name": "data-ae-shortcut",
+      "extension": "focus",
+      "description": "Contextual physical shortcuts, separated by semicolons. Exact modifiers use Ctrl/Alt/Shift/Meta+code. Focus chooses the closest eligible action in the active scope.",
+      "syntax": "string",
+      "examples": [
+        "keyboard:KeyI; gamepad:north",
+        "keyboard:Ctrl+KeyI"
+      ],
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
+    },
+    {
+      "name": "data-ae-shortcut-action",
+      "extension": "focus",
+      "description": "Action invoked by a shortcut: click, a registered action, or Present pop/unpop/dismiss.",
+      "syntax": "string",
+      "values": [
+        "click",
+        "pop",
+        "unpop",
+        "dismiss"
+      ],
+      "default": "click",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
+    },
+    {
+      "name": "data-ae-shortcut-code",
+      "extension": "input",
+      "description": "Input hint presentation metadata.",
+      "syntax": "string",
+      "role": "output",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "data-ae-shortcut-focus",
+      "extension": "input",
+      "description": "Logical context used for this hint's presentation metadata. Defaults to 1.",
+      "syntax": "positive-integer",
+      "default": "1",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "data-ae-shortcut-hint",
+      "extension": "input",
+      "description": "CSS hint descriptor. Empty inherits data-ae-shortcut from the nearest ancestor; an explicit descriptor works without Focus.",
+      "syntax": "string",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "data-ae-shortcut-hint-position",
+      "extension": "input",
+      "description": "Inline by default. Anchor uses optional CSS Anchor Positioning with inline fallback.",
+      "syntax": "enum",
+      "values": [
+        "inline",
+        "anchor"
+      ],
+      "default": "inline",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "data-ae-shortcut-label",
+      "extension": "input",
+      "description": "Input hint presentation metadata.",
+      "syntax": "string",
+      "role": "output",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "data-ae-shortcut-priority",
+      "extension": "focus",
+      "description": "Numeric priority breaking equal DOM-distance shortcut ties. Higher values win; final ties follow DOM order.",
+      "syntax": "number",
+      "default": "0",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
+    },
+    {
+      "name": "data-ae-shortcut-source",
+      "extension": "input",
+      "description": "Input hint presentation metadata.",
+      "syntax": "string",
+      "role": "output",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "data-ae-shortcut-target",
+      "extension": "focus",
+      "description": "Present action target ID, optionally prefixed by #. Omitted uses the shortcut element.",
+      "syntax": "id",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
     },
     {
       "name": "data-ae-snap-item",
@@ -4131,6 +4395,47 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
     },
     {
+      "name": "--ae-shortcut-anchor",
+      "extension": "input",
+      "syntax": "<dashed-ident>",
+      "description": "Optional CSS anchor name for positioned shortcut hints.",
+      "default": "--ae-shortcut",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "--ae-shortcut-hint-background",
+      "extension": "input",
+      "syntax": "*",
+      "description": "CSS-only shortcut hint presentation override.",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "--ae-shortcut-hint-border",
+      "extension": "input",
+      "syntax": "*",
+      "description": "CSS-only shortcut hint presentation override.",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "--ae-shortcut-hint-color",
+      "extension": "input",
+      "syntax": "*",
+      "description": "CSS-only shortcut hint presentation override.",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "--ae-shortcut-hint-radius",
+      "extension": "input",
+      "syntax": "*",
+      "description": "CSS-only shortcut hint presentation override.",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
       "name": "--ae-snap-focus",
       "extension": "scrollbox-snap",
       "syntax": "<number>",
@@ -4334,6 +4639,27 @@
       "role": "output",
       "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/adaptive.htm"
+    },
+    {
+      "name": "ae--focus-player1",
+      "extension": "focus",
+      "role": "output",
+      "description": "Runtime-managed state class; useful in CSS selectors.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
+    },
+    {
+      "name": "ae--focus-player2",
+      "extension": "focus",
+      "role": "output",
+      "description": "Runtime-managed state class; useful in CSS selectors.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
+    },
+    {
+      "name": "ae--focus-player3",
+      "extension": "focus",
+      "role": "output",
+      "description": "Runtime-managed state class; useful in CSS selectors.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
     },
     {
       "name": "ae--mounted",
@@ -15202,6 +15528,169 @@
   ],
   "methods": [
     {
+      "name": "comm.handle",
+      "extension": "core",
+      "description": "handle(name, handler, { owner, signal }) registers one command/query provider and returns its remover. Duplicate providers diagnose and throw.",
+      "doc": "runtime/communication",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/communication.htm"
+    },
+    {
+      "name": "comm.request",
+      "extension": "core",
+      "description": "request(name, payload) synchronously returns { handled, value }. Missing providers have handled=false; async operations return a Promise in value.",
+      "doc": "runtime/communication",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/communication.htm"
+    },
+    {
+      "name": "comm.has",
+      "extension": "core",
+      "description": "has(name) probes command/query availability without loading Extensions.",
+      "doc": "runtime/communication",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/communication.htm"
+    },
+    {
+      "name": "comm.on",
+      "extension": "core",
+      "description": "on(name, handler, { owner, signal, priority }) subscribes to notifications with deterministic priority/order.",
+      "doc": "runtime/communication",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/communication.htm"
+    },
+    {
+      "name": "comm.emit",
+      "extension": "core",
+      "description": "emit(name, payload) synchronously notifies active subscribers and returns their count. Listener failures diagnose independently.",
+      "doc": "runtime/communication",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/communication.htm"
+    },
+    {
+      "name": "comm.removeOwner",
+      "extension": "core",
+      "description": "removeOwner(owner) releases one owner's handlers and listeners; Extension lifecycle also removes its records.",
+      "doc": "runtime/communication",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/communication.htm"
+    },
+    {
+      "name": "comm.clear",
+      "extension": "core",
+      "description": "clear() removes all communication handlers and listeners.",
+      "doc": "runtime/communication",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/communication.htm"
+    },
+    {
+      "name": "input.registerRouter",
+      "extension": "input",
+      "description": "registerRouter(resolve, { priority, owner, signal }) returns a remover. Undefined abstains; null blocks; a positive safe integer routes.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "input.removeRouters",
+      "extension": "input",
+      "description": "removeRouters(owner) releases all routers owned by an Extension name or element.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "input.resolveFocusId",
+      "extension": "input",
+      "description": "resolveFocusId(command) synchronously returns a logical ID (default 1) or null for a blocked/invalid association.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "input.dispatchCommand",
+      "extension": "input",
+      "description": "dispatchCommand(command) normalizes, routes and synchronously submits an enabled source. Returns whether consumed.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "input.devices",
+      "extension": "input",
+      "description": "devices() returns current gamepad session descriptors; session deviceId is independent of browser index.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "input.pointers",
+      "extension": "input",
+      "description": "pointers(element) preserves pointer tracking. Mounted controller: $ae(element).input.pointers().",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "input.setHintContext",
+      "extension": "input",
+      "description": "setHintContext(focusId, metadata) updates only that focus's hint source/family/model.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "input.setActionMap",
+      "extension": "input",
+      "description": "setActionMap(source, mapping) sets application semantic actions independently of physical codes.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "input.registerAdapter",
+      "extension": "input",
+      "description": "registerAdapter(name, factory) adds a selectively loaded/initialized modality and returns a remover.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "input.registerGamepadFamily",
+      "extension": "input",
+      "description": "registerGamepadFamily(detector, { priority }) adds a presentation-family detector and returns a remover.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "input.describeShortcuts",
+      "extension": "input",
+      "description": "describeShortcuts(value) returns shared physical shortcut descriptors without executing actions.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "input.refresh",
+      "extension": "input",
+      "description": "refresh() awaits adapters requested by current mounted scopes and updates hint metadata.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+    },
+    {
+      "name": "focus.createContext",
+      "extension": "focus",
+      "description": "createContext(id, { scope, syncDOM }) creates an independent logical context. Only default context 1 may synchronize with the DOM.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
+    },
+    {
+      "name": "focus.destroyContext",
+      "extension": "focus",
+      "description": "destroyContext(id) clears its class/reference and removes the context. Context 1 cannot be independently destroyed.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
+    },
+    {
+      "name": "focus.getContext",
+      "extension": "focus",
+      "description": "getContext(id=1) returns an immutable logical context snapshot or null.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
+    },
+    {
+      "name": "focus.setFocus",
+      "extension": "focus",
+      "description": "setFocus(id, elementOrId) validates scope/visibility and updates the logical focus; null clears it.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
+    },
+    {
+      "name": "focus.updateContext",
+      "extension": "focus",
+      "description": "updateContext(id, options) changes scope or context 1 DOM synchronization.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
+    },
+    {
+      "name": "focus.eligibleShortcuts",
+      "extension": "focus",
+      "description": "eligibleShortcuts(id=1, command?) returns contextual shortcuts sorted by proximity, priority and DOM order.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
+    },
+    {
+      "name": "focus.registerShortcutAction",
+      "extension": "focus",
+      "description": "registerShortcutAction(name, handler, { signal }) registers a contextual component action and returns a remover.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
+    },
+    {
       "name": "present.unpop",
       "extension": "present",
       "description": "unpop(element) reverses the captured opening trajectory and its easing back to from, using only its travelled time. Returns false during independent dismissal without interrupting it. Mounted controller: $ae(element).present.unpop().",
@@ -15306,6 +15795,14 @@
     {
       "bubbles": true,
       "cancelable": true,
+      "name": "AelluxJsBeforeInputCommand",
+      "extension": "input",
+      "description": "Cancel processing of an immutable routed command before Focus consumes it. detail: { command }.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
+      "cancelable": true,
       "name": "AelluxJsBeforeMount",
       "extension": "core",
       "description": "BeforeMount pass preflight on document. Cancel to prevent the pass and its completion event. detail: { root, extensions }.",
@@ -15317,6 +15814,14 @@
       "name": "AelluxJsBeforePop",
       "extension": "present",
       "description": "BeforePop notification on the Present element. Cancel to veto the transition.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
+      "cancelable": true,
+      "name": "AelluxJsBeforeShortcut",
+      "extension": "focus",
+      "description": "Cancel the selected contextual action. detail: { command, action }.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
     },
     {
@@ -15361,10 +15866,66 @@
     },
     {
       "bubbles": true,
+      "cancelable": false,
+      "name": "AelluxJsExtensionDestroy",
+      "extension": "core",
+      "description": "Extension teardown notification; owned Input routers are released. detail: { extension }.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
       "cancelable": true,
       "name": "AelluxJsFeedback",
       "extension": "feedback",
       "description": "Cancelable feedback event. detail: { type, message, value, target, motion }; handled boundaries stop propagation.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
+      "cancelable": false,
+      "name": "AelluxJsFocusChange",
+      "extension": "focus",
+      "description": "Logical focus changed. detail: { focusId, element, previous }.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
+      "cancelable": false,
+      "name": "AelluxJsFocusContextDestroy",
+      "extension": "focus",
+      "description": "Logical context ended. detail: { focusId }.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
+      "cancelable": false,
+      "name": "AelluxJsInputBlocked",
+      "extension": "input",
+      "description": "Router explicitly blocked a command or supplied an invalid association. detail: { command }.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
+      "cancelable": false,
+      "name": "AelluxJsInputCommand",
+      "extension": "input",
+      "description": "Observation after synchronous command processing. detail: { command, handled }.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
+      "cancelable": false,
+      "name": "AelluxJsInputDeviceConnected",
+      "extension": "input",
+      "description": "Gamepad session lifecycle. detail: { device }.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
+      "cancelable": false,
+      "name": "AelluxJsInputDeviceDisconnected",
+      "extension": "input",
+      "description": "Gamepad session lifecycle. detail: { device }.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
     },
     {
@@ -15395,7 +15956,7 @@
       "bubbles": false,
       "cancelable": false,
       "name": "AelluxJsPointerCancel",
-      "extension": "point",
+      "extension": "input",
       "description": "Selected element's pointer notification. Does not bubble; detail includes pointer, target, pressStart, originalEvent and hover.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
     },
@@ -15403,7 +15964,7 @@
       "bubbles": false,
       "cancelable": false,
       "name": "AelluxJsPointerDown",
-      "extension": "point",
+      "extension": "input",
       "description": "Selected element's pointer notification. Does not bubble; detail includes pointer, target, pressStart, originalEvent and hover.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
     },
@@ -15411,7 +15972,7 @@
       "bubbles": false,
       "cancelable": false,
       "name": "AelluxJsPointerHover",
-      "extension": "point",
+      "extension": "input",
       "description": "Selected element's pointer notification. Does not bubble; detail includes pointer, target, pressStart, originalEvent and hover.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
     },
@@ -15419,7 +15980,7 @@
       "bubbles": false,
       "cancelable": false,
       "name": "AelluxJsPointerMove",
-      "extension": "point",
+      "extension": "input",
       "description": "Selected element's pointer notification. Does not bubble; detail includes pointer, target, pressStart, originalEvent and hover.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
     },
@@ -15443,7 +16004,7 @@
       "bubbles": false,
       "cancelable": false,
       "name": "AelluxJsPointerUp",
-      "extension": "point",
+      "extension": "input",
       "description": "Selected element's pointer notification. Does not bubble; detail includes pointer, target, pressStart, originalEvent and hover.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
     },
@@ -15626,6 +16187,14 @@
     {
       "bubbles": true,
       "cancelable": false,
+      "name": "AelluxJsShortcut",
+      "extension": "focus",
+      "description": "Selected contextual action executed. detail: { command, action }.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+    },
+    {
+      "bubbles": true,
+      "cancelable": false,
       "name": "AelluxJsSnapshotChange",
       "extension": "state-navigation",
       "description": "SnapshotChange on document. detail includes snapshot, removeSnapshot and popState copies.",
@@ -15651,9 +16220,9 @@
       "bubbles": true,
       "cancelable": false,
       "name": "AelluxJsTap",
-      "extension": "point",
+      "extension": "input",
       "composed": true,
-      "description": "Short primary pointer activation of an eligible mounted Point control. Bubbles across shadow boundaries; detail: { pointerType, pointerId, duration, distance, originalEvent }. Independent of native click and scroll.",
+      "description": "Short primary pointer activation of an eligible mounted Input control. Bubbles across shadow boundaries; detail: { pointerType, pointerId, duration, distance, originalEvent }. Independent of native click and scroll.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
     },
     {

@@ -262,6 +262,13 @@
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/communication.htm" data-ae-overflow-marquee="190px">
+                                        Shared Communication                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/modern-legacy.htm" data-ae-overflow-marquee="190px">
                                         Modern &amp; Legacy                                      </a>
                                     </div>
@@ -459,8 +466,8 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/point.htm" data-ae-overflow-marquee="190px">
-                                              Point                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/input.htm" data-ae-overflow-marquee="190px">
+                                              Input                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -681,6 +688,7 @@ npm run test:browser
 <p><code>test:browser</code> builds <code>dist/</code> before testing. Use <code>npm run test:browser -- --project=chromium</code> to run only Chromium. To use an installed Chrome or Edge instead of Playwright&#39;s Chromium, set <code>AELLUXJS_TEST_BROWSER_CHANNEL</code> to <code>chrome</code> or <code>msedge</code> and select the Chromium project. The <a href="https://getbootstrap.com/">Bootstrap</a> scenario uses the versioned local fixture <code>tests/fixtures/bootstrap-5.3.8.min.css</code> and requires no CDN or network access.</p>
 <p>To run one spec after a build, use <code>npx playwright test tests/browser/full-bundle.spec.mjs --project=chromium</code>. For a Scrollbox change, replace that path with <code>tests/browser/scrollbox-pointer.spec.mjs</code> or <code>tests/browser/scrollbox-scrollbar.spec.mjs</code>. Direct <code>npx playwright test</code> commands use the current <code>dist/</code> files; run <code>npm run build:core</code> first after changing runtime or Extension source. The full bundle spec compares the bundled, registered, and lazy Core Extensions with the explicit list in <code>src/official-extension-definitions.js</code> in the normal and minified Modern and Legacy runtimes. Extension registry tests verify that Full loads the separate Snap script on demand while using bundled Scrollbox; Basic loads both separately. The Full spec also verifies bundled Viewport without separate requests and the separate signed Marquee script and stylesheet. Run <code>npm run test:budget</code> after a build to check raw and gzip artifact limits.</p>
 <h2>Browser Matrix</h2>
+<p><code>input-focus.spec.mjs</code> covers Modern/Legacy selective adapter loading, native keyboard/mouse and text editing, bidirectional focus 1, independent/shared targets, scope cleanup, default/gamepad routing, two simultaneous devices, route updates/removal/blocking/priority/ownership, invalid and async routers, contextual shortcut proximity and isolation, disabled/hidden/inert candidates, per-focus CSS hint families, gamepad sessions/index changes, dead zones, hidden-document suspension and destroy/remount. Pointer/Tap and Present Tap specs retain their behavioral coverage through the Input namespace. Gamepads are deterministic API fixtures rather than physical hardware tests.</p>
 <p>The Playwright configuration runs Chromium, Firefox, and WebKit. The suite covers both normal Modern selection and forced Legacy execution. Forced Legacy validates the ES5 distribution path in these current engines; it does not establish support for historical versions of those browsers.</p>
 <p>Run the complete matrix with one worker when recording a release result:</p>
 <pre><code class="language-sh">npm run test:browser -- --workers=1
@@ -765,7 +773,7 @@ npm run test:browser
 </tbody></table>
 <p>The shared <a href="https://github.com/aelluxjs/core/blob/main/tests/browser/harness.js"><code>harness.js</code></a> waits for <code>AelluxJsReady</code>, applies a timeout, records assertion failures, and exposes the final status through <code>data-test-status</code> for Playwright.</p>
 <h2>Core Contract Regression Matrix</h2>
-<p>Present regressions use the <code>dismiss</code> contract: public and mounted methods, trigger actions and existing close controls, auto-dismiss attribute mutation/countdown, click/Point/hover routing, group outgoing members, vetoes and event order. They also cover independent CSS destinations, progress endpoints, intermediate rendered-state handoff in controlled/native motion, Modern/Legacy, reduced motion, repeated/replaced operations and teardown. Removed beta automatic attributes remain inactive. Present reverse-playback coverage compares nonlinear intermediate opacity/transform values against the captured opening timeline, partial/full duration, grid/measured dimensions, native and controlled modes, CSS-only fallback, veto, refusal during dismissal, selection/capacity, repeated calls, replacement and teardown.</p>
+<p>Present regressions use the <code>dismiss</code> contract: public and mounted methods, trigger actions and existing close controls, auto-dismiss attribute mutation/countdown, click/Input/hover routing, group outgoing members, vetoes and event order. They also cover independent CSS destinations, progress endpoints, intermediate rendered-state handoff in controlled/native motion, Modern/Legacy, reduced motion, repeated/replaced operations and teardown. Removed beta automatic attributes remain inactive. Present reverse-playback coverage compares nonlinear intermediate opacity/transform values against the captured opening timeline, partial/full duration, grid/measured dimensions, native and controlled modes, CSS-only fallback, veto, refusal during dismissal, selection/capacity, repeated calls, replacement and teardown.</p>
 <p>The browser suite covers the release contract in Chromium, Firefox, and WebKit:</p>
 <table>
 <thead>

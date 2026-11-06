@@ -6,6 +6,8 @@ Runtime status is also available there: `diagnostics.legacy` identifies the sele
 
 Each catalog entry contains a numeric aellux.js diagnostic code and its default message:
 
+Shared communication adds `ERROR_COMM_DUPLICATE` (**1130**) for a second command/query provider and `ERROR_COMM_CALLBACK` (**1131**) for a failed notification listener. Duplicate registration throws while preserving the first provider; notification failures are isolated and reported with contract/owner context. See [Shared Communication](communication.md).
+
 ```js
 $ae.diagnostics.ERROR_NOT_INITIALIZED;
 // { code: 1001, message: "aellux.js has not been initialized." }

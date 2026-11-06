@@ -262,6 +262,13 @@
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/communication.htm" data-ae-overflow-marquee="190px">
+                                        Shared Communication                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/modern-legacy.htm" data-ae-overflow-marquee="190px">
                                         Modern &amp; Legacy                                      </a>
                                     </div>
@@ -459,8 +466,8 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/point.htm" data-ae-overflow-marquee="190px">
-                                              Point                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/input.htm" data-ae-overflow-marquee="190px">
+                                              Input                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -685,7 +692,7 @@ npm run build
   AelluxJs.init({ mode: &quot;full&quot; });
 &lt;/script&gt;
 </code></pre>
-<p>The Full runtime is loaded by the aellux.js boot script. Its <strong>Bundled Extensions</strong> are Adaptive, Anchor, Feedback, Focus, Point, Preference, Present, Scrollbox, State Navigation and Viewport. Preference and State Navigation initialize at startup; the remaining implementations initialize when matching markup is mounted, without separate script requests.</p>
+<p>The Full runtime is loaded by the aellux.js boot script. Its <strong>Bundled Extensions</strong> are Adaptive, Anchor, Feedback, Focus, Input, Preference, Present, Scrollbox, State Navigation and Viewport. Preference and State Navigation initialize at startup; the remaining implementations initialize when matching markup is mounted, without separate script requests.</p>
 <p><strong>Optional Extensions</strong> (Ajax Href, Dialog, Overflow Marquee, Progress, PWA and Scrollbox Snap) are registered but excluded from the Full JavaScript bundle. Mounting <code>a[data-ae-ajax-href]</code>, <code>&lt;dialog&gt;</code>, <code>&lt;progress&gt;</code>/<code>&lt;meter&gt;</code>, <code>[data-ae-pwa]</code>, <code>[data-ae-overflow-marquee]</code> or <code>[data-ae-scrollbox-snap]</code> loads the corresponding signed script using the official metadata embedded in the boot script. Modern/Legacy and normal/minified variants follow boot selection. The Dialog and Progress Legacy Extensions contain their own fallbacks and required styles; native controls are preserved when supported. PWA keeps its reusable Service Worker as a separate application-managed artifact and adds no shared styles. Bundled and Optional describe delivery in Full, rather than maturity or stability.</p>
 <p>Full automatically loads <code>aellux.full.css</code> (or <code>.min.css</code> with the minified boot) beside the runtime, using the configured base path. Deploy this stylesheet with the JavaScript artifacts. It includes global defaults and Bundled Extension CSS. Overflow Marquee loads its separate signed stylesheet on demand.</p>
 <h2>Basic Mode</h2>

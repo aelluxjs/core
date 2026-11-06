@@ -17,6 +17,8 @@ To run one spec after a build, use `npx playwright test tests/browser/full-bundl
 
 ## Browser Matrix
 
+`input-focus.spec.mjs` covers Modern/Legacy selective adapter loading, native keyboard/mouse and text editing, bidirectional focus 1, independent/shared targets, scope cleanup, default/gamepad routing, two simultaneous devices, route updates/removal/blocking/priority/ownership, invalid and async routers, contextual shortcut proximity and isolation, disabled/hidden/inert candidates, per-focus CSS hint families, gamepad sessions/index changes, dead zones, hidden-document suspension and destroy/remount. Pointer/Tap and Present Tap specs retain their behavioral coverage through the Input namespace. Gamepads are deterministic API fixtures rather than physical hardware tests.
+
 The Playwright configuration runs Chromium, Firefox, and WebKit. The suite covers both normal Modern selection and forced Legacy execution. Forced Legacy validates the ES5 distribution path in these current engines; it does not establish support for historical versions of those browsers.
 
 Run the complete matrix with one worker when recording a release result:
@@ -53,7 +55,7 @@ The shared [`harness.js`](https://github.com/aelluxjs/core/blob/main/tests/brows
 
 ## Core Contract Regression Matrix
 
-Present regressions use the `dismiss` contract: public and mounted methods, trigger actions and existing close controls, auto-dismiss attribute mutation/countdown, click/Point/hover routing, group outgoing members, vetoes and event order. They also cover independent CSS destinations, progress endpoints, intermediate rendered-state handoff in controlled/native motion, Modern/Legacy, reduced motion, repeated/replaced operations and teardown. Removed beta automatic attributes remain inactive. Present reverse-playback coverage compares nonlinear intermediate opacity/transform values against the captured opening timeline, partial/full duration, grid/measured dimensions, native and controlled modes, CSS-only fallback, veto, refusal during dismissal, selection/capacity, repeated calls, replacement and teardown.
+Present regressions use the `dismiss` contract: public and mounted methods, trigger actions and existing close controls, auto-dismiss attribute mutation/countdown, click/Input/hover routing, group outgoing members, vetoes and event order. They also cover independent CSS destinations, progress endpoints, intermediate rendered-state handoff in controlled/native motion, Modern/Legacy, reduced motion, repeated/replaced operations and teardown. Removed beta automatic attributes remain inactive. Present reverse-playback coverage compares nonlinear intermediate opacity/transform values against the captured opening timeline, partial/full duration, grid/measured dimensions, native and controlled modes, CSS-only fallback, veto, refusal during dismissal, selection/capacity, repeated calls, replacement and teardown.
 
 The browser suite covers the release contract in Chromium, Firefox, and WebKit:
 

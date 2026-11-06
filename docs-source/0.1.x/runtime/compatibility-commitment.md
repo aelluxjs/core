@@ -15,7 +15,7 @@ The Present dismissal rename is part of this prerelease finalization: the beta c
 | Classification | Compatibility commitment | AelluxJS examples |
 | --- | --- | --- |
 | Stable Public API | Preserved throughout `0.1.x`, subject to documented exceptional fixes. | <span class="large">Documented Core methods such as `$ae.mount()`, `BeforeMount`, and Stable Extension contracts such as Present's `pop()`, `data-ae-present`, and `--ae-pop-progress`.</span> |
-| Experimental Public API | May evolve, including incompatible changes, with appropriate documentation. | <span class="large">The Not stable Focus and Point APIs; Not stable Viewport attributes, outputs and events.</span> |
+| Experimental Public API | May evolve, including incompatible changes, with appropriate documentation. | <span class="large">The Not stable Focus and Input APIs; Not stable Viewport attributes, outputs and events.</span> |
 | Internal Implementation | No compatibility guarantee. | <span class="large">Private controller maps, Marquee's generated wrapper structure, `data-ae-scrollbox-fade-state`, and `--ae-present-pop-phase`.</span> |
 
 Protection applies to documented public names, supported inputs, defaults, results and observable semantics under the documented prerequisites. It does not imply identical behavior for invalid inputs unless their handling is itself documented. Known limits, required markup, lifecycle rules, dependencies and platform capabilities remain part of each contract.
@@ -28,7 +28,7 @@ The [Core Extensions index](../core-extensions/README.md#stability) and individu
 | --- | --- | --- |
 | Stable | Bundled | <span class="large">[Adaptive](../core-extensions/adaptive.md), [Anchor](../core-extensions/anchor.md), [Feedback](../core-extensions/feedback.md), [Preference](../core-extensions/preference.md), [Present](../core-extensions/present.md), [Scrollbox](../core-extensions/scrollbox.md), [State Navigation](../core-extensions/state-navigation.md).</span> |
 | Stable | Optional | [Overflow Marquee](../core-extensions/optional/overflow-marquee.md), [Scrollbox Snap](../core-extensions/optional/scrollbox-snap.md). |
-| Not stable | Bundled | [Focus](../core-extensions/focus.md), [Point](../core-extensions/point.md), [Viewport](../core-extensions/viewport.md). |
+| Not stable | Bundled | [Focus](../core-extensions/focus.md), [Input](../core-extensions/input.md), [Viewport](../core-extensions/viewport.md). |
 | Not stable | Optional | <span class="large">[Ajax Href](../core-extensions/optional/ajax-href.md), [Dialog](../core-extensions/optional/dialog.md), [Progress](../core-extensions/optional/progress.md), [PWA](../core-extensions/optional/pwa.md).</span> |
 
 All sixteen remain available during `0.1.x`. Stable Extensions receive the public-contract protection in this document. Not stable means experimental: their methods, markup, CSS and events may change incompatibly, with changelog entries and migration guidance for affected usage. Their current documentation still governs use of each published version.
@@ -109,7 +109,7 @@ Required event fields cannot be removed or incompatibly retyped. Optional fields
 
 Generic `AelluxJsProgress` is nonbubbling and noncancelable and must be observed on the producer. It does not require the experimental Progress Extension. `feedback.progress()` continues to emit the distinct, cancelable `AelluxJsFeedback` contract, including boundary handling. These channels are not interchangeable.
 
-Notifications from Not stable Extensions, such as Point's `Tap` and Viewport's geometry events, remain experimental even though listed in the shared reference. Application-defined events and Docweaver theme events do not acquire Core stability from using the same naming helpers.
+Notifications from Not stable Extensions, such as Input's `Tap` and Viewport's geometry events, remain experimental even though listed in the shared reference. Application-defined events and Docweaver theme events do not acquire Core stability from using the same naming helpers.
 
 This commitment does not guarantee undocumented event timing, exact frequency, event counts per frame, compositor synchronization, or a total order across unrelated operations. Cancellation must be synchronous; a Promise returned by an event listener does not delay dispatch. Scheduler and browser throttling remain applicable.
 

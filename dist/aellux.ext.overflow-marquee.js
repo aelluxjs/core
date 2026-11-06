@@ -546,12 +546,22 @@
     api.extAttach(extensionName, { init, destroy });
     async function init() {
       if (!api.registry.ext.anchor) api.ext("anchor");
-      const anchor = await api.wait("anchor");
-      if (!(anchor == null ? void 0 : anchor.createPlacementMap)) throw new Error("[aellux.js] Overflow Marquee requires Anchor's placement map.");
-      placements = anchor.createPlacementMap();
-      marquee = createOverflowMarquee(root, api, __spreadProps(__spreadValues({}, placements), {
-        measure: (element, end) => placements.measure(element, end ? "bottom-right:bottom-right" : "top-left:top-left")
-      }));
+      await api.wait("anchor");
+      if (!api.comm.has("anchor.placement")) throw new Error("[aellux.js] Overflow Marquee requires Anchor geometry.");
+      const owner = {};
+      const request = (action, payload) => api.comm.request("anchor.placement", __spreadValues({ action, owner }, payload));
+      placements = {
+        mount: (element) => request("mount", { element }),
+        unmount: (element) => request("unmount", { element }),
+        measure: (element, end) => request("measure", { element, pairs: end ? "bottom-right:bottom-right" : "top-left:top-left" }).value,
+        place: (element, placement) => request("place", { element, placement }),
+        invisible: (element) => {
+          const result = request("invisible", { element });
+          return !result.handled || result.value;
+        },
+        destroy: () => request("dispose")
+      };
+      marquee = createOverflowMarquee(root, api, placements);
       api.registerCssProperty(
         { name: "--ae-overflow-marquee-speed", syntax: "<number>", initialValue: "30" },
         { name: "--ae-overflow-marquee-delay", syntax: "<time>", initialValue: "1200ms" },

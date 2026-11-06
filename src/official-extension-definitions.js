@@ -13,7 +13,7 @@ export const officialExtensionDefinitions = Object.freeze([
   Object.freeze({ name: "progress", optional: true, style: false, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "pwa", optional: true, style: false, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "viewport", style: false, dependencies: Object.freeze([]) }),
-  Object.freeze({ name: "point", style: false, dependencies: Object.freeze([]) }),
+  Object.freeze({ name: "input", style: true, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "anchor", style: true, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "overflow-marquee", optional: true, style: true, dependencies: Object.freeze([]) }),
   Object.freeze({ name: "ajax-href", optional: true, style: false, dependencies: Object.freeze([]) }),

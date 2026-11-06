@@ -13,7 +13,7 @@ async function start(page, mode, forceLegacy) {
       <button id="other" data-ae-point data-ae-trigger="toggle" data-ae-target="other-panel">Other</button>
       <section id="other-panel" data-ae-present="" data-ae-dismiss-on-click="false" hidden>Other panel</section>`;
     if (mode === "basic") {
-      AelluxJs.ext("point");
+      AelluxJs.ext("input");
       AelluxJs.ext("present", { loadStyle: true });
     }
     AelluxJs.on("Ready", resolve, { once: true });
@@ -182,7 +182,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
       }
     });
 
-    for (const [id, extension] of [["control", "present"], ["panel", "present"], ["control", "point"]]) {
+    for (const [id, extension] of [["control", "present"], ["panel", "present"], ["control", "input"]]) {
       test(`unmount/remount ${id} in ${extension} cancels a queued tap`, async ({ page }) => {
         await start(page, mode, forceLegacy);
         await page.evaluate(async ({ id, extension }) => {

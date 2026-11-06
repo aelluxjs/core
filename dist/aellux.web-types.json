@@ -8,6 +8,15 @@
     "html": {
       "attributes": [
         {
+          "name": "data-ae-active-input",
+          "description": "Input presentation state. Gamepad presence is independent of the last intentionally used modality.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm",
+          "value": {
+            "kind": "plain",
+            "type": "\"point\" | \"keyboard\" | \"gamepad\""
+          }
+        },
+        {
           "name": "data-ae-adaptive",
           "description": "Publishes width-based size classes, aspect-ratio shape classes, dimensions and orientation using the Extension's adaptiveParams thresholds.\n\nValue syntax: presence.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/adaptive.htm",
@@ -100,6 +109,51 @@
           }
         },
         {
+          "name": "data-ae-focus-scope",
+          "description": "Isolated navigation and shortcut scope. Logical contexts can be restricted to this container.\n\nValue syntax: presence.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm",
+          "value": {
+            "kind": "no-value"
+          }
+        },
+        {
+          "name": "data-ae-gamepad",
+          "description": "Input presentation state. Gamepad presence is independent of the last intentionally used modality.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm",
+          "value": {
+            "kind": "plain",
+            "type": "\"true\" | \"false\""
+          }
+        },
+        {
+          "name": "data-ae-gamepad-family",
+          "description": "Input presentation state. Gamepad presence is independent of the last intentionally used modality.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm",
+          "value": {
+            "kind": "plain",
+            "type": "\"generic\" | \"xbox\" | \"playstation\" | \"nintendo\""
+          }
+        },
+        {
+          "name": "data-ae-gamepad-model",
+          "description": "Input hint presentation metadata.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: string.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm",
+          "value": {
+            "kind": "plain",
+            "type": "string"
+          }
+        },
+        {
+          "name": "data-ae-inputs",
+          "description": "Enabled Input adapters inherited by descendants. Omitted defaults to point keyboard. An empty list disables adapters in this scope; gamepad is opt-in.\n\nValue syntax: token-list.\n\nDefault behavior: \"point keyboard\".\n\nSuggested values: `point`, `keyboard`, `gamepad`, `point keyboard gamepad`. This is an open grammar, not a closed enumeration.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm",
+          "default": "point keyboard",
+          "value": {
+            "kind": "plain",
+            "type": "string"
+          }
+        },
+        {
           "name": "data-ae-label",
           "description": "Shown when this value matches the enclosing preference; otherwise hidden. It does not copy text into another element.\n\nValue syntax: string.\n\nExamples: `auto`, `light`, `dark`.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/preference.htm",
@@ -166,7 +220,7 @@
         {
           "name": "data-ae-point",
           "description": "Maximum simultaneously associated pointers. Empty defaults to 1; a nonnegative integer is expected, and 0 disables association.\n\nValue syntax: integer.\n\nDefault behavior: \"1\".\n\nExamples: `0`, `1`, `2`.",
-          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/point.htm",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm",
           "default": "1",
           "value": {
             "kind": "plain",
@@ -385,6 +439,100 @@
           "value": {
             "kind": "plain",
             "type": "\"true\" | \"false\""
+          }
+        },
+        {
+          "name": "data-ae-shortcut",
+          "description": "Contextual physical shortcuts, separated by semicolons. Exact modifiers use Ctrl/Alt/Shift/Meta+code. Focus chooses the closest eligible action in the active scope.\n\nValue syntax: string.\n\nExamples: `keyboard:KeyI; gamepad:north`, `keyboard:Ctrl+KeyI`.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm",
+          "value": {
+            "kind": "plain",
+            "type": "string"
+          }
+        },
+        {
+          "name": "data-ae-shortcut-action",
+          "description": "Action invoked by a shortcut: click, a registered action, or Present pop/unpop/dismiss.\n\nValue syntax: string.\n\nDefault behavior: \"click\".\n\nSuggested values: `click`, `pop`, `unpop`, `dismiss`. This is an open grammar, not a closed enumeration.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm",
+          "default": "click",
+          "value": {
+            "kind": "plain",
+            "type": "string"
+          }
+        },
+        {
+          "name": "data-ae-shortcut-code",
+          "description": "Input hint presentation metadata.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: string.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm",
+          "value": {
+            "kind": "plain",
+            "type": "string"
+          }
+        },
+        {
+          "name": "data-ae-shortcut-focus",
+          "description": "Logical context used for this hint's presentation metadata. Defaults to 1.\n\nValue syntax: positive-integer.\n\nDefault behavior: \"1\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm",
+          "default": "1",
+          "value": {
+            "kind": "plain",
+            "type": "string"
+          }
+        },
+        {
+          "name": "data-ae-shortcut-hint",
+          "description": "CSS hint descriptor. Empty inherits data-ae-shortcut from the nearest ancestor; an explicit descriptor works without Focus.\n\nValue syntax: string.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm",
+          "value": {
+            "kind": "plain",
+            "type": "string"
+          }
+        },
+        {
+          "name": "data-ae-shortcut-hint-position",
+          "description": "Inline by default. Anchor uses optional CSS Anchor Positioning with inline fallback.\n\nValue syntax: enum.\n\nDefault behavior: \"inline\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm",
+          "default": "inline",
+          "value": {
+            "kind": "plain",
+            "type": "\"inline\" | \"anchor\""
+          }
+        },
+        {
+          "name": "data-ae-shortcut-label",
+          "description": "Input hint presentation metadata.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: string.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm",
+          "value": {
+            "kind": "plain",
+            "type": "string"
+          }
+        },
+        {
+          "name": "data-ae-shortcut-priority",
+          "description": "Numeric priority breaking equal DOM-distance shortcut ties. Higher values win; final ties follow DOM order.\n\nValue syntax: number.\n\nDefault behavior: \"0\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm",
+          "default": "0",
+          "value": {
+            "kind": "plain",
+            "type": "string"
+          }
+        },
+        {
+          "name": "data-ae-shortcut-source",
+          "description": "Input hint presentation metadata.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: string.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm",
+          "value": {
+            "kind": "plain",
+            "type": "string"
+          }
+        },
+        {
+          "name": "data-ae-shortcut-target",
+          "description": "Present action target ID, optionally prefixed by #. Omitted uses the shortcut element.\n\nValue syntax: id.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm",
+          "value": {
+            "kind": "plain",
+            "type": "string"
           }
         },
         {
@@ -890,6 +1038,31 @@
           ]
         },
         {
+          "name": "--ae-shortcut-anchor",
+          "description": "Optional CSS anchor name for positioned shortcut hints.\n\nValue syntax: <dashed-ident>.\n\nDefault behavior: \"--ae-shortcut\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        },
+        {
+          "name": "--ae-shortcut-hint-background",
+          "description": "CSS-only shortcut hint presentation override.\n\nValue syntax: *.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        },
+        {
+          "name": "--ae-shortcut-hint-border",
+          "description": "CSS-only shortcut hint presentation override.\n\nValue syntax: *.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        },
+        {
+          "name": "--ae-shortcut-hint-color",
+          "description": "CSS-only shortcut hint presentation override.\n\nValue syntax: *.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        },
+        {
+          "name": "--ae-shortcut-hint-radius",
+          "description": "CSS-only shortcut hint presentation override.\n\nValue syntax: *.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
+        },
+        {
           "name": "--ae-snap-focus",
           "description": "Per-item alignment proximity from 0 to 1; 1 means aligned with the requested snap position.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: <number>.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/scrollbox-snap.htm"
@@ -1025,6 +1198,21 @@
           "name": "ae--fits-xxl",
           "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/adaptive.htm"
+        },
+        {
+          "name": "ae--focus-player1",
+          "description": "Runtime-managed state class; useful in CSS selectors.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
+        },
+        {
+          "name": "ae--focus-player2",
+          "description": "Runtime-managed state class; useful in CSS selectors.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
+        },
+        {
+          "name": "ae--focus-player3",
+          "description": "Runtime-managed state class; useful in CSS selectors.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
         },
         {
           "name": "ae--mounted",
@@ -8831,6 +9019,11 @@
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
         },
         {
+          "name": "AelluxJsBeforeInputCommand",
+          "description": "Cancel processing of an immutable routed command before Focus consumes it. detail: { command }. Bubbles: true. Cancelable: true.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+        },
+        {
           "name": "AelluxJsBeforeMount",
           "description": "BeforeMount pass preflight on document. Cancel to prevent the pass and its completion event. detail: { root, extensions }. Bubbles: true. Cancelable: true.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
@@ -8838,6 +9031,11 @@
         {
           "name": "AelluxJsBeforePop",
           "description": "BeforePop notification on the Present element. Cancel to veto the transition. Bubbles: true. Cancelable: true.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsBeforeShortcut",
+          "description": "Cancel the selected contextual action. detail: { command, action }. Bubbles: true. Cancelable: true.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
         },
         {
@@ -8866,8 +9064,43 @@
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
         },
         {
+          "name": "AelluxJsExtensionDestroy",
+          "description": "Extension teardown notification; owned Input routers are released. detail: { extension }. Bubbles: true. Cancelable: false.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+        },
+        {
           "name": "AelluxJsFeedback",
           "description": "Cancelable feedback event. detail: { type, message, value, target, motion }; handled boundaries stop propagation. Bubbles: true. Cancelable: true.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsFocusChange",
+          "description": "Logical focus changed. detail: { focusId, element, previous }. Bubbles: true. Cancelable: false.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsFocusContextDestroy",
+          "description": "Logical context ended. detail: { focusId }. Bubbles: true. Cancelable: false.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsInputBlocked",
+          "description": "Router explicitly blocked a command or supplied an invalid association. detail: { command }. Bubbles: true. Cancelable: false.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsInputCommand",
+          "description": "Observation after synchronous command processing. detail: { command, handled }. Bubbles: true. Cancelable: false.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsInputDeviceConnected",
+          "description": "Gamepad session lifecycle. detail: { device }. Bubbles: true. Cancelable: false.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+        },
+        {
+          "name": "AelluxJsInputDeviceDisconnected",
+          "description": "Gamepad session lifecycle. detail: { device }. Bubbles: true. Cancelable: false.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
         },
         {
@@ -9031,6 +9264,11 @@
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
         },
         {
+          "name": "AelluxJsShortcut",
+          "description": "Selected contextual action executed. detail: { command, action }. Bubbles: true. Cancelable: false.",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
+        },
+        {
           "name": "AelluxJsSnapshotChange",
           "description": "SnapshotChange on document. detail includes snapshot, removeSnapshot and popState copies. Bubbles: true. Cancelable: false.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
@@ -9047,7 +9285,7 @@
         },
         {
           "name": "AelluxJsTap",
-          "description": "Short primary pointer activation of an eligible mounted Point control. Bubbles across shadow boundaries; detail: { pointerType, pointerId, duration, distance, originalEvent }. Independent of native click and scroll. Bubbles: true. Cancelable: false.",
+          "description": "Short primary pointer activation of an eligible mounted Input control. Bubbles across shadow boundaries; detail: { pointerType, pointerId, duration, distance, originalEvent }. Independent of native click and scroll. Bubbles: true. Cancelable: false.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/events.htm"
         },
         {

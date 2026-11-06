@@ -76,7 +76,7 @@ const attributesByExtension = {
   "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
   scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-parent scrollbar-vertical scrollbar-horizontal",
   "scrollbox-snap": "scrollbox-snap snap-item",
-  focus: "focus", point: "point", adaptive: "adaptive", "ajax-href": "ajax-href",
+  focus: "focus focus-scope shortcut shortcut-priority shortcut-action shortcut-target", input: "point inputs shortcut-hint shortcut-focus shortcut-hint-position shortcut-label shortcut-source shortcut-code gamepad gamepad-family gamepad-model active-input", adaptive: "adaptive", "ajax-href": "ajax-href",
   viewport: "viewport viewport-target",
   progress: "progress-target progress-fallback",
   preference: "preference option label next prev ready",
@@ -86,7 +86,7 @@ const coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds l
 const activation = {
   present: "present present-group trigger dismiss", anchor: "anchor", "overflow-marquee": "overflow-marquee",
   scrollbox: "scrollbox", "scrollbox-snap": "scrollbox-snap",
-  focus: "focus", point: "point", adaptive: "adaptive", "ajax-href": "ajax-href",
+  focus: "focus focus-scope shortcut", input: "point inputs shortcut-hint", adaptive: "adaptive", "ajax-href": "ajax-href",
   viewport: "viewport",
   preference: "preference", feedback: "feedback"
 };
@@ -158,7 +158,7 @@ export function validateExtensionDeclarations(root, scope, extensionNames = null
         if (value("focus") === "next" && !element.matches('input:not([type]),input[type=text],input[type=search],input[type=email],input[type=url],input[type=tel],input[type=password],input[type=number],textarea,[contenteditable]:not([contenteditable=false])'))
           invalid(extension, "focus", "Enter navigation is declared on a non-text-entry element.", "Apply data-ae-focus=next to a text input, textarea or editable element.");
       }
-      if (extension === "point" && value("point") !== "" &&
+      if (extension === "input" && value("point") !== "" && element.hasAttribute(attr("point")) &&
           (!/^\d+$/.test(value("point")) || !Number.isSafeInteger(Number(value("point")))))
         invalid(extension, "point", "Pointer count must be a nonnegative integer.", "Use an integer such as 1; 0 disables pointer association.");
       if (extension === "ajax-href") {
@@ -230,7 +230,7 @@ export function validateExtensionDeclarations(root, scope, extensionNames = null
         if (!api.ext.present?.initialized)
           report("WARN_EXTENSION_REQUIRED", "present", "anchor-target", "A Present Group target requires Present.", "Register and initialize Present before mounting the group and its Anchors.");
         // A mounted group with no accepted selection is a normal inactive state.
-        target = api.ext.present?.selected?.(target);
+        target = api.comm.request("present.selection", { group: target }).value;
         if (!target) return;
       }
       if (!target) invalid("anchor", "anchor-target", "Anchor target does not exist or the selector is invalid.", "Use an existing target ID or a valid CSS selector.", "WARN_CONFIGURATION_TARGET");

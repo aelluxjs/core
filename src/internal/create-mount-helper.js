@@ -336,7 +336,8 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
       detail: {
         root: rootElement,
         extensions: selectedNames ? Array.from(selectedNames) : null,
-        elements: Array.from(affected)
+        elements: Array.from(affected),
+        ...(detachedOnly ? { detachedOnly: true } : {})
       }
     });
     return true;

@@ -141,8 +141,11 @@ for (const options of [
       const feedback = AelluxJs.ext.feedback;
       const calls = [];
       const beforePop = [];
-      const pop = AelluxJs.ext.present.pop;
-      AelluxJs.ext.present.pop = element => { calls.push(element.id); return pop(element); };
+      const request = AelluxJs.comm.request;
+      AelluxJs.comm.request = (name, payload) => {
+        if (name === "present.pop") calls.push(payload.element.id);
+        return request(name, payload);
+      };
       panel.addEventListener(AelluxJs.eventName("BeforePop"), () => beforePop.push({
         text: message.textContent, typeClass: message.classList.contains("ae--feedback-error")
       }));
@@ -198,8 +201,11 @@ for (const options of [
     await startFeedback(page, '<aside id="panel" data-ae-present hidden><p id="boundary" data-ae-feedback></p></aside>', options);
     const result = await page.evaluate(() => {
       let calls = 0;
-      const pop = AelluxJs.ext.present.pop;
-      AelluxJs.ext.present.pop = element => { calls++; return pop(element); };
+      const request = AelluxJs.comm.request;
+      AelluxJs.comm.request = (name, payload) => {
+        if (name === "present.pop") calls++;
+        return request(name, payload);
+      };
       const boundary = document.getElementById("boundary");
       AelluxJs.ext.feedback.announce("default targets", boundary);
       return { calls, hidden: document.getElementById("panel").hidden, message: boundary.textContent };
@@ -218,8 +224,11 @@ for (const options of [
       const boundary = document.getElementById("boundary");
       const panels = ["message-panel", "motion-panel"].map(id => document.getElementById(id));
       const calls = [];
-      const pop = AelluxJs.ext.present.pop;
-      AelluxJs.ext.present.pop = element => { calls.push(element.id); return pop(element); };
+      const request = AelluxJs.comm.request;
+      AelluxJs.comm.request = (name, payload) => {
+        if (name === "present.pop") calls.push(payload.element.id);
+        return request(name, payload);
+      };
       function opened(panel) {
         return new Promise(resolve => panel.addEventListener(AelluxJs.eventName("Pop"), resolve, { once: true }));
       }

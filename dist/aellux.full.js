@@ -625,7 +625,13 @@
         const transformTargetAttribute = AelluxJs2.attr("transformTarget");
         const presentTargetAttribute = AelluxJs2.attr("presentTarget");
         const presentSelector = `[${AelluxJs2.attr("present")}]`;
+        const mountedFeedback = /* @__PURE__ */ new Set();
         function init() {
+          AelluxJs2.comm.handle("feedback.prepare", ({ boundary, feedback, element }) => {
+            if (!mountedFeedback.has(boundary) || !boundary.isConnected) return false;
+            applyFeedback(boundary, feedback, element);
+            return true;
+          }, { owner: extensionName });
           AelluxJs2.mountManager.add({
             extensionName,
             selector: `[${feedbackAttribute}]`,
@@ -636,15 +642,19 @@
           });
         }
         async function destroy() {
+          AelluxJs2.comm.removeOwner(extensionName);
+          mountedFeedback.clear();
           AelluxJs2.mountManager.remove({ extensionName });
           for (const operation of motionOperations.values()) AelluxJs2.motion.cancel(operation.id);
           motionOperations.clear();
           handlers.clear();
         }
         function mountFeedback(element) {
+          mountedFeedback.add(element);
           AelluxJs2.onEvent(element, "Feedback", onFeedback);
         }
         function unmountFeedback(element) {
+          mountedFeedback.delete(element);
           AelluxJs2.offEvent(element, "Feedback", onFeedback);
         }
         function onFeedback(event) {
@@ -662,19 +672,24 @@
           event.stopPropagation();
           if (!event.detail) return;
           const presentTarget = element.getAttribute(presentTargetAttribute);
-          const present = AelluxJs2.ext.present;
-          const presentElement = presentTarget !== null && presentTarget.trim() && (present == null ? void 0 : present.initialized) ? AelluxJs2.elementOrId(presentTarget) : null;
+          const presentElement = presentTarget !== null && presentTarget.trim() && (AelluxJs2.comm.has("present.pop") || AelluxJs2.comm.has("present.pop-next")) ? AelluxJs2.elementOrId(presentTarget) : null;
           if (presentElement == null ? void 0 : presentElement.hasAttribute(AelluxJs2.attr("present-group"))) {
-            present.popNext(presentElement, (member) => applyFeedback(element, event.detail, member)).catch((cause) => AelluxJs2.diagnostics.error(
-              AelluxJs2.diagnostics.ERROR_EXTENSION_TRANSITION,
-              { cause, extension: extensionName, element: presentElement }
-            ));
-            return;
+            const result = AelluxJs2.comm.request("present.pop-next", {
+              group: presentElement,
+              preparation: { contract: "feedback.prepare", payload: { boundary: element, feedback: event.detail } }
+            });
+            if (result.handled) {
+              Promise.resolve(result.value).catch((cause) => AelluxJs2.diagnostics.error(
+                AelluxJs2.diagnostics.ERROR_EXTENSION_TRANSITION,
+                { cause, extension: extensionName, element: presentElement }
+              ));
+              return;
+            }
           }
           applyFeedback(element, event.detail, element, (messageElement, transformElement) => {
-            if (presentTarget !== null && (present == null ? void 0 : present.initialized)) {
+            if (presentTarget !== null) {
               const target = presentElement || !presentTarget.trim() && ((messageElement == null ? void 0 : messageElement.closest(presentSelector)) || (transformElement == null ? void 0 : transformElement.closest(presentSelector)));
-              if (target) present.pop(target);
+              if (target) AelluxJs2.comm.request("present.pop", { element: target });
             }
           });
         }
@@ -859,10 +874,43 @@
     }
   });
 
+  // src/internal/input-shortcuts.js
+  function parseShortcuts(value) {
+    return String(value || "").split(";").map((part) => {
+      const match = part.trim().match(/^([a-z][a-z0-9-]*):([^:;\s]+)$/i);
+      if (!match) return null;
+      const tokens = match[2].split("+");
+      const code = tokens.pop();
+      const modifiers = tokens.map((token) => token.toLowerCase()).sort();
+      if (!code || modifiers.some((token) => !["alt", "ctrl", "meta", "shift"].includes(token)) || new Set(modifiers).size !== modifiers.length) return null;
+      return Object.freeze({ source: match[1].toLowerCase(), code, modifiers: Object.freeze(modifiers) });
+    }).filter(Boolean);
+  }
+  function matchesShortcut(shortcut, command) {
+    const modifiers = command.modifiers || {};
+    return shortcut.source === command.source && shortcut.code === command.code && ["alt", "ctrl", "meta", "shift"].every((name) => !!modifiers[name] === shortcut.modifiers.includes(name));
+  }
+  function shortcutLabel(shortcut, family = "generic") {
+    if (!shortcut) return "";
+    const faces = {
+      xbox: { south: "A", east: "B", west: "X", north: "Y" },
+      playstation: { south: "\xD7", east: "\u25CB", west: "\u25A1", north: "\u25B3" },
+      nintendo: { south: "B", east: "A", west: "Y", north: "X" }
+    };
+    const label = shortcut.source === "keyboard" ? shortcut.code.replace(/^Key(?=[A-Z]$)|^Digit(?=\d$)/g, "") : faces[family] && faces[family][shortcut.code] || shortcut.code;
+    return [...shortcut.modifiers.map((name) => name[0].toUpperCase() + name.slice(1)), label].join("+");
+  }
+  var init_input_shortcuts = __esm({
+    "src/internal/input-shortcuts.js"() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
   // src/aellux.ext.focus.js
   var aellux_ext_focus_exports = {};
   var init_aellux_ext_focus = __esm({
     "src/aellux.ext.focus.js"() {
+      init_input_shortcuts();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
@@ -874,7 +922,14 @@
         AelluxJs2.extAttach(extensionName, {
           init,
           destroy,
-          restoreLastFocus
+          restoreLastFocus,
+          createContext,
+          destroyContext,
+          getContext,
+          setFocus,
+          updateContext,
+          eligibleShortcuts,
+          registerShortcutAction
         });
         const attribute = AelluxJs2.attr(extensionName);
         const snapshotKey = "ae-focus";
@@ -884,7 +939,25 @@
         const textEntrySelector = "input:not([type]), input[type=text], input[type=search], input[type=email], input[type=url], input[type=tel], input[type=password], input[type=number], textarea, [contenteditable]:not([contenteditable=false])";
         const focusableSelector = "a[href], area[href], button, input, select, textarea, [tabindex], [contenteditable]:not([contenteditable=false])";
         let current = null, restoring = false;
+        const contexts = /* @__PURE__ */ new Map();
+        const shortcutActions = /* @__PURE__ */ new Map();
+        let contextObserver = null;
+        const scopeSelector = `[${AelluxJs2.attr("focus-scope")}], dialog, [aria-modal="true"]`;
+        const focusClasses = [null, AelluxJs2.className("focus-player1"), AelluxJs2.className("focus-player2"), AelluxJs2.className("focus-player3")];
+        const focusClass = (id) => focusClasses[id] || AelluxJs2.className("focus-player" + id);
         function init() {
+          createContext(1);
+          AelluxJs2.comm.handle("focus.command", consumeCommand, { owner: extensionName });
+          AelluxJs2.comm.handle("focus.context", ({ focusId }) => getContext(focusId), { owner: extensionName });
+          contextObserver = new root2.MutationObserver((records) => {
+            if (records.some((record) => Array.from(contexts.values()).some((context) => !context.scope.isConnected || context.element && (record.type === "attributes" && record.target.contains(context.element) || record.type === "childList" && Array.from(record.removedNodes).some((node) => node.contains(context.element)))))) pruneContexts();
+          });
+          contextObserver.observe(document.documentElement, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ["hidden", "inert", "disabled", "aria-disabled", "class", "style"]
+          });
           AelluxJs2.mountManager.add({
             extensionName,
             selector: `[${attribute}]`,
@@ -900,9 +973,18 @@
           AelluxJs2.on("SnapshotRestore", onSnapshotRestore);
           AelluxJs2.on("DismissFocusLost", onDismissFocusLost);
           AelluxJs2.on("UnpopFocusLost", onDismissFocusLost);
+          AelluxJs2.on("Unmount", onContextUnmount);
+          AelluxJs2.on("Mount", onContextMount);
           remember(document.activeElement, false);
+          syncNative(document.activeElement);
         }
         function destroy() {
+          AelluxJs2.comm.removeOwner(extensionName);
+          contextObserver == null ? void 0 : contextObserver.disconnect();
+          contextObserver = null;
+          for (const context of contexts.values()) clearContext(context);
+          contexts.clear();
+          shortcutActions.clear();
           AelluxJs2.off("$focusin", onFocusIn, true);
           AelluxJs2.off("$focus", onFocusChange, true);
           AelluxJs2.off("$blur", onBlur, true);
@@ -911,6 +993,8 @@
           AelluxJs2.off("SnapshotRestore", onSnapshotRestore);
           AelluxJs2.off("DismissFocusLost", onDismissFocusLost);
           AelluxJs2.off("UnpopFocusLost", onDismissFocusLost);
+          AelluxJs2.off("Unmount", onContextUnmount);
+          AelluxJs2.off("Mount", onContextMount);
           AelluxJs2.mountManager.remove({ extensionName });
           entries.length = 0;
           current = null;
@@ -949,7 +1033,7 @@
           }
         }
         function isValid(element) {
-          if (!element || element === document.body || element === document.documentElement || !element.isConnected || typeof element.focus !== "function" || element.matches(":disabled, [hidden], [inert]")) return false;
+          if (!element || element === document.body || element === document.documentElement || !element.isConnected || typeof element.focus !== "function" || element.matches(":disabled, [disabled], [hidden], [inert]") || element.closest('[aria-disabled="true"]')) return false;
           for (let node = element; node && node.nodeType === 1; node = node.parentElement) {
             if (node.hidden || node.hasAttribute("inert")) return false;
             const style = root2.getComputedStyle(node);
@@ -976,13 +1060,16 @@
           return element.isContentEditable || element.hasAttribute("contenteditable") && element.getAttribute("contenteditable") !== "false";
         }
         function onFocusIn(event) {
+          syncNative(event.target);
           if (!restoring) remember(event.target, true);
         }
         function onFocusChange(event) {
+          syncNative(event.target);
           if (!restoring) remember(event.target, true);
         }
         function onBlur(event) {
           if (!restoring) remember(event.target, false);
+          Promise.resolve().then(() => syncNative(document.activeElement));
         }
         function onWindowFocus() {
           if (!restoring) remember(document.activeElement, true);
@@ -1000,6 +1087,7 @@
           }
           if (document.activeElement !== entry.element) return false;
           current = entry;
+          syncNative(entry.element);
           return true;
         }
         function restoreLastFocus() {
@@ -1028,326 +1116,554 @@
           }
           restoreLastFocus();
         }
+        function warn(reason, extra = {}) {
+          AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CONFIGURATION_VALUE, __spreadValues({ extension: extensionName, reason }, extra));
+        }
+        function getContext(focusId = 1) {
+          const context = contexts.get(focusId);
+          return context ? Object.freeze(__spreadValues({}, context)) : null;
+        }
+        function createContext(focusId, { scope = document.body, syncDOM = focusId === 1 } = {}) {
+          if (!Number.isSafeInteger(focusId) || focusId < 1 || contexts.has(focusId) || !scope || scope.nodeType !== 1 || !scope.isConnected || focusId !== 1 && syncDOM) return false;
+          contexts.set(focusId, { focusId, element: null, scope, syncDOM: !!syncDOM });
+          return getContext(focusId);
+        }
+        function clearContext(context) {
+          const previous = context.element;
+          context.element = null;
+          previous == null ? void 0 : previous.classList.remove(focusClass(context.focusId));
+          if (previous) publishFocus({ focusId: context.focusId, element: null, previous });
+        }
+        function publishFocus(detail) {
+          AelluxJs2.comm.emit("focus.changed", detail);
+          AelluxJs2.dispatch("FocusChange", { detail });
+        }
+        function destroyContext(focusId) {
+          if (focusId === 1 || !contexts.has(focusId)) return false;
+          clearContext(contexts.get(focusId));
+          contexts.delete(focusId);
+          AelluxJs2.comm.emit("focus.context-destroyed", { focusId });
+          AelluxJs2.dispatch("FocusContextDestroy", { detail: { focusId } });
+          return true;
+        }
+        function updateContext(focusId, { scope, syncDOM } = {}) {
+          const context = contexts.get(focusId);
+          if (!context || scope && (scope.nodeType !== 1 || !scope.isConnected) || focusId !== 1 && syncDOM) return false;
+          if (scope) context.scope = scope;
+          if (syncDOM !== void 0) context.syncDOM = !!syncDOM;
+          if (context.element && !context.scope.contains(context.element)) clearContext(context);
+          if (context.syncDOM) syncNative(document.activeElement);
+          return getContext(focusId);
+        }
+        function assign(context, element) {
+          if (context.element === element) return true;
+          const previous = context.element;
+          previous == null ? void 0 : previous.classList.remove(focusClass(context.focusId));
+          context.element = element;
+          element == null ? void 0 : element.classList.add(focusClass(context.focusId));
+          publishFocus({ focusId: context.focusId, element, previous });
+          return true;
+        }
+        function setFocus(focusId, elementOrId) {
+          var _a;
+          const context = contexts.get(focusId);
+          const element = typeof elementOrId === "string" ? document.getElementById(elementOrId.replace(/^#/, "")) : elementOrId;
+          if (!context || element !== null && (!isValid(element) || !context.scope.contains(element))) return false;
+          if (element && context.syncDOM) {
+            element.focus();
+            if (document.activeElement !== element) return false;
+          }
+          if (!element && context.syncDOM) (_a = context.element) == null ? void 0 : _a.blur();
+          return assign(context, element);
+        }
+        function syncNative(element) {
+          const context = contexts.get(1);
+          if (context == null ? void 0 : context.syncDOM) assign(context, isValid(element) && context.scope.contains(element) ? element : null);
+        }
+        function pruneContexts() {
+          for (const context of contexts.values()) {
+            if (!context.scope.isConnected && context.focusId !== 1) {
+              destroyContext(context.focusId);
+              continue;
+            }
+            if (context.element && (!isValid(context.element) || !context.scope.contains(context.element))) clearContext(context);
+          }
+          for (let index = entries.length - 1; index >= 0; index--) if (!entries[index].element.isConnected) entries.splice(index, 1);
+          if (current && !current.element.isConnected) current = null;
+        }
+        function onContextUnmount(event) {
+          const { root: scope, extensions } = event.detail;
+          if (extensions && !extensions.includes(extensionName)) return;
+          if (event.detail.detachedOnly) {
+            pruneContexts();
+            return;
+          }
+          for (const context of contexts.values()) {
+            if (context.focusId !== 1 && scope.contains(context.scope)) destroyContext(context.focusId);
+            else if (context.element && scope.contains(context.element)) clearContext(context);
+          }
+          for (let index = entries.length - 1; index >= 0; index--) if (scope.contains(entries[index].element)) entries.splice(index, 1);
+          if (current && scope.contains(current.element)) current = null;
+        }
+        function onContextMount() {
+          syncNative(document.activeElement);
+          for (const context of contexts.values()) if (context.element && isValid(context.element)) context.element.classList.add(focusClass(context.focusId));
+        }
+        function activeScope(context) {
+          var _a;
+          const nearest = (_a = context.element) == null ? void 0 : _a.closest(scopeSelector);
+          let scope = nearest && context.scope.contains(nearest) ? nearest : context.scope;
+          const modal = Array.from(document.querySelectorAll('dialog[open], [aria-modal="true"]')).reverse().find((element) => {
+            try {
+              return element.matches(":modal") || element.getAttribute("aria-modal") === "true";
+            } catch (_) {
+              return element.getAttribute("aria-modal") === "true";
+            }
+          });
+          if (modal && !modal.contains(context.element)) return null;
+          return scope;
+        }
+        function available(element, scope) {
+          if (!isValid(element) || !scope.contains(element)) return false;
+          const nearest = element.closest(scopeSelector);
+          return !nearest || nearest === scope || !scope.contains(nearest);
+        }
+        function distance(a, b, scope) {
+          const ancestors = /* @__PURE__ */ new Map();
+          let depth = 0;
+          for (let node = a; node; node = node.parentElement) {
+            ancestors.set(node, depth++);
+            if (node === scope) break;
+          }
+          depth = 0;
+          for (let node = b; node; node = node.parentElement) {
+            if (ancestors.has(node)) return depth + ancestors.get(node);
+            if (node === scope) break;
+            depth++;
+          }
+          return Infinity;
+        }
+        function eligibleShortcuts(focusId = 1, command = null) {
+          const context = contexts.get(focusId);
+          if (!context || !context.element || !isValid(context.element)) return [];
+          const scope = activeScope(context);
+          if (!scope) return [];
+          const shortcutAttribute = AelluxJs2.attr("shortcut");
+          const candidates = [scope, ...scope.querySelectorAll(`[${shortcutAttribute}]`)].filter((element) => element.hasAttribute(shortcutAttribute) && available(element, scope));
+          return candidates.map((element, order) => ({
+            element,
+            order,
+            shortcuts: parseShortcuts(element.getAttribute(shortcutAttribute)),
+            distance: distance(context.element, element, scope),
+            priority: Number(element.getAttribute(AelluxJs2.attr("shortcut-priority"))) || 0
+          })).filter((item) => !command || item.shortcuts.some((shortcut) => matchesShortcut(shortcut, command))).sort((a, b) => a.distance - b.distance || b.priority - a.priority || a.order - b.order);
+        }
+        function registerShortcutAction(name, handler, { signal } = {}) {
+          if (!/^[a-z][a-z0-9-]*$/.test(name) || typeof handler !== "function" || shortcutActions.has(name)) throw new TypeError("Invalid or duplicate shortcut action.");
+          const remove = () => {
+            if (shortcutActions.get(name) === handler) shortcutActions.delete(name);
+            signal == null ? void 0 : signal.removeEventListener("abort", remove);
+          };
+          if (!(signal == null ? void 0 : signal.aborted)) {
+            shortcutActions.set(name, handler);
+            signal == null ? void 0 : signal.addEventListener("abort", remove, { once: true });
+          }
+          return remove;
+        }
+        function executeShortcut(element, command) {
+          const action = element.getAttribute(AelluxJs2.attr("shortcut-action")) || "click";
+          if (!AelluxJs2.dispatchFrom(element, "BeforeShortcut", { cancelable: true, detail: { command, action } })) return false;
+          if (action === "click") element.click();
+          else {
+            const handler = shortcutActions.get(action);
+            if (handler) {
+              if (handler(element, command) === false) return false;
+            } else if (["pop", "unpop", "dismiss"].includes(action)) {
+              const id = element.getAttribute(AelluxJs2.attr("shortcut-target"));
+              const target = id ? document.getElementById(id.replace(/^#/, "")) : element;
+              if (!target) return false;
+              const response = AelluxJs2.comm.request("present." + action, { element: target });
+              if (!response.handled) return false;
+            } else {
+              warn("Unknown shortcut action.", { value: action, element });
+              return false;
+            }
+          }
+          AelluxJs2.dispatchFrom(element, "Shortcut", { detail: { command, action } });
+          return true;
+        }
+        function consumeCommand(command) {
+          var _a, _b, _c, _d, _e, _f;
+          const context = contexts.get(command.focusId);
+          if (!context) {
+            warn("Input command refers to an unknown focus context; command blocked.", { focusId: command.focusId });
+            return false;
+          }
+          if (!["press", "repeat"].includes(command.phase) || ((_a = command.originalEvent) == null ? void 0 : _a.defaultPrevented)) return false;
+          if (command.source === "point") return false;
+          const focused = context.element;
+          const inputScope = (focused || context.scope).closest(`[${AelluxJs2.attr("inputs")}]`);
+          if (inputScope && !inputScope.getAttribute(AelluxJs2.attr("inputs")).split(/\s+/).includes(command.source)) return false;
+          const origin = (_b = command.originalEvent) == null ? void 0 : _b.target;
+          const editable = (element) => element == null ? void 0 : element.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]');
+          const reserved = ((_c = command.modifiers) == null ? void 0 : _c.meta) || ((_d = command.modifiers) == null ? void 0 : _d.ctrl) && ["KeyW", "KeyT", "KeyN", "KeyR", "KeyL", "KeyF", "KeyP", "KeyS", "KeyC", "KeyV", "KeyX", "KeyA", "KeyZ", "KeyY"].includes(command.code) || ((_e = command.modifiers) == null ? void 0 : _e.alt) && ["ArrowLeft", "ArrowRight", "F4"].includes(command.code);
+          if (command.source === "keyboard" && (editable(origin) || editable(focused) || command.code === "Tab" || reserved)) return false;
+          const candidate = eligibleShortcuts(command.focusId, command)[0];
+          if (candidate && command.phase === "press") return executeShortcut(candidate.element, command);
+          if (context.syncDOM && command.source === "keyboard") return false;
+          const scope = activeScope(context);
+          if (!scope) return false;
+          if (command.action === "confirm" && command.phase === "press" && focused && available(focused, scope)) {
+            focused.click();
+            return true;
+          }
+          if (!((_f = command.action) == null ? void 0 : _f.startsWith("navigate-"))) return false;
+          const elements = Array.from(scope.querySelectorAll(focusableSelector)).filter((element) => element.tabIndex >= 0 && available(element, scope));
+          if (!elements.length) return false;
+          const index = elements.indexOf(focused);
+          const direction = command.action.slice(9);
+          const step = direction === "left" || direction === "up" ? -1 : 1;
+          const next = index < 0 ? step > 0 ? 0 : elements.length - 1 : Math.max(0, Math.min(elements.length - 1, index + step));
+          return setFocus(command.focusId, elements[next]);
+        }
       })(typeof globalThis !== "undefined" ? globalThis : window);
     }
   });
 
-  // src/aellux.ext.point.js
-  var aellux_ext_point_exports = {};
-  var init_aellux_ext_point = __esm({
-    "src/aellux.ext.point.js"() {
+  // src/aellux.ext.input.js
+  var aellux_ext_input_exports = {};
+  var init_aellux_ext_input = __esm({
+    "src/aellux.ext.input.js"() {
+      init_input_shortcuts();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
-        const AelluxJs2 = root2.AelluxJs;
-        const extensionName = "point";
-        if (!AelluxJs2) {
-          throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
-        }
-        const POINTER = "pointer";
-        const trackedPointers = /* @__PURE__ */ new Map();
-        const pointableElements = /* @__PURE__ */ new Set();
-        const pointableAttribute = AelluxJs2.attr("point");
-        const pointableSelector = `[${pointableAttribute}]`;
-        const tapSelector = 'button, a, [role="button"]';
-        const tapDuration = 300;
-        const pointerEvents = [
-          ["down", onPointerDown],
-          ["move", onPointerMove],
-          ["up", onPointerUp],
-          ["cancel", onPointerCancel],
-          ["over", onPointerOver],
-          ["out", onPointerOut]
-        ];
-        AelluxJs2.extAttach(extensionName, {
+        const api = root2.AelluxJs;
+        if (!api) throw new Error("[aellux.js] Load the boot script before Input.");
+        const extensionName = "input", attr = (name) => api.attr(name);
+        const mounted = /* @__PURE__ */ new Set(), adapters = /* @__PURE__ */ new Map(), active = /* @__PURE__ */ new Map(), routers = [], families = [];
+        const hintContexts = /* @__PURE__ */ new Map(), hints = /* @__PURE__ */ new Map();
+        const loading = /* @__PURE__ */ new Map();
+        const mountTokens = /* @__PURE__ */ new WeakMap();
+        const outputs = ["gamepad", "active-input", "gamepad-family", "gamepad-model"];
+        const actionMaps = {
+          keyboard: {
+            Enter: "confirm",
+            Space: "confirm",
+            Escape: "cancel",
+            ArrowLeft: "navigate-left",
+            ArrowRight: "navigate-right",
+            ArrowUp: "navigate-up",
+            ArrowDown: "navigate-down"
+          },
+          gamepad: { "dpad-left": "navigate-left", "dpad-right": "navigate-right", "dpad-up": "navigate-up", "dpad-down": "navigate-down" }
+        };
+        let running = false, observer = null, rootMemory = null, routerOrder = 0, familyOrder = 0;
+        for (const name of ["point", "keyboard", "gamepad"]) adapters.set(name, () => loadAdapter(name));
+        api.extAttach(extensionName, {
           init,
           destroy,
-          pointers
+          pointers: (element) => {
+            var _a;
+            return ((_a = active.get("point")) == null ? void 0 : _a.pointers(element)) || [];
+          },
+          registerRouter,
+          removeRouters,
+          resolveFocusId,
+          dispatchCommand,
+          registerAdapter,
+          registerGamepadFamily,
+          devices: () => {
+            var _a;
+            return ((_a = active.get("gamepad")) == null ? void 0 : _a.devices()) || [];
+          },
+          setActionMap,
+          setHintContext,
+          describeShortcuts: parseShortcuts,
+          refresh
         });
-        function init() {
-          AelluxJs2.mountManager.add({
+        function warn(reason, extra = {}) {
+          api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_VALUE, __spreadValues({ extension: extensionName, reason }, extra));
+        }
+        function modalities(element) {
+          const scope = element && element.nodeType === 1 ? element.closest(`[${attr("inputs")}]`) : null;
+          const value = scope ? scope.getAttribute(attr("inputs")) : root2.document.documentElement.getAttribute(attr("inputs"));
+          return new Set(value === null ? ["point", "keyboard"] : value.trim().split(/\s+/).filter(Boolean));
+        }
+        function accepts(source, element) {
+          return modalities(element).has(source);
+        }
+        async function init() {
+          if (running) return;
+          running = true;
+          rootMemory = api.persist.element.save(root2.document.documentElement, outputs.map(attr), []);
+          root2.document.documentElement.setAttribute(attr("gamepad"), "false");
+          api.mountManager.add({
             extensionName,
-            selector: pointableSelector,
-            priority: 0,
-            mount: mountPointable,
-            unmount: unmountPointable,
+            selector: ["point", "inputs", "shortcut-hint"].map((name) => `[${attr(name)}]`).join(","),
+            mount,
+            unmount,
+            update: refresh,
             controllers: ["pointers"]
           });
-          for (const [suffix2, handler] of pointerEvents)
-            AelluxJs2.on(`$${POINTER}${suffix2}`, handler, true);
+          api.comm.on("extension.destroyed", extensionDestroyed, { owner: extensionName });
+          api.comm.on("focus.context-destroyed", contextDestroyed, { owner: extensionName });
+          api.comm.handle("input.mount-token", ({ element }) => mountTokens.get(element) || null, { owner: extensionName });
+          api.on("Unmount", onUnmount);
+          observer = new root2.MutationObserver((records) => {
+            if (records.some((record) => record.type === "attributes" || record.removedNodes.length || record.addedNodes.length)) refresh().catch((cause) => warn("Input adapter refresh failed.", { cause }));
+          });
+          observer.observe(root2.document.documentElement, {
+            subtree: true,
+            childList: true,
+            attributes: true,
+            attributeFilter: ["inputs", "shortcut", "shortcut-hint", "shortcut-focus"].map(attr)
+          });
+          try {
+            await refresh();
+          } catch (cause) {
+            destroy();
+            throw cause;
+          }
+        }
+        function mount(element) {
+          var _a;
+          if (!mounted.has(element)) mountTokens.set(element, {});
+          mounted.add(element);
+          if (element.hasAttribute(attr("point"))) (_a = active.get("point")) == null ? void 0 : _a.mount(element);
+          return refresh();
+        }
+        function unmount(element) {
+          var _a;
+          mounted.delete(element);
+          mountTokens.delete(element);
+          (_a = active.get("point")) == null ? void 0 : _a.unmount(element);
+          restoreHint(element);
+          removeRouters(element);
+          return refresh();
+        }
+        async function loadAdapter(name) {
+          var _a, _b, _c;
+          const filename = `aellux.input.${name}${api.diagnostics.legacy ? ".legacy" : ""}${api.minified ? ".min" : ""}.js`;
+          if (!((_a = api.registry.inputAdapters) == null ? void 0 : _a[name])) {
+            await api.dep("aellux-input-" + filename, "./" + filename, (_b = api.coreAssetIntegrity) == null ? void 0 : _b[filename]);
+          }
+          const factory = (_c = api.registry.inputAdapters) == null ? void 0 : _c[name];
+          if (!factory) throw new Error("Input adapter did not register: " + name);
+          return factory({ root: root2, emit: dispatchCommand, accepts, changed: deviceChanged, identify: identifyFamily });
+        }
+        async function refresh() {
+          if (!running) return;
+          const requested = modalities(root2.document.documentElement);
+          for (const element of mounted) if (element.isConnected && element.hasAttribute(attr("inputs"))) {
+            for (const name of modalities(element)) requested.add(name);
+          }
+          for (const name of requested) if (!adapters.has(name)) warn("Unknown Input adapter.", { value: name });
+          for (const [name, adapter] of active) if (!requested.has(name)) {
+            active.delete(name);
+            adapter.destroy();
+          }
+          await Promise.all(Array.from(requested).filter((name) => adapters.has(name)).map(async (name) => {
+            if (active.has(name)) return;
+            if (!loading.has(name)) loading.set(name, Promise.resolve().then(() => adapters.get(name)()).then(async (adapter) => {
+              if (!running || !adapters.has(name) || !requestedModalities().has(name)) return;
+              active.set(name, adapter);
+              await adapter.init();
+              if (!running || !adapters.has(name) || !requestedModalities().has(name)) {
+                if (active.get(name) === adapter) active.delete(name);
+                adapter.destroy();
+                return;
+              }
+              if (name === "point") {
+                for (const element of mounted) if (element.hasAttribute(attr("point"))) adapter.mount(element);
+              }
+            }).finally(() => loading.delete(name)));
+            await loading.get(name);
+          }));
+          for (const entry of routers.slice()) if (entry.owner && entry.owner.nodeType && !entry.owner.isConnected) entry.remove();
+          for (const [id] of hintContexts) if (!Number.isSafeInteger(id)) hintContexts.delete(id);
+          updateHints();
+        }
+        function requestedModalities() {
+          const names = modalities(root2.document.documentElement);
+          for (const element of mounted) if (element.isConnected && element.hasAttribute(attr("inputs"))) for (const name of modalities(element)) names.add(name);
+          return names;
         }
         function destroy() {
-          AelluxJs2.mountManager.remove({ extensionName });
-          for (const [suffix2, handler] of pointerEvents)
-            AelluxJs2.off(`$${POINTER}${suffix2}`, handler, true);
-          trackedPointers.clear();
-          pointableElements.clear();
+          running = false;
+          observer == null ? void 0 : observer.disconnect();
+          observer = null;
+          api.comm.removeOwner(extensionName);
+          for (const element of mounted) mountTokens.delete(element);
+          api.off("Unmount", onUnmount);
+          for (const adapter of active.values()) adapter.destroy();
+          active.clear();
+          mounted.clear();
+          for (const entry of routers.slice()) entry.remove();
+          for (const element of hints.keys()) restoreHint(element);
+          hintContexts.clear();
+          families.length = 0;
+          rootMemory == null ? void 0 : rootMemory.restore();
+          rootMemory = null;
+          api.mountManager.remove({ extensionName });
         }
-        function mountPointable(element) {
-          pointableElements.add(element);
+        function registerAdapter(name, factory) {
+          if (!/^[a-z][a-z0-9-]*$/.test(name) || typeof factory !== "function" || adapters.has(name)) throw new TypeError("Invalid or duplicate Input adapter.");
+          adapters.set(name, factory);
+          refresh().catch((cause) => warn("Input adapter refresh failed.", { cause }));
+          return () => {
+            var _a;
+            (_a = active.get(name)) == null ? void 0 : _a.destroy();
+            active.delete(name);
+            adapters.delete(name);
+          };
         }
-        function unmountPointable(element) {
-          pointableElements.delete(element);
-          for (const pointer of trackedPointers.values()) {
-            if (pointer.target === element) pointer.target = null;
-            if (pointer.pressStart === element) pointer.pressStart = null;
-            if (pointer.tap && pointer.tap.element === element) pointer.tap = null;
-          }
+        function registerRouter(resolve, { priority = 0, owner = null, signal } = {}) {
+          if (typeof resolve !== "function" || !Number.isFinite(priority)) throw new TypeError("A router requires a synchronous function and a finite priority.");
+          if (signal == null ? void 0 : signal.aborted) return () => {
+          };
+          const entry = { resolve, priority, owner, order: routerOrder++, remove() {
+            const index = routers.indexOf(entry);
+            if (index !== -1) routers.splice(index, 1);
+            signal == null ? void 0 : signal.removeEventListener("abort", entry.remove);
+          } };
+          routers.push(entry);
+          routers.sort((a, b) => b.priority - a.priority || a.order - b.order);
+          signal == null ? void 0 : signal.addEventListener("abort", entry.remove, { once: true });
+          return entry.remove;
         }
-        function pointers(element) {
-          const result = [];
-          for (const pointer of trackedPointers.values()) {
-            if (pointer.target === element) result.push(pointer);
-          }
-          return result;
+        function removeRouters(owner) {
+          for (const entry of routers.slice()) if (entry.owner === owner) entry.remove();
         }
-        function limitFor(element) {
-          const value = element.getAttribute(pointableAttribute);
-          if (value === null || !value.trim()) return 1;
-          const trimmed = value.trim();
-          const limit = Number(trimmed);
-          return /^\d+$/.test(trimmed) && Number.isSafeInteger(limit) ? limit : 1;
+        function extensionDestroyed(detail) {
+          removeRouters(detail.extension);
         }
-        function targetFor(target, pointer) {
-          let element = target && target.nodeType === 1 ? target : target && target.parentElement;
-          while (element) {
-            if (pointableElements.has(element) && element.hasAttribute(pointableAttribute)) {
-              let occupied = 0;
-              for (const other of trackedPointers.values()) {
-                if (other !== pointer && other.target === element) occupied++;
-              }
-              if (occupied < limitFor(element)) return element;
+        function contextDestroyed(detail) {
+          hintContexts.delete(detail.focusId);
+          updateHints();
+        }
+        function onUnmount(event) {
+          var _a;
+          const { root: scope, extensions, detachedOnly } = event.detail;
+          if (extensions && !extensions.includes(extensionName)) return;
+          for (const entry of routers.slice()) if (((_a = entry.owner) == null ? void 0 : _a.nodeType) && (detachedOnly ? !entry.owner.isConnected : scope.contains(entry.owner))) entry.remove();
+        }
+        function resolveFocusId(command) {
+          var _a;
+          for (const entry of routers.slice()) {
+            if (!routers.includes(entry)) continue;
+            if (((_a = entry.owner) == null ? void 0 : _a.nodeType) && !entry.owner.isConnected) {
+              entry.remove();
+              continue;
             }
-            element = element.parentElement;
+            let id;
+            try {
+              id = entry.resolve(command);
+            } catch (cause) {
+              warn("Input router failed; command blocked.", { cause, deviceId: command.deviceId });
+              return null;
+            }
+            if (id === void 0) continue;
+            if (id === null) return null;
+            if (Number.isSafeInteger(id) && id > 0) return id;
+            if (id && typeof id.then === "function") Promise.resolve(id).catch(() => {
+            });
+            warn("Invalid focus association; command blocked.", { value: id, deviceId: command.deviceId });
+            return null;
+          }
+          return 1;
+        }
+        function dispatchCommand(value) {
+          var _a, _b;
+          if (!running || !value || typeof value.deviceId !== "string" || !value.deviceId || typeof value.source !== "string" || typeof value.code !== "string" || !["press", "release", "repeat", "move", "cancel"].includes(value.phase)) return false;
+          if (!active.has(value.source) || value.target && !accepts(value.source, value.target)) return false;
+          const normalized = Object.freeze(__spreadProps(__spreadValues({}, value), {
+            modifiers: Object.freeze(__spreadValues({}, value.modifiers)),
+            action: value.action || ((_a = actionMaps[value.source]) == null ? void 0 : _a[value.code]) || null,
+            timestamp: root2.performance.now()
+          }));
+          const focusId = resolveFocusId(normalized);
+          if (focusId === null) {
+            api.dispatch("InputBlocked", { detail: { command: normalized } });
+            return false;
+          }
+          const command = Object.freeze(__spreadProps(__spreadValues({}, normalized), { focusId }));
+          if (command.intentional && (command.phase === "press" || command.phase === "repeat")) {
+            setHintContext(focusId, { source: command.source, family: command.family || "generic", model: command.model || "", deviceId: command.deviceId });
+            const html = root2.document.documentElement;
+            html.setAttribute(attr("active-input"), command.source);
+            if (command.source === "gamepad") {
+              html.setAttribute(attr("gamepad-family"), command.family);
+              html.setAttribute(attr("gamepad-model"), command.model);
+            }
+          }
+          if (!api.dispatch("BeforeInputCommand", { cancelable: true, detail: { command } })) return false;
+          const response = api.comm.request("focus.command", command);
+          const handled = response.handled && response.value === true;
+          if (handled && ((_b = command.originalEvent) == null ? void 0 : _b.cancelable)) command.originalEvent.preventDefault();
+          api.dispatch("InputCommand", { detail: { command, handled } });
+          return handled;
+        }
+        function setActionMap(source, mapping) {
+          actionMaps[source] = __spreadValues(__spreadValues({}, actionMaps[source]), mapping);
+        }
+        function registerGamepadFamily(identify, { priority = 0 } = {}) {
+          if (typeof identify !== "function" || !Number.isFinite(priority)) throw new TypeError("Invalid gamepad family detector.");
+          const entry = { identify, priority, order: familyOrder++ };
+          families.push(entry);
+          families.sort((a, b) => b.priority - a.priority || a.order - b.order);
+          return () => {
+            const index = families.indexOf(entry);
+            if (index !== -1) families.splice(index, 1);
+          };
+        }
+        function identifyFamily(id) {
+          for (const entry of families) {
+            const result = entry.identify(id);
+            if (result) return result;
           }
           return null;
         }
-        function dispatchPointer(name, pointer, originalEvent, recipient, hover, target = pointer.target, pressStart = pointer.pressStart) {
-          if (!recipient) return;
-          AelluxJs2.dispatchFrom(recipient, name, {
-            bubbles: false,
-            detail: {
-              pointer,
-              target,
-              pressStart,
-              originalEvent,
-              hover
-            }
-          });
-        }
-        function dispatchToTarget(name, pointer, originalEvent) {
-          if (!pointer.target) return;
-          pointer.beforeDispatch();
-          dispatchPointer(name, pointer, originalEvent, pointer.target);
-        }
-        function dispatchRelease(name, pointer, originalEvent) {
-          const target = pointer.target;
-          const pressStart = pointer.pressStart;
-          if (!target && !pressStart) return;
-          pointer.beforeDispatch();
-          dispatchPointer(name, pointer, originalEvent, target, void 0, target, pressStart);
-          if (pressStart !== target)
-            dispatchPointer(name, pointer, originalEvent, pressStart, void 0, target, pressStart);
-        }
-        function updateHoverTarget(pointer, event, nextTarget) {
-          const previousTarget = pointer.target;
-          if (previousTarget === nextTarget) return;
-          if (previousTarget || nextTarget) pointer.beforeDispatch();
-          dispatchPointer("PointerHover", pointer, event, previousTarget, false);
-          pointer.target = nextTarget;
-          dispatchPointer("PointerHover", pointer, event, nextTarget, true);
-        }
-        function canHover(event) {
-          return event.pointerType === "mouse" || event.pointerType === "pen";
-        }
-        function canTap(element) {
-          return element && pointableElements.has(element) && element.isConnected && element.hasAttribute(pointableAttribute) && limitFor(element) > 0 && element.matches(tapSelector) && !element.matches(":disabled, [disabled]") && !element.closest('[aria-disabled="true"], [inert]');
-        }
-        function startTap(pointer, event, wasPressed) {
-          pointer.tap = null;
-          let multitouch = false;
-          if (event.pointerType === "touch") {
-            for (const other of trackedPointers.values()) {
-              if (other !== pointer && other.pressed && other.pointerType === "touch") {
-                other.tap = null;
-                multitouch = true;
-              }
-            }
+        function deviceChanged(device, connected, operational) {
+          if (running) root2.document.documentElement.setAttribute(attr("gamepad"), String(operational));
+          if (!connected) {
+            for (const [id, context] of hintContexts) if (context.deviceId === device.deviceId) hintContexts.delete(id);
           }
-          if (wasPressed || multitouch || !event.isPrimary || event.button !== 0) return;
-          const origin = event.composedPath ? event.composedPath()[0] : event.target;
-          const element = targetFor(origin, pointer);
-          if (!canTap(element)) return;
-          const scrollOffsets = [];
-          let ancestor = element;
-          while (ancestor) {
-            scrollOffsets.push({ element: ancestor, x: ancestor.scrollLeft, y: ancestor.scrollTop });
-            ancestor = ancestor.parentElement || ancestor.getRootNode && ancestor.getRootNode().host;
-          }
-          pointer.tap = {
-            element,
-            distance: 0,
-            limit: event.pointerType === "mouse" ? 4 : 10,
-            bounds: element.getBoundingClientRect(),
-            scrollOffsets
-          };
+          api.dispatch(connected ? "InputDeviceConnected" : "InputDeviceDisconnected", { detail: { device } });
+          updateHints();
         }
-        function finishTap(pointer, event) {
-          const tap = pointer.tap;
-          pointer.tap = null;
-          if (!tap || !event.isPrimary || event.button !== 0 || event.pointerType !== pointer.pointerType || pointer.deltaTime > tapDuration || !canTap(tap.element)) return null;
-          const path = event.composedPath ? event.composedPath() : [];
-          const target = path[0] || event.target;
-          const captured = target && target.hasPointerCapture && target.hasPointerCapture(event.pointerId);
-          if (captured || !path.includes(tap.element) && !tap.element.contains(target)) {
-            const bounds = tap.bounds;
-            if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) return null;
-            if (!captured && !tap.scrollOffsets.some((offset) => offset.element.scrollLeft !== offset.x || offset.element.scrollTop !== offset.y)) return null;
-          }
-          return { element: tap.element, detail: {
-            pointerType: pointer.pointerType,
-            pointerId: pointer.pointerId,
-            duration: pointer.deltaTime,
-            distance: tap.distance,
-            originalEvent: event
-          } };
+        function setHintContext(focusId, context) {
+          if (!Number.isSafeInteger(focusId) || focusId < 1) throw new TypeError("Invalid hint focusId.");
+          hintContexts.set(focusId, Object.freeze(__spreadValues({}, context)));
+          updateHints();
         }
-        function addPointer(event, pressed, hover) {
-          const pointer = new AePointer(event, pressed, hover);
-          trackedPointers.set(event.pointerId, pointer);
-          return pointer;
+        function restoreHint(element) {
+          var _a;
+          (_a = hints.get(element)) == null ? void 0 : _a.restore();
+          hints.delete(element);
         }
-        function onPointerDown(event) {
-          let pointer = trackedPointers.get(event.pointerId);
-          const wasPressed = pointer && pointer.pressed;
-          pointer = pointer || addPointer(event, true, canHover(event));
-          pointer.tap = null;
-          pointer.initial.x = event.clientX;
-          pointer.initial.y = event.clientY;
-          pointer.pointerType = event.pointerType;
-          pointer.pressed = true;
-          pointer.startPress();
-          pointer.hover = canHover(event);
-          pointer.update(event);
-          pointer.target = targetFor(event.target, pointer);
-          pointer.pressStart = pointer.target;
-          startTap(pointer, event, wasPressed);
-          dispatchToTarget("PointerDown", pointer, event);
-        }
-        function onPointerMove(event) {
-          let pointer = trackedPointers.get(event.pointerId);
-          if (!pointer) {
-            if (!canHover(event)) return;
-            pointer = addPointer(event, false, true);
-          }
-          pointer.update(event);
-          pointer.target = targetFor(event.target, pointer);
-          dispatchToTarget("PointerMove", pointer, event);
-        }
-        function onPointerUp(event) {
-          const pointer = trackedPointers.get(event.pointerId);
-          if (!pointer) return;
-          pointer.update(event);
-          pointer.pressed = false;
-          pointer.endPress();
-          pointer.target = targetFor(event.target, pointer);
-          const tap = finishTap(pointer, event);
-          dispatchRelease("PointerUp", pointer, event);
-          if (tap && canTap(tap.element)) AelluxJs2.dispatchFrom(tap.element, "tap", {
-            bubbles: true,
-            composed: true,
-            detail: tap.detail
-          });
-          if (!pointer.hover) trackedPointers.delete(event.pointerId);
-        }
-        function onPointerCancel(event) {
-          const pointer = trackedPointers.get(event.pointerId);
-          if (pointer) {
-            pointer.tap = null;
-            pointer.update(event);
-            pointer.pressed = false;
-            pointer.endPress();
-            pointer.target = targetFor(event.target, pointer);
-            dispatchRelease("PointerCancel", pointer, event);
-          }
-          trackedPointers.delete(event.pointerId);
-        }
-        function onPointerOver(event) {
-          if (!canHover(event)) return;
-          const pointer = trackedPointers.get(event.pointerId) || addPointer(event, false, true);
-          pointer.update(event);
-          pointer.hover = true;
-          updateHoverTarget(pointer, event, targetFor(event.target, pointer));
-        }
-        function onPointerOut(event) {
-          const pointer = trackedPointers.get(event.pointerId);
-          if (!pointer) return;
-          const relatedTarget = event.relatedTarget;
-          pointer.update(event);
-          updateHoverTarget(pointer, event, targetFor(relatedTarget, pointer));
-          if (!relatedTarget || !relatedTarget.nodeType || !document.contains(relatedTarget)) {
-            pointer.hover = false;
-            pointer.target = null;
-          }
-          if (!pointer.pressed && !pointer.hover) trackedPointers.delete(event.pointerId);
-        }
-        class AePointer {
-          constructor(event, pressed, hover) {
-            const x = event.clientX;
-            const y = event.clientY;
-            this.pointerId = event.pointerId;
-            this.pointerType = event.pointerType;
-            this.initial = { x, y };
-            this.current = { x, y };
-            this.delta = { x: 0, y: 0 };
-            this.movement = { x: 0, y: 0 };
-            this.lastDispatched = { x, y };
-            this.time = { pressStart: null, pressEnd: null };
-            this.buttons = event.buttons;
-            this.pressed = pressed;
-            this.hover = hover;
-            this.target = null;
-            this.pressStart = null;
-            this.tap = null;
-          }
-          get deltaTime() {
-            var _a;
-            if (this.time.pressStart === null) return 0;
-            return ((_a = this.time.pressEnd) != null ? _a : root2.performance.now()) - this.time.pressStart;
-          }
-          startPress() {
-            this.time.pressStart = root2.performance.now();
-            this.time.pressEnd = null;
-          }
-          endPress() {
-            if (this.time.pressStart !== null && this.time.pressEnd === null)
-              this.time.pressEnd = root2.performance.now();
-          }
-          update(event) {
-            this.current.x = event.clientX;
-            this.current.y = event.clientY;
-            this.delta.x = this.current.x - this.initial.x;
-            this.delta.y = this.current.y - this.initial.y;
-            this.buttons = event.buttons;
-            if (this.tap) {
-              let distance = Math.hypot(this.delta.x, this.delta.y);
-              if (event.getCoalescedEvents) {
-                for (const sample of event.getCoalescedEvents()) {
-                  distance = Math.max(
-                    distance,
-                    Math.hypot(sample.clientX - this.initial.x, sample.clientY - this.initial.y)
-                  );
-                }
-              }
-              this.tap.distance = Math.max(this.tap.distance, distance);
-              if (distance > this.tap.limit) this.tap = null;
-            }
-          }
-          beforeDispatch() {
-            this.movement.x = this.current.x - this.lastDispatched.x;
-            this.movement.y = this.current.y - this.lastDispatched.y;
-            this.lastDispatched.x = this.current.x;
-            this.lastDispatched.y = this.current.y;
+        function updateHints() {
+          for (const element of hints.keys()) if (!element.isConnected || !element.hasAttribute(attr("shortcut-hint"))) restoreHint(element);
+          for (const element of mounted) {
+            if (!element.isConnected || !element.hasAttribute(attr("shortcut-hint"))) continue;
+            if (!hints.has(element)) hints.set(element, api.persist.element.save(
+              element,
+              ["shortcut-label", "shortcut-source", "gamepad-family", "shortcut-code", "gamepad-model"].map(attr),
+              []
+            ));
+            const explicit = element.getAttribute(attr("shortcut-hint"));
+            const owner = element.closest(`[${attr("shortcut")}]`);
+            const descriptions = parseShortcuts(explicit || (owner == null ? void 0 : owner.getAttribute(attr("shortcut"))));
+            const id = Number(element.getAttribute(attr("shortcut-focus")) || 1);
+            const context = hintContexts.get(id) || { source: "keyboard", family: "generic" };
+            const description = descriptions.find((item) => item.source === context.source) || descriptions[0];
+            for (const [name, value] of [
+              ["shortcut-label", shortcutLabel(description, context.family)],
+              ["shortcut-source", (description == null ? void 0 : description.source) || ""],
+              ["shortcut-code", (description == null ? void 0 : description.code) || ""],
+              ["gamepad-family", context.family || "generic"],
+              ["gamepad-model", context.model || ""]
+            ]) element.setAttribute(attr(name), value);
           }
         }
       })(typeof globalThis !== "undefined" ? globalThis : window);
@@ -1403,10 +1719,12 @@
         const anchors = /* @__PURE__ */ new Map();
         const elementMemories = /* @__PURE__ */ new WeakMap();
         const placementMaps = /* @__PURE__ */ new Set();
+        const requestedMaps = /* @__PURE__ */ new Map();
         let nextLayoutId = 2e6;
         let mutations = null;
         AelluxJs2.extAttach(extensionName, { init, destroy, createPlacementMap });
         function init() {
+          AelluxJs2.comm.handle("anchor.placement", placementRequest, { owner: extensionName });
           AelluxJs2.registerCssProperty(
             { name: "--ae-anchor-x", syntax: "<length>", initialValue: "0px" },
             { name: "--ae-anchor-y", syntax: "<length>", initialValue: "0px" },
@@ -1427,9 +1745,30 @@
           });
         }
         async function destroy() {
+          AelluxJs2.comm.removeOwner(extensionName);
           for (const map of placementMaps) map.destroy();
+          requestedMaps.clear();
           await Promise.all(Array.from(anchors.keys(), unmountAnchor));
           AelluxJs2.mountManager.remove({ extensionName });
+        }
+        function placementRequest({ action, owner, element, pairs, target, placement }) {
+          if (action === "invisible") return isInvisible(element);
+          let map = requestedMaps.get(owner);
+          if (action === "dispose") {
+            map == null ? void 0 : map.destroy();
+            requestedMaps.delete(owner);
+            return true;
+          }
+          if (action === "mount" && !map) {
+            map = createPlacementMap();
+            requestedMaps.set(owner, map);
+          }
+          if (!map) return null;
+          if (action === "mount") return map.mount(element);
+          if (action === "unmount") return map.unmount(element);
+          if (action === "measure") return map.measure(element, pairs, target);
+          if (action === "place") return map.place(element, placement);
+          return null;
         }
         function createPlacementMap() {
           const memories = /* @__PURE__ */ new Map();
@@ -1610,11 +1949,10 @@
           );
         }
         function effectiveTarget(element, state) {
-          var _a, _b;
           const value = element.getAttribute(targetAttribute);
           const target = value && value.trim() ? resolveElement(value) : element.offsetParent;
           state.group = value && value.trim() && (target == null ? void 0 : target.hasAttribute(groupAttribute)) ? target : null;
-          return state.group ? ((_b = (_a = AelluxJs2.ext.present) == null ? void 0 : _a.selected) == null ? void 0 : _b.call(_a, state.group)) || null : target;
+          return state.group ? AelluxJs2.comm.request("present.selection", { group: state.group }).value || null : target;
         }
         function circularTarget(element, target) {
           const visited = /* @__PURE__ */ new Set([element]);
@@ -2759,16 +3097,13 @@
         const inlineMemories = /* @__PURE__ */ new WeakMap();
         const elasticMemories = /* @__PURE__ */ new WeakMap();
         const pointerScrollMemories = /* @__PURE__ */ new WeakMap();
-        let snapController = null;
         let activePointerScrollState = null;
         AelluxJs2.extAttach(extensionName, {
           init,
           destroy,
           next,
           previous,
-          goto,
-          registerSnapController,
-          unregisterSnapController
+          goto
         });
         function init() {
           layoutEvents.forEach((name) => onEvent(root2.document, name, onLayout));
@@ -2808,20 +3143,14 @@
           for (const element of scrollboxes.keys()) unmountScrollbox(element);
           AelluxJs2.mountManager.remove({ extensionName });
         }
-        function registerSnapController(controller) {
-          snapController = controller;
-        }
-        function unregisterSnapController(controller) {
-          if (snapController === controller) snapController = null;
-        }
         function goto(element, index, behavior) {
-          return (snapController == null ? void 0 : snapController.goto(element, index, behavior)) || false;
+          return AelluxJs2.comm.request("scrollbox-snap.goto", { element, index, behavior }).value || false;
         }
         function next(element) {
-          return (snapController == null ? void 0 : snapController.next(element)) || false;
+          return AelluxJs2.comm.request("scrollbox-snap.next", { element }).value || false;
         }
         function previous(element) {
-          return (snapController == null ? void 0 : snapController.previous(element)) || false;
+          return AelluxJs2.comm.request("scrollbox-snap.previous", { element }).value || false;
         }
         function dispatchInteraction(state, reason, active) {
           AelluxJs2.dispatchFrom(state.element, "ScrollboxInteraction", {
@@ -5810,6 +6139,18 @@
           ["dismiss-duration", "<time>", "250ms"]
         ];
         function init(options) {
+          const communication = { owner: extensionName };
+          for (const [name, method] of Object.entries({ pop, unpop, dismiss }))
+            AelluxJs2.comm.handle("present." + name, ({ element }) => method(element), communication);
+          AelluxJs2.comm.handle("present.toggle", ({ element, goto }) => toggle(element, goto), communication);
+          AelluxJs2.comm.handle("present.show", ({ group, member }) => show(group, member), communication);
+          AelluxJs2.comm.handle("present.selection", ({ group }) => selected(group), communication);
+          AelluxJs2.comm.handle("present.pop-next", (request) => popNext(request.group, (member) => {
+            if (request.preparation) {
+              const result = AelluxJs2.comm.request(request.preparation.contract, __spreadProps(__spreadValues({}, request.preparation.payload), { element: member }));
+              if (!result.handled || result.value === false) throw new Error("Present preparation is unavailable.");
+            }
+          }), communication);
           playback.init();
           const descriptors = cssProperties.map(([name, syntax, initialValue]) => ({ name: `--ae-${name}`, syntax, initialValue }));
           const progressRegistered = AelluxJs2.registerCssProperty(...descriptors.slice(0, 4));
@@ -5868,6 +6209,7 @@
           AelluxJs2.onEvent(root2, "$resize", refreshExpandedStates);
         }
         function destroy() {
+          AelluxJs2.comm.removeOwner(extensionName);
           gestures.destroy();
           autoObserver == null ? void 0 : autoObserver.disconnect();
           autoObserver = null;
@@ -6745,7 +7087,6 @@
           return (target == null ? void 0 : target.closest) ? target : null;
         }
         function onTap(event) {
-          var _a;
           const target = activationTarget(event);
           if (!target) return;
           const control = target.closest(`[${attr.trigger}],[${attr.dismiss}]`);
@@ -6755,14 +7096,13 @@
             target,
             hoverSuppressed: control && suppressHoverClick(control, event),
             present: triggerTargets.get(control),
-            point: (_a = AelluxJs2.mountManager.controller(target)) == null ? void 0 : _a.point,
+            input: AelluxJs2.comm.request("input.mount-token", { element: target }).value,
             timer: null
           };
           pendingTaps.add(pending);
           pending.timer = setTimeout(() => {
-            var _a2;
             pendingTaps.delete(pending);
-            if (!target.isConnected || pending.point && ((_a2 = AelluxJs2.mountManager.controller(target)) == null ? void 0 : _a2.point) !== pending.point) return;
+            if (!target.isConnected || pending.input && AelluxJs2.comm.request("input.mount-token", { element: target }).value !== pending.input) return;
             activate(event, target, pending.hoverSuppressed);
           }, TAP_CLICK_WAIT_TIME);
         }
@@ -7972,8 +8312,8 @@
     "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
     scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-parent scrollbar-vertical scrollbar-horizontal",
     "scrollbox-snap": "scrollbox-snap snap-item",
-    focus: "focus",
-    point: "point",
+    focus: "focus focus-scope shortcut shortcut-priority shortcut-action shortcut-target",
+    input: "point inputs shortcut-hint shortcut-focus shortcut-hint-position shortcut-label shortcut-source shortcut-code gamepad gamepad-family gamepad-model active-input",
     adaptive: "adaptive",
     "ajax-href": "ajax-href",
     viewport: "viewport viewport-target",
@@ -7988,8 +8328,8 @@
     "overflow-marquee": "overflow-marquee",
     scrollbox: "scrollbox",
     "scrollbox-snap": "scrollbox-snap",
-    focus: "focus",
-    point: "point",
+    focus: "focus focus-scope shortcut",
+    input: "point inputs shortcut-hint",
     adaptive: "adaptive",
     "ajax-href": "ajax-href",
     viewport: "viewport",
@@ -8062,7 +8402,7 @@
           });
         }
       }, validateAnchor = function() {
-        var _a2, _b2, _c;
+        var _a2;
         const pivots = new Set("top-left top-center top-right center-left center center-right bottom-left bottom-center bottom-right".split(" "));
         const pairs = has("anchor") ? value("anchor").split(",") : [];
         if (has("anchor") && !pairs.every((token) => {
@@ -8082,7 +8422,7 @@
         if (target == null ? void 0 : target.hasAttribute(attr("present-group"))) {
           if (!((_a2 = api.ext.present) == null ? void 0 : _a2.initialized))
             report("WARN_EXTENSION_REQUIRED", "present", "anchor-target", "A Present Group target requires Present.", "Register and initialize Present before mounting the group and its Anchors.");
-          target = (_c = (_b2 = api.ext.present) == null ? void 0 : _b2.selected) == null ? void 0 : _c.call(_b2, target);
+          target = api.comm.request("present.selection", { group: target }).value;
           if (!target) return;
         }
         if (!target) invalid("anchor", "anchor-target", "Anchor target does not exist or the selector is invalid.", "Use an existing target ID or a valid CSS selector.", "WARN_CONFIGURATION_TARGET");
@@ -8234,7 +8574,7 @@
           if (value("focus") === "next" && !element.matches("input:not([type]),input[type=text],input[type=search],input[type=email],input[type=url],input[type=tel],input[type=password],input[type=number],textarea,[contenteditable]:not([contenteditable=false])"))
             invalid(extension, "focus", "Enter navigation is declared on a non-text-entry element.", "Apply data-ae-focus=next to a text input, textarea or editable element.");
         }
-        if (extension === "point" && value("point") !== "" && (!/^\d+$/.test(value("point")) || !Number.isSafeInteger(Number(value("point")))))
+        if (extension === "input" && value("point") !== "" && element.hasAttribute(attr("point")) && (!/^\d+$/.test(value("point")) || !Number.isSafeInteger(Number(value("point")))))
           invalid(extension, "point", "Pointer count must be a nonnegative integer.", "Use an integer such as 1; 0 disables pointer association.");
         if (extension === "ajax-href") {
           const selectors = api.parseSelectors(value("ajax-href").trim() || "title,body");
@@ -8707,11 +9047,11 @@
         }
       }
       AelluxJs2.dispatch(toCapitalized2(method), {
-        detail: {
+        detail: __spreadValues({
           root: rootElement,
           extensions: selectedNames ? Array.from(selectedNames) : null,
           elements: Array.from(affected)
-        }
+        }, detachedOnly ? { detachedOnly: true } : {})
       });
       return true;
     }
@@ -9628,7 +9968,7 @@
     Object.freeze({ name: "progress", optional: true, style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "pwa", optional: true, style: false, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "viewport", style: false, dependencies: Object.freeze([]) }),
-    Object.freeze({ name: "point", style: false, dependencies: Object.freeze([]) }),
+    Object.freeze({ name: "input", style: true, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "anchor", style: true, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "overflow-marquee", optional: true, style: true, dependencies: Object.freeze([]) }),
     Object.freeze({ name: "ajax-href", optional: true, style: false, dependencies: Object.freeze([]) }),
@@ -9705,6 +10045,7 @@
           if (await destroyExtensions(null, () => AelluxJs.waitLayout.clear()) === false)
             return false;
           mountManager.destroy();
+          AelluxJs.comm.clear();
         },
         async destroyExtensions(extensionNames) {
           return destroyExtensions(extensionNames);
@@ -9749,6 +10090,8 @@
         if (name === "present") {
           loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
         }
+        if (name === "input") loadWhen = ["point", "inputs", "shortcut", "shortcut-hint"].map(attr).join(",");
+        if (name === "focus") loadWhen = ["focus", "focus-scope", "shortcut"].map(attr).join(",");
         if (name === "state-navigation" || name === "preference") loadWhen = null;
         api.ext(name, { loadWhen, load: true, loadStyle: !!(optional && style) });
         api.registry.ext[key].automatic = true;
@@ -9780,6 +10123,10 @@
             { cause: error, extension: extensionName }
           );
         } finally {
+          AelluxJs.comm.removeOwner(extensionName);
+          if (key !== extensionName) AelluxJs.comm.removeOwner(key);
+          AelluxJs.comm.emit("extension.destroyed", { extension: extensionName });
+          AelluxJs.dispatch("ExtensionDestroy", { detail: { extension: extensionName } });
           delete AelluxJs.ext[key];
           delete extensionPromises[key];
           delete AelluxJs.registry.ext[key];
@@ -9890,7 +10237,13 @@
         }
       }
       const options = AelluxJs.options.extensions[key] || {};
-      await AelluxJs.ext[key].init(options);
+      try {
+        await AelluxJs.ext[key].init(options);
+      } catch (cause) {
+        AelluxJs.comm.removeOwner(extensionName);
+        if (key !== extensionName) AelluxJs.comm.removeOwner(key);
+        throw cause;
+      }
       AelluxJs.ext[key].initialized = true;
       delete AelluxJs.registry.lazyExtSelectors[key];
       return AelluxJs.ext[key];
@@ -10238,7 +10591,7 @@
     "stateNavigation": () => Promise.resolve().then(() => (init_aellux_ext_state_navigation(), aellux_ext_state_navigation_exports)),
     "feedback": () => Promise.resolve().then(() => (init_aellux_ext_feedback(), aellux_ext_feedback_exports)),
     "focus": () => Promise.resolve().then(() => (init_aellux_ext_focus(), aellux_ext_focus_exports)),
-    "point": () => Promise.resolve().then(() => (init_aellux_ext_point(), aellux_ext_point_exports)),
+    "input": () => Promise.resolve().then(() => (init_aellux_ext_input(), aellux_ext_input_exports)),
     "anchor": () => Promise.resolve().then(() => (init_aellux_ext_anchor(), aellux_ext_anchor_exports)),
     "viewport": () => Promise.resolve().then(() => (init_aellux_ext_viewport(), aellux_ext_viewport_exports)),
     "scrollbox": () => Promise.resolve().then(() => (init_aellux_ext_scrollbox(), aellux_ext_scrollbox_exports)),

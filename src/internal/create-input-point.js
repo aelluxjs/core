@@ -1,42 +1,7 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
-/**
- * Point Extension
- *
- * Purpose: normalizes active Pointer Events and routes point lifecycle events
- * directly to the nearest eligible mounted `data-ae-point` element.
- *
- * Capability profile: interaction and input routing, with infrastructure for
- * multi-pointer state.
- *
- * Inputs and activation: tracks pointer down, move, up, cancel, over and out at
- * document level. The integer value of `data-ae-point` limits simultaneous
- * pointers for an element. Empty or invalid values default to one; zero disables
- * association.
- *
- * Outputs and owned state: keeps positions, movement, press timing, press origin
- * and current target. It dispatches non-bubbling `AelluxJsPointer*` events and
- * exposes `point.pointers()` on mounted controllers. Mounted buttons, links and
- * role=button controls also emit bubbling, composed `AelluxJsTap` events for
- * short primary presses, independently of native click and scroll behavior.
- *
- * Lifecycle: removes global listeners, clears tracked pointers and releases
- * per-element pointer references on unmount or destruction.
- *
- * Accessibility: pointer gestures are an enhancement channel. Every essential
- * action must also have a native keyboard-operable UI or equivalent input path
- * supplied by the consumer.
- */
-
-(function (root) {
-  "use strict";
-
-  const AelluxJs = root.AelluxJs;
-  const extensionName = "point";
-  if (!AelluxJs) {
-    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
-  }
-
+export function createPointAdapter(AelluxJs, root, emit, accepts) {
+  const extensionName = "input";
   const POINTER = "pointer";
 
   const trackedPointers = new Map();
@@ -50,23 +15,12 @@
     ["cancel", onPointerCancel], ["over", onPointerOver], ["out", onPointerOut]
   ];
 
-  AelluxJs.extAttach(extensionName, {
-    init, destroy, pointers
-  });
-
   function init() {
-    AelluxJs.mountManager.add({
-      extensionName, selector: pointableSelector,
-      priority: 0,
-      mount: mountPointable, unmount: unmountPointable,
-      controllers: ["pointers"]
-    });
     for (const [suffix, handler] of pointerEvents)
       AelluxJs.on(`$${POINTER}${suffix}`, handler, true);
   }
 
   function destroy() {
-    AelluxJs.mountManager.remove({ extensionName });
     for (const [suffix, handler] of pointerEvents)
       AelluxJs.off(`$${POINTER}${suffix}`, handler, true);
     trackedPointers.clear();
@@ -105,7 +59,7 @@
   function targetFor(target, pointer) {
     let element = target && target.nodeType === 1 ? target : target && target.parentElement;
     while (element) {
-      if (pointableElements.has(element) && element.hasAttribute(pointableAttribute)) {
+      if (pointableElements.has(element) && element.hasAttribute(pointableAttribute) && accepts("point", element)) {
         let occupied = 0;
         for (const other of trackedPointers.values()) {
           if (other !== pointer && other.target === element) occupied++;
@@ -227,6 +181,8 @@
   }
 
   function onPointerDown(event) {
+    if (!accepts("point", event.target)) return;
+    command(event, "press");
     let pointer = trackedPointers.get(event.pointerId);
     const wasPressed = pointer && pointer.pressed;
     pointer = pointer ||
@@ -246,6 +202,8 @@
   }
 
   function onPointerMove(event) {
+    if (!accepts("point", event.target)) return;
+    command(event, "move");
     let pointer = trackedPointers.get(event.pointerId);
     if (!pointer) {
       if (!canHover(event)) return;
@@ -257,6 +215,7 @@
   }
 
   function onPointerUp(event) {
+    command(event, "release");
     const pointer = trackedPointers.get(event.pointerId);
     if (!pointer) return;
     pointer.update(event);
@@ -272,6 +231,7 @@
   }
 
   function onPointerCancel(event) {
+    command(event, "cancel");
     const pointer = trackedPointers.get(event.pointerId);
     if (pointer) {
       pointer.tap = null;
@@ -285,6 +245,7 @@
   }
 
   function onPointerOver(event) {
+    if (!accepts("point", event.target)) return;
     if (!canHover(event)) return;
     const pointer = trackedPointers.get(event.pointerId) ||
       addPointer(event, false, true);
@@ -304,6 +265,13 @@
       pointer.target = null;
     }
     if (!pointer.pressed && !pointer.hover) trackedPointers.delete(event.pointerId);
+  }
+
+  function command(event, phase) {
+    emit({ deviceId: "point:" + (event.pointerType || "mouse"), source: "point",
+      code: "button" + Math.max(0, event.button), phase, contactId: event.pointerId,
+      pointerType: event.pointerType, x: event.clientX, y: event.clientY,
+      originalEvent: event, target: event.target, intentional: event.isTrusted && phase === "press" });
   }
 
   class AePointer {
@@ -367,4 +335,5 @@
       this.lastDispatched.y = this.current.y;
     }
   }
-})(typeof globalThis !== "undefined" ? globalThis : window);
+  return { init, destroy, pointers, mount: mountPointable, unmount: unmountPointable };
+}

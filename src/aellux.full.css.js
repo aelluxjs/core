@@ -6,6 +6,7 @@ import { generatePresentCSS } from "./aellux.ext.present.css.js";
 import { generateFeedbackCSS } from "./aellux.ext.feedback.css.js";
 import { generateScrollboxCSS } from "./aellux.ext.scrollbox.css.js";
 import { generateAnchorCSS } from "./aellux.ext.anchor.css.js";
+import { generateInputCSS } from "./aellux.ext.input.css.js";
 
 export function generateFullCSS(AelluxJs) {
   const core = createWeakCss()
@@ -18,6 +19,7 @@ export function generateFullCSS(AelluxJs) {
     generatePresentCSS(AelluxJs),
     generateFeedbackCSS(AelluxJs),
     generateScrollboxCSS(AelluxJs),
-    generateAnchorCSS(AelluxJs)
+    generateAnchorCSS(AelluxJs),
+    generateInputCSS(AelluxJs)
   ].join("\n\n");
 }

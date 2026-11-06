@@ -263,6 +263,13 @@
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/communication.htm" data-ae-overflow-marquee="190px">
+                                        Shared Communication                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/modern-legacy.htm" data-ae-overflow-marquee="190px">
                                         Modern &amp; Legacy                                      </a>
                                     </div>
@@ -459,8 +466,8 @@
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
                                             <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                              href="/core/docs/0.1.x/core-extensions/point.htm" data-ae-overflow-marquee="190px">
-                                              Point                                            </a>
+                                              href="/core/docs/0.1.x/core-extensions/input.htm" data-ae-overflow-marquee="190px">
+                                              Input                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -668,12 +675,12 @@
         Feedback      </span>
     </a>
 
-                  <a href="/core/docs/0.1.x/core-extensions/point.htm"
+                  <a href="/core/docs/0.1.x/core-extensions/input.htm"
             class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2" style="width: 40%;">
             <span
               class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
               style="max-width:200px" data-ae-overflow-marquee="80">
-              Point            </span> →
+              Input            </span> →
           </a>
           </div>          </div>
 
@@ -682,6 +689,30 @@
             <h1>Focus Extension</h1>
 <p><strong>Distribution:</strong> Bundled Extension. <strong>Stability:</strong> Not stable.</p>
 <p><code>focus</code> is an official <strong>Bundled Extension</strong> included in the <code>full</code> runtime. Basic requires explicit registration.</p>
+<p>Focus consumes already routed commands from <a href="input.htm">Input</a>. It does not import or poll physical adapters. The existing native focus history, Next behavior and State Navigation integration below remain available without Input.</p>
+<h2>Logical contexts and synchronization</h2>
+<p>Context <code>1</code> exists by default and synchronizes bidirectionally with native DOM focus. Every current target receives <code>ae--focus-playerN</code>, including <code>ae--focus-player1</code> for conventional interfaces. Multiple context classes can coexist on one element. Contexts above 1 remain logical and never call native <code>.focus()</code>.</p>
+<pre><code class="language-js">const focus = $ae.ext.focus;
+focus.createContext(2, { scope: document.getElementById(&quot;panel&quot;) });
+focus.setFocus(2, &quot;inventory&quot;);
+focus.getContext(2); // immutable snapshot: { focusId, element, scope, syncDOM }
+focus.updateContext(1, { syncDOM: false }); // optional independent logical context 1
+focus.destroyContext(2);
+</code></pre>
+<p>IDs are positive safe integers. Duplicate/invalid creation or invalid targets return <code>false</code>. <code>setFocus(id, null)</code> clears a logical target. Context 1 cannot be destroyed independently; <code>updateContext</code> may change its scope/synchronization. A context cannot focus outside its scope, on a disabled/hidden/inert target or in a detached tree. Detached scope contexts are removed; invalid current elements lose their class and reference. Context 1, history and all classes are released on Extension destruction. Only context 1 may synchronize with the DOM.</p>
+<p>Navigation uses eligible controls in DOM order within the nearest active scope, bounded by the configured context container. Left/up move backward; right/down forward; edges do not wrap. With native synchronization, keyboard navigation stays native. Gamepad navigation can move native focus 1. Independent contexts also accept semantic navigation/confirm commands. Directional spatial geometry and independent screen-reader focus are not provided.</p>
+<h2>Contextual shortcuts</h2>
+<pre><code class="language-html">&lt;section id=&quot;panel&quot; data-ae-focus-scope&gt;
+  &lt;button id=&quot;inventory&quot; data-ae-shortcut=&quot;keyboard:KeyI; gamepad:north&quot;&gt;
+    Inventory &lt;kbd data-ae-shortcut-hint aria-hidden=&quot;true&quot;&gt;&lt;/kbd&gt;
+  &lt;/button&gt;
+&lt;/section&gt;
+</code></pre>
+<p>The nearest <code>data-ae-focus-scope</code>, dialog or <code>aria-modal=&quot;true&quot;</code> ancestor bounds resolution. Descendants in another isolated scope are excluded; active modal dialogs prevent contexts outside them from executing commands. The currently focused element wins first. Other candidates are sorted by DOM edge distance through their nearest common ancestor, then descending <code>data-ae-shortcut-priority</code>, then DOM order. Ancestors and descendant component actions participate in the same search. Only one eligible action executes per press. Native disabled controls, disabled fieldsets, <code>aria-disabled</code>, hidden/collapsed/inert ancestors and detached targets are excluded.</p>
+<p>Physical source and code must match; modifiers match exactly. Shortcuts ignore repeat/release/move phases. Text entry, composition, already prevented events, native Tab, system Meta commands and essential browser/editing combinations retain native processing. Other declared Ctrl/Alt combinations are supported. A keyboard shortcut on a native button prevents the subsequent native default activation after executing, so Enter/Space do not activate twice.</p>
+<p>The default action is the native control&#39;s <code>.click()</code>, which reuses Present triggers, tabs and application handlers. <code>data-ae-shortcut-action=&quot;pop|unpop|dismiss&quot;</code> optionally targets a mounted Present by <code>data-ae-shortcut-target=&quot;id&quot;</code>; Focus requests Present operations through the shared <code>comm</code> mediator; Present owns their implementation. A hidden Present can be the target of a visible action, while the shortcut owner itself must remain eligible. Other components register named actions with <code>registerShortcutAction(name, (element, command) =&gt; handled, { signal })</code>, which returns a remover. Returning <code>false</code> leaves the command unconsumed.</p>
+<p><code>eligibleShortcuts(focusId, command?)</code> returns descriptors in resolution order, allowing presentation/integration code to read Focus&#39;s eligibility decision without implementing another resolver. <code>BeforeShortcut</code> can veto an action; <code>Shortcut</code> reports execution. Their detail is <code>{ command, action }</code>. <code>FocusChange</code> reports <code>{ focusId, element, previous }</code>; <code>FocusContextDestroy</code> reports <code>{ focusId }</code>.</p>
+<h2>Native focus history</h2>
 <p><code>data-ae-focus=&quot;next&quot;</code> adds <code>enterkeyhint=&quot;next&quot;</code> to text-entry inputs, textareas and editable elements when <code>enterkeyhint</code> is absent. An explicit hint is preserved. Pressing Enter on a mounted element moves focus to the next connected, visible, enabled focusable control in document order. If there is no next control, Enter keeps its usual behavior. This also applies when a mobile keyboard sends Enter for its Next or confirmation key.</p>
 <pre><code class="language-html">&lt;label&gt;Name &lt;input id=&quot;name&quot; data-ae-focus=&quot;next&quot;&gt;&lt;/label&gt;
 &lt;label&gt;Email &lt;input id=&quot;email&quot; data-ae-focus=&quot;next&quot; type=&quot;email&quot;&gt;&lt;/label&gt;
@@ -734,7 +765,7 @@ $ae.init({ mode: &quot;basic&quot; });
 <td><span class="large">Test the actual keyboard and assistive-technology combinations used by the form.</span></td>
 </tr>
 </tbody></table>
-<p>Evidence: <a href="https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.focus.js">Implementation</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/focus.spec.mjs">focus.spec.mjs</a>.</p>
+<p>Evidence: <a href="https://github.com/aelluxjs/core/blob/update/beta.10/dist/aellux.ext.focus.js">Implementation</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/focus.spec.mjs">focus.spec.mjs</a>.</p>
           </main>
 
           <div id="doc-navlinks2" ajax-load="doc-navlinks2">
@@ -745,12 +776,12 @@ $ae.init({ mode: &quot;basic&quot; });
         Feedback      </span>
     </a>
 
-                  <a href="/core/docs/0.1.x/core-extensions/point.htm"
+                  <a href="/core/docs/0.1.x/core-extensions/input.htm"
             class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2" style="width: 40%;">
             <span
               class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
               style="max-width:200px" data-ae-overflow-marquee="80">
-              Point            </span> →
+              Input            </span> →
           </a>
           </div>          </div>
 
