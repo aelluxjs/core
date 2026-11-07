@@ -2,12 +2,14 @@ import { expect, test } from "@playwright/test";
 
 async function attachElementMemoryToStub(page) {
   await page.evaluate(async () => {
-    const [{ createSaveElementMemoryHelper }, { createAriaHelper }] = await Promise.all([
+    const [{ createSaveElementMemoryHelper }, { createAriaHelper }, { createCommunication }] = await Promise.all([
       import("/src/internal/create-save-element-memory-helper.js"),
-      import("/src/internal/create-aria-helper.js")
+      import("/src/internal/create-aria-helper.js"),
+      import("/src/internal/create-communication.js")
     ]);
     AelluxJs.persist = { element: createSaveElementMemoryHelper() };
     AelluxJs.aria = createAriaHelper();
+    AelluxJs.comm = createCommunication();
     AelluxJs.onEvent = (target, event, handler) => target.addEventListener(event.replace(/^\$/, ""), handler);
     AelluxJs.offEvent = (target, event, handler) => target.removeEventListener(event.replace(/^\$/, ""), handler);
   });
@@ -470,9 +472,10 @@ test("direct pop restarts from hidden during either transition and when already 
   await page.goto("/tests/index.htm");
   // This case builds its own stub inside evaluate rather than using the shared helper.
   const result = await page.evaluate(async () => {
-    const [{ createSaveElementMemoryHelper }, { createAriaHelper }] = await Promise.all([
+    const [{ createSaveElementMemoryHelper }, { createAriaHelper }, { createCommunication }] = await Promise.all([
       import("/src/internal/create-save-element-memory-helper.js"),
-      import("/src/internal/create-aria-helper.js")
+      import("/src/internal/create-aria-helper.js"),
+      import("/src/internal/create-communication.js")
     ]);
     document.body.innerHTML = `
       <div id="panel" data-ae-present="opacity" hidden
@@ -482,6 +485,7 @@ test("direct pop restarts from hidden during either transition and when already 
       registerCssProperty: () => true,
       persist: { element: createSaveElementMemoryHelper() },
       aria: createAriaHelper(),
+      comm: createCommunication(),
       on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
       off: (event, handler, options) => document.removeEventListener(event.slice(1), handler, options),
       onEvent: (target, event, handler) => target.addEventListener(event.replace(/^\$/, ""), handler),

@@ -132,12 +132,10 @@ a { text-underline-offset: .22em; }
   perspective: 200px;
 }
 #main-navigation-wrapper[hidden] { display: none !important; }
-#main-navigation:has([data-ae-anchor-target="item1"]) #item1,
-#main-navigation:has([data-ae-anchor-target="item2"]) #item2,
-#main-navigation:has([data-ae-anchor-target="item3"]) #item3,
-#main-navigation:has([data-ae-anchor-target="item4"]) #item4,
-#main-navigation:has([data-ae-anchor-target="item5"]) #item5,
-#main-navigation:has([data-ae-anchor-target="item6"]) #item6{
+#main-navigation:not(:has([aria-current="location"])) [data-ae-anchor] {
+  opacity: 0 !important;
+}
+#main-navigation a[aria-current="location"] {
   color: #000 !important;
   border-color: transparent!important;
 }

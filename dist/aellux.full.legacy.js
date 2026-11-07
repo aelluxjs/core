@@ -36993,7 +36993,7 @@
           };
           var emit = function emit2(completed) {
             var initial = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
-            var elapsedMs = initial ? 0 : Math.min(duration, Math.max(0, root2.performance.now() - countdown.start));
+            var elapsedMs = completed ? duration : initial ? 0 : Math.min(duration, Math.max(0, root2.performance.now() - countdown.start));
             emitAutoDismissProgress(element, elapsedMs, duration, completed);
           };
           var _tick = function tick() {

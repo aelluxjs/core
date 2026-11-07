@@ -17,6 +17,7 @@
       "children": [
         { "label": "Runtime API", "href": "runtime/api.md" },
         { "label": "Compatibility Commitment", "href": "runtime/compatibility-commitment.md" },
+        { "label": "Compatibility Policy Review (Pending)", "href": "runtime/compatibility-policy-review.md" },
         { "label": "waitLayout", "href": "runtime/wait-layout.md" },
         { "label": "Events", "href": "runtime/events.md" },
         { "label": "Shared Communication", "href": "runtime/communication.md" },

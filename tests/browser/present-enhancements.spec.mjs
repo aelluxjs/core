@@ -53,16 +53,49 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
       await $ae("panel").present.pop();
       const panel = document.getElementById("panel");
       panel.setAttribute("data-ae-dismiss-on-click", "none");
-      window.countdown = [];
-      panel.addEventListener("AelluxJsProgress", event => countdown.push({ bubbles: event.bubbles,
-        cancelable: event.cancelable, ...event.detail }));
       panel.setAttribute("data-ae-auto-dismiss", "80ms");
     });
     await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
-    const countdown = await page.evaluate(() => window.countdown);
-    expect(countdown[0]).toMatchObject({ value: 0, max: 1, elapsedMs: 0, durationMs: 80, remainingMs: 80, bubbles: false, cancelable: false });
-    expect(countdown.at(-1)).toMatchObject({ value: 1, max: 1, status: "completed", elapsedMs: 80, durationMs: 80, remainingMs: 0 });
-    expect(countdown.every((sample, index) => index === 0 || sample.value >= countdown[index - 1].value)).toBe(true);
+  });
+}
+
+for (const forceLegacy of [false, true]) {
+  test(`auto-dismiss completes its logical duration when the timer clock rounds early (legacy=${forceLegacy})`, async ({ page }) => {
+    await start(page, '<div id="panel" data-ae-present="" data-ae-auto-dismiss="80ms" hidden></div>', { forceLegacy });
+    const result = await page.evaluate(async () => {
+      const panel = document.getElementById("panel");
+      const originalTimeout = window.setTimeout;
+      const descriptor = Object.getOwnPropertyDescriptor(performance, "now");
+      const base = performance.now();
+      let now = base, expire;
+      const samples = [];
+      panel.addEventListener("AelluxJsProgress", event => samples.push({
+        bubbles: event.bubbles, cancelable: event.cancelable, ...event.detail
+      }));
+      Object.defineProperty(performance, "now", { configurable: true, value: () => now });
+      window.setTimeout = (callback, delay, ...args) => {
+        if (delay === 80) { expire = () => callback(...args); return 0; }
+        return originalTimeout(callback, delay, ...args);
+      };
+      try {
+        await $ae("panel").present.pop();
+        if (!expire) throw new Error("Auto-dismiss did not schedule its timeout.");
+        now += 79;
+        expire();
+        return { samples, observedElapsed: now - base };
+      } finally {
+        window.setTimeout = originalTimeout;
+        if (descriptor) Object.defineProperty(performance, "now", descriptor);
+        else delete performance.now;
+      }
+    });
+    expect(result.observedElapsed).toBe(79);
+    expect(result.samples[0]).toMatchObject({ value: 0, max: 1, elapsedMs: 0, durationMs: 80,
+      remainingMs: 80, bubbles: false, cancelable: false });
+    expect(result.samples.at(-1)).toMatchObject({ value: 1, max: 1, status: "completed", elapsedMs: 80,
+      durationMs: 80, remainingMs: 0, bubbles: false, cancelable: false });
+    expect(result.samples.every((sample, index) => index === 0 || sample.value >= result.samples[index - 1].value)).toBe(true);
+    await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
   });
 }
 

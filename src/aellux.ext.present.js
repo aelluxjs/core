@@ -1034,7 +1034,8 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
     const valid = () => controller.autoCountdown === countdown &&
       presentElements.get(element) === controller && element.isConnected;
     const emit = (completed, initial = false) => {
-      const elapsedMs = initial ? 0 : Math.min(duration, Math.max(0, root.performance.now() - countdown.start));
+      const elapsedMs = completed ? duration : initial ? 0 :
+        Math.min(duration, Math.max(0, root.performance.now() - countdown.start));
       emitAutoDismissProgress(element, elapsedMs, duration, completed);
     };
     const tick = () => {

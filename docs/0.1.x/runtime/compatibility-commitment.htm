@@ -248,6 +248,13 @@
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/runtime/compatibility-policy-review.htm" data-ae-overflow-marquee="190px">
+                                        Compatibility Policy Review (Pending)                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/wait-layout.htm" data-ae-overflow-marquee="190px">
                                         waitLayout                                      </a>
                                     </div>
@@ -671,12 +678,12 @@
         Runtime API      </span>
     </a>
 
-                  <a href="/core/docs/0.1.x/runtime/wait-layout.htm"
+                  <a href="/core/docs/0.1.x/runtime/compatibility-policy-review.htm"
             class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2" style="width: 40%;">
             <span
               class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
               style="max-width:200px" data-ae-overflow-marquee="80">
-              waitLayout            </span> →
+              Compatibility Policy Review (Pending)            </span> →
           </a>
           </div>          </div>
 
@@ -762,7 +769,7 @@
 </ul>
 <p>Intentional incompatible changes to Stable APIs belong in a future <code>0.2.x</code> line. A bug fix may correct behavior that violates the documented contract; relying on an undocumented defect does not turn it into a guaranteed feature. If a proposed fix would also break documented valid usage, it must be assessed as an incompatibility rather than silently described as maintenance.</p>
 <p>Deprecation must identify the affected interface, explain the reason, name a replacement when available, and include migration guidance in the documentation and changelog. A deprecated Stable interface continues to work throughout <code>0.1.x</code> under its existing contract. Removal belongs in a later line; this is not a promise of indefinite support. There is no fixed notice period or automatic promotion schedule for experimental APIs.</p>
-<p>A security vulnerability or severe defect may require an exceptional incompatible fix. Such a change requires an explicit maintainer decision for that case and documentation of the reason, affected contracts and versions, mitigation or migration, and validation. This is not standing permission to bypass compatibility. The general exception procedure and support-policy proposals remain pending in the separate <a href="https://github.com/aelluxjs/core/blob/release/0.1.0/milestones/0.1.x-compatibility-policy-review.md">Policy Decisions Pending Review</a>.</p>
+<p>A security vulnerability or severe defect may require an exceptional incompatible fix. Such a change requires an explicit maintainer decision for that case and documentation of the reason, affected contracts and versions, mitigation or migration, and validation. This is not standing permission to bypass compatibility. The general exception procedure and support-policy proposals remain pending in the separate <a href="compatibility-policy-review.htm">Compatibility Policy Review</a>.</p>
 <h2>3. JavaScript Public API</h2>
 <p>The public namespace <code>AelluxJs</code> and alias <code>$ae</code>, the shared API&#39;s documented package entry, and the documented Core methods retain their names and semantics. The <a href="api.htm">Runtime API</a>, <a href="../extensions/registration.htm">Extension registration</a> and <a href="../extensions/authoring.htm">authoring contract</a> define the protected surface; this page does not reproduce their complete reference.</p>
 <p>Compatibility includes parameter order, supported options and defaults, return types and meanings, availability before or after initialization, and documented asynchronous behavior. In particular:</p>
@@ -849,7 +856,7 @@
 <p>Published changes must pass the validation gates applicable to their scope. The repository&#39;s CI verifies distribution/documentation builds, unit tests, bundle budgets, browser tests, package contents and generated-file consistency. API or behavior changes need relevant regression coverage, including loading and lifecycle effects where applicable. Documentation-only work requires editorial, link, navigation and documentation-build checks; it does not establish a fresh runtime test result.</p>
 <p>Distribution validation must check that public artifacts, compatible variants and official metadata describe the delivered files, including final-byte integrity. The build and packaging references are maintained in <a href="../getting-started.htm">Getting Started</a>, <a href="../extensions/official-registry.htm">Official registry</a> and <a href="../validation-scenarios.htm">Validation scenarios</a>.</p>
 <p>Record released public changes in the changelog. Document migrations for experimental incompatibilities and any explicitly approved exceptional Stable fix. Keep deprecated APIs identified and usable for this line, and update <a href="known-limits-and-risks.htm">Known Limits &amp; Risks</a> and individual Extension limits when evidence or contracts change. Separate demonstrated issues, potential risks, validation gaps and historical test results.</p>
-<p>Security reports and severe defects require assessment of affected versions, contracts and mitigations. No private reporting channel, response deadline, correction SLA, commercial availability or guaranteed support duration is established by this commitment. General exception handling, the maintenance focus on the latest <code>0.1.x</code>, backports, and a dedicated reporting process require the separate maintainer decisions recorded in the <a href="https://github.com/aelluxjs/core/blob/release/0.1.0/milestones/0.1.x-compatibility-policy-review.md">policy review</a>. There is no commitment to maintain every earlier patch version simultaneously.</p>
+<p>Security reports and severe defects require assessment of affected versions, contracts and mitigations. No private reporting channel, response deadline, correction SLA, commercial availability or guaranteed support duration is established by this commitment. General exception handling, the maintenance focus on the latest <code>0.1.x</code>, backports, and a dedicated reporting process require the separate maintainer decisions recorded in the <a href="compatibility-policy-review.htm">policy review</a>. There is no commitment to maintain every earlier patch version simultaneously.</p>
 <p>Compatibility is a maintenance rule, not a guarantee of zero bugs. Bundle budgets are internal quality controls that may evolve with reviewed changes; they do not promise an exact permanent size. No fixed latency, FPS, memory ceiling or capacity follows from this document. Performance improvements must preserve documented semantics, but actual performance depends on content, device, browser, workload and application integration. See <a href="performance.htm#scope-and-limitations">Performance and bundle budget</a>.</p>
           </main>
 
@@ -861,12 +868,12 @@
         Runtime API      </span>
     </a>
 
-                  <a href="/core/docs/0.1.x/runtime/wait-layout.htm"
+                  <a href="/core/docs/0.1.x/runtime/compatibility-policy-review.htm"
             class="text-decoration-none d-inline-flex flex-row justify-content-end gap-2" style="width: 40%;">
             <span
               class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill text-end"
               style="max-width:200px" data-ae-overflow-marquee="80">
-              waitLayout            </span> →
+              Compatibility Policy Review (Pending)            </span> →
           </a>
           </div>          </div>
 

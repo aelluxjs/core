@@ -4331,62 +4331,82 @@ test("elastic limits accept fractions and pixel values per axis", async ({ page 
   expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory(1)[0]?.code)).toBe(2015);
 });
 
-test("elastic pressure returns by 15 percent per native frame while CSS follows scheduled updates", async ({ page }) => {
-  await setup(page, `<div id="box" data-ae-scrollbox="pointer"
-    data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
-    <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div></div>`);
-  const result = await page.evaluate(async () => {
-    await AelluxJs.waitLayout.update(() => {});
-    const element = document.getElementById("box");
-    const wrapper = element.firstElementChild;
-    const rect = element.getBoundingClientRect();
-    const x = rect.left + 50, y = rect.top + 50;
-    const frameCallbacks = new Map();
-    let nextFrameId = 1, time = performance.now();
-    window.requestAnimationFrame = callback => {
-      const id = nextFrameId++;
-      frameCallbacks.set(id, callback);
-      return id;
+test("elastic returns by 15 percent per native frame independently of CSS publication", async ({ page }) => {
+  const at = new Date("2026-11-07T12:00:00Z");
+  await page.clock.install({ time: at });
+  await page.clock.pauseAt(new Date(at.getTime() + 1000));
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await setup(page, `<div id="box" data-ae-scrollbox="pointer" data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto"><div data-ae-scrollbox-elastic style="width:100px;height:300px"></div></div>`);
+  await page.clock.runFor(160);
+  await page.evaluate(() => {
+    const element = document.getElementById("box"), wrapper = element.firstElementChild;
+    const rect = element.getBoundingClientRect(), x = rect.left + 50, y = rect.top + 50;
+    window.readElasticAmount = () => {
+      const match = /translate3d\(0px, ([\d.]+)px/.exec(wrapper.style.transform);
+      if (!match) throw new Error("Expected published transform: " + wrapper.style.transform);
+      return Number.parseFloat(match[1]);
     };
-    window.cancelAnimationFrame = id => frameCallbacks.delete(id);
-    const frame = async () => {
-      const callbacks = [...frameCallbacks.values()];
-      frameCallbacks.clear();
-      time += 1000 / 60;
-      for (const callback of callbacks) callback(time);
-      for (let i = 0; i < 12; i++) await Promise.resolve();
-    };
-    const amount = () => Number.parseFloat(/translate3d\(0px, ([\d.]+)px/.exec(
-      wrapper.style.transform)[1]);
-    const pointer = (type, clientY, buttons) => new PointerEvent(type, {
-      bubbles: true, cancelable: true, isPrimary: true, pointerId: 91,
-      pointerType: "mouse", button: type === "pointermove" ? -1 : 0,
-      buttons, clientX: x, clientY
-    });
-    element.dispatchEvent(pointer("pointerdown", y, 1));
-    const pressures = [];
-    for (const force of [30, 60, 90]) {
-      window.dispatchEvent(pointer("pointermove", y + force, 1));
-      await frame();
-      pressures.push(amount());
-    }
-    window.dispatchEvent(pointer("pointerup", y + 90, 0));
-    const beforeFrame = amount();
-    let releaseFrames = 0;
-    for (; releaseFrames < 4 && frameCallbacks.size && amount() === beforeFrame; releaseFrames++)
-      await frame();
-    const afterFrame = amount();
-    return { pressures, beforeFrame, afterFrame, releaseFrames, limit: element.clientHeight / 4 };
+    window.elasticPointer = (type, offset, buttons) => (type === "pointerdown" ? element : window).dispatchEvent(new PointerEvent(type, {
+      bubbles: true, cancelable: true, isPrimary: true, pointerId: 91, pointerType: "mouse", button: type === "pointermove" ? -1 : 0,
+      buttons, clientX: x, clientY: y + offset
+    }));
+    elasticPointer("pointerdown", 0, 1);
   });
-  for (const [index, force] of [30, 60, 90].entries()) {
-    expect(result.pressures[index]).toBeCloseTo(elasticAmount(force, result.limit), 2);
+  const pressures = [];
+  for (const force of [30, 60, 90]) {
+    await page.evaluate(force => elasticPointer("pointermove", force, 1), force);
+    await page.clock.runFor(32);
+    pressures.push(await page.evaluate(() => readElasticAmount()));
   }
-  expect(result.pressures[1] - result.pressures[0])
-    .toBeLessThan(result.pressures[0]);
-  expect(result.pressures[2] - result.pressures[1])
-    .toBeLessThan(result.pressures[1] - result.pressures[0]);
-  expect(result.releaseFrames).toBeGreaterThan(0);
-  expect(result.afterFrame).toBeCloseTo(result.beforeFrame * 0.85 ** result.releaseFrames, 2);
+  const before = await page.evaluate(() => ({ amount: readElasticAmount(), limit: document.getElementById("box").clientHeight / 4 }));
+  await page.evaluate(() => {
+    const wrapper = document.getElementById("box").firstElementChild;
+    window.elasticReleaseFrames = 0;
+    window.elasticPublications = [];
+    window.inElasticUpdate = false;
+    const scheduler = AelluxJs.waitLayout;
+    AelluxJs.waitLayout = { ...scheduler, update(...args) {
+      const i = typeof args[0] === "number" ? 1 : 0, callback = args[i];
+      args[i] = (...values) => { inElasticUpdate = true; try { return callback(...values); } finally { inElasticUpdate = false; } };
+      return scheduler.update(...args);
+    } };
+    const set = CSSStyleDeclaration.prototype.setProperty;
+    CSSStyleDeclaration.prototype.setProperty = function (name, value, priority) {
+      const result = set.call(this, name, value, priority);
+      if (this === wrapper.style && name === "transform") elasticPublications.push({
+        value: readElasticAmount(), frames: elasticReleaseFrames, update: inElasticUpdate, time: performance.now()
+      });
+      return result;
+    };
+    AelluxJs.waitLayout.setVisualFPSLimit(990099, 20);
+    elasticPointer("pointerup", 90, 0);
+    // Register after the release callback so the counter represents completed
+    // native physics steps at the instant each CSS publication occurs.
+    let frameId;
+    const count = () => { elasticReleaseFrames++; frameId = requestAnimationFrame(count); };
+    frameId = requestAnimationFrame(count);
+    window.restoreElasticProbe = () => {
+      cancelAnimationFrame(frameId);
+      scheduler.setVisualFPSLimit(990099, null);
+      AelluxJs.waitLayout = scheduler;
+      CSSStyleDeclaration.prototype.setProperty = set;
+    };
+  });
+  await page.clock.runFor(160);
+  const result = await page.evaluate(() => {
+    const result = { samples: elasticPublications, frames: elasticReleaseFrames };
+    restoreElasticProbe();
+    return result;
+  });
+  for (const [index, force] of [30, 60, 90].entries()) expect(pressures[index]).toBeCloseTo(elasticAmount(force, before.limit), 2);
+  expect(pressures[1] - pressures[0]).toBeLessThan(pressures[0]);
+  expect(pressures[2] - pressures[1]).toBeLessThan(pressures[1] - pressures[0]);
+  expect(result.samples.length).toBeGreaterThanOrEqual(2);
+  expect(result.samples.length).toBeLessThan(result.frames);
+  for (const sample of result.samples) {
+    expect(sample.update).toBe(true);
+    expect(sample.value, JSON.stringify(result)).toBeCloseTo(before.amount * 0.85 ** sample.frames, 2);
+  }
 });
 
 test("elastic snapback is immediate with reduced motion", async ({ page }) => {

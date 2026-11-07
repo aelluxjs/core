@@ -550,13 +550,25 @@ test("main navigation opens on an initial section fragment and remains open afte
   await expect(wrapper).toHaveClass(/(?:^|\s)ae--pop(?:\s|$)/);
 });
 
-test("homepage section Viewports select when the block top crosses the screen midpoint and restore Back to top", async ({ page }) => {
+test("homepage section Viewports select at the screen midpoint and clear the current section at the top", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/home/index.htm");
   await expect.poll(() => page.evaluate(() => !!$ae.ext.viewport?.initialized)).toBe(true);
   const marker = page.locator('nav[aria-label="Main navigation"] [data-ae-anchor]');
+  const current = page.locator('#main-navigation [aria-current="location"]');
+  const expectSelection = async target => {
+    if (target) {
+      await expect(marker).toHaveAttribute("data-ae-anchor-target", target);
+      await expect(current).toHaveAttribute("id", target);
+      await expect(marker).toHaveCSS("opacity", "1");
+    } else {
+      await expect(current).toHaveCount(0);
+      await expect(marker).toHaveCSS("opacity", "0");
+    }
+  };
   await expect(page.locator("section.hero")).toHaveAttribute("data-ae-viewport", "y");
   await expect(page.locator("#item1")).toHaveAttribute("href", "#main");
+  await expect(page.locator("#main-navigation #item1")).toHaveCount(0);
   await expect(page.locator("#item2")).toHaveAttribute("href", "#getting-started");
   await expect(page.locator("#item2")).toHaveText("Start");
   await page.evaluate(() => {
@@ -565,7 +577,7 @@ test("homepage section Viewports select when the block top crosses the screen mi
       if (event.target.id) homeViewportSnapshots[event.target.id] = event.detail;
     });
   });
-  let previous = "item1";
+  let previous = null;
   for (const [id, target] of [["getting-started", "item2"], ["examples", "item3"], ["extensions", "item4"]]) {
     const section = page.locator(`#${id}`);
     const title = page.locator(`#${id}-title`);
@@ -575,17 +587,17 @@ test("homepage section Viewports select when the block top crosses the screen mi
     }));
     await expect.poll(() => section.evaluate(element => Number(element.style.getPropertyValue("--ae-viewport-visible")))).toBeGreaterThan(0);
     expect(await section.evaluate(element => Number(element.style.getPropertyValue("--ae-viewport-visible")))).toBeLessThan(1);
-    await expect(marker).toHaveAttribute("data-ae-anchor-target", previous);
+    await expectSelection(previous);
     await section.evaluate(element => window.scrollTo({
       top: scrollY + element.getBoundingClientRect().top - innerHeight / 2 - 10, behavior: "instant"
     }));
     await expect.poll(() => page.evaluate(id => homeViewportSnapshots[id]?.y1, id)).toBeCloseTo(.025, 2);
-    await expect(marker).toHaveAttribute("data-ae-anchor-target", previous);
+    await expectSelection(previous);
     await section.evaluate(element => window.scrollTo({
       top: scrollY + element.getBoundingClientRect().top - innerHeight / 2 + 10, behavior: "instant"
     }));
     await expect.poll(() => page.evaluate(id => homeViewportSnapshots[id]?.y1, id)).toBeCloseTo(-.025, 2);
-    await expect(marker).toHaveAttribute("data-ae-anchor-target", target);
+    await expectSelection(target);
     expect(await title.evaluate(element => element.getBoundingClientRect().top > innerHeight / 2)).toBe(true);
     if (id !== "getting-started")
       expect(await section.evaluate(element => element.getBoundingClientRect().bottom > innerHeight)).toBe(true);
@@ -607,7 +619,9 @@ test("homepage section Viewports select when the block top crosses the screen mi
   await expect(marker).toHaveAttribute("data-ae-anchor-target", "item3");
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
   await expect.poll(() => page.locator("section.hero").evaluate(element => Number(element.style.getPropertyValue("--ae-viewport-visible")))).toBeGreaterThan(0);
-  await expect(marker).toHaveAttribute("data-ae-anchor-target", "item1");
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+  await expect(page.locator("#main-navigation-wrapper")).toHaveJSProperty("hidden", true);
+  await expectSelection(null);
 });
 
 test("main navigation scrolls the Anchor target into view on reveal and section changes", async ({ page }) => {
@@ -658,17 +672,21 @@ test("homepage section Viewports work on a short viewport and link clicks wait f
     await expect(marker).toHaveAttribute("data-ae-anchor-target", target);
   }
   await page.locator("#item1").click();
-  await expect(marker).toHaveAttribute("data-ae-anchor-target", "item1");
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
   await expect(page).toHaveURL(/#main$/);
+  await expect(page.locator("#main-navigation-wrapper")).toHaveJSProperty("hidden", true);
+  await expect(page.locator('#main-navigation [aria-current="location"]')).toHaveCount(0);
+  await expect(marker).toHaveCSS("opacity", "0");
+  const topTarget = await marker.getAttribute("data-ae-anchor-target");
   const immediateTarget = await page.locator("#item4").evaluate(link => {
     link.click();
     return document.querySelector('nav[aria-label="Main navigation"] [data-ae-anchor]').dataset.aeAnchorTarget;
   });
-  expect(immediateTarget).toBe("item1");
+  expect(immediateTarget).toBe(topTarget);
   await expect.poll(() => page.locator("#extensions").evaluate(element =>
     Number(element.style.getPropertyValue("--ae-viewport-visible")))).toBeGreaterThan(0);
   await expect(marker).toHaveAttribute("data-ae-anchor-target", "item4");
+  await expect(page.locator("#item4")).toHaveAttribute("aria-current", "location");
 });
 
 test("homepage embeds four themed demos and displays the exact runnable source", async ({ page }) => {

@@ -25,6 +25,8 @@ Changes in this section are pending for the `0.1.0` release candidate.
 
 ### Changed
 
+- Made the pending `0.1.x` Compatibility Policy Review available in the public documentation, with navigation and local Commitment links. Updated distribution counts and Input naming; the milestone now points to the canonical review. Policy proposals remain non-normative.
+
 - Migrated internal Input/Focus, Focus/Present, Feedback/Present, Anchor/Present, Marquee/Anchor, Scrollbox/Snap and PWA/Dialog API connections to named communication contracts. Feedback prepares reserved Present members through a data contract before opening. Removed the provisional `inputCommands` channel and internal Scrollbox controller-registration hooks; public Extension operations and DOM events remain available.
 
 - Replace the public Point Extension and `aellux.ext.point*.js` artifacts with Input. Register `input` and use `.input.pointers()`; `data-ae-point` and Pointer/Tap events remain compatible. Deploy the boot/runtime and new `aellux.input.*` adapter artifacts together.
@@ -54,6 +56,9 @@ Changes in this section are pending for the `0.1.0` release candidate.
 - Positioned Docweaver notifications at the top of the viewport with spacing between pooled messages and reduced vertical padding.
 
 ### Fixed
+
+- Present auto-dismiss completion now reports the full duration and zero remaining time even when timer and performance-clock precision differ. Added deterministic regression coverage, updated Present test stubs for the communication service, and aligned Elastic measurements with scheduled CSS publication.
+- Homepage navigation now keeps its Anchor targets inside the menu, exposes the current section through `aria-current`, and clears the highlight in the hero while preserving the separate Back to top control.
 
 - Present gestures now follow Scrollbox's control eligibility: links and buttons with `draggable="false"`, including their descendants, can start gestures. Presses preserve native clicks; activated drags suppress the release click. Other controls, contenteditable regions, explicitly draggable descendants and Scrollbox regions/bars remain excluded.
 - Present automatically sets `draggable="false"` on link/button gesture sources when missing or different and emits configuration warning `2026`, including sources resolved after insertion or replacement.
