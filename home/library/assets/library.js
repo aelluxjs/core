@@ -78,7 +78,8 @@
           <label class="editor-filename" for="code-${escapeHTML(snippet.id)}">${icon("code")} exemplo.html</label>
           <div class="d-flex gap-1">
             <button class="btn btn-sm" type="button" data-action="reset" aria-label="Restaurar código de ${escapeHTML(snippet.title)}">${icon("reset")} Restaurar</button>
-            <button class="btn btn-sm" type="button" data-action="copy" aria-label="Copiar HTML de ${escapeHTML(snippet.title)}">${icon("copy")} Copiar</button>
+            <button class="btn btn-sm copy-snippet" type="button" data-action="copy" aria-label="Copiar snippet de ${escapeHTML(snippet.title)}">${icon("copy")} Copiar snippet</button>
+            <button class="btn btn-sm" type="button" data-action="copy-full" aria-label="Copiar exemplo completo de ${escapeHTML(snippet.title)}">Exemplo completo</button>
           </div>
         </div>
         <textarea id="code-${escapeHTML(snippet.id)}" class="code-editor" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Código de ${escapeHTML(snippet.title)}" aria-describedby="edit-help-${escapeHTML(snippet.id)}"></textarea>
@@ -216,7 +217,7 @@
       const bridge = `(()=>{const send=(type,message)=>parent.postMessage({type,token:${serialize(token)},message},"*");
         window.addEventListener("error",e=>send("library-error",e.message));
         window.addEventListener("unhandledrejection",e=>send("library-error",String(e.reason)));
-        window.addEventListener("keydown",e=>{if(e.key==="Escape")send("library-escape");});
+        window.addEventListener("keydown",e=>{if(e.key==="Escape"&&!e.defaultPrevented)send("library-escape");});
         window.addEventListener("message",e=>{
           if(e.source!==parent||e.data?.type!=="library-theme"||e.data.token!==${serialize(token)}||!["light","dark"].includes(e.data.theme))return;
           const preference=$ae.ext.preference;
@@ -412,8 +413,11 @@
       state.card.querySelector(".edit-status").textContent = "Código original restaurado";
       if (shouldRun(state)) preview(state);
     }
-    if (action === "copy") {
-      try { await navigator.clipboard.writeText(exportDocument(state)); notify("HTML completo copiado, com Bootstrap e a inicialização do Aellux."); }
+    if (action === "copy" || action === "copy-full") {
+      try {
+        await navigator.clipboard.writeText(action === "copy" ? state.editor.value : exportDocument(state));
+        notify(action === "copy" ? "Snippet copiado. Inclua as extensões indicadas na aplicação que vai recebê-lo." : "Exemplo completo copiado, com Bootstrap e a inicialização do Aellux.");
+      }
       catch { state.editor.focus(); state.editor.select(); notify("Selecione e copie o código pelo teclado ou pelo menu do dispositivo."); }
     }
   });
