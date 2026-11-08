@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Biblioteca de snippets — aellux.js",
+  "name": "AelluxJS Library — Copy, paste, customize.",
   "short_name": "ællux.js",
-  "description": "Explore e edite exemplos AelluxJS, inclusive offline.",
+  "description": "Experiências responsivas para copiar, colar e personalizar, inclusive offline.",
   "lang": "pt-BR",
   "start_url": "./index.htm",
   "scope": "./",

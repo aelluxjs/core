@@ -1,23 +1,46 @@
-# Biblioteca de snippets
+# AelluxJS Library — Copy, paste, customize.
+
+Experiências responsivas prontas para incorporar a páginas existentes. O catálogo tem **17 snippets em sete categorias**, incluindo os 12 exemplos prioritários e a evolução dos exemplos anteriores. A Library organiza soluções pelo que a pessoa quer construir; os detalhes de API continuam na documentação de extensões.
 
 Abra `home/library/index.htm` em um servidor HTTP local ou HTTPS. Não há etapa de build própria nem dependência de CDN: Bootstrap 5.3.8 está em `vendor/`, com sua licença, e os arquivos AelluxJS são os de `../../dist/`.
 
-- **Conteúdo:** `assets/snippets.js` contém o objeto `window.librarySource`. Cada exemplo define `id` único, `title`, `description`, `category`, `tags`, `extensions` e `code` (HTML, CSS e JavaScript do exemplo). Categorias também estão no objeto.
+- **Conteúdo:** `assets/snippets.js` contém o objeto `window.librarySource`. Cada exemplo define `id` único, `title`, `description`, `category`, `tags`, `extensions`, `dependencies`, `features` e `code` (HTML, CSS e JavaScript do componente). Categorias também estão no objeto. `extensions` determina os registros Basic e os assets da prévia; `dependencies` declara Bootstrap quando necessário; `features` descreve capacidades concretas. Cards mostram esses requisitos e instruções de integração.
 - **Apresentação:** `assets/library.js`, carregado no final da página, possui o template único `renderCard()` e o documento compartilhado das prévias. Para mudar todos os cards, altere esse renderizador e `assets/library.css`.
-- **Edição:** após 650 ms sem digitar, a prévia é recriada com o código atual. Edições e favoritos ficam em `localStorage`; Restaurar recupera o código do objeto source. **Copiar snippet** copia exatamente o conteúdo atual do editor, incluindo seus estilos e scripts locais. **Exemplo completo** copia um documento HTML com Bootstrap, os registros Basic e `$ae.init()`. Se o clipboard falhar, o editor é selecionado para cópia manual.
+- **Edição e cópia:** após 650 ms sem digitar, a prévia é recriada com o código atual. Edições e favoritos ficam em `localStorage`; Restaurar recupera o código do objeto source. **Copiar snippet** é a ação principal e copia exatamente o conteúdo atual do editor, incluindo estilos e scripts locais, sem reinicializar o runtime. **Exemplo completo** acrescenta o documento HTML e somente as dependências declaradas: não inclui Bootstrap na Sidebar ou no Split Hero, nem Aellux no Split Hero. Os URLs dos assets apontam para o servidor que hospeda a Library; ajuste-os ao distribuir a página em outro ambiente. Se o clipboard falhar, um diálogo seleciona o conteúdo solicitado, inclusive o documento completo, para cópia manual.
 - **Prévia:** usa `iframe.srcdoc`, sem página externa. Viewport ativa somente prévias com área visível e descarrega as demais, preservando o editor. As prévias iniciam no tema do app e acompanham suas mudanças sem recriar o iframe; os controles de tema de um exemplo continuam funcionando dentro dele. O modo ampliado usa `position: fixed; inset: 0`, mantém o espaço do card e cria uma entrada no State Navigation. Voltar, Escape e o Back do navegador retornam ao mesmo card; Forward reabre a prévia. Substituir o nó do iframe a cada execução evita entradas extras de histórico.
-- **Isolamento:** o iframe permite scripts em uma origem opaca (`sandbox="allow-scripts"`). O renderizador incorpora Bootstrap e os arquivos Basic necessários antes de montar os exemplos via `startAelluxJs()`, sem requests de scripts com SRI a partir da origem opaca. A comunicação verifica a janela emissora e o token da execução. O código do exemplo não recebe acesso ao documento, storage ou histórico do app.
+- **Larguras:** Disponível acompanha o espaço do card. Mobile (375 px), Tablet (768 px) e Desktop (1280 px) definem a largura real do iframe em CSS px, sem zoom ou transform. Se o viewport escolhido for maior que o card, role a área horizontalmente ou amplie a prévia. A seleção é mantida ao editar, descarregar e ampliar a prévia, durante a sessão. Os breakpoints de cada componente respondem a essa largura; Navbar, Sidebar e Toolbar usam Adaptive no contêiner, e o Split Hero usa container queries de CSS.
+- **Isolamento:** o iframe usa uma origem opaca (`sandbox="allow-scripts allow-forms"`). A permissão de formulários permite validação e eventos nativos de submit; os exemplos fornecidos interceptam o envio e confirmam os dados localmente. O renderizador incorpora Bootstrap e os arquivos Basic necessários antes de montar os exemplos via `startAelluxJs()`, sem requests de scripts com SRI a partir da origem opaca. A comunicação verifica a janela emissora e o token da execução. O código do exemplo não recebe acesso ao documento, storage ou histórico do app.
 - **Busca:** título, descrição, categoria, tags e extensões são normalizados sem distinção de acentos/maiúsculas. O filtro textual é aplicado ao enviar o formulário Buscar. Tags e categorias aplicam filtros diretos.
 - **PWA:** `manifest.webmanifest` e `sw.js` preparam o app inteiro e todos os exemplos já na primeira visita online, mesmo os ainda não vistos. Instalação usa a extensão PWA e instruções manuais quando necessário. A instalação efetiva depende do navegador; o indicador de offline só confirma depois da ativação do worker.
 - **Marca:** o cabeçalho usa o quadrado com “æ” e as proporções do hero e dos SVGs da homepage. `../assets/bootstrap-brand.css` compartilha a paleta com a homepage, as prévias e o HTML copiado: warning padrão do Bootstrap (#FFC107) no modo claro, amarelo JavaScript (#F7DF1E) no escuro e grafite (#232323) nos textos do modo claro e no “æ”. Textos sobre fundos escuros mantêm contraste. Os ícones de instalação usam a paleta clara; `assets/icon.svg` incorpora Geist e origina os PNGs de 192 e 512 px. A fonte local do logotipo e sua licença estão em `assets/geist-latin.woff2` e `assets/geist.OFL.txt`.
 
 Ao adicionar extensões ou assets aos exemplos, inclua seus arquivos na lista explícita de `sw.js`. O worker aceita somente assets públicos listados, inclusive os arquivos `dist/` fora da pasta do app, e não intercepta outras páginas. Incremente `VERSION` ao publicar alterações para renovar o cache. A atualização aguarda o botão Atualizar biblioteca e preserva as edições antes de recarregar. O navegador pode remover caches por falta de espaço.
 
-Verificação de integração: `npx playwright test tests/browser/library.spec.mjs` (ou `--config playwright.isolated.config.mjs` com o servidor de testes já iniciado).
+Verificação de integração: `npx playwright test tests/browser/library.spec.mjs tests/browser/library-catalog.spec.mjs` (ou `--config playwright.isolated.config.mjs` com `node tests/browser/server.mjs` já iniciado). Validação do contrato do catálogo e da cobertura de assets offline: `node --test tests/unit/library-source.test.mjs`.
+
+## Catálogo e integração
+
+| Categoria | Snippets |
+| --- | --- |
+| Navegação & Estrutura | Responsive Navbar, Responsive Sidebar, Mobile Bottom Navigation, Responsive Tabs |
+| Apresentação & Destaques | Responsive Split Hero |
+| Carrosséis & Rolagem | Responsive Card Carousel, Parallax Carousel, Scroll Reveal |
+| Camadas & Feedback | Welcome Notification, Responsive Bottom Sheet, Toast Notification Stack, Anchored Popover |
+| Formulários & Fluxos | Multi-step Form, Keyboard-friendly Form |
+| Preferências & Adaptação | Adaptive Toolbar, Theme Switcher |
+| Interações Personalizadas | Virtual Gamepad |
+
+Todos os estilos próprios usam classes `ae-lib-*`. O HTML é semântico, os scripts usam um escopo local por instância e os IDs de destinos têm prefixos próprios. Ao repetir um snippet, renomeie seus IDs e referências de HTML, ARIA e atributos Aellux. A arte é feita em CSS, sem download de imagens ou licenças externas adicionais. As animações decorativas respeitam movimento reduzido. Os exemplos que usam Bootstrap declaram a dependência; não dependem do CSS do aplicativo Library.
+
+Registre uma vez as extensões indicadas em **Como integrar** antes de iniciar uma aplicação Basic. Em uma aplicação iniciada, insira o HTML, execute o script local quando houver e aguarde `$ae.mount(container)`; não repita `$ae.init()`. O HTML copiado não inclui o runtime nem os registros. Se usar `innerHTML`, os scripts inseridos não executam automaticamente: execute-os explicitamente na integração.
+
+Os IDs persistidos `hello-present`, `little-tabs`, `slow-scroll`, `in-view`, `your-theme`, `next-focus` e `responsive-sidebar` foram preservados. Favoritos e rascunhos existentes continuam associados aos mesmos componentes; um rascunho permanece intacto até a pessoa escolher Restaurar.
+
+Mobile Bottom Navigation alterna painéis localmente e preserva a seleção ao mudar de largura; integre os destinos ao roteador da sua aplicação quando necessário. Bottom Sheet combina o diálogo modal nativo com Present para animação e devolve o foco ao botão ao fechar. Toast Stack aceita até três mensagens, usa `<progress>` nativo e pausa o prazo de seis segundos com hover, foco ou página oculta. Multi-step Form usa validação nativa e confirmação local; o formulário e o painel de compartilhamento não enviam dados. Virtual Gamepad compõe eventos Pointer do Input com teclado local, aceita pressionamentos simultâneos e limpa estados ao perder foco; não é um motor de jogos nem exige um gamepad físico.
 
 ## Responsive Sidebar
 
-Componente pronto para incorporar, na categoria **Navegação**, com um único menu e CSS próprio, sem dependência de Bootstrap, fontes ou imagens externas. Use **Copiar snippet** e cole o conteúdo no local desejado da página. O componente inclui seu `<style>`, layout e um IIFE local; não registra extensões nem inicializa o runtime novamente. Para experimentar uma página autônoma, use **Exemplo completo**.
+Componente pronto para incorporar, na categoria **Navegação & Estrutura**, com um único menu e CSS próprio, sem dependência de Bootstrap, fontes ou imagens externas. Use **Copiar snippet** e cole o conteúdo no local desejado da página. O componente inclui seu `<style>`, layout e um IIFE local; não registra extensões nem inicializa o runtime novamente. Para experimentar uma página autônoma, use **Exemplo completo**.
 
 A aplicação hospedeira deve fornecer assets AelluxJS compatíveis e as extensões **Present, Adaptive e Focus**. Em Basic, registre uma vez, antes da inicialização da aplicação:
 

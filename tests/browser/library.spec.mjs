@@ -13,7 +13,7 @@ const sidebarSource = sourceWindow.librarySource.snippets.find(snippet => snippe
 async function openSidebar(page) {
   await open(page);
   await page.locator('#category-filters [data-category="navegacao"]').click();
-  await expect(page.locator("[data-snippet]:visible")).toHaveCount(2);
+  await expect(page.locator("[data-snippet]:visible")).toHaveCount(4);
   await expect(page.locator(`${sidebar} h3`)).toHaveText("Responsive Sidebar");
   await page.locator(`${sidebar} .preview-slot`).scrollIntoViewIfNeeded();
   await expect(page.locator(`${sidebar} .preview-state`)).toHaveText("· ao vivo");
@@ -44,7 +44,7 @@ test("source renders the feed, and the mobile/desktop layouts fit the viewport",
   const errors = [];
   page.on("pageerror", error => errors.push(error.message));
   await open(page);
-  await expect(page.locator("[data-snippet]")).toHaveCount(7);
+  await expect(page.locator("[data-snippet]")).toHaveCount(17);
   for (const width of [320, 390, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -52,26 +52,26 @@ test("source renders the feed, and the mobile/desktop layouts fit the viewport",
   }
   const frame = page.frameLocator(`${first} iframe`);
   await frame.getByRole("button", { name: /Dizer/ }).click();
-  await expect(frame.locator("#hello")).toBeVisible();
+  await expect(frame.locator("#ae-welcome-message")).toBeVisible();
   expect(errors).toEqual([]);
 });
 
 test("search applies on submit, normalizes accents, and combines categories and tags", async ({ page }) => {
   await open(page);
   await page.locator("#search").fill("ANIMACAO");
-  await expect(page.locator("[data-snippet]:visible")).toHaveCount(7);
+  await expect(page.locator("[data-snippet]:visible")).toHaveCount(17);
   await page.getByRole("button", { name: "Buscar", exact: true }).click();
   await expect(page.locator("[data-snippet]:visible")).toHaveCount(1);
   await page.locator("#clear-filters").click();
   await page.locator('#category-filters [data-category="rolagem"]').click();
+  await expect(page.locator("[data-snippet]:visible")).toHaveCount(3);
+  await page.locator('[data-tag="scrollbox"]').first().click();
   await expect(page.locator("[data-snippet]:visible")).toHaveCount(2);
-  await page.locator('[data-tag="scrollbox"]').click();
-  await expect(page.locator("[data-snippet]:visible")).toHaveCount(1);
   await page.locator("#clear-filters").click();
   await page.locator('.bottom-nav [data-view="categories"]').click();
-  await expect(page.locator("#category-grid button")).toHaveCount(4);
-  await page.locator('#category-grid [data-category="interacao"]').click();
-  await expect(page.locator("[data-snippet]:visible")).toHaveCount(2);
+  await expect(page.locator("#category-grid button")).toHaveCount(7);
+  await page.locator('#category-grid [data-category="interacoes"]').click();
+  await expect(page.locator("[data-snippet]:visible")).toHaveCount(1);
 });
 
 test("only visible previews execute, while code survives unloading and re-entry", async ({ page }) => {
@@ -93,9 +93,13 @@ test("the snippets mount working tabs, pointer scrolling, Viewport CSS, theme an
     return page.frameLocator(`#snippet-${id} iframe`);
   }
   const tabs = await show("little-tabs");
-  await tabs.getByRole("button", { name: "Pausar", exact: true }).click();
-  await expect(tabs.locator("#pause")).toBeVisible();
-  await expect(tabs.locator("#make")).toBeHidden();
+  await tabs.getByRole("tab", { name: "Pausar", exact: true }).click();
+  await expect(tabs.locator("#ae-tabs-pause")).toBeVisible();
+  await expect(tabs.locator("#ae-tabs-make")).toBeHidden();
+  await expect(tabs.getByRole("tab", { name: "Pausar" })).toHaveAttribute("aria-selected", "true");
+  await tabs.getByRole("tab", { name: "Pausar" }).press("Home");
+  await expect(tabs.getByRole("tab", { name: "Criar" })).toBeFocused();
+  await expect(tabs.locator("#ae-tabs-make")).toBeVisible();
 
   const scroll = await show("slow-scroll");
   const gallery = scroll.locator("[data-ae-scrollbox]");
@@ -107,10 +111,10 @@ test("the snippets mount working tabs, pointer scrolling, Viewport CSS, theme an
   await expect.poll(() => gallery.evaluate(element => element.scrollLeft)).toBeGreaterThan(20);
 
   const viewport = await show("in-view");
-  const shape = viewport.locator("#shape");
+  const shape = viewport.locator("#ae-reveal-idea");
   await expect.poll(() => shape.evaluate(element => element.style.getPropertyValue("--ae-viewport-y"))).not.toBe("");
   const before = await shape.evaluate(element => element.style.getPropertyValue("--ae-viewport-y"));
-  await viewport.getByRole("region").evaluate(element => { element.scrollTop = 150; });
+  await viewport.getByRole("region", { name: "História com revelação ao rolar", exact: true }).evaluate(element => { element.scrollTop = 150; });
   await expect.poll(() => shape.evaluate(element => element.style.getPropertyValue("--ae-viewport-y"))).not.toBe(before);
 
   const preference = await show("your-theme");
@@ -118,9 +122,12 @@ test("the snippets mount working tabs, pointer scrolling, Viewport CSS, theme an
   await expect(preference.locator("html")).toHaveAttribute("data-bs-theme", "dark");
 
   const focus = await show("next-focus");
-  await focus.locator("#name").fill("Ada");
-  await focus.locator("#name").press("Enter");
-  await expect(focus.locator("#idea")).toBeFocused();
+  await focus.locator("#ae-focus-name").fill("Ada");
+  await focus.locator("#ae-focus-name").press("Enter");
+  await expect(focus.locator("#ae-focus-idea")).toBeFocused();
+  await focus.locator("#ae-focus-idea").fill("Uma biblioteca de boas ideias");
+  await focus.getByRole("button", { name: "Guardar esta ideia ↗" }).click();
+  await expect(focus.getByRole("status")).toBeVisible();
 });
 
 test("editing is debounced, persists locally, and keeps the preview isolated", async ({ page }) => {
@@ -148,8 +155,8 @@ test("fullscreen uses fixed positioning and restores the card on Back, Forward a
   await page.setViewportSize({ width: 900, height: 1300 });
   // Repeated srcdoc execution must not insert extra iframe history entries.
   for (const text of ["primeira", "segunda"]) {
-    await editor.fill(`<main class="p-4"><p>${text}</p></main>`);
-    await expect(page.frameLocator(`${first} iframe`).locator("p")).toHaveText(text);
+    await editor.fill(`<main class="p-4"><p data-edited>${text}</p></main>`);
+    await expect(page.frameLocator(`${first} iframe`).locator("[data-edited]")).toHaveText(text);
   }
   const scrollY = await page.evaluate(() => window.scrollY);
   await page.locator(`${first} [data-action="expand"]`).click();
@@ -206,10 +213,10 @@ test("all examples, including unseen ones, work after a complete offline reload"
   await page.reload();
   await expect(page.locator(`${first} .preview-state`)).toHaveText("· ao vivo");
   await expect(page.locator("#connection-label")).toHaveText("Offline");
-  for (const id of ["little-tabs", "responsive-sidebar", "slow-scroll", "in-view", "your-theme", "next-focus"]) {
+  for (const { id } of sourceWindow.librarySource.snippets) {
     await page.locator(`#snippet-${id} .preview-slot`).scrollIntoViewIfNeeded();
     await expect(page.locator(`#snippet-${id} .preview-state`)).toHaveText("· ao vivo");
-    await expect(page.frameLocator(`#snippet-${id} iframe`).locator("h1, .ae-lib-sidebar__title")).toBeVisible();
+    await expect(page.frameLocator(`#snippet-${id} iframe`).getByRole("heading").first()).toBeVisible();
     if (id === "responsive-sidebar") {
       const frame = page.frameLocator(`${sidebar} iframe`);
       await frame.getByRole("button", { name: "Abrir navegação" }).click();
@@ -220,9 +227,9 @@ test("all examples, including unseen ones, work after a complete offline reload"
     }
   }
   const frame = page.frameLocator(`${last} iframe`);
-  await frame.locator("#name").fill("Ada");
-  await frame.locator("#name").press("Enter");
-  await expect(frame.locator("#idea")).toBeFocused();
+  await frame.locator("#ae-focus-name").fill("Ada");
+  await frame.locator("#ae-focus-name").press("Enter");
+  await expect(frame.locator("#ae-focus-idea")).toBeFocused();
 });
 
 for (const width of [320, 390, 768, 1024, 1440]) {
@@ -356,7 +363,7 @@ test("copy actions export current source or the full runtime document and preser
     const full = await page.evaluate(() => window.copiedLibraryText);
     fullExample = full;
     expect(full).toContain("<!doctype html>");
-    expect(full).toContain("bootstrap.min.css");
+    expect(full).not.toContain("bootstrap.min.css");
     expect(full).toContain("aellux.min.js");
     expect(full).toContain('$ae.ext("adaptive", {loadStyle:true})');
     expect(full).toContain('$ae.init({mode:"basic"');
@@ -370,9 +377,13 @@ test("copy actions export current source or the full runtime document and preser
   });
   for (const action of ["copy", "copy-full"]) {
     await page.locator(`${sidebar} [data-action="${action}"]`).click();
-    await expect(editor).toBeFocused();
-    expect(await editor.evaluate(element => element.selectionEnd - element.selectionStart)).toBe(original.length);
-    await expect(page.locator("#notice")).toContainText("copie o código pelo teclado");
+    const manual = page.locator('#copy-fallback textarea');
+    await expect(manual).toBeFocused();
+    const value = await manual.inputValue();
+    expect(value).toContain(original);
+    expect(value.startsWith('<!doctype')).toBe(action === "copy-full");
+    expect(await manual.evaluate(element => element.selectionEnd - element.selectionStart)).toBe(value.length);
+    await page.locator('#copy-fallback button').click();
   }
   await page.route("**/tests/copied-sidebar.htm", route => route.fulfill({ contentType: "text/html; charset=utf-8", body: fullExample }));
   await page.goto("/tests/copied-sidebar.htm");

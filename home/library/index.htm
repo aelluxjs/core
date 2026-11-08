@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="Explore, edite e experimente snippets AelluxJS. Uma biblioteca de pequenas ideias para suas interfaces, também offline.">
+  <meta name="description" content="AelluxJS Library — Copy, paste, customize. Experiências responsivas prontas para incorporar ao seu projeto, também offline.">
   <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#232323" media="(prefers-color-scheme: dark)">
   <meta name="color-scheme" content="light dark">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>Biblioteca — aellux.js</title>
+  <title>AelluxJS Library — Copy, paste, customize.</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/icon-192.png">
@@ -27,7 +27,7 @@
   <header class="app-header border-bottom bg-body">
     <div class="container-xl d-flex align-items-center justify-content-between gap-3 py-3">
       <a href="../index.htm" class="brand text-body text-decoration-none" aria-label="aellux.js, página inicial"><svg class="brand-mark" viewBox="0 0 128 128" width="32" height="32" aria-hidden="true"><rect width="128" height="128" rx="1"/><text x="64" y="84">æ</text></svg> <span>aellux<span class="brand-suffix">.js</span></span></a>
-      <span class="header-label small text-body-secondary d-none d-sm-inline">um playground de possibilidades</span>
+      <span class="header-label small text-body-secondary d-none d-sm-inline">AelluxJS Library</span>
       <div class="d-flex align-items-center gap-2">
         <span id="connection" class="connection small"><span class="status-dot"></span><span id="connection-label">Online</span></span>
         <button type="button" class="btn icon-button" data-ae-preference="color-scheme" data-ae-next aria-label="Alterar tema" title="Alterar tema"><svg class="icon" aria-hidden="true"><use href="#i-theme"></use></svg></button>
@@ -40,8 +40,8 @@
       <aside class="col-lg-3 d-none d-lg-block">
         <div class="side-content">
           <p class="overline text-body-secondary">AELLUX / BIBLIOTECA</p>
-          <h1 class="h3 fw-semibold mb-3">Uma ideia.<br>Seu próximo projeto.</h1>
-          <p class="text-body-secondary small mb-4">Explore o código, mude os detalhes e veja acontecer.</p>
+          <h1 class="h3 fw-semibold mb-3">Experiências prontas.<br>Do seu jeito.</h1>
+          <p class="text-body-secondary small mb-4">Encontre o que precisa construir. Copie, cole e personalize no seu projeto.</p>
           <nav class="d-grid gap-2" aria-label="Navegação da biblioteca">
             <button class="btn side-link text-start" type="button" data-view="feed"><svg class="icon" aria-hidden="true"><use href="#i-home"></use></svg> Explorar</button>
             <button class="btn side-link text-start" type="button" data-view="categories"><svg class="icon" aria-hidden="true"><use href="#i-grid"></use></svg> Categorias</button>
@@ -53,9 +53,9 @@
 
       <main class="col-lg-9 col-xl-6" id="main">
         <div class="feed-intro pt-4 pb-3">
-          <p class="overline text-body-secondary mb-2">CÓDIGO ABERTO. IDEIAS TAMBÉM.</p>
-          <h2 id="view-title" class="fw-semibold mb-2">Explore. Edite. Crie<span class="text-warning">.</span></h2>
-          <p class="text-body-secondary small mb-0">Pequenos snippets, prontos para experimentar.</p>
+          <p class="overline text-body-secondary mb-2">READY-TO-USE RESPONSIVE EXPERIENCES</p>
+          <h2 id="view-title" class="fw-semibold mb-2">Copy, paste, customize<span class="text-warning">.</span></h2>
+          <p class="text-body-secondary small mb-0">Componentes para páginas reais. Confira os requisitos, teste as larguras e leve o código.</p>
         </div>
         <div class="search-panel bg-body py-3">
           <form id="search-form" role="search" class="d-flex gap-2">
@@ -73,7 +73,7 @@
           </div>
         </div>
         <section id="categories-panel" class="mb-4" aria-labelledby="categories-title" hidden>
-          <h3 id="categories-title" class="h5 mb-3">Encontre seu próximo experimento</h3>
+          <h3 id="categories-title" class="h5 mb-3">O que você quer construir?</h3>
           <div id="category-grid" class="row g-3"></div>
         </section>
         <div id="feed" class="d-grid gap-4" tabindex="-1" aria-label="Feed de exemplos"></div>
@@ -83,7 +83,7 @@
           <p id="empty-message" class="text-body-secondary small mb-3"></p>
           <button class="btn btn-outline-secondary btn-sm" type="button" data-action="explore">Explorar todos</button>
         </div>
-        <p class="feed-end text-center text-body-secondary small py-4 mb-0">Feito para testar. Livre para transformar. <span aria-hidden="true">✳</span></p>
+        <p class="feed-end text-center text-body-secondary small py-4 mb-0">Pronto para incorporar. Livre para transformar. <span aria-hidden="true">✳</span></p>
       </main>
 
       <aside class="col-xl-3 d-none d-xl-block">
@@ -98,8 +98,9 @@
           <p class="small text-body-secondary mt-3" id="offline-status" role="status">Preparando acesso offline…</p>
           <button id="apply-update" class="btn btn-outline-secondary btn-sm" type="button" hidden>Atualizar biblioteca</button>
           <div class="border-top mt-4 pt-4 small text-body-secondary">
-            <p class="text-body fw-medium mb-2">Um espaço para experimentar</p>
-            <p>Edite o HTML de qualquer card. A prévia acompanha suas mudanças após uma pequena pausa.</p>
+            <p class="text-body fw-medium mb-2">Do exemplo ao seu projeto</p>
+            <p>Copiar snippet leva só o componente. Exemplo completo inclui as dependências indicadas no card.</p>
+            <p>Mobile, Tablet e Desktop alteram a largura real da prévia. Role horizontalmente para explorar uma largura maior que o card, ou amplie.</p>
             <p class="mb-0">Seus salvos e suas edições ficam neste dispositivo.</p>
           </div>
         </div>
@@ -121,6 +122,13 @@
     <p class="small text-body-secondary">No menu do navegador, procure “Instalar aplicativo” ou “Adicionar à tela inicial”. No Safari do iPhone ou iPad, abra Compartilhar e escolha “Adicionar à Tela de Início”.</p>
     <p id="install-offline-status" class="small"></p>
     <form method="dialog"><button class="btn btn-warning btn-sm">Entendi</button></form>
+  </dialog>
+  <dialog id="copy-fallback" class="copy-fallback rounded-4 border p-4" aria-labelledby="copy-fallback-title">
+    <h2 id="copy-fallback-title" class="h5">Copiar código</h2>
+    <p class="small text-body-secondary">O clipboard está indisponível. Copie o código selecionado pelo teclado ou pelo menu do dispositivo.</p>
+    <label class="visually-hidden" for="copy-fallback-code">Código para cópia manual</label>
+    <textarea id="copy-fallback-code" class="form-control mb-3" readonly spellcheck="false"></textarea>
+    <form method="dialog"><button class="btn btn-warning btn-sm">Fechar</button></form>
   </dialog>
   <div id="notice" class="app-notice bg-body text-body border rounded-3 shadow p-3 small" role="status" hidden></div>
   <noscript><p class="container py-5">Ative o JavaScript para carregar e editar os exemplos da biblioteca.</p></noscript>

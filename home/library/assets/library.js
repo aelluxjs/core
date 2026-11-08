@@ -13,6 +13,8 @@
   const search = document.getElementById("search");
   const storageKey = "aellux-library-v1";
   const editDelay = 650;
+  const previewWidths = { fluid: null, mobile: 375, tablet: 768, desktop: 1280 };
+  const extensionLabels = { input: "Input", present: "Present", focus: "Focus", adaptive: "Adaptive", anchor: "Anchor", viewport: "Viewport", preference: "Preference", feedback: "Feedback", "scrollbox": "Scrollbox", "scrollbox-snap": "Scrollbox Snap", "state-navigation": "State Navigation" };
   let stored = {};
   try { stored = JSON.parse(localStorage.getItem(storageKey)) || {}; } catch { /* Storage is optional. */ }
   const saved = new Set(Array.isArray(stored.saved) ? stored.saved.filter(id => snippets.has(id)) : []);
@@ -52,6 +54,8 @@
   // Altere este template para mudar a estrutura de todos os cards de uma vez.
   function renderCard(snippet) {
     const group = categories.get(snippet.category);
+    const requirements = [...snippet.extensions.map(name => extensionLabels[name] || name), ...(snippet.dependencies || [])];
+    const registrations = snippet.extensions.map(name => `$ae.ext(${serialize(name)}, {loadStyle:true});`).join("\n");
     return `<article class="snippet-card" id="snippet-${escapeHTML(snippet.id)}" data-snippet="${escapeHTML(snippet.id)}" style="--snippet-tint:${escapeHTML(group.tint)}" aria-labelledby="title-${escapeHTML(snippet.id)}">
       <header class="snippet-header">
         <div class="d-flex align-items-center gap-2 mb-3">
@@ -62,15 +66,28 @@
         <h3 id="title-${escapeHTML(snippet.id)}" class="mb-2">${escapeHTML(snippet.title)}</h3>
         <p class="snippet-description text-body-secondary mb-2">${escapeHTML(snippet.description)}</p>
         <div class="d-flex flex-wrap gap-2">${snippet.tags.map(tag => `<button class="tag" type="button" data-tag="${escapeHTML(tag)}">#${escapeHTML(tag)}</button>`).join("")}</div>
+        <div class="snippet-requirements d-flex flex-wrap gap-1 mt-3" aria-label="Dependências">${(requirements.length ? requirements : ["HTML / CSS"]).map(name => `<span class="badge border text-body-secondary fw-normal">${escapeHTML(name)}</span>`).join("")}</div>
+        <p class="snippet-capabilities small text-body-secondary mt-2 mb-0">${escapeHTML(snippet.features.join(" · "))} · Copie e personalize</p>
+        <details class="integration-details small mt-2">
+          <summary>Como integrar</summary>
+          <p class="mt-2 mb-2">${snippet.dependencies.length ? "Requer Bootstrap 5.3.8. " : "CSS próprio, sem Bootstrap. "}${snippet.extensions.length ? "Em Basic, registre as extensões abaixo antes de inicializar a aplicação uma vez." : "Cole o snippet diretamente na página. Este exemplo usa somente HTML e CSS."}</p>
+          ${registrations ? `<pre class="integration-code"><code>${escapeHTML(registrations)}</code></pre><p class="mb-2">Em uma aplicação iniciada, execute o script local do snippet, se houver, e aguarde <code>$ae.mount(container)</code> após inseri-lo.</p>` : ""}
+          <p class="mb-0">${escapeHTML(snippet.integration || "Para repetir o componente na mesma página, renomeie os IDs e todas as referências correspondentes (href, for, ARIA e data-ae-*).")}</p>
+        </details>
       </header>
       <div class="preview-slot" data-ae-viewport>
         <div class="preview-shell">
           <div class="preview-toolbar">
             <button class="btn btn-sm preview-back" type="button" data-action="back" aria-label="Voltar ao feed">${icon("back")} Voltar</button>
             <span class="preview-label"><span class="status-dot"></span> PRÉVIA <span class="preview-state">· em pausa</span></span>
-            <button class="btn btn-sm preview-expand" type="button" data-action="expand" aria-label="Ampliar ${escapeHTML(snippet.title)}">${icon("expand")} Ampliar</button>
+            <label class="preview-size-label">Largura
+              <select class="form-select form-select-sm preview-width" aria-label="Largura da prévia de ${escapeHTML(snippet.title)}">
+                <option value="fluid">Disponível</option><option value="mobile">Mobile · 375 px</option><option value="tablet">Tablet · 768 px</option><option value="desktop">Desktop · 1280 px</option>
+              </select>
+            </label>
+            <button class="btn btn-sm preview-expand" type="button" data-action="expand" aria-label="Ampliar ${escapeHTML(snippet.title)}" disabled>${icon("expand")} Ampliar</button>
           </div>
-          <iframe title="Prévia: ${escapeHTML(snippet.title)}" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe>
+          <div class="preview-viewport"><iframe title="Prévia: ${escapeHTML(snippet.title)}" sandbox="allow-scripts allow-forms" referrerpolicy="no-referrer"></iframe></div>
         </div>
       </div>
       <div class="editor-panel">
@@ -86,7 +103,7 @@
       </div>
       <footer class="snippet-footer">
         <span id="edit-help-${escapeHTML(snippet.id)}" class="edit-status">Edite e veja acontecer · 650 ms</span>
-        <span class="small text-body-secondary" style="font-size:.65rem">${escapeHTML(snippet.extensions.join(" + "))}</span>
+        <span class="small text-body-secondary" style="font-size:.65rem">${escapeHTML(requirements.join(" + ") || "HTML / CSS")}</span>
       </footer>
     </article>`;
   }
@@ -104,11 +121,14 @@
 
   document.getElementById("category-filters").innerHTML = [{ id: "all", label: "Tudo" }, ...source.categories].map(item =>
     `<button class="btn category-chip" type="button" data-category="${escapeHTML(item.id)}" aria-pressed="${item.id === category}">${escapeHTML(item.label)}</button>`).join("");
-  document.getElementById("category-grid").innerHTML = source.categories.map(item =>
-    `<div class="col-6"><button class="category-tile h-100" type="button" data-category="${escapeHTML(item.id)}" data-open-category>
+  document.getElementById("category-grid").innerHTML = source.categories.map(item => {
+    const count = source.snippets.filter(snippet => snippet.category === item.id).length;
+    return `<div class="col-6"><button class="category-tile h-100" type="button" data-category="${escapeHTML(item.id)}" data-open-category>
       <span class="snippet-avatar mb-3" style="--snippet-tint:${escapeHTML(item.tint)}" aria-hidden="true">${escapeHTML(item.symbol)}</span>
       <span class="d-block fw-semibold small mb-1">${escapeHTML(item.label)}</span><span class="d-block small text-body-secondary">${escapeHTML(item.description)}</span>
-    </button></div>`).join("");
+      <span class="d-block small text-body-secondary mt-2">${count} ${count === 1 ? "snippet" : "snippets"}</span>
+    </button></div>`;
+  }).join("");
 
   function updateSaved() {
     for (const state of cards.values()) {
@@ -125,7 +145,7 @@
     let count = 0;
     for (const state of cards.values()) {
       const snippet = state.snippet;
-      const haystack = normalize([snippet.title, snippet.description, categories.get(snippet.category).label, ...snippet.tags, ...snippet.extensions].join(" "));
+      const haystack = normalize([snippet.title, snippet.description, categories.get(snippet.category).label, ...snippet.tags, ...snippet.extensions, ...snippet.dependencies, ...snippet.features].join(" "));
       const match = (view !== "saved" || saved.has(snippet.id)) && (category === "all" || snippet.category === category) && terms.every(term => haystack.includes(term));
       state.card.hidden = !match;
       if (match) count++;
@@ -144,7 +164,7 @@
     category = "all";
     query = "";
     search.value = "";
-    document.getElementById("view-title").textContent = { feed: "Explore. Edite. Crie.", categories: "Encontre sua próxima ideia.", saved: "Suas ideias favoritas." }[view];
+    document.getElementById("view-title").textContent = { feed: "Copy, paste, customize.", categories: "O que você quer construir?", saved: "Seus snippets favoritos." }[view];
     document.getElementById("categories-panel").hidden = view !== "categories";
     document.querySelectorAll("[data-view]").forEach(button => {
       if (button.dataset.view === view) button.setAttribute("aria-current", "page");
@@ -165,6 +185,14 @@
     }
     return assets.get(key);
   }
+
+  document.addEventListener("change", event => {
+    if (!event.target.matches(".preview-width")) return;
+    const state = cards.get(event.target.closest("[data-snippet]").dataset.snippet);
+    const width = previewWidths[event.target.value];
+    // CSS pixels change the actual iframe viewport, including its media queries.
+    state.shell.style.setProperty("--preview-width", width ? `${width}px` : "100%");
+  });
 
   function shouldRun(state) {
     return !document.hidden && !state.card.hidden && (fullscreen ? fullscreen === state.snippet.id : state.visible);
@@ -200,10 +228,12 @@
     try {
       const extensions = state.snippet.extensions;
       const styleExtensions = extensions.filter(name => ["input", "present", "anchor", "scrollbox", "adaptive", "feedback"].includes(name));
+      const hasRuntime = extensions.length > 0;
       const [bootstrap, palette, boot, runtime, scripts, styles, adapters] = await Promise.all([
-        fetchText(new URL("vendor/bootstrap.min.css", base)), fetchText(new URL("../assets/bootstrap-brand.css", base)),
-        fetchText(new URL("aellux.min.js", dist)),
-        fetchText(new URL("aellux.orchestrator.min.js", dist)),
+        state.snippet.dependencies.length ? fetchText(new URL("vendor/bootstrap.min.css", base)) : "",
+        state.snippet.dependencies.length ? fetchText(new URL("../assets/bootstrap-brand.css", base)) : "",
+        hasRuntime ? fetchText(new URL("aellux.min.js", dist)) : "",
+        hasRuntime ? fetchText(new URL("aellux.orchestrator.min.js", dist)) : "",
         Promise.all(extensions.map(name => fetchText(new URL(`aellux.ext.${name}.min.js`, dist)))),
         Promise.all(styleExtensions.map(name => fetchText(new URL(`aellux.ext.${name}.min.css`, dist)))),
         Promise.all((extensions.includes("input") ? ["point", "keyboard"] : []).map(name => fetchText(new URL(`aellux.input.${name}.min.js`, dist))))
@@ -220,13 +250,14 @@
         window.addEventListener("keydown",e=>{if(e.key==="Escape"&&!e.defaultPrevented)send("library-escape");});
         window.addEventListener("message",e=>{
           if(e.source!==parent||e.data?.type!=="library-theme"||e.data.token!==${serialize(token)}||!["light","dark"].includes(e.data.theme))return;
+          if(!window.$ae){document.documentElement.dataset.bsTheme=e.data.theme;return;}
           const preference=$ae.ext.preference;
           if(preference?.initialized){preference.set("colorScheme",e.data.theme);preference.update();}
           else{$ae.persist.preferences.setObject(Object.assign({},$ae.persist.preferences.getObject(),{colorScheme:e.data.theme}));$ae.updatePreferenceAttributesHTML();}
         });
-        $ae.on("Ready",()=>send("library-ready"),{once:true});})();`;
+        ${hasRuntime ? '$ae.on("Ready",()=>send("library-ready"),{once:true});' : 'window.addEventListener("DOMContentLoaded",()=>send("library-ready"),{once:true});'}})();`;
       const start = `$ae.updatePreferenceAttributesHTML();$ae.startAelluxJs().catch(error=>parent.postMessage({type:"library-error",token:${serialize(token)},message:error.message},"*"));`;
-      const html = `<!doctype html><html lang="pt-BR" data-bs-theme="${theme}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHTML(state.snippet.title)}</title><style>${bootstrap}\n${palette}\n${styles.join("\n")}\nbody{min-height:100vh;margin:0;}html{color-scheme:${theme};}</style>${inlineScript(setup)}${inlineScript(runtime)}${scripts.map(inlineScript).join("")}${adapters.map(inlineScript).join("")}${inlineScript(bridge)}</head><body>${state.editor.value}${inlineScript(start)}</body></html>`;
+      const html = `<!doctype html><html lang="pt-BR" data-bs-theme="${theme}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHTML(state.snippet.title)}</title><style>${bootstrap}\n${palette}\n${styles.join("\n")}\nbody{min-height:100vh;margin:0;}html{color-scheme:${theme};}</style>${hasRuntime ? inlineScript(setup) + inlineScript(runtime) : ""}${scripts.map(inlineScript).join("")}${adapters.map(inlineScript).join("")}${inlineScript(bridge)}</head><body>${state.editor.value}${hasRuntime ? inlineScript(start) : ""}</body></html>`;
       replaceFrame(state, html);
       state.loaded = true;
       state.loading = false;
@@ -361,7 +392,9 @@
 
   function exportDocument(state) {
     const registrations = state.snippet.extensions.map(name => `$ae.ext(${serialize(name)}, {loadStyle:true});`).join("\n");
-    return `<!doctype html>\n<html lang="pt-BR">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>${escapeHTML(state.snippet.title)}</title>\n<link rel="stylesheet" href="${new URL("vendor/bootstrap.min.css", base).href}">\n<link rel="stylesheet" href="${new URL("../assets/bootstrap-brand.css", base).href}">\n<script src="${new URL("aellux.min.js", dist).href}"></script>\n${inlineScript(`${registrations}\n$ae.init({mode:"basic",useHash:false,syncBootstrapThemeTag:true});`)}\n</head>\n<body>\n${state.editor.value}\n</body>\n</html>`;
+    const styles = state.snippet.dependencies.length ? `<link rel="stylesheet" href="${new URL("vendor/bootstrap.min.css", base).href}">\n<link rel="stylesheet" href="${new URL("../assets/bootstrap-brand.css", base).href}">` : "";
+    const runtime = registrations ? `<script src="${new URL("aellux.min.js", dist).href}"></script>\n${inlineScript(`${registrations}\n$ae.init({mode:"basic",useHash:false,syncBootstrapThemeTag:true});`)}` : "";
+    return `<!doctype html>\n<html lang="pt-BR">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>${escapeHTML(state.snippet.title)}</title>\n${styles}\n${runtime}\n</head>\n<body>\n${state.editor.value}\n</body>\n</html>`;
   }
 
   async function install() {
@@ -414,11 +447,17 @@
       if (shouldRun(state)) preview(state);
     }
     if (action === "copy" || action === "copy-full") {
+      const code = action === "copy" ? state.editor.value : exportDocument(state);
       try {
-        await navigator.clipboard.writeText(action === "copy" ? state.editor.value : exportDocument(state));
-        notify(action === "copy" ? "Snippet copiado. Inclua as extensões indicadas na aplicação que vai recebê-lo." : "Exemplo completo copiado, com Bootstrap e a inicialização do Aellux.");
+        await navigator.clipboard.writeText(code);
+        notify(action === "copy" ? "Snippet copiado. Confira os requisitos em Como integrar." : "Exemplo completo copiado, com as dependências indicadas no card.");
       }
-      catch { state.editor.focus(); state.editor.select(); notify("Selecione e copie o código pelo teclado ou pelo menu do dispositivo."); }
+      catch {
+        const dialog = document.getElementById("copy-fallback");
+        const editor = dialog.querySelector("textarea");
+        editor.value = code;
+        dialog.showModal(); editor.focus(); editor.select();
+      }
     }
   });
 
@@ -476,6 +515,7 @@
 
   $ae.on("Ready", async () => {
     navigation = await $ae.wait("state-navigation");
+    document.querySelectorAll('.preview-expand').forEach(button => { button.disabled = false; });
     syncFullscreen(navigation.globalSnapshot);
     prepareOffline();
   }, { once: true });
