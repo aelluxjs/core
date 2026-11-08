@@ -13,6 +13,8 @@ Core sources live in `src/`, build tooling in `scripts/`, browser validation pag
 
 ## Full Mode
 
+Load the boot script and call `init()` synchronously in `<head>`, without `defer` or `async`. This lets basic preferences such as `colorScheme` apply before the first paint and avoids a flash of the wrong theme. The boot reports independent warnings for execution outside `<head>` and for asynchronous or deferred loading; see [Diagnostics](runtime/diagnostics.md#boot-script-loading-checks).
+
 Full automatically bundles all Core primitives, the reusable building blocks for components and new behaviors. It does not embed every Extension available in Core: optional navigation and environment Extensions, such as Ajax Href and PWA, load separately on demand. Full registers them automatically through the boot script and runtime:
 
 ```html

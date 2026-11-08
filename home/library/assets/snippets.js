@@ -75,7 +75,7 @@ window.librarySource = {
       description: "Viewport transforma a posição visível em variáveis CSS. Role dentro do exemplo e acompanhe a forma.",
       tags: ["viewport", "css", "scroll", "variaveis"], extensions: ["viewport"],
       code: String.raw`<style>
-  .shape { width: 80px; height: 80px; border-radius: 22px; background: #ffc107;
+  .shape { width: 80px; height: 80px; border-radius: 22px; background: var(--bs-warning);
     transform: rotate(calc(var(--ae-viewport-y, 0) * 90deg)); }
 </style>
 <main class="p-4">

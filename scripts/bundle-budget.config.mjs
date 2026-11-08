@@ -12,7 +12,8 @@ export const bundleBudget = Object.freeze([
   // Input's signed adapter assets and synchronous command channel. Measured
   // before/after bytes and selective-loading costs: core-extensions/input.md.
   // Shared mediator and provider contracts: measured costs in runtime/communication.md.
-  { file: "aellux.min.js", maxRawBytes: 53.25 * 1024, maxGzipBytes: 18.75 * 1024 },
+  // Boot placement/loading warnings: +559 raw / +212 gzip bytes; runtime/diagnostics.md.
+  { file: "aellux.min.js", maxRawBytes: 53.5 * 1024, maxGzipBytes: 18.75 * 1024 },
   { file: "aellux.ext.progress.js", maxRawBytes: 3.25 * 1024, maxGzipBytes: 1.125 * 1024 },
   { file: "aellux.ext.progress.min.js", maxRawBytes: 1.75 * 1024, maxGzipBytes: 0.875 * 1024 },
   { file: "aellux.ext.progress.legacy.js", maxRawBytes: 15 * 1024, maxGzipBytes: 4.5 * 1024 },
@@ -23,7 +24,8 @@ export const bundleBudget = Object.freeze([
   { file: "aellux.ext.viewport.min.js", maxRawBytes: 10.5 * 1024, maxGzipBytes: 4.25 * 1024 },
   { file: "aellux.ext.viewport.legacy.js", maxRawBytes: 35.5 * 1024, maxGzipBytes: 9 * 1024 },
   { file: "aellux.ext.viewport.legacy.min.js", maxRawBytes: 16.75 * 1024, maxGzipBytes: 6.5 * 1024 },
-  { file: "aellux.esm.min.js", maxRawBytes: 29 * 1024, maxGzipBytes: 10 * 1024 },
+  // Shared boot diagnostic catalog: +350 raw / +141 gzip bytes; runtime/diagnostics.md.
+  { file: "aellux.esm.min.js", maxRawBytes: 29.5 * 1024, maxGzipBytes: 10 * 1024 },
   // Development source inspection and CSS resource conflict diagnostics.
   // Also covers CSS Motion subtree capture; fade costs: core-extensions/optional/overflow-marquee.md.
   // Measured deltas and the superseded limits: runtime/diagnostics.md.

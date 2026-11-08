@@ -693,6 +693,7 @@ npm run build
 </code></pre>
 <p>Core sources live in <code>src/</code>, build tooling in <code>scripts/</code>, browser validation pages in <code>tests/browser/</code>, and generated browser files in <code>dist/</code>.</p>
 <h2>Full Mode</h2>
+<p>Load the boot script and call <code>init()</code> synchronously in <code>&lt;head&gt;</code>, without <code>defer</code> or <code>async</code>. This lets basic preferences such as <code>colorScheme</code> apply before the first paint and avoids a flash of the wrong theme. The boot reports independent warnings for execution outside <code>&lt;head&gt;</code> and for asynchronous or deferred loading; see <a href="runtime/diagnostics.htm#boot-script-loading-checks">Diagnostics</a>.</p>
 <p>Full automatically bundles all Core primitives, the reusable building blocks for components and new behaviors. It does not embed every Extension available in Core: optional navigation and environment Extensions, such as Ajax Href and PWA, load separately on demand. Full registers them automatically through the boot script and runtime:</p>
 <pre><code class="language-html">&lt;script src=&quot;./dist/aellux.js&quot;&gt;&lt;/script&gt;
 &lt;script&gt;

@@ -77,6 +77,19 @@ $ae.init({ environment: "production", verboseLevel: "warn" });
 
 Equivalent diagnostics are deduplicated while their original entry remains in this circular history. Identity includes the code plus the relevant context (including element identity), so separate elements are not collapsed. Once an entry ages out, the same condition can be reported again.
 
+## Boot script loading checks
+
+During `init()`, the boot script reports two independent warnings based on its element's location and loading flags captured when the boot executed:
+
+| Code | Constant | Meaning |
+| --- | --- | --- |
+| `2035` | `WARN_BOOTSTRAP_NOT_IN_HEAD` | The boot script executed outside `<head>`. |
+| `2036` | `WARN_BOOTSTRAP_NOT_SYNCHRONOUS` | The boot script used `defer` or `async`, including a dynamically inserted script with its default asynchronous loading. |
+
+Both messages recommend loading the boot script and calling `init()` synchronously in `<head>`, without `defer` or `async`, so basic preferences such as `colorScheme` apply before the first paint and avoid flashes. The context identifies the script element; `2036` also includes the captured `defer` and `async` flags. Both warnings can occur together and do not stop initialization. They use the normal history, deduplication and verbosity rules in either environment. Console output requires `verboseLevel: "warn"` or `"info"`; development selects `"info"` by default. When no script element can be identified, these checks are skipped.
+
+The boot checks and catalog add 559 raw / 212 gzip bytes to `aellux.min.js` (54,603 / 18,840 bytes). The shared catalog adds 350 raw / 141 gzip bytes to `aellux.esm.min.js` (29,859 / 10,228 bytes). Their raw budgets change from 53.25 to 53.5 KiB and from 29 to 29.5 KiB respectively; gzip limits remain 18.75 and 10 KiB.
+
 ## Development configuration checks
 
 With `environment: "development"`, mounting validates declarations after lazy Extensions have loaded and all mount registrations have completed. `mountManager.update()` repeats those checks after updates. Scoped mounts and updates validate only the requested Extensions. The checks use the existing diagnostic history and do not install additional observers. Production skips these DOM scans, independently of `verboseLevel`.

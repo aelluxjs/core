@@ -674,6 +674,28 @@
                 }
               }
             },
+            "WARN_BOOTSTRAP_NOT_IN_HEAD": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            },
+            "WARN_BOOTSTRAP_NOT_SYNCHRONOUS": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            },
             "WARN_INTERRUPTION": {
               "type": "object",
               "properties": {
@@ -1832,6 +1854,28 @@
               }
             },
             "WARN_BROWSER_CAPABILITIES": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            },
+            "WARN_BOOTSTRAP_NOT_IN_HEAD": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            },
+            "WARN_BOOTSTRAP_NOT_SYNCHRONOUS": {
               "type": "object",
               "properties": {
                 "code": {

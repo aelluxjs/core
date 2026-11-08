@@ -82,11 +82,11 @@ test("brand SVGs own their styles, default to light and detect either theme attr
     return states;
   });
   expect(result).toEqual([
-    ["rgb(255, 193, 7)", "rgb(33, 37, 41)"],
-    ["rgb(255, 193, 7)", "rgb(222, 226, 230)"],
-    ["rgb(255, 193, 7)", "rgb(33, 37, 41)"],
-    ["rgb(255, 193, 7)", "rgb(222, 226, 230)"],
-    ["rgb(255, 193, 7)", "rgb(33, 37, 41)"]
+    ["rgb(255, 193, 7)", "rgb(35, 35, 35)"],
+    ["rgb(247, 223, 30)", "rgb(222, 226, 230)"],
+    ["rgb(255, 193, 7)", "rgb(35, 35, 35)"],
+    ["rgb(247, 223, 30)", "rgb(222, 226, 230)"],
+    ["rgb(255, 193, 7)", "rgb(35, 35, 35)"]
   ]);
 });
 
@@ -195,7 +195,7 @@ for (const theme of ["light", "dark"]) {
         }, { base64: buffer.toString("base64"), format, wordColor });
         expect(rendered.width).toBe(variant === "symbol" ? 384 : 904);
         expect(rendered.height).toBe(384);
-        expect(rendered.tile).toEqual([255, 193, 7, 255]);
+        expect(rendered.tile).toEqual(theme === "dark" ? [247, 223, 30, 255] : [255, 193, 7, 255]);
         expect(rendered.corner[3]).toBe(0);
         expect(rendered.bounds.left).toBe(64);
         expect(rendered.bounds.top).toBeGreaterThanOrEqual(64);
@@ -222,7 +222,7 @@ for (const theme of ["light", "dark"]) {
             frame.remove();
             return colors;
           }, buffer.toString("utf8"));
-          const expected = variant === "logotype" ? wordColor : "rgb(33, 37, 41)";
+          const expected = variant === "logotype" ? wordColor : "rgb(35, 35, 35)";
           expect(frozenColors).toEqual([expected, expected]);
         } else {
           expect(rendered.pngDifference).toBeLessThanOrEqual(2);

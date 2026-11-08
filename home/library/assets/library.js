@@ -34,6 +34,7 @@
   const icon = name => `<svg class="icon" aria-hidden="true"><use href="#i-${name}"></use></svg>`;
   const inlineScript = code => `<script>${code.replace(/<\/script/gi, "<\\/script")}</script>`;
   const serialize = value => JSON.stringify(value).replace(/</g, "\\u003c");
+  const colorScheme = () => document.documentElement.dataset.bsTheme === "dark" ? "dark" : "light";
 
   function persist() {
     try { localStorage.setItem(storageKey, JSON.stringify({ saved: [...saved], drafts })); }
@@ -198,8 +199,9 @@
     try {
       const extensions = state.snippet.extensions;
       const styleExtensions = extensions.filter(name => ["input", "present", "anchor", "scrollbox", "adaptive", "feedback"].includes(name));
-      const [bootstrap, boot, runtime, scripts, styles, adapters] = await Promise.all([
-        fetchText(new URL("vendor/bootstrap.min.css", base)), fetchText(new URL("aellux.min.js", dist)),
+      const [bootstrap, palette, boot, runtime, scripts, styles, adapters] = await Promise.all([
+        fetchText(new URL("vendor/bootstrap.min.css", base)), fetchText(new URL("../assets/bootstrap-brand.css", base)),
+        fetchText(new URL("aellux.min.js", dist)),
         fetchText(new URL("aellux.orchestrator.min.js", dist)),
         Promise.all(extensions.map(name => fetchText(new URL(`aellux.ext.${name}.min.js`, dist)))),
         Promise.all(styleExtensions.map(name => fetchText(new URL(`aellux.ext.${name}.min.css`, dist)))),
@@ -207,17 +209,23 @@
       ]);
       if (revision !== state.revision || !shouldRun(state)) return;
       const token = state.token = `${state.snippet.id}:${revision}:${Math.random()}`;
+      const theme = colorScheme();
       // Incorpora os assets já carregados a um documento de origem opaca. Assim,
       // scripts editados não acessam o app, o storage ou o histórico da página.
-      const setup = `window.__aelluxBootstrapURL=${serialize(new URL("aellux.min.js", dist).href)};\n${boot}\nObject.assign($ae.options,{mode:"basic",useHash:false,syncBootstrapThemeTag:true});\n${extensions.map(name => `$ae.ext(${serialize(name)}, {loadStyle:false});`).join("\n")}`;
+      const setup = `window.__aelluxBootstrapURL=${serialize(new URL("aellux.min.js", dist).href)};\n${boot}\n$ae.persist.preferences.setObject({colorScheme:${serialize(theme)}});\nObject.assign($ae.options,{mode:"basic",useHash:false,syncBootstrapThemeTag:true});\n${extensions.map(name => `$ae.ext(${serialize(name)}, {loadStyle:false});`).join("\n")}`;
       const bridge = `(()=>{const send=(type,message)=>parent.postMessage({type,token:${serialize(token)},message},"*");
         window.addEventListener("error",e=>send("library-error",e.message));
         window.addEventListener("unhandledrejection",e=>send("library-error",String(e.reason)));
         window.addEventListener("keydown",e=>{if(e.key==="Escape")send("library-escape");});
+        window.addEventListener("message",e=>{
+          if(e.source!==parent||e.data?.type!=="library-theme"||e.data.token!==${serialize(token)}||!["light","dark"].includes(e.data.theme))return;
+          const preference=$ae.ext.preference;
+          if(preference?.initialized){preference.set("colorScheme",e.data.theme);preference.update();}
+          else{$ae.persist.preferences.setObject(Object.assign({},$ae.persist.preferences.getObject(),{colorScheme:e.data.theme}));$ae.updatePreferenceAttributesHTML();}
+        });
         $ae.on("Ready",()=>send("library-ready"),{once:true});})();`;
       const start = `$ae.updatePreferenceAttributesHTML();$ae.startAelluxJs().catch(error=>parent.postMessage({type:"library-error",token:${serialize(token)},message:error.message},"*"));`;
-      const theme = document.documentElement.dataset.bsTheme === "dark" ? "dark" : "light";
-      const html = `<!doctype html><html lang="pt-BR" data-bs-theme="${theme}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHTML(state.snippet.title)}</title><style>${bootstrap}\n${styles.join("\n")}\nbody{min-height:100vh;margin:0;}html{color-scheme:${theme};}</style>${inlineScript(setup)}${inlineScript(runtime)}${scripts.map(inlineScript).join("")}${adapters.map(inlineScript).join("")}${inlineScript(bridge)}</head><body>${state.editor.value}${inlineScript(start)}</body></html>`;
+      const html = `<!doctype html><html lang="pt-BR" data-bs-theme="${theme}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHTML(state.snippet.title)}</title><style>${bootstrap}\n${palette}\n${styles.join("\n")}\nbody{min-height:100vh;margin:0;}html{color-scheme:${theme};}</style>${inlineScript(setup)}${inlineScript(runtime)}${scripts.map(inlineScript).join("")}${adapters.map(inlineScript).join("")}${inlineScript(bridge)}</head><body>${state.editor.value}${inlineScript(start)}</body></html>`;
       replaceFrame(state, html);
       state.loaded = true;
       state.loading = false;
@@ -286,11 +294,26 @@
   $ae.on("SnapshotChange", event => syncFullscreen(event.detail.snapshot));
   $ae.on("SnapshotRestore", event => syncFullscreen(event.detail.snapshot));
 
+  function syncPreviewTheme(state) {
+    if (state.token) state.frame.contentWindow.postMessage({ type: "library-theme", token: state.token, theme: colorScheme() }, "*");
+  }
+
+  let previewTheme = colorScheme();
+  $ae.on("PreferencesChange", () => {
+    const theme = colorScheme();
+    if (theme === previewTheme) return;
+    previewTheme = theme;
+    for (const state of cards.values()) syncPreviewTheme(state);
+  });
+
   window.addEventListener("message", event => {
     if (!event.data || typeof event.data !== "object") return;
     const state = [...cards.values()].find(item => item.token && item.token === event.data.token && item.frame.contentWindow === event.source);
     if (!state) return;
-    if (event.data.type === "library-ready") state.shell.querySelector(".preview-state").textContent = "· ao vivo";
+    if (event.data.type === "library-ready") {
+      state.shell.querySelector(".preview-state").textContent = "· ao vivo";
+      syncPreviewTheme(state);
+    }
     if (event.data.type === "library-error") {
       state.shell.querySelector(".preview-state").textContent = "· confira o código";
       state.card.querySelector(".edit-status").textContent = `Prévia: ${String(event.data.message).slice(0, 160)}`;
@@ -337,7 +360,7 @@
 
   function exportDocument(state) {
     const registrations = state.snippet.extensions.map(name => `$ae.ext(${serialize(name)}, {loadStyle:true});`).join("\n");
-    return `<!doctype html>\n<html lang="pt-BR">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>${escapeHTML(state.snippet.title)}</title>\n<link rel="stylesheet" href="${new URL("vendor/bootstrap.min.css", base).href}">\n<script src="${new URL("aellux.min.js", dist).href}"></script>\n${inlineScript(`${registrations}\n$ae.init({mode:"basic",useHash:false,syncBootstrapThemeTag:true});`)}\n</head>\n<body>\n${state.editor.value}\n</body>\n</html>`;
+    return `<!doctype html>\n<html lang="pt-BR">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>${escapeHTML(state.snippet.title)}</title>\n<link rel="stylesheet" href="${new URL("vendor/bootstrap.min.css", base).href}">\n<link rel="stylesheet" href="${new URL("../assets/bootstrap-brand.css", base).href}">\n<script src="${new URL("aellux.min.js", dist).href}"></script>\n${inlineScript(`${registrations}\n$ae.init({mode:"basic",useHash:false,syncBootstrapThemeTag:true});`)}\n</head>\n<body>\n${state.editor.value}\n</body>\n</html>`;
   }
 
   async function install() {

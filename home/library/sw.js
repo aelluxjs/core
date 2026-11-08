@@ -1,6 +1,6 @@
 /* Application-owned worker: the public runtime is outside the app's URL scope.
    Keep this explicit list aligned with snippets.js; bump VERSION on deployment. */
-const VERSION = "1";
+const VERSION = "3";
 const PREFIX = `aellux-library:${self.registration.scope}:`;
 const CACHE = PREFIX + VERSION;
 const app = path => new URL(path, self.registration.scope).href;
@@ -9,7 +9,8 @@ const extensions = ["input", "present", "scrollbox", "viewport", "preference", "
 const styled = ["input", "present", "scrollbox"];
 const PRECACHE = [
   "index.htm", "manifest.webmanifest", "assets/library.css", "assets/library.js", "assets/snippets.js",
-  "assets/icon.svg", "assets/icon-192.png", "assets/icon-512.png", "vendor/bootstrap.min.css"
+  "assets/icon.svg", "assets/icon-192.png", "assets/icon-512.png", "assets/geist-latin.woff2", "vendor/bootstrap.min.css",
+  "../assets/bootstrap-brand.css"
 ].map(app).concat(
   ["aellux.min.js", "aellux.full.min.js", "aellux.full.min.css", "aellux.orchestrator.min.js", "aellux.extensions.min.json", "aellux.input.point.min.js", "aellux.input.keyboard.min.js"].map(dist),
   extensions.map(name => dist(`aellux.ext.${name}.min.js`)),

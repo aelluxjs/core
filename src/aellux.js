@@ -44,6 +44,9 @@ import { hasProgressAPI } from "./internal/has-progress-api.js";
   var bootstrapScript =
     document.currentScript ||
     document.querySelector("script[src*='aellux.js'],script[src*='aellux.min.js']");
+  var bootstrapInHead = bootstrapScript && document.head && document.head.contains(bootstrapScript);
+  var bootstrapDefer = bootstrapScript && bootstrapScript.defer;
+  var bootstrapAsync = bootstrapScript && bootstrapScript.async;
 
   var aelluxBootstrapSrc = root.__aelluxBootstrapURL ||
     (bootstrapScript && bootstrapScript.src);
@@ -73,6 +76,15 @@ import { hasProgressAPI } from "./internal/has-progress-api.js";
     if (typeof document === "undefined") {
       diagnostics.warn(diagnostics.WARN_BROWSER_UNSUPPORTED);
       return;
+    }
+
+    if (bootstrapScript && !bootstrapInHead) {
+      diagnostics.warn(diagnostics.WARN_BOOTSTRAP_NOT_IN_HEAD, { element: bootstrapScript });
+    }
+    if (bootstrapDefer || bootstrapAsync) {
+      diagnostics.warn(diagnostics.WARN_BOOTSTRAP_NOT_SYNCHRONOUS, {
+        element: bootstrapScript, defer: !!bootstrapDefer, async: !!bootstrapAsync
+      });
     }
 
     if (document.querySelector("[" + api.attr("legacy") + "]") ||

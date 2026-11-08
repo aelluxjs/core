@@ -8,7 +8,7 @@
     content="AelluxJS is a lightweight JavaScript library for declarative, reusable UX behaviors. Explore Extensions, read the documentation and get started.">
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#17191c" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#232323" media="(prefers-color-scheme: dark)">
   <title>aellux.js — UX Made Easy.</title>
   <script src="../dist/aellux.min.js"></script>
   <script>
@@ -147,9 +147,9 @@
             </div>
             <p class="small text-body-secondary mt-4 mb-0 pb-4 pb-lg-0">
               Open Source<span class="mx-2 opacity-50" aria-hidden="true">▪</span>
-              <a href="https://github.com/aelluxjs/core">GitHub <span aria-hidden="true">↗</span></a><span
+              <a href="https://github.com/aelluxjs/core" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a><span
                 class="mx-2 opacity-50" aria-hidden="true">▪</span>
-              <a href="https://npmjs.com/package/@aelluxjs/core">npm <span aria-hidden="true">↗</span></a>
+              <a href="https://npmjs.com/package/@aelluxjs/core" target="_blank" rel="noopener">npm <span aria-hidden="true">↗</span></a>
             </p>
             <div class="theme-controls btn-group btn-group-sm mt-4" role="group" aria-label="Color theme"
               data-ae-preference="color-scheme">
@@ -824,7 +824,7 @@ AelluxJs.attr("preference");</code></pre>
             <div class="border-top border-warning border-2 pt-4 h-100">
               <h3 class="h5">Contribute Code</h3>
               <p class="text-body-secondary">Help improve the library through implementations, fixes and tests.</p><a
-                class="text-body fw-normal" href="https://github.com/aelluxjs/core#build">Development guide <span
+                class="text-body fw-normal" href="https://github.com/aelluxjs/core#build" target="_blank" rel="noopener">Development guide <span
                   aria-hidden="true">↗</span></a>
             </div>
           </article>
@@ -832,7 +832,7 @@ AelluxJs.attr("preference");</code></pre>
             <div class="border-top pt-4 h-100">
               <h3 class="h5">Share Your Experience</h3>
               <p class="text-body-secondary">Share real-world UX challenges and implementation experiences.</p><a
-                class="text-body fw-normal" href="https://github.com/aelluxjs/core/issues">Join the conversation <span
+                class="text-body fw-normal" href="https://github.com/aelluxjs/core/issues" target="_blank" rel="noopener">Join the conversation <span
                   aria-hidden="true">↗</span></a>
             </div>
           </article>
@@ -840,7 +840,7 @@ AelluxJs.attr("preference");</code></pre>
             <div class="border-top pt-4 h-100">
               <h3 class="h5">Suggest Behaviors</h3>
               <p class="text-body-secondary">Propose reusable UX patterns and new Extensions.</p><a
-                class="text-body fw-normal" href="https://github.com/aelluxjs/core/issues/new">Suggest an idea <span
+                class="text-body fw-normal" href="https://github.com/aelluxjs/core/issues/new" target="_blank" rel="noopener">Suggest an idea <span
                   aria-hidden="true">↗</span></a>
             </div>
           </article>
@@ -852,9 +852,10 @@ AelluxJs.attr("preference");</code></pre>
       <div class="container">
         <p class="eyebrow text-body-secondary">06 <span class="opacity-50" aria-hidden="true">▪</span> Brand assets</p>
         <h2 id="brand-assets-title" class="section-title">Take aellux.js with you.</h2>
-        <p class="text-body-secondary">The æ symbol pairs <a href="https://getbootstrap.com/">Bootstrap</a> <span
-            class="text-bg-warning">warning yellow</span> with dark lettering, just like
-          the mark above. The logotype uses Geist from Google Fonts: a 650-weight name and a lighter, 400-weight
+        <p class="text-body-secondary">The æ symbol pairs <span class="text-bg-warning">warning yellow</span> with
+          graphite lettering (#232323), just like the mark above. Dark mode uses JavaScript yellow (#F7DF1E);
+          light mode keeps <a href="https://getbootstrap.com/" target="_blank" rel="noopener">Bootstrap</a> warning yellow (#FFC107).
+          The logotype uses Geist from Google Fonts: a 650-weight name and a lighter, 400-weight
           <span class="text-nowrap">.js</span> suffix. Its text follows the same light or dark color as the page.
         </p>
         <p class="text-body-secondary">Keep clear space of at least one quarter of the symbol’s width around the
@@ -887,8 +888,13 @@ AelluxJs.attr("preference");</code></pre>
                       fill: var(--bs-warning, #ffc107);
                     }
 
+                    [data-bs-theme="dark"] #brand-symbol .ae-brand-tile,
+                    [data-ae-color-scheme="dark"] #brand-symbol .ae-brand-tile {
+                      fill: #F7DF1E;
+                    }
+
                     #brand-symbol .ae-brand-glyph {
-                      fill: var(--bs-dark, #212529);
+                      fill: var(--bs-dark, #232323);
                       font: 650 64px "Geist", sans-serif;
                       text-anchor: middle;
                     }
@@ -929,14 +935,19 @@ AelluxJs.attr("preference");</code></pre>
                       fill: var(--bs-warning, #ffc107);
                     }
 
+                    [data-bs-theme="dark"] #brand-logotype .ae-brand-tile,
+                    [data-ae-color-scheme="dark"] #brand-logotype .ae-brand-tile {
+                      fill: #F7DF1E;
+                    }
+
                     #brand-logotype .ae-brand-glyph {
-                      fill: var(--bs-dark, #212529);
+                      fill: var(--bs-dark, #232323);
                       font: 650 40px "Geist", sans-serif;
                       text-anchor: middle;
                     }
 
                     #brand-logotype .ae-brand-word {
-                      fill: var(--bs-body-color, #212529);
+                      fill: var(--bs-body-color, #232323);
                       font: 650 80px "Geist", sans-serif;
                       letter-spacing: -4px;
                     }
@@ -977,20 +988,20 @@ AelluxJs.attr("preference");</code></pre>
         </div>
         <nav class="footer-nav d-flex flex-wrap gap-3 small" aria-label="Footer navigation">
           <a href="../docs">Documentation</a><a href="#examples">Examples</a><a href="#brand-assets">Brand assets</a>
-          <a href="https://github.com/aelluxjs/core">GitHub <span aria-hidden="true">↗</span></a>
-          <a href="https://npmjs.com/package/@aelluxjs/core">npm <span aria-hidden="true">↗</span></a>
-          <a href="https://github.com/aelluxjs/core/blob/main/CHANGELOG.md">Changelog <span
+          <a href="https://github.com/aelluxjs/core" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
+          <a href="https://npmjs.com/package/@aelluxjs/core" target="_blank" rel="noopener">npm <span aria-hidden="true">↗</span></a>
+          <a href="https://github.com/aelluxjs/core/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog <span
               aria-hidden="true">↗</span></a>
-          <a href="https://github.com/aelluxjs/core/blob/main/LICENSE">License <span aria-hidden="true">↗</span></a>
+          <a href="https://github.com/aelluxjs/core/blob/main/LICENSE" target="_blank" rel="noopener">License <span aria-hidden="true">↗</span></a>
           <!-- Add Aellux Manifesto here when an official destination is available. -->
         </nav>
       </div>
       <div class="border-top pt-4 d-flex flex-wrap justify-content-between gap-3 small text-body-secondary">
-        <p class="mb-0">By <a href="https://github.com/pecrodrigues">Pec Rodrigues</a>. Released under Apache 2.0.</p>
-        <p class="mb-0">Made with the help of <a href="https://chatgpt.com/">ChatGPT</a>, <a
-            href="https://openai.com/codex/">Codex</a>, <a href="https://www.google.com/">Google</a>, <a
-            href="https://gemini.google.com/">Gemini</a>, <a href="https://code.visualstudio.com/">VS Code</a>, <a
-            href="https://getbootstrap.com/">Bootstrap</a> &amp; <a href="https://github.com/">GitHub</a>.</p>
+        <p class="mb-0">By <a href="https://github.com/pecrodrigues" target="_blank" rel="noopener">Pec Rodrigues</a>. Released under Apache 2.0.</p>
+        <p class="mb-0">Made with the help of <a href="https://chatgpt.com/" target="_blank" rel="noopener">ChatGPT</a>, <a
+            href="https://openai.com/codex/" target="_blank" rel="noopener">Codex</a>, <a href="https://www.google.com/" target="_blank" rel="noopener">Google</a>, <a
+            href="https://gemini.google.com/" target="_blank" rel="noopener">Gemini</a>, <a href="https://code.visualstudio.com/" target="_blank" rel="noopener">VS Code</a>, <a
+            href="https://getbootstrap.com/" target="_blank" rel="noopener">Bootstrap</a> &amp; <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>.</p>
       </div>
     </div>
   </footer>

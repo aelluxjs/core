@@ -8,7 +8,8 @@ export function createAelluxConstants() {
     DEPENDENCY = AELLUX + "Dependency ",
     INVALID_ARGUMENTS = " has invalid arguments.",
     LEGACY_RUNTIME = AELLUX + "Legacy runtime ",
-    MODERN_RUNTIME = AELLUX + "Modern runtime ";
+    MODERN_RUNTIME = AELLUX + "Modern runtime ",
+    BOOTSTRAP_PREFERENCES = "Load and initialize the boot script synchronously in <head>, without defer or async, so basic preferences such as colorScheme apply before the first paint and avoid flashes.";
 
   return {
     AELLUXJS_VERSION: typeof __AELLUX_VERSION__ !== "undefined"
@@ -96,6 +97,8 @@ export function createAelluxConstants() {
       WARN_ATTRIBUTE_DUPLICATE: { code: 2032, message: "Duplicate HTML attributes discard values and may affect appearance or behavior." },
       WARN_RESOURCE_CONFLICT: { code: 2033, message: "Behaviors replace the same CSS resource; animate a child element instead." },
       WARN_SCROLLBOX_FADE_SCROLLBAR: { code: 2034, message: "A two-axis Scrollbox fade also fades its custom scrollbars; use a wrapper and data-ae-scrollbar-parent=\"wrapper\" to keep the bars outside the mask." },
+      WARN_BOOTSTRAP_NOT_IN_HEAD: { code: 2035, message: "Boot script is outside <head>. " + BOOTSTRAP_PREFERENCES },
+      WARN_BOOTSTRAP_NOT_SYNCHRONOUS: { code: 2036, message: "Boot script uses defer or async. " + BOOTSTRAP_PREFERENCES },
       INFO_LEGACY_FALLBACK: { code: 3000, message: AELLUX + "is starting the Legacy runtime." },
       INFO_PRESENT_MEASURED_LAYOUT: { code: 3001, message: "Present measures size transitions without a direct present-motion child; add one to use the grid layout strategy." },
       INFO_FEEDBACK_MOTION_CUSTOM: { code: 3002, message: "The requested feedback motion is not standard. Standard motions are listed in the diagnostic context." }

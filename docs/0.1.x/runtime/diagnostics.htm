@@ -774,6 +774,29 @@ $ae.init({ environment: &quot;production&quot;, verboseLevel: &quot;warn&quot; }
 </code></pre>
 <p><code>error()</code>, <code>warn()</code>, and <code>info()</code> are recorded even when the selected level hides them from the console. The history retains the 100 most recent entries; older entries and their context references are released as new diagnostics arrive. Call <code>$ae.diagnostics.showHistory(10)</code> to print the last 10 retained entries with timestamps; omit the argument to print all retained entries. The method also returns the selected entries, including their timestamp, level, code, message, and context. Passing <code>0</code> prints and returns no entries. Replaying history does not record new diagnostics.</p>
 <p>Equivalent diagnostics are deduplicated while their original entry remains in this circular history. Identity includes the code plus the relevant context (including element identity), so separate elements are not collapsed. Once an entry ages out, the same condition can be reported again.</p>
+<h2>Boot script loading checks</h2>
+<p>During <code>init()</code>, the boot script reports two independent warnings based on its element&#39;s location and loading flags captured when the boot executed:</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Constant</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>2035</code></td>
+<td><code>WARN_BOOTSTRAP_NOT_IN_HEAD</code></td>
+<td>The boot script executed outside <code>&lt;head&gt;</code>.</td>
+</tr>
+<tr>
+<td><code>2036</code></td>
+<td><code>WARN_BOOTSTRAP_NOT_SYNCHRONOUS</code></td>
+<td>The boot script used <code>defer</code> or <code>async</code>, including a dynamically inserted script with its default asynchronous loading.</td>
+</tr>
+</tbody></table>
+<p>Both messages recommend loading the boot script and calling <code>init()</code> synchronously in <code>&lt;head&gt;</code>, without <code>defer</code> or <code>async</code>, so basic preferences such as <code>colorScheme</code> apply before the first paint and avoid flashes. The context identifies the script element; <code>2036</code> also includes the captured <code>defer</code> and <code>async</code> flags. Both warnings can occur together and do not stop initialization. They use the normal history, deduplication and verbosity rules in either environment. Console output requires <code>verboseLevel: &quot;warn&quot;</code> or <code>&quot;info&quot;</code>; development selects <code>&quot;info&quot;</code> by default. When no script element can be identified, these checks are skipped.</p>
+<p>The boot checks and catalog add 559 raw / 212 gzip bytes to <code>aellux.min.js</code> (54,603 / 18,840 bytes). The shared catalog adds 350 raw / 141 gzip bytes to <code>aellux.esm.min.js</code> (29,859 / 10,228 bytes). Their raw budgets change from 53.25 to 53.5 KiB and from 29 to 29.5 KiB respectively; gzip limits remain 18.75 and 10 KiB.</p>
 <h2>Development configuration checks</h2>
 <p>With <code>environment: &quot;development&quot;</code>, mounting validates declarations after lazy Extensions have loaded and all mount registrations have completed. <code>mountManager.update()</code> repeats those checks after updates. Scoped mounts and updates validate only the requested Extensions. The checks use the existing diagnostic history and do not install additional observers. Production skips these DOM scans, independently of <code>verboseLevel</code>.</p>
 <p>Configuration diagnostics explain what happened, identify the element/attribute/value, and suggest a correction in <code>context</code>:</p>
