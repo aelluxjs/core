@@ -6,7 +6,7 @@
   "lang": "pt-BR",
   "start_url": "./index.htm",
   "scope": "./",
-  "display": "minimal-ui",
+  "display": "standalone",
   "background_color": "#232323",
   "icons": [
     {
