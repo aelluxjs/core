@@ -81,7 +81,7 @@ body.preview-open { overflow: hidden; }
 #feed { scroll-margin-top: 15rem; }
 @media (max-width: 575.98px) {
   .app-header .container-xl { padding-block: .65rem !important; }
-  .search-panel { top: 3.65rem; }
+  .search-panel { top: 0; }
   .snippet-header { padding: 1rem; }
   .snippet-card { border-radius: .8rem; }
   .preview-slot { height: 17rem; }
