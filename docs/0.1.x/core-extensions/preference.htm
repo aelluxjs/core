@@ -695,6 +695,7 @@
             ajax-load="doc-content">
             <h1>Preference Extension</h1>
 <p><strong>Distribution:</strong> Bundled Extension. <strong>Stability:</strong> Stable.</p>
+<p>Stability describes implementation maturity and validation, not API compatibility. Only the <a href="../runtime/compatibility-commitment.htm">minimal initialization and declarative activation/mounting contract</a> is protected during <code>0.1.x</code>.</p>
 <p><code>preference</code> stores user choices, combines them with defaults, and reflects the result in document attributes. It is included in the <code>full</code> runtime. In Basic, register it explicitly with <code>$ae.ext(&quot;preference&quot;)</code> before initialization. Add <code>loadWhen: &quot;[data-ae-preference]&quot;</code> to activate it through markup, or <code>load: false</code> to defer loading until <code>await $ae.wait(&quot;preference&quot;)</code> after runtime initialization.</p>
 <h2>Accessibility profile</h2>
 <ul>

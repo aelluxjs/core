@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import { runInNewContext } from "node:vm";
+import { openCodePen } from "./library-codepen.mjs";
 
 const entry = "/home/library/index.htm";
 const first = "#snippet-hello-present";
@@ -130,33 +131,41 @@ test("the snippets mount working tabs, pointer scrolling, Viewport CSS, theme an
   await expect(focus.getByRole("status")).toBeVisible();
 });
 
-test("editing is debounced, persists locally, and keeps the preview isolated", async ({ page }) => {
-  await open(page);
-  // A tall viewport keeps the preview visible while the editor is focused.
+test("previews hide source, ignore old drafts and keep a noninteractive yellow background in both themes", async ({ page }) => {
   await page.setViewportSize({ width: 900, height: 1300 });
-  const editor = page.locator(`${first} textarea`);
-  const initial = await editor.inputValue();
-  const code = `<main class="p-4"><h1 id="edited">Minha edição</h1></main><script>try { parent.document.body.dataset.escaped = "yes"; } catch { document.body.dataset.isolated = "yes"; }</script>`;
-  await editor.fill(code);
-  await expect(page.frameLocator(`${first} iframe`).locator("#edited")).toHaveCount(0);
-  await expect(page.frameLocator(`${first} iframe`).locator("#edited")).toHaveText("Minha edição");
-  await expect(page.frameLocator(`${first} iframe`).locator("body")).toHaveAttribute("data-isolated", "yes");
-  expect(await page.locator("body").getAttribute("data-escaped")).toBeNull();
-  await page.reload();
-  await expect(editor).toHaveValue(code);
-  await page.locator(`${first} [data-action="reset"]`).click();
-  await expect(editor).toHaveValue(initial);
+  await page.addInitScript(() => localStorage.setItem("aellux-library-v1", JSON.stringify({
+    drafts: { "hello-present": '<h1 id="old-draft">Old draft</h1>' }
+  })));
+  await open(page);
+  await expect(page.locator("#feed textarea, #feed pre, .editor-panel")).toHaveCount(0);
+  const frame = page.frameLocator(`${first} iframe`);
+  await expect(frame.locator("#old-draft")).toHaveCount(0);
+  expect(await frame.locator("body").evaluate(() => { try { return !!parent.document; } catch { return false; } })).toBe(false);
+  for (const theme of ["light", "dark"]) {
+    await page.evaluate(theme => { $ae.ext.preference.set("colorScheme", theme); $ae.ext.preference.update(); }, theme);
+    await expect(frame.locator("html")).toHaveAttribute("data-bs-theme", theme);
+    expect(await frame.locator("body").evaluate(body => {
+      const style = getComputedStyle(body, "::before");
+      return { content: style.content, background: style.backgroundColor, position: style.position, inset: style.inset, pointerEvents: style.pointerEvents, zIndex: style.zIndex };
+    })).toEqual({ content: '\"\"', background: "rgba(255, 214, 58, 0.12)", position: "fixed", inset: "0px", pointerEvents: "none", zIndex: "-1" });
+    await frame.getByRole("button", { name: /Dizer/ }).click();
+    await expect(frame.locator("#ae-welcome-message")).toBeVisible();
+    await frame.getByRole("button", { name: "Entendi" }).click();
+    await expect(frame.locator("#ae-welcome-message")).toBeHidden();
+    await expect(frame.locator("#ae-welcome-message")).not.toHaveClass(/ae--(?:popping|dismissing|unpopping)/);
+  }
 });
 
 test("fullscreen uses fixed positioning and restores the card on Back, Forward and Escape", async ({ page }) => {
   await open(page);
   const shell = page.locator(`${first} .preview-shell`);
-  const editor = page.locator(`${first} textarea`);
   await page.setViewportSize({ width: 900, height: 1300 });
   // Repeated srcdoc execution must not insert extra iframe history entries.
-  for (const text of ["primeira", "segunda"]) {
-    await editor.fill(`<main class="p-4"><p data-edited>${text}</p></main>`);
-    await expect(page.frameLocator(`${first} iframe`).locator("[data-edited]")).toHaveText(text);
+  for (let reload = 0; reload < 2; reload++) {
+    await page.locator(`${last} .preview-slot`).scrollIntoViewIfNeeded();
+    await expect(page.locator(`${first} iframe`)).not.toHaveAttribute("srcdoc");
+    await page.locator(`${first} .preview-slot`).scrollIntoViewIfNeeded();
+    await expect(page.locator(`${first} .preview-state`)).toHaveText("· ao vivo");
   }
   const scrollY = await page.evaluate(() => window.scrollY);
   await page.locator(`${first} [data-action="expand"]`).click();
@@ -176,7 +185,7 @@ test("fullscreen uses fixed positioning and restores the card on Back, Forward a
   await expect(page.locator(`${first} [data-action="expand"]`)).toBeFocused();
 });
 
-test("bookmarks and drafts survive reloading; saved view has a useful empty state", async ({ page }) => {
+test("bookmarks survive reloading; saved view has a useful empty state", async ({ page }) => {
   await open(page);
   await page.locator('.bottom-nav [data-view="saved"]').click();
   await expect(page.locator("#empty-state")).toBeVisible();
@@ -338,61 +347,44 @@ test("Responsive Sidebar survives interrupted transitions and responds to a narr
   await settledSidebar(frame, false);
 });
 
-test("copy actions export current source or the full runtime document and preserve the manual fallback", async ({ page }) => {
+test("CodePen opens by POST in a separate window with editable source and working self-contained dependencies", async ({ page }) => {
   await open(page);
-  await page.evaluate(() => {
-    window.copiedLibraryText = null;
-    Object.defineProperty(navigator, "clipboard", { configurable: true, value: {
-      writeText: async text => { window.copiedLibraryText = text; }
-    } });
-  });
-  const editor = page.locator(`${sidebar} textarea`);
-  const original = await editor.inputValue();
-  let fullExample;
-  for (const code of [original, `${original}\n<!-- Edição que também será copiada -->`]) {
-    await editor.fill(code);
-    await page.locator(`${sidebar} [data-action="copy"]`).click();
-    const snippet = await page.evaluate(() => window.copiedLibraryText);
-    expect(snippet).toBe(code);
-    expect(snippet).toContain("<style>");
-    expect(snippet).toContain("<script>");
-    expect(snippet).toContain("ae-lib-sidebar");
-    expect(snippet).not.toMatch(/<!doctype|<(?:html|head|body)(?:\s|>)|\$ae\.init\(|\$ae\.ext\(/i);
-    await expect(page.locator("#notice")).toContainText("Snippet copiado");
-    await page.locator(`${sidebar} [data-action="copy-full"]`).click();
-    const full = await page.evaluate(() => window.copiedLibraryText);
-    fullExample = full;
-    expect(full).toContain("<!doctype html>");
-    expect(full).not.toContain("bootstrap.min.css");
-    expect(full).toContain("aellux.min.js");
-    expect(full).toContain('$ae.ext("adaptive", {loadStyle:true})');
-    expect(full).toContain('$ae.init({mode:"basic"');
-    expect(full).toContain(code);
-    await expect(page.locator("#notice")).toContainText("Exemplo completo copiado");
+  await page.evaluate(() => { $ae.ext.preference.set("colorScheme", "dark"); $ae.ext.preference.update(); });
+  await expect(page.locator("html")).toHaveAttribute("data-bs-theme", "dark");
+  // Bootstrap/Input and the standalone Sidebar exercise both dependency paths.
+  for (const id of ["hello-present", "responsive-sidebar"]) {
+    const card = page.locator(`#snippet-${id}`);
+    await card.locator(".preview-slot").scrollIntoViewIfNeeded();
+    await expect(card.locator(".preview-state")).toHaveText("· ao vivo");
+    if (id === "responsive-sidebar") await card.locator('[data-action="expand"]').click();
+    const { pen, request, data } = await openCodePen(page, card.locator('[data-action="codepen"]'));
+    expect(request.method()).toBe("POST");
+    expect(request.headers()["content-type"]).toContain("application/x-www-form-urlencoded");
+    expect(request.headers().referer).toBeUndefined();
+    expect(await pen.evaluate(() => window.opener)).toBeNull();
+    expect(page.url()).toContain(entry);
+    expect(data.title).toContain(id === "hello-present" ? "Welcome Notification" : "Responsive Sidebar");
+    expect(data.html).not.toMatch(/<style|<script/i);
+    expect(data.css).toContain(id === "hello-present" ? ".ae-lib-welcome" : ".ae-lib-sidebar");
+    expect(data.js).toContain("$ae.startAelluxJs()");
+    expect(data.head).toContain('$ae.ext("present", {loadStyle:false})');
+    expect(JSON.stringify(data)).not.toMatch(/localhost|127\.0\.0\.1|library-preview-background|library-ready|library-theme/);
+    expect(await pen.locator("script[src], link[rel=stylesheet]").count()).toBe(0);
+    await expect(pen.locator("html")).toHaveAttribute("data-bs-theme", "dark");
+    if (id === "hello-present") {
+      await expect(pen.getByRole("button", { name: /Dizer/ })).toHaveCSS("display", "inline-block");
+      await pen.getByRole("button", { name: /Dizer/ }).click();
+      await expect(pen.locator("#ae-welcome-message")).toBeVisible();
+    } else {
+      await settledSidebar(pen, false);
+      await pen.getByRole("button", { name: "Abrir navegação" }).click();
+      await expect(pen.locator("#ae-sidebar-nav")).toHaveClass(/ae--pop(?:\s|$)/);
+      await pen.keyboard.press("Escape");
+      await settledSidebar(pen, false);
+      await expect(card.locator(".preview-shell")).toHaveClass(/is-fullscreen/);
+    }
+    await pen.close();
   }
-  await page.locator(`${sidebar} [data-action="reset"]`).click();
-  await expect(editor).toHaveValue(original);
-  await page.evaluate(() => {
-    navigator.clipboard.writeText = async () => { throw new Error("Clipboard unavailable"); };
-  });
-  for (const action of ["copy", "copy-full"]) {
-    await page.locator(`${sidebar} [data-action="${action}"]`).click();
-    const manual = page.locator('#copy-fallback textarea');
-    await expect(manual).toBeFocused();
-    const value = await manual.inputValue();
-    expect(value).toContain(original);
-    expect(value.startsWith('<!doctype')).toBe(action === "copy-full");
-    expect(await manual.evaluate(element => element.selectionEnd - element.selectionStart)).toBe(value.length);
-    await page.locator('#copy-fallback button').click();
-  }
-  await page.route("**/tests/copied-sidebar.htm", route => route.fulfill({ contentType: "text/html; charset=utf-8", body: fullExample }));
-  await page.goto("/tests/copied-sidebar.htm");
-  await expect(page.locator(".ae-lib-sidebar")).toHaveClass(/ae--fits-compact/);
-  await settledSidebar(page, false);
-  await page.getByRole("button", { name: "Abrir navegação" }).click();
-  await expect(page.locator("#ae-sidebar-nav")).toHaveClass(/ae--pop(?:\s|$)/);
-  await page.keyboard.press("Escape");
-  await settledSidebar(page, false);
 });
 
 for (const lateMount of [false, true]) {

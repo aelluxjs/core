@@ -470,11 +470,12 @@ for (const name of ["carousel", "viewport", "floating", "navigation"]) {
     await openExample(page, name, "preference");
     for (const width of [240, 320, 520]) {
       await page.setViewportSize({ width, height: 640 });
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      // Anchor/Viewport publish responsive geometry through waitLayout.
+      await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     }
     await page.evaluate(() => document.documentElement.style.fontSize = "200%");
     await page.setViewportSize({ width: 320, height: 640 });
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });
 }
 

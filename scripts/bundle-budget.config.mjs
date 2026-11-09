@@ -51,8 +51,10 @@ export const bundleBudget = Object.freeze([
   // Anchor controlled target switching; measured deltas: core-extensions/anchor.md.
   // Optional Present gestures and semantic state preservation; measured costs:
   // docs-source/0.1.x/core-extensions/present.md.
-  { file: "aellux.full.min.js", maxRawBytes: 223 * 1024, maxGzipBytes: 69 * 1024 },
-  { file: "aellux.full.legacy.min.js", maxRawBytes: 553.5 * 1024, maxGzipBytes: 164 * 1024 },
+  // Focus spatial geometry, native-key policy and bounded scrolling;
+  // measured before/after costs: core-extensions/focus.md#bundle-cost.
+  { file: "aellux.full.min.js", maxRawBytes: 226 * 1024, maxGzipBytes: 70.5 * 1024 },
+  { file: "aellux.full.legacy.min.js", maxRawBytes: 558 * 1024, maxGzipBytes: 165 * 1024 },
   { file: "aellux.full.min.css", maxRawBytes: 124 * 1024, maxGzipBytes: 12 * 1024 },
   { file: "aellux.ext.adaptive.min.css", maxRawBytes: 121 * 1024, maxGzipBytes: 11 * 1024 },
   { file: "aellux.ext.adaptive.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
@@ -73,8 +75,8 @@ export const bundleBudget = Object.freeze([
   // Explicit Present target integration; measured bytes: core-extensions/feedback.md.
   { file: "aellux.ext.feedback.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 2.25 * 1024 },
   { file: "aellux.ext.feedback.legacy.min.js", maxRawBytes: 9 * 1024, maxGzipBytes: 4 * 1024 },
-  { file: "aellux.ext.focus.min.js", maxRawBytes: 11.5 * 1024, maxGzipBytes: 4.5 * 1024 },
-  { file: "aellux.ext.focus.legacy.min.js", maxRawBytes: 15.25 * 1024, maxGzipBytes: 5.5 * 1024 },
+  { file: "aellux.ext.focus.min.js", maxRawBytes: 14.5 * 1024, maxGzipBytes: 5.75 * 1024 },
+  { file: "aellux.ext.focus.legacy.min.js", maxRawBytes: 19 * 1024, maxGzipBytes: 6.875 * 1024 },
   { file: "aellux.ext.input.min.js", maxRawBytes: 10 * 1024, maxGzipBytes: 4 * 1024 },
   { file: "aellux.ext.input.legacy.min.js", maxRawBytes: 19 * 1024, maxGzipBytes: 7 * 1024 },
   { file: "aellux.ext.input.min.css", maxRawBytes: 1.5 * 1024, maxGzipBytes: .75 * 1024 },

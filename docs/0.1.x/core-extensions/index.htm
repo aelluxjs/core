@@ -731,16 +731,16 @@ $ae.init({ mode: &quot;basic&quot; });
 </thead>
 <tbody><tr>
 <td>Stable</td>
-<td>Stabilized public API and behavior.</td>
+<td>Mature implementation with usage documentation, tests and validation appropriate to its documented scope; no API compatibility guarantee.</td>
 </tr>
 <tr>
 <td>Not stable (unstable)</td>
-<td>Public API and behavior may change during stabilization.</td>
+<td>Implementation and contracts are still stabilizing and may change more frequently; no API compatibility guarantee.</td>
 </tr>
 </tbody></table>
 <p>Distribution and stability are independent. Focus, Input and Viewport are included in Full and remain <strong>Not stable</strong>. Ajax Href, Dialog, Progress and PWA are also <strong>Not stable</strong> and load separately. Overflow Marquee and Scrollbox Snap remain <strong>Stable</strong> while delivered separately. Nine official Extensions are <strong>Stable</strong>.</p>
 <p>Stability appears on each Extension page and in the index below. Navigation groups follow distribution. Documented limits and compatibility requirements apply to both statuses. Each Extension&#39;s Known Limits &amp; Risks section describes its boundaries; see also the <a href="../runtime/known-limits-and-risks.htm">shared Core limits</a>.</p>
-<p>The <a href="../runtime/compatibility-commitment.htm">Compatibility Commitment</a> protects Stable public contracts from <code>0.1.0</code> throughout <code>0.1.x</code>. Not stable Extensions remain available but may change incompatibly with documented migration guidance. This policy does not change the classifications below or retroactively stabilize earlier betas.</p>
+<p>The <a href="../runtime/compatibility-commitment.htm">Compatibility Commitment</a> protects only minimal global initialization and declarative activation/mounting during <code>0.1.x</code>. Stable and Not stable describe maturity and validation, independently of API compatibility. Extension methods, behavioral attributes, events and CSS may change incompatibly within this line, with relevant changes documented and migration guidance when appropriate. Classifications below remain unchanged.</p>
 <h2 id="bundled-extensions">Bundled Extensions</h2><p>These ten Extensions are included in the Full JavaScript bundle.</p>
 <table>
 <thead>

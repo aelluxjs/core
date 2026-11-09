@@ -1,6 +1,7 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 import { parseShortcuts, matchesShortcut } from "./internal/input-shortcuts.js";
+import { selectSpatialCandidate } from "./internal/focus-spatial.js";
 
 /**
  * Focus Extension
@@ -25,8 +26,9 @@ import { parseShortcuts, matchesShortcut } from "./internal/input-shortcuts.js";
  * on destruction. Logical context classes and command subscriptions are released
  * too. Focus history does not survive a page reload.
  *
- * Accessibility: follows document order for Enter navigation and does not
- * announce focus changes. Consumers remain responsible for suitable focus order.
+ * Accessibility: Enter Next follows document order; directional commands use
+ * visual rectangles under the nearest focus-nav policy. Tab, editing and ARIA
+ * widget keys remain native. Logical contexts do not announce focus changes.
  */
 
 (function (root) {
@@ -56,6 +58,12 @@ import { parseShortcuts, matchesShortcut } from "./internal/input-shortcuts.js";
   const shortcutActions = new Map();
   let contextObserver = null;
   const scopeSelector = `[${AelluxJs.attr("focus-scope")}], dialog, [aria-modal="true"]`;
+  const navAttribute = AelluxJs.attr("focus-nav");
+  const keyboardWidgetSelector = 'input, textarea, select, [contenteditable]:not([contenteditable="false"]), ' +
+    '[role="textbox"], [role="combobox"], [role="slider"], [role="spinbutton"], [role="scrollbar"], ' +
+    '[role="tablist"], [role="tab"], [role="menu"], [role="menubar"], [role="menuitem"], ' +
+    '[role="listbox"], [role="option"], [role="grid"], [role="treegrid"], [role="tree"], [role="treeitem"], ' +
+    '[role="radiogroup"], [role="radio"], [role="toolbar"], audio[controls], video[controls]';
   const focusClasses = [null, AelluxJs.className("focus-player1"), AelluxJs.className("focus-player2"), AelluxJs.className("focus-player3")];
   const focusClass = id => focusClasses[id] || AelluxJs.className("focus-player" + id);
 
@@ -70,7 +78,7 @@ import { parseShortcuts, matchesShortcut } from "./internal/input-shortcuts.js";
             (record.type === "childList" && Array.from(record.removedNodes).some(node => node.contains(context.element)))))))) pruneContexts();
     });
     contextObserver.observe(document.documentElement, { childList: true, subtree: true, attributes: true,
-      attributeFilter: ["hidden", "inert", "disabled", "aria-disabled", "class", "style"] });
+      attributeFilter: ["hidden", "inert", "disabled", "aria-disabled", "class", "style", "open", "aria-hidden"] });
     AelluxJs.mountManager.add({
       extensionName, selector: `[${attribute}]`,
       priority: 0,
@@ -147,14 +155,19 @@ import { parseShortcuts, matchesShortcut } from "./internal/input-shortcuts.js";
     }
   }
 
-  function isValid(element) {
+  function isValid(element, spatial = false) {
     if (!element || element === document.body || element === document.documentElement ||
       !element.isConnected || typeof element.focus !== "function" ||
       element.matches(":disabled, [disabled], [hidden], [inert]") || element.closest('[aria-disabled="true"]')) return false;
     for (let node = element; node && node.nodeType === 1; node = node.parentElement) {
-      if (node.hidden || node.hasAttribute("inert")) return false;
+      if (node.hidden || node.hasAttribute("inert") || (spatial && node.getAttribute("aria-hidden") === "true")) return false;
       const style = root.getComputedStyle(node);
-      if (style.display === "none" || style.visibility === "hidden" || style.visibility === "collapse") return false;
+      if (style.display === "none" || style.visibility === "hidden" || style.visibility === "collapse" ||
+        (spatial && (style.contentVisibility === "hidden" || Number(style.opacity) === 0))) return false;
+      // Native history follows actual focus, including opening preparation.
+      // Only directional candidate selection rejects presentation state.
+      if (spatial && node.hasAttribute(AelluxJs.attr("present")) &&
+        (node.classList.contains(AelluxJs.className("dismissed")) || node.classList.contains(AelluxJs.className("unpop")))) return false;
     }
     return element.getClientRects().length > 0;
   }
@@ -296,9 +309,12 @@ import { parseShortcuts, matchesShortcut } from "./internal/input-shortcuts.js";
   function setFocus(focusId, elementOrId) {
     const context = contexts.get(focusId);
     const element = typeof elementOrId === "string" ? document.getElementById(elementOrId.replace(/^#/, "")) : elementOrId;
+    return applyFocus(context, element);
+  }
+  function applyFocus(context, element, preventScroll = false) {
     if (!context || (element !== null && (!isValid(element) || !context.scope.contains(element)))) return false;
     if (element && context.syncDOM) {
-      element.focus();
+      element.focus({ preventScroll });
       if (document.activeElement !== element) return false;
     }
     if (!element && context.syncDOM) context.element?.blur();
@@ -333,18 +349,60 @@ import { parseShortcuts, matchesShortcut } from "./internal/input-shortcuts.js";
   }
   function activeScope(context) {
     const nearest = context.element?.closest(scopeSelector);
-    let scope = nearest && context.scope.contains(nearest) ? nearest : context.scope;
+    const scope = nearest && context.scope.contains(nearest) ? nearest : context.scope;
     // A modal native dialog isolates all contexts outside it.
     const modal = Array.from(document.querySelectorAll('dialog[open], [aria-modal="true"]')).reverse()
       .find(element => {
+        if (!isValid(element)) return false;
         try { return element.matches(":modal") || element.getAttribute("aria-modal") === "true"; }
         catch (_) { return element.getAttribute("aria-modal") === "true"; }
       });
-    if (modal && !modal.contains(context.element)) return null;
+    if (modal && !modal.contains(context.element || context.scope)) return null;
     return scope;
   }
-  function available(element, scope) {
-    if (!isValid(element) || !scope.contains(element)) return false;
+
+  function navigate(context, command, scope) {
+    const region = (context.element || context.scope).closest(`[${navAttribute}]`);
+    const policy = region?.getAttribute(navAttribute)?.trim().toLowerCase() || "auto";
+    if (policy === "none") return false;
+    const keyboard = command.source === "keyboard";
+    if (keyboard && (policy === "native" || (context.syncDOM && policy !== "spatial"))) return false;
+    if (!keyboard && command.source !== "gamepad" && context.syncDOM && policy !== "spatial") return false;
+    // Declaring a region also bounds its navigation, even without focus-scope.
+    if (region && scope.contains(region)) scope = region;
+    const focused = context.element;
+    // Collect all geometry before any focus/class/scroll writes. Fresh reads
+    // keep synchronous commands correct after responsive layout or transforms.
+    const origin = focused && available(focused, scope, true) ? focused.getBoundingClientRect() : null;
+    const candidates = Array.from(scope.querySelectorAll(focusableSelector))
+      .filter(element => element !== focused && available(element, scope, true))
+      .map(element => ({ element, rect: element.getBoundingClientRect() }));
+    const selected = selectSpatialCandidate(origin, candidates, command.action.slice(9));
+    if (!selected || !applyFocus(context, selected.element, true)) return false;
+    reveal(selected.element, scope);
+    return true;
+  }
+
+  function reveal(element, scope) {
+    if (scope === document.body || scope === document.documentElement) {
+      element.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
+      return;
+    }
+    // Scroll only ancestors within this navigation boundary. Native scroll
+    // events notify Scrollbox; Focus does not reproduce its physics engine.
+    for (let node = element.parentElement; node && scope.contains(node); node = node.parentElement) {
+      const style = root.getComputedStyle(node);
+      const rect = element.getBoundingClientRect(), box = node.getBoundingClientRect();
+      const left = box.left + node.clientLeft, top = box.top + node.clientTop;
+      const offset = (start, end, min, max) => start < min ? start - min : end > max ? Math.min(end - max, start - min) : 0;
+      const x = /^(auto|scroll|overlay)$/.test(style.overflowX) ? offset(rect.left, rect.right, left, left + node.clientWidth) : 0;
+      const y = /^(auto|scroll|overlay)$/.test(style.overflowY) ? offset(rect.top, rect.bottom, top, top + node.clientHeight) : 0;
+      if (x || y) node.scrollBy({ left: x, top: y, behavior: "instant" });
+      if (node === scope) break;
+    }
+  }
+  function available(element, scope, spatial = false) {
+    if (!isValid(element, spatial) || !scope.contains(element)) return false;
     const nearest = element.closest(scopeSelector);
     return !nearest || nearest === scope || !scope.contains(nearest);
   }
@@ -401,7 +459,8 @@ import { parseShortcuts, matchesShortcut } from "./internal/input-shortcuts.js";
   function consumeCommand(command) {
     const context = contexts.get(command.focusId);
     if (!context) { warn("Input command refers to an unknown focus context; command blocked.", { focusId: command.focusId }); return false; }
-    if (!["press", "repeat"].includes(command.phase) || command.originalEvent?.defaultPrevented) return false;
+    if (!["press", "repeat"].includes(command.phase) || command.originalEvent?.defaultPrevented ||
+      command.originalEvent?.isComposing || command.originalEvent?.keyCode === 229) return false;
     if (command.source === "point") return false; // Native pointer focus/click owns activation.
     const focused = context.element;
     const inputScope = (focused || context.scope).closest(`[${AelluxJs.attr("inputs")}]`);
@@ -413,22 +472,20 @@ import { parseShortcuts, matchesShortcut } from "./internal/input-shortcuts.js";
       (command.modifiers?.ctrl && ["KeyW", "KeyT", "KeyN", "KeyR", "KeyL", "KeyF", "KeyP", "KeyS", "KeyC", "KeyV", "KeyX", "KeyA", "KeyZ", "KeyY"].includes(command.code)) ||
       (command.modifiers?.alt && ["ArrowLeft", "ArrowRight", "F4"].includes(command.code));
     if (command.source === "keyboard" && (editable(origin) || editable(focused) || command.code === "Tab" || reserved)) return false;
+    const directional = command.action?.startsWith("navigate-");
+    if (command.source === "keyboard" && directional &&
+      (origin?.closest?.(keyboardWidgetSelector) || focused?.closest(keyboardWidgetSelector) ||
+        Object.values(command.modifiers || {}).some(Boolean))) return false;
     const candidate = eligibleShortcuts(command.focusId, command)[0];
     if (candidate && command.phase === "press") return executeShortcut(candidate.element, command);
-    // Keyboard confirm/navigation are native for the DOM-synchronized context.
-    if (context.syncDOM && command.source === "keyboard") return false;
     const scope = activeScope(context);
     if (!scope) return false;
+    if (directional) return navigate(context, command, scope);
+    // Keyboard confirmation remains native for the DOM-synchronized context.
+    if (context.syncDOM && command.source === "keyboard") return false;
     if (command.action === "confirm" && command.phase === "press" && focused && available(focused, scope)) {
       focused.click(); return true;
     }
-    if (!command.action?.startsWith("navigate-")) return false;
-    const elements = Array.from(scope.querySelectorAll(focusableSelector)).filter(element => element.tabIndex >= 0 && available(element, scope));
-    if (!elements.length) return false;
-    const index = elements.indexOf(focused);
-    const direction = command.action.slice(9);
-    const step = direction === "left" || direction === "up" ? -1 : 1;
-    const next = index < 0 ? (step > 0 ? 0 : elements.length - 1) : Math.max(0, Math.min(elements.length - 1, index + step));
-    return setFocus(command.focusId, elements[next]);
+    return false;
   }
 })(typeof globalThis !== "undefined" ? globalThis : window);

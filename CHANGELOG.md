@@ -8,6 +8,8 @@ Changes in this section are pending for the `0.1.0` release candidate.
 
 ### Added
 
+- Focus directional navigation now uses visual rectangles, perpendicular overlap and edge distances instead of DOM order. Added `data-ae-focus-nav="auto|spatial|native|none"`, scoped native scrolling, opt-in keyboard spatial regions, gamepad/independent-context defaults, and native editing/ARIA key protection. Existing `next`, shortcuts, routing and history remain available.
+
 - Added `$ae.comm` to the ES5 boot: named synchronous commands/queries, ordered notifications, explicit unavailable/value responses, async results, duplicate-provider diagnostics and cleanup by owner or AbortSignal. Runtime startup preserves the boot instance; failed initialization and destruction release owned records.
 
 - Input normalizes and synchronously routes device commands with deterministic priorities, explicit blocking, owned-router teardown and default logical focus 1. Independently loaded Point/Keyboard/Gamepad adapters have Modern and Legacy variants; gamepad sessions are separate from browser indices.
@@ -21,9 +23,11 @@ Changes in this section are pending for the `0.1.0` release candidate.
 - Added browser regressions for adaptive CSS publication, latest-value coalescing, interruption/unmount cleanup and inline-priority restoration across Modern and Legacy distributions.
 
 - Added the opt-in top-level boot option `syncBootstrapThemeTag` (default `false`). The boot synchronously publishes `data-bs-theme` during `$ae.init()` without requiring Preference, and maintains it through the shared preference publisher. This replaces `extensions.preference.syncBootstrapThemeTag`; destroying Preference no longer restores the boot-owned tag. Preference now manages and restores option-button `aria-pressed`, replacing the homepage's manual ARIA handler.
-- Added the Compatibility Commitment for AelluxJS `0.1.x`, effective from `0.1.0`, covering Stable public JavaScript, HTML, CSS, events, loading and integration contracts. Linked it from the documentation navigation and reference pages; recorded pending support policies and contract discrepancies separately for maintainer review without changing Extension stability or runtime behavior.
+- Added the Compatibility Commitment for AelluxJS `0.1.x`, effective from `0.1.0`, covering only minimal global initialization and declarative activation/mounting. Stable indicates maturity and validation, without an Extension API compatibility guarantee. Linked it from the documentation navigation and reference pages; recorded pending support policies and contract discrepancies separately for maintainer review without changing Extension stability or runtime behavior.
 
 ### Changed
+
+- Narrowed the `0.1.x` Compatibility Commitment to the exhaustive minimal initialization and declarative activation/mounting list. Removed broad protection of Stable Extension APIs, controller/lifecycle methods, configuration values, events and CSS. Such changes may ship within `0.1.x` without mandatory deprecation periods; document relevant renames/removals and migrations. Extension classifications remain unchanged.
 
 - Made the pending `0.1.x` Compatibility Policy Review available in the public documentation, with navigation and local Commitment links. Updated distribution counts and Input naming; the milestone now points to the canonical review. Policy proposals remain non-normative.
 

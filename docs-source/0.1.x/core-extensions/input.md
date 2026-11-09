@@ -2,7 +2,13 @@
 
 **Distribution:** Bundled Extension. **Stability:** Not stable.
 
+Stability describes implementation maturity and validation, not API compatibility. Only the [minimal initialization and declarative activation/mounting contract](../runtime/compatibility-commitment.md) is protected during `0.1.x`.
+
 Input captures physical sources and produces commands. Synchronous routers resolve `deviceId → focusId`; [Focus](focus.md) owns logical navigation and contextual shortcut execution. Input never invokes UI components. No Multiplayer Extension is included.
+
+Directional commands (`navigate-up/down/left/right`) are interpreted geometrically by Focus, using the nearest `data-ae-focus-nav="auto|spatial|native|none"` policy. Under `auto`, enabled gamepads and independent logical contexts use spatial navigation; synchronized keyboard context 1 keeps native arrows. `spatial` opts a region into keyboard directions; `native` preserves keyboard directions without disabling gamepad; `none` blocks automatic directional navigation. See [Focus examples and boundaries](focus.md#spatial-navigation-and-input-policy).
+
+Input continues to normalize D-pad and primary-stick directions, resolve synchronous routers and request `focus.command` through `comm`; it does not select targets or read spatial geometry. Application-registered adapters follow the same route: explicit spatial policy permits normalized directions from other sources in synchronized contexts without assuming every future source wants spatial behavior. Input prevents a physical event's default only when Focus reports consumption; no destination leaves the command unhandled. Native Tab, editing/IME, modified arrows, ARIA widget commands and already handled events remain protected.
 
 ## Modalities and loading
 
@@ -78,7 +84,7 @@ Keyboard uses `deviceId: "keyboard"` and physical KeyboardEvent codes such as `K
 
 Each observed gamepad session receives a fresh `gamepad:N` ID. The Gamepad API index is separate metadata. Disconnect/reconnect, a detected model replacement or a move to a different index creates a new session. Never persist player assignments by index. Identical devices replaced without an observable disconnection cannot be distinguished reliably; refresh associations from device lifecycle events. Browser exposure can require a user gesture and may be denied by Permissions Policy. See the [Gamepad specification](https://w3c.github.io/gamepad/).
 
-Standard mapping button codes are `south`, `east`, `west`, `north`, shoulder/trigger/stick buttons, `select`, `start`, `dpad-up/down/left/right`, and `home`. Nonstandard mappings keep `buttonN` and `axisN`; no positional layout is invented. Face positions have **no implicit confirm/cancel action**. Directional pads and standard left-stick directions produce navigation. Keyboard Enter/Space map to confirm, Escape to cancel, and arrows to navigation, while the DOM-synchronized keyboard context retains native behavior.
+Standard mapping button codes are `south`, `east`, `west`, `north`, shoulder/trigger/stick buttons, `select`, `start`, `dpad-up/down/left/right`, and `home`. Nonstandard mappings keep `buttonN` and `axisN`; no positional layout is invented. Face positions have **no implicit confirm/cancel action**. Directional pads and standard left-stick directions produce navigation. Keyboard Enter/Space map to confirm, Escape to cancel, and arrows to navigation, while the DOM-synchronized keyboard context retains native behavior by default; explicitly spatial regions enable contextual directions.
 
 ```js
 // Explicit application convention; it does not change physical button codes.

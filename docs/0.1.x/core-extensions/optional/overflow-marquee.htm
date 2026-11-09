@@ -695,6 +695,7 @@
             ajax-load="doc-content">
             <h1>Overflow Marquee</h1>
 <p><strong>Distribution:</strong> Optional Extension. <strong>Stability:</strong> Stable.</p>
+<p>Stability describes implementation maturity and validation, not API compatibility. Only the <a href="../../runtime/compatibility-commitment.htm">minimal initialization and declarative activation/mounting contract</a> is protected during <code>0.1.x</code>.</p>
 <p><code>overflow-marquee</code> is a dedicated Extension for <code>[data-ae-overflow-marquee]</code>. In Basic, register it explicitly with <code>$ae.ext(&quot;overflow-marquee&quot;, { loadStyle: true })</code> before initialization to include its stylesheet. Add <code>loadWhen: &quot;[data-ae-overflow-marquee]&quot;</code> for lazy loading. During <code>init()</code>, it registers Anchor if necessary and awaits <code>$ae.wait(&quot;anchor&quot;)</code> before obtaining a placement map and registering its own mount map. Full loads its separate signed script and stylesheet only when matching content is mounted. Neither is included in the Full bundle. This registration is temporary pending migration to an external extension. A mount restricted to Anchor does not mount marquee elements.</p>
 <pre><code class="language-js">$ae.ext(&quot;overflow-marquee&quot;, { loadStyle: true });
 $ae.init({ mode: &quot;basic&quot; });

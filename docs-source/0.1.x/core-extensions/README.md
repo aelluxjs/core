@@ -35,14 +35,14 @@ State Navigation has no activation selector; register it explicitly before reque
 
 | Status | Meaning |
 | --- | --- |
-| Stable | Stabilized public API and behavior. |
-| Not stable (unstable) | Public API and behavior may change during stabilization. |
+| Stable | Mature implementation with usage documentation, tests and validation appropriate to its documented scope; no API compatibility guarantee. |
+| Not stable (unstable) | Implementation and contracts are still stabilizing and may change more frequently; no API compatibility guarantee. |
 
 Distribution and stability are independent. Focus, Input and Viewport are included in Full and remain **Not stable**. Ajax Href, Dialog, Progress and PWA are also **Not stable** and load separately. Overflow Marquee and Scrollbox Snap remain **Stable** while delivered separately. Nine official Extensions are **Stable**.
 
 Stability appears on each Extension page and in the index below. Navigation groups follow distribution. Documented limits and compatibility requirements apply to both statuses. Each Extension's Known Limits & Risks section describes its boundaries; see also the [shared Core limits](../runtime/known-limits-and-risks.md).
 
-The [Compatibility Commitment](../runtime/compatibility-commitment.md) protects Stable public contracts from `0.1.0` throughout `0.1.x`. Not stable Extensions remain available but may change incompatibly with documented migration guidance. This policy does not change the classifications below or retroactively stabilize earlier betas.
+The [Compatibility Commitment](../runtime/compatibility-commitment.md) protects only minimal global initialization and declarative activation/mounting during `0.1.x`. Stable and Not stable describe maturity and validation, independently of API compatibility. Extension methods, behavioral attributes, events and CSS may change incompatibly within this line, with relevant changes documented and migration guidance when appropriate. Classifications below remain unchanged.
 
 <h2 id="bundled-extensions">Bundled Extensions</h2>
 

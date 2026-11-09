@@ -695,6 +695,7 @@
             ajax-load="doc-content">
             <h1>Ajax Href Extension</h1>
 <p><strong>Distribution:</strong> Optional Extension. <strong>Stability:</strong> Not stable.</p>
+<p>Stability describes implementation maturity and validation, not API compatibility. Only the <a href="../../runtime/compatibility-commitment.htm">minimal initialization and declarative activation/mounting contract</a> is protected during <code>0.1.x</code>.</p>
 <p><code>ajax-href</code> replaces selected page regions with matching elements from a same-origin HTML response. This Optional Extension is excluded from the Full bundle. Full registers it for lazy loading when mounting <code>a[data-ae-ajax-href]</code>; Basic requires explicit registration. With the selector registered, dynamically inserted links activate it through <code>$ae.mount(container)</code>.</p>
 <pre><code class="language-html">&lt;a href=&quot;./next.htm&quot; data-ae-ajax-href&gt;Next page (title and body)&lt;/a&gt;
 &lt;a href=&quot;./next.htm&quot; data-ae-ajax-href=&quot;title,#content&quot;&gt;Next page&lt;/a&gt;

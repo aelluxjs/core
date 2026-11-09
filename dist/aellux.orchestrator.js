@@ -777,7 +777,7 @@
     "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
     scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-parent scrollbar-vertical scrollbar-horizontal",
     "scrollbox-snap": "scrollbox-snap snap-item",
-    focus: "focus focus-scope shortcut shortcut-priority shortcut-action shortcut-target",
+    focus: "focus focus-scope focus-nav shortcut shortcut-priority shortcut-action shortcut-target",
     input: "point inputs shortcut-hint shortcut-focus shortcut-hint-position shortcut-label shortcut-source shortcut-code gamepad gamepad-family gamepad-model active-input",
     adaptive: "adaptive",
     "ajax-href": "ajax-href",
@@ -793,7 +793,7 @@
     "overflow-marquee": "overflow-marquee",
     scrollbox: "scrollbox",
     "scrollbox-snap": "scrollbox-snap",
-    focus: "focus focus-scope shortcut",
+    focus: "focus focus-scope focus-nav shortcut",
     input: "point inputs shortcut-hint",
     adaptive: "adaptive",
     "ajax-href": "ajax-href",
@@ -2569,7 +2569,7 @@
           loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
         }
         if (name === "input") loadWhen = ["point", "inputs", "shortcut", "shortcut-hint"].map(attr).join(",");
-        if (name === "focus") loadWhen = ["focus", "focus-scope", "shortcut"].map(attr).join(",");
+        if (name === "focus") loadWhen = ["focus", "focus-scope", "focus-nav", "shortcut"].map(attr).join(",");
         if (name === "state-navigation" || name === "preference") loadWhen = null;
         api.ext(name, { loadWhen, load: true, loadStyle: !!(optional && style) });
         api.registry.ext[key].automatic = true;

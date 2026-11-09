@@ -4,6 +4,8 @@
 <p>Modular UX behavior management for browser interfaces with an ES5-compatible AelluxJs boot script and an ES2017+ runtime</p>
 </div>
 
+During `0.1.x`, only minimal global initialization and declarative Extension activation/mounting are protected. Stable indicates implementation maturity and validation; Extension methods, behavioral settings, events and CSS may change incompatibly, with relevant changes documented. See the [Compatibility Commitment](runtime/compatibility-commitment.md).
+
 <div class="d-flex gap-2 flex-row justify-content-center my-4">
 <a class="btn btn-outline-adaptive rounded-1" href="https://github.com/aelluxjs/core">
 View on Github

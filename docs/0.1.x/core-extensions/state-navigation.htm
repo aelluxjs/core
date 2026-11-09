@@ -695,6 +695,7 @@
             ajax-load="doc-content">
             <h1>State Navigation Extension</h1>
 <p><strong>Distribution:</strong> Bundled Extension. <strong>Stability:</strong> Stable.</p>
+<p>Stability describes implementation maturity and validation, not API compatibility. Only the <a href="../runtime/compatibility-commitment.htm">minimal initialization and declarative activation/mounting contract</a> is protected during <code>0.1.x</code>.</p>
 <p><code>state-navigation</code> manages snapshots through the current window&#39;s browser history and, by default, its URL hash. It is included in the <code>full</code> runtime. Basic requires explicit registration. <code>$ae.ext(&quot;state-navigation&quot;)</code> before initialization enables eager loading. To defer it, register with <code>{ load: false }</code> and call <code>await $ae.wait(&quot;state-navigation&quot;)</code> after runtime initialization; it has no activation selector.</p>
 <h2>Accessibility profile</h2>
 <ul>

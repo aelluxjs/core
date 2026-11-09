@@ -21,6 +21,14 @@ Do not force an Extension into a single category. For example, a dialog behavior
 
 For every capability not declared, the corresponding requirements are not applicable unless the implementation still produces that effect indirectly.
 
+## Spatial directions and native keyboard ownership
+
+[Focus](../core-extensions/focus.md#spatial-navigation-and-input-policy) provides scoped visual navigation from normalized Input commands. Ordinary synchronized keyboard context 1 keeps native arrows; `data-ae-focus-nav="spatial"` enables directions within a declared region. Tab and Shift+Tab stay native, including inside spatial regions. Gamepad remains opt-in; logical player contexts do not move DOM focus or create independent screen-reader cursors.
+
+Preserve IME, text cursor movement, selects, sliders/spinbuttons and component-owned tablist/menu/listbox/grid/tree keyboard behavior. Do not assign a composite ARIA role merely to enable spatial arrows: that role brings its own keyboard, selection and focus responsibilities. Keep meaningful DOM/Tab order, visible focus and accessible names. Focus does not change tabindex or supply roving tabindex/aria-activedescendant. Prevent a directional default only after a valid destination actually consumes the command.
+
+Use [WAI-ARIA APG keyboard conventions](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/) as the component model; the experimental [CSS Spatial Navigation draft](https://www.w3.org/TR/css-nav-1/) is a conceptual geometry reference. Physical TV/gamepad, mobile IME and assistive-technology workflows still require direct validation.
+
 ## Requirements for Every Extension
 
 Regardless of category, an Extension must:

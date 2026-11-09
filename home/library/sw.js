@@ -1,6 +1,6 @@
 /* Application-owned worker: the public runtime is outside the app's URL scope.
    Keep this explicit list aligned with snippets.js; bump VERSION on deployment. */
-const VERSION = "5";
+const VERSION = "6";
 const PREFIX = `aellux-library:${self.registration.scope}:`;
 const CACHE = PREFIX + VERSION;
 const app = path => new URL(path, self.registration.scope).href;

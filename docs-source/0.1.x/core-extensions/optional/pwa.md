@@ -2,6 +2,8 @@
 
 **Distribution:** Optional Extension. **Stability:** Not stable.
 
+Stability describes implementation maturity and validation, not API compatibility. Only the [minimal initialization and declarative activation/mounting contract](../../runtime/compatibility-commitment.md) is protected during `0.1.x`.
+
 PWA is an official, optional Extension for page-side installation, installation guidance and explicit Service Worker registration. Its Modern and Legacy implementations are **external and lazy**, including in Full mode. No PWA implementation, guide styles or worker handlers are incorporated into Core, Orchestrator, Full JavaScript or Full CSS. Full knows only the signed official entry and the `[data-ae-pwa]` selector. A page without a declaration or explicit load does not download PWA, attach its listeners, create UI or register a worker.
 
 ## Loading and installation

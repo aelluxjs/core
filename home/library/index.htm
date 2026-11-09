@@ -41,7 +41,7 @@
         <div class="side-content">
           <p class="overline text-body-secondary">AELLUX / BIBLIOTECA</p>
           <h1 class="h3 fw-semibold mb-3">Experiências prontas.<br>Do seu jeito.</h1>
-          <p class="text-body-secondary small mb-4">Encontre o que precisa construir. Copie, cole e personalize no seu projeto.</p>
+          <p class="text-body-secondary small mb-4">Encontre o que precisa construir. Experimente a prévia e personalize no CodePen.</p>
           <nav class="d-grid gap-2" aria-label="Navegação da biblioteca">
             <button class="btn side-link text-start" type="button" data-view="feed"><svg class="icon" aria-hidden="true"><use href="#i-home"></use></svg> Explorar</button>
             <button class="btn side-link text-start" type="button" data-view="categories"><svg class="icon" aria-hidden="true"><use href="#i-grid"></use></svg> Categorias</button>
@@ -55,7 +55,7 @@
         <div class="feed-intro pt-4 pb-3">
           <p class="overline text-body-secondary mb-2">READY-TO-USE RESPONSIVE EXPERIENCES</p>
           <h2 id="view-title" class="fw-semibold mb-2">Copy, paste, customize<span class="text-warning">.</span></h2>
-          <p class="text-body-secondary small mb-0">Componentes para páginas reais. Confira os requisitos, teste as larguras e leve o código.</p>
+          <p class="text-body-secondary small mb-0">Componentes para páginas reais. Teste as larguras e abra no CodePen para personalizar.</p>
         </div>
         <div class="search-panel bg-body py-3">
           <form id="search-form" role="search" class="d-flex gap-2">
@@ -99,9 +99,9 @@
           <button id="apply-update" class="btn btn-outline-secondary btn-sm" type="button" hidden>Atualizar biblioteca</button>
           <div class="border-top mt-4 pt-4 small text-body-secondary">
             <p class="text-body fw-medium mb-2">Do exemplo ao seu projeto</p>
-            <p>Copiar snippet leva só o componente. Exemplo completo inclui as dependências indicadas no card.</p>
+            <p>Abra o exemplo no CodePen para acessar HTML, CSS e JavaScript, com as dependências incluídas, em uma nova janela.</p>
             <p>Mobile, Tablet e Desktop alteram a largura real da prévia. Role horizontalmente para explorar uma largura maior que o card, ou amplie.</p>
-            <p class="mb-0">Seus salvos e suas edições ficam neste dispositivo.</p>
+            <p class="mb-0">Seus salvos ficam neste dispositivo. As prévias funcionam offline; abrir o CodePen requer conexão.</p>
           </div>
         </div>
       </aside>
@@ -123,15 +123,8 @@
     <p id="install-offline-status" class="small"></p>
     <form method="dialog"><button class="btn btn-warning btn-sm">Entendi</button></form>
   </dialog>
-  <dialog id="copy-fallback" class="copy-fallback rounded-4 border p-4" aria-labelledby="copy-fallback-title">
-    <h2 id="copy-fallback-title" class="h5">Copiar código</h2>
-    <p class="small text-body-secondary">O clipboard está indisponível. Copie o código selecionado pelo teclado ou pelo menu do dispositivo.</p>
-    <label class="visually-hidden" for="copy-fallback-code">Código para cópia manual</label>
-    <textarea id="copy-fallback-code" class="form-control mb-3" readonly spellcheck="false"></textarea>
-    <form method="dialog"><button class="btn btn-warning btn-sm">Fechar</button></form>
-  </dialog>
   <div id="notice" class="app-notice bg-body text-body border rounded-3 shadow p-3 small" role="status" hidden></div>
-  <noscript><p class="container py-5">Ative o JavaScript para carregar e editar os exemplos da biblioteca.</p></noscript>
+  <noscript><p class="container py-5">Ative o JavaScript para experimentar os exemplos e abri-los no CodePen.</p></noscript>
 
   <svg xmlns="http://www.w3.org/2000/svg" class="icon-sprite" aria-hidden="true">
     <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></symbol>
@@ -142,8 +135,6 @@
     <symbol id="i-expand" viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></symbol>
     <symbol id="i-back" viewBox="0 0 24 24"><path d="m11 5-7 7 7 7M4 12h16"/></symbol>
     <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 6-6 6 6 6m8-12 6 6-6 6m-3-15-2 18"/></symbol>
-    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V3H3v13h5"/></symbol>
-    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 4v6h6M3 10a9 9 0 1 1 2 8"/></symbol>
     <symbol id="i-theme" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor"/></symbol>
   </svg>
 

@@ -109,6 +109,16 @@
           }
         },
         {
+          "name": "data-ae-focus-nav",
+          "description": "Nearest directional navigation policy: auto uses spatial geometry for gamepad and independent logical contexts; spatial also enables keyboard arrows; native preserves keyboard directions; none disables automatic directions. Tab and native editing/widget keys stay native.\n\nValue syntax: enum.\n\nDefault behavior: \"auto\".",
+          "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm",
+          "default": "auto",
+          "value": {
+            "kind": "plain",
+            "type": "\"auto\" | \"spatial\" | \"native\" | \"none\""
+          }
+        },
+        {
           "name": "data-ae-focus-scope",
           "description": "Isolated navigation and shortcut scope. Logical contexts can be restricted to this container.\n\nValue syntax: presence.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm",

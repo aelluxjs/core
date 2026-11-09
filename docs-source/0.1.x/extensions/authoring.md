@@ -12,7 +12,7 @@ Being an official Core Extension does not imply bundle membership. Full register
 
 Overflow Marquee and Scrollbox Snap are specialized behaviors and remain outside the Full JavaScript bundle pending migration to external extensions. Marquee's stylesheet also stays separate. Their current lazy registrations are transitional.
 
-The [Compatibility Commitment](../runtime/compatibility-commitment.md) defines the `0.1.x` protection of public Core integration contracts and Stable official Extensions beginning with `0.1.0`. It does not assign stability to a third-party Extension or to a Not stable official Extension.
+The [Compatibility Commitment](../runtime/compatibility-commitment.md) protects only the listed minimal global initialization and declarative activation/mounting interfaces during `0.1.x`. Authoring, lifecycle and Extension-specific APIs remain documented usage contracts for the current version and may evolve incompatibly. Stable indicates maturity and validation, not compatibility; third-party policies belong to their authors.
 
 Start from [`templates/aellux.ext.template.js`](https://github.com/aelluxjs/core/blob/main/templates/aellux.ext.template.js). The scaffold contains the required structure and a compatibility summary.
 

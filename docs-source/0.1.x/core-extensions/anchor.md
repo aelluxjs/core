@@ -2,6 +2,8 @@
 
 **Distribution:** Bundled Extension. **Stability:** Stable.
 
+Stability describes implementation maturity and validation, not API compatibility. Only the [minimal initialization and declarative activation/mounting contract](../runtime/compatibility-commitment.md) is protected during `0.1.x`.
+
 `data-ae-anchor` positions an element against a target using pairs of pivots. The target is named by `data-ae-anchor-target`; when that attribute is absent or empty, the target is the anchored element's `offsetParent` (its absolute-positioning reference). Anchor is included in the `full` runtime. In Basic, register it explicitly with `$ae.ext("anchor", { loadStyle: true })` before initialization. Add `loadWhen: "[data-ae-anchor]"` for lazy loading.
 
 ```html

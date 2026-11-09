@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import { runInNewContext } from "node:vm";
+import { openCodePen } from "./library-codepen.mjs";
 
 const window = {};
 runInNewContext(await readFile(new URL("../../home/library/assets/snippets.js", import.meta.url), "utf8"), { window });
@@ -44,14 +45,13 @@ for (const [preset, width] of [["mobile", 375], ["tablet", 768], ["desktop", 128
   });
 }
 
-test("width selection persists through editing, fullscreen and preview unloading without zoom", async ({ page }) => {
+test("width selection persists through fullscreen and preview unloading without zoom", async ({ page }) => {
   const { card, frame } = await open(page, 'responsive-split-hero');
   await card.locator('.preview-width').selectOption('desktop');
   await expect.poll(() => frame.locator('html').evaluate(() => innerWidth)).toBe(1280);
   const hero = frame.locator('.ae-lib-hero__layout');
   await expect.poll(() => hero.evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length)).toBe(2);
   await card.locator('[data-action="back"]').click();
-  await card.locator('textarea').fill((await card.locator('textarea').inputValue()) + '\n<!-- customized -->');
   await card.locator('.preview-slot').scrollIntoViewIfNeeded();
   await expect.poll(() => frame.locator('html').evaluate(() => innerWidth)).toBe(1280);
   await page.locator('#snippet-next-focus .preview-slot').scrollIntoViewIfNeeded();
@@ -246,18 +246,16 @@ test.describe('virtual gamepad on a touch device', () => {
   });
 });
 
-test("CSS-only full export has no runtime and reduced motion removes decorative movement", async ({ page }) => {
+test("CSS-only CodePen export has no runtime and reduced motion removes decorative movement", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const { card, frame } = await open(page, 'responsive-split-hero');
   expect(await frame.locator('script[src]').count()).toBe(0);
-  await card.locator('[data-action="back"]').click();
-  await page.evaluate(() => { Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async text => { window.copiedExample = text; } } }); });
-  await card.locator('[data-action="copy-full"]').click();
-  const exported = await page.evaluate(() => window.copiedExample);
-  expect(exported).not.toMatch(/aellux\.min\.js|bootstrap\.min\.css|\$ae\.init/);
-  await page.route('**/tests/copied-hero.htm', route => route.fulfill({ contentType: 'text/html', body: exported }));
-  await page.goto('/tests/copied-hero.htm');
-  await expect(page.locator('.ae-lib-hero')).toBeVisible();
+  const { pen, data } = await openCodePen(page, card.locator('[data-action="codepen"]'));
+  expect(data.js).toBe("");
+  expect(data.css).toContain(".ae-lib-hero");
+  expect(JSON.stringify(data)).not.toMatch(/aellux\.min\.js|bootstrap\.min\.css|\$ae\.init|library-preview-background/);
+  await expect(pen.locator('.ae-lib-hero')).toBeVisible();
+  await pen.close();
   const parallax = await open(page, 'parallax-carousel');
   await expect(parallax.frame.locator('.ae-lib-parallax__caption').first()).toHaveCSS('transform', 'none');
   expect(await parallax.frame.locator('.ae-lib-parallax__scene').first().evaluate(element => getComputedStyle(element, '::before').transform)).toBe('none');

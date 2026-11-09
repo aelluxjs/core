@@ -2,6 +2,8 @@
 
 **Distribution:** Bundled Extension. **Stability:** Not stable.
 
+Stability describes implementation maturity and validation, not API compatibility. Only the [minimal initialization and declarative activation/mounting contract](../runtime/compatibility-commitment.md) is protected during `0.1.x`.
+
 Viewport is an official **Bundled Extension** that publishes an element's position and geometric visible area relative to its nearest native scroll container. It works with ordinary HTML/CSS, independently of Scrollbox, Snap and Present. It never changes scroll, presentation, focus or DOM structure.
 
 ```html

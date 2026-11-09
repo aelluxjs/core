@@ -50,7 +50,7 @@ Use `./dist/aellux.web-types.json` in an Aellux checkout. Existing native HTML t
 
 ## Semantic coverage
 
-The complete catalog currently contains 56 attributes, 54 CSS properties, 1,568 classes and 38 events. Native editor files expose 48 public input/output attributes and 42 public CSS properties; private runtime markers and implementation properties stay in the shared catalog. The native `link` tag also receives the `aelluxjs-ext` relation suggestion.
+The catalog snapshot generated on 2026-11-09 contains 92 attributes, 103 CSS properties, 1,575 classes and 72 events. Native editor files expose 66 global input/output attributes and 58 public CSS properties; tag-specific declarations also appear on native elements. Private runtime markers and implementation properties stay in the shared catalog. The native `link` tag receives the `aelluxjs-ext` relation suggestion. Counts and catalog inclusion do not expand the minimal initialization and declarative activation/mounting [compatibility guarantee](../runtime/compatibility-commitment.md).
 
 Descriptions distinguish editable inputs from runtime outputs such as progress, measured dimensions, resolved root preferences and state classes. Suggestions for open grammars are examples, not exhaustive allowed values. For example, `data-ae-target` accepts application IDs, and `data-ae-anchor` accepts candidate lists; neither is restricted to the examples. Removed `data-ae-present-key` is excluded: Present Group membership uses native IDs.
 

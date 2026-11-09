@@ -12,13 +12,11 @@
   const feed = document.getElementById("feed");
   const search = document.getElementById("search");
   const storageKey = "aellux-library-v1";
-  const editDelay = 650;
   const previewWidths = { fluid: null, mobile: 375, tablet: 768, desktop: 1280 };
   const extensionLabels = { input: "Input", present: "Present", focus: "Focus", adaptive: "Adaptive", anchor: "Anchor", viewport: "Viewport", preference: "Preference", feedback: "Feedback", "scrollbox": "Scrollbox", "scrollbox-snap": "Scrollbox Snap", "state-navigation": "State Navigation" };
   let stored = {};
   try { stored = JSON.parse(localStorage.getItem(storageKey)) || {}; } catch { /* Storage is optional. */ }
   const saved = new Set(Array.isArray(stored.saved) ? stored.saved.filter(id => snippets.has(id)) : []);
-  const drafts = stored.drafts && typeof stored.drafts === "object" ? stored.drafts : {};
   let navigation;
   let view = "feed";
   let category = "all";
@@ -39,8 +37,8 @@
   const colorScheme = () => document.documentElement.dataset.bsTheme === "dark" ? "dark" : "light";
 
   function persist() {
-    try { localStorage.setItem(storageKey, JSON.stringify({ saved: [...saved], drafts })); }
-    catch { notify("O armazenamento está indisponível. Suas alterações continuam nesta sessão."); }
+    try { localStorage.setItem(storageKey, JSON.stringify({ ...stored, saved: [...saved] })); }
+    catch { notify("O armazenamento está indisponível. Seus salvos continuam nesta sessão."); }
   }
 
   function notify(message) {
@@ -55,7 +53,6 @@
   function renderCard(snippet) {
     const group = categories.get(snippet.category);
     const requirements = [...snippet.extensions.map(name => extensionLabels[name] || name), ...(snippet.dependencies || [])];
-    const registrations = snippet.extensions.map(name => `$ae.ext(${serialize(name)}, {loadStyle:true});`).join("\n");
     return `<article class="snippet-card" id="snippet-${escapeHTML(snippet.id)}" data-snippet="${escapeHTML(snippet.id)}" style="--snippet-tint:${escapeHTML(group.tint)}" aria-labelledby="title-${escapeHTML(snippet.id)}">
       <header class="snippet-header">
         <div class="d-flex align-items-center gap-2 mb-3">
@@ -67,11 +64,10 @@
         <p class="snippet-description text-body-secondary mb-2">${escapeHTML(snippet.description)}</p>
         <div class="d-flex flex-wrap gap-2">${snippet.tags.map(tag => `<button class="tag" type="button" data-tag="${escapeHTML(tag)}">#${escapeHTML(tag)}</button>`).join("")}</div>
         <div class="snippet-requirements d-flex flex-wrap gap-1 mt-3" aria-label="Dependências">${(requirements.length ? requirements : ["HTML / CSS"]).map(name => `<span class="badge border text-body-secondary fw-normal">${escapeHTML(name)}</span>`).join("")}</div>
-        <p class="snippet-capabilities small text-body-secondary mt-2 mb-0">${escapeHTML(snippet.features.join(" · "))} · Copie e personalize</p>
+        <p class="snippet-capabilities small text-body-secondary mt-2 mb-0">${escapeHTML(snippet.features.join(" · "))} · Personalize no CodePen</p>
         <details class="integration-details small mt-2">
           <summary>Como integrar</summary>
-          <p class="mt-2 mb-2">${snippet.dependencies.length ? "Requer Bootstrap 5.3.8. " : "CSS próprio, sem Bootstrap. "}${snippet.extensions.length ? "Em Basic, registre as extensões abaixo antes de inicializar a aplicação uma vez." : "Cole o snippet diretamente na página. Este exemplo usa somente HTML e CSS."}</p>
-          ${registrations ? `<pre class="integration-code"><code>${escapeHTML(registrations)}</code></pre><p class="mb-2">Em uma aplicação iniciada, execute o script local do snippet, se houver, e aguarde <code>$ae.mount(container)</code> após inseri-lo.</p>` : ""}
+          <p class="mt-2 mb-2">${snippet.dependencies.length ? "Requer Bootstrap 5.3.8. " : "CSS próprio, sem Bootstrap. "}${snippet.extensions.length ? "Registre as extensões indicadas antes de inicializar a aplicação. No CodePen, as dependências já estão incluídas." : "Este exemplo usa somente HTML e CSS. Abra no CodePen para copiar ou personalizar."}</p>
           <p class="mb-0">${escapeHTML(snippet.integration || "Para repetir o componente na mesma página, renomeie os IDs e todas as referências correspondentes (href, for, ARIA e data-ae-*).")}</p>
         </details>
       </header>
@@ -85,24 +81,14 @@
                 <option value="fluid">Disponível</option><option value="mobile">Mobile · 375 px</option><option value="tablet">Tablet · 768 px</option><option value="desktop">Desktop · 1280 px</option>
               </select>
             </label>
+            <button class="btn btn-sm btn-outline-secondary preview-codepen" type="button" data-action="codepen" aria-label="Abrir ${escapeHTML(snippet.title)} no CodePen em nova janela" disabled>${icon("code")} Abrir no CodePen <span aria-hidden="true">↗</span></button>
             <button class="btn btn-sm preview-expand" type="button" data-action="expand" aria-label="Ampliar ${escapeHTML(snippet.title)}" disabled>${icon("expand")} Ampliar</button>
           </div>
           <div class="preview-viewport"><iframe title="Prévia: ${escapeHTML(snippet.title)}" sandbox="allow-scripts allow-forms" referrerpolicy="no-referrer"></iframe></div>
         </div>
       </div>
-      <div class="editor-panel">
-        <div class="editor-toolbar">
-          <label class="editor-filename" for="code-${escapeHTML(snippet.id)}">${icon("code")} exemplo.html</label>
-          <div class="d-flex gap-1">
-            <button class="btn btn-sm" type="button" data-action="reset" aria-label="Restaurar código de ${escapeHTML(snippet.title)}">${icon("reset")} Restaurar</button>
-            <button class="btn btn-sm copy-snippet" type="button" data-action="copy" aria-label="Copiar snippet de ${escapeHTML(snippet.title)}">${icon("copy")} Copiar snippet</button>
-            <button class="btn btn-sm" type="button" data-action="copy-full" aria-label="Copiar exemplo completo de ${escapeHTML(snippet.title)}">Exemplo completo</button>
-          </div>
-        </div>
-        <textarea id="code-${escapeHTML(snippet.id)}" class="code-editor" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Código de ${escapeHTML(snippet.title)}" aria-describedby="edit-help-${escapeHTML(snippet.id)}"></textarea>
-      </div>
       <footer class="snippet-footer">
-        <span id="edit-help-${escapeHTML(snippet.id)}" class="edit-status">Edite e veja acontecer · 650 ms</span>
+        <span class="preview-feedback" role="status">Experimente aqui · Personalize no CodePen</span>
         <span class="small text-body-secondary" style="font-size:.65rem">${escapeHTML(requirements.join(" + ") || "HTML / CSS")}</span>
       </footer>
     </article>`;
@@ -111,11 +97,9 @@
   feed.innerHTML = source.snippets.map(renderCard).join("");
   for (const snippet of source.snippets) {
     const card = document.getElementById(`snippet-${snippet.id}`);
-    const editor = card.querySelector("textarea");
-    editor.value = typeof drafts[snippet.id] === "string" ? drafts[snippet.id] : snippet.code;
     cards.set(snippet.id, {
-      snippet, card, editor, slot: card.querySelector(".preview-slot"), shell: card.querySelector(".preview-shell"),
-      frame: card.querySelector("iframe"), visible: false, revision: 0, loaded: false, loading: false, timer: null, token: null
+      snippet, card, slot: card.querySelector(".preview-slot"), shell: card.querySelector(".preview-shell"),
+      frame: card.querySelector("iframe"), visible: false, revision: 0, loaded: false, loading: false, token: null, exportHead: null
     });
   }
 
@@ -209,9 +193,6 @@
 
   function pause(state) {
     state.revision++;
-    if (state.timer) persist();
-    clearTimeout(state.timer);
-    state.timer = null;
     if (state.loaded || state.loading) replaceFrame(state, null);
     state.loaded = false;
     state.loading = false;
@@ -242,8 +223,14 @@
       const token = state.token = `${state.snippet.id}:${revision}:${Math.random()}`;
       const theme = colorScheme();
       // Incorpora os assets já carregados a um documento de origem opaca. Assim,
-      // scripts editados não acessam o app, o storage ou o histórico da página.
-      const setup = `window.__aelluxBootstrapURL=${serialize(new URL("aellux.min.js", dist).href)};\n${boot}\n$ae.persist.preferences.setObject({colorScheme:${serialize(theme)}});\nObject.assign($ae.options,{mode:"basic",useHash:false,syncBootstrapThemeTag:true});\n${extensions.map(name => `$ae.ext(${serialize(name)}, {loadStyle:false});`).join("\n")}`;
+      // os exemplos não acessam o app, o storage ou o histórico da página.
+      const setup = bootstrapURL => `window.__aelluxBootstrapURL=${serialize(bootstrapURL)};\n${boot}\n$ae.persist.preferences.setObject({colorScheme:${serialize(theme)}});\nObject.assign($ae.options,{mode:"basic",useHash:false,syncBootstrapThemeTag:true});\n${extensions.map(name => `$ae.ext(${serialize(name)}, {loadStyle:false});`).join("\n")}`;
+      const dependencyStyles = `${bootstrap}\n${palette}\n${styles.join("\n")}\nbody{min-height:100vh;margin:0;}`;
+      const dependencyScripts = bootstrapURL => (hasRuntime ? inlineScript(setup(bootstrapURL)) + inlineScript(runtime) : "") + scripts.map(inlineScript).join("") + adapters.map(inlineScript).join("");
+      // O POST leva os mesmos assets da prévia, inclusive em desenvolvimento local.
+      // Nenhum recurso do CodePen depende de localhost ou de uma versão publicada.
+      state.exportHead = `<meta name="viewport" content="width=device-width,initial-scale=1"><style>${dependencyStyles}</style>${dependencyScripts("https://aelluxjs.github.io/core/dist/aellux.min.js")}`;
+      state.card.querySelector(".preview-codepen").disabled = false;
       const bridge = `(()=>{const send=(type,message)=>parent.postMessage({type,token:${serialize(token)},message},"*");
         window.addEventListener("error",e=>send("library-error",e.message));
         window.addEventListener("unhandledrejection",e=>send("library-error",String(e.reason)));
@@ -257,7 +244,8 @@
         });
         ${hasRuntime ? '$ae.on("Ready",()=>send("library-ready"),{once:true});' : 'window.addEventListener("DOMContentLoaded",()=>send("library-ready"),{once:true});'}})();`;
       const start = `$ae.updatePreferenceAttributesHTML();$ae.startAelluxJs().catch(error=>parent.postMessage({type:"library-error",token:${serialize(token)},message:error.message},"*"));`;
-      const html = `<!doctype html><html lang="pt-BR" data-bs-theme="${theme}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHTML(state.snippet.title)}</title><style>${bootstrap}\n${palette}\n${styles.join("\n")}\nbody{min-height:100vh;margin:0;}html{color-scheme:${theme};}</style>${hasRuntime ? inlineScript(setup) + inlineScript(runtime) : ""}${scripts.map(inlineScript).join("")}${adapters.map(inlineScript).join("")}${inlineScript(bridge)}</head><body>${state.editor.value}${hasRuntime ? inlineScript(start) : ""}</body></html>`;
+      const background = `<style id="library-preview-background">html body{isolation:isolate!important;}html body::before{content:""!important;position:fixed!important;inset:0!important;background:rgba(255,214,58,.12)!important;pointer-events:none!important;z-index:-1!important;}</style>`;
+      const html = `<!doctype html><html lang="pt-BR" data-bs-theme="${theme}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHTML(state.snippet.title)}</title><style>${dependencyStyles}\nhtml{color-scheme:${theme};}</style>${dependencyScripts(new URL("aellux.min.js", dist).href)}${inlineScript(bridge)}</head><body>${state.snippet.code}${background}${hasRuntime ? inlineScript(start) : ""}</body></html>`;
       replaceFrame(state, html);
       state.loaded = true;
       state.loading = false;
@@ -310,7 +298,7 @@
       state.shell.setAttribute("aria-modal", "true");
       state.shell.setAttribute("aria-label", state.snippet.title);
       const background = document.querySelectorAll(".app-header, .bottom-nav, .app-layout aside, #main > :not(#feed), .snippet-card");
-      for (const element of [...background, ...state.card.querySelectorAll(".snippet-header, .editor-panel, .snippet-footer")]) {
+      for (const element of [...background, ...state.card.querySelectorAll(".snippet-header, .snippet-footer")]) {
         if (element === state.card || element.inert) continue;
         element.inert = true;
         inertElements.add(element);
@@ -348,7 +336,7 @@
     }
     if (event.data.type === "library-error") {
       state.shell.querySelector(".preview-state").textContent = "· confira o código";
-      state.card.querySelector(".edit-status").textContent = `Prévia: ${String(event.data.message).slice(0, 160)}`;
+      state.card.querySelector(".preview-feedback").textContent = `Prévia: ${String(event.data.message).slice(0, 160)}`;
     }
     if (event.data.type === "library-escape" && fullscreen) history.back();
   });
@@ -374,27 +362,37 @@
   });
   document.getElementById("clear-filters").addEventListener("click", () => { category = "all"; query = ""; search.value = ""; filter(); });
 
-  feed.addEventListener("input", event => {
-    if (!event.target.matches(".code-editor")) return;
-    const state = cards.get(event.target.closest("[data-snippet]").dataset.snippet);
-    clearTimeout(state.timer);
-    state.revision++; // Cancela uma compilação anterior, mesmo se ainda estiver buscando assets.
-    if (state.editor.value === state.snippet.code) delete drafts[state.snippet.id];
-    else drafts[state.snippet.id] = state.editor.value;
-    state.card.querySelector(".edit-status").textContent = "Editando… a prévia acompanha sua pausa.";
-    state.timer = setTimeout(() => {
-      persist();
-      state.card.querySelector(".edit-status").textContent = state.editor.value === state.snippet.code ? "Código original · 650 ms" : "Edição salva neste dispositivo";
-      state.loading = false;
-      if (shouldRun(state)) preview(state);
-    }, editDelay);
-  });
-
-  function exportDocument(state) {
-    const registrations = state.snippet.extensions.map(name => `$ae.ext(${serialize(name)}, {loadStyle:true});`).join("\n");
-    const styles = state.snippet.dependencies.length ? `<link rel="stylesheet" href="${new URL("vendor/bootstrap.min.css", base).href}">\n<link rel="stylesheet" href="${new URL("../assets/bootstrap-brand.css", base).href}">` : "";
-    const runtime = registrations ? `<script src="${new URL("aellux.min.js", dist).href}"></script>\n${inlineScript(`${registrations}\n$ae.init({mode:"basic",useHash:false,syncBootstrapThemeTag:true});`)}` : "";
-    return `<!doctype html>\n<html lang="pt-BR">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>${escapeHTML(state.snippet.title)}</title>\n${styles}\n${runtime}\n</head>\n<body>\n${state.editor.value}\n</body>\n</html>`;
+  function openCodePen(state) {
+    if (!state.exportHead) return;
+    const fragment = document.createElement("template");
+    fragment.innerHTML = state.snippet.code;
+    const css = [], js = [];
+    for (const element of fragment.content.querySelectorAll("style, script")) {
+      (element.tagName === "STYLE" ? css : js).push(element.textContent);
+      element.remove();
+    }
+    if (state.snippet.extensions.length) js.push("$ae.updatePreferenceAttributesHTML();\n$ae.startAelluxJs();");
+    const theme = colorScheme();
+    const form = document.createElement("form");
+    form.action = "https://codepen.io/pen/define/";
+    form.method = "POST";
+    form.target = "_blank";
+    form.rel = "noopener noreferrer";
+    form.hidden = true;
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "data";
+    input.value = JSON.stringify({
+      title: `${state.snippet.title} · AelluxJS`, description: state.snippet.description,
+      html: fragment.innerHTML.trim(), css: css.join("\n\n"), js: js.join("\n\n"),
+      head: state.exportHead + inlineScript(`document.documentElement.lang="pt-BR";document.documentElement.dataset.bsTheme=${serialize(theme)};${state.snippet.extensions.length ? `$ae.persist.preferences.setObject({colorScheme:${serialize(theme)}});` : ""}`),
+      css_starter: "neither", css_prefix: "neither"
+    });
+    form.append(input);
+    document.body.append(form);
+    // O envio ocorre no próprio clique, sem await, para preservar a nova janela.
+    form.submit();
+    form.remove();
   }
 
   async function install() {
@@ -437,28 +435,7 @@
       try { await navigation.setState("preview", state.snippet.id, state.snippet.title); }
       catch { notify("Não foi possível abrir a prévia ampliada."); }
     }
-    if (action === "reset") {
-      state.editor.value = state.snippet.code;
-      delete drafts[state.snippet.id];
-      clearTimeout(state.timer);
-      state.timer = null;
-      persist();
-      state.card.querySelector(".edit-status").textContent = "Código original restaurado";
-      if (shouldRun(state)) preview(state);
-    }
-    if (action === "copy" || action === "copy-full") {
-      const code = action === "copy" ? state.editor.value : exportDocument(state);
-      try {
-        await navigator.clipboard.writeText(code);
-        notify(action === "copy" ? "Snippet copiado. Confira os requisitos em Como integrar." : "Exemplo completo copiado, com as dependências indicadas no card.");
-      }
-      catch {
-        const dialog = document.getElementById("copy-fallback");
-        const editor = dialog.querySelector("textarea");
-        editor.value = code;
-        dialog.showModal(); editor.focus(); editor.select();
-      }
-    }
+    if (action === "codepen") openCodePen(state);
   });
 
   function updateConnection() {

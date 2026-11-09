@@ -691,7 +691,7 @@
             ajax-load="doc-content">
             <h1>Compatibility Policy Review — AelluxJS 0.1.x</h1>
 <p><strong>Status:</strong> Pending maintainer review; non-normative. These proposals do not create support obligations or authorize exceptions.</p>
-<p>The <a href="compatibility-commitment.htm">Compatibility Commitment</a> defines public-contract protection beginning with <code>0.1.0</code>. This page records policy proposals that still require an explicit maintainer decision. The package remains <code>0.1.0-beta.10</code>; publishing this review does not adopt its proposals or promote the package to a stable release.</p>
+<p>The <a href="compatibility-commitment.htm">Compatibility Commitment</a> defines only minimal initialization and declarative activation/mounting protection beginning with <code>0.1.0</code>. This page records policy proposals that still require an explicit maintainer decision. The package remains <code>0.1.0-beta.10</code>; publishing this review does not adopt its proposals or promote the package to a stable release.</p>
 <h2>Existing foundations and sources</h2>
 <table>
 <thead>
@@ -704,7 +704,7 @@
 <tbody><tr>
 <td>Stable / Not stable</td>
 <td><a href="../core-extensions/index.htm#stability">Extension index</a> and individual guides</td>
-<td>Nine Stable Extensions and seven experimental Extensions. This review does not change their status.</td>
+<td>Nine Stable Extensions and seven Not stable Extensions; labels indicate maturity and validation, not API preservation. This review does not change their status.</td>
 </tr>
 <tr>
 <td>Bundled / Optional</td>
@@ -714,12 +714,12 @@
 <tr>
 <td>Public API and lifecycle</td>
 <td><a href="api.htm">Runtime API</a>, <a href="events.htm">Events</a>, <a href="../extensions/authoring.htm">Authoring</a></td>
-<td>Protect documented inputs, results, async semantics, controller lifecycle and observable behavior.</td>
+<td>Document current usage; only the explicit initialization and activation/mounting subset is protected.</td>
 </tr>
 <tr>
 <td>Public versus internal semantics</td>
 <td><a href="https://github.com/aelluxjs/core/blob/release/0.1.0/scripts/semantic-definitions.mjs">Semantic definitions</a>, <a href="https://github.com/aelluxjs/core/blob/release/0.1.0/scripts/build-editor-data.mjs">catalog generator</a>, <a href="../integrations/editor-tooling.htm">editor guide</a></td>
-<td>Internal entries and generated implementation details do not automatically become Stable.</td>
+<td>Catalog inclusion and public visibility do not expand the protected subset.</td>
 </tr>
 <tr>
 <td>Platform and accessibility boundaries</td>
@@ -732,7 +732,7 @@
 <td>Use existing applicable validation and distinguish recorded coverage from a fresh run.</td>
 </tr>
 </tbody></table>
-<p>The line-wide preservation rule, reservation of intentional Stable breaks for <code>0.2.x</code>, and retention of deprecated Stable APIs in <code>0.1.x</code> are defined by the Compatibility Commitment. A beta&#39;s Stable label alone did not establish those rules. Historical beta changelogs are migration evidence, not a retroactive compatibility promise.</p>
+<p>The adopted commitment permits incompatible changes to Extension APIs within <code>0.1.x</code>, regardless of maturity label, without a mandatory deprecation period or <code>0.2.0</code> requirement. The previous broader Stable-API preservation rule is superseded. Historical beta changelogs remain migration evidence.</p>
 <h2>Decisions pending maintainer approval</h2>
 <table>
 <thead>
@@ -746,7 +746,7 @@
 <tbody><tr>
 <td>Security / severe-defect exceptions</td>
 <td>The repository describes trust boundaries and validation, but has no general exception policy.</td>
-<td>Require impact analysis, a compatible mitigation when feasible, explicit maintainer approval, affected-version disclosure, migration guidance and targeted validation before an exceptional Stable break.</td>
+<td>Require impact analysis, a compatible mitigation when feasible, explicit maintainer approval, affected-version disclosure, migration guidance and targeted validation before an exceptional change to the minimal protected subset.</td>
 <td>No blanket exception. Review each concrete case explicitly; documenting a change alone does not approve it.</td>
 </tr>
 <tr>
@@ -764,8 +764,8 @@
 <tr>
 <td>Deprecation notice and experimental promotion</td>
 <td>The release milestone leaves the broader policy and promotion criteria open.</td>
-<td>Keep the commitment&#39;s retention of deprecated Stable APIs within <code>0.1.x</code>; separately define notice practices, replacement criteria and evidence required to promote experimental APIs.</td>
-<td>No fixed number of releases or days, automatic promotion, indefinite support, or permission to demote an existing Stable contract.</td>
+<td>Consider optional notice practices and evidence for maturity promotion; unprotected APIs have no required deprecation period or line-wide retention.</td>
+<td>No fixed number of releases or days, automatic promotion or indefinite support; maturity changes do not alter the minimal protected subset.</td>
 </tr>
 <tr>
 <td>npm release / withdrawal procedure</td>

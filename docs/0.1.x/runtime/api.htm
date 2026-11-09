@@ -692,7 +692,7 @@
             <h1>Runtime API</h1>
 <p>The browser distribution exposes <code>AelluxJs</code> and its short alias <code>$ae</code> on the global object.</p>
 <p><code>$ae.comm</code> is the boot-level <a href="communication.htm">shared communication mediator</a>: named commands/queries through <code>handle</code> / <code>request</code>, notifications through <code>on</code> / <code>emit</code>, availability checks and owned cleanup. Extensions exchange data contracts while application code retains access to public Extension APIs.</p>
-<p>The <a href="compatibility-commitment.htm">Compatibility Commitment</a> defines preservation and evolution of documented public contracts from <code>0.1.0</code> through <code>0.1.x</code>. Individual Extension stability and documented limits still apply.</p>
+<p>The <a href="compatibility-commitment.htm">Compatibility Commitment</a> protects only the explicitly listed global initialization and declarative activation/mounting subset during <code>0.1.x</code>. This reference documents current usage; global availability does not guarantee compatibility of every method. Programmatic mounting, lifecycle controls, helpers and Extension APIs may change incompatibly. Stable describes maturity, not API preservation.</p>
 <p>Modules can import the shared API through <code>@aelluxjs/core</code>:</p>
 <pre><code class="language-js">import AelluxJs from &quot;@aelluxjs/core&quot;;
 </code></pre>

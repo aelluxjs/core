@@ -906,11 +906,53 @@
     }
   });
 
+  // src/internal/focus-spatial.js
+  function validSpatialRect(rect) {
+    return !!rect && [rect.left, rect.top, rect.right, rect.bottom].every(Number.isFinite) && rect.right > rect.left && rect.bottom > rect.top;
+  }
+  function selectSpatialCandidate(origin, candidates, direction) {
+    if (!["left", "right", "up", "down"].includes(direction)) return null;
+    const horizontal = direction === "left" || direction === "right";
+    const forward = direction === "right" || direction === "down";
+    const start = horizontal ? "left" : "top", end = horizontal ? "right" : "bottom";
+    const crossStart = horizontal ? "top" : "left", crossEnd = horizontal ? "bottom" : "right";
+    if (origin && !validSpatialRect(origin)) return null;
+    let best = null, bestScore = null;
+    for (const candidate of candidates) {
+      const rect = candidate.rect;
+      if (!validSpatialRect(rect)) continue;
+      let score;
+      if (!origin) {
+        score = [forward ? rect[start] : -rect[end], rect[crossStart]];
+      } else {
+        const advance = (rect[start] + rect[end] - (origin[start] + origin[end])) / 2 * (forward ? 1 : -1);
+        if (advance <= 0) continue;
+        const overlap = Math.min(origin[crossEnd], rect[crossEnd]) - Math.max(origin[crossStart], rect[crossStart]);
+        const primaryGap = Math.max(0, forward ? rect[start] - origin[end] : origin[start] - rect[end]);
+        const crossGap = Math.max(0, -overlap);
+        const crossOffset = Math.abs((rect[crossStart] + rect[crossEnd] - origin[crossStart] - origin[crossEnd]) / 2);
+        score = [overlap > 0 ? 0 : 1, primaryGap + crossGap * 3 + crossOffset * 0.1, advance];
+      }
+      const different = bestScore && score.findIndex((value, index) => value !== bestScore[index]);
+      if (!bestScore || different >= 0 && score[different] < bestScore[different]) {
+        best = candidate;
+        bestScore = score;
+      }
+    }
+    return best;
+  }
+  var init_focus_spatial = __esm({
+    "src/internal/focus-spatial.js"() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
   // src/aellux.ext.focus.js
   var aellux_ext_focus_exports = {};
   var init_aellux_ext_focus = __esm({
     "src/aellux.ext.focus.js"() {
       init_input_shortcuts();
+      init_focus_spatial();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
@@ -943,6 +985,8 @@
         const shortcutActions = /* @__PURE__ */ new Map();
         let contextObserver = null;
         const scopeSelector = `[${AelluxJs2.attr("focus-scope")}], dialog, [aria-modal="true"]`;
+        const navAttribute = AelluxJs2.attr("focus-nav");
+        const keyboardWidgetSelector = 'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="combobox"], [role="slider"], [role="spinbutton"], [role="scrollbar"], [role="tablist"], [role="tab"], [role="menu"], [role="menubar"], [role="menuitem"], [role="listbox"], [role="option"], [role="grid"], [role="treegrid"], [role="tree"], [role="treeitem"], [role="radiogroup"], [role="radio"], [role="toolbar"], audio[controls], video[controls]';
         const focusClasses = [null, AelluxJs2.className("focus-player1"), AelluxJs2.className("focus-player2"), AelluxJs2.className("focus-player3")];
         const focusClass = (id) => focusClasses[id] || AelluxJs2.className("focus-player" + id);
         function init() {
@@ -956,7 +1000,7 @@
             childList: true,
             subtree: true,
             attributes: true,
-            attributeFilter: ["hidden", "inert", "disabled", "aria-disabled", "class", "style"]
+            attributeFilter: ["hidden", "inert", "disabled", "aria-disabled", "class", "style", "open", "aria-hidden"]
           });
           AelluxJs2.mountManager.add({
             extensionName,
@@ -1032,12 +1076,13 @@
             }
           }
         }
-        function isValid(element) {
+        function isValid(element, spatial = false) {
           if (!element || element === document.body || element === document.documentElement || !element.isConnected || typeof element.focus !== "function" || element.matches(":disabled, [disabled], [hidden], [inert]") || element.closest('[aria-disabled="true"]')) return false;
           for (let node = element; node && node.nodeType === 1; node = node.parentElement) {
-            if (node.hidden || node.hasAttribute("inert")) return false;
+            if (node.hidden || node.hasAttribute("inert") || spatial && node.getAttribute("aria-hidden") === "true") return false;
             const style = root2.getComputedStyle(node);
-            if (style.display === "none" || style.visibility === "hidden" || style.visibility === "collapse") return false;
+            if (style.display === "none" || style.visibility === "hidden" || style.visibility === "collapse" || spatial && (style.contentVisibility === "hidden" || Number(style.opacity) === 0)) return false;
+            if (spatial && node.hasAttribute(AelluxJs2.attr("present")) && (node.classList.contains(AelluxJs2.className("dismissed")) || node.classList.contains(AelluxJs2.className("unpop")))) return false;
           }
           return element.getClientRects().length > 0;
         }
@@ -1165,12 +1210,15 @@
           return true;
         }
         function setFocus(focusId, elementOrId) {
-          var _a;
           const context = contexts.get(focusId);
           const element = typeof elementOrId === "string" ? document.getElementById(elementOrId.replace(/^#/, "")) : elementOrId;
+          return applyFocus(context, element);
+        }
+        function applyFocus(context, element, preventScroll = false) {
+          var _a;
           if (!context || element !== null && (!isValid(element) || !context.scope.contains(element))) return false;
           if (element && context.syncDOM) {
-            element.focus();
+            element.focus({ preventScroll });
             if (document.activeElement !== element) return false;
           }
           if (!element && context.syncDOM) (_a = context.element) == null ? void 0 : _a.blur();
@@ -1212,19 +1260,53 @@
         function activeScope(context) {
           var _a;
           const nearest = (_a = context.element) == null ? void 0 : _a.closest(scopeSelector);
-          let scope = nearest && context.scope.contains(nearest) ? nearest : context.scope;
+          const scope = nearest && context.scope.contains(nearest) ? nearest : context.scope;
           const modal = Array.from(document.querySelectorAll('dialog[open], [aria-modal="true"]')).reverse().find((element) => {
+            if (!isValid(element)) return false;
             try {
               return element.matches(":modal") || element.getAttribute("aria-modal") === "true";
             } catch (_) {
               return element.getAttribute("aria-modal") === "true";
             }
           });
-          if (modal && !modal.contains(context.element)) return null;
+          if (modal && !modal.contains(context.element || context.scope)) return null;
           return scope;
         }
-        function available(element, scope) {
-          if (!isValid(element) || !scope.contains(element)) return false;
+        function navigate(context, command, scope) {
+          var _a;
+          const region = (context.element || context.scope).closest(`[${navAttribute}]`);
+          const policy = ((_a = region == null ? void 0 : region.getAttribute(navAttribute)) == null ? void 0 : _a.trim().toLowerCase()) || "auto";
+          if (policy === "none") return false;
+          const keyboard = command.source === "keyboard";
+          if (keyboard && (policy === "native" || context.syncDOM && policy !== "spatial")) return false;
+          if (!keyboard && command.source !== "gamepad" && context.syncDOM && policy !== "spatial") return false;
+          if (region && scope.contains(region)) scope = region;
+          const focused = context.element;
+          const origin = focused && available(focused, scope, true) ? focused.getBoundingClientRect() : null;
+          const candidates = Array.from(scope.querySelectorAll(focusableSelector)).filter((element) => element !== focused && available(element, scope, true)).map((element) => ({ element, rect: element.getBoundingClientRect() }));
+          const selected = selectSpatialCandidate(origin, candidates, command.action.slice(9));
+          if (!selected || !applyFocus(context, selected.element, true)) return false;
+          reveal(selected.element, scope);
+          return true;
+        }
+        function reveal(element, scope) {
+          if (scope === document.body || scope === document.documentElement) {
+            element.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
+            return;
+          }
+          for (let node = element.parentElement; node && scope.contains(node); node = node.parentElement) {
+            const style = root2.getComputedStyle(node);
+            const rect = element.getBoundingClientRect(), box = node.getBoundingClientRect();
+            const left = box.left + node.clientLeft, top = box.top + node.clientTop;
+            const offset = (start, end, min, max) => start < min ? start - min : end > max ? Math.min(end - max, start - min) : 0;
+            const x = /^(auto|scroll|overlay)$/.test(style.overflowX) ? offset(rect.left, rect.right, left, left + node.clientWidth) : 0;
+            const y = /^(auto|scroll|overlay)$/.test(style.overflowY) ? offset(rect.top, rect.bottom, top, top + node.clientHeight) : 0;
+            if (x || y) node.scrollBy({ left: x, top: y, behavior: "instant" });
+            if (node === scope) break;
+          }
+        }
+        function available(element, scope, spatial = false) {
+          if (!isValid(element, spatial) || !scope.contains(element)) return false;
           const nearest = element.closest(scopeSelector);
           return !nearest || nearest === scope || !scope.contains(nearest);
         }
@@ -1293,38 +1375,34 @@
           return true;
         }
         function consumeCommand(command) {
-          var _a, _b, _c, _d, _e, _f;
+          var _a, _b, _c, _d, _e, _f, _g, _h, _i;
           const context = contexts.get(command.focusId);
           if (!context) {
             warn("Input command refers to an unknown focus context; command blocked.", { focusId: command.focusId });
             return false;
           }
-          if (!["press", "repeat"].includes(command.phase) || ((_a = command.originalEvent) == null ? void 0 : _a.defaultPrevented)) return false;
+          if (!["press", "repeat"].includes(command.phase) || ((_a = command.originalEvent) == null ? void 0 : _a.defaultPrevented) || ((_b = command.originalEvent) == null ? void 0 : _b.isComposing) || ((_c = command.originalEvent) == null ? void 0 : _c.keyCode) === 229) return false;
           if (command.source === "point") return false;
           const focused = context.element;
           const inputScope = (focused || context.scope).closest(`[${AelluxJs2.attr("inputs")}]`);
           if (inputScope && !inputScope.getAttribute(AelluxJs2.attr("inputs")).split(/\s+/).includes(command.source)) return false;
-          const origin = (_b = command.originalEvent) == null ? void 0 : _b.target;
+          const origin = (_d = command.originalEvent) == null ? void 0 : _d.target;
           const editable = (element) => element == null ? void 0 : element.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]');
-          const reserved = ((_c = command.modifiers) == null ? void 0 : _c.meta) || ((_d = command.modifiers) == null ? void 0 : _d.ctrl) && ["KeyW", "KeyT", "KeyN", "KeyR", "KeyL", "KeyF", "KeyP", "KeyS", "KeyC", "KeyV", "KeyX", "KeyA", "KeyZ", "KeyY"].includes(command.code) || ((_e = command.modifiers) == null ? void 0 : _e.alt) && ["ArrowLeft", "ArrowRight", "F4"].includes(command.code);
+          const reserved = ((_e = command.modifiers) == null ? void 0 : _e.meta) || ((_f = command.modifiers) == null ? void 0 : _f.ctrl) && ["KeyW", "KeyT", "KeyN", "KeyR", "KeyL", "KeyF", "KeyP", "KeyS", "KeyC", "KeyV", "KeyX", "KeyA", "KeyZ", "KeyY"].includes(command.code) || ((_g = command.modifiers) == null ? void 0 : _g.alt) && ["ArrowLeft", "ArrowRight", "F4"].includes(command.code);
           if (command.source === "keyboard" && (editable(origin) || editable(focused) || command.code === "Tab" || reserved)) return false;
+          const directional = (_h = command.action) == null ? void 0 : _h.startsWith("navigate-");
+          if (command.source === "keyboard" && directional && (((_i = origin == null ? void 0 : origin.closest) == null ? void 0 : _i.call(origin, keyboardWidgetSelector)) || (focused == null ? void 0 : focused.closest(keyboardWidgetSelector)) || Object.values(command.modifiers || {}).some(Boolean))) return false;
           const candidate = eligibleShortcuts(command.focusId, command)[0];
           if (candidate && command.phase === "press") return executeShortcut(candidate.element, command);
-          if (context.syncDOM && command.source === "keyboard") return false;
           const scope = activeScope(context);
           if (!scope) return false;
+          if (directional) return navigate(context, command, scope);
+          if (context.syncDOM && command.source === "keyboard") return false;
           if (command.action === "confirm" && command.phase === "press" && focused && available(focused, scope)) {
             focused.click();
             return true;
           }
-          if (!((_f = command.action) == null ? void 0 : _f.startsWith("navigate-"))) return false;
-          const elements = Array.from(scope.querySelectorAll(focusableSelector)).filter((element) => element.tabIndex >= 0 && available(element, scope));
-          if (!elements.length) return false;
-          const index = elements.indexOf(focused);
-          const direction = command.action.slice(9);
-          const step = direction === "left" || direction === "up" ? -1 : 1;
-          const next = index < 0 ? step > 0 ? 0 : elements.length - 1 : Math.max(0, Math.min(elements.length - 1, index + step));
-          return setFocus(command.focusId, elements[next]);
+          return false;
         }
       })(typeof globalThis !== "undefined" ? globalThis : window);
     }
@@ -8312,7 +8390,7 @@
     "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
     scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-parent scrollbar-vertical scrollbar-horizontal",
     "scrollbox-snap": "scrollbox-snap snap-item",
-    focus: "focus focus-scope shortcut shortcut-priority shortcut-action shortcut-target",
+    focus: "focus focus-scope focus-nav shortcut shortcut-priority shortcut-action shortcut-target",
     input: "point inputs shortcut-hint shortcut-focus shortcut-hint-position shortcut-label shortcut-source shortcut-code gamepad gamepad-family gamepad-model active-input",
     adaptive: "adaptive",
     "ajax-href": "ajax-href",
@@ -8328,7 +8406,7 @@
     "overflow-marquee": "overflow-marquee",
     scrollbox: "scrollbox",
     "scrollbox-snap": "scrollbox-snap",
-    focus: "focus focus-scope shortcut",
+    focus: "focus focus-scope focus-nav shortcut",
     input: "point inputs shortcut-hint",
     adaptive: "adaptive",
     "ajax-href": "ajax-href",
@@ -10091,7 +10169,7 @@
           loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
         }
         if (name === "input") loadWhen = ["point", "inputs", "shortcut", "shortcut-hint"].map(attr).join(",");
-        if (name === "focus") loadWhen = ["focus", "focus-scope", "shortcut"].map(attr).join(",");
+        if (name === "focus") loadWhen = ["focus", "focus-scope", "focus-nav", "shortcut"].map(attr).join(",");
         if (name === "state-navigation" || name === "preference") loadWhen = null;
         api.ext(name, { loadWhen, load: true, loadStyle: !!(optional && style) });
         api.registry.ext[key].automatic = true;

@@ -2,6 +2,8 @@
 
 **Distribution:** Bundled Extension. **Stability:** Stable.
 
+Stability describes implementation maturity and validation, not API compatibility. Only the [minimal initialization and declarative activation/mounting contract](../runtime/compatibility-commitment.md) is protected during `0.1.x`.
+
 `data-ae-scrollbox` uses the browser's native scrolling and publishes `--ae-scroll-y-progress` and `--ae-scroll-x-progress` on the scroll container. Each value runs from 0 at the start to 1 at the end of its axis; an axis without overflow reports 0. Repeated scroll events share one layout read and one CSS update in the next frame, using the latest position. Native `scroll` events continue to reach ordinary listeners, including Anchor's capture listener. On unmount, Scrollbox restores the previous inline progress values and priorities.
 
 Scrollbox marks positions within 5 px of each scroll limit with `ae--scroll-v-start`, `ae--scroll-v-end`, `ae--scroll-h-start`, and `ae--scroll-h-end` on the container. An axis without overflow has both its start and end classes. During elastic pressure and its return animation, the classes keep their last state; they update again when the effect ends. Scrollbox removes these classes on unmount.

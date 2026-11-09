@@ -2,6 +2,8 @@
 
 **Distribution:** Bundled Extension. **Stability:** Stable.
 
+Stability describes implementation maturity and validation, not API compatibility. Only the [minimal initialization and declarative activation/mounting contract](../runtime/compatibility-commitment.md) is protected during `0.1.x`.
+
 `preference` stores user choices, combines them with defaults, and reflects the result in document attributes. It is included in the `full` runtime. In Basic, register it explicitly with `$ae.ext("preference")` before initialization. Add `loadWhen: "[data-ae-preference]"` to activate it through markup, or `load: false` to defer loading until `await $ae.wait("preference")` after runtime initialization.
 
 ## Accessibility profile

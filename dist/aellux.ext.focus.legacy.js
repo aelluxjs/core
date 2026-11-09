@@ -27,65 +27,7 @@
     });
   }
 
-  // src/src/aellux.ext.focus.js
-  function _typeof(o) {
-    "@babel/helpers - typeof";
-    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
-      return typeof o2;
-    } : function(o2) {
-      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof(o);
-  }
-  function _toConsumableArray(r) {
-    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread();
-  }
-  function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _iterableToArray(r) {
-    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
-  }
-  function _arrayWithoutHoles(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray(r);
-  }
-  function ownKeys(e, r) {
-    var t = Object.keys(e);
-    if (Object.getOwnPropertySymbols) {
-      var o = Object.getOwnPropertySymbols(e);
-      r && (o = o.filter(function(r2) {
-        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
-      })), t.push.apply(t, o);
-    }
-    return t;
-  }
-  function _objectSpread(e) {
-    for (var r = 1; r < arguments.length; r++) {
-      var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys(Object(t), true).forEach(function(r2) {
-        _defineProperty(e, r2, t[r2]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function(r2) {
-        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
-      });
-    }
-    return e;
-  }
-  function _defineProperty(e, r, t) {
-    return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
-  }
-  function _toPropertyKey(t) {
-    var i = _toPrimitive(t, "string");
-    return "symbol" == _typeof(i) ? i : i + "";
-  }
-  function _toPrimitive(t, r) {
-    if ("object" != _typeof(t) || !t) return t;
-    var e = t[Symbol.toPrimitive];
-    if (void 0 !== e) {
-      var i = e.call(t, r || "default");
-      if ("object" != _typeof(i)) return i;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return ("string" === r ? String : Number)(t);
-  }
+  // src/internal/focus-spatial.js
   function _createForOfIteratorHelper(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
@@ -130,6 +72,154 @@
     return n;
   }
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function validSpatialRect(rect) {
+    return !!rect && [rect.left, rect.top, rect.right, rect.bottom].every(Number.isFinite) && rect.right > rect.left && rect.bottom > rect.top;
+  }
+  function selectSpatialCandidate(origin, candidates, direction) {
+    if (!["left", "right", "up", "down"].includes(direction)) return null;
+    var horizontal = direction === "left" || direction === "right";
+    var forward = direction === "right" || direction === "down";
+    var start = horizontal ? "left" : "top", end = horizontal ? "right" : "bottom";
+    var crossStart = horizontal ? "top" : "left", crossEnd = horizontal ? "bottom" : "right";
+    if (origin && !validSpatialRect(origin)) return null;
+    var best = null, bestScore = null;
+    var _iterator = _createForOfIteratorHelper(candidates), _step;
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+        var candidate = _step.value;
+        var rect = candidate.rect;
+        if (!validSpatialRect(rect)) continue;
+        var score = void 0;
+        if (!origin) {
+          score = [forward ? rect[start] : -rect[end], rect[crossStart]];
+        } else {
+          var advance = (rect[start] + rect[end] - (origin[start] + origin[end])) / 2 * (forward ? 1 : -1);
+          if (advance <= 0) continue;
+          var overlap = Math.min(origin[crossEnd], rect[crossEnd]) - Math.max(origin[crossStart], rect[crossStart]);
+          var primaryGap = Math.max(0, forward ? rect[start] - origin[end] : origin[start] - rect[end]);
+          var crossGap = Math.max(0, -overlap);
+          var crossOffset = Math.abs((rect[crossStart] + rect[crossEnd] - origin[crossStart] - origin[crossEnd]) / 2);
+          score = [overlap > 0 ? 0 : 1, primaryGap + crossGap * 3 + crossOffset * 0.1, advance];
+        }
+        var different = bestScore && score.findIndex(function(value, index) {
+          return value !== bestScore[index];
+        });
+        if (!bestScore || different >= 0 && score[different] < bestScore[different]) {
+          best = candidate;
+          bestScore = score;
+        }
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+    return best;
+  }
+
+  // src/src/aellux.ext.focus.js
+  function _typeof(o) {
+    "@babel/helpers - typeof";
+    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof(o);
+  }
+  function _toConsumableArray(r) {
+    return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray2(r) || _nonIterableSpread();
+  }
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArray(r) {
+    if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
+  }
+  function _arrayWithoutHoles(r) {
+    if (Array.isArray(r)) return _arrayLikeToArray2(r);
+  }
+  function ownKeys(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function(r2) {
+        return Object.getOwnPropertyDescriptor(e, r2).enumerable;
+      })), t.push.apply(t, o);
+    }
+    return t;
+  }
+  function _objectSpread(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys(Object(t), true).forEach(function(r2) {
+        _defineProperty(e, r2, t[r2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function(r2) {
+        Object.defineProperty(e, r2, Object.getOwnPropertyDescriptor(t, r2));
+      });
+    }
+    return e;
+  }
+  function _defineProperty(e, r, t) {
+    return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: true, configurable: true, writable: true }) : e[r] = t, e;
+  }
+  function _toPropertyKey(t) {
+    var i = _toPrimitive(t, "string");
+    return "symbol" == _typeof(i) ? i : i + "";
+  }
+  function _toPrimitive(t, r) {
+    if ("object" != _typeof(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r || "default");
+      if ("object" != _typeof(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return ("string" === r ? String : Number)(t);
+  }
+  function _createForOfIteratorHelper2(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray2(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _unsupportedIterableToArray2(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray2(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray2(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray2(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
     var AelluxJs = root.AelluxJs;
@@ -161,6 +251,8 @@
     var shortcutActions = /* @__PURE__ */ new Map();
     var contextObserver = null;
     var scopeSelector = "[".concat(AelluxJs.attr("focus-scope"), '], dialog, [aria-modal="true"]');
+    var navAttribute = AelluxJs.attr("focus-nav");
+    var keyboardWidgetSelector = 'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="combobox"], [role="slider"], [role="spinbutton"], [role="scrollbar"], [role="tablist"], [role="tab"], [role="menu"], [role="menubar"], [role="menuitem"], [role="listbox"], [role="option"], [role="grid"], [role="treegrid"], [role="tree"], [role="treeitem"], [role="radiogroup"], [role="radio"], [role="toolbar"], audio[controls], video[controls]';
     var focusClasses = [null, AelluxJs.className("focus-player1"), AelluxJs.className("focus-player2"), AelluxJs.className("focus-player3")];
     var focusClass = function focusClass2(id) {
       return focusClasses[id] || AelluxJs.className("focus-player" + id);
@@ -189,7 +281,7 @@
         childList: true,
         subtree: true,
         attributes: true,
-        attributeFilter: ["hidden", "inert", "disabled", "aria-disabled", "class", "style"]
+        attributeFilter: ["hidden", "inert", "disabled", "aria-disabled", "class", "style", "open", "aria-hidden"]
       });
       AelluxJs.mountManager.add({
         extensionName: extensionName,
@@ -216,7 +308,7 @@
       AelluxJs.comm.removeOwner(extensionName);
       (_contextObserver = contextObserver) === null || _contextObserver === void 0 || _contextObserver.disconnect();
       contextObserver = null;
-      var _iterator = _createForOfIteratorHelper(contexts.values()), _step;
+      var _iterator = _createForOfIteratorHelper2(contexts.values()), _step;
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
           var context = _step.value;
@@ -268,7 +360,7 @@
       if (event.key !== "Enter" || event.isComposing || event.repeat || event.defaultPrevented || event.target !== event.currentTarget && event.target.closest(focusableSelector) !== event.currentTarget) return;
       var elements = document.querySelectorAll(focusableSelector);
       var foundCurrent = false;
-      var _iterator2 = _createForOfIteratorHelper(elements), _step2;
+      var _iterator2 = _createForOfIteratorHelper2(elements), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
           var element = _step2.value;
@@ -287,11 +379,13 @@
       }
     }
     function isValid(element) {
+      var spatial = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : false;
       if (!element || element === document.body || element === document.documentElement || !element.isConnected || typeof element.focus !== "function" || element.matches(":disabled, [disabled], [hidden], [inert]") || element.closest('[aria-disabled="true"]')) return false;
       for (var node = element; node && node.nodeType === 1; node = node.parentElement) {
-        if (node.hidden || node.hasAttribute("inert")) return false;
+        if (node.hidden || node.hasAttribute("inert") || spatial && node.getAttribute("aria-hidden") === "true") return false;
         var style = root.getComputedStyle(node);
-        if (style.display === "none" || style.visibility === "hidden" || style.visibility === "collapse") return false;
+        if (style.display === "none" || style.visibility === "hidden" || style.visibility === "collapse" || spatial && (style.contentVisibility === "hidden" || Number(style.opacity) === 0)) return false;
+        if (spatial && node.hasAttribute(AelluxJs.attr("present")) && (node.classList.contains(AelluxJs.className("dismissed")) || node.classList.contains(AelluxJs.className("unpop")))) return false;
       }
       return element.getClientRects().length > 0;
     }
@@ -456,12 +550,18 @@
       return true;
     }
     function setFocus(focusId, elementOrId) {
-      var _context$element;
       var context = contexts.get(focusId);
       var element = typeof elementOrId === "string" ? document.getElementById(elementOrId.replace(/^#/, "")) : elementOrId;
+      return applyFocus(context, element);
+    }
+    function applyFocus(context, element) {
+      var _context$element;
+      var preventScroll = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
       if (!context || element !== null && (!isValid(element) || !context.scope.contains(element))) return false;
       if (element && context.syncDOM) {
-        element.focus();
+        element.focus({
+          preventScroll: preventScroll
+        });
         if (document.activeElement !== element) return false;
       }
       if (!element && context.syncDOM) (_context$element = context.element) === null || _context$element === void 0 || _context$element.blur();
@@ -472,7 +572,7 @@
       if (context !== null && context !== void 0 && context.syncDOM) assign(context, isValid(element) && context.scope.contains(element) ? element : null);
     }
     function pruneContexts() {
-      var _iterator3 = _createForOfIteratorHelper(contexts.values()), _step3;
+      var _iterator3 = _createForOfIteratorHelper2(contexts.values()), _step3;
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
           var context = _step3.value;
@@ -497,7 +597,7 @@
         pruneContexts();
         return;
       }
-      var _iterator4 = _createForOfIteratorHelper(contexts.values()), _step4;
+      var _iterator4 = _createForOfIteratorHelper2(contexts.values()), _step4;
       try {
         for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
           var context = _step4.value;
@@ -514,7 +614,7 @@
     }
     function onContextMount() {
       syncNative(document.activeElement);
-      var _iterator5 = _createForOfIteratorHelper(contexts.values()), _step5;
+      var _iterator5 = _createForOfIteratorHelper2(contexts.values()), _step5;
       try {
         for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
           var context = _step5.value;
@@ -531,17 +631,69 @@
       var nearest = (_context$element2 = context.element) === null || _context$element2 === void 0 ? void 0 : _context$element2.closest(scopeSelector);
       var scope = nearest && context.scope.contains(nearest) ? nearest : context.scope;
       var modal = Array.from(document.querySelectorAll('dialog[open], [aria-modal="true"]')).reverse().find(function(element) {
+        if (!isValid(element)) return false;
         try {
           return element.matches(":modal") || element.getAttribute("aria-modal") === "true";
         } catch (_) {
           return element.getAttribute("aria-modal") === "true";
         }
       });
-      if (modal && !modal.contains(context.element)) return null;
+      if (modal && !modal.contains(context.element || context.scope)) return null;
       return scope;
     }
+    function navigate(context, command, scope) {
+      var _region$getAttribute;
+      var region = (context.element || context.scope).closest("[".concat(navAttribute, "]"));
+      var policy = (region === null || region === void 0 || (_region$getAttribute = region.getAttribute(navAttribute)) === null || _region$getAttribute === void 0 ? void 0 : _region$getAttribute.trim().toLowerCase()) || "auto";
+      if (policy === "none") return false;
+      var keyboard = command.source === "keyboard";
+      if (keyboard && (policy === "native" || context.syncDOM && policy !== "spatial")) return false;
+      if (!keyboard && command.source !== "gamepad" && context.syncDOM && policy !== "spatial") return false;
+      if (region && scope.contains(region)) scope = region;
+      var focused = context.element;
+      var origin = focused && available(focused, scope, true) ? focused.getBoundingClientRect() : null;
+      var candidates = Array.from(scope.querySelectorAll(focusableSelector)).filter(function(element) {
+        return element !== focused && available(element, scope, true);
+      }).map(function(element) {
+        return {
+          element: element,
+          rect: element.getBoundingClientRect()
+        };
+      });
+      var selected = selectSpatialCandidate(origin, candidates, command.action.slice(9));
+      if (!selected || !applyFocus(context, selected.element, true)) return false;
+      reveal(selected.element, scope);
+      return true;
+    }
+    function reveal(element, scope) {
+      if (scope === document.body || scope === document.documentElement) {
+        element.scrollIntoView({
+          block: "nearest",
+          inline: "nearest",
+          behavior: "instant"
+        });
+        return;
+      }
+      for (var node = element.parentElement; node && scope.contains(node); node = node.parentElement) {
+        var style = root.getComputedStyle(node);
+        var rect = element.getBoundingClientRect(), box = node.getBoundingClientRect();
+        var left = box.left + node.clientLeft, top = box.top + node.clientTop;
+        var offset = function offset2(start, end, min, max) {
+          return start < min ? start - min : end > max ? Math.min(end - max, start - min) : 0;
+        };
+        var x = /^(auto|scroll|overlay)$/.test(style.overflowX) ? offset(rect.left, rect.right, left, left + node.clientWidth) : 0;
+        var y = /^(auto|scroll|overlay)$/.test(style.overflowY) ? offset(rect.top, rect.bottom, top, top + node.clientHeight) : 0;
+        if (x || y) node.scrollBy({
+          left: x,
+          top: y,
+          behavior: "instant"
+        });
+        if (node === scope) break;
+      }
+    }
     function available(element, scope) {
-      if (!isValid(element) || !scope.contains(element)) return false;
+      var spatial = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
+      if (!isValid(element, spatial) || !scope.contains(element)) return false;
       var nearest = element.closest(scopeSelector);
       return !nearest || nearest === scope || !scope.contains(nearest);
     }
@@ -641,7 +793,7 @@
       return true;
     }
     function consumeCommand(command) {
-      var _command$originalEven, _command$originalEven2, _command$modifiers, _command$modifiers2, _command$modifiers3, _command$action;
+      var _command$originalEven, _command$originalEven2, _command$originalEven3, _command$originalEven4, _command$modifiers, _command$modifiers2, _command$modifiers3, _command$action, _origin$closest;
       var context = contexts.get(command.focusId);
       if (!context) {
         warn("Input command refers to an unknown focus context; command blocked.", {
@@ -649,36 +801,30 @@
         });
         return false;
       }
-      if (!["press", "repeat"].includes(command.phase) || (_command$originalEven = command.originalEvent) !== null && _command$originalEven !== void 0 && _command$originalEven.defaultPrevented) return false;
+      if (!["press", "repeat"].includes(command.phase) || (_command$originalEven = command.originalEvent) !== null && _command$originalEven !== void 0 && _command$originalEven.defaultPrevented || (_command$originalEven2 = command.originalEvent) !== null && _command$originalEven2 !== void 0 && _command$originalEven2.isComposing || ((_command$originalEven3 = command.originalEvent) === null || _command$originalEven3 === void 0 ? void 0 : _command$originalEven3.keyCode) === 229) return false;
       if (command.source === "point") return false;
       var focused = context.element;
       var inputScope = (focused || context.scope).closest("[".concat(AelluxJs.attr("inputs"), "]"));
       if (inputScope && !inputScope.getAttribute(AelluxJs.attr("inputs")).split(/\s+/).includes(command.source)) return false;
-      var origin = (_command$originalEven2 = command.originalEvent) === null || _command$originalEven2 === void 0 ? void 0 : _command$originalEven2.target;
+      var origin = (_command$originalEven4 = command.originalEvent) === null || _command$originalEven4 === void 0 ? void 0 : _command$originalEven4.target;
       var editable = function editable2(element) {
         return element === null || element === void 0 ? void 0 : element.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]');
       };
       var reserved = ((_command$modifiers = command.modifiers) === null || _command$modifiers === void 0 ? void 0 : _command$modifiers.meta) || ((_command$modifiers2 = command.modifiers) === null || _command$modifiers2 === void 0 ? void 0 : _command$modifiers2.ctrl) && ["KeyW", "KeyT", "KeyN", "KeyR", "KeyL", "KeyF", "KeyP", "KeyS", "KeyC", "KeyV", "KeyX", "KeyA", "KeyZ", "KeyY"].includes(command.code) || ((_command$modifiers3 = command.modifiers) === null || _command$modifiers3 === void 0 ? void 0 : _command$modifiers3.alt) && ["ArrowLeft", "ArrowRight", "F4"].includes(command.code);
       if (command.source === "keyboard" && (editable(origin) || editable(focused) || command.code === "Tab" || reserved)) return false;
+      var directional = (_command$action = command.action) === null || _command$action === void 0 ? void 0 : _command$action.startsWith("navigate-");
+      if (command.source === "keyboard" && directional && (origin !== null && origin !== void 0 && (_origin$closest = origin.closest) !== null && _origin$closest !== void 0 && _origin$closest.call(origin, keyboardWidgetSelector) || focused !== null && focused !== void 0 && focused.closest(keyboardWidgetSelector) || Object.values(command.modifiers || {}).some(Boolean))) return false;
       var candidate = eligibleShortcuts(command.focusId, command)[0];
       if (candidate && command.phase === "press") return executeShortcut(candidate.element, command);
-      if (context.syncDOM && command.source === "keyboard") return false;
       var scope = activeScope(context);
       if (!scope) return false;
+      if (directional) return navigate(context, command, scope);
+      if (context.syncDOM && command.source === "keyboard") return false;
       if (command.action === "confirm" && command.phase === "press" && focused && available(focused, scope)) {
         focused.click();
         return true;
       }
-      if (!((_command$action = command.action) !== null && _command$action !== void 0 && _command$action.startsWith("navigate-"))) return false;
-      var elements = Array.from(scope.querySelectorAll(focusableSelector)).filter(function(element) {
-        return element.tabIndex >= 0 && available(element, scope);
-      });
-      if (!elements.length) return false;
-      var index = elements.indexOf(focused);
-      var direction = command.action.slice(9);
-      var step = direction === "left" || direction === "up" ? -1 : 1;
-      var next = index < 0 ? step > 0 ? 0 : elements.length - 1 : Math.max(0, Math.min(elements.length - 1, index + step));
-      return setFocus(command.focusId, elements[next]);
+      return false;
     }
   })(typeof globalThis !== "undefined" ? globalThis : window);
 })();

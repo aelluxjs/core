@@ -695,6 +695,7 @@
             ajax-load="doc-content">
             <h1>Progress Extension</h1>
 <p><strong>Distribution:</strong> Optional Extension. <strong>Stability:</strong> Not stable.</p>
+<p>Stability describes implementation maturity and validation, not API compatibility. Only the <a href="../../runtime/compatibility-commitment.htm">minimal initialization and declarative activation/mounting contract</a> is protected during <code>0.1.x</code>.</p>
 <p>Dialog and Progress remain Optional Extensions because their main additional value is Legacy compatibility. Modern browsers already provide native dialog, progress and meter controls; the separate Legacy artifacts supply the missing behavior and required fallback styles without adding that compatibility code to Full.</p>
 <p>Progress mounts <code>progress, meter</code> without a <code>data-ae-progress</code> marker. <code>&lt;progress&gt;</code> describes task completion; omit <code>value</code> for indeterminate work. <code>&lt;meter&gt;</code> describes a scalar measurement in a known range, such as storage usage. It is not a task timer.</p>
 <h2>Loading and native controls</h2>

@@ -695,6 +695,7 @@
             ajax-load="doc-content">
             <h1>Focus Extension</h1>
 <p><strong>Distribution:</strong> Bundled Extension. <strong>Stability:</strong> Not stable.</p>
+<p>Stability describes implementation maturity and validation, not API compatibility. Only the <a href="../runtime/compatibility-commitment.htm">minimal initialization and declarative activation/mounting contract</a> is protected during <code>0.1.x</code>.</p>
 <p><code>focus</code> is an official <strong>Bundled Extension</strong> included in the <code>full</code> runtime. Basic requires explicit registration.</p>
 <p>Focus consumes already routed commands from <a href="input.htm">Input</a>. It does not import or poll physical adapters. The existing native focus history, Next behavior and State Navigation integration below remain available without Input.</p>
 <h2>Logical contexts and synchronization</h2>
@@ -707,7 +708,74 @@ focus.updateContext(1, { syncDOM: false }); // optional independent logical cont
 focus.destroyContext(2);
 </code></pre>
 <p>IDs are positive safe integers. Duplicate/invalid creation or invalid targets return <code>false</code>. <code>setFocus(id, null)</code> clears a logical target. Context 1 cannot be destroyed independently; <code>updateContext</code> may change its scope/synchronization. A context cannot focus outside its scope, on a disabled/hidden/inert target or in a detached tree. Detached scope contexts are removed; invalid current elements lose their class and reference. Context 1, history and all classes are released on Extension destruction. Only context 1 may synchronize with the DOM.</p>
-<p>Navigation uses eligible controls in DOM order within the nearest active scope, bounded by the configured context container. Left/up move backward; right/down forward; edges do not wrap. With native synchronization, keyboard navigation stays native. Gamepad navigation can move native focus 1. Independent contexts also accept semantic navigation/confirm commands. Directional spatial geometry and independent screen-reader focus are not provided.</p>
+<p>Directional navigation uses visual rectangles within the nearest active scope, bounded by the configured context container. It never transfers to another logical context or wraps at an edge. Independent screen-reader focus is not provided.</p>
+<h2>Spatial navigation and input policy</h2>
+<p><code>data-ae-focus-nav</code> applies from the nearest declared ancestor (or current target itself); nested declarations override outer policy. It is read for every directional command, so inserted regions and attribute changes require no geometry-cache invalidation. In Basic, declare both Focus and Input; Full activates Focus on focus declarations, including <code>data-ae-focus-nav</code>. Enable physical adapters with <code>data-ae-inputs</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Directional behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>auto</code> (default)</td>
+<td>Gamepad and contexts without DOM synchronization navigate spatially. Keyboard in synchronized context 1 stays native. Other sources in synchronized contexts require an explicit spatial policy.</td>
+</tr>
+<tr>
+<td><code>spatial</code></td>
+<td>Also enables keyboard directions and application-supplied normalized directions in this region. Native editing and widget keys remain protected.</td>
+</tr>
+<tr>
+<td><code>native</code></td>
+<td>Preserves keyboard directions, including independent contexts. Gamepad and other sources retain their automatic policy; this does not disable gamepad.</td>
+</tr>
+<tr>
+<td><code>none</code></td>
+<td>Disables automatic directional navigation for every source in the region. Explicit contextual shortcuts retain their own contract.</td>
+</tr>
+</tbody></table>
+<p>Tab and Shift+Tab always retain browser navigation. Focus does not alter <code>tabindex</code>, implement roving tabindex or supply <code>aria-activedescendant</code>. IME, already prevented commands, text-entry/select/contenteditable keys, directional commands in ARIA composites and arrow-dependent native/custom controls remain under their native/component keyboard owner. Directional commands with modifiers are not consumed by spatial navigation. Enter/Space activation and scoped shortcuts keep their existing behavior.</p>
+<p><strong>Traditional website:</strong> keep the default policy, preserving native Tab, arrows and scrolling.</p>
+<pre><code class="language-html">&lt;main data-ae-inputs=&quot;point keyboard&quot;&gt;
+  &lt;a href=&quot;/library/&quot;&gt;Library&lt;/a&gt;
+  &lt;input aria-label=&quot;Search&quot;&gt;
+&lt;/main&gt;
+</code></pre>
+<p><strong>Keyboard spatial menu:</strong> use semantic navigation with native buttons/links; ARIA menus/tablists/grids still require their own APG keyboard behavior.</p>
+<pre><code class="language-html">&lt;main data-ae-inputs=&quot;point keyboard&quot;&gt;
+  &lt;nav aria-label=&quot;Sections&quot; data-ae-focus-scope data-ae-focus-nav=&quot;spatial&quot;&gt;
+    &lt;button&gt;Home&lt;/button&gt;&lt;button&gt;Library&lt;/button&gt;&lt;button&gt;Documentation&lt;/button&gt;
+    &lt;section data-ae-focus-nav=&quot;native&quot;&gt;&lt;input aria-label=&quot;Filter&quot;&gt;&lt;/section&gt;
+  &lt;/nav&gt;
+&lt;/main&gt;
+</code></pre>
+<p><strong>Gamepad interface:</strong> gamepad remains opt-in in Input; D-pad and primary-stick directions feed the same Focus geometry. Keyboard remains native under <code>auto</code>, including when gamepad can move context 1&#39;s DOM focus.</p>
+<pre><code class="language-html">&lt;main data-ae-inputs=&quot;point keyboard gamepad&quot;&gt;
+  &lt;section id=&quot;inventoryPanel&quot; data-ae-focus-scope&gt;
+    &lt;button id=&quot;sword&quot;&gt;Sword&lt;/button&gt;&lt;button id=&quot;shield&quot;&gt;Shield&lt;/button&gt;
+  &lt;/section&gt;
+&lt;/main&gt;
+</code></pre>
+<p><strong>Two independent focuses:</strong> after Input and Focus initialize and markup is mounted, bind the application&#39;s chosen device session to context 2. Session IDs come from <code>input.devices()</code>; they are not browser gamepad indices. Release application-owned routing when its player session ends.</p>
+<pre><code class="language-js">const input = $ae.ext.input;
+const focus = $ae.ext.focus;
+focus.createContext(2, { scope: document.getElementById(&quot;inventoryPanel&quot;) });
+focus.setFocus(1, &quot;sword&quot;);
+focus.setFocus(2, &quot;sword&quot;); // player classes coexist
+const secondDeviceId = input.devices()[1]?.deviceId;
+const removeRoute = input.registerRouter(command =&gt;
+  secondDeviceId &amp;&amp; command.deviceId === secondDeviceId ? 2 : undefined);
+// Player 2 directions move only context 2; document.activeElement belongs to 1.
+// Call removeRoute() on application player teardown or reassignment.
+</code></pre>
+<h3>Geometry, boundaries and scrolling</h3>
+<p>Focus measures eligible targets with <code>getBoundingClientRect()</code> synchronously for each command. It filters disconnected, disabled, inert, hidden/collapsed/content-hidden and transparent ancestors, effectively closed Present regions and invalid or zero-area rectangles. Native focusable elements, contenteditable and explicit <code>tabindex</code> controls, including <code>tabindex=&quot;-1&quot;</code> logical/programmatic targets, participate without changing their tabindex. Visibility is not restricted to the global viewport.</p>
+<p>Candidates must advance their rectangle center in the requested direction. Perpendicular interval overlap takes priority; within each alignment class, the score is primary edge gap plus three times the perpendicular gap plus 0.1 times perpendicular center offset. Primary center advance then breaks ties, followed by candidate DOM order. This uses edges and overlap rather than center distance alone. In an irregular grid, an aligned target can beat a closer diagonal target. A context without a target enters from the requested visual edge; an invalid/no candidate leaves the current focus unchanged and returns unhandled.</p>
+<p>The nearest <code>data-ae-focus-scope</code>, dialog or modal region bounds candidates; nested isolated scopes are excluded rather than entered automatically. A navigation-policy region inside that boundary narrows navigation further, even without <code>data-ae-focus-scope</code>. Context programmatic scope remains the outer limit. Inactive/hidden modal declarations do not block navigation; active modals isolate contexts outside them.</p>
+<p>All candidate measurements finish before changing focus/classes/scroll. No persistent geometry cache or continuous measurement loop is needed; responsive layout, CSS transforms, scroll and insertion are measured on the next synchronous command. Commands retain their synchronous <code>comm</code> result; no scheduler wait is inserted.</p>
+<p>Selected targets are revealed with native nearest scrolling. Inside a region, only scrollable ancestors through its navigation boundary are adjusted; a document-wide scope uses native <code>scrollIntoView</code>. Logical-only movement can scroll its region without calling <code>.focus()</code> or changing native focus. Scrollbox receives normal scroll events; Focus does not reproduce its physics or force scrolling when navigation is disabled. At an edge, an unconsumed keyboard arrow can still perform native scrolling.</p>
+<p>The conceptual references are the experimental <a href="https://www.w3.org/TR/css-nav-1/">CSS Spatial Navigation draft</a> and <a href="https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/">WAI-ARIA APG keyboard conventions</a>. This implementation uses stable rectangle/focus/scroll APIs; it does not implement the draft&#39;s experimental browser APIs or replace APG widget behavior.</p>
 <h2>Contextual shortcuts</h2>
 <pre><code class="language-html">&lt;section id=&quot;panel&quot; data-ae-focus-scope&gt;
   &lt;button id=&quot;inventory&quot; data-ae-shortcut=&quot;keyboard:KeyI; gamepad:north&quot;&gt;
@@ -736,6 +804,48 @@ $ae.init({ mode: &quot;basic&quot; });
 <p>For a focused input, textarea, select, editable element or element explicitly declaring <code>data-ae-focus</code>, a non-empty <code>id</code> lets Focus emit <code>AelluxJsPushState</code> with <code>detail: { key: &quot;ae-focus&quot;, value: element.id }</code>. Ordinary buttons and links can enter local focus history without creating navigation snapshots unless explicitly declared. State Navigation records eligible IDs in the hash as <code>ae-focus={elementid}</code> and dispatches <code>AelluxJsSnapshotRestore</code> to restore a matching connected, visible, eligible element. Elements without an ID still enter local history for <code>restoreLastFocus()</code>, but do not push a state. Without State Navigation, the command remains available to another consumer.</p>
 <p>With the default hash navigation setting, recorded focus changes also change the hash. Set <code>useHash: false</code> in the Core options if that URL behavior is unwanted. Local focus history remains in memory and does not survive a page reload. Unmount removes an <code>enterkeyhint</code> generated by Focus while preserving a value originally declared by the application.</p>
 <p>The Extension does not trap focus or announce navigation changes. Applications remain responsible for suitable focus order and accessible controls. A <code>change</code> event alone does not move focus, so changing a value and clicking another control retains the user&#39;s chosen target.</p>
+<h2>Bundle cost</h2>
+<p>Measured on 2026-11-09 against the preceding checked-in artifacts, using minified bytes and gzip level 9, matching the budget checker. Full includes the shared runtime and bundled Focus implementation; these are net distribution changes, not measured runtime speed improvements. Boot/SRI and editor metadata are also regenerated. Physical Input adapters and Input&#39;s implementation are unchanged.</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Before raw / gzip bytes</th>
+<th>After raw / gzip bytes</th>
+<th>Delta raw / gzip bytes</th>
+<th>Budget raw / gzip KiB</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>aellux.ext.focus.min.js</code></td>
+<td>11,574 / 4,540</td>
+<td>14,417 / 5,577</td>
+<td>+2,843 / +1,037</td>
+<td>11.5 / 4.5 -&gt; 14.5 / 5.75</td>
+</tr>
+<tr>
+<td><code>aellux.ext.focus.legacy.min.js</code></td>
+<td>15,123 / 5,530</td>
+<td>19,309 / 6,773</td>
+<td>+4,186 / +1,243</td>
+<td>15.25 / 5.5 -&gt; 19 / 6.875</td>
+</tr>
+<tr>
+<td><code>aellux.full.min.js</code></td>
+<td>227,227 / 70,649</td>
+<td>230,048 / 71,661</td>
+<td>+2,821 / +1,012</td>
+<td>223 / 69 -&gt; 226 / 70.5</td>
+</tr>
+<tr>
+<td><code>aellux.full.legacy.min.js</code></td>
+<td>565,255 / 166,995</td>
+<td>569,495 / 168,138</td>
+<td>+4,240 / +1,143</td>
+<td>553.5 / 164 -&gt; 558 / 165</td>
+</tr>
+</tbody></table>
+<p>Only these four budget entries increase to account for geometry, native-key policy and scoped reveal. Per-command work is linear in eligible controls and includes computed-style ancestor checks; profile large scopes. Fresh measurements avoid a complex invalidation cache and do not introduce continuous idle work.</p>
 <h2>Known Limits &amp; Risks</h2>
 <p>See <a href="../runtime/known-limits-and-risks.htm">Core Known Limits &amp; Risks</a> for classifications and shared architecture, loading and lifecycle boundaries.</p>
 <table>
@@ -752,6 +862,24 @@ $ae.init({ mode: &quot;basic&quot; });
 <td>Known Limit</td>
 <td><span class="large">Enter navigation scans eligible controls in document order, rather than sorting positive tabindex values. It is not a focus trap or a complete Shadow DOM navigation model.</span></td>
 <td><span class="large">Keep a meaningful native document/tab order and supply any required modal focus policy.</span></td>
+</tr>
+<tr>
+<td>Spatial geometry</td>
+<td>Known Limit</td>
+<td><span class="large">Axis-aligned rectangles approximate transformed shapes and inline fragments. Virtualized/unrendered nodes, iframe interiors, shadow-root interiors, occlusion and complex clipping are not modeled. Beam priority may favor a distant aligned target.</span></td>
+<td><span class="large">Validate irregular layouts and materialize virtualized targets. Future scoring/container strategies must preserve context ownership.</span></td>
+</tr>
+<tr>
+<td>Spatial scroll</td>
+<td>Known Limit</td>
+<td><span class="large">Only native scrollable ancestors inside the navigation boundary are revealed. Transform-based scrollers, complex transformed coordinates and oversized targets have limited alignment; outer containers are not scrolled across an isolated boundary.</span></td>
+<td><span class="large">Use native overflow/Scrollbox; provide application reveal behavior when needed.</span></td>
+</tr>
+<tr>
+<td>Logical players</td>
+<td>Validation Gap</td>
+<td><span class="large">Simulated D-pad/stick tests validate routing and geometry, not physical console/TV hardware or multiple screen-reader cursors.</span></td>
+<td><span class="large">Test physical devices and retain a visible indicator per player.</span></td>
 </tr>
 <tr>
 <td>Restoration</td>
@@ -772,7 +900,7 @@ $ae.init({ mode: &quot;basic&quot; });
 <td><span class="large">Test the actual keyboard and assistive-technology combinations used by the form.</span></td>
 </tr>
 </tbody></table>
-<p>Evidence: <a href="https://github.com/aelluxjs/core/blob/update/beta.10/dist/aellux.ext.focus.js">Implementation</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/focus.spec.mjs">focus.spec.mjs</a>.</p>
+<p>Evidence: <a href="https://github.com/aelluxjs/core/blob/release/0.1.0/src/aellux.ext.focus.js">Implementation</a>, <a href="https://github.com/aelluxjs/core/blob/release/0.1.0/tests/browser/focus.spec.mjs">native Focus regressions</a>, and repository coverage in <code>tests/unit/focus-spatial.test.mjs</code>, <code>tests/browser/focus-spatial.spec.mjs</code> and <code>tests/browser/input-focus.spec.mjs</code>.</p>
           </main>
 
           <div id="doc-navlinks2" ajax-load="doc-navlinks2">

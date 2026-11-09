@@ -143,7 +143,7 @@ import { officialExtensionDefinitions } from "./official-extension-definitions.j
         loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
       }
       if (name === "input") loadWhen = ["point", "inputs", "shortcut", "shortcut-hint"].map(attr).join(",");
-      if (name === "focus") loadWhen = ["focus", "focus-scope", "shortcut"].map(attr).join(",");
+      if (name === "focus") loadWhen = ["focus", "focus-scope", "focus-nav", "shortcut"].map(attr).join(",");
       // Full initializes its foundational services without a DOM selector.
       if (name === "state-navigation" || name === "preference") loadWhen = null;
       api.ext(name, { loadWhen, load: true, loadStyle: !!(optional && style) });

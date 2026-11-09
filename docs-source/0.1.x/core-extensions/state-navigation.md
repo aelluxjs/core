@@ -2,6 +2,8 @@
 
 **Distribution:** Bundled Extension. **Stability:** Stable.
 
+Stability describes implementation maturity and validation, not API compatibility. Only the [minimal initialization and declarative activation/mounting contract](../runtime/compatibility-commitment.md) is protected during `0.1.x`.
+
 `state-navigation` manages snapshots through the current window's browser history and, by default, its URL hash. It is included in the `full` runtime. Basic requires explicit registration. `$ae.ext("state-navigation")` before initialization enables eager loading. To defer it, register with `{ load: false }` and call `await $ae.wait("state-navigation")` after runtime initialization; it has no activation selector.
 
 ## Accessibility profile

@@ -2,6 +2,8 @@
 
 **Distribution:** Bundled Extension. **Stability:** Stable.
 
+Stability describes implementation maturity and validation, not API compatibility. Only the [minimal initialization and declarative activation/mounting contract](../runtime/compatibility-commitment.md) is protected during `0.1.x`.
+
 Standard motion effects replace `transform` on the resolved `data-ae-transform-target` element (the boundary itself by default). Keep that element separate from Anchor positioning, an Elastic Scrollbox wrapper, or Present transform. In development, an inspectable replacing transform effect records diagnostic `2033` with its writers. Animate a child to compose those behaviors; opacity-only custom effects and additive transforms do not trigger that warning.
 
 `feedback` sends structured feedback events, lets application code subscribe by type, and updates mounted feedback boundaries. It is included in the `full` runtime. In Basic, register it explicitly with `$ae.ext("feedback", { loadStyle: true })` to include the standard motion styles, or omit `loadStyle` if animations are unnecessary. Add `loadWhen: "[data-ae-feedback]"` for lazy loading.

@@ -695,6 +695,7 @@
             ajax-load="doc-content">
             <h1>Adaptive Extension</h1>
 <p><strong>Distribution:</strong> Bundled Extension. <strong>Stability:</strong> Stable.</p>
+<p>Stability describes implementation maturity and validation, not API compatibility. Only the <a href="../runtime/compatibility-commitment.htm">minimal initialization and declarative activation/mounting contract</a> is protected during <code>0.1.x</code>.</p>
 <p><code>adaptive</code> adds size and shape classes to elements marked with <code>data-ae-adaptive</code>. It is included in the <code>full</code> runtime and its CSS is supplied by the shared Full stylesheet. In Basic, register it explicitly with <code>$ae.ext(&quot;adaptive&quot;, { loadStyle: true })</code> before initialization. Add <code>loadWhen: &quot;[data-ae-adaptive]&quot;</code> for lazy loading.</p>
 <pre><code class="language-html">&lt;div id=&quot;responsive&quot; data-ae-adaptive&gt;Responsive content&lt;/div&gt;
 </code></pre>

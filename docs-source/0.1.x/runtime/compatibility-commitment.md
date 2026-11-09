@@ -1,154 +1,84 @@
 # Compatibility Commitment — AelluxJS 0.1.x
 
-> Preserve stable public contracts and observable behavior without freezing their internal implementation.
+AelluxJS is currently in its initial development stage.
 
-This document defines how AelluxJS preserves and evolves its public contracts, beginning with `0.1.0` and continuing through subsequent `0.1.x` releases. [Compatibility](../compatibility.md) describes technical requirements and validated environments; this commitment defines the rules for changing the API within those boundaries.
+Throughout the `0.1.x` release line, compatibility is maintained for the minimal global initialization contract and the core declarative Extension activation and mounting mechanisms documented for version `0.1.0`.
 
-The current package is still a prerelease. This commitment does not retroactively stabilize earlier betas, their superseded names, or their behavior. The release baseline is the public contract delivered with `0.1.0`; a compatible public addition receives protection from the release that introduces it.
+Extension-specific APIs, behavioral configuration attributes, methods, events, CSS interfaces, and implementation details may evolve, including through incompatible changes, regardless of whether an Extension is classified as Stable or Not stable. Extension stability classifications indicate implementation maturity and validation status, not API compatibility guarantees. Relevant changes will be documented, with migration guidance provided when appropriate.
 
-The Present dismissal rename is part of this prerelease finalization: the beta closing operation becomes `dismiss()`, with matching HTML, CSS and events, without an `unpop()` alias. `unpop()` now implements actual opening reverse playback as a distinct operation; it never aliases dismissal. Its trigger, progress channel, class and events identify that new meaning. See the [Present migration table](../core-extensions/present.md#operations-and-prerelease-migration). Publication was checked on 2026-11-04: npm listed only `0.1.0-beta.*` versions (through beta.9), the local package remained `0.1.0-beta.10`, and the public repository had no GitHub releases. No version is changed by this migration. A stable publication with the previous contract would require a maintainer compatibility decision before applying or releasing this removal.
+This commitment begins with `0.1.0`; it does not retroactively stabilize earlier betas. The package currently remains a prerelease. [Technical compatibility](../compatibility.md) and [Browser support](browser-support.md) describe platform requirements and tested environments, independently of this maintenance policy.
 
-## 1. Scope & Stability
+## Minimal protected contract
 
-[Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html#spec-item-4) treats `0.y.z` as initial development and does not automatically establish a stable public API. AelluxJS adopts the narrower, project-specific commitment below for the `0.1.x` line.
+This is an exhaustive list of protected interfaces. Being documented, public, reachable through `$ae`, or included in generated editor metadata does not add an interface to this list.
 
-| Classification | Compatibility commitment | AelluxJS examples |
-| --- | --- | --- |
-| Stable Public API | Preserved throughout `0.1.x`, subject to documented exceptional fixes. | <span class="large">Documented Core methods such as `$ae.mount()`, `BeforeMount`, and Stable Extension contracts such as Present's `pop()`, `data-ae-present`, and `--ae-pop-progress`.</span> |
-| Experimental Public API | May evolve, including incompatible changes, with appropriate documentation. | <span class="large">The Not stable Focus and Input APIs; Not stable Viewport attributes, outputs and events.</span> |
-| Internal Implementation | No compatibility guarantee. | <span class="large">Private controller maps, Marquee's generated wrapper structure, `data-ae-scrollbox-fade-state`, and `--ae-present-pop-phase`.</span> |
+### Global initialization
 
-Protection applies to documented public names, supported inputs, defaults, results and observable semantics under the documented prerequisites. It does not imply identical behavior for invalid inputs unless their handling is itself documented. Known limits, required markup, lifecycle rules, dependencies and platform capabilities remain part of each contract.
+- The browser boot exposes the global namespace `AelluxJs` and its alias `$ae`.
+- `$ae.init()` initializes the selected distribution. `$ae.init({ mode: "basic" })` and `$ae.init({ mode: "full" })` remain the fundamental modes.
+- Basic permits explicit declarations of desired Extensions before initialization through `$ae.ext(nameOrUrl, options?)`. Protection covers registration by name or Extension URL and participation in initial loading/mounting, rather than every registration option or runtime helper.
+- Full automatically registers the official Extensions, permitting initial declarative activation/mounting without declaring each one separately. Bundling versus loading a separate script is an implementation choice; deploy matching boot/runtime/Extension assets and satisfy documented platform prerequisites.
 
-### Extension classification
+Initialization settings beyond those explicitly listed, global helper methods, and post-initialization control APIs do not receive an implicit guarantee. Calling a method through the global namespace does not make it part of the protected initialization contract.
 
-The [Core Extensions index](../core-extensions/README.md#stability) and individual guides establish the current classification:
+### Declarative activation and initial mounting
 
-| Stability | Current distribution in Full | Extensions |
-| --- | --- | --- |
-| Stable | Bundled | <span class="large">[Adaptive](../core-extensions/adaptive.md), [Anchor](../core-extensions/anchor.md), [Feedback](../core-extensions/feedback.md), [Preference](../core-extensions/preference.md), [Present](../core-extensions/present.md), [Scrollbox](../core-extensions/scrollbox.md), [State Navigation](../core-extensions/state-navigation.md).</span> |
-| Stable | Optional | [Overflow Marquee](../core-extensions/optional/overflow-marquee.md), [Scrollbox Snap](../core-extensions/optional/scrollbox-snap.md). |
-| Not stable | Bundled | [Focus](../core-extensions/focus.md), [Input](../core-extensions/input.md), [Viewport](../core-extensions/viewport.md). |
-| Not stable | Optional | <span class="large">[Ajax Href](../core-extensions/optional/ajax-href.md), [Dialog](../core-extensions/optional/dialog.md), [Progress](../core-extensions/optional/progress.md), [PWA](../core-extensions/optional/pwa.md).</span> |
+`<link rel="aelluxjs-ext" href="name-or-extension-url">` continues to declare an Extension for the initial mount. The names and basic loading roles of `data-ae-load-when` (selector-driven loading), `data-ae-builds` (available runtime variants) and `data-ae-load-style` (stylesheet request) on these declarations are preserved. Additional options, extended value grammars and loading heuristics are outside the guarantee. The runtime's rewritten `rel="aelluxjs-ext-registered"` is an internal marker.
 
-All sixteen remain available during `0.1.x`. Stable Extensions receive the public-contract protection in this document. Not stable means experimental: their methods, markup, CSS and events may change incompatibly, with changelog entries and migration guidance for affected usage. Their current documentation still governs use of each published version.
+The following names retain their minimum role of identifying eligible markup for the corresponding Extension, once registered and loaded. Presence alone is not a promise that every element or every attribute value is valid; retain suitable native markup and any minimum target/value needed to identify an activation. Initial startup continues to integrate these declarations into its mount pass.
 
-Stability, distribution, platform compatibility and API compatibility are separate dimensions. Bundled does not mean Stable; Optional does not mean experimental. A loading or packaging change cannot revoke an existing Stable contract. Reclassifying an already Stable interface does not permit its incompatible removal within this line. Third-party Extension behavior is governed by its author; the documented Core registration and lifecycle interfaces remain protected.
+| Extension | Protected activation / mounting declaration |
+| --- | --- |
+| Adaptive | `data-ae-adaptive` |
+| Anchor | `data-ae-anchor` |
+| Feedback | `data-ae-feedback` |
+| Focus | `data-ae-focus`; `data-ae-focus-scope`, `data-ae-focus-nav` and `data-ae-shortcut` also trigger Full activation |
+| Input | `data-ae-point`, `data-ae-inputs`, `data-ae-shortcut-hint`; `data-ae-shortcut` also triggers Full activation |
+| Preference | `data-ae-preference` |
+| Present | `data-ae-present`, `data-ae-present-group`, `data-ae-trigger`, `data-ae-dismiss`, `data-ae-target` |
+| Scrollbox | `data-ae-scrollbox` |
+| Viewport | `data-ae-viewport` |
+| Ajax Href | `data-ae-ajax-href` on eligible anchors; activates delegated navigation rather than a mounted controller |
+| Dialog | Native `dialog` elements; no activation data attribute |
+| Progress | Native `progress` and `meter` elements; no activation data attribute |
+| Overflow Marquee | `data-ae-overflow-marquee` |
+| PWA | `data-ae-pwa` |
+| Scrollbox Snap | `data-ae-scrollbox` together with `data-ae-scrollbox-snap` |
+| State Navigation | Explicit registration in Basic, automatic startup registration in Full; no element mounting declaration |
 
-## 2. Versioning & API Evolution
+For attributes serving both activation and configuration, **only the activation/mounting role is protected**. For example, `data-ae-focus` remains a Focus mounting declaration, while its behavioral value `next` is not frozen. Input's modality list, Present actions/targets/group capacity, Anchor placement, Scrollbox settings, Snap strategies and all other behavioral values, formats and defaults may evolve. A mounting attribute's name does not guarantee the behavior currently configured by its value. Markup alone does not register Extensions in Basic.
 
-Releases after `0.1.0` may include bug fixes, maintenance, internal refactoring, performance improvements, compatible functionality, additional Extensions, new methods or attributes, and optional fields or options. Within this line, these changes use subsequent `0.1.x` versions. New options must preserve existing defaults and valid usage when omitted. Adding an optional field must preserve the meaning and type of existing fields.
+The checked implementation is the boot's `init`, the initial mount helper's link processing, Full's official activation selectors and each Extension's mount selector. See [Runtime API](api.md), [registration](../extensions/registration.md), [lazy loading](../extensions/lazy-loading.md) and the [Extension index](../core-extensions/README.md). These usage references describe more APIs than the protected subset.
 
-For Stable Public APIs, a normal `0.1.x` update must not:
+## Interfaces outside the guarantee
 
-- remove a public method or rename a public attribute;
-- reinterpret an existing supported value or incompatibly change a documented default;
-- introduce incompatible required parameters or change existing parameter meanings;
-- incompatibly change a return type, Promise result or documented failure outcome;
-- remove required event fields, change their types, or change documented event routing or order; or
-- change established operational semantics while retaining the same signature.
+The following may change incompatibly within `0.1.x`, for both Stable and Not stable Extensions:
 
-Intentional incompatible changes to Stable APIs belong in a future `0.2.x` line. A bug fix may correct behavior that violates the documented contract; relying on an undocumented defect does not turn it into a guaranteed feature. If a proposed fix would also break documented valid usage, it must be assessed as an incompatibility rather than silently described as maintenance.
+- Extension APIs and controller methods, their inputs, return values and asynchronous behavior.
+- Behavioral configuration attributes, values, formats, defaults and post-initialization options, including `data-ae-focus-nav`.
+- Extension events, payloads, timing and behavioral heuristics.
+- CSS classes, custom properties, generated styling hooks and visual interfaces.
+- Internal communication contracts, implementation details and storage structures.
+- Programmatic mounting, updating, unmounting and destruction; lifecycle methods and events; `wait()`, `extAttach()`, diagnostic, request, scheduling, persistence and other global helpers absent from the exhaustive protected list.
+- Package subpaths, editor catalog schemas, auxiliary artifact names and packaging details beyond the minimal ability to initialize and activate/mount the selected distribution.
 
-Deprecation must identify the affected interface, explain the reason, name a replacement when available, and include migration guidance in the documentation and changelog. A deprecated Stable interface continues to work throughout `0.1.x` under its existing contract. Removal belongs in a later line; this is not a promise of indefinite support. There is no fixed notice period or automatic promotion schedule for experimental APIs.
+Current documentation remains a factual reference for each published version. Removing an API compatibility guarantee does not remove its usage documentation or authorize arbitrary changes without a technical reason.
 
-A security vulnerability or severe defect may require an exceptional incompatible fix. Such a change requires an explicit maintainer decision for that case and documentation of the reason, affected contracts and versions, mitigation or migration, and validation. This is not standing permission to bypass compatibility. The general exception procedure and support-policy proposals remain pending in the separate [Compatibility Policy Review](compatibility-policy-review.md).
+## Extension maturity
 
-## 3. JavaScript Public API
+| Classification | Meaning |
+| --- | --- |
+| Stable | Implementation considered sufficiently mature, documented, tested and validated for its documented environments and scope. |
+| Not stable | Implementation and contracts are still stabilizing and may change more frequently. |
 
-The public namespace `AelluxJs` and alias `$ae`, the shared API's documented package entry, and the documented Core methods retain their names and semantics. The [Runtime API](api.md), [Extension registration](../extensions/registration.md) and [authoring contract](../extensions/authoring.md) define the protected surface; this page does not reproduce their complete reference.
+Neither classification guarantees API compatibility. Existing classifications remain unchanged: nine Stable and seven Not stable Extensions, independently of the ten Bundled and six Optional implementations. See the [complete index](../core-extensions/README.md#stability).
 
-Compatibility includes parameter order, supported options and defaults, return types and meanings, availability before or after initialization, and documented asynchronous behavior. In particular:
+## Incompatible changes and maintenance
 
-- `mount()` remains idempotent and resolves to distinct elements newly mounted by that call. Partial failures, empty results and cancellation retain their documented meanings.
-- `wait(name)` requires registration, awaits Extension initialization and returns the API or the documented `null` failure result. An asynchronous `init(options)` must finish before the Extension is reported initialized; supported retries remain available.
-- Mounted controllers remain accessible through `$ae(elementOrId)` and `mountManager.controller()`. Documented Extension methods keep their element binding. Unmount removes the corresponding methods; a later mount may create a new controller. Controller object identity after remount is not guaranteed.
-- Initialization, mount, update, unmount and destruction preserve their documented ordering, cleanup and cancellation behavior. Updating mounted elements does not implicitly register or mount every new declaration. Extension authors retain their obligations to release owned resources.
-- Promise settlement, cancellation, supersession and failure must follow each operation's reference. A resolved Promise is not a universal success flag or proof of visual completion. For example, an interrupted Present request can settle without reaching its endpoint, and a canceled unmount resolves to `false`.
+Changes outside the protected subset may ship in a subsequent `0.1.x`; an Extension API change does not require `0.2.0`. No formal deprecation period or retention through the entire line is required for these interfaces.
 
-Behavior is part of the interface. Standalone `present.pop(element)` restarts opening even when already open; `toggle(element, true)` and opening an already selected exclusive group member have their documented idempotent semantics. Making standalone `pop()` idempotent would be incompatible despite preserving its signature. See [Present](../core-extensions/present.md).
+Maintenance practice is to record relevant changes in the CHANGELOG, identify public API renames/removals, update reference documentation and examples, and provide migration guidance when appropriate. Avoid incompatible changes without an identifiable technical benefit. The change from DOM-order directional Focus to spatial geometry, for example, is documented with its keyboard policy and scope boundaries in the [Focus guide](../core-extensions/focus.md).
 
-Public error contracts are protected where documented: for example, `request()` rejects unsuccessful HTTP responses with `AelluxJsRequestError` and its `status`, `statusText` and `response`; an automatic error event does not consume a direct caller's Promise rejection. Experimental producers retain their experimental status.
+This replaces the previous broad protection of Stable Extension APIs, all documented Core methods, controller/lifecycle contracts, events and CSS. Only the explicit initialization and declarative activation/mounting subset above remains protected. It reserves room for architectural corrections while preserving a useful minimum for early adoption.
 
-Documented diagnostic identifiers, numeric codes and their meanings remain usable. The documented diagnostics API, severity and verbosity behavior remain public; explanatory wording, stack traces, auxiliary context and internal diagnostic construction may evolve. Required context fields are protected only where documented as part of a specific public contract. Applications should branch on documented codes or structured fields rather than message text. See [Diagnostics](diagnostics.md) and [asynchronous failures](events.md#asynchronous-failures).
-
-Source exports, private helpers, caches, controller storage and undocumented functions do not become Stable merely because they are reachable or appear in an API-shape inspection. Registry access documented by the reference retains its documented use; this does not authorize arbitrary mutation of runtime indexes or freeze their private representation.
-
-## 4. Declarative HTML & CSS Contracts
-
-Public semantic contracts include documented `data-ae-*` inputs and outputs, accepted syntax and values, defaults, public `--ae-*` properties, and classes documented for application use. For Stable behavior, these names, value types, units, ranges and meanings are preserved just as JavaScript contracts are.
-
-Examples include `data-ae-dismiss-on-click` values and their default outside dismissal, Present's numeric `--ae-pop-progress` range of `0..1`, Scrollbox's numeric `--ae-scroll-x-progress` range of `0..1`, and Present's documented `ae--pop` state class. A documented output is for observation or styling; setting it is not automatically a supported command.
-
-Dynamic updates follow each Extension's contract. Observer-backed reconfiguration remains supported where documented, such as Present Group selection and Marquee fade changes. New DOM insertion still requires `$ae.mount(root)`. Use the documented controller or `mountManager.update()` where required; there is no promise that arbitrary attribute or CSS changes are observed automatically.
-
-The generated `dist/aellux.semantic.json` catalog, maintained through `scripts/semantic-definitions.mjs`, helps identify names, syntax, defaults and input/output/internal roles. Its native editor formats are described in [Editor support](../integrations/editor-tooling.md). Open-grammar suggestions are examples rather than closed enums. Catalog inclusion alone does not stabilize an internal entry or an experimental Extension. Automatically collected class names and API shapes must be interpreted alongside the specialized public guide; conflicting descriptions require review rather than silent reclassification.
-
-Internal implementation details may change: generated wrapper nesting, auxiliary classes and attributes, private CSS properties, animation bookkeeping and intermediate state machinery receive no independent guarantee. For example, `--ae-present-pop-phase` is internal even though the similarly named `--ae-pop-progress` is public. A documented state class remains public even when the code that manages it changes.
-
-The design principle is **reusable UX behavior without prescribing visual appearance**. Public styling hooks and documented behavior are preserved, while stylesheet generation, selector organization, keyframe implementation and private geometry may evolve. This does not promise identical pixels, computed styles, every intermediate animation value, or invariability of all CSS produced by Extensions. Host styles and documented capability fallbacks still affect rendering.
-
-## 5. Event Contracts
-
-For Stable events, the contract includes the public name, originating target, `bubbles`, `composed`, `cancelable`, required `detail` fields and types, emission conditions, documented relative order, and the meanings of states or transitions. Use `eventName()` and the [Events reference](events.md) for naming and routing. Runtime dispatch defaults to bubbling, noncancelable events; composition is opt-in, so bubbling alone does not promise crossing a shadow boundary. Per-producer declarations take precedence over defaults.
-
-Different event roles must retain their meaning:
-
-| Role | Example | Meaning to preserve |
-| --- | --- | --- |
-| Intention or command | `PushState` | A request handled by State Navigation; dispatch alone does not prove completion. |
-| Cancelable pre-operation | `BeforeMount`, `BeforePop` | Synchronous `preventDefault()` vetoes the documented operation before its effects. |
-| Transition in progress | `Popping`, `Dismissing` | A transition starts; the requested endpoint has not necessarily been reached. |
-| Completion | `Pop`, `Dismiss`, `Mount` | The corresponding current operation or pass finishes according to its own contract. |
-| State update | `PreferencesChange` | Reports resolved state and changed keys; it is not a request to change state. |
-| Numeric progress | `Progress` | Reports finite `{ value, max }`, with `max > 0` and `0 <= value <= max`, on its producer. |
-
-For example, lifecycle before/completion events originate on `document`; canceling a mount suppresses `Mount` but does not prevent startup from emitting `Ready`. `Ready` does not guarantee that every element mounted successfully. Present emits its before-event before transition-start and current completion notifications; interrupted requests must not publish an obsolete successful completion. See [Runtime lifecycle](events.md#runtime-lifecycle) and [Present](../core-extensions/present.md) for the precise exceptions and payloads.
-
-Required event fields cannot be removed or incompatibly retyped. Optional fields may be added without changing existing meaning. Consumers should tolerate additional fields. Payload ownership and snapshot guarantees apply only where the producer documents them; event detail is not universally immutable.
-
-Generic `AelluxJsProgress` is nonbubbling and noncancelable and must be observed on the producer. It does not require the experimental Progress Extension. `feedback.progress()` continues to emit the distinct, cancelable `AelluxJsFeedback` contract, including boundary handling. These channels are not interchangeable.
-
-Notifications from Not stable Extensions, such as Input's `Tap` and Viewport's geometry events, remain experimental even though listed in the shared reference. Application-defined events and Docweaver theme events do not acquire Core stability from using the same naming helpers.
-
-This commitment does not guarantee undocumented event timing, exact frequency, event counts per frame, compositor synchronization, or a total order across unrelated operations. Cancellation must be synchronous; a Promise returned by an event listener does not delay dispatch. Scheduler and browser throttling remain applicable.
-
-## 6. Distribution & Loading Compatibility
-
-Documented loading interfaces remain supported across Basic/Full and Modern/Legacy. Basic starts with no Extension registrations; declarations through `$ae.ext(...)` or `<link rel="aelluxjs-ext">` select the desired Extensions and loading policy. Full makes all official Extensions available through automatic registration, currently embedding ten Bundled implementations and lazily loading six Optional scripts. Registration, loading, initialization and mounting are distinct stages.
-
-Eager loading, `loadWhen`, deferred `load: false` followed by `wait()`, optional stylesheet loading, declared dependencies, `extAttach()`, and compatible build selection preserve their documented contracts. An Extension may change its internal loading or packaging strategy while maintaining documented usage, resource requirements and availability. Applications must still meet each Extension's dependency and mount requirements. See [Registration](../extensions/registration.md), [Lazy loading](../extensions/lazy-loading.md), [Styles](../extensions/styles.md) and [Authoring](../extensions/authoring.md).
-
-The npm package's public entry and subpaths are preserved during `0.1.x`: the root import/default entry, `/boot`, `/esm`, `/full`, `/full/legacy`, `/orchestrator`, `/orchestrator/legacy`, `/semantic`, `/html-data`, `/css-data`, `/web-types` and documented paths under `/dist/*`. Documented browser filenames, minified and Legacy variants, public stylesheets, official registry files and metadata discovery remain supported. A file's presence under `dist` does not make every undocumented internal file a permanent public entry.
-
-The [official registry](../extensions/official-registry.md) describes the versioned metadata, resolution order, exact official Core compatibility, compatible build declarations and diagnostics. Official approval is explicit; a source filename alone does not grant official status. Third-party compatibility ranges do not imply a compatibility guarantee for arbitrary mixed assets. Deploy matching boot/runtime/Extension/CSS resources: boot and orchestrator version mismatch prevents startup, and incompatible declared Extension versions are rejected unless the documented check is explicitly skipped.
-
-SRI is specific to the final bytes of each published artifact. A new version has its own integrity values; compatibility does not promise unchanged bytes or hashes between versions. Skipping a version check does not bypass SRI or URL validation. CSP, CORS, trusted origins and resource availability remain deployment requirements; see [CSP and trust](../extensions/csp-and-trust.md).
-
-Public paths receive the same exceptional-change review as other Stable interfaces. Internal bundle layout, dependency organization, private file count and byte-for-byte output are not frozen. This commitment does not establish a new project-operated CDN, an npm publication/withdrawal procedure, or permanent availability of third-party hosts.
-
-## 7. Platform & Integration Compatibility
-
-The boot distribution has ES5 syntax. Modern targets ES2017+; Legacy provides ES5 output plus its documented shared polyfills. Parsing ES5, running the complete Legacy distribution, and passing validation on a particular browser/OS are three different claims. Required host DOM APIs and Extension-specific dependencies still apply. See [Browser support](browser-support.md), [Modern & Legacy](modern-legacy.md) and [ES5 support](es5-support.md).
-
-The recorded matrix covers Playwright-managed Chromium, Firefox and WebKit desktop engines, including forced Legacy, with exact versions and recorded scope maintained in [Browser support](browser-support.md) and [Validation scenarios](../validation-scenarios.md). This document adds no new test result. Those tests do not establish support for all commercial Chrome, Edge, Safari or Firefox versions. Historical browsers, including Internet Explorer, and mobile devices are outside the validated matrix. An ES2017 syntax-reference table or a Babel target does not expand that matrix.
-
-Within the documented platform scope, updates must preserve supported public behavior and disclose changes to prerequisites or validated coverage. A new feature may require an additional capability without making it mandatory for existing Stable usage. A regression in previously documented supported usage requires compatibility review; adding a limitation to a page does not by itself make the regression compatible.
-
-Progressive enhancement favors available, sufficiently compatible native APIs. Polyfills and fallbacks activate according to feature detection and the documented loading contract. Core Legacy supplies only its listed shared polyfills; Extensions own extra compatibility layers. For example, declaring and mounting Dialog is necessary for its Legacy element fallback; forcing Legacy does not replace a complete native dialog. A fallback preserves its documented public behavior without promising perfect visual or internal equivalence to the browser, such as a native top layer.
-
-AelluxJS integrates with existing HTML and CSS through its namespaces and lifecycle. Applications remain responsible for native semantics, explicit mounting of dynamic content and coordination of managed styles, focus and history. Bootstrap is neither required nor bundled. The recorded Bootstrap 5.3.8 fixture validates basic CSS and namespace coexistence; it does not guarantee interoperability with Bootstrap JavaScript components, plugins or arbitrary other libraries. See [Bootstrap integration](../integrations/bootstrap.md).
-
-Documented accessible behaviors remain part of Stable contracts, including applicable keyboard paths, focus handling, ARIA state, cleanup and reduced-motion behavior. The [accessibility requirements](../extensions/accessibility.md) apply according to each Extension's capabilities. They do not certify arbitrary application markup, universal WCAG conformance, equivalent screen-reader behavior, physical input devices or untested assistive technologies.
-
-## 8. Maintenance & Quality Assurance
-
-Published changes must pass the validation gates applicable to their scope. The repository's CI verifies distribution/documentation builds, unit tests, bundle budgets, browser tests, package contents and generated-file consistency. API or behavior changes need relevant regression coverage, including loading and lifecycle effects where applicable. Documentation-only work requires editorial, link, navigation and documentation-build checks; it does not establish a fresh runtime test result.
-
-Distribution validation must check that public artifacts, compatible variants and official metadata describe the delivered files, including final-byte integrity. The build and packaging references are maintained in [Getting Started](../getting-started.md), [Official registry](../extensions/official-registry.md) and [Validation scenarios](../validation-scenarios.md).
-
-Record released public changes in the changelog. Document migrations for experimental incompatibilities and any explicitly approved exceptional Stable fix. Keep deprecated APIs identified and usable for this line, and update [Known Limits & Risks](known-limits-and-risks.md) and individual Extension limits when evidence or contracts change. Separate demonstrated issues, potential risks, validation gaps and historical test results.
-
-Security reports and severe defects require assessment of affected versions, contracts and mitigations. No private reporting channel, response deadline, correction SLA, commercial availability or guaranteed support duration is established by this commitment. General exception handling, the maintenance focus on the latest `0.1.x`, backports, and a dedicated reporting process require the separate maintainer decisions recorded in the [policy review](compatibility-policy-review.md). There is no commitment to maintain every earlier patch version simultaneously.
-
-Compatibility is a maintenance rule, not a guarantee of zero bugs. Bundle budgets are internal quality controls that may evolve with reviewed changes; they do not promise an exact permanent size. No fixed latency, FPS, memory ceiling or capacity follows from this document. Performance improvements must preserve documented semantics, but actual performance depends on content, device, browser, workload and application integration. See [Performance and bundle budget](performance.md#scope-and-limitations).
+Applicable build, unit, browser, bundle and documentation checks remain maintenance quality gates; they are not a compatibility promise for every tested behavior. Record coverage, limitations and migration needs honestly. No fixed bundle size, performance target, universal accessibility certification or support duration is promised. Pending support windows, security-reporting and publication procedures remain separate, non-normative proposals in the [Compatibility Policy Review](compatibility-policy-review.md).

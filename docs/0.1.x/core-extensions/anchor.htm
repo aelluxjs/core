@@ -695,6 +695,7 @@
             ajax-load="doc-content">
             <h1>Anchor Extension</h1>
 <p><strong>Distribution:</strong> Bundled Extension. <strong>Stability:</strong> Stable.</p>
+<p>Stability describes implementation maturity and validation, not API compatibility. Only the <a href="../runtime/compatibility-commitment.htm">minimal initialization and declarative activation/mounting contract</a> is protected during <code>0.1.x</code>.</p>
 <p><code>data-ae-anchor</code> positions an element against a target using pairs of pivots. The target is named by <code>data-ae-anchor-target</code>; when that attribute is absent or empty, the target is the anchored element&#39;s <code>offsetParent</code> (its absolute-positioning reference). Anchor is included in the <code>full</code> runtime. In Basic, register it explicitly with <code>$ae.ext(&quot;anchor&quot;, { loadStyle: true })</code> before initialization. Add <code>loadWhen: &quot;[data-ae-anchor]&quot;</code> for lazy loading.</p>
 <pre><code class="language-html">&lt;div style=&quot;position: relative&quot;&gt;
   &lt;button id=&quot;trigger&quot;&gt;Open&lt;/button&gt;

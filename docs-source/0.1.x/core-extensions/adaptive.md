@@ -2,6 +2,8 @@
 
 **Distribution:** Bundled Extension. **Stability:** Stable.
 
+Stability describes implementation maturity and validation, not API compatibility. Only the [minimal initialization and declarative activation/mounting contract](../runtime/compatibility-commitment.md) is protected during `0.1.x`.
+
 `adaptive` adds size and shape classes to elements marked with `data-ae-adaptive`. It is included in the `full` runtime and its CSS is supplied by the shared Full stylesheet. In Basic, register it explicitly with `$ae.ext("adaptive", { loadStyle: true })` before initialization. Add `loadWhen: "[data-ae-adaptive]"` for lazy loading.
 
 ```html

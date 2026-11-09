@@ -2,6 +2,8 @@
 
 **Distribution:** Bundled Extension. **Stability:** Stable.
 
+Stability describes implementation maturity and validation, not API compatibility. Only the [minimal initialization and declarative activation/mounting contract](../runtime/compatibility-commitment.md) is protected during `0.1.x`.
+
 `present` controls the visibility of elements marked with `data-ae-present`. It is included in the `full` runtime, with CSS supplied by the shared Full stylesheet. In Basic, register it explicitly with `$ae.ext("present", { loadStyle: true })`. Supply `loadWhen` to choose a lazy activation selector, including trigger markup when needed.
 
 ## Operations and prerelease migration
@@ -64,7 +66,7 @@ Click keeps priority: Present queues a tap fallback with a 32 ms grace period, a
 
 Keyboard clicks keep their normal path. Mouse taps on an already hovered trigger respect the existing hover suppression; touch taps retain their configured action. Unmounting a related Present target or control, unmounting/remounting its Input controller, or destroying Present cancels the pending fallback. Destroy also removes the tap listener.
 
-The integration adds no dependencies. Minified Present grows from 18,858 to 20,037 bytes (gzip: 6,727 to 7,124), and Legacy Present from 26,358 to 27,825 bytes (gzip: 9,329 to 9,760). Budgets change from 18.5 / 6.5 KiB to 20 / 7.25 KiB for Modern and from 26 / 9 KiB to 28 / 9.75 KiB for Legacy. Both preceding gzip artifacts already exceeded their old limits. Combined Full costs are recorded in [Input](input.md#bundle-cost).
+The integration adds no dependencies. Minified Present grows from 18,858 to 20,037 bytes (gzip: 6,727 to 7,124), and Legacy Present from 26,358 to 27,825 bytes (gzip: 9,329 to 9,760). Budgets change from 18.5 / 6.5 KiB to 20 / 7.25 KiB for Modern and from 26 / 9 KiB to 28 / 9.75 KiB for Legacy. Both preceding gzip artifacts already exceeded their old limits. Combined Full costs are recorded in [Input](input.md#distribution-cost).
 
 ## Motion and state
 

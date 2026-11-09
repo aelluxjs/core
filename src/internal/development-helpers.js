@@ -76,7 +76,7 @@ const attributesByExtension = {
   "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
   scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-parent scrollbar-vertical scrollbar-horizontal",
   "scrollbox-snap": "scrollbox-snap snap-item",
-  focus: "focus focus-scope shortcut shortcut-priority shortcut-action shortcut-target", input: "point inputs shortcut-hint shortcut-focus shortcut-hint-position shortcut-label shortcut-source shortcut-code gamepad gamepad-family gamepad-model active-input", adaptive: "adaptive", "ajax-href": "ajax-href",
+  focus: "focus focus-scope focus-nav shortcut shortcut-priority shortcut-action shortcut-target", input: "point inputs shortcut-hint shortcut-focus shortcut-hint-position shortcut-label shortcut-source shortcut-code gamepad gamepad-family gamepad-model active-input", adaptive: "adaptive", "ajax-href": "ajax-href",
   viewport: "viewport viewport-target",
   progress: "progress-target progress-fallback",
   preference: "preference option label next prev ready",
@@ -86,7 +86,7 @@ const coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds l
 const activation = {
   present: "present present-group trigger dismiss", anchor: "anchor", "overflow-marquee": "overflow-marquee",
   scrollbox: "scrollbox", "scrollbox-snap": "scrollbox-snap",
-  focus: "focus focus-scope shortcut", input: "point inputs shortcut-hint", adaptive: "adaptive", "ajax-href": "ajax-href",
+  focus: "focus focus-scope focus-nav shortcut", input: "point inputs shortcut-hint", adaptive: "adaptive", "ajax-href": "ajax-href",
   viewport: "viewport",
   preference: "preference", feedback: "feedback"
 };

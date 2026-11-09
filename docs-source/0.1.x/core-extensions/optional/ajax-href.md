@@ -2,6 +2,8 @@
 
 **Distribution:** Optional Extension. **Stability:** Not stable.
 
+Stability describes implementation maturity and validation, not API compatibility. Only the [minimal initialization and declarative activation/mounting contract](../../runtime/compatibility-commitment.md) is protected during `0.1.x`.
+
 `ajax-href` replaces selected page regions with matching elements from a same-origin HTML response. This Optional Extension is excluded from the Full bundle. Full registers it for lazy loading when mounting `a[data-ae-ajax-href]`; Basic requires explicit registration. With the selector registered, dynamically inserted links activate it through `$ae.mount(container)`.
 
 ```html

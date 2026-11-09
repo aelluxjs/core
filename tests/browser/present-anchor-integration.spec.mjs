@@ -19,7 +19,16 @@ async function start(page, options = {}, html = fixture) {
   const { minified = false, ...runtimeOptions } = options;
   await page.goto("/tests/index.htm");
   await page.evaluate(html => { document.body.innerHTML = html; }, html);
-  await page.addScriptTag({ url: minified ? "/dist/aellux.min.js" : "/dist/aellux.js" });
+  // The boot diagnoses async/defer loading. A dynamically inserted classic
+  // script must explicitly opt out of async before it is connected.
+  await page.evaluate(url => new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.async = false;
+    script.src = url;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error(`Failed to load ${url}`));
+    document.head.append(script);
+  }), minified ? "/dist/aellux.min.js" : "/dist/aellux.js");
   await page.evaluate(options => {
     if (options.mode === "basic") {
       AelluxJs.ext("present", { loadStyle: true });
