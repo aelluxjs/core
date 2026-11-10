@@ -26,7 +26,7 @@
     },
     {
       "name": "--ae-anchor-switch-duration",
-      "description": "CSS Motion target-switch duration, with native fallback; reduced motion disables switching.\n\nValue syntax: <time>.\n\nDefault behavior: \"0ms\".\n\nSuggested values: `0ms`, `150ms`, `250ms`. This is an open grammar, not a closed enumeration.",
+      "description": "Target-switch duration on one scheduled timeline. Scroll and layout update the destination without restarting; reduced motion disables switching.\n\nValue syntax: <time>.\n\nDefault behavior: \"0ms\".\n\nSuggested values: `0ms`, `150ms`, `250ms`. This is an open grammar, not a closed enumeration.",
       "syntax": "<time>",
       "references": [
         {
@@ -48,7 +48,7 @@
     },
     {
       "name": "--ae-anchor-switch-ease",
-      "description": "CSS easing for Anchor target switches; position and matched dimensions share one clock.\n\nValue syntax: <easing-function>.\n\nDefault behavior: \"ease-in-out\".\n\nSuggested values: `linear`, `ease`, `ease-in-out`. This is an open grammar, not a closed enumeration.",
+      "description": "CSS easing for Anchor's dynamic target geometry; position, pivots and matching dimensions share one uninterrupted clock, including without Web Animations.\n\nValue syntax: <easing-function>.\n\nDefault behavior: \"ease-in-out\".\n\nSuggested values: `linear`, `ease`, `ease-in-out`, `cubic-bezier(.34,1.56,.64,1)`, `steps(4,end)`. This is an open grammar, not a closed enumeration.",
       "syntax": "<easing-function>",
       "references": [
         {
@@ -65,6 +65,12 @@
         },
         {
           "name": "ease-in-out"
+        },
+        {
+          "name": "cubic-bezier(.34,1.56,.64,1)"
+        },
+        {
+          "name": "steps(4,end)"
         }
       ]
     },

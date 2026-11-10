@@ -53,17 +53,19 @@ export const bundleBudget = Object.freeze([
   // docs-source/0.1.x/core-extensions/present.md.
   // Focus spatial geometry, native-key policy and bounded scrolling;
   // measured before/after costs: core-extensions/focus.md#bundle-cost.
-  { file: "aellux.full.min.js", maxRawBytes: 226 * 1024, maxGzipBytes: 70.5 * 1024 },
-  { file: "aellux.full.legacy.min.js", maxRawBytes: 558 * 1024, maxGzipBytes: 165 * 1024 },
+  // Anchor dynamic destination interpolation and CSS easing; measured before/after
+  // bytes and former budgets: core-extensions/anchor.md#dynamic-destination-cost.
+  { file: "aellux.full.min.js", maxRawBytes: 229.5 * 1024, maxGzipBytes: 72 * 1024 },
+  { file: "aellux.full.legacy.min.js", maxRawBytes: 562.5 * 1024, maxGzipBytes: 166.25 * 1024 },
   { file: "aellux.full.min.css", maxRawBytes: 124 * 1024, maxGzipBytes: 12 * 1024 },
   { file: "aellux.ext.adaptive.min.css", maxRawBytes: 121 * 1024, maxGzipBytes: 11 * 1024 },
   { file: "aellux.ext.adaptive.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
   { file: "aellux.ext.adaptive.legacy.min.js", maxRawBytes: 8.5 * 1024, maxGzipBytes: 3.5 * 1024 },
   { file: "aellux.ext.dialog.min.js", maxRawBytes: 1.125 * 1024, maxGzipBytes: .625 * 1024 },
   { file: "aellux.ext.dialog.legacy.min.js", maxRawBytes: 16.25 * 1024, maxGzipBytes: 5.5 * 1024 },
-  { file: "aellux.ext.anchor.min.js", maxRawBytes: 16.5 * 1024, maxGzipBytes: 6 * 1024 },
+  { file: "aellux.ext.anchor.min.js", maxRawBytes: 21 * 1024, maxGzipBytes: 7.625 * 1024 },
   { file: "aellux.ext.anchor.min.css", maxRawBytes: 2 * 1024, maxGzipBytes: 1024 },
-  { file: "aellux.ext.anchor.legacy.min.js", maxRawBytes: 24.25 * 1024, maxGzipBytes: 8.5 * 1024 },
+  { file: "aellux.ext.anchor.legacy.min.js", maxRawBytes: 30 * 1024, maxGzipBytes: 10.375 * 1024 },
   // Dedicated lazy Extension, including dormant pixel-limit lifecycle;
   // measured costs and previous limits: core-extensions/optional/overflow-marquee.md.
   { file: "aellux.ext.overflow-marquee.min.js", maxRawBytes: 14.25 * 1024, maxGzipBytes: 5.25 * 1024 },

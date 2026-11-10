@@ -1,12 +1,19 @@
 import { expect, test } from "@playwright/test";
+import { installAnchorProbe } from "./anchor-probe.mjs";
 
 async function start(page, html, options = {}) {
   await page.goto("/tests/index.htm");
   await page.evaluate(html => { document.body.innerHTML = html; }, html);
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(({ mode = "full", forceLegacy = false, noResizeObserver = false, noAnimations = false, ...initialization }) => {
+  await page.evaluate(({ mode = "full", forceLegacy = false, noResizeObserver = false, noAnimations = false, noScrollEnd = false, ...initialization }) => {
     if (noResizeObserver) window.ResizeObserver = class { observe() {} disconnect() {} };
     if (noAnimations) Element.prototype.getAnimations = undefined;
+    if (noScrollEnd) {
+      window.addEventListener("scrollend", event => event.stopImmediatePropagation(), true);
+      for (const target of [window, document, document.documentElement]) {
+        for (let prototype = target; prototype; prototype = Object.getPrototypeOf(prototype)) delete prototype.onscrollend;
+      }
+    }
     if (mode === "basic") {
       AelluxJs.ext("anchor", { loadStyle: true });
       if (document.querySelector("[data-ae-present-group]")) AelluxJs.ext("present", { loadStyle: true });
@@ -15,6 +22,7 @@ async function start(page, html, options = {}) {
   }, options);
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.anchor?.initialized)).toBe(true);
   await page.evaluate(() => AelluxJs.mount(document));
+  await installAnchorProbe(page);
 }
 
 const stage = `<style>body{margin:0} #ref{position:relative;width:750px;height:550px}
@@ -169,7 +177,7 @@ test("known layout motion tracks intermediate dimensions without ResizeObserver 
 
 for (const mode of ["basic", "full"]) {
   for (const forceLegacy of [false, true]) {
-    test(`CSS Motion controls matched dimensions and position on one clock (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
+    test(`one scheduled clock interpolates matched dimensions and position (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
       await start(page, `${stage}<div id="ref">${targets}${indicator}</div>`, { mode, forceLegacy });
       await aligned(page, "a");
       await page.locator("#indicator").evaluate(element => {
@@ -177,25 +185,17 @@ for (const mode of ["basic", "full"]) {
         window.unrelated = element.animate([{ opacity: .8 }, { opacity: .9 }], { duration: 10000, iterations: Infinity });
         element.setAttribute("data-ae-anchor-target", "b");
       });
-      await expect.poll(() => page.locator("#indicator").evaluate(element => {
-        const effects = element.getAnimations().filter(animation => animation.transitionProperty);
-        return effects.length === 3 && effects.every(animation => animation.playState === "paused");
-      })).toBe(true);
-      const samples = await page.locator("#indicator").evaluate(element => {
-        const effects = element.getAnimations().filter(animation => animation.transitionProperty);
-        return [0, .2, .4, .8].map(progress => {
-          effects.forEach(animation => { animation.currentTime = progress * 500; });
-          const rect = element.getBoundingClientRect();
-          return { progress, left: rect.left, top: rect.top, width: rect.width, height: rect.height };
-        });
-      });
-      for (const sample of samples) {
-        expect(sample.left).toBeCloseTo(20 + 280 * sample.progress, 1);
-        expect(sample.top).toBeCloseTo(60 + 110 * sample.progress, 1);
-        expect(sample.width).toBeCloseTo(80 + 80 * sample.progress, 1);
-        expect(sample.height).toBeCloseTo(40 + 30 * sample.progress, 1);
-      }
       await aligned(page, "b");
+      const samples = await page.evaluate(() => switchProbe.operations[0].frames);
+      expect(samples.some(sample => sample.width > 85 && sample.width < 155)).toBe(true);
+      for (const sample of samples) {
+        const progress = (sample.width - 80) / 80;
+        expect(sample.x).toBeCloseTo(20 + 280 * progress, 1);
+        expect(sample.y).toBeCloseTo(60 + 110 * progress, 1);
+        expect(sample.height).toBeCloseTo(40 + 30 * progress, 1);
+      }
+      expect(await page.evaluate(() => switchProbe.operations.length)).toBe(1);
+      expect(await page.locator("#indicator").evaluate(element => element.getAnimations().filter(animation => animation.transitionProperty).length)).toBe(0);
       await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
       expect(await page.evaluate(() => window.unrelated.playState)).toBe("running");
     });
@@ -204,8 +204,8 @@ for (const mode of ["basic", "full"]) {
 
 for (const forceLegacy of [false, true]) {
   for (const fallback of ["disabled", "unavailable"]) {
-    test(`native fallback retargets and completes without owning existing effects (${fallback}, legacy=${forceLegacy})`, async ({ page }) => {
-      await start(page, `${stage}<div id="ref">${targets}${indicator}</div>`, {
+    test(`fallback retargets on one clock without owning existing effects (${fallback}, legacy=${forceLegacy})`, async ({ page }) => {
+      await start(page, `${stage}<style>#c{width:50px}</style><div id="ref">${targets}${indicator}</div>`, {
         forceLegacy, cssMotionController: fallback !== "disabled", noAnimations: fallback === "unavailable"
       });
       await aligned(page, "a");
@@ -216,21 +216,20 @@ for (const forceLegacy of [false, true]) {
       await expect.poll(async () => (await geometry(page)).width).toBeGreaterThan(85);
       const before = await geometry(page);
       expect(before.width).toBeLessThan(160);
-      if (fallback === "disabled") {
-        expect(await page.locator("#indicator").evaluate(element => element.getAnimations()
-          .filter(animation => animation.transitionProperty).every(animation => animation.playState === "running"))).toBe(true);
-      }
       const handoff = await page.locator("#indicator").evaluate(async element => {
-        const before = element.getBoundingClientRect(), at = performance.now();
+        const before = { left: element.getBoundingClientRect().left, width: parseFloat(getComputedStyle(element).width) };
+        const at = performance.now();
         element.setAttribute("data-ae-anchor-target", "c");
         await $ae(element).anchor.update();
-        const after = element.getBoundingClientRect();
+        const after = { left: element.getBoundingClientRect().left, width: parseFloat(getComputedStyle(element).width) };
         return { before: { left: before.left, width: before.width }, after: { left: after.left, width: after.width }, elapsed: performance.now() - at };
       });
       // Native compositor values can materialize a frame after the JS sample.
       // Allow that frame while still rejecting a jump to either destination.
       expect(Math.abs(handoff.after.left - handoff.before.left)).toBeLessThan(handoff.elapsed + 20);
       expect(Math.abs(handoff.after.width - handoff.before.width)).toBeLessThan(handoff.elapsed * .2 + 5);
+      expect(handoff.after.width).toBeGreaterThan(52);
+      expect(handoff.after.width).toBeLessThan(158);
       await aligned(page, "c");
       await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
       expect(await page.evaluate(() => window.unrelated.playState)).toBe("running");
@@ -254,18 +253,17 @@ for (const forceLegacy of [false, true]) {
       window.unrelatedTransition = element.getAnimations().find(animation => animation.transitionProperty === "opacity");
       element.setAttribute("data-ae-anchor-target", "b");
     });
-    await expect.poll(() => page.locator("#indicator").evaluate(element =>
-      element.getAnimations().filter(animation => animation !== window.unrelatedTransition).length === 3 &&
-      element.getAnimations().filter(animation => animation !== window.unrelatedTransition).every(animation => animation.playState === "paused"))).toBe(true);
+    await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
     const cadence = await page.locator("#indicator").evaluate(async element => {
       let previous = null, changes = 0, synchronized = true;
       const until = performance.now() + 650;
       while (performance.now() < until) {
         await new Promise(requestAnimationFrame);
-        const times = element.getAnimations().filter(animation => animation !== window.unrelatedTransition).map(animation => animation.currentTime);
-        synchronized &&= times.length === 3 && Math.max(...times) - Math.min(...times) < .01;
-        if (times[0] !== previous) changes++;
-        previous = times[0];
+        const width = parseFloat(element.style.getPropertyValue("--ae-anchor-target-width"));
+        const height = parseFloat(element.style.getPropertyValue("--ae-anchor-target-height"));
+        synchronized &&= Math.abs((width - 80) / 80 - (height - 40) / 30) < .001;
+        if (width !== previous) changes++;
+        previous = width;
       }
       const before = element.getBoundingClientRect(), at = performance.now();
       element.setAttribute("data-ae-anchor-target", "c");
@@ -284,11 +282,12 @@ for (const forceLegacy of [false, true]) {
     expect(Math.abs(cadence.widthAfter - cadence.widthBefore)).toBeLessThan(cadence.elapsed * .06 + 6);
     expect(Math.abs(cadence.xAfter - cadence.xBefore)).toBeLessThan(cadence.elapsed * .2 + 18);
     expect(cadence.styles).toEqual([["var(--ae-anchor-target-width)", "important"],
-      ["var(--ae-anchor-target-height)", "important"], ["transform, width, height, opacity", "important"]]);
+      ["var(--ae-anchor-target-height)", "important"], ["opacity", "important"]]);
     expect(cadence.transform).toBe("");
     expect(cadence.unrelated).toBe("running");
     expect(cadence.preserved).toBe(true);
     await aligned(page, "c");
+    expect(await page.locator("#indicator").evaluate(element => element.style.getPropertyValue("transition-property"))).toBe("transform, width, height, opacity");
   });
 }
 
@@ -297,8 +296,6 @@ test("switching shares position and size timing, retargets continuously and igno
   await aligned(page, "a");
   await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "b"));
   await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
-  await expect(page.locator("#indicator")).toHaveCSS("transition-duration", "0.5s");
-  await expect(page.locator("#indicator")).toHaveCSS("transition-timing-function", "linear");
   await expect.poll(async () => (await geometry(page, "indicator", "b")).width).toBeGreaterThan(85);
   const sample = await geometry(page, "indicator", "b");
   expect(sample.width).toBeLessThan(160);
@@ -315,100 +312,397 @@ test("switching shares position and size timing, retargets continuously and igno
   await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
 });
 
+
 for (const forceLegacy of [false, true]) {
-  test(`rapid link changes keep switching during document scroll in a fixed reference (legacy=${forceLegacy})`, async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: "no-preference" });
-    await start(page, `${stage}<style>html{scroll-behavior:smooth}
-      #ref{position:fixed;top:0;left:0} body{height:3000px}
-      #first-section{position:absolute;top:1200px} #second-section{position:absolute;top:2400px}</style>
-      <nav id="ref" onclick="const link=event.target.closest('a');if(link)document.getElementById('indicator').dataset.aeAnchorTarget=link.id">
-        <a id="a" class="target" href="#">A</a>
-        <a id="b" class="target" href="#first-section">B</a>
-        <a id="c" class="target" href="#second-section">C</a>${indicator}
-      </nav><div id="first-section"></div><div id="second-section"></div>`, { forceLegacy });
+  test(`rapid genuine targets during document scroll each start one continuous timeline (legacy=${forceLegacy})`, async ({ page }) => {
+    await start(page, `${stage}<style>#ref{position:fixed;top:0;left:0}body{height:6000px}</style>
+      <div id="ref">${targets}${indicator}</div>`, { forceLegacy });
     await aligned(page, "a");
-    const samples = await page.evaluate(async () => {
-      const anchor = document.getElementById("indicator");
-      const frames = [];
-      const until = async predicate => {
-        const deadline = performance.now() + 2000;
-        do {
-          await new Promise(requestAnimationFrame);
-          if (predicate()) return;
-        } while (performance.now() < deadline);
-        throw new Error("Expected intermediate switching state during document scroll");
-      };
-      document.getElementById("b").click();
-      await until(() => scrollY > 0 && anchor.getBoundingClientRect().width > 85 &&
-        anchor.getBoundingClientRect().width < 155);
-      const before = { x: anchor.getBoundingClientRect().left, at: performance.now() };
-      document.getElementById("c").click();
-      await until(() => anchor.style.getPropertyValue("--ae-anchor-target-width") === "110px");
-      const after = { x: anchor.getBoundingClientRect().left, at: performance.now(),
-        switching: anchor.classList.contains("ae--anchor-switching"),
-        width: anchor.getBoundingClientRect().width, scrollY };
-      const deadline = performance.now() + 200;
-      while (performance.now() < deadline) {
-        frames.push({ switching: anchor.classList.contains("ae--anchor-switching"), scrollY });
-        await new Promise(requestAnimationFrame);
+    const result = await page.evaluate(async () => {
+      const anchor = document.getElementById("indicator"), samples = [];
+      anchor.setAttribute("data-ae-anchor-target", "b");
+      await waitAnchor(() => switchProbe.operations.length === 1);
+      window.scrollTo({ top: 5000, behavior: "smooth" });
+      for (const [index, id] of ["c", "a"].entries()) {
+        const previous = switchProbe.operations.at(-1);
+        await waitAnchor(() => performance.now() - previous.at >= 100);
+        const before = anchor.getBoundingClientRect(), at = performance.now();
+        anchor.setAttribute("data-ae-anchor-target", id);
+        await waitAnchor(() => switchProbe.operations.length === index + 2);
+        const after = anchor.getBoundingClientRect();
+        samples.push({ before: before.width, after: after.width, elapsed: performance.now() - at,
+          switching: anchor.classList.contains("ae--anchor-switching"), scrollY });
       }
-      // Repeated scroll notifications with the same destination must not
-      // restart the transition's cleanup timer.
-      while (performance.now() < after.at + 800) {
-        window.dispatchEvent(new Event("scroll"));
-        await new Promise(requestAnimationFrame);
-      }
-      return { before, after, frames, completed: !anchor.classList.contains("ae--anchor-switching") };
+      await waitAnchor(() => !anchor.classList.contains("ae--anchor-switching"));
+      return { samples, targets: switchProbe.operations.map(operation => operation.target),
+        duration: performance.now() - switchProbe.operations.at(-1).at };
     });
-    expect(samples.after.switching).toBe(true);
-    expect(Math.abs(samples.after.x - samples.before.x)).toBeLessThan(
-      (samples.after.at - samples.before.at) * 2 + 5);
-    expect(Math.abs(samples.after.width - 110)).toBeGreaterThan(1);
-    expect(samples.frames.every(frame => frame.switching)).toBe(true);
-    expect(samples.frames.at(-1).scrollY).toBeGreaterThan(samples.after.scrollY);
-    expect(samples.completed).toBe(true);
-    await aligned(page, "c");
-    await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
+    expect(result.targets).toEqual(["b", "c", "a"]);
+    expect(result.duration).toBeGreaterThanOrEqual(470);
+    expect(result.duration).toBeLessThan(850);
+    for (const sample of result.samples) {
+      expect(sample.switching).toBe(true);
+      expect(sample.scrollY).toBeGreaterThan(0);
+      expect(Math.abs(sample.after - sample.before)).toBeLessThan(sample.elapsed * .25 + 3);
+    }
+    await aligned(page, "a");
+    await page.waitForTimeout(600);
+    await aligned(page, "a");
+    expect(await page.evaluate(() => switchProbe.operations.length)).toBe(3);
   });
 
-  test(`scroll retargets an active switch when a sticky target moves and tracks immediately when idle (legacy=${forceLegacy})`, async ({ page }) => {
-    await start(page, `${stage}<style>#ref{overflow:auto}
-      #b{position:sticky;top:20px;margin:300px 0 0 300px}</style>
-      <div id="ref">${targets}${indicator.replace("500ms", "1000ms")}<div style="height:1500px"></div></div>`, { forceLegacy });
-    await aligned(page, "a");
-    await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "b"));
-    await expect.poll(async () => (await geometry(page)).width).toBeGreaterThan(85);
-    const sample = await page.evaluate(async () => {
-      const anchor = document.getElementById("indicator"), ref = document.getElementById("ref");
-      const previous = anchor.style.getPropertyValue("--ae-anchor-pivot-y");
-      const before = { top: anchor.getBoundingClientRect().top + ref.scrollTop, at: performance.now() };
-      ref.scrollTop = 350;
-      const deadline = performance.now() + 2000;
-      while (anchor.style.getPropertyValue("--ae-anchor-pivot-y") === previous) {
-        if (performance.now() > deadline) throw new Error("Scroll did not update the destination");
-        await new Promise(requestAnimationFrame);
-      }
-      return { before, top: anchor.getBoundingClientRect().top + ref.scrollTop, at: performance.now(),
-        switching: anchor.classList.contains("ae--anchor-switching"), width: anchor.getBoundingClientRect().width };
+  for (const fallback of ["controlled", "disabled", "unavailable"]) test(`smooth scroll updates a sticky destination without changing its clock (${fallback}, legacy=${forceLegacy})`, async ({ page }) => {
+    await start(page, `${stage}<style>#ref{overflow:auto}#b{position:sticky;top:20px;margin:300px 0 0 300px}</style>
+      <div id="ref">${targets}${indicator}<div style="height:2500px"></div></div>`, {
+      forceLegacy, cssMotionController: fallback !== "disabled", noAnimations: fallback === "unavailable"
     });
-    expect(sample).toMatchObject({ switching: true });
-    expect(sample.width).toBeLessThan(159);
-    expect(Math.abs(sample.top - sample.before.top)).toBeLessThan((sample.at - sample.before.at) * 2 + 5);
+    await aligned(page, "a");
+    const result = await page.evaluate(async () => {
+      const anchor = document.getElementById("indicator"), ref = document.getElementById("ref");
+      anchor.setAttribute("data-ae-anchor-target", "b");
+      await waitAnchor(() => switchProbe.operations.length === 1);
+      const operation = switchProbe.operations[0];
+      await waitAnchor(() => performance.now() - operation.at >= 100);
+      ref.scrollTo({ top: 1200, behavior: "smooth" });
+      const frame = await waitAnchorFrame(operation, 220);
+      const middle = { width: frame.width, switching: frame.switching, top: ref.scrollTop, elapsed: frame.at - operation.at };
+      await waitAnchor(() => !anchor.classList.contains("ae--anchor-switching"));
+      return { middle, count: switchProbe.operations.length,
+        duration: performance.now() - operation.at, frames: operation.frames };
+    });
+    expect(result.middle.switching).toBe(true);
+    expect(result.middle.width).toBeGreaterThan(80);
+    expect(result.middle.width).toBeLessThan(160);
+    expect(Math.abs(result.middle.width - (80 + 80 * result.middle.elapsed / 500))).toBeLessThan(1);
+    expect(result.middle.top).toBeGreaterThan(0);
+    expect(result.count).toBe(1);
+    expect(result.duration).toBeGreaterThanOrEqual(470);
+    expect(result.duration).toBeLessThan(850);
+    for (const frame of result.frames) {
+      const progress = (frame.width - 80) / 80;
+      expect(frame.height).toBeCloseTo(40 + 30 * progress, 1);
+    }
     await aligned(page, "b");
-    await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
-    await page.locator("#ref").evaluate(element => { element.scrollTop = 450; });
+    await page.locator("#ref").evaluate(element => element.scrollTo({ top: 1300, behavior: "instant" }));
     await aligned(page, "b");
-    await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
+    expect(await page.evaluate(() => switchProbe.operations.length)).toBe(1);
   });
 }
 
-test("resize interrupts switching for immediate tracking; hidden, removed and reduced targets deactivate safely", async ({ page }) => {
+test("moving and resizing the same target retain the original origin and completion deadline", async ({ page }) => {
+  await start(page, `${stage}<div id="ref">${targets}${indicator}</div>`);
+  await aligned(page, "a");
+  const result = await page.evaluate(async () => {
+    const anchor = document.getElementById("indicator"), target = document.getElementById("b");
+    anchor.setAttribute("data-ae-anchor-target", "b");
+    await waitAnchor(() => switchProbe.operations.length === 1);
+    const operation = switchProbe.operations[0];
+    await waitAnchor(() => performance.now() - operation.at >= 150);
+    Object.assign(target.style, { left: "400px", top: "160px", width: "200px", height: "90px" });
+    await $ae(anchor).anchor.update();
+    const changedAt = performance.now();
+    const frame = await waitAnchorFrame(operation, 330);
+    await waitAnchor(() => !anchor.classList.contains("ae--anchor-switching"));
+    return { frame, changedAt, at: operation.at, duration: performance.now() - operation.at, count: switchProbe.operations.length };
+  });
+  const progress = (result.frame.width - 80) / 120;
+  expect(progress).toBeGreaterThan(.58);
+  expect(progress).toBeLessThan(1);
+  expect(Math.abs(progress - (result.frame.at - result.at) / 500)).toBeLessThan(.02);
+  expect(result.frame.height).toBeCloseTo(40 + 50 * progress, 1);
+  expect(result.frame.pivotX).toBeCloseTo(100 + 500 * progress, 1);
+  expect(result.frame.pivotY).toBeCloseTo(60 + 190 * progress, 1);
+  expect(result.count).toBe(1);
+  expect(result.duration).toBeGreaterThanOrEqual(470);
+  expect(result.duration).toBeLessThan(850);
+  await aligned(page, "b");
+});
+
+test("same-target updates retain the captured duration and easing after configuration changes", async ({ page }) => {
+  await start(page, `${stage}<div id="ref">${targets}${indicator}</div>`);
+  await aligned(page, "a");
+  const sample = await page.evaluate(async () => {
+    const anchor = document.getElementById("indicator"), target = document.getElementById("b");
+    anchor.setAttribute("data-ae-anchor-target", "b");
+    await waitAnchor(() => switchProbe.operations.length === 1);
+    const operation = switchProbe.operations[0];
+    await waitAnchor(() => performance.now() - operation.at >= 150);
+    anchor.style.setProperty("--ae-anchor-switch-duration", "0ms");
+    anchor.style.setProperty("--ae-anchor-switch-ease", "steps(1,end)");
+    target.style.left = "400px";
+    await $ae(anchor).anchor.update();
+    const frame = await waitAnchorFrame(operation, 300);
+    const middle = { switching: frame.switching, width: frame.width, elapsed: frame.at - operation.at };
+    await waitAnchor(() => !anchor.classList.contains("ae--anchor-switching"));
+    return { middle, duration: performance.now() - operation.at, count: switchProbe.operations.length };
+  });
+  expect(sample.middle.switching).toBe(true);
+  expect(sample.middle.width).toBeGreaterThan(120);
+  expect(sample.middle.width).toBeLessThan(160);
+  expect(Math.abs(sample.middle.width - (80 + 80 * sample.middle.elapsed / 500))).toBeLessThan(1);
+  expect(sample.count).toBe(1);
+  expect(sample.duration).toBeGreaterThanOrEqual(470);
+  expect(sample.duration).toBeLessThan(850);
+  await aligned(page, "b");
+});
+
+test("origins and pivots share the size clock in a scaled bordered reference", async ({ page }) => {
+  await start(page, `${stage}<style>#indicator{left:.5px;top:.25px;margin-left:3px;margin-top:2px}</style>
+    <div id="ref" style="transform:scale(1.3);transform-origin:0 0;border:5px solid;padding:10px">${targets}${indicator}</div>`);
+  await expect(page.locator("#indicator")).toHaveClass(/ae--anchored/);
+  const snapshot = await page.evaluate(async () => {
+    const anchor = document.getElementById("indicator"), ref = document.getElementById("ref");
+    let sample = null;
+    switchProbe.onFrame = (operation, frame) => {
+      if (!frame.switching || frame.at - operation.at < 250) return;
+      const value = name => parseFloat(anchor.style.getPropertyValue(name));
+      const box = anchor.getBoundingClientRect(), reference = ref.getBoundingClientRect();
+      sample = { width: value("--ae-anchor-target-width"), originX: value("--ae-anchor-origin-x"), originY: value("--ae-anchor-origin-y"),
+        pivotX: value("--ae-anchor-pivot-x"), pivotY: value("--ae-anchor-pivot-y"),
+        left: (box.left - reference.left) / 1.3 - ref.clientLeft,
+        top: (box.top - reference.top) / 1.3 - ref.clientTop,
+        boxWidth: box.width / 1.3, boxHeight: box.height / 1.3 };
+      switchProbe.onFrame = null;
+    };
+    anchor.setAttribute("data-ae-anchor", "top-left:bottom-left");
+    anchor.setAttribute("data-ae-anchor-target", "b");
+    await waitAnchor(() => sample !== null);
+    return sample;
+  });
+  const progress = (snapshot.width - 80) / 80;
+  expect(progress).toBeGreaterThan(.4);
+  expect(progress).toBeLessThan(1);
+  expect(snapshot.originX).toBeCloseTo(100 * (1 - progress), 1);
+  expect(snapshot.originY).toBeCloseTo(100 * progress, 1);
+  expect(snapshot.pivotX).toBeCloseTo(100 + 200 * progress, 1);
+  expect(snapshot.pivotY).toBeCloseTo(60 + 40 * progress, 1);
+  // Layout may quantize fractional lengths before applying percentage transforms.
+  expect(Math.abs(snapshot.left - (snapshot.pivotX - snapshot.boxWidth * snapshot.originX / 100 + 3.5))).toBeLessThan(.2);
+  expect(Math.abs(snapshot.top - (snapshot.pivotY - snapshot.boxHeight * snapshot.originY / 100 + 2.25))).toBeLessThan(.2);
+  await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
+});
+
+for (const forceLegacy of [false, true]) test(`CSS curves match native easing with Web Animations APIs unavailable (legacy=${forceLegacy})`, async ({ page }) => {
+  await start(page, `${stage}<div id="ref">${targets}${indicator}</div>`, { forceLegacy });
+  await aligned(page, "a");
+  const samples = await page.evaluate(async () => {
+    const anchor = document.getElementById("indicator");
+    const curves = ["cubic-bezier(.34,1.56,.64,1)", "steps(4,jump-both)", "linear(0,.3 30% 70%,1)"]
+      .filter(curve => CSS.supports("transition-timing-function", curve));
+    const oracles = curves.map(easing => {
+      const effect = new KeyframeEffect(null, [], { duration: 500, easing, fill: "both" });
+      return { effect, animation: new Animation(effect) };
+    });
+    Element.prototype.getAnimations = undefined;
+    Element.prototype.animate = undefined;
+    window.Animation = window.KeyframeEffect = undefined;
+    const results = [];
+    for (const [index, easing] of curves.entries()) {
+      const fromWidth = parseFloat(anchor.style.getPropertyValue("--ae-anchor-target-width"));
+      const id = index % 2 ? "a" : "b", toWidth = id === "a" ? 80 : 160;
+      anchor.style.setProperty("--ae-anchor-switch-ease", easing);
+      anchor.setAttribute("data-ae-anchor-target", id);
+      await waitAnchor(() => switchProbe.operations.length === index + 1);
+      const operation = switchProbe.operations.at(-1);
+      await waitAnchor(() => operation.frames.some(frame => frame.at - operation.at >= 170));
+      const frame = operation.frames.at(-1), progress = (frame.at - operation.at) / 500;
+      oracles[index].animation.currentTime = progress * 500;
+      results.push({ easing, actual: (frame.width - fromWidth) / (toWidth - fromWidth),
+        expected: oracles[index].effect.getComputedTiming().progress });
+      await waitAnchor(() => !anchor.classList.contains("ae--anchor-switching"));
+    }
+    return results;
+  });
+  expect(samples.length).toBeGreaterThanOrEqual(2);
+  for (const sample of samples) expect(Math.abs(sample.actual - sample.expected), JSON.stringify(sample)).toBeLessThan(.03);
+});
+
+test("scroll longer than the switch leaves direct tracking and no idle animation work", async ({ page }) => {
+  await start(page, `${stage}<style>#ref{overflow:auto}#b{position:sticky;top:20px;margin:300px 0 0 300px}</style>
+    <div id="ref">${targets}${indicator}<div style="height:2500px"></div></div>`);
+  await aligned(page, "a");
+  const result = await page.evaluate(async () => {
+    const anchor = document.getElementById("indicator"), ref = document.getElementById("ref");
+    anchor.setAttribute("data-ae-anchor-target", "b");
+    await waitAnchor(() => switchProbe.operations.length === 1);
+    const operation = switchProbe.operations[0];
+    const started = performance.now();
+    while (performance.now() - started < 950) {
+      ref.scrollTo({ top: (performance.now() - started) * .8, behavior: "instant" });
+      await new Promise(requestAnimationFrame);
+    }
+    await $ae(anchor).anchor.update();
+    const frames = operation.frames.length;
+    await new Promise(resolve => setTimeout(resolve, 150));
+    return { count: switchProbe.operations.length, framesAfter: operation.frames.length - frames,
+      completedAt: operation.frames.find(frame => !frame.switching)?.at - operation.at,
+      switching: anchor.classList.contains("ae--anchor-switching") };
+  });
+  expect(result.count).toBe(1);
+  expect(result.completedAt).toBeGreaterThanOrEqual(470);
+  expect(result.completedAt).toBeLessThan(850);
+  expect(result.switching).toBe(false);
+  expect(result.framesAfter).toBe(0);
+  await aligned(page, "b");
+});
+
+for (const transition of ["all", "transform, width, height, opacity"]) for (const noAnimations of [false, true]) {
+  test(`dynamic switching preserves application transition timing and priorities (${transition}, no WAAPI=${noAnimations})`, async ({ page }) => {
+    await start(page, `${stage}<style>#ref{overflow:auto} #b{position:sticky;top:20px;margin:300px 0 0 300px}</style>
+      <div id="ref">${targets}${indicator}<div style="height:1500px"></div></div>`);
+    await aligned(page, "a");
+    await page.locator("#indicator").evaluate((element, { transition, noAnimations }) => {
+      window.inspectAnimations = element.getAnimations.bind(element);
+      window.transitionStartedAt = performance.now();
+      if (noAnimations) Element.prototype.getAnimations = undefined;
+      element.style.setProperty("transition-property", transition, "important");
+      element.style.setProperty("transition-duration", transition === "all" ? "2s" : "500ms, 500ms, 500ms, 2s", "important");
+      element.style.setProperty("transition-delay", "0s", "important");
+      element.style.setProperty("width", "var(--ae-anchor-target-width)", "important");
+      element.style.setProperty("height", "var(--ae-anchor-target-height)", "important");
+      element.style.opacity = ".5";
+      element.getBoundingClientRect();
+      window.opacityTransition = inspectAnimations().find(animation => animation.transitionProperty === "opacity");
+      window.authoredTransitions = ["transition-property", "transition-duration", "transition-delay", "transition-timing-function", "width", "height"].map(property =>
+        [element.style.getPropertyValue(property), element.style.getPropertyPriority(property)]);
+      element.setAttribute("data-ae-anchor-target", "b");
+    }, { transition, noAnimations });
+    await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
+    await page.locator("#ref").evaluate(element => { element.scrollTop = 350; });
+    await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
+    const result = await page.locator("#indicator").evaluate(element => ({
+      transitions: ["transition-property", "transition-duration", "transition-delay", "transition-timing-function", "width", "height"].map(property =>
+        [element.style.getPropertyValue(property), element.style.getPropertyPriority(property)]),
+      expected: window.authoredTransitions,
+      opacityRunning: window.opacityTransition?.playState === "running" && inspectAnimations().includes(window.opacityTransition),
+      geometryTransitions: inspectAnimations().filter(animation => ["transform", "width", "height"].includes(animation.transitionProperty)).length,
+      x: element.style.getPropertyValue("--ae-anchor-x"),
+      elapsed: performance.now() - window.transitionStartedAt,
+      opacityState: window.opacityTransition?.playState,
+      effects: inspectAnimations().map(animation => [animation.transitionProperty, animation.playState, animation.currentTime]),
+      width: element.getBoundingClientRect().width
+    }));
+    expect(result.transitions).toEqual(result.expected);
+    expect(result.opacityRunning, JSON.stringify(result)).toBe(true);
+    expect(result.geometryTransitions, JSON.stringify(result)).toBe(0);
+    expect(result.x).toBe("300px");
+    await aligned(page, "b");
+    await page.locator("#ref").evaluate(element => { element.scrollTop = 450; });
+    await aligned(page, "b");
+    await page.waitForTimeout(600);
+    await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
+    await aligned(page, "b");
+    await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "a"));
+    await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" }));
+    await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
+    expect(await page.evaluate(() => inspectAnimations().filter(animation => ["transform", "width", "height"].includes(animation.transitionProperty)).length)).toBe(0);
+    await aligned(page, "a");
+  });
+}
+
+test("scrolling an independent region and synthetic scroll notifications preserve a normal switch", async ({ page }) => {
+  await start(page, `${stage}<div id="ref">${targets}${indicator}
+    <div id="independent" style="overflow:auto;width:50px;height:50px"><div style="height:800px"></div></div></div>`);
+  await aligned(page, "a");
+  await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "b"));
+  await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
+  await page.evaluate(async () => {
+    document.getElementById("independent").scrollTop = 200;
+    window.dispatchEvent(new Event("scroll"));
+    await AelluxJs.waitLayout.update(() => {});
+    await AelluxJs.waitLayout.update(() => {});
+  });
+  await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
+  await aligned(page, "b");
+  await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
+});
+
+for (const forceLegacy of [false, true]) test(`wheel scrolling a Scrollbox preserves the Anchor timeline (legacy=${forceLegacy})`, async ({ page }) => {
+  await start(page, `${stage}<div id="ref" data-ae-scrollbox="native" style="overflow:auto">
+    ${targets}${indicator.replace("500ms", "900ms")}<div style="height:1800px"></div></div>`, { forceLegacy });
+  await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollbox?.initialized)).toBe(true);
+  await aligned(page, "a");
+  await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "b"));
+  await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
+  await page.mouse.move(650, 450);
+  await page.mouse.wheel(0, 180);
+  await expect.poll(() => page.locator("#ref").evaluate(element => element.scrollTop)).toBeGreaterThan(0);
+  await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
+  await aligned(page, "b");
+  await page.mouse.wheel(0, 180);
+  await aligned(page, "b");
+  await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
+  expect(await page.evaluate(() => switchProbe.operations.length)).toBe(1);
+});
+
+for (const forceLegacy of [false, true]) test(`scroll tracking settles without scrollend and subsequent changes animate (legacy=${forceLegacy})`, async ({ page }) => {
+  await start(page, `${stage}<style>#ref{overflow:auto}</style><div id="ref">${targets}${indicator}
+    <div style="height:2000px"></div></div>`, { forceLegacy, noScrollEnd: true });
+  await aligned(page, "a");
+  expect(await page.locator("#ref").evaluate(element => "onscrollend" in element)).toBe(false);
+  await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "b"));
+  await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
+  await page.locator("#ref").evaluate(element => element.scrollTo({ top: 1300, behavior: "smooth" }));
+  await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
+  await aligned(page, "b");
+  await expect.poll(() => page.locator("#ref").evaluate(element => element.scrollTop)).toBe(1300);
+  await page.evaluate(async () => { for (let frame = 0; frame < 8; frame++) await AelluxJs.waitLayout.update(() => {}); });
+  await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "c"));
+  await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
+  await aligned(page, "c");
+});
+
+test("a target change between scroll measurement and publication never writes the older target", async ({ page }) => {
+  await start(page, `${stage}<style>#ref{overflow:auto} #b{position:sticky;top:20px;margin:300px 0 0 300px}</style>
+    <div id="ref">${targets}${indicator}<div style="height:1500px"></div></div>`);
+  await aligned(page, "a");
+  await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "b"));
+  await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
+  const values = await page.evaluate(async () => {
+    const anchor = document.getElementById("indicator"), target = document.getElementById("b");
+    const original = target.getBoundingClientRect;
+    let armed = true;
+    let fromWidth = null;
+    target.getBoundingClientRect = function () {
+      const result = original.call(this);
+      if (armed) {
+        armed = false;
+        fromWidth = parseFloat(anchor.style.getPropertyValue("--ae-anchor-target-width"));
+        anchor.setAttribute("data-ae-anchor-target", "c");
+        document.getElementById("c").style.width = "125px";
+      }
+      return result;
+    };
+    const published = [];
+    const observer = new MutationObserver(() => published.push(anchor.style.getPropertyValue("--ae-anchor-target-width")));
+    observer.observe(anchor, { attributes: true, attributeFilter: ["style"] });
+    document.getElementById("ref").scrollTo({ top: 350, behavior: "instant" });
+    await $ae(anchor).anchor.update();
+    await waitAnchor(() => switchProbe.operations.length === 2 && published.length > 1);
+    target.getBoundingClientRect = original;
+    observer.disconnect();
+    return { published, fromWidth, targets: switchProbe.operations.map(operation => operation.target) };
+  });
+  expect(values.targets).toEqual(["b", "c"]);
+  expect(values.published.length).toBeGreaterThan(0);
+  expect(values.published.every(value => parseFloat(value) >= Math.min(values.fromWidth, 125) - .01 &&
+    parseFloat(value) <= Math.max(values.fromWidth, 125) + .01)).toBe(true);
+  await aligned(page, "c");
+  await page.waitForTimeout(600);
+  await aligned(page, "c");
+  await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
+});
+
+test("resize preserves the timeline; hidden, removed and reduced targets deactivate safely", async ({ page }) => {
   await start(page, `${stage}<div id="ref">${targets}${indicator}</div>`);
   await aligned(page, "a");
   await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "b"));
   await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
   await page.evaluate(() => window.dispatchEvent(new Event("resize")));
-  await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
+  await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
+  expect(await page.evaluate(() => switchProbe.operations.length)).toBe(1);
   await aligned(page, "b");
   await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "a"));
   await aligned(page, "a");
@@ -611,7 +905,9 @@ test("zero duration, CSS steps easing and unmount during a switch leave no delay
     element.setAttribute("data-ae-anchor-target", "a");
   });
   await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
-  await expect(page.locator("#indicator")).toHaveCSS("transition-timing-function", "steps(4)");
+  await expect.poll(() => page.locator("#indicator").evaluate(element => parseFloat(element.style.getPropertyValue("--ae-anchor-target-width")))).toBeLessThan(150);
+  const stepFrames = await page.evaluate(() => switchProbe.operations.at(-1).frames.map(frame => frame.width));
+  expect(stepFrames.every(width => [160, 140, 120, 100, 80].some(value => Math.abs(width - value) < .1))).toBe(true);
   const snapshot = await page.evaluate(async () => {
     const element = document.getElementById("indicator");
     await AelluxJs.unmount(element, "anchor");

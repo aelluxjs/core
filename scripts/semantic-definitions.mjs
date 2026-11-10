@@ -107,8 +107,8 @@ export const semanticCSSProperties = [
     property(`${phase}-transform`, "present", "<transform-list> | none", `${phase} transform endpoint.`, { default: phase === "from" ? "scale(0.5)" : phase === "pop" ? "scale(1)" : "scale(1.2)" }),
     ...["height", "width"].map(axis => property(`${phase}-${axis}`, "present", "<flex>", `${phase} grid ${axis} endpoint.`, { default: phase === "pop" ? "1fr" : "0fr" }))
   ]),
-  property("anchor-switch-duration", "anchor", "<time>", "CSS Motion target-switch duration, with native fallback; reduced motion disables switching.", { default: "0ms", values: ["0ms", "150ms", "250ms"] }),
-  property("anchor-switch-ease", "anchor", "<easing-function>", "CSS easing for Anchor target switches; position and matched dimensions share one clock.", { default: "ease-in-out", values: ["linear", "ease", "ease-in-out"] }),
+  property("anchor-switch-duration", "anchor", "<time>", "Target-switch duration on one scheduled timeline. Scroll and layout update the destination without restarting; reduced motion disables switching.", { default: "0ms", values: ["0ms", "150ms", "250ms"] }),
+  property("anchor-switch-ease", "anchor", "<easing-function>", "CSS easing for Anchor's dynamic target geometry; position, pivots and matching dimensions share one uninterrupted clock, including without Web Animations.", { default: "ease-in-out", values: ["linear", "ease", "ease-in-out", "cubic-bezier(.34,1.56,.64,1)", "steps(4,end)"] }),
   property("overflow-marquee-speed", "overflow-marquee", "<number>", "Overflow Marquee speed in CSS pixels per second. Positive numbers only; invalid values use 30.", { default: "30" }),
   property("overflow-marquee-delay", "overflow-marquee", "<time>", "Overflow Marquee pause at both ends of each pass; nonnegative ms/s values. Invalid values use 1200ms.", { default: "1200ms" }),
   property("overflow-marquee-fade-size", "overflow-marquee", "<length>", "Maximum width of each progressive overflow fade. Zero disables the visual effect.", { default: "16px", values: ["0px", "16px", "24px"] }),

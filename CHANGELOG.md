@@ -27,6 +27,8 @@ Changes in this section are pending for the `0.1.0` release candidate.
 
 ### Changed
 
+- Anchor target switching now retains a fixed rendered origin, CSS easing and original completion deadline while scroll, resize and layout updates replace only its destination geometry. Genuine target changes start new timelines, including during automatic scrolling. Shared scheduled interpolation covers placement, pivots, origins and matching dimensions without competing native CSS transitions; Modern/Legacy and unavailable/disabled CSS Motion paths use the same model. Unrelated effects and authored transition priorities are preserved.
+
 - Narrowed the `0.1.x` Compatibility Commitment to the exhaustive minimal initialization and declarative activation/mounting list. Removed broad protection of Stable Extension APIs, controller/lifecycle methods, configuration values, events and CSS. Such changes may ship within `0.1.x` without mandatory deprecation periods; document relevant renames/removals and migrations. Extension classifications remain unchanged.
 
 - Made the pending `0.1.x` Compatibility Policy Review available in the public documentation, with navigation and local Commitment links. Updated distribution counts and Input naming; the milestone now points to the canonical review. Policy proposals remain non-normative.
@@ -41,7 +43,7 @@ Changes in this section are pending for the `0.1.0` release candidate.
 
 - Adaptive now compares element width in CSS pixels against `adaptiveParams.minSizes` for `ae--fits-*` classes, replacing `sqrt(width * height)`. Height-only reflow no longer changes size breakpoints or causes columns to repeatedly switch layouts. Shape classes, orientation and dimension outputs continue to use both dimensions.
 
-- Anchor target-switch transitions now use CSS Motion's shared adaptive clock for transform and matched dimensions, including the property FPS ceiling when animating width or height. Rapid replacements preserve rendered geometry and unrelated transitions; unchanged scroll destinations keep their operation. Native fallback and ordinary scheduled placement tracking remain supported. Completion and teardown cancel owned work and remove temporary state through the scheduler. Updated browser regressions, editor metadata and bundle budgets; measured artifact deltas are recorded in the Anchor guide.
+- Anchor target-switch transitions use shared adaptive publication and the property FPS ceiling when animating matching dimensions. Rapid target replacements preserve rendered geometry and unrelated transitions. Ordinary placement tracking remains supported. Completion and teardown cancel owned work and remove temporary state through the scheduler. Updated browser regressions and bundle budgets; measured artifact deltas are recorded in the Anchor guide.
 
 - The homepage publishes document scroll progress from `0` at the top to `1` at the bottom as `--home-scroll-progress-y` on `#main-navigation-3D`, using scheduled read/update publication and refreshing when the document or viewport size changes.
 
@@ -69,7 +71,7 @@ Changes in this section are pending for the `0.1.0` release candidate.
 
 - Anchor dimension matching compares the positioning pivot when identifying a changed destination, so intermediate inline width/height values do not interrupt an active switch.
 
-- Anchor preserves an active target-switch transition during scrolling, keeps unchanged destinations on their existing timeline, and retargets moving destinations from the rendered position. Resize still prioritizes immediate placement.
+- Anchor distinguishes effective target changes from geometry changes of the same target. Scroll and resize update the destination of an active operation; they do not restart or finish its timeline.
 - Snap replaces pre-existing inline `!important` registered focus values correctly in WebKit and restores the original value and priority on unmount.
 - Homepage section highlighting now follows Viewport visibility for Start, Examples and Extensions, with Back to top restored when returning to the hero; source disclosure lists the standalone files executed by each demo.
 

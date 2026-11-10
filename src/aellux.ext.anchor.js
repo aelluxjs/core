@@ -1,5 +1,7 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
+import { createCssEasing } from "./internal/create-css-easing.js";
+
 /**
  * Anchor Extension
  *
@@ -13,7 +15,8 @@
  * `data-ae-anchor-target`; a Present Group target resolves to its selected member.
  * Without an explicit target, the positioning parent is the target.
  * `data-ae-anchor-scroll-into-view="block inline"` optionally scrolls the Anchor
- * target on visibility or effective target changes, before switching.
+ * target on visibility or effective target changes. Switching keeps one clock
+ * while scroll/layout updates replace only its destination geometry.
  * `data-ae-maxfps` sets an optional maximum update rate.
  * Scroll, resize, size and intersection changes, and bubbling `AelluxJsLayout`
  * events schedule placement updates at the configured rate. A Layout event with
@@ -162,8 +165,7 @@
       invalidContext: false, active: false, revision: 0,
       target: null, resolvedTarget: null, reference: null,
       group: null, lastPlacement: null, switchOperation: null,
-      motionId: AelluxJs.motion.id(), cleanupLayoutId: nextLayoutId++,
-      interruptSwitch: false, scrollRevision: 0,
+      motionId: AelluxJs.motion.id(),
       scrollVisible: false, scrollPending: false, ownClass: null, ownStyle: null,
       layoutId: nextLayoutId++, styleLayoutId: nextLayoutId++,
       layoutUntil: 0, layoutSingle: false,
@@ -223,17 +225,25 @@
     }
     AelluxJs.waitLayout.cancel(state.layoutId);
     AelluxJs.waitLayout.cancel(state.styleLayoutId);
-    AelluxJs.waitLayout.cancel(state.cleanupLayoutId);
     await AelluxJs.waitLayout.update(state.styleLayoutId, deactivate, [element, state, memory]);
   }
 
   function scheduleUpdate(event) {
     if (!anchors.size) return;
+    const source = event?.type === "scroll" ? scrollSource(event) : null;
     for (const [element, state] of anchors) {
-      if (event?.type === "scroll") state.scrollRevision++;
-      else state.interruptSwitch = true;
+      if (source && !relevantScroll(source, element, state)) continue;
       scheduleAnchor(element);
     }
+  }
+
+  function scrollSource(event) {
+    return event.target === document || event.target === root
+      ? document.scrollingElement || document.documentElement : event.target;
+  }
+
+  function relevantScroll(source, element, state) {
+    return source.contains?.(element) || source.contains?.(effectiveTarget(element, state));
   }
 
   function onGroupChange(event) {
@@ -478,28 +488,36 @@
     let applied = false;
     await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
       if (!current()) return;
+      // A retarget can land between the read and write phases. Discard that
+      // destination; scroll alone must not starve publication on every frame.
+      if (effectiveTarget(element, state) !== placement.target) return;
       state.invalidContext = false;
       observe(state, element, placement.target, placement.reference);
       const previous = state.lastPlacement;
       const switching = previous && previous.target !== placement.target;
       if (!previous || switching) state.scrollPending = true;
-      if (switching && effectiveTarget(element, state) === placement.target) {
+      const moved = !previous || previous.signature !== placement.signature;
+      if (switching && placement.duration > 0) {
+        startSwitch(element, state, placement);
+      } else if (state.switchOperation && !switching && AelluxJs.currentPreference("reduced-motion") !== "reduced") {
+        // Same target, same origin and clock. Publishing new CSS destinations
+        // here would start competing native transitions; only replace the data.
+        state.switchOperation.toGeometry = placement;
+      } else if (state.switchOperation) {
+        // Reduced motion or an immediate genuine retarget must publish the
+        // destination while our transition mask is still held.
+        writePlacement(element, placement);
+        stopSwitch(element, state);
+      } else {
+        stopSwitch(element, state);
+        if (moved) placeDirectly(element, placement);
+        else writePlacement(element, placement);
+      }
+      if (switching) {
         state.scrollPending = false;
         state.scrollVisible = true;
         scrollTargetIntoView(element, placement.target);
       }
-      const moved = !previous || previous.signature !== placement.signature;
-      // Keep scroll notifications with the measured placement across the
-      // asynchronous read/write phases. Unchanged destinations keep their clock.
-      const scrollMoved = moved && state.switchOperation !== null &&
-        previous?.scrollRevision !== placement.scrollRevision;
-      if ((switching || scrollMoved) && placement.duration > 0 && !state.interruptSwitch) {
-        startSwitch(element, state, placement);
-      } else {
-        if (moved || state.interruptSwitch || !placement.duration) stopSwitch(element, state);
-        writePlacement(element, placement);
-      }
-      state.interruptSwitch = false;
       rememberVisual(element, state);
       state.lastUpdateAt = now();
       state.lastPlacement = placement;
@@ -511,7 +529,7 @@
     if (!applied && anchors.get(element) === state) return updateAnchor(element, ensureLatest);
     if (!applied || !element.hasAttribute(scrollIntoViewAttribute)) return;
     // Initial placement and reappearance need a visibility check after our
-    // hidden rule is released. Target changes already scrolled before switching;
+    // hidden rule is released. Target changes already requested scrolling;
     // transition cleanup and ordinary tracking do not re-arm that request.
     const visible = await AelluxJs.waitLayout.read(state.styleLayoutId, () =>
       current() && !isInvisible(element));
@@ -562,8 +580,21 @@
     const scaleY = reference.offsetHeight ? referenceRect.height / reference.offsetHeight : 1;
     const targetRect = toReference(target.getBoundingClientRect(), reference, referenceRect, scaleX, scaleY);
     const selfRect = element.getBoundingClientRect();
+    const visual = toReference(selfRect, reference, referenceRect, scaleX, scaleY);
+    const fromSelf = [ORIGIN_X, ORIGIN_Y].map(name => (parseFloat(style.getPropertyValue(name)) || 0) / 100);
+    // Read translation itself: subtracting integer offsetLeft/Top from a visual
+    // box with fractional layout offsets or margins can round the origin.
+    const matrix = /^matrix(3d)?\(([^)]*)\)$/.exec(style.transform);
+    const components = matrix ? matrix[2].split(",").map(Number) : null;
+    const visualX = components ? components[matrix[1] ? 12 : 4] : visual.left - element.offsetLeft;
+    const visualY = components ? components[matrix[1] ? 13 : 5] : visual.top - element.offsetTop;
+    const fromGeometry = { width: parseFloat(style.getPropertyValue("--ae-anchor-target-width")) || 0,
+      height: parseFloat(style.getPropertyValue("--ae-anchor-target-height")) || 0,
+      selected: { x: visualX, y: visualY, self: fromSelf,
+        pivotX: visualX + visual.width * fromSelf[0], pivotY: visualY + visual.height * fromSelf[1] } };
     const projectSize = (axis, actual, desired) => {
-      if (!tokens.includes(axis) || element.style[axis]) return actual;
+      const inline = element.style[axis].replace(/\s+/g, "");
+      if (!tokens.includes(axis) || inline && inline !== `var(--ae-anchor-target-${axis})`) return actual;
       const previous = parseFloat(element.style.getPropertyValue(`--ae-anchor-target-${axis}`)) || 0;
       const sides = axis === "width" ? ["Left", "Right"] : ["Top", "Bottom"];
       const extra = sides.reduce((sum, side) => sum + (parseFloat(style[`padding${side}`]) || 0) +
@@ -610,8 +641,8 @@
     // inline sizing); that alone must not look like a changed destination.
     const position = tokens.includes("width") || tokens.includes("height")
       ? [selected.pivotX, selected.pivotY] : [selected.x, selected.y];
-    return { valid: true, target, reference, selected, opacity, duration,
-      scrollRevision: anchors.get(element)?.scrollRevision || 0,
+    return { valid: true, target, reference, selected, opacity, duration, scaleX, scaleY, fromGeometry,
+      easing: style.getPropertyValue("--ae-anchor-switch-ease").trim() || "ease-in-out",
       width: targetRect.width, height: targetRect.height,
       signature: [...position, targetRect.width, targetRect.height, ...selected.self].join("/") };
   }
@@ -704,12 +735,60 @@
     rememberVisual(element, state);
   }
 
-  function stopSwitch(element, state) {
+  function stopSwitch(element, state, keepStyles = false) {
+    const operation = state.switchOperation;
     state.switchOperation = null;
-    AelluxJs.motion.cancel(state.motionId);
-    AelluxJs.waitLayout.cancel(state.cleanupLayoutId);
+    AelluxJs.waitLayout.cancel(state.motionId);
+    AelluxJs.waitLayout.setVisualFPSLimit(state.motionId, null);
     element.classList.remove(switchingClass);
+    if (!keepStyles && operation?.styles) {
+      // Commit the last frame before re-enabling authored transitions.
+      element.getBoundingClientRect();
+      operation.styles.restore();
+    }
     rememberVisual(element, state);
+    return operation?.styles || null;
+  }
+
+  function suppressTransitions(element) {
+    const style = root.getComputedStyle(element);
+    if (!style.transitionDuration.split(",").some(value => parseFloat(value) > 0)) return null;
+    const properties = style.transitionProperty.split(",").map(property => property.trim());
+    const controlled = ["transform", "transform-origin",
+      ...(element.getAttribute(matchAttribute) || "").split(/\s+/).filter(property => property === "width" || property === "height"),
+      ...ownedProperties.filter(property => property.startsWith("--ae-anchor-"))];
+    const horizontal = !style.writingMode || style.writingMode.startsWith("horizontal");
+    if (controlled.includes("width")) controlled.push(horizontal ? "inline-size" : "block-size");
+    if (controlled.includes("height")) controlled.push(horizontal ? "block-size" : "inline-size");
+    const memory = AelluxJs.persist.element.save(element, [], ["transition-property", "transition-duration", "transition-delay", "transition-timing-function"]);
+    // Remove the controlled properties entirely: setting their duration to zero
+    // alone does not cancel an already running native transition. Expand all
+    // from computed CSS even without WAAPI, retaining unrelated list timings.
+    const durations = style.transitionDuration.split(","), delays = style.transitionDelay.split(",");
+    const timing = style.transitionTimingFunction.match(/(?:[^,(]|\([^)]*\))+/g) || ["ease"];
+    const retained = [], times = [], waits = [], easings = [];
+    properties.forEach((property, index) => {
+      for (const name of property === "all" ? Array.from(style) : [property]) {
+        if (name === "none" || controlled.includes(name.replace(/^-(?:webkit|moz|ms|o)-/, ""))) continue;
+        retained.push(name);
+        times.push(durations[index % durations.length]);
+        waits.push(delays[index % delays.length]);
+        easings.push(timing[index % timing.length]);
+      }
+    });
+    element.style.setProperty("transition-property", retained.join(",") || "none", "important");
+    element.style.setProperty("transition-duration", times.join(",") || "0s", "important");
+    element.style.setProperty("transition-delay", waits.join(",") || "0s", "important");
+    element.style.setProperty("transition-timing-function", easings.join(",") || "ease", "important");
+    return memory;
+  }
+
+  function placeDirectly(element, placement) {
+    const memory = suppressTransitions(element);
+    try {
+      writePlacement(element, placement);
+      if (memory) element.getBoundingClientRect();
+    } finally { memory?.restore(); }
   }
 
   function setValue(style, name, value) {
@@ -721,48 +800,67 @@
   }
 
   function startSwitch(element, state, placement) {
-    let handoff = null;
-    if (state.switchOperation) {
-      // A paused transition would jump to its previous destination on cancel.
-      // Copy the rendered values before releasing that clock, then materialize
-      // a bounded frozen frame for CSS to use as the next transition's origin.
-      const properties = ["transform", ...(element.getAttribute(matchAttribute) || "").split(/\s+/)
-        .filter(property => property === "width" || property === "height")];
-      const computed = root.getComputedStyle(element);
-      const values = properties.map(property => [property, computed.getPropertyValue(property)]);
-      // Suppress only the properties being frozen. Existing application
-      // transitions on other properties must survive the handoff as well.
-      const transitions = computed.transitionProperty.split(",").flatMap(property => {
-        property = property.trim();
-        return property === "all" ? (element.getAnimations?.() || []).map(animation => animation.transitionProperty).filter(Boolean) : [property];
-      }).filter(property => !properties.includes(property));
-      handoff = AelluxJs.persist.element.save(element, [], [...properties, "transition-property"]);
-      element.style.setProperty("transition-property", transitions.join(",") || "none", "important");
-      for (const [property, value] of values) element.style.setProperty(property, value, "important");
-      element.getBoundingClientRect();
-    }
-    stopSwitch(element, state);
-    const operation = {};
+    // Our last published frame is newer than an asynchronous geometry read
+    // when a frame and a genuine retarget arrive in the same scheduler batch.
+    const from = state.switchOperation?.rendered || placement.fromGeometry;
+    const retained = stopSwitch(element, state, true);
+    const operation = {
+      target: placement.target, startedAt: now(), duration: placement.duration,
+      easing: createCssEasing(placement.easing, AelluxJs),
+      fromGeometry: from, toGeometry: placement, rendered: from,
+      styles: retained || suppressTransitions(element)
+    };
     state.switchOperation = operation;
     element.classList.add(switchingClass);
-    AelluxJs.motion.run(element, {
-      id: state.motionId, extension: extensionName, nativeDuration: placement.duration, ownedOnly: true,
-      abort: () => anchors.get(element) !== state || state.switchOperation !== operation,
-      apply: () => {
-        if (handoff) handoff.restore();
-        writePlacement(element, placement);
+    renderSwitch(element, state, operation);
+    const limits = [AelluxJs.layoutMaxFPS(element)];
+    const matching = (element.getAttribute(matchAttribute) || "").split(/\s+/).some(axis => axis === "width" || axis === "height");
+    const policy = AelluxJs.options.cssMotionPropertyMaxFPS;
+    if (matching && policy !== null && policy !== 0) {
+      const value = Number(policy);
+      if (Number.isFinite(value) && value > 0) limits.push(value);
+      else {
+        if (policy !== undefined) AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID,
+          { extension: "core", option: "cssMotionPropertyMaxFPS", value: policy, fallback: 55,
+            reason: "CSS Motion frame rate must be finite and greater than zero; using 55 FPS.",
+            suggestion: "Use a positive finite number or omit the option for the default." });
+        limits.push(55);
       }
+    }
+    const maxFPS = limits.filter(value => Number.isFinite(value) && value > 0).reduce((min, value) => Math.min(min, value), Infinity);
+    AelluxJs.waitLayout.setVisualFPSLimit(state.motionId, maxFPS === Infinity ? null : maxFPS);
+    AelluxJs.waitLayout.sequence(state.motionId, {
+      update: () => renderSwitch(element, state, operation),
+      repeat: { ms: 0 }, maxFPS: maxFPS === Infinity ? undefined : maxFPS,
+      abort: () => anchors.get(element) !== state || state.switchOperation !== operation
     }).catch(cause => {
+      if (state.switchOperation === operation) stopSwitch(element, state);
       AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
         { cause, extension: extensionName, element, method: "switch" });
-    }).then(() => {
-      if (anchors.get(element) !== state || state.switchOperation !== operation) return;
-      return AelluxJs.waitLayout.update(state.cleanupLayoutId, () => {
-        if (anchors.get(element) !== state || state.switchOperation !== operation) return;
-        stopSwitch(element, state);
-        scheduleAnchor(element);
-      });
     });
+  }
+
+  function renderSwitch(element, state, operation) {
+    if (state.switchOperation !== operation || effectiveTarget(element, state) !== operation.target) return;
+    const progress = Math.max(0, Math.min(1, (now() - operation.startedAt) / operation.duration));
+    const from = operation.fromGeometry, to = operation.toGeometry;
+    const eased = operation.easing(progress);
+    const mix = (a, b) => a + (b - a) * eased;
+    const geometry = { target: to.target, reference: to.reference, opacity: to.opacity,
+      width: Math.max(0, mix(from.width, to.width)), height: Math.max(0, mix(from.height, to.height)),
+      selected: { x: mix(from.selected.x, to.selected.x), y: mix(from.selected.y, to.selected.y),
+        pivotX: mix(from.selected.pivotX, to.selected.pivotX), pivotY: mix(from.selected.pivotY, to.selected.pivotY),
+        self: from.selected.self.map((value, axis) => mix(value, to.selected.self[axis])) } };
+    operation.rendered = progress === 1 ? to : geometry;
+    writePlacement(element, operation.rendered);
+    if (progress === 1 || AelluxJs.currentPreference("reduced-motion") === "reduced") {
+      writePlacement(element, to);
+      stopSwitch(element, state);
+      // One final scheduled measurement catches a scroll/layout notification
+      // still in flight at the deadline. No progress loop remains when idle.
+      scheduleAnchor(element);
+    }
+    rememberVisual(element, state);
   }
 
   function resolveElement(value) {

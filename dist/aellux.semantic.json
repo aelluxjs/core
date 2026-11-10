@@ -3669,7 +3669,7 @@
       "name": "--ae-anchor-switch-duration",
       "extension": "anchor",
       "syntax": "<time>",
-      "description": "CSS Motion target-switch duration, with native fallback; reduced motion disables switching.",
+      "description": "Target-switch duration on one scheduled timeline. Scroll and layout update the destination without restarting; reduced motion disables switching.",
       "default": "0ms",
       "values": [
         "0ms",
@@ -3683,12 +3683,14 @@
       "name": "--ae-anchor-switch-ease",
       "extension": "anchor",
       "syntax": "<easing-function>",
-      "description": "CSS easing for Anchor target switches; position and matched dimensions share one clock.",
+      "description": "CSS easing for Anchor's dynamic target geometry; position, pivots and matching dimensions share one uninterrupted clock, including without Web Animations.",
       "default": "ease-in-out",
       "values": [
         "linear",
         "ease",
-        "ease-in-out"
+        "ease-in-out",
+        "cubic-bezier(.34,1.56,.64,1)",
+        "steps(4,end)"
       ],
       "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
@@ -4577,7 +4579,7 @@
       "name": "ae--anchor-switching",
       "extension": "anchor",
       "role": "output",
-      "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
+      "description": "Runtime-managed state class; useful in CSS selectors.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
     },
     {

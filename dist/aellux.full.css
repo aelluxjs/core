@@ -7037,15 +7037,6 @@ html[data-ae-reduced-motion='reduced'] *[data-ae-scrollbar-horizontal] {
   transform: translate3d(var(--ae-anchor-pivot-x), var(--ae-anchor-pivot-y), 0)
     translate(calc(0% - var(--ae-anchor-origin-x)), calc(0% - var(--ae-anchor-origin-y)));
 }
-:where([data-ae-anchor].ae--anchor-switching) {
-  transition-property: transform, width, height;
-  transition-duration: var(--ae-anchor-switch-duration, 0ms);
-  transition-timing-function: var(--ae-anchor-switch-ease, ease-in-out);
-  transition-delay: 0s;
-}
-:where(html[data-ae-reduced-motion="reduced"] [data-ae-anchor].ae--anchor-switching) {
-  transition: none;
-}
 
 
 /*! aellux.js Input Extension | SPDX-License-Identifier: Apache-2.0 */

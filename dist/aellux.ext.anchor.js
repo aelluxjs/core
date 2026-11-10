@@ -1,4 +1,73 @@
 (() => {
+  // src/internal/create-css-easing.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function createCssEasing(value, api) {
+    const name = String(value || "ease-in-out").trim().toLowerCase();
+    const keywords = {
+      ease: ".25,.1,.25,1",
+      "ease-in": ".42,0,1,1",
+      "ease-out": "0,0,.58,1",
+      "ease-in-out": ".42,0,.58,1"
+    };
+    if (name === "linear") return (progress) => progress;
+    const steps = /^(?:steps\(\s*(\d+)\s*(?:,\s*(jump-start|jump-end|jump-none|jump-both|start|end)\s*)?\)|step-(start|end))$/.exec(name);
+    if (steps) {
+      const count = steps[3] ? 1 : Number(steps[1]);
+      const position = steps[3] || steps[2] || "end";
+      const start = position === "start" || position === "jump-start" || position === "jump-both";
+      const jumps = count + (position === "jump-both" ? 1 : position === "jump-none" ? -1 : 0);
+      if (count > 0 && jumps > 0) return (progress) => Math.max(0, Math.min(1, (Math.floor(progress * count) + (start ? 1 : 0)) / jumps));
+    }
+    const linear = /^linear\(([^()]*)\)$/.exec(name);
+    if (linear) {
+      const points = [];
+      for (const stop of linear[1].split(",")) {
+        const tokens = stop.trim().split(/\s+/);
+        const values = tokens.filter((token) => !token.endsWith("%"));
+        const positions = tokens.filter((token) => token.endsWith("%"));
+        if (values.length !== 1 || positions.length > 2 || !tokens.every((token) => /^[+-]?(?:\d*\.\d+|\d+\.?)(?:e[+-]?\d+)?%?$/.test(token))) return fallback(api);
+        for (const position of positions.length ? positions : [null])
+          points.push({ x: position === null ? null : parseFloat(position) / 100, y: Number(values[0]) });
+      }
+      if (points.length < 2) return fallback(api);
+      if (points[0].x === null) points[0].x = 0;
+      if (points[points.length - 1].x === null) points[points.length - 1].x = 1;
+      let largest = -Infinity;
+      for (const point of points) if (point.x !== null) largest = point.x = Math.max(largest, point.x);
+      for (let index = 1; index < points.length; index++) {
+        if (points[index].x !== null) continue;
+        const begin = index - 1;
+        while (points[index].x === null) index++;
+        for (let cursor = begin + 1; cursor < index; cursor++)
+          points[cursor].x = points[begin].x + (points[index].x - points[begin].x) * (cursor - begin) / (index - begin);
+      }
+      return (progress) => {
+        let index = 0;
+        while (index < points.length - 1 && points[index + 1].x <= progress) index++;
+        const first = points[Math.min(index, points.length - 2)], second = points[Math.min(index + 1, points.length - 1)];
+        return second.x === first.x ? progress < first.x ? first.y : second.y : first.y + (second.y - first.y) * (progress - first.x) / (second.x - first.x);
+      };
+    }
+    let curve = keywords[name] ? `cubic-bezier(${keywords[name]})` : name;
+    const cubic = /^cubic-bezier\(([^()]*)\)$/.exec(curve);
+    if (cubic) {
+      const values = cubic[1].split(",").map((value2) => value2.trim());
+      if (values.length === 4 && values.every((value2) => /^[+-]?(?:\d*\.\d+|\d+\.?)(?:e[+-]?\d+)?$/.test(value2)))
+        curve = `cubic-bezier(${values.map(Number).join(",")})`;
+    }
+    if (/^cubic-bezier\(/.test(curve)) {
+      try {
+        api.ease(curve, 0.5);
+        return (progress) => api.ease(curve, progress);
+      } catch (_) {
+      }
+    }
+    return fallback(api);
+  }
+  function fallback(api) {
+    return (progress) => api.ease("cubic-bezier(.25,.1,.25,1)", progress);
+  }
+
   // src/aellux.ext.anchor.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
@@ -141,9 +210,6 @@
         lastPlacement: null,
         switchOperation: null,
         motionId: AelluxJs.motion.id(),
-        cleanupLayoutId: nextLayoutId++,
-        interruptSwitch: false,
-        scrollRevision: 0,
         scrollVisible: false,
         scrollPending: false,
         ownClass: null,
@@ -223,16 +289,22 @@
       }
       AelluxJs.waitLayout.cancel(state.layoutId);
       AelluxJs.waitLayout.cancel(state.styleLayoutId);
-      AelluxJs.waitLayout.cancel(state.cleanupLayoutId);
       await AelluxJs.waitLayout.update(state.styleLayoutId, deactivate, [element, state, memory]);
     }
     function scheduleUpdate(event) {
       if (!anchors.size) return;
+      const source = (event == null ? void 0 : event.type) === "scroll" ? scrollSource(event) : null;
       for (const [element, state] of anchors) {
-        if ((event == null ? void 0 : event.type) === "scroll") state.scrollRevision++;
-        else state.interruptSwitch = true;
+        if (source && !relevantScroll(source, element, state)) continue;
         scheduleAnchor(element);
       }
+    }
+    function scrollSource(event) {
+      return event.target === document || event.target === root ? document.scrollingElement || document.documentElement : event.target;
+    }
+    function relevantScroll(source, element, state) {
+      var _a, _b;
+      return ((_a = source.contains) == null ? void 0 : _a.call(source, element)) || ((_b = source.contains) == null ? void 0 : _b.call(source, effectiveTarget(element, state)));
     }
     function onGroupChange(event) {
       var _a;
@@ -461,25 +533,30 @@
       let applied = false;
       await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
         if (!current()) return;
+        if (effectiveTarget(element, state) !== placement.target) return;
         state.invalidContext = false;
         observe(state, element, placement.target, placement.reference);
         const previous = state.lastPlacement;
         const switching = previous && previous.target !== placement.target;
         if (!previous || switching) state.scrollPending = true;
-        if (switching && effectiveTarget(element, state) === placement.target) {
+        const moved = !previous || previous.signature !== placement.signature;
+        if (switching && placement.duration > 0) {
+          startSwitch(element, state, placement);
+        } else if (state.switchOperation && !switching && AelluxJs.currentPreference("reduced-motion") !== "reduced") {
+          state.switchOperation.toGeometry = placement;
+        } else if (state.switchOperation) {
+          writePlacement(element, placement);
+          stopSwitch(element, state);
+        } else {
+          stopSwitch(element, state);
+          if (moved) placeDirectly(element, placement);
+          else writePlacement(element, placement);
+        }
+        if (switching) {
           state.scrollPending = false;
           state.scrollVisible = true;
           scrollTargetIntoView(element, placement.target);
         }
-        const moved = !previous || previous.signature !== placement.signature;
-        const scrollMoved = moved && state.switchOperation !== null && (previous == null ? void 0 : previous.scrollRevision) !== placement.scrollRevision;
-        if ((switching || scrollMoved) && placement.duration > 0 && !state.interruptSwitch) {
-          startSwitch(element, state, placement);
-        } else {
-          if (moved || state.interruptSwitch || !placement.duration) stopSwitch(element, state);
-          writePlacement(element, placement);
-        }
-        state.interruptSwitch = false;
         rememberVisual(element, state);
         state.lastUpdateAt = now();
         state.lastPlacement = placement;
@@ -512,7 +589,6 @@
       state.ownStyle = element.getAttribute("style");
     }
     function readPlacement(element, target, candidates, measure) {
-      var _a;
       const reference = element.offsetParent;
       target = target || reference;
       if (target && isInvisible(target)) return { hidden: true, target, reference };
@@ -536,9 +612,27 @@
       const scaleY = reference.offsetHeight ? referenceRect.height / reference.offsetHeight : 1;
       const targetRect = toReference(target.getBoundingClientRect(), reference, referenceRect, scaleX, scaleY);
       const selfRect = element.getBoundingClientRect();
+      const visual = toReference(selfRect, reference, referenceRect, scaleX, scaleY);
+      const fromSelf = [ORIGIN_X, ORIGIN_Y].map((name) => (parseFloat(style.getPropertyValue(name)) || 0) / 100);
+      const matrix = /^matrix(3d)?\(([^)]*)\)$/.exec(style.transform);
+      const components = matrix ? matrix[2].split(",").map(Number) : null;
+      const visualX = components ? components[matrix[1] ? 12 : 4] : visual.left - element.offsetLeft;
+      const visualY = components ? components[matrix[1] ? 13 : 5] : visual.top - element.offsetTop;
+      const fromGeometry = {
+        width: parseFloat(style.getPropertyValue("--ae-anchor-target-width")) || 0,
+        height: parseFloat(style.getPropertyValue("--ae-anchor-target-height")) || 0,
+        selected: {
+          x: visualX,
+          y: visualY,
+          self: fromSelf,
+          pivotX: visualX + visual.width * fromSelf[0],
+          pivotY: visualY + visual.height * fromSelf[1]
+        }
+      };
       const projectSize = (axis, actual, desired) => {
-        var _a2;
-        if (!tokens.includes(axis) || element.style[axis]) return actual;
+        var _a;
+        const inline = element.style[axis].replace(/\s+/g, "");
+        if (!tokens.includes(axis) || inline && inline !== `var(--ae-anchor-target-${axis})`) return actual;
         const previous = parseFloat(element.style.getPropertyValue(`--ae-anchor-target-${axis}`)) || 0;
         const sides = axis === "width" ? ["Left", "Right"] : ["Top", "Bottom"];
         const extra = sides.reduce((sum, side) => sum + (parseFloat(style[`padding${side}`]) || 0) + (parseFloat(style[`border${side}Width`]) || 0), 0);
@@ -546,7 +640,7 @@
         const minimum = Math.max(borderBox ? extra : 0, parseFloat(style.getPropertyValue(`min-${axis}`)) || 0);
         const maximum = parseFloat(style.getPropertyValue(`max-${axis}`));
         const constrain = (value) => Math.max(minimum, Math.min(Number.isFinite(maximum) ? maximum : Infinity, value));
-        return !((_a2 = anchors.get(element)) == null ? void 0 : _a2.switchOperation) && Math.abs(parseFloat(style[axis]) - constrain(previous)) > 0.5 ? actual : constrain(desired) + (borderBox ? 0 : extra);
+        return !((_a = anchors.get(element)) == null ? void 0 : _a.switchOperation) && Math.abs(parseFloat(style[axis]) - constrain(previous)) > 0.5 ? actual : constrain(desired) + (borderBox ? 0 : extra);
       };
       const selfWidth = projectSize("width", selfRect.width / scaleX, targetRect.width);
       const selfHeight = projectSize("height", selfRect.height / scaleY, targetRect.height);
@@ -586,7 +680,10 @@
         selected,
         opacity,
         duration,
-        scrollRevision: ((_a = anchors.get(element)) == null ? void 0 : _a.scrollRevision) || 0,
+        scaleX,
+        scaleY,
+        fromGeometry,
+        easing: style.getPropertyValue("--ae-anchor-switch-ease").trim() || "ease-in-out",
         width: targetRect.width,
         height: targetRect.height,
         signature: [...position, targetRect.width, targetRect.height, ...selected.self].join("/")
@@ -674,12 +771,59 @@
       state.scrollPending = false;
       rememberVisual(element, state);
     }
-    function stopSwitch(element, state) {
+    function stopSwitch(element, state, keepStyles = false) {
+      const operation = state.switchOperation;
       state.switchOperation = null;
-      AelluxJs.motion.cancel(state.motionId);
-      AelluxJs.waitLayout.cancel(state.cleanupLayoutId);
+      AelluxJs.waitLayout.cancel(state.motionId);
+      AelluxJs.waitLayout.setVisualFPSLimit(state.motionId, null);
       element.classList.remove(switchingClass);
+      if (!keepStyles && (operation == null ? void 0 : operation.styles)) {
+        element.getBoundingClientRect();
+        operation.styles.restore();
+      }
       rememberVisual(element, state);
+      return (operation == null ? void 0 : operation.styles) || null;
+    }
+    function suppressTransitions(element) {
+      const style = root.getComputedStyle(element);
+      if (!style.transitionDuration.split(",").some((value) => parseFloat(value) > 0)) return null;
+      const properties = style.transitionProperty.split(",").map((property) => property.trim());
+      const controlled = [
+        "transform",
+        "transform-origin",
+        ...(element.getAttribute(matchAttribute) || "").split(/\s+/).filter((property) => property === "width" || property === "height"),
+        ...ownedProperties.filter((property) => property.startsWith("--ae-anchor-"))
+      ];
+      const horizontal = !style.writingMode || style.writingMode.startsWith("horizontal");
+      if (controlled.includes("width")) controlled.push(horizontal ? "inline-size" : "block-size");
+      if (controlled.includes("height")) controlled.push(horizontal ? "block-size" : "inline-size");
+      const memory = AelluxJs.persist.element.save(element, [], ["transition-property", "transition-duration", "transition-delay", "transition-timing-function"]);
+      const durations = style.transitionDuration.split(","), delays = style.transitionDelay.split(",");
+      const timing = style.transitionTimingFunction.match(/(?:[^,(]|\([^)]*\))+/g) || ["ease"];
+      const retained = [], times = [], waits = [], easings = [];
+      properties.forEach((property, index) => {
+        for (const name of property === "all" ? Array.from(style) : [property]) {
+          if (name === "none" || controlled.includes(name.replace(/^-(?:webkit|moz|ms|o)-/, ""))) continue;
+          retained.push(name);
+          times.push(durations[index % durations.length]);
+          waits.push(delays[index % delays.length]);
+          easings.push(timing[index % timing.length]);
+        }
+      });
+      element.style.setProperty("transition-property", retained.join(",") || "none", "important");
+      element.style.setProperty("transition-duration", times.join(",") || "0s", "important");
+      element.style.setProperty("transition-delay", waits.join(",") || "0s", "important");
+      element.style.setProperty("transition-timing-function", easings.join(",") || "ease", "important");
+      return memory;
+    }
+    function placeDirectly(element, placement) {
+      const memory = suppressTransitions(element);
+      try {
+        writePlacement(element, placement);
+        if (memory) element.getBoundingClientRect();
+      } finally {
+        memory == null ? void 0 : memory.restore();
+      }
     }
     function setValue(style, name, value) {
       if (style.getPropertyValue(name) === value && !style.getPropertyPriority(name)) return;
@@ -687,48 +831,86 @@
       style.setProperty(name, value);
     }
     function startSwitch(element, state, placement) {
-      let handoff = null;
-      if (state.switchOperation) {
-        const properties = ["transform", ...(element.getAttribute(matchAttribute) || "").split(/\s+/).filter((property) => property === "width" || property === "height")];
-        const computed = root.getComputedStyle(element);
-        const values = properties.map((property) => [property, computed.getPropertyValue(property)]);
-        const transitions = computed.transitionProperty.split(",").flatMap((property) => {
-          var _a;
-          property = property.trim();
-          return property === "all" ? (((_a = element.getAnimations) == null ? void 0 : _a.call(element)) || []).map((animation) => animation.transitionProperty).filter(Boolean) : [property];
-        }).filter((property) => !properties.includes(property));
-        handoff = AelluxJs.persist.element.save(element, [], [...properties, "transition-property"]);
-        element.style.setProperty("transition-property", transitions.join(",") || "none", "important");
-        for (const [property, value] of values) element.style.setProperty(property, value, "important");
-        element.getBoundingClientRect();
-      }
-      stopSwitch(element, state);
-      const operation = {};
+      var _a;
+      const from = ((_a = state.switchOperation) == null ? void 0 : _a.rendered) || placement.fromGeometry;
+      const retained = stopSwitch(element, state, true);
+      const operation = {
+        target: placement.target,
+        startedAt: now(),
+        duration: placement.duration,
+        easing: createCssEasing(placement.easing, AelluxJs),
+        fromGeometry: from,
+        toGeometry: placement,
+        rendered: from,
+        styles: retained || suppressTransitions(element)
+      };
       state.switchOperation = operation;
       element.classList.add(switchingClass);
-      AelluxJs.motion.run(element, {
-        id: state.motionId,
-        extension: extensionName,
-        nativeDuration: placement.duration,
-        ownedOnly: true,
-        abort: () => anchors.get(element) !== state || state.switchOperation !== operation,
-        apply: () => {
-          if (handoff) handoff.restore();
-          writePlacement(element, placement);
+      renderSwitch(element, state, operation);
+      const limits = [AelluxJs.layoutMaxFPS(element)];
+      const matching = (element.getAttribute(matchAttribute) || "").split(/\s+/).some((axis) => axis === "width" || axis === "height");
+      const policy = AelluxJs.options.cssMotionPropertyMaxFPS;
+      if (matching && policy !== null && policy !== 0) {
+        const value = Number(policy);
+        if (Number.isFinite(value) && value > 0) limits.push(value);
+        else {
+          if (policy !== void 0) AelluxJs.diagnostics.warn(
+            AelluxJs.diagnostics.WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID,
+            {
+              extension: "core",
+              option: "cssMotionPropertyMaxFPS",
+              value: policy,
+              fallback: 55,
+              reason: "CSS Motion frame rate must be finite and greater than zero; using 55 FPS.",
+              suggestion: "Use a positive finite number or omit the option for the default."
+            }
+          );
+          limits.push(55);
         }
+      }
+      const maxFPS = limits.filter((value) => Number.isFinite(value) && value > 0).reduce((min, value) => Math.min(min, value), Infinity);
+      AelluxJs.waitLayout.setVisualFPSLimit(state.motionId, maxFPS === Infinity ? null : maxFPS);
+      AelluxJs.waitLayout.sequence(state.motionId, {
+        update: () => renderSwitch(element, state, operation),
+        repeat: { ms: 0 },
+        maxFPS: maxFPS === Infinity ? void 0 : maxFPS,
+        abort: () => anchors.get(element) !== state || state.switchOperation !== operation
       }).catch((cause) => {
+        if (state.switchOperation === operation) stopSwitch(element, state);
         AelluxJs.diagnostics.error(
           AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
           { cause, extension: extensionName, element, method: "switch" }
         );
-      }).then(() => {
-        if (anchors.get(element) !== state || state.switchOperation !== operation) return;
-        return AelluxJs.waitLayout.update(state.cleanupLayoutId, () => {
-          if (anchors.get(element) !== state || state.switchOperation !== operation) return;
-          stopSwitch(element, state);
-          scheduleAnchor(element);
-        });
       });
+    }
+    function renderSwitch(element, state, operation) {
+      if (state.switchOperation !== operation || effectiveTarget(element, state) !== operation.target) return;
+      const progress = Math.max(0, Math.min(1, (now() - operation.startedAt) / operation.duration));
+      const from = operation.fromGeometry, to = operation.toGeometry;
+      const eased = operation.easing(progress);
+      const mix = (a, b) => a + (b - a) * eased;
+      const geometry = {
+        target: to.target,
+        reference: to.reference,
+        opacity: to.opacity,
+        width: Math.max(0, mix(from.width, to.width)),
+        height: Math.max(0, mix(from.height, to.height)),
+        selected: {
+          x: mix(from.selected.x, to.selected.x),
+          y: mix(from.selected.y, to.selected.y),
+          pivotX: mix(from.selected.pivotX, to.selected.pivotX),
+          pivotY: mix(from.selected.pivotY, to.selected.pivotY),
+          self: from.selected.self.map((value, axis) => mix(value, to.selected.self[axis]))
+        }
+      };
+      operation.rendered = progress === 1 ? to : geometry;
+      writePlacement(element, operation.rendered);
+      if (progress === 1 || AelluxJs.currentPreference("reduced-motion") === "reduced") {
+        writePlacement(element, to);
+        stopSwitch(element, state);
+        scheduleAnchor(element);
+      }
+      rememberVisual(element, state);
     }
     function resolveElement(value) {
       if (!value || !value.trim()) return null;

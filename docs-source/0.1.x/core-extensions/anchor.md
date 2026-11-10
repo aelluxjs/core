@@ -71,7 +71,7 @@ Set `data-ae-anchor-scroll-into-view="center center"` to scroll the effective ta
 
 The two whitespace-separated values map to native `scrollIntoView({ block, inline })`, in that order. Each accepts `start`, `center`, `end` or `nearest`. Missing, empty or invalid values disable this behavior. Attribute changes are observed automatically and affect subsequent visibility or target changes.
 
-On an effective target change, Anchor calls the new target's `scrollIntoView()` before starting its target-switch transition. It does not scroll again when the transition finishes, and never calls `scrollIntoView()` on the Anchor itself. Initial placement and reappearance check visibility after the internal hidden rule is released, then scroll the target. Scrolling is smooth, or instant when the current reduced-motion preference is `reduced`. Visibility means effective CSS visibility, including the Anchor and its ancestors; being outside the viewport does not suppress the request. Ordinary tracking, resize and scroll events, equivalent target spellings and repeated placement updates do not request scrolling again. Native `scrollIntoView` can scroll multiple containing scroll areas, including the document, and honors CSS scroll margins and padding. This option does not move focus.
+On an effective target change, Anchor establishes the new target-switch operation and requests the new target's `scrollIntoView()` once. The same timeline continues while scrolling moves its destination; it does not wait for scrolling to finish. Anchor does not scroll again on completion and never calls `scrollIntoView()` on the Anchor itself. Initial placement and reappearance check visibility after the internal hidden rule is released, then scroll the target. Scrolling is smooth, or instant when the current reduced-motion preference is `reduced`. Visibility means effective CSS visibility, including the Anchor and its ancestors; being outside the viewport does not suppress the request. Ordinary tracking, resize and scroll events, equivalent target spellings and repeated placement updates do not request scrolling again. Native `scrollIntoView` can scroll multiple containing scroll areas, including the document, and honors CSS scroll margins and padding. This option does not move focus.
 
 ## Dimension Matching
 
@@ -86,7 +86,7 @@ On an effective target change, Anchor calls the new target's `scrollIntoView()` 
 </div>
 ```
 
-Every valid placement publishes `--ae-anchor-target-width` and `--ae-anchor-target-height`, even when matching is disabled. Their pixel values describe the target's bounding rectangle in the positioning reference's coordinate system, compensating for the reference's axis-aligned scale. Target transforms contribute to that bounding rectangle. Arbitrary rotation or skew of the shared positioning reference is outside this coordinate model.
+Every valid placement publishes `--ae-anchor-target-width` and `--ae-anchor-target-height`, even when matching is disabled. Outside target switching, their pixel values describe the target's bounding rectangle in the positioning reference's coordinate system, compensating for the reference's axis-aligned scale. During switching they publish the interpolated matching inputs; the measured destination is retained separately. Target transforms contribute to that bounding rectangle. Arbitrary rotation or skew of the shared positioning reference is outside this coordinate model.
 
 ```css
 .menu-decoration {
@@ -117,11 +117,19 @@ Configure deliberate changes of the effective target separately from normal trac
 }
 ```
 
-The default duration is `0ms`. CSS easing values such as `linear`, `ease`, `cubic-bezier(...)` and `steps(...)` are supported. Initial placement does not animate. A different valid target adds the internal `ae--anchor-switching` class. CSS defines transitions of transform, width and height; [CSS Motion](../runtime/css-motion.md) advances them with one clock, duration and easing. Matching dimensions therefore animate along with the target change. An equivalent target spelling, such as `panel` versus `#panel`, does not restart motion. Rapid replacements preserve the current rendered transform and matched dimensions before canceling the previous operation, then start the replacement from that frame with the configured duration.
+The default duration is `0ms`. Initial placement does not animate. A different valid target adds the internal `ae--anchor-switching` class and captures the currently rendered placement as a fixed origin in the positioning reference's coordinates. The operation retains its start time, duration and CSS easing; changes to those CSS configuration values apply to the next target change. Reduced Motion remains an immediate exception. An equivalent target spelling, such as `panel` versus `#panel`, does not start another operation. A genuine target replacement captures the last rendered frame and starts a new timeline with the configured duration, including during scrolling.
 
-Scroll recalculates placement without interrupting an active target-switch transition. An unchanged destination keeps its current operation and completion time; if scrolling changes the destination during switching, Anchor replaces the operation from its current rendered frame. Outside an active switch, scroll tracking publishes placement directly through `waitLayout`, without starting CSS Motion. Native scrolling and momentum remain independent. Window resize and geometry changes unrelated to scrolling still interrupt switching to prioritize tracking; opacity-only changes do not. Pre-existing unrelated animations remain outside the switch operation's ownership. Hidden or removed targets deactivate the Anchor, and reduced motion disables switching. Unmount cancels pending placement, motion and completion cleanup, restoring authored inline values and priorities.
+During target-switch transitions, Anchor continuously updates the destination geometry without restarting the animation timeline. Scroll and layout changes may move the destination while duration, easing, and progress remain uninterrupted. This includes document and containing-element scrolling, Scrollbox, wheel, touch, scrollbar, programmatic scrolling and automatic `scrollIntoView()`. Window resize and geometry changes of the same effective target also update the existing destination. Independent scroll regions do not schedule placement work for that Anchor.
 
-Geometry and controlled switching follow WaitLayout's adaptive cadence and `data-ae-maxfps`. A switch animating width or height also receives the shared `cssMotionPropertyMaxFPS` ceiling (55 FPS by default); all properties keep the same clock and limit. CSS retains its declared easing; Anchor does not interpret Aellux easing names in `--ae-anchor-switch-ease`. When `cssMotionController` is `false` or Web Animations control is unavailable, CSS runs natively with the same rendered-frame handoff and cleanup. Completion removes the temporary switching class through the scheduler; there is no Anchor animation-progress timer.
+Anchor publishes interpolated position, pivots, origins and matching inputs together through `waitLayout`. Every frame uses elapsed time from the original start, a fixed origin and the most recently measured destination. It does not use the preceding frame as a new origin. Coordinates compensate for reference scale and scroll offsets; native scrolling moves the containing content independently, without a second scroll compensation. Weak CSS applies the interpolated inputs, so authored sizing constraints and overrides still control the actual box.
+
+At the first eligible update at or beyond the original deadline, Anchor publishes its latest destination and removes `ae--anchor-switching`. Scrolling may continue afterward: ordinary placement tracking stays directly aligned without starting another transition. No `scrollend` listener or scroll-settling timer is needed. A target change between measurement and publication discards the older measurement, and queued frames from replaced or unmounted operations cannot publish an old target. Hidden, removed or invalid targets retain their existing deactivation behavior; reduced motion places directly.
+
+Geometry measurement and temporal publication may run at different eligible cadences. Both reuse WaitLayout's adaptive scheduling and `data-ae-maxfps`; matching width or height also applies the shared `cssMotionPropertyMaxFPS` ceiling (55 FPS by default). Progress depends on elapsed time, so a lower update rate does not lengthen the configured duration. The finite progress sequence ends on completion or teardown; there is no permanent animation polling.
+
+Anchor owns numeric geometry interpolation rather than changing the endpoints of a native CSS Transition. This keeps the same behavior when `cssMotionController` is `false` or Web Animations APIs are unavailable, without changing the public [CSS Motion](../runtime/css-motion.md) API. `--ae-anchor-switch-ease` accepts CSS keywords, `cubic-bezier(...)`, `steps(...)` including jump variants, and piecewise `linear(...)`; overshoot and step boundaries are retained. Aellux easing family names are not interpreted as CSS easing values.
+
+During a switch, Anchor temporarily excludes transform, transform-origin, matching dimensions and its geometry variables from authored transition lists, including `transition: all` and logical size aliases. Unrelated transitions retain their existing timing, delays and easing. Completion and teardown restore the authored transition declarations and priorities. Direct tracking suppresses competing transitions only for the bounded geometry publication when required. Existing unrelated Web Animations are not captured or canceled. Unmount/destroy cancels pending reads, publications and progress tasks and restores original inline geometry.
 
 ## Present Group Anchor
 
@@ -189,6 +197,21 @@ CSS Motion integration, rendered-frame handoff and scheduled completion change t
 | Full Legacy | 544,068 / 160,470 | 545,453 / 160,895 | +1,385 / +425 |
 
 Anchor Modern's raw budget moves from 15 to 16 KiB (gzip stays 6 KiB); Anchor Legacy moves from 23 / 8 to 23.5 / 8.25 KiB. Full Modern moves from 209.5 / 64.75 to 210.5 / 65 KiB, and Full Legacy from 531.75 / 157 to 533 / 157.5 KiB.
+
+### Dynamic destination cost
+
+Dynamic destination switching replaces the earlier scroll-completion policy. It removes active-scroll/scrollend tracking and adds a finite numeric interpolation sequence, fixed-origin handoff and CSS easing evaluation, including steps and piecewise linear curves without Web Animations. The existing transition-list preservation remains. No dependency or public CSS Motion API is added. Measurements compare against the immediately preceding local scroll-completion implementation on `release/0.1.0`; values are bytes with gzip level 9.
+
+| Minified artifact | Before raw / gzip | After raw / gzip | Delta raw / gzip |
+| --- | ---: | ---: | ---: |
+| Anchor Modern | 18,751 / 6,667 | 21,368 / 7,740 | +2,617 / +1,073 |
+| Anchor Legacy | 26,936 / 9,266 | 30,698 / 10,571 | +3,762 / +1,305 |
+| Full Modern | 232,349 / 72,395 | 234,881 / 73,521 | +2,532 / +1,126 |
+| Full Legacy | 572,106 / 168,865 | 575,895 / 170,045 | +3,789 / +1,180 |
+| Anchor CSS | 1,239 / 479 | 904 / 381 | -335 / -98 |
+| Full CSS | 125,159 / 11,925 | 124,824 / 11,862 | -335 / -63 |
+
+Anchor Modern budgets move from 18.5 / 6.625 to 21 / 7.625 KiB (raw / gzip); Legacy moves from 26.5 / 9.125 to 30 / 10.375 KiB. Full Modern moves from 227 / 70.75 to 229.5 / 72 KiB; Full Legacy moves from 559 / 165 to 562.5 / 166.25 KiB. CSS budgets remain unchanged. Boot retains its raw size; signed registry values change with the new JavaScript and stylesheet artifacts.
 
 ## Application placement maps and Extension communication
 
