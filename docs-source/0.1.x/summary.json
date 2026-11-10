@@ -34,6 +34,7 @@
       "label": "Extensions",
       "slug": "extensions",
       "children": [
+        { "label": "Declarative Action Naming Convention", "href": "extensions/declarative-action-naming.md" },
         { "label": "Extension Authoring", "href": "extensions/authoring.md" },
         { "label": "Accessibility Requirements", "href": "extensions/accessibility.md" },
         { "label": "Registration", "href": "extensions/registration.md" },

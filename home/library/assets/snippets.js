@@ -71,11 +71,11 @@ window.librarySource = {
 <section class="ae-lib-welcome p-4" aria-label="Boas-vindas">
   <h2 class="h4">Um bom começo.</h2>
   <p class="small text-body-secondary">Uma mensagem no tempo de quem está chegando.</p>
-  <button class="btn btn-warning" type="button" data-ae-point data-ae-trigger="toggle" data-ae-target="ae-welcome-message">Dizer olá ✳</button>
+  <button class="btn btn-warning" type="button" data-ae-point data-ae-present-trigger="toggle" data-ae-present-target="ae-welcome-message">Dizer olá ✳</button>
   <div class="mt-3" role="status" aria-live="polite">
     <div id="ae-welcome-message" class="p-3 rounded-3 bg-warning-subtle" data-ae-present="opacity transform" data-ae-dismiss-on-click="false" hidden>
       <p>Bem-vindo ao seu espaço de criação. Sua próxima ideia começa aqui.</p>
-      <button class="btn btn-sm btn-outline-secondary" type="button" data-ae-dismiss>Entendi</button>
+      <button class="btn btn-sm btn-outline-secondary" type="button" data-ae-present-trigger="dismiss">Entendi</button>
     </div>
   </div>
 </section>`
@@ -106,7 +106,7 @@ window.librarySource = {
 <section class="ae-lib-navbar" data-ae-adaptive aria-label="Exemplo de navbar">
   <header class="ae-lib-navbar__bar">
     <span class="fw-bold fs-4">estúdio /</span>
-    <button class="ae-lib-navbar__toggle btn btn-outline-secondary" type="button" data-ae-trigger="toggle" data-ae-target="ae-navbar-links" aria-controls="ae-navbar-links" aria-expanded="false">Menu</button>
+    <button class="ae-lib-navbar__toggle btn btn-outline-secondary" type="button" data-ae-present-trigger="toggle" data-ae-present-target="ae-navbar-links" aria-controls="ae-navbar-links" aria-expanded="false">Menu</button>
     <nav id="ae-navbar-links" class="ae-lib-navbar__links ae--dismissed" data-ae-present="opacity" data-ae-dismiss-on-click="false" aria-label="Navegação do estúdio">
       <a href="#ae-navbar-projects">Projetos</a><a href="#ae-navbar-about">Sobre</a><a href="#ae-navbar-contact">Contato</a>
     </nav>
@@ -204,7 +204,7 @@ window.librarySource = {
 <section class="ae-lib-sidebar" data-ae-adaptive aria-label="Aplicação de exemplo: Estúdio">
   <header class="ae-lib-sidebar__header">
     <button class="ae-lib-sidebar__button ae-lib-sidebar__mobile" type="button" aria-label="Abrir navegação"
-      aria-controls="ae-sidebar-nav" aria-expanded="false" data-ae-trigger="toggle" data-ae-target="ae-sidebar-nav">
+      aria-controls="ae-sidebar-nav" aria-expanded="false" data-ae-present-trigger="toggle" data-ae-present-target="ae-sidebar-nav">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
     <span class="ae-lib-sidebar__brand">estúdio<span aria-hidden="true"> /</span></span>
@@ -214,7 +214,7 @@ window.librarySource = {
     <aside id="ae-sidebar-nav" class="ae-lib-sidebar__panel ae--dismissed" data-ae-present="transform" data-ae-dismiss-on-click="false">
       <div class="ae-lib-sidebar__panel-heading">
         <span class="ae-lib-sidebar__brand">estúdio / workspace</span>
-        <button class="ae-lib-sidebar__button ae-lib-sidebar__mobile" type="button" aria-label="Fechar navegação" data-ae-dismiss>
+        <button class="ae-lib-sidebar__button ae-lib-sidebar__mobile" type="button" aria-label="Fechar navegação" data-ae-present-trigger="dismiss">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6"/></svg>
         </button>
       </div>
@@ -228,7 +228,7 @@ window.librarySource = {
         <div class="ae-lib-sidebar__account"><a class="ae-lib-sidebar__link" href="#ae-sidebar-settings" tabindex="0">Configurações da conta</a></div>
       </nav>
     </aside>
-    <div class="ae-lib-sidebar__backdrop" data-ae-dismiss="ae-sidebar-nav" aria-hidden="true"></div>
+    <div class="ae-lib-sidebar__backdrop" data-ae-present-trigger="dismiss" data-ae-present-target="ae-sidebar-nav" aria-hidden="true"></div>
     <main class="ae-lib-sidebar__content" tabindex="0" aria-label="Conteúdo do workspace">
       <section id="ae-sidebar-overview">
         <p class="ae-lib-sidebar__eyebrow">WORKSPACE / VISÃO GERAL</p>
@@ -251,7 +251,7 @@ window.librarySource = {
 (() => {
   const root = document.currentScript.previousElementSibling;
   const panel = root.querySelector(".ae-lib-sidebar__panel");
-  const opener = root.querySelector("[data-ae-trigger]");
+  const opener = root.querySelector("[data-ae-present-trigger]");
   let connected = false, desktop, revision = 0, closing;
   const isDesktop = () => root.classList.contains("ae--fits-medium");
 
@@ -552,10 +552,10 @@ window.librarySource = {
 </style>
 <section class="ae-lib-popover" aria-label="Detalhes do projeto">
   <h2 class="h4">Tudo tem seu contexto.</h2><p class="small text-body-secondary">Abra os detalhes sem sair da página.</p>
-  <button id="ae-popover-trigger" class="btn btn-warning" type="button" data-ae-trigger="toggle" data-ae-target="ae-popover-panel" aria-controls="ae-popover-panel" aria-expanded="false">Detalhes do projeto</button>
+  <button id="ae-popover-trigger" class="btn btn-warning" type="button" data-ae-present-trigger="toggle" data-ae-present-target="ae-popover-panel" aria-controls="ae-popover-panel" aria-expanded="false">Detalhes do projeto</button>
   <div class="ae-lib-popover__position" data-ae-anchor="bottom-left:top-left, top-left:bottom-left" data-ae-anchor-target="ae-popover-trigger">
     <aside id="ae-popover-panel" class="ae-lib-popover__panel" data-ae-present="opacity" data-ae-dismiss-on-click="false" aria-labelledby="ae-popover-title" hidden>
-      <h3 id="ae-popover-title" class="h6">Estúdio / Identidade</h3><p class="small">Uma coleção de novas perspectivas, feita em conjunto.</p><button class="btn btn-sm btn-outline-secondary" type="button" data-ae-dismiss>Fechar detalhes</button>
+      <h3 id="ae-popover-title" class="h6">Estúdio / Identidade</h3><p class="small">Uma coleção de novas perspectivas, feita em conjunto.</p><button class="btn btn-sm btn-outline-secondary" type="button" data-ae-present-trigger="dismiss">Fechar detalhes</button>
     </aside>
   </div>
 </section>
@@ -692,8 +692,8 @@ window.librarySource = {
 <section class="ae-lib-tabs p-4" aria-label="Planos para hoje">
   <h2 class="h4">Qual é o plano de hoje?</h2>
   <div role="tablist" aria-label="Ideias" class="mb-3">
-    <button id="ae-tabs-create" class="btn btn-sm btn-outline-secondary" type="button" role="tab" aria-selected="true" aria-controls="ae-tabs-make" data-ae-point data-ae-trigger="pop" data-ae-target="ae-tabs-make">Criar</button>
-    <button id="ae-tabs-rest" class="btn btn-sm btn-outline-secondary" type="button" role="tab" aria-selected="false" aria-controls="ae-tabs-pause" tabindex="-1" data-ae-point data-ae-trigger="pop" data-ae-target="ae-tabs-pause">Pausar</button>
+    <button id="ae-tabs-create" class="btn btn-sm btn-outline-secondary" type="button" role="tab" aria-selected="true" aria-controls="ae-tabs-make" data-ae-point data-ae-present-trigger="pop" data-ae-present-target="ae-tabs-make">Criar</button>
+    <button id="ae-tabs-rest" class="btn btn-sm btn-outline-secondary" type="button" role="tab" aria-selected="false" aria-controls="ae-tabs-pause" tabindex="-1" data-ae-point data-ae-present-trigger="pop" data-ae-present-target="ae-tabs-pause">Pausar</button>
   </div>
   <div data-ae-present-group data-ae-present-active="ae-tabs-make">
     <section id="ae-tabs-make" class="p-3 rounded-3 bg-warning-subtle" role="tabpanel" aria-labelledby="ae-tabs-create" tabindex="0" data-ae-present="opacity" data-ae-dismiss-on-click="false"><h3 class="h5">Faça algo pequeno.</h3><p class="mb-0">Uma boa ideia pode começar com uma linha de código.</p></section>

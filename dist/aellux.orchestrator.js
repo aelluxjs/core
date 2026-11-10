@@ -772,7 +772,7 @@
     }
   }
   var attributesByExtension = {
-    present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-dismiss dismiss-on-click",
+    present: "present present-group present-active present-when present-motion present-trigger present-trigger-on present-target present-effect auto-dismiss dismiss-on-click",
     anchor: "anchor anchor-target anchor-match anchor-scroll-into-view",
     "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
     scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-parent scrollbar-vertical scrollbar-horizontal",
@@ -784,11 +784,11 @@
     viewport: "viewport viewport-target",
     progress: "progress-target progress-fallback",
     preference: "preference option label next prev ready",
-    feedback: "feedback message-target transform-target present-target"
+    feedback: "feedback feedback-message-target feedback-effect-target present-target"
   };
   var coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds load-style weak-style full-style legacy esm theme-color";
   var activation = {
-    present: "present present-group trigger dismiss",
+    present: "present present-group present-trigger",
     anchor: "anchor",
     "overflow-marquee": "overflow-marquee",
     scrollbox: "scrollbox",
@@ -827,25 +827,25 @@
           invalid("present", "present", "Unknown animated Present property.", "Use opacity, transform, height, width, all, or an empty value to disable motion.");
         if (has("present-when") && /\s/.test(value("present-when")))
           invalid("present", "present-when", "A group condition must be one class token.", "Use one class name without spaces or a leading dot.", "WARN_PRESENT_GROUP_SELECTION");
-        for (const [name, allowed] of [["trigger", ["", "toggle", "pop", "dismiss", "unpop"]], ["trigger-on", ["", "click", "hover"]]])
-          if (has(name) && !allowed.includes(name === "trigger" ? value(name).toLowerCase() : value(name)))
+        for (const [name, allowed] of [["present-trigger", ["", "toggle", "pop", "dismiss", "unpop", "effect"]], ["present-trigger-on", ["", "click", "hover"]]])
+          if (has(name) && !allowed.includes(name === "present-trigger" ? value(name).toLowerCase() : value(name)))
             invalid("present", name, "Unknown Present control value.", `Use ${allowed.filter(Boolean).join(", ")}.`);
-        if (has("trigger") || has("dismiss")) {
-          const name = value("dismiss") ? "dismiss" : "target";
+        if (has("present-trigger")) {
+          const name = "present-target";
           const reference = value(name);
           if (reference) diagnosePresentTarget(api, element, root.document.getElementById(reference.replace(/^#/, "")), attr(name), reference);
           else if (!element.closest(`[${attr("present")}]`))
             invalid(
               "present",
-              has("trigger") ? "trigger" : "dismiss",
+              "present-trigger",
               "Control has no target or enclosing Present container.",
-              "Set data-ae-target to an existing Present ID or place the control inside its Present container.",
+              "Set data-ae-present-target to an existing Present ID or place the control inside its Present container.",
               "WARN_CONFIGURATION_TARGET"
             );
           if (element.tabIndex < 0 && !element.matches(":disabled,[inert]"))
             invalid(
               "present",
-              has("trigger") ? "trigger" : "dismiss",
+              "present-trigger",
               "Control is not reachable with the keyboard.",
               "Prefer a native button; custom controls need focusability and appropriate keyboard activation.",
               "WARN_CONTROL_ACCESSIBILITY"
@@ -2566,7 +2566,7 @@
         if (name === "progress") loadWhen = "progress, meter";
         if (name === "ajax-href") loadWhen = "a" + loadWhen;
         if (name === "present") {
-          loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
+          loadWhen = ["present", "present-group", "present-trigger"].map(attr).join(",");
         }
         if (name === "input") loadWhen = ["point", "inputs", "shortcut", "shortcut-hint"].map(attr).join(",");
         if (name === "focus") loadWhen = ["focus", "focus-scope", "focus-nav", "shortcut"].map(attr).join(",");

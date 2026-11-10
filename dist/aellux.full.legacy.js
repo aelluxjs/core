@@ -22234,16 +22234,16 @@
             return token && !["opacity", "transform", "height", "width"].includes(token);
           })) invalid("present", "present", "Unknown animated Present property.", "Use opacity, transform, height, width, all, or an empty value to disable motion.");
           if (has("present-when") && /\s/.test(value("present-when"))) invalid("present", "present-when", "A group condition must be one class token.", "Use one class name without spaces or a leading dot.", "WARN_PRESENT_GROUP_SELECTION");
-          for (var _i4 = 0, _arr2 = [["trigger", ["", "toggle", "pop", "dismiss", "unpop"]], ["trigger-on", ["", "click", "hover"]]]; _i4 < _arr2.length; _i4++) {
+          for (var _i4 = 0, _arr2 = [["present-trigger", ["", "toggle", "pop", "dismiss", "unpop", "effect"]], ["present-trigger-on", ["", "click", "hover"]]]; _i4 < _arr2.length; _i4++) {
             var _arr2$_i = _slicedToArray(_arr2[_i4], 2), _name = _arr2$_i[0], allowed = _arr2$_i[1];
-            if (has(_name) && !allowed.includes(_name === "trigger" ? value(_name).toLowerCase() : value(_name))) invalid("present", _name, "Unknown Present control value.", "Use ".concat(allowed.filter(Boolean).join(", "), "."));
+            if (has(_name) && !allowed.includes(_name === "present-trigger" ? value(_name).toLowerCase() : value(_name))) invalid("present", _name, "Unknown Present control value.", "Use ".concat(allowed.filter(Boolean).join(", "), "."));
           }
-          if (has("trigger") || has("dismiss")) {
-            var _name2 = value("dismiss") ? "dismiss" : "target";
+          if (has("present-trigger")) {
+            var _name2 = "present-target";
             var reference = value(_name2);
             if (reference) diagnosePresentTarget(api, element, root2.document.getElementById(reference.replace(/^#/, "")), attr(_name2), reference);
-            else if (!element.closest("[".concat(attr("present"), "]"))) invalid("present", has("trigger") ? "trigger" : "dismiss", "Control has no target or enclosing Present container.", "Set data-ae-target to an existing Present ID or place the control inside its Present container.", "WARN_CONFIGURATION_TARGET");
-            if (element.tabIndex < 0 && !element.matches(":disabled,[inert]")) invalid("present", has("trigger") ? "trigger" : "dismiss", "Control is not reachable with the keyboard.", "Prefer a native button; custom controls need focusability and appropriate keyboard activation.", "WARN_CONTROL_ACCESSIBILITY");
+            else if (!element.closest("[".concat(attr("present"), "]"))) invalid("present", "present-trigger", "Control has no target or enclosing Present container.", "Set data-ae-present-target to an existing Present ID or place the control inside its Present container.", "WARN_CONFIGURATION_TARGET");
+            if (element.tabIndex < 0 && !element.matches(":disabled,[inert]")) invalid("present", "present-trigger", "Control is not reachable with the keyboard.", "Prefer a native button; custom controls need focusability and appropriate keyboard activation.", "WARN_CONTROL_ACCESSIBILITY");
           }
           if (has("auto-dismiss") && value("auto-dismiss") && !/^(?:\d+(?:\.\d+)?|\.\d+)(?:ms|s)?$/.test(value("auto-dismiss").trim())) invalid("present", "auto-dismiss", "Auto-dismiss duration is invalid.", "Use a nonnegative duration such as 250ms or 2s.");
           if (has("present-group")) {
@@ -22581,7 +22581,7 @@
       init_utils_name_case();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       attributesByExtension = {
-        present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-dismiss dismiss-on-click",
+        present: "present present-group present-active present-when present-motion present-trigger present-trigger-on present-target present-effect auto-dismiss dismiss-on-click",
         anchor: "anchor anchor-target anchor-match anchor-scroll-into-view",
         "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
         scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-parent scrollbar-vertical scrollbar-horizontal",
@@ -22593,11 +22593,11 @@
         viewport: "viewport viewport-target",
         progress: "progress-target progress-fallback",
         preference: "preference option label next prev ready",
-        feedback: "feedback message-target transform-target present-target"
+        feedback: "feedback feedback-message-target feedback-effect-target present-target"
       };
       coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds load-style weak-style full-style legacy esm theme-color";
       activation = {
-        present: "present present-group trigger dismiss",
+        present: "present present-group present-trigger",
         anchor: "anchor",
         "overflow-marquee": "overflow-marquee",
         scrollbox: "scrollbox",
@@ -25451,7 +25451,7 @@
               if (name === "progress") loadWhen = "progress, meter";
               if (name === "ajax-href") loadWhen = "a" + loadWhen;
               if (name === "present") {
-                loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
+                loadWhen = ["present", "present-group", "present-trigger"].map(attr).join(",");
               }
               if (name === "input") loadWhen = ["point", "inputs", "shortcut", "shortcut-hint"].map(attr).join(",");
               if (name === "focus") loadWhen = ["focus", "focus-scope", "focus-nav", "shortcut"].map(attr).join(",");
@@ -27139,6 +27139,14 @@
       });
     };
   }
+  function _typeof8(o) {
+    "@babel/helpers - typeof";
+    return _typeof8 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof8(o);
+  }
   var init_aellux_ext_feedback = __esm({
     "src/aellux.ext.feedback.js": function() {
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
@@ -27166,19 +27174,18 @@
         var motionOptions = ["shake", "yes", "no", "breathe", "tremble", "pulse", "alert"];
         var feedbackTypes = ["warning", "error", "success", "announce", "busy", "progress", "validate"];
         var handlers = /* @__PURE__ */ new Map();
-        var motionOperations = /* @__PURE__ */ new Map();
-        var motionIds = /* @__PURE__ */ new WeakMap();
         var feedbackAttribute = AelluxJs2.attr(extensionName);
-        var messageTargetAttribute = AelluxJs2.attr("messageTarget");
-        var transformTargetAttribute = AelluxJs2.attr("transformTarget");
+        var messageTargetAttribute = AelluxJs2.attr("feedback-message-target");
+        var effectTargetAttribute = AelluxJs2.attr("feedback-effect-target");
         var presentTargetAttribute = AelluxJs2.attr("presentTarget");
         var presentSelector = "[".concat(AelluxJs2.attr("present"), "]");
-        var mountedFeedback = /* @__PURE__ */ new Set();
+        var mountedFeedback = /* @__PURE__ */ new Map();
+        var applications = /* @__PURE__ */ new WeakMap();
         function init() {
-          AelluxJs2.comm.handle("feedback.prepare", function(_ref) {
-            var boundary = _ref.boundary, feedback2 = _ref.feedback, element = _ref.element;
-            if (!mountedFeedback.has(boundary) || !boundary.isConnected) return false;
-            applyFeedback(boundary, feedback2, element);
+          AelluxJs2.comm.handle("feedback.prepare", function(request) {
+            var boundary = request.boundary, feedback2 = request.feedback, element = request.element;
+            if (!mountedFeedback.has(boundary) || !boundary.isConnected || !feedback2 || _typeof8(feedback2) !== "object") return false;
+            applications.set(feedback2, applyFeedback(boundary, feedback2, element, false));
             return true;
           }, {
             owner: extensionName
@@ -27197,7 +27204,6 @@
         }
         function _destroy() {
           _destroy = _asyncToGenerator4(/* @__PURE__ */ _regenerator4().m(function _callee() {
-            var _iterator3, _step3, operation;
             return _regenerator4().w(function(_context) {
               while (1) switch (_context.n) {
                 case 0:
@@ -27206,18 +27212,6 @@
                   AelluxJs2.mountManager.remove({
                     extensionName: extensionName
                   });
-                  _iterator3 = _createForOfIteratorHelper10(motionOperations.values());
-                  try {
-                    for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-                      operation = _step3.value;
-                      AelluxJs2.motion.cancel(operation.id);
-                    }
-                  } catch (err) {
-                    _iterator3.e(err);
-                  } finally {
-                    _iterator3.f();
-                  }
-                  motionOperations.clear();
                   handlers.clear();
                 case 1:
                   return _context.a(2);
@@ -27227,10 +27221,11 @@
           return _destroy.apply(this, arguments);
         }
         function mountFeedback(element) {
-          mountedFeedback.add(element);
+          mountedFeedback.set(element, {});
           AelluxJs2.onEvent(element, "Feedback", onFeedback);
         }
         function unmountFeedback(element) {
+          applications.delete(element);
           mountedFeedback.delete(element);
           AelluxJs2.offEvent(element, "Feedback", onFeedback);
         }
@@ -27247,22 +27242,26 @@
             }
           }
           event.stopPropagation();
-          if (!event.detail) return;
+          if (!event.detail || _typeof8(event.detail) !== "object") return;
           var presentTarget = element.getAttribute(presentTargetAttribute);
           var presentElement = presentTarget !== null && presentTarget.trim() && (AelluxJs2.comm.has("present.pop") || AelluxJs2.comm.has("present.pop-next")) ? AelluxJs2.elementOrId(presentTarget) : null;
           if (presentElement !== null && presentElement !== void 0 && presentElement.hasAttribute(AelluxJs2.attr("present-group"))) {
+            var preparation = {
+              boundary: element,
+              feedback: event.detail
+            };
             var result = AelluxJs2.comm.request("present.pop-next", {
               group: presentElement,
               preparation: {
                 contract: "feedback.prepare",
-                payload: {
-                  boundary: element,
-                  feedback: event.detail
-                }
+                payload: preparation
               }
             });
             if (result.handled) {
-              Promise.resolve(result.value).catch(function(cause) {
+              var application = applications.get(event.detail);
+              Promise.resolve(result.value).then(function(member) {
+                if (member) requestEffect(element, application);
+              }).catch(function(cause) {
                 return AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_TRANSITION, {
                   cause: cause,
                   extension: extensionName,
@@ -27272,27 +27271,33 @@
               return;
             }
           }
-          applyFeedback(element, event.detail, element, function(messageElement, transformElement) {
+          applyFeedback(element, event.detail, element, function(messageElement, effectElement) {
             if (presentTarget !== null) {
-              var target = presentElement || !presentTarget.trim() && ((messageElement === null || messageElement === void 0 ? void 0 : messageElement.closest(presentSelector)) || (transformElement === null || transformElement === void 0 ? void 0 : transformElement.closest(presentSelector)));
+              var target = presentElement || !presentTarget.trim() && ((messageElement === null || messageElement === void 0 ? void 0 : messageElement.closest(presentSelector)) || (effectElement === null || effectElement === void 0 ? void 0 : effectElement.closest(presentSelector)));
               if (target) AelluxJs2.comm.request("present.pop", {
                 element: target
               });
             }
           });
         }
-        function applyFeedback(element, _ref2) {
-          var message = _ref2.message, type = _ref2.type, motion = _ref2.motion;
+        function applyFeedback(element, _ref) {
+          var message = _ref.message, type = _ref.type, motion = _ref.motion;
           var defaultElement = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : element;
           var presentRequest = arguments.length > 3 ? arguments[3] : void 0;
+          var application = {
+            mount: mountedFeedback.get(element)
+          };
           var messageTarget = element.getAttribute(messageTargetAttribute);
-          var transformTarget = element.getAttribute(transformTargetAttribute);
+          var effectTarget = element.getAttribute(effectTargetAttribute);
           var messageElement = AelluxJs2.elementOrId(messageTarget, {
             defaultElement: defaultElement
           });
-          var transformElement = AelluxJs2.elementOrId(transformTarget, {
+          var effectElement = AelluxJs2.elementOrId(effectTarget, {
             defaultElement: defaultElement
           });
+          application.effectElement = effectElement;
+          application.motion = motion;
+          if (effectElement) applications.set(effectElement, application);
           if (messageElement && typeof message === "string") {
             var textNode = null;
             var _iterator = _createForOfIteratorHelper10(messageElement.childNodes), _step;
@@ -27314,7 +27319,7 @@
           }
           if (feedbackTypes.includes(type)) {
             var typeClass = AelluxJs2.className("feedback-".concat(type));
-            for (var _i = 0, _arr = [element, messageElement, transformElement]; _i < _arr.length; _i++) {
+            for (var _i = 0, _arr = [element, messageElement, effectElement]; _i < _arr.length; _i++) {
               var target = _arr[_i];
               if (target) {
                 if (defaultElement !== element) {
@@ -27334,52 +27339,19 @@
               }
             }
           }
-          if (presentRequest) presentRequest(messageElement, transformElement);
-          if (transformElement) {
-            var motionPrefix = AelluxJs2.className("feedback-motion-");
-            for (var _i2 = 0, _Array$from = Array.from(transformElement.classList); _i2 < _Array$from.length; _i2++) {
-              var className = _Array$from[_i2];
-              if (className.startsWith(motionPrefix)) transformElement.classList.remove(className);
-            }
-            var _previous = motionOperations.get(transformElement);
-            if (_previous) AelluxJs2.motion.cancel(_previous.id);
-            motionOperations.delete(transformElement);
-            if (typeof motion === "string") {
-              var motionClass = AelluxJs2.className("feedback-motion-".concat(motion));
-              var id = motionIds.get(transformElement);
-              if (id === void 0) {
-                id = AelluxJs2.motion.id();
-                motionIds.set(transformElement, id);
-              }
-              var operation = {
-                id: id,
-                className: motionClass
-              };
-              motionOperations.set(transformElement, operation);
-              var advancedEase = root2.getComputedStyle(transformElement).getPropertyValue("--ae-feedback-aellux-ease").trim() || void 0;
-              AelluxJs2.motion.run(transformElement, {
-                extension: extensionName,
-                id: id,
-                apply: function apply() {
-                  return transformElement.classList.add(motionClass);
-                },
-                easing: advancedEase,
-                abort: function abort() {
-                  return !transformElement.isConnected;
-                }
-              }).catch(function(cause) {
-                AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_TRANSITION, {
-                  cause: cause,
-                  extension: extensionName,
-                  element: transformElement
-                });
-              }).finally(function() {
-                if (motionOperations.get(transformElement) !== operation) return;
-                transformElement.classList.remove(motionClass);
-                motionOperations.delete(transformElement);
-              });
-            }
-          }
+          if (typeof presentRequest === "function") presentRequest(messageElement, effectElement);
+          if (presentRequest !== false) requestEffect(element, application);
+          return application;
+        }
+        function requestEffect(element, application) {
+          if (!application || application.mount !== mountedFeedback.get(element) || !element.isConnected) return;
+          var effectElement = application.effectElement, motion = application.motion;
+          if (!(effectElement !== null && effectElement !== void 0 && effectElement.isConnected) || applications.get(effectElement) !== application || typeof motion !== "string") return;
+          AelluxJs2.comm.request("present.effect", {
+            element: effectElement.closest(presentSelector) || effectElement,
+            effect: motion,
+            effectTarget: effectElement
+          });
         }
         function on(type, handler) {
           if (!handlers.has(type)) {
@@ -27431,7 +27403,7 @@
           });
         }
         function send(input2, payload) {
-          var _ref3 = payload || input2, type = _ref3.type, message = _ref3.message, value = _ref3.value, target = _ref3.target, motion = _ref3.motion;
+          var _ref2 = payload || input2, type = _ref2.type, message = _ref2.message, value = _ref2.value, target = _ref2.target, motion = _ref2.motion;
           if (input2 && input2.nodeType === 1) target = input2;
           if (typeof message !== "string") {
             reportInvalidArgument("message", message);
@@ -27693,13 +27665,13 @@
 
   // src/aellux.ext.focus.js
   var aellux_ext_focus_exports = {};
-  function _typeof8(o) {
+  function _typeof9(o) {
     "@babel/helpers - typeof";
-    return _typeof8 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof9 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof8(o);
+    }, _typeof9(o);
   }
   function _toConsumableArray7(r) {
     return _arrayWithoutHoles7(r) || _iterableToArray7(r) || _unsupportedIterableToArray14(r) || _nonIterableSpread7();
@@ -27739,14 +27711,14 @@
   }
   function _toPropertyKey4(t) {
     var i = _toPrimitive4(t, "string");
-    return "symbol" == _typeof8(i) ? i : i + "";
+    return "symbol" == _typeof9(i) ? i : i + "";
   }
   function _toPrimitive4(t, r) {
-    if ("object" != _typeof8(t) || !t) return t;
+    if ("object" != _typeof9(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof8(i)) return i;
+      if ("object" != _typeof9(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -28411,13 +28383,13 @@
 
   // src/aellux.ext.input.js
   var aellux_ext_input_exports = {};
-  function _typeof9(o) {
+  function _typeof10(o) {
     "@babel/helpers - typeof";
-    return _typeof9 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof10 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof9(o);
+    }, _typeof10(o);
   }
   function _regenerator5() {
     /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
@@ -28619,14 +28591,14 @@
   }
   function _toPropertyKey5(t) {
     var i = _toPrimitive5(t, "string");
-    return "symbol" == _typeof9(i) ? i : i + "";
+    return "symbol" == _typeof10(i) ? i : i + "";
   }
   function _toPrimitive5(t, r) {
-    if ("object" != _typeof9(t) || !t) return t;
+    if ("object" != _typeof10(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof9(i)) return i;
+      if ("object" != _typeof10(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -30955,13 +30927,13 @@
 
   // src/aellux.ext.viewport.js
   var aellux_ext_viewport_exports = {};
-  function _typeof10(o) {
+  function _typeof11(o) {
     "@babel/helpers - typeof";
-    return _typeof10 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof11 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof10(o);
+    }, _typeof11(o);
   }
   function ownKeys6(e, r) {
     var t = Object.keys(e);
@@ -30989,14 +30961,14 @@
   }
   function _toPropertyKey6(t) {
     var i = _toPrimitive6(t, "string");
-    return "symbol" == _typeof10(i) ? i : i + "";
+    return "symbol" == _typeof11(i) ? i : i + "";
   }
   function _toPrimitive6(t, r) {
-    if ("object" != _typeof10(t) || !t) return t;
+    if ("object" != _typeof11(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof10(i)) return i;
+      if ("object" != _typeof11(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -34387,14 +34359,14 @@
   }
   function _toPropertyKey7(t) {
     var i = _toPrimitive7(t, "string");
-    return "symbol" == _typeof11(i) ? i : i + "";
+    return "symbol" == _typeof12(i) ? i : i + "";
   }
   function _toPrimitive7(t, r) {
-    if ("object" != _typeof11(t) || !t) return t;
+    if ("object" != _typeof12(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof11(i)) return i;
+      if ("object" != _typeof12(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -34441,13 +34413,13 @@
   function _arrayWithHoles9(r) {
     if (Array.isArray(r)) return r;
   }
-  function _typeof11(o) {
+  function _typeof12(o) {
     "@babel/helpers - typeof";
-    return _typeof11 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof12 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof11(o);
+    }, _typeof12(o);
   }
   var init_aellux_ext_adaptive = __esm({
     "src/aellux.ext.adaptive.js": function() {
@@ -34514,17 +34486,17 @@
             initialValue: "0"
           });
           var overrides = options.adaptiveParams === void 0 ? {} : options.adaptiveParams;
-          if (!overrides || _typeof11(overrides) !== "object" || Array.isArray(overrides)) {
+          if (!overrides || _typeof12(overrides) !== "object" || Array.isArray(overrides)) {
             parameterDiagnostic("", overrides, "Expected an object of Adaptive parameter groups; using defaults.");
             overrides = {};
           }
           for (var _i = 0, _Object$keys = Object.keys(adaptiveParams); _i < _Object$keys.length; _i++) {
             var group = _Object$keys[_i];
-            if (group in overrides && (!overrides[group] || _typeof11(overrides[group]) !== "object" || Array.isArray(overrides[group]))) {
+            if (group in overrides && (!overrides[group] || _typeof12(overrides[group]) !== "object" || Array.isArray(overrides[group]))) {
               parameterDiagnostic(group, overrides[group], "Expected a parameter group object; using defaults.");
               continue;
             }
-            if (overrides[group] && _typeof11(overrides[group]) === "object") {
+            if (overrides[group] && _typeof12(overrides[group]) === "object") {
               for (var _i2 = 0, _Object$entries = Object.entries(overrides[group]); _i2 < _Object$entries.length; _i2++) {
                 var _Object$entries$_i = _slicedToArray9(_Object$entries[_i2], 2), key = _Object$entries$_i[0], value = _Object$entries$_i[1];
                 if (typeof value !== "number" || !Number.isFinite(value) || (group === "minSizes" ? value < 0 : value <= 0)) {
@@ -34780,13 +34752,13 @@
   });
 
   // src/internal/create-present-playback.js
-  function _typeof12(o) {
+  function _typeof13(o) {
     "@babel/helpers - typeof";
-    return _typeof12 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof13 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof12(o);
+    }, _typeof13(o);
   }
   function _slicedToArray10(r, e) {
     return _arrayWithHoles10(r) || _iterableToArrayLimit10(r, e) || _unsupportedIterableToArray21(r, e) || _nonIterableRest10();
@@ -34862,14 +34834,14 @@
   }
   function _toPropertyKey8(t) {
     var i = _toPrimitive8(t, "string");
-    return "symbol" == _typeof12(i) ? i : i + "";
+    return "symbol" == _typeof13(i) ? i : i + "";
   }
   function _toPrimitive8(t, r) {
-    if ("object" != _typeof12(t) || !t) return t;
+    if ("object" != _typeof13(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof12(i)) return i;
+      if ("object" != _typeof13(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -35435,13 +35407,13 @@
   });
 
   // src/internal/create-present-gestures.js
-  function _typeof13(o) {
+  function _typeof14(o) {
     "@babel/helpers - typeof";
-    return _typeof13 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof14 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof13(o);
+    }, _typeof14(o);
   }
   function _toConsumableArray12(r) {
     return _arrayWithoutHoles12(r) || _iterableToArray12(r) || _unsupportedIterableToArray22(r) || _nonIterableSpread12();
@@ -35481,14 +35453,14 @@
   }
   function _toPropertyKey9(t) {
     var i = _toPrimitive9(t, "string");
-    return "symbol" == _typeof13(i) ? i : i + "";
+    return "symbol" == _typeof14(i) ? i : i + "";
   }
   function _toPrimitive9(t, r) {
-    if ("object" != _typeof13(t) || !t) return t;
+    if ("object" != _typeof14(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof13(i)) return i;
+      if ("object" != _typeof14(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
@@ -35918,15 +35890,267 @@
     }
   });
 
+  // src/internal/create-present-effects.js
+  function _createForOfIteratorHelper21(r, e) {
+    var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (!t) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray23(r)) || e && r && "number" == typeof r.length) {
+        t && (r = t);
+        var _n = 0, F = function F2() {
+        };
+        return { s: F, n: function n() {
+          return _n >= r.length ? { done: true } : { done: false, value: r[_n++] };
+        }, e: function e2(r2) {
+          throw r2;
+        }, f: F };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var o, a = true, u = false;
+    return { s: function s() {
+      t = t.call(r);
+    }, n: function n() {
+      var r2 = t.next();
+      return a = r2.done, r2;
+    }, e: function e2(r2) {
+      u = true, o = r2;
+    }, f: function f() {
+      try {
+        a || null == t.return || t.return();
+      } finally {
+        if (u) throw o;
+      }
+    } };
+  }
+  function _unsupportedIterableToArray23(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray23(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray23(r, a) : void 0;
+    }
+  }
+  function _arrayLikeToArray23(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
+  function createPresentEffects(root2, api, controllers) {
+    var operations = /* @__PURE__ */ new Map();
+    var targets = /* @__PURE__ */ new Map();
+    var presets = /* @__PURE__ */ new Set(["shake", "yes", "no", "breathe", "tremble", "pulse", "alert"]);
+    var presentAttribute = api.attr("present");
+    function visible(element) {
+      if (!element.isConnected || !element.getClientRects().length) return false;
+      var style = root2.getComputedStyle(element);
+      if (["hidden", "collapse"].includes(style.visibility)) return false;
+      for (var node = element; node; node = node.parentElement) {
+        var computed = root2.getComputedStyle(node);
+        if (computed.display === "none" || computed.contentVisibility === "hidden" || Number(computed.opacity) === 0) return false;
+      }
+      return true;
+    }
+    function finish(operation, status) {
+      if (operations.get(operation.element) !== operation) return;
+      api.motion.cancel(operation.id);
+      if (!operation.authoredClass) operation.target.classList.remove(operation.className);
+      operations.delete(operation.element);
+      if (targets.get(operation.target) === operation) targets.delete(operation.target);
+      operation.resolve({
+        status: status
+      });
+    }
+    function cancelWithin(element) {
+      var _iterator = _createForOfIteratorHelper21(operations.values()), _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
+          var operation = _step.value;
+          if (element.contains(operation.element) || element.contains(operation.target)) finish(operation, "aborted");
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    }
+    function blocked(operation) {
+      var _controllers$get;
+      for (var node = operation.target; node; node = node.parentElement) {
+        var controller = controllers.get(node);
+        if (controller !== null && controller !== void 0 && controller.transition) operation.waiting.add(controller.transition);
+      }
+      var transition = (_controllers$get = controllers.get(operation.element)) === null || _controllers$get === void 0 ? void 0 : _controllers$get.transition;
+      if (transition) operation.waiting.add(transition);
+      return operation.waiting.size > 0;
+    }
+    function start(operation) {
+      if (operations.get(operation.element) !== operation) return;
+      if (!controllers.has(operation.element) || !operation.element.contains(operation.target) || !visible(operation.target) || api.currentPreference("reduced-motion") === "reduced") {
+        finish(operation, "skipped");
+        return;
+      }
+      if (blocked(operation)) return;
+      var transform = root2.getComputedStyle(operation.target).transform;
+      if (presets.has(operation.effect) && (operation.target.hasAttribute(api.attr("anchor")) || operation.target.hasAttribute(api.attr("scrollbox-elastic")) || (operation.target.getAttribute(presentAttribute) || "").split(/\s+/).includes("transform") || transform && transform !== "none" && transform !== "matrix(1, 0, 0, 1, 0, 0)")) {
+        var owners = [];
+        for (var _i = 0, _arr = ["anchor", "scrollbox-elastic"]; _i < _arr.length; _i++) {
+          var name = _arr[_i];
+          if (operation.target.hasAttribute(api.attr(name))) owners.push(name);
+        }
+        if (!operation.target.hasAttribute(api.attr("anchor")) && (operation.target.getAttribute(presentAttribute) || "").split(/\s+/).includes("transform")) owners.push("present");
+        if (!owners.length) owners.push("authored-transform");
+        if (api.options.environment === "development") {
+          var _iterator2 = _createForOfIteratorHelper21(owners), _step2;
+          try {
+            for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
+              var owner = _step2.value;
+              api.diagnostics.warn(api.diagnostics.WARN_RESOURCE_CONFLICT, {
+                extension: "present",
+                element: operation.target,
+                property: "transform",
+                writers: [owner, "present-effect"],
+                reason: "A preset effect would replace the stable transform.",
+                suggestion: "Pass an untransformed inner effectTarget to present.effect()."
+              });
+            }
+          } catch (err) {
+            _iterator2.e(err);
+          } finally {
+            _iterator2.f();
+          }
+        }
+        finish(operation, "skipped");
+        return;
+      }
+      operation.target.getBoundingClientRect();
+      api.motion.run(operation.target, {
+        extension: "present-effect",
+        id: operation.id,
+        ownedOnly: true,
+        apply: function apply() {
+          return operation.target.classList.add(operation.className);
+        },
+        easing: root2.getComputedStyle(operation.target).getPropertyValue("--ae-present-effect-aellux-ease").trim() || void 0,
+        abort: function abort() {
+          return operations.get(operation.element) !== operation || !controllers.has(operation.element) || !operation.target.isConnected || !operation.element.contains(operation.target) || api.currentPreference("reduced-motion") === "reduced" || blocked(operation);
+        }
+      }).then(function(result) {
+        return finish(operation, result.status);
+      }, function(cause) {
+        api.diagnostics.error(api.diagnostics.ERROR_EXTENSION_TRANSITION, {
+          cause: cause,
+          extension: "present",
+          element: operation.target
+        });
+        finish(operation, "aborted");
+      });
+    }
+    function effect(element, effect2) {
+      var effectTarget = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : element;
+      var controller = controllers.get(element);
+      if (!controller) return Promise.resolve({
+        status: "skipped"
+      });
+      if (typeof effect2 !== "string" || !/^[a-zA-Z_][\w-]*$/.test(effect2) || !effectTarget || effectTarget.nodeType !== 1 || !element.contains(effectTarget)) {
+        api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_VALUE, {
+          extension: "present",
+          element: element,
+          value: effect2,
+          reason: "An effect requires one CSS identifier and a target inside its mounted Present.",
+          suggestion: "Use a preset or custom effect name and an optional descendant Element."
+        });
+        return Promise.resolve({
+          status: "skipped"
+        });
+      }
+      if (operations.has(element)) finish(operations.get(element), "aborted");
+      if (targets.has(effectTarget)) finish(targets.get(effectTarget), "aborted");
+      var resolve;
+      var promise = new Promise(function(done) {
+        resolve = done;
+      });
+      var className = api.className("present-effect-".concat(effect2));
+      var operation = {
+        element: element,
+        target: effectTarget,
+        effect: effect2,
+        resolve: resolve,
+        className: className,
+        id: api.motion.id(),
+        waiting: /* @__PURE__ */ new Set(),
+        authoredClass: effectTarget.classList.contains(className)
+      };
+      operations.set(element, operation);
+      targets.set(effectTarget, operation);
+      if (api.currentPreference("reduced-motion") === "reduced") finish(operation, "skipped");
+      else if (!blocked(operation)) start(operation);
+      return promise;
+    }
+    function settled(transition) {
+      var _iterator3 = _createForOfIteratorHelper21(operations.values()), _step3;
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
+          var operation = _step3.value;
+          if (!operation.waiting.delete(transition)) continue;
+          if (!transition.completed) finish(operation, "aborted");
+          else if (!operation.waiting.size) start(operation);
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
+      }
+    }
+    function destroy() {
+      var _iterator4 = _createForOfIteratorHelper21(operations.values()), _step4;
+      try {
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
+          var operation = _step4.value;
+          finish(operation, "aborted");
+        }
+      } catch (err) {
+        _iterator4.e(err);
+      } finally {
+        _iterator4.f();
+      }
+    }
+    function preferences() {
+      if (api.currentPreference("reduced-motion") === "reduced") {
+        var _iterator5 = _createForOfIteratorHelper21(operations.values()), _step5;
+        try {
+          for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
+            var operation = _step5.value;
+            finish(operation, "skipped");
+          }
+        } catch (err) {
+          _iterator5.e(err);
+        } finally {
+          _iterator5.f();
+        }
+      }
+    }
+    return {
+      effect: effect,
+      cancelWithin: cancelWithin,
+      settled: settled,
+      destroy: destroy,
+      preferences: preferences
+    };
+  }
+  var init_create_present_effects = __esm({
+    "src/internal/create-present-effects.js": function() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
   // src/aellux.ext.present.js
   var aellux_ext_present_exports = {};
-  function _typeof14(o) {
+  function _typeof15(o) {
     "@babel/helpers - typeof";
-    return _typeof14 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+    return _typeof15 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
       return typeof o2;
     } : function(o2) {
       return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
-    }, _typeof14(o);
+    }, _typeof15(o);
   }
   function _regenerator8() {
     /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
@@ -36029,10 +36253,10 @@
       });
     };
   }
-  function _createForOfIteratorHelper21(r, e) {
+  function _createForOfIteratorHelper22(r, e) {
     var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
     if (!t) {
-      if (Array.isArray(r) || (t = _unsupportedIterableToArray23(r)) || e && r && "number" == typeof r.length) {
+      if (Array.isArray(r) || (t = _unsupportedIterableToArray24(r)) || e && r && "number" == typeof r.length) {
         t && (r = t);
         var _n = 0, F = function F2() {
         };
@@ -36061,7 +36285,7 @@
     } };
   }
   function _toConsumableArray13(r) {
-    return _arrayWithoutHoles13(r) || _iterableToArray13(r) || _unsupportedIterableToArray23(r) || _nonIterableSpread13();
+    return _arrayWithoutHoles13(r) || _iterableToArray13(r) || _unsupportedIterableToArray24(r) || _nonIterableSpread13();
   }
   function _nonIterableSpread13() {
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -36070,7 +36294,7 @@
     if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r);
   }
   function _arrayWithoutHoles13(r) {
-    if (Array.isArray(r)) return _arrayLikeToArray23(r);
+    if (Array.isArray(r)) return _arrayLikeToArray24(r);
   }
   function ownKeys10(e, r) {
     var t = Object.keys(e);
@@ -36098,32 +36322,32 @@
   }
   function _toPropertyKey10(t) {
     var i = _toPrimitive10(t, "string");
-    return "symbol" == _typeof14(i) ? i : i + "";
+    return "symbol" == _typeof15(i) ? i : i + "";
   }
   function _toPrimitive10(t, r) {
-    if ("object" != _typeof14(t) || !t) return t;
+    if ("object" != _typeof15(t) || !t) return t;
     var e = t[Symbol.toPrimitive];
     if (void 0 !== e) {
       var i = e.call(t, r || "default");
-      if ("object" != _typeof14(i)) return i;
+      if ("object" != _typeof15(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return ("string" === r ? String : Number)(t);
   }
   function _slicedToArray11(r, e) {
-    return _arrayWithHoles11(r) || _iterableToArrayLimit11(r, e) || _unsupportedIterableToArray23(r, e) || _nonIterableRest11();
+    return _arrayWithHoles11(r) || _iterableToArrayLimit11(r, e) || _unsupportedIterableToArray24(r, e) || _nonIterableRest11();
   }
   function _nonIterableRest11() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-  function _unsupportedIterableToArray23(r, a) {
+  function _unsupportedIterableToArray24(r, a) {
     if (r) {
-      if ("string" == typeof r) return _arrayLikeToArray23(r, a);
+      if ("string" == typeof r) return _arrayLikeToArray24(r, a);
       var t = {}.toString.call(r).slice(8, -1);
-      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray23(r, a) : void 0;
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray24(r, a) : void 0;
     }
   }
-  function _arrayLikeToArray23(r, a) {
+  function _arrayLikeToArray24(r, a) {
     (null == a || a > r.length) && (a = r.length);
     for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
     return n;
@@ -36156,6 +36380,7 @@
     "src/aellux.ext.present.js": function() {
       init_create_present_playback();
       init_create_present_gestures();
+      init_create_present_effects();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
@@ -36169,16 +36394,15 @@
           group: AelluxJs2.attr("present-group"),
           active: AelluxJs2.attr("present-active"),
           when: AelluxJs2.attr("present-when"),
-          triggerOn: AelluxJs2.attr("trigger-on"),
+          triggerOn: AelluxJs2.attr("present-trigger-on"),
           autoDismiss: AelluxJs2.attr("auto-dismiss"),
           presentMotion: AelluxJs2.attr("present-motion"),
           dismissOnClick: AelluxJs2.attr("dismiss-on-click"),
-          trigger: AelluxJs2.attr("trigger"),
-          //toggle,pop,dismiss,unpop
-          dismiss: AelluxJs2.attr("dismiss"),
+          trigger: AelluxJs2.attr("present-trigger"),
+          //toggle,pop,dismiss,unpop,effect
+          target: AelluxJs2.attr("present-target"),
           //target ID
-          target: AelluxJs2.attr("target")
-          //target ID
+          effect: AelluxJs2.attr("present-effect")
         };
         var className = {
           pop: AelluxJs2.className("pop"),
@@ -36202,12 +36426,15 @@
           trigger: trigger,
           show: show,
           selected: selected,
-          popNext: popNext
+          popNext: popNext,
+          effect: effect,
+          cancelEffect: cancelEffect
         });
         var POP = "Pop", DISMISS = "Dismiss", UNPOP = "Unpop", BEFORE = "Before", MILLISECOND = "ms", SECOND = "s", DEFAULT_PRESENT = "opacity transform height width", OPACITY_SYNTAX = "<number> | <percentage>", TRANSFORM_SYNTAX = "<transform-list> | none";
         var TRANSITION_PREPARE_TIME = 100;
         var TAP_CLICK_WAIT_TIME = 32;
         var presentElements = /* @__PURE__ */ new Map();
+        var effects = createPresentEffects(root2, AelluxJs2, presentElements);
         var openPresentElements = /* @__PURE__ */ new Set();
         var fallbackMotionId = 5e6;
         var triggerElementsSet = /* @__PURE__ */ new Set();
@@ -36275,12 +36502,16 @@
             var element = _ref2.element, goto = _ref2.goto;
             return toggle(element, goto);
           }, communication);
-          AelluxJs2.comm.handle("present.show", function(_ref3) {
-            var group = _ref3.group, member = _ref3.member;
+          AelluxJs2.comm.handle("present.effect", function(_ref3) {
+            var element = _ref3.element, name = _ref3.effect, effectTarget = _ref3.effectTarget;
+            return effect(element, name, effectTarget);
+          }, communication);
+          AelluxJs2.comm.handle("present.show", function(_ref4) {
+            var group = _ref4.group, member = _ref4.member;
             return show(group, member);
           }, communication);
-          AelluxJs2.comm.handle("present.selection", function(_ref4) {
-            var group = _ref4.group;
+          AelluxJs2.comm.handle("present.selection", function(_ref5) {
+            var group = _ref5.group;
             return selected(group);
           }, communication);
           AelluxJs2.comm.handle("present.pop-next", function(request) {
@@ -36294,8 +36525,8 @@
             });
           }, communication);
           playback.init();
-          var descriptors = cssProperties.map(function(_ref5) {
-            var _ref6 = _slicedToArray11(_ref5, 3), name = _ref6[0], syntax = _ref6[1], initialValue = _ref6[2];
+          var descriptors = cssProperties.map(function(_ref6) {
+            var _ref7 = _slicedToArray11(_ref6, 3), name = _ref7[0], syntax = _ref7[1], initialValue = _ref7[2];
             return {
               name: "--ae-".concat(name),
               syntax: syntax,
@@ -36319,14 +36550,15 @@
             update: function update(element) {
               return autoDismissSchedule(element, presentElements.get(element));
             },
-            controllers: ["pop", "dismiss", "unpop", "trigger", "toggle"]
+            controllers: ["pop", "dismiss", "unpop", "trigger", "toggle", "effect", "cancelEffect"]
           });
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
             priority: 0,
-            selector: "[".concat([attr.trigger, attr.dismiss, attr.target].join("],["), "]"),
+            selector: "[".concat(attr.trigger, "]"),
             mount: mountTriggerElement,
-            unmount: unmountTriggerElement
+            unmount: unmountTriggerElement,
+            update: refreshTriggerTargets
           });
           AelluxJs2.mountManager.add({
             extensionName: extensionName,
@@ -36337,10 +36569,11 @@
             controllers: ["show", "selected", "popNext"]
           });
           autoObserver = new root2.MutationObserver(function(records) {
-            var _iterator = _createForOfIteratorHelper21(records), _step;
+            var _iterator = _createForOfIteratorHelper22(records), _step;
             try {
               for (_iterator.s(); !(_step = _iterator.n()).done; ) {
                 var record = _step.value;
+                if (record.target === document.documentElement && record.attributeName === AelluxJs2.attr("reduced-motion")) effects.preferences();
                 var controller = presentElements.get(record.target);
                 if (controller) {
                   if (record.attributeName !== attr.autoDismiss) gestures.update(record.target);
@@ -36355,7 +36588,7 @@
             if (records.some(function(record2) {
               return record2.type === "childList" || record2.attributeName === "id";
             })) {
-              var _iterator2 = _createForOfIteratorHelper21(presentElements.keys()), _step2;
+              var _iterator2 = _createForOfIteratorHelper22(presentElements.keys()), _step2;
               try {
                 for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
                   var element = _step2.value;
@@ -36372,7 +36605,7 @@
             subtree: true,
             childList: true,
             attributes: true,
-            attributeFilter: [attr.autoDismiss, "id"].concat(_toConsumableArray13(["", "-source", "-unpop", "-dismiss"].map(function(suffix3) {
+            attributeFilter: [attr.autoDismiss, "id", AelluxJs2.attr("reduced-motion")].concat(_toConsumableArray13(["", "-source", "-unpop", "-dismiss"].map(function(suffix3) {
               return AelluxJs2.attr("present-gesture".concat(suffix3));
             })))
           });
@@ -36385,6 +36618,7 @@
         function destroy() {
           var _autoObserver;
           AelluxJs2.comm.removeOwner(extensionName);
+          effects.destroy();
           gestures.destroy();
           (_autoObserver = autoObserver) === null || _autoObserver === void 0 || _autoObserver.disconnect();
           autoObserver = null;
@@ -36393,7 +36627,7 @@
           });
           AelluxJs2.off("$click", OnClick);
           AelluxJs2.off("tap", onTap);
-          var _iterator3 = _createForOfIteratorHelper21(pendingTaps), _step3;
+          var _iterator3 = _createForOfIteratorHelper22(pendingTaps), _step3;
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
               var pending = _step3.value;
@@ -36407,7 +36641,7 @@
           AelluxJs2.offEvent(root2, "$resize", refreshExpandedStates);
           document.removeEventListener("pointerover", onHover);
           document.removeEventListener("pointerout", onHover);
-          var _iterator4 = _createForOfIteratorHelper21(groups.keys()), _step4;
+          var _iterator4 = _createForOfIteratorHelper22(groups.keys()), _step4;
           try {
             for (_iterator4.s(); !(_step4 = _iterator4.n()).done; ) {
               var group = _step4.value;
@@ -36418,7 +36652,7 @@
           } finally {
             _iterator4.f();
           }
-          var _iterator5 = _createForOfIteratorHelper21(hoverTimers.keys()), _step5;
+          var _iterator5 = _createForOfIteratorHelper22(hoverTimers.keys()), _step5;
           try {
             for (_iterator5.s(); !(_step5 = _iterator5.n()).done; ) {
               var target = _step5.value;
@@ -36430,7 +36664,7 @@
             _iterator5.f();
           }
           hoveredTriggers.clear();
-          var _iterator6 = _createForOfIteratorHelper21(triggerElementsSet), _step6;
+          var _iterator6 = _createForOfIteratorHelper22(triggerElementsSet), _step6;
           try {
             for (_iterator6.s(); !(_step6 = _iterator6.n()).done; ) {
               var triggerElement = _step6.value;
@@ -36441,7 +36675,7 @@
           } finally {
             _iterator6.f();
           }
-          var _iterator7 = _createForOfIteratorHelper21(presentElements.keys()), _step7;
+          var _iterator7 = _createForOfIteratorHelper22(presentElements.keys()), _step7;
           try {
             for (_iterator7.s(); !(_step7 = _iterator7.n()).done; ) {
               var element = _step7.value;
@@ -36517,6 +36751,7 @@
             stop: function stop() {
               var _this$gesture, _this$reverse, _this$gestureDisplay;
               var options = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
+              effects.cancelWithin(element);
               (_this$gesture = this.gesture) === null || _this$gesture === void 0 || _this$gesture.abort();
               this.gesture = null;
               var replacement = options.replacement === true;
@@ -36558,7 +36793,7 @@
             openPresentElements.add(element);
           }
           presentElements.set(element, presentController);
-          var _iterator8 = _createForOfIteratorHelper21(element.querySelectorAll("[".concat(attr.trigger, "],[").concat(attr.dismiss, "],[").concat(attr.target, "]"))), _step8;
+          var _iterator8 = _createForOfIteratorHelper22(element.querySelectorAll("[".concat(attr.trigger, "]"))), _step8;
           try {
             for (_iterator8.s(); !(_step8 = _iterator8.n()).done; ) {
               var _triggerElement = _step8.value;
@@ -36574,7 +36809,7 @@
           }
           var idTriggers = triggersByTargetId.get(element.id);
           if (idTriggers) {
-            var _iterator9 = _createForOfIteratorHelper21(idTriggers), _step9;
+            var _iterator9 = _createForOfIteratorHelper22(idTriggers), _step9;
             try {
               for (_iterator9.s(); !(_step9 = _iterator9.n()).done; ) {
                 var triggerElement = _step9.value;
@@ -36599,7 +36834,7 @@
           var controller = presentElements.get(element);
           gestures.remove(element);
           cancelHoverClose(element);
-          var _iterator0 = _createForOfIteratorHelper21(controller.triggers), _step0;
+          var _iterator0 = _createForOfIteratorHelper22(controller.triggers), _step0;
           try {
             for (_iterator0.s(); !(_step0 = _iterator0.n()).done; ) {
               var button = _step0.value;
@@ -36625,7 +36860,7 @@
           queueGroups();
         }
         function mountTriggerElement(triggerElement) {
-          if (triggerElementsSet.has(triggerElement)) return;
+          if (triggerElementsSet.has(triggerElement) || !triggerElement.hasAttribute(attr.trigger)) return;
           triggerAriaHandlers.set(triggerElement, AelluxJs2.aria.register(triggerElement));
           triggerElementsSet.add(triggerElement);
           refreshTriggerTargets(triggerElement);
@@ -36692,23 +36927,30 @@
         }
         function refreshTriggerTargets(triggerElement) {
           var _presentElements$get6, _triggerAriaHandlers$4;
+          if (!triggerElement.hasAttribute(attr.trigger)) {
+            unmountTriggerElement(triggerElement);
+            return;
+          }
+          if (!triggerElementsSet.has(triggerElement)) {
+            mountTriggerElement(triggerElement);
+            return;
+          }
           var previousTarget = triggerTargets.get(triggerElement);
           var targetSelector = triggerElement.getAttribute(attr.target);
-          var dismiss2 = triggerElement.getAttribute(attr.dismiss);
-          indexTriggerTarget(triggerElement, dismiss2 || targetSelector);
+          indexTriggerTarget(triggerElement, targetSelector);
           var container = triggerElement.closest(presentSelector);
           if (previousTarget) {
             var _presentElements$get5;
             (_presentElements$get5 = presentElements.get(previousTarget)) === null || _presentElements$get5 === void 0 || _presentElements$get5.triggers.delete(triggerElement);
           }
           var target = null;
-          if (dismiss2 || targetSelector) {
-            target = targetById(dismiss2 || targetSelector);
-          } else if (container && container.id) {
+          if (targetSelector) {
+            target = targetById(targetSelector);
+          } else if (container) {
             target = container;
           }
           if (previousTarget !== target) hoveredTriggers.delete(triggerElement);
-          if (!target || !target.id) {
+          if (!target) {
             var _triggerAriaHandlers$2, _triggerAriaHandlers$3;
             triggerTargets.delete(triggerElement);
             (_triggerAriaHandlers$2 = triggerAriaHandlers.get(triggerElement)) === null || _triggerAriaHandlers$2 === void 0 || _triggerAriaHandlers$2.unset("expanded");
@@ -36717,7 +36959,7 @@
           }
           triggerTargets.set(triggerElement, target);
           (_presentElements$get6 = presentElements.get(target)) === null || _presentElements$get6 === void 0 || _presentElements$get6.triggers.add(triggerElement);
-          var targetIds = /* @__PURE__ */ new Set([target.id]);
+          var targetIds = new Set(target.id ? [target.id] : []);
           var initial = (_triggerAriaHandlers$4 = triggerAriaHandlers.get(triggerElement)) === null || _triggerAriaHandlers$4 === void 0 ? void 0 : _triggerAriaHandlers$4.initial("controls");
           if (initial) {
             initial.trim().split(/\s+/).forEach(function(x) {
@@ -36725,9 +36967,10 @@
             });
           }
           updateTriggerAriaExpanded(triggerElement);
-          triggerAriaHandlers.get(triggerElement).set({
+          if (targetIds.size) triggerAriaHandlers.get(triggerElement).set({
             controls: _toConsumableArray13(targetIds)
           });
+          else triggerAriaHandlers.get(triggerElement).unset("controls");
         }
         function updateTriggerAriaExpanded(triggerElement) {
           var _presentElements$get7, _triggerAriaHandlers$5;
@@ -36750,8 +36993,15 @@
         function toggle(element, goto) {
           return presentTransition(element, goto);
         }
-        function trigger(element, trigger2) {
+        function effect(element, name, effectTarget) {
+          return effects.effect(element, name, effectTarget);
+        }
+        function cancelEffect(element) {
+          effects.cancelWithin(element);
+        }
+        function trigger(element, trigger2, name) {
           trigger2 = typeof trigger2 === "string" ? (trigger2 || "toggle").toLowerCase() : "toggle";
+          if (trigger2 === "effect") return effect(element, name);
           if (!["pop", "dismiss", "unpop", "toggle"].includes(trigger2)) AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CONFIGURATION_VALUE, {
             extension: extensionName,
             element: element,
@@ -36803,7 +37053,7 @@
           var transition = AelluxJs2.persist.element.save(element, [], ["transition-property"]);
           var freeze = function freeze2() {
             element.style.setProperty("transition-property", "none", "important");
-            var _iterator1 = _createForOfIteratorHelper21(values), _step1;
+            var _iterator1 = _createForOfIteratorHelper22(values), _step1;
             try {
               for (_iterator1.s(); !(_step1 = _iterator1.n()).done; ) {
                 var _step1$value = _slicedToArray11(_step1.value, 2), property = _step1$value[0], value = _step1$value[1];
@@ -36988,6 +37238,7 @@
                   }
                   return _context2.a(2, false);
                 case 12:
+                  effects.cancelWithin(element);
                   controller.operationRevision++;
                   impliedReverse = reversing && !controller.opening && !controller.transition;
                   reverseTracks = reversing && controller.motionEnabled && ((_AelluxJs$currentPref = AelluxJs2.currentPreference) === null || _AelluxJs$currentPref === void 0 ? void 0 : _AelluxJs$currentPref.call(AelluxJs2, "reduced-motion")) !== "reduced" ? gesture ? playback.full(element, controller, false) : playback.snapshot(element, controller, interpolatedProgress) : [];
@@ -37176,11 +37427,11 @@
                       element.style.setProperty("transition-property", "none", "important");
                       applyDestination();
                       var _computed = root2.getComputedStyle(element);
-                      var _tracks2 = handoff.values.filter(function(_ref7) {
-                        var _ref8 = _slicedToArray11(_ref7, 1), property2 = _ref8[0];
+                      var _tracks2 = handoff.values.filter(function(_ref8) {
+                        var _ref9 = _slicedToArray11(_ref8, 1), property2 = _ref9[0];
                         return property2.startsWith("grid-template-") || property2 === "height" || property2 === "width";
-                      }).map(function(_ref9) {
-                        var _ref0 = _slicedToArray11(_ref9, 1), property2 = _ref0[0];
+                      }).map(function(_ref0) {
+                        var _ref1 = _slicedToArray11(_ref0, 1), property2 = _ref1[0];
                         return [property2, _computed.getPropertyValue(property2)];
                       });
                       handoff.freeze();
@@ -37190,7 +37441,7 @@
                       handoff.memory.restore();
                       applyDestination();
                       if (_tracks2.length) element.style.setProperty("transition-property", "".concat(properties, ", height, width"), "important");
-                      var _iterator19 = _createForOfIteratorHelper21(_tracks2), _step19;
+                      var _iterator19 = _createForOfIteratorHelper22(_tracks2), _step19;
                       try {
                         for (_iterator19.s(); !(_step19 = _iterator19.n()).done; ) {
                           var _step19$value = _slicedToArray11(_step19.value, 2), property = _step19$value[0], value = _step19$value[1];
@@ -37344,6 +37595,7 @@
                     restoreMeasuredStyles(element, controller);
                     controller.transition = null;
                     controller.classList.remove(className.willChange);
+                    effects.settled(transition);
                   }
                   return _context2.f(26);
                 case 27:
@@ -37394,6 +37646,7 @@
             });
           }
           transition.timeout = null;
+          transition.completed = true;
         }
         function establishState(element, controller, state) {
           controller.state = state;
@@ -37476,7 +37729,7 @@
           controller.autoCountdown = null;
         }
         function clickAutoDismiss(eventTarget, currentExceptions) {
-          var _iterator10 = _createForOfIteratorHelper21(openPresentElements), _step10;
+          var _iterator10 = _createForOfIteratorHelper22(openPresentElements), _step10;
           try {
             var _loop2 = function _loop22() {
               var pContainer = _step10.value;
@@ -37500,14 +37753,14 @@
         }
         function refreshChangedTrigger(button) {
           if (!triggerElementsSet.has(button)) return;
-          var value = button.getAttribute(attr.dismiss) || button.getAttribute(attr.target);
+          var value = button.getAttribute(attr.target);
           if (value !== indexedTriggerValues.get(button)) refreshTriggerTargets(button);
         }
         function OnClick(event) {
           var target = activationTarget(event);
           if (!target) return;
           var matched;
-          var _iterator11 = _createForOfIteratorHelper21(pendingTaps), _step11;
+          var _iterator11 = _createForOfIteratorHelper22(pendingTaps), _step11;
           try {
             for (_iterator11.s(); !(_step11 = _iterator11.n()).done; ) {
               var _pending$event$detail, _pending$event$detail2;
@@ -37533,7 +37786,7 @@
         function onTap(event) {
           var target = activationTarget(event);
           if (!target) return;
-          var control = target.closest("[".concat(attr.trigger, "],[").concat(attr.dismiss, "]"));
+          var control = target.closest("[".concat(attr.trigger, "]"));
           if (control) refreshChangedTrigger(control);
           var pending = {
             event: event,
@@ -37559,7 +37812,7 @@
           pendingTaps.delete(pending);
         }
         function cancelElementTaps(element) {
-          var _iterator12 = _createForOfIteratorHelper21(pendingTaps), _step12;
+          var _iterator12 = _createForOfIteratorHelper22(pendingTaps), _step12;
           try {
             for (_iterator12.s(); !(_step12 = _iterator12.n()).done; ) {
               var pending = _step12.value;
@@ -37585,39 +37838,16 @@
               diagnoseTarget(button, target, attr.target, targetSelector);
               if (target) {
                 exceptions.push(target);
-                if (!(hoverSuppressed !== null && hoverSuppressed !== void 0 ? hoverSuppressed : suppressHoverClick(button, event))) trigger(target, triggerAttr);
+                if (!(hoverSuppressed !== null && hoverSuppressed !== void 0 ? hoverSuppressed : suppressHoverClick(button, event))) trigger(target, triggerAttr, button.getAttribute(attr.effect));
               }
             } else if (container) {
               exceptions.push(container);
-              if (!(hoverSuppressed !== null && hoverSuppressed !== void 0 ? hoverSuppressed : suppressHoverClick(button, event))) trigger(container, triggerAttr);
+              if (!(hoverSuppressed !== null && hoverSuppressed !== void 0 ? hoverSuppressed : suppressHoverClick(button, event))) trigger(container, triggerAttr, button.getAttribute(attr.effect));
             } else {
               AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING, {
                 extension: extensionName,
                 element: button,
-                action: "trigger"
-              });
-            }
-          }
-          button = eventTarget.closest("[".concat(attr.dismiss, "]"));
-          if (button) {
-            refreshChangedTrigger(button);
-            var dismissTargetId = button.getAttribute(attr.dismiss);
-            var _targetSelector = button.getAttribute(attr.target);
-            if (dismissTargetId || _targetSelector) {
-              var _target = targetById(dismissTargetId || _targetSelector);
-              diagnoseTarget(button, _target, dismissTargetId ? attr.dismiss : attr.target, dismissTargetId || _targetSelector);
-              if (_target) {
-                exceptions.push(_target);
-                dismiss(_target);
-              }
-            } else if (container) {
-              exceptions.push(container);
-              dismiss(container);
-            } else {
-              AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING, {
-                extension: extensionName,
-                element: button,
-                action: "dismiss"
+                action: triggerAttr === "dismiss" ? "dismiss" : "trigger"
               });
             }
           }
@@ -37646,7 +37876,7 @@
           if (controller.expanded !== visible) controller.setAriaExpanded(String(visible));
         }
         function refreshExpandedStates() {
-          var _iterator13 = _createForOfIteratorHelper21(presentElements), _step13;
+          var _iterator13 = _createForOfIteratorHelper22(presentElements), _step13;
           try {
             for (_iterator13.s(); !(_step13 = _iterator13.n()).done; ) {
               var _step13$value = _slicedToArray11(_step13.value, 2), element = _step13$value[0], controller = _step13$value[1];
@@ -37744,7 +37974,7 @@
           state.jobs.clear();
           state.reservations.clear();
           publishGroup(group, state, null);
-          var _iterator14 = _createForOfIteratorHelper21(groupMembers(group)), _step14;
+          var _iterator14 = _createForOfIteratorHelper22(groupMembers(group)), _step14;
           try {
             for (_iterator14.s(); !(_step14 = _iterator14.n()).done; ) {
               var member = _step14.value;
@@ -37980,7 +38210,7 @@
               return presentElements.has(member2) && member2.isConnected && member2.closest(groupSelector) === group && member2.id === ids[index] && member2.getAttribute(attr.when) === conditions[index];
             });
           };
-          var _iterator15 = _createForOfIteratorHelper21(changes), _step15;
+          var _iterator15 = _createForOfIteratorHelper22(changes), _step15;
           try {
             for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
               var member = _step15.value;
@@ -38018,7 +38248,7 @@
             complete = resolve;
           });
           state.pending = pending;
-          var _iterator16 = _createForOfIteratorHelper21(changes), _step16;
+          var _iterator16 = _createForOfIteratorHelper22(changes), _step16;
           try {
             var _loop3 = function _loop32() {
               var member2 = _step16.value;
@@ -38062,7 +38292,7 @@
         function inHoverRegion(target, node) {
           if (!node || !node.nodeType) return false;
           if (target.contains(node)) return true;
-          var _iterator17 = _createForOfIteratorHelper21(triggerElementsSet), _step17;
+          var _iterator17 = _createForOfIteratorHelper22(triggerElementsSet), _step17;
           try {
             for (_iterator17.s(); !(_step17 = _iterator17.n()).done; ) {
               var button = _step17.value;
@@ -38095,18 +38325,18 @@
                 hoveredTriggers.add(button);
                 var action = button.getAttribute(attr.trigger);
                 if (action === "pop") toggle(target, true);
-                else trigger(target, action);
+                else trigger(target, action, button.getAttribute(attr.effect));
               } else hoveredTriggers.delete(button);
             }
           }
-          var _iterator18 = _createForOfIteratorHelper21(openPresentElements), _step18;
+          var _iterator18 = _createForOfIteratorHelper22(openPresentElements), _step18;
           try {
             var _loop4 = function _loop42() {
               var target2 = _step18.value;
               if (!inHoverRegion(target2, event.target)) return 1;
               if (entering || inHoverRegion(target2, event.relatedTarget)) cancelHoverClose(target2);
               else if (_toConsumableArray13(triggerElementsSet).some(function(control) {
-                return triggerTargets.get(control) === target2 && control.getAttribute(attr.triggerOn) === "hover" && !["dismiss", "unpop"].includes(control.getAttribute(attr.trigger));
+                return triggerTargets.get(control) === target2 && control.getAttribute(attr.triggerOn) === "hover" && !["dismiss", "unpop", "effect"].includes(control.getAttribute(attr.trigger));
               })) {
                 cancelHoverClose(target2);
                 hoverTimers.set(target2, setTimeout(function() {

@@ -2,19 +2,22 @@
 
 import { createPresentPlayback } from "./internal/create-present-playback.js";
 import { createPresentGestures } from "./internal/create-present-gestures.js";
+import { createPresentEffects } from "./internal/create-present-effects.js";
 
 /**
  * Present Extension
  *
  * Purpose: controls the presented or hidden state of mounted regions and
  * coordinates triggers, dismiss controls, outside interaction and CSS motion.
+ * It also owns temporary effects that execute only between presentation transitions.
  *
  * Capability profile: interaction and input, structure and state, and motion
  * and timing.
  *
  * Inputs and activation: mounts `[data-ae-present]` regions. Its whitespace-
  * separated opacity, transform, height and width values select the animated
- * properties. An empty value disables motion, while `all` expands to all four
+ * properties. An empty value disables presentation transitions while allowing effects;
+ * `all` expands to all four
  * tokens during mount. A direct `[data-ae-present-motion]` child enables grid
  * size transitions; without it, size transitions measure the container.
  * Trigger and dismiss relationships use extension data attributes and may
@@ -23,7 +26,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
  *
  * Outputs and owned state: owns presentation and will-change classes plus its
  * changes to `hidden`, `aria-expanded` and `aria-controls`. It exposes
- * controller methods for presenting, dismissing, reversing and toggling and dispatches
+ * controller methods for presenting, dismissing, reversing, toggling and temporary effects, and dispatches
  * lifecycle events.
  * When hiding a region containing the active element, it dispatches
  * `DismissFocusLost` or `UnpopFocusLost` after that element loses focus.
@@ -50,13 +53,13 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
     group: AelluxJs.attr("present-group"),
     active: AelluxJs.attr("present-active"),
     when: AelluxJs.attr("present-when"),
-    triggerOn: AelluxJs.attr("trigger-on"),
+    triggerOn: AelluxJs.attr("present-trigger-on"),
     autoDismiss: AelluxJs.attr("auto-dismiss"),
     presentMotion: AelluxJs.attr("present-motion"),
     dismissOnClick: AelluxJs.attr("dismiss-on-click"),
-    trigger: AelluxJs.attr("trigger"), //toggle,pop,dismiss,unpop
-    dismiss: AelluxJs.attr("dismiss"), //target ID
-    target: AelluxJs.attr("target"), //target ID
+    trigger: AelluxJs.attr("present-trigger"), //toggle,pop,dismiss,unpop,effect
+    target: AelluxJs.attr("present-target"), //target ID
+    effect: AelluxJs.attr("present-effect"),
   };
   const className = {
     pop: AelluxJs.className("pop"),
@@ -73,7 +76,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
 
   AelluxJs.extAttach(extensionName, {
     init, destroy,
-    pop, dismiss, unpop, toggle, trigger, show, selected, popNext
+    pop, dismiss, unpop, toggle, trigger, show, selected, popNext, effect, cancelEffect
   });
 
   const
@@ -90,6 +93,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
   const TRANSITION_PREPARE_TIME = 100;
   const TAP_CLICK_WAIT_TIME = 32;
   const presentElements = new Map();
+  const effects = createPresentEffects(root, AelluxJs, presentElements);
   const openPresentElements = new Set();
   let fallbackMotionId = 5000000;
   const triggerElementsSet = new Set();
@@ -148,6 +152,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
     for (const [name, method] of Object.entries({ pop, unpop, dismiss }))
       AelluxJs.comm.handle("present." + name, ({ element }) => method(element), communication);
     AelluxJs.comm.handle("present.toggle", ({ element, goto }) => toggle(element, goto), communication);
+    AelluxJs.comm.handle("present.effect", ({ element, effect: name, effectTarget }) => effect(element, name, effectTarget), communication);
     AelluxJs.comm.handle("present.show", ({ group, member }) => show(group, member), communication);
     AelluxJs.comm.handle("present.selection", ({ group }) => selected(group), communication);
     AelluxJs.comm.handle("present.pop-next", request => popNext(request.group, member => {
@@ -169,18 +174,15 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
       priority: 0,
       mount: mountPresentContainer, unmount: unmountPresentContainer,
       update: element => autoDismissSchedule(element, presentElements.get(element)),
-      controllers: ["pop", "dismiss", "unpop", "trigger", "toggle"]
+      controllers: ["pop", "dismiss", "unpop", "trigger", "toggle", "effect", "cancelEffect"]
     });
 
     AelluxJs.mountManager.add({
       extensionName,
       priority: 0,
-      selector: `[${[
-        attr.trigger,
-        attr.dismiss,
-        attr.target
-      ].join('],[')}]`,
-      mount: mountTriggerElement, unmount: unmountTriggerElement
+      selector: `[${attr.trigger}]`,
+      mount: mountTriggerElement, unmount: unmountTriggerElement,
+      update: refreshTriggerTargets
     });
 
     AelluxJs.mountManager.add({
@@ -189,6 +191,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
     });
     autoObserver = new root.MutationObserver(records => {
       for (const record of records) {
+        if (record.target === document.documentElement && record.attributeName === AelluxJs.attr("reduced-motion")) effects.preferences();
         const controller = presentElements.get(record.target);
         if (controller) {
           if (record.attributeName !== attr.autoDismiss) gestures.update(record.target);
@@ -199,7 +202,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
         for (const element of presentElements.keys()) if (element.hasAttribute(AelluxJs.attr("present-gesture-source"))) gestures.update(element);
       }
     });
-    autoObserver.observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: [attr.autoDismiss, "id",
+    autoObserver.observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: [attr.autoDismiss, "id", AelluxJs.attr("reduced-motion"),
       ...["", "-source", "-unpop", "-dismiss"].map(suffix => AelluxJs.attr(`present-gesture${suffix}`))] });
     document.addEventListener("pointerover", onHover);
     document.addEventListener("pointerout", onHover);
@@ -210,6 +213,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
 
   function destroy() {
     AelluxJs.comm.removeOwner(extensionName);
+    effects.destroy();
     gestures.destroy();
     autoObserver?.disconnect();
     autoObserver = null;
@@ -294,6 +298,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
         this.triggers.forEach(updateTriggerAriaExpanded);
       },
       stop: function (options = {}) {
+        effects.cancelWithin(element);
         this.gesture?.abort();
         this.gesture = null;
         const replacement = options.replacement === true;
@@ -344,7 +349,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
     }
     presentElements.set(element, presentController);
     for (const triggerElement of element.querySelectorAll(
-      `[${attr.trigger}],[${attr.dismiss}],[${attr.target}]`
+      `[${attr.trigger}]`
     )) {
       if (triggerTargets.get(triggerElement) === element) {
         presentController.triggers.add(triggerElement);
@@ -387,7 +392,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
   }
 
   function mountTriggerElement(triggerElement) {
-    if (triggerElementsSet.has(triggerElement)) return;
+    if (triggerElementsSet.has(triggerElement) || !triggerElement.hasAttribute(attr.trigger)) return;
     triggerAriaHandlers.set(triggerElement, AelluxJs.aria.register(triggerElement));
     triggerElementsSet.add(triggerElement);
     refreshTriggerTargets(triggerElement);
@@ -457,10 +462,17 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
   }
 
   function refreshTriggerTargets(triggerElement) {
+    if (!triggerElement.hasAttribute(attr.trigger)) {
+      unmountTriggerElement(triggerElement);
+      return;
+    }
+    if (!triggerElementsSet.has(triggerElement)) {
+      mountTriggerElement(triggerElement);
+      return;
+    }
     const previousTarget = triggerTargets.get(triggerElement);
     const targetSelector = triggerElement.getAttribute(attr.target);
-    const dismiss = triggerElement.getAttribute(attr.dismiss);
-    indexTriggerTarget(triggerElement, dismiss || targetSelector);
+    indexTriggerTarget(triggerElement, targetSelector);
     const container = triggerElement.closest(presentSelector);
 
     if (previousTarget) {
@@ -468,15 +480,15 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
     }
 
     let target = null;
-    if (dismiss || targetSelector) {
-      target = targetById(dismiss || targetSelector);
-    } else if (container && container.id) {
+    if (targetSelector) {
+      target = targetById(targetSelector);
+    } else if (container) {
       target = container;
     }
 
     if (previousTarget !== target) hoveredTriggers.delete(triggerElement);
 
-    if (!target || !target.id) {
+    if (!target) {
       triggerTargets.delete(triggerElement);
       triggerAriaHandlers.get(triggerElement)?.unset("expanded");
       triggerAriaHandlers.get(triggerElement)?.unset("controls");
@@ -484,11 +496,12 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
     }
     triggerTargets.set(triggerElement, target);
     presentElements.get(target)?.triggers.add(triggerElement);
-    const targetIds = new Set([target.id]);
+    const targetIds = new Set(target.id ? [target.id] : []);
     const initial = triggerAriaHandlers.get(triggerElement)?.initial("controls");
     if (initial) { initial.trim().split(/\s+/).forEach(x => targetIds.add(x)); }
     updateTriggerAriaExpanded(triggerElement);
-    triggerAriaHandlers.get(triggerElement).set({ controls: [...targetIds] });
+    if (targetIds.size) triggerAriaHandlers.get(triggerElement).set({ controls: [...targetIds] });
+    else triggerAriaHandlers.get(triggerElement).unset("controls");
   }
 
   function updateTriggerAriaExpanded(triggerElement) {
@@ -502,10 +515,13 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
   function dismiss(element) { return presentTransition(element, false); }
   function unpop(element) { return presentTransition(element, false, false, false, undefined, UNPOP); }
   function toggle(element, goto) { return presentTransition(element, goto); }
-  function trigger(element, trigger) {
+  function effect(element, name, effectTarget) { return effects.effect(element, name, effectTarget); }
+  function cancelEffect(element) { effects.cancelWithin(element); }
+  function trigger(element, trigger, name) {
     trigger = typeof trigger === "string" ?
       (trigger || "toggle").toLowerCase() :
       "toggle";
+    if (trigger === "effect") return effect(element, name);
     if (!["pop", "dismiss", "unpop", "toggle"].includes(trigger)) AelluxJs.diagnostics.warn(
       AelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
         extension: extensionName, element, attribute: attr.trigger, value: trigger,
@@ -659,6 +675,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
       if (!groupOperation && element !== group && (element.closest(groupSelector) !== group ||
         (groupState && (groups.get(group) !== groupState || groupState.revision !== groupRevision)))) return;
       if (!hasCapacity()) return false;
+      effects.cancelWithin(element);
       controller.operationRevision++;
       const impliedReverse = reversing && !controller.opening && !controller.transition;
       const reverseTracks = reversing && controller.motionEnabled &&
@@ -973,6 +990,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
         restoreMeasuredStyles(element, controller);
         controller.transition = null;
         controller.classList.remove(className.willChange);
+        effects.settled(transition);
       }
     }
   }
@@ -1012,6 +1030,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
       });
     }
     transition.timeout = null;
+    transition.completed = true;
   }
 
   function establishState(element, controller, state) {
@@ -1091,7 +1110,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
 
   function refreshChangedTrigger(button) {
     if (!triggerElementsSet.has(button)) return;
-    const value = button.getAttribute(attr.dismiss) || button.getAttribute(attr.target);
+    const value = button.getAttribute(attr.target);
     if (value !== indexedTriggerValues.get(button)) refreshTriggerTargets(button);
   }
 
@@ -1123,7 +1142,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
   function onTap(event) {
     const target = activationTarget(event);
     if (!target) return;
-    const control = target.closest(`[${attr.trigger}],[${attr.dismiss}]`);
+    const control = target.closest(`[${attr.trigger}]`);
     if (control) refreshChangedTrigger(control);
     const pending = {
       event, target, hoverSuppressed: control && suppressHoverClick(control, event),
@@ -1169,37 +1188,15 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
         diagnoseTarget(button, target, attr.target, targetSelector);
         if (target) {
           exceptions.push(target);
-          if (!(hoverSuppressed ?? suppressHoverClick(button, event))) trigger(target, triggerAttr);
+          if (!(hoverSuppressed ?? suppressHoverClick(button, event))) trigger(target, triggerAttr, button.getAttribute(attr.effect));
         }
       } else if (container) {
         exceptions.push(container);
-        if (!(hoverSuppressed ?? suppressHoverClick(button, event))) trigger(container, triggerAttr);
+        if (!(hoverSuppressed ?? suppressHoverClick(button, event))) trigger(container, triggerAttr, button.getAttribute(attr.effect));
       } else {
         AelluxJs.diagnostics.error(
           AelluxJs.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING,
-          { extension: extensionName, element: button, action: "trigger" }
-        );
-      }
-    }
-    button = eventTarget.closest(`[${attr.dismiss}]`);
-    if (button) {
-      refreshChangedTrigger(button);
-      const dismissTargetId = button.getAttribute(attr.dismiss);
-      const targetSelector = button.getAttribute(attr.target);
-      if (dismissTargetId || targetSelector) {
-        const target = targetById(dismissTargetId || targetSelector);
-        diagnoseTarget(button, target, dismissTargetId ? attr.dismiss : attr.target, dismissTargetId || targetSelector);
-        if (target) {
-          exceptions.push(target);
-          dismiss(target);
-        }
-      } else if (container) {
-        exceptions.push(container);
-        dismiss(container);
-      } else {
-        AelluxJs.diagnostics.error(
-          AelluxJs.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING,
-          { extension: extensionName, element: button, action: "dismiss" }
+          { extension: extensionName, element: button, action: triggerAttr === "dismiss" ? "dismiss" : "trigger" }
         );
       }
     }
@@ -1603,7 +1600,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
           hoveredTriggers.add(button);
           const action = button.getAttribute(attr.trigger);
           if (action === "pop") toggle(target, true);
-          else trigger(target, action);
+          else trigger(target, action, button.getAttribute(attr.effect));
         } else hoveredTriggers.delete(button);
       }
     }
@@ -1612,7 +1609,7 @@ import { createPresentGestures } from "./internal/create-present-gestures.js";
       if (entering || inHoverRegion(target, event.relatedTarget)) cancelHoverClose(target);
       else if ([...triggerElementsSet].some(control =>
         triggerTargets.get(control) === target && control.getAttribute(attr.triggerOn) === "hover" &&
-        !["dismiss", "unpop"].includes(control.getAttribute(attr.trigger)))) {
+        !["dismiss", "unpop", "effect"].includes(control.getAttribute(attr.trigger)))) {
         cancelHoverClose(target);
         hoverTimers.set(target, setTimeout(() => {
           hoverTimers.delete(target);

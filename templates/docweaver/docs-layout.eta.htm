@@ -61,7 +61,7 @@
 
           </div>
 
-          <button class="navbar-toggler" type="button" data-ae-trigger="toggle" data-ae-target="#navbarSupportedContent"
+          <button class="navbar-toggler" type="button" data-ae-present-trigger="toggle" data-ae-present-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" data-ae-point>
             <div class="hamburger">
               <span></span>
@@ -88,7 +88,7 @@
                     <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
                       <button data-ae-point type="button"
                         class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
-                        data-ae-trigger="toggle" data-ae-target="#children-<%= item.slug %>">
+                        data-ae-present-trigger="toggle" data-ae-present-target="#children-<%= item.slug %>">
                         <%= item.label %>
                           <% if (item.children !==undefined) { %><span class="chevron"><svg class="svg-icon small"
                                 aria-hidden="true" focusable="false">
@@ -113,7 +113,7 @@
                                     style="flex:0">
                                     <button data-ae-point type="button"
                                       class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      data-ae-trigger="toggle" data-ae-target="#children2-<%= child.slug %>">
+                                      data-ae-present-trigger="toggle" data-ae-present-target="#children2-<%= child.slug %>">
                                       <%= child.label %>
                                         <% if (child.children !==undefined) { %><span class="chevron"><svg
                                               class="svg-icon small" aria-hidden="true" focusable="false">
@@ -176,8 +176,8 @@
 
           <div class="menu-toggle d-flex flex-row gap-2 small">
             <button data-ae-point id="button-toc-menu" type="button"
-              class="btn btn-outline-adaptive rounded-1 text-nowrap" data-ae-trigger="toggle"
-              data-ae-target="#toc-collapse" aria-expanded="false" aria-controls="toc-collapse"
+              class="btn btn-outline-adaptive rounded-1 text-nowrap" data-ae-present-trigger="toggle"
+              data-ae-present-target="#toc-collapse" aria-expanded="false" aria-controls="toc-collapse"
               aria-label="Table of Contents" title="Summary">
               <svg class="svg-icon" aria-hidden="true" focusable="false">
                 <use href="#bi-layout-text-sidebar"></use>
@@ -185,7 +185,7 @@
             </button>
             <button type="button"
               class="p-2 text-nowrap overflow-hidden text-truncate fw-bold border-0 bg-transparent text-start"
-              id="tocbot-current-label" data-ae-trigger="toggle" data-ae-target="#toc-collapse">
+              id="tocbot-current-label" data-ae-present-trigger="toggle" data-ae-present-target="#toc-collapse">
               -
             </button>
           </div>

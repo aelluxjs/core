@@ -16,7 +16,7 @@ This entry creates the core API when it is absent. The browser boot script start
 
 ## Naming and element lookup
 
-The naming helpers use the configured AelluxJs prefixes and convert camelCase names to kebab-case. For example, `$ae.attr("messageTarget")` returns `data-ae-message-target`, `$ae.className("feedbackError")` returns `ae--feedback-error`, and `$ae.cssVar("panelWidth")` returns `--ae-panel-width`. `extFilename(name)` returns the matching Extension script filename for the current minified setting; `extName(filename)` extracts an Extension name from that filename.
+The naming helpers use the configured AelluxJs prefixes and convert camelCase names to kebab-case. For example, `$ae.attr("feedbackMessageTarget")` returns `data-ae-feedback-message-target`, `$ae.className("feedbackError")` returns `ae--feedback-error`, and `$ae.cssVar("panelWidth")` returns `--ae-panel-width`. `extFilename(name)` returns the matching Extension script filename for the current minified setting; `extName(filename)` extracts an Extension name from that filename.
 
 `$ae.elementOrId(value, options?)` resolves a DOM element or an element ID, with or without a leading `#`. By default, only element nodes are accepted. Pass `{ defaultElement: element }` to use a fallback when `value` is `null` or `undefined`, or `{ allowedNodeTypes: [...] }` to accept other node types. Invalid values and missing IDs record `WARN_INVALID_ELEMENT_OR_ID` (`2011`) and return `null`; `options.method` can identify the caller in that diagnostic. This helper is available before runtime initialization.
 
@@ -233,3 +233,9 @@ Names can be short (`expanded`) or full (`aria-expanded`). A later registered ha
 ## Diagnostics
 
 Structured errors, warnings, and informational messages are available through `$ae.diagnostics`. See [Diagnostics](diagnostics.md) for severity guidelines, verbosity, history, codes, and contextual data.
+
+## Present effects and declarative actions
+
+`$ae.ext.present.effect(element, name, effectTarget?)` and `$ae(element).present.effect(name, effectTarget?)` return a Promise resolving to `{ status }` (`completed`, `aborted` or `skipped`). The optional Element must be inside the mounted Present. `cancelEffect(element)` / controller `cancelEffect()` cancels active and pending effects within that region. Effects change no presentation state; they wait for valid idle completion, replace older requests and stop on accepted transitions or teardown. See [Present effects](../core-extensions/present.md#temporary-effects).
+
+Interaction markup follows the [Declarative Action Naming Convention](../extensions/declarative-action-naming.md). Present mounts `data-ae-present-trigger`; a standalone `data-ae-present-target` creates no control.

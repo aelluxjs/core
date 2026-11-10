@@ -4,9 +4,9 @@
 
 Stability describes implementation maturity and validation, not API compatibility. Only the [minimal initialization and declarative activation/mounting contract](../runtime/compatibility-commitment.md) is protected during `0.1.x`.
 
-Standard motion effects replace `transform` on the resolved `data-ae-transform-target` element (the boundary itself by default). Keep that element separate from Anchor positioning, an Elastic Scrollbox wrapper, or Present transform. In development, an inspectable replacing transform effect records diagnostic `2033` with its writers. Animate a child to compose those behaviors; opacity-only custom effects and additive transforms do not trigger that warning.
+Feedback owns semantic communication and message application. Visual effects are optional requests to Present through `$ae.comm`; Feedback owns no animation operations, temporary motion classes or keyframes. The `motion` payload remains an effect request. Without Present, events, subscriptions, messages and semantic classes continue to work.
 
-`feedback` sends structured feedback events, lets application code subscribe by type, and updates mounted feedback boundaries. It is included in the `full` runtime. In Basic, register it explicitly with `$ae.ext("feedback", { loadStyle: true })` to include the standard motion styles, or omit `loadStyle` if animations are unnecessary. Add `loadWhen: "[data-ae-feedback]"` for lazy loading.
+`feedback` sends structured feedback events, lets application code subscribe by type, and updates mounted feedback boundaries. It is included in the `full` runtime. In Basic, register it with `$ae.ext("feedback")`. For visual effects, also register `$ae.ext("present", { loadStyle: true })` and mount a containing `data-ae-present` region. Add `loadWhen: "[data-ae-feedback]"` for lazy loading.
 
 ```js
 const feedback = await $ae.wait("feedback");
@@ -41,36 +41,36 @@ controller.feedback.error("Check the form.", null, "shake");
 controller.feedback.send({ type: "progress", message: "Uploading", value: 0.5 });
 ```
 
-Add `data-ae-feedback` to an element to handle feedback events that reach it. An empty value accepts every type; a space-separated list accepts only the named types. The nearest matching boundary stops propagation. A boundary updates the message and applies a type class to itself, the message target, and the transform target. Type classes have the form `ae--feedback-warning`, `ae--feedback-error`, and so on; previously added type classes remain until application code removes them.
+Add `data-ae-feedback` to an element to handle feedback events that reach it. An empty value accepts every type; a space-separated list accepts only the named types. The nearest matching boundary stops propagation. A boundary updates the message and applies a type class to itself, the message target, and the effect target. Type classes have the form `ae--feedback-warning`, `ae--feedback-error`, and so on; previously added type classes remain until application code removes them.
 
 ```html
-<section data-ae-feedback="error warning"
-         data-ae-message-target="email-message"
-         data-ae-transform-target="email-field">
+<section data-ae-present="" data-ae-feedback="error warning"
+         data-ae-feedback-message-target="email-message"
+         data-ae-feedback-effect-target="email-field">
   <label for="email-field">Email</label>
   <input id="email-field" type="email" aria-describedby="email-message">
   <p id="email-message" role="alert"></p>
 </section>
 ```
 
-`data-ae-message-target` and `data-ae-transform-target` accept an element ID, with or without `#`. If omitted, each target is the boundary itself. The message updates the first direct text node of the message target, or appends a text node if none exists. Child elements are preserved. A missing or invalid target ID records `WARN_INVALID_ELEMENT_OR_ID` (`2011`) and skips that target. Boundaries are mounted and unmounted with the normal DOM lifecycle.
+`data-ae-feedback-message-target` and `data-ae-feedback-effect-target` accept an element ID, with or without `#`. If omitted, each target is the boundary itself. The message updates the first direct text node of the message target, or appends a text node if none exists. Child elements are preserved. A missing or invalid target ID records `WARN_INVALID_ELEMENT_OR_ID` (`2011`) and skips that target. Boundaries are mounted and unmounted with the normal DOM lifecycle.
 
-The transform target receives `ae--feedback-motion-{motion}` for the duration declared by CSS. A new event cancels the previous owned motion and replaces its class. The shared [CSS Motion Controller](../runtime/css-motion.md) controls compatible animations through `waitLayout`; custom keyframes remain browser-interpolated. Set `--ae-feedback-aellux-ease` to an `$ae.ease()` name for optional advanced controlled easing. The generated stylesheet provides `shake`, `yes`, `no`, `breathe`, `tremble`, `pulse`, and `alert`; reduced motion disables them. A custom motion name can be supplied by application CSS and records an informational diagnostic.
+The effect target must belong to a mounted Present. Feedback requests `present.effect` after synchronous message and presentation routing, using the target's closest Present as owner. Present applies `ae--present-effect-{motion}` only when idle and effectively visible, replaces pending effects, cancels them on accepted transitions and skips reduced motion. The seven presets and custom finite CSS animations are described under [Present effects](present.md#temporary-effects). An effect target outside mounted Present remains a semantic destination without animation. A custom effect name still records the informational Feedback diagnostic.
 
 Set `data-ae-present-target` on the boundary to request `Present.pop()` for each accepted feedback event:
 
 | Attribute | Present behavior |
 | --- | --- |
 | Omitted | No Present request. |
-| Empty or whitespace-only | Use the message target's closest `data-ae-present` element, including the target itself. If none exists, use the transform target's closest Present element. Request pop only on that element. |
+| Empty or whitespace-only | Use the message target's closest `data-ae-present` element, including the target itself. If none exists, use the effect target's closest Present element. Request pop only on that element. |
 | Element ID, with or without `#` | Request pop only on that element. |
 
-Feedback updates the text and type classes before requesting the pop, then starts any requested feedback motion. The call also applies when the Present target is already open, following the usual Present replay behavior, auto-dismiss timing, groups and cancelable `BeforePop` event. Feedback does not await the transition. Present must already be initialized and targets mounted; its public API ignores unmounted elements. In Basic, explicitly register Present as well as Feedback. If Present is unavailable, message and motion handling still run. An invalid explicit target ID records `2011` when Present is initialized. Automatic discovery falls back to the transform target when the message target is unresolved or has no closest Present element. It does not open additional Present elements or search above the selected nearest container.
+Feedback updates the text and type classes before requesting the pop, then forwards any requested effect to Present. The call also applies when the Present target is already open, following the usual Present replay behavior, auto-dismiss timing, groups and cancelable `BeforePop` event. Feedback does not await the transition. Present must already be initialized and targets mounted; its public API ignores unmounted elements. In Basic, explicitly register Present as well as Feedback. If Present is unavailable, messages and semantic classes still update, with no visual effect. A hidden target or vetoed opening does not retain an effect for later. An invalid explicit target ID records `2011` when Present is initialized. Automatic discovery falls back to the effect target when the message target is unresolved or has no closest Present element. It does not open additional Present elements or search above the selected nearest container.
 
 ```html
 <section data-ae-feedback
-         data-ae-message-target="status-message"
-         data-ae-transform-target="status-message"
+         data-ae-feedback-message-target="status-message"
+         data-ae-feedback-effect-target="status-message"
          data-ae-present-target="status-panel">
   <button id="submit">Submit</button>
 </section>
@@ -79,22 +79,22 @@ Feedback updates the text and type classes before requesting the pop, then start
 </aside>
 ```
 
-The attributes `data-ae-target-message` and `data-ae-target-transform` have been renamed to `data-ae-message-target` and `data-ae-transform-target`; update existing markup to the new names.
+The prerelease names `data-ae-message-target` and `data-ae-transform-target` are replaced by `data-ae-feedback-message-target` and `data-ae-feedback-effect-target`. See the [Declarative Action Naming Convention](../extensions/declarative-action-naming.md). A standalone `data-ae-present-target` never creates an interaction control.
 
-The Present integration, including empty-target discovery, and target rename change the minified Modern script from 4,016/1,738 to 4,298/1,849 raw/gzip level 9 bytes, and Legacy from 8,035/3,557 to 8,394/3,706 bytes. The Modern raw budget increases from 4 to 4.25 KiB; its 2 KiB gzip limit and Legacy's 9/4 KiB limits remain unchanged. Full includes the integration in its existing bundle budgets.
+Historical measurement before effect migration: the Present integration, including empty-target discovery, and target rename changed the minified Modern script from 4,016/1,738 to 4,298/1,849 raw/gzip level 9 bytes, and Legacy from 8,035/3,557 to 8,394/3,706 bytes. The Modern raw budget increases from 4 to 4.25 KiB; its 2 KiB gzip limit and Legacy's 9/4 KiB limits remain unchanged. Full includes the integration in its existing bundle budgets.
 
 ## Accessibility profile
 
-- **Capabilities:** event distribution, boundary text updates, and optional motion classes.
-- **Owned state:** subscriptions, mounted listeners, motion classes, and CSS Motion operations.
+- **Capabilities:** event distribution, boundary text updates, semantic classes and optional effect requests.
+- **Owned state:** subscriptions, mounted listeners, message text and semantic feedback classes. Present owns motion classes, cancellation and CSS Motion operations.
 - **Consumer responsibility:** choose suitable semantics, live region priority, and focus behavior. `announce()` publishes an event but does not create a live region.
-- **Motion:** the generated styles respect the AelluxJs reduced-motion attribute. Application supplied motion styles must handle reduced motion themselves.
+- **Motion:** Present skips effect requests under reduced motion while preserving Feedback semantics.
 
 <h2 id="stacked-notifications">Stacked notifications</h2>
 
-A nonempty `data-ae-present-target` can identify a mounted Present Group. Feedback calls public `present.popNext()` and prepares the reserved member before `BeforePop` and opening motion. An ordinary Present target continues using `present.pop()`. Empty target discovery retains the closest message Present, then the transform Present fallback. Missing/uninitialized Present leaves Feedback usable.
+A nonempty `data-ae-present-target` can identify a mounted Present Group. Feedback requests `present.pop-next` through the mediator and prepares the reserved member before `BeforePop` and opening motion. An ordinary Present target continues using `present.pop()`. Empty target discovery retains the closest message Present, then the effect Present fallback. Missing/uninitialized Present leaves Feedback usable.
 
-Without explicit message/transform targets, a group uses its reserved member as both logical destinations. Feedback replaces the first direct text node or appends one, preserving children such as buttons and progress controls. Each member keeps an independent message and current feedback type class; reuse replaces its prior type. Explicit message and transform IDs remain absolute destinations, so sharing one across notifications shares that content/motion instead of isolating it.
+Without explicit message/effect targets, a group uses its reserved member as both logical destinations. Feedback replaces the first direct text node or appends one, preserving children such as buttons and progress controls. Each member keeps an independent message and current feedback type class; reuse replaces its prior type. Explicit message and effect IDs remain absolute destinations, so sharing one across notifications shares that content/motion instead of isolating it.
 
 ```html
 <section id="feedback-source" data-ae-feedback data-ae-present-target="notifications"></section>
@@ -119,7 +119,7 @@ Without explicit message/transform targets, a group uses its reserved member as 
 
 After mounting, publish normally: `$ae("feedback-source").feedback.success("Saved.")`. The group explicitly sets capacity to three, bounded by the three HTML members; a fourth message reuses the oldest active slot and resets only its auto-dismiss. An empty group value defaults to one. No application timer or member-selection code is needed. Basic registers Feedback, Present and [Progress](optional/progress.md) explicitly; Full registers them automatically.
 
-Use opacity-only Present motion when animating Feedback on the same member. To combine transform animations, give Feedback an explicit descendant transform target and keep Present's transform on the outer member; do not have both replace one transform. Explicit descendant IDs are absolute, so configure independent sources/targets if per-member nested motion is required. Live-region announcements and reading time remain application responsibilities.
+Use opacity-only Present motion when animating Feedback on the same member. To combine transform animations, give Feedback an explicit descendant effect target and keep Present's transform on the outer member; do not have both replace one transform. Explicit descendant IDs are absolute, so configure independent sources/targets if per-member nested motion is required. Live-region announcements and reading time remain application responsibilities.
 
 ## Known Limits & Risks
 
@@ -129,8 +129,12 @@ See [Core Known Limits & Risks](../runtime/known-limits-and-risks.md) for classi
 | --- | --- | --- | --- |
 | Delivery | Known Limit | <span class="large">A matching boundary stops DOM propagation, but typed and wildcard subscriptions still run after send() dispatches the event, even if it is canceled.</span> | <span class="large">Coordinate boundary rendering and subscriptions; event cancellation does not cancel subscribers.</span> |
 | Rendering | Known Limit | <span class="large">Boundaries update the first direct text node and retain child markup. Ordinary boundaries retain accumulated type classes until application code removes them; grouped notifications replace the previous type on their resolved targets. announce() creates no live region.</span> | <span class="large">Choose message targets, reset obsolete type styling for ordinary boundaries and supply appropriate announcement semantics.</span> |
-| Motion | Potential Risk | <span class="large">Standard motion replaces the resolved transform target transform and can compete with Anchor, Present or an elastic wrapper.</span> | <span class="large">Animate a separate descendant; see the transform ownership guidance at the start of this page.</span> |
+| Motion | Potential Risk | <span class="large">Present presets need an untransformed effect target inside mounted Present; incompatible preset targets are skipped and diagnosed.</span> | <span class="large">Animate a separate descendant; see the transform ownership guidance at the start of this page.</span> |
 | Messages | Potential Risk | <span class="large">Frequent feedback or multiple renderers can repeat announcements and work. Message and value payloads are visible to application subscribers.</span> | <span class="large">Coalesce progress, avoid duplicate rendering and exclude sensitive data from shared messages.</span> |
 | Coverage | Validation Gap | <span class="large">Boundary text, filtering, argument checks, motion and explicit Present targets have automated checks; these do not validate live-region announcements in real screen readers.</span> | <span class="large">Review announcement priority and repetition with the target assistive technologies.</span> |
 
 Evidence: [Implementation](https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.feedback.js), [feedback.spec.mjs](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/feedback.spec.mjs), [extension-composition.spec.mjs](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/extension-composition.spec.mjs).
+
+## Effect distribution change
+
+Present now ships the presets and the effect controller. Feedback Modern changes from 4,918 / 2,117 to 4,666 / 2,050 bytes (raw / gzip level 9), Legacy from 9,167 / 3,991 to 8,980 / 3,903, and CSS from 2,790 / 541 to a licensed empty artifact of 74 / 94 bytes. Basic loads Present only when visual effects are needed. See [the complete before/after table and budget changes](present.md#effect-distribution-cost), including Full and selective Present loading.

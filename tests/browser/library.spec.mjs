@@ -150,6 +150,8 @@ test("previews hide source, ignore old drafts and keep a noninteractive yellow b
     })).toEqual({ content: '\"\"', background: "rgba(255, 214, 58, 0.12)", position: "fixed", inset: "0px", pointerEvents: "none", zIndex: "-1" });
     await frame.getByRole("button", { name: /Dizer/ }).click();
     await expect(frame.locator("#ae-welcome-message")).toBeVisible();
+    // The theme check exercises the stable preview, after its opening motion.
+    await expect(frame.locator("#ae-welcome-message")).toHaveClass(/\bae--pop\b/);
     await frame.getByRole("button", { name: "Entendi" }).click();
     await expect(frame.locator("#ae-welcome-message")).toBeHidden();
     await expect(frame.locator("#ae-welcome-message")).not.toHaveClass(/ae--(?:popping|dismissing|unpopping)/);

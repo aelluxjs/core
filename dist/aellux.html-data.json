@@ -143,21 +143,6 @@
       ]
     },
     {
-      "name": "data-ae-dismiss",
-      "description": "Closes one Present ID, optionally prefixed with #. Empty uses data-ae-target or the closest Present ancestor.\n\nValue syntax: id.\n\nDefault behavior: \"\".\n\nExamples: `details`.",
-      "references": [
-        {
-          "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-        }
-      ],
-      "values": [
-        {
-          "name": "details"
-        }
-      ]
-    },
-    {
       "name": "data-ae-dismiss-on-click",
       "description": "Close on outside/out clicks (default), inside/in clicks, or disable click dismissal with false/none.\n\nValue syntax: enum.\n\nDefault behavior: \"outside\".",
       "references": [
@@ -223,6 +208,36 @@
         },
         {
           "name": "warning error success"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-feedback-effect-target",
+      "description": "One element ID, optionally prefixed with #, receiving semantic classes and the effect requested from its closest mounted Present. Must be inside that Present; omission uses the boundary. Omitted uses the boundary itself.\n\nValue syntax: id.\n\nExamples: `status-icon`.",
+      "references": [
+        {
+          "name": "AelluxJS feedback",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "status-icon"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-feedback-message-target",
+      "description": "One element ID, optionally prefixed with #, receiving message text. Omitted uses the boundary itself.\n\nValue syntax: id.\n\nExamples: `status-message`.",
+      "references": [
+        {
+          "name": "AelluxJS feedback",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "status-message"
         }
       ]
     },
@@ -391,21 +406,6 @@
         },
         {
           "name": "60"
-        }
-      ]
-    },
-    {
-      "name": "data-ae-message-target",
-      "description": "One element ID, optionally prefixed with #, receiving message text. Omitted uses the boundary itself.\n\nValue syntax: id.\n\nExamples: `status-message`.",
-      "references": [
-        {
-          "name": "AelluxJS feedback",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
-        }
-      ],
-      "values": [
-        {
-          "name": "status-message"
         }
       ]
     },
@@ -611,7 +611,7 @@
     },
     {
       "name": "data-ae-present",
-      "description": "Present container. Empty disables motion; all expands to opacity transform height width. Property tokens are whitespace-separated.\n\nValue syntax: token-list.\n\nDefault behavior: \"\".\n\nSuggested values: ``, `all`, `opacity`, `transform`, `height`, `width`, `opacity transform`, `opacity transform height width`. This is an open grammar, not a closed enumeration.",
+      "description": "Present container. Empty disables presentation transitions while allowing temporary effects; all expands to opacity transform height width. Property tokens are whitespace-separated.\n\nValue syntax: token-list.\n\nDefault behavior: \"\".\n\nSuggested values: ``, `all`, `opacity`, `transform`, `height`, `width`, `opacity transform`, `opacity transform height width`. This is an open grammar, not a closed enumeration.",
       "references": [
         {
           "name": "AelluxJS present",
@@ -657,6 +657,39 @@
       "values": [
         {
           "name": "details"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-present-effect",
+      "description": "Temporary effect selected by present-trigger=effect. Presets or an application CSS identifier; runs only in an idle, visible mounted Present.\n\nValue syntax: string.\n\nSuggested values: `shake`, `yes`, `no`, `breathe`, `tremble`, `pulse`, `alert`. This is an open grammar, not a closed enumeration.",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "shake"
+        },
+        {
+          "name": "yes"
+        },
+        {
+          "name": "no"
+        },
+        {
+          "name": "breathe"
+        },
+        {
+          "name": "tremble"
+        },
+        {
+          "name": "pulse"
+        },
+        {
+          "name": "alert"
         }
       ]
     },
@@ -784,11 +817,29 @@
     },
     {
       "name": "data-ae-present-target",
-      "description": "One mounted Present or Present Group ID, optionally prefixed with #. Groups use popNext and prepare the reserved member before opening; without explicit message/transform targets, that member receives the content and classes. Empty uses the nearest message Present, then transform Present fallback. Omitted makes no Present request. Requires initialized Present.\n\nValue syntax: id.\n\nExamples: ``, `status-panel`, `#status-panel`, `notifications`.",
+      "description": "One Present target ID, optionally prefixed with #. Alone it creates no interaction control. With present-trigger it selects the action target; with Feedback it requests Pop or pooled popNext. Empty uses the closest Present for a trigger, or the message/effect Present for Feedback.\n\nValue syntax: id.\n\nExamples: `details`, `#details`.",
       "references": [
         {
-          "name": "AelluxJS feedback",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": "details"
+        },
+        {
+          "name": "#details"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-present-trigger",
+      "description": "Present action. unpop reverses opening; dismiss uses its independent outgoing destination. Target is one native ID, or the closest Present ancestor when omitted. Prefer a native button for keyboard activation.\n\nValue syntax: enum.\n\nDefault behavior: \"toggle\".",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
       "values": [
@@ -796,13 +847,40 @@
           "name": ""
         },
         {
-          "name": "status-panel"
+          "name": "toggle"
         },
         {
-          "name": "#status-panel"
+          "name": "pop"
         },
         {
-          "name": "notifications"
+          "name": "dismiss"
+        },
+        {
+          "name": "unpop"
+        },
+        {
+          "name": "effect"
+        }
+      ]
+    },
+    {
+      "name": "data-ae-present-trigger-on",
+      "description": "Use hover for delegated pointer hover opening/closing. Touch and keyboard activation keep click behavior.\n\nValue syntax: enum.\n\nDefault behavior: \"click\".",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ],
+      "values": [
+        {
+          "name": ""
+        },
+        {
+          "name": "click"
+        },
+        {
+          "name": "hover"
         }
       ]
     },
@@ -1212,87 +1290,6 @@
         },
         {
           "name": "bottom"
-        }
-      ]
-    },
-    {
-      "name": "data-ae-target",
-      "description": "One Present target ID, optionally prefixed with #; CSS selector lists are not accepted.\n\nValue syntax: id.\n\nExamples: `details`, `#details`.",
-      "references": [
-        {
-          "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-        }
-      ],
-      "values": [
-        {
-          "name": "details"
-        },
-        {
-          "name": "#details"
-        }
-      ]
-    },
-    {
-      "name": "data-ae-transform-target",
-      "description": "One element ID, optionally prefixed with #, receiving feedback classes and motion. Omitted uses the boundary itself.\n\nValue syntax: id.\n\nExamples: `status-icon`.",
-      "references": [
-        {
-          "name": "AelluxJS feedback",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
-        }
-      ],
-      "values": [
-        {
-          "name": "status-icon"
-        }
-      ]
-    },
-    {
-      "name": "data-ae-trigger",
-      "description": "Present action. unpop reverses opening; dismiss uses its independent outgoing destination. Target is one native ID, or the closest Present ancestor when omitted. Prefer a native button for keyboard activation.\n\nValue syntax: enum.\n\nDefault behavior: \"toggle\".",
-      "references": [
-        {
-          "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-        }
-      ],
-      "values": [
-        {
-          "name": ""
-        },
-        {
-          "name": "toggle"
-        },
-        {
-          "name": "pop"
-        },
-        {
-          "name": "dismiss"
-        },
-        {
-          "name": "unpop"
-        }
-      ]
-    },
-    {
-      "name": "data-ae-trigger-on",
-      "description": "Use hover for delegated pointer hover opening/closing. Touch and keyboard activation keep click behavior.\n\nValue syntax: enum.\n\nDefault behavior: \"click\".",
-      "references": [
-        {
-          "name": "AelluxJS present",
-          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-        }
-      ],
-      "values": [
-        {
-          "name": ""
-        },
-        {
-          "name": "click"
-        },
-        {
-          "name": "hover"
         }
       ]
     },

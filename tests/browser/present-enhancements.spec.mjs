@@ -2,10 +2,10 @@ import { expect, test } from "@playwright/test";
 
 for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
   test(`dismiss contract replaces beta names (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
-    await start(page, `<button id="trigger" data-ae-trigger="dismiss" data-ae-target="#panel">Close</button>
-      <button id="explicit" data-ae-dismiss="panel">Close by ID</button>
+    await start(page, `<button id="trigger" data-ae-present-trigger="dismiss" data-ae-present-target="#panel">Close</button>
+      <button id="explicit" data-ae-present-trigger="dismiss" data-ae-present-target="panel">Close by ID</button>
       <div id="panel" data-ae-present="" data-ae-dismiss-on-click="none" hidden>
-        <button id="nested" data-ae-dismiss>Close ancestor</button></div>`, { mode, forceLegacy });
+        <button id="nested" data-ae-present-trigger="dismiss">Close ancestor</button></div>`, { mode, forceLegacy });
     const api = await page.evaluate(() => ({
       publicDismiss: typeof $ae.ext.present.dismiss, mountedDismiss: typeof $ae("panel").present.dismiss,
       publicUnpop: typeof $ae.ext.present.unpop, mountedUnpop: typeof $ae("panel").present.unpop
@@ -507,8 +507,8 @@ test("groups diagnose ambiguity, isolate nested members, mount dynamically and r
 });
 
 test("hover shares trigger/panel region, tolerates gaps, preserves keyboard and outside clicks", async ({ page }) => {
-  await start(page, `<button id="trigger" data-ae-trigger="pop" data-ae-trigger-on="hover" data-ae-target="b"><span>Open</span></button>
-    <button id="other" data-ae-trigger="pop" data-ae-trigger-on="hover" data-ae-target="b">Other</button>${panels}`);
+  await start(page, `<button id="trigger" data-ae-present-trigger="pop" data-ae-present-trigger-on="hover" data-ae-present-target="b"><span>Open</span></button>
+    <button id="other" data-ae-present-trigger="pop" data-ae-present-trigger-on="hover" data-ae-present-target="b">Other</button>${panels}`);
   await page.locator("#trigger span").hover();
   await expect(page.locator("#b")).toHaveAttribute("aria-expanded", "true");
   await expect(page.locator("#a")).toHaveJSProperty("hidden", true);
@@ -531,7 +531,7 @@ test("hover shares trigger/panel region, tolerates gaps, preserves keyboard and 
 });
 
 test("touch hover is ignored, click toggles once, descendants and remount do not duplicate pop", async ({ page }) => {
-  await start(page, `<button id="trigger" data-ae-trigger="toggle" data-ae-trigger-on="hover" data-ae-target="panel"><span>Open</span></button>
+  await start(page, `<button id="trigger" data-ae-present-trigger="toggle" data-ae-present-trigger-on="hover" data-ae-present-target="panel"><span>Open</span></button>
     <div id="panel" data-ae-present="opacity" hidden>Panel</div>`);
   await page.evaluate(() => {
     window.pops = 0;
@@ -691,7 +691,7 @@ test("native touch activation of a hover toggle opens once", async ({ browser, b
   const context = await browser.newContext({ hasTouch: true, baseURL });
   const page = await context.newPage();
   try {
-    await start(page, `<button id="trigger" data-ae-trigger="toggle" data-ae-trigger-on="hover" data-ae-target="panel">Open</button>
+    await start(page, `<button id="trigger" data-ae-present-trigger="toggle" data-ae-present-trigger-on="hover" data-ae-present-target="panel">Open</button>
       <div id="panel" data-ae-present="opacity" hidden>Content</div>`);
     await page.locator("#trigger").tap();
     await expect(page.locator("#panel")).toHaveAttribute("aria-expanded", "true");
@@ -705,11 +705,11 @@ test("native touch activation of a hover toggle opens once", async ({ browser, b
 });
 
 test("hover click suppression follows live trigger mode and target changes", async ({ page }) => {
-  await start(page, `<button id="trigger" data-ae-trigger="toggle" data-ae-trigger-on="hover" data-ae-target="a">Open</button>
+  await start(page, `<button id="trigger" data-ae-present-trigger="toggle" data-ae-present-trigger-on="hover" data-ae-present-target="a">Open</button>
     <div id="a" data-ae-present="opacity" hidden>A</div><div id="b" data-ae-present="opacity" hidden>B</div>`);
   await page.locator("#trigger").hover();
   await expect(page.locator("#a")).toHaveAttribute("aria-expanded", "true");
-  await page.locator("#trigger").evaluate(element => element.setAttribute("data-ae-target", "b"));
+  await page.locator("#trigger").evaluate(element => element.setAttribute("data-ae-present-target", "b"));
   await page.locator("#trigger").click();
   await expect(page.locator("#b")).toHaveAttribute("aria-expanded", "true");
   await page.mouse.move(900, 600);
@@ -717,7 +717,7 @@ test("hover click suppression follows live trigger mode and target changes", asy
   await expect(page.locator("#b")).toHaveJSProperty("hidden", true);
   await page.locator("#trigger").hover();
   await expect(page.locator("#b")).toHaveAttribute("aria-expanded", "true");
-  await page.locator("#trigger").evaluate(element => element.setAttribute("data-ae-trigger-on", "click"));
+  await page.locator("#trigger").evaluate(element => element.setAttribute("data-ae-present-trigger-on", "click"));
   await page.locator("#trigger").click();
   await expect(page.locator("#b")).toHaveJSProperty("hidden", true);
 });

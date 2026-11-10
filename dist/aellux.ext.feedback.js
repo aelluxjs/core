@@ -25,18 +25,18 @@
     const motionOptions = ["shake", "yes", "no", "breathe", "tremble", "pulse", "alert"];
     const feedbackTypes = ["warning", "error", "success", "announce", "busy", "progress", "validate"];
     const handlers = /* @__PURE__ */ new Map();
-    const motionOperations = /* @__PURE__ */ new Map();
-    const motionIds = /* @__PURE__ */ new WeakMap();
     const feedbackAttribute = AelluxJs.attr(extensionName);
-    const messageTargetAttribute = AelluxJs.attr("messageTarget");
-    const transformTargetAttribute = AelluxJs.attr("transformTarget");
+    const messageTargetAttribute = AelluxJs.attr("feedback-message-target");
+    const effectTargetAttribute = AelluxJs.attr("feedback-effect-target");
     const presentTargetAttribute = AelluxJs.attr("presentTarget");
     const presentSelector = `[${AelluxJs.attr("present")}]`;
-    const mountedFeedback = /* @__PURE__ */ new Set();
+    const mountedFeedback = /* @__PURE__ */ new Map();
+    const applications = /* @__PURE__ */ new WeakMap();
     function init() {
-      AelluxJs.comm.handle("feedback.prepare", ({ boundary, feedback, element }) => {
-        if (!mountedFeedback.has(boundary) || !boundary.isConnected) return false;
-        applyFeedback(boundary, feedback, element);
+      AelluxJs.comm.handle("feedback.prepare", (request) => {
+        const { boundary, feedback, element } = request;
+        if (!mountedFeedback.has(boundary) || !boundary.isConnected || !feedback || typeof feedback !== "object") return false;
+        applications.set(feedback, applyFeedback(boundary, feedback, element, false));
         return true;
       }, { owner: extensionName });
       AelluxJs.mountManager.add({
@@ -52,15 +52,14 @@
       AelluxJs.comm.removeOwner(extensionName);
       mountedFeedback.clear();
       AelluxJs.mountManager.remove({ extensionName });
-      for (const operation of motionOperations.values()) AelluxJs.motion.cancel(operation.id);
-      motionOperations.clear();
       handlers.clear();
     }
     function mountFeedback(element) {
-      mountedFeedback.add(element);
+      mountedFeedback.set(element, {});
       AelluxJs.onEvent(element, "Feedback", onFeedback);
     }
     function unmountFeedback(element) {
+      applications.delete(element);
       mountedFeedback.delete(element);
       AelluxJs.offEvent(element, "Feedback", onFeedback);
     }
@@ -77,34 +76,42 @@
         }
       }
       event.stopPropagation();
-      if (!event.detail) return;
+      if (!event.detail || typeof event.detail !== "object") return;
       const presentTarget = element.getAttribute(presentTargetAttribute);
       const presentElement = presentTarget !== null && presentTarget.trim() && (AelluxJs.comm.has("present.pop") || AelluxJs.comm.has("present.pop-next")) ? AelluxJs.elementOrId(presentTarget) : null;
       if (presentElement == null ? void 0 : presentElement.hasAttribute(AelluxJs.attr("present-group"))) {
+        const preparation = { boundary: element, feedback: event.detail };
         const result = AelluxJs.comm.request("present.pop-next", {
           group: presentElement,
-          preparation: { contract: "feedback.prepare", payload: { boundary: element, feedback: event.detail } }
+          preparation: { contract: "feedback.prepare", payload: preparation }
         });
         if (result.handled) {
-          Promise.resolve(result.value).catch((cause) => AelluxJs.diagnostics.error(
+          const application = applications.get(event.detail);
+          Promise.resolve(result.value).then((member) => {
+            if (member) requestEffect(element, application);
+          }).catch((cause) => AelluxJs.diagnostics.error(
             AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION,
             { cause, extension: extensionName, element: presentElement }
           ));
           return;
         }
       }
-      applyFeedback(element, event.detail, element, (messageElement, transformElement) => {
+      applyFeedback(element, event.detail, element, (messageElement, effectElement) => {
         if (presentTarget !== null) {
-          const target = presentElement || !presentTarget.trim() && ((messageElement == null ? void 0 : messageElement.closest(presentSelector)) || (transformElement == null ? void 0 : transformElement.closest(presentSelector)));
+          const target = presentElement || !presentTarget.trim() && ((messageElement == null ? void 0 : messageElement.closest(presentSelector)) || (effectElement == null ? void 0 : effectElement.closest(presentSelector)));
           if (target) AelluxJs.comm.request("present.pop", { element: target });
         }
       });
     }
     function applyFeedback(element, { message, type, motion }, defaultElement = element, presentRequest) {
+      const application = { mount: mountedFeedback.get(element) };
       const messageTarget = element.getAttribute(messageTargetAttribute);
-      const transformTarget = element.getAttribute(transformTargetAttribute);
+      const effectTarget = element.getAttribute(effectTargetAttribute);
       const messageElement = AelluxJs.elementOrId(messageTarget, { defaultElement });
-      const transformElement = AelluxJs.elementOrId(transformTarget, { defaultElement });
+      const effectElement = AelluxJs.elementOrId(effectTarget, { defaultElement });
+      application.effectElement = effectElement;
+      application.motion = motion;
+      if (effectElement) applications.set(effectElement, application);
       if (messageElement && typeof message === "string") {
         let textNode = null;
         for (const child of messageElement.childNodes) {
@@ -118,7 +125,7 @@
       }
       if (feedbackTypes.includes(type)) {
         const typeClass = AelluxJs.className(`feedback-${type}`);
-        for (const target of [element, messageElement, transformElement]) {
+        for (const target of [element, messageElement, effectElement]) {
           if (target) {
             if (defaultElement !== element) {
               for (const previous of feedbackTypes) target.classList.remove(AelluxJs.className(`feedback-${previous}`));
@@ -127,43 +134,19 @@
           }
         }
       }
-      if (presentRequest) presentRequest(messageElement, transformElement);
-      if (transformElement) {
-        const motionPrefix = AelluxJs.className("feedback-motion-");
-        for (const className of Array.from(transformElement.classList)) {
-          if (className.startsWith(motionPrefix)) transformElement.classList.remove(className);
-        }
-        const previous = motionOperations.get(transformElement);
-        if (previous) AelluxJs.motion.cancel(previous.id);
-        motionOperations.delete(transformElement);
-        if (typeof motion === "string") {
-          const motionClass = AelluxJs.className(`feedback-motion-${motion}`);
-          let id = motionIds.get(transformElement);
-          if (id === void 0) {
-            id = AelluxJs.motion.id();
-            motionIds.set(transformElement, id);
-          }
-          const operation = { id, className: motionClass };
-          motionOperations.set(transformElement, operation);
-          const advancedEase = root.getComputedStyle(transformElement).getPropertyValue("--ae-feedback-aellux-ease").trim() || void 0;
-          AelluxJs.motion.run(transformElement, {
-            extension: extensionName,
-            id,
-            apply: () => transformElement.classList.add(motionClass),
-            easing: advancedEase,
-            abort: () => !transformElement.isConnected
-          }).catch((cause) => {
-            AelluxJs.diagnostics.error(
-              AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION,
-              { cause, extension: extensionName, element: transformElement }
-            );
-          }).finally(() => {
-            if (motionOperations.get(transformElement) !== operation) return;
-            transformElement.classList.remove(motionClass);
-            motionOperations.delete(transformElement);
-          });
-        }
-      }
+      if (typeof presentRequest === "function") presentRequest(messageElement, effectElement);
+      if (presentRequest !== false) requestEffect(element, application);
+      return application;
+    }
+    function requestEffect(element, application) {
+      if (!application || application.mount !== mountedFeedback.get(element) || !element.isConnected) return;
+      const { effectElement, motion } = application;
+      if (!(effectElement == null ? void 0 : effectElement.isConnected) || applications.get(effectElement) !== application || typeof motion !== "string") return;
+      AelluxJs.comm.request("present.effect", {
+        element: effectElement.closest(presentSelector) || effectElement,
+        effect: motion,
+        effectTarget: effectElement
+      });
     }
     function on(type, handler) {
       if (!handlers.has(type)) {

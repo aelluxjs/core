@@ -13,8 +13,14 @@ const find = (entries, name) => entries.find(entry => entry.name === name);
 
 test("Present metadata distinguishes dismissal and opening reversal", () => {
   assert.ok(find(catalog.methods, "present.dismiss"));
-  assert.deepEqual(find(catalog.attributes, "data-ae-trigger").values, ["", "toggle", "pop", "dismiss", "unpop"]);
-  for (const name of ["data-ae-auto-dismiss", "data-ae-dismiss-on-click", "data-ae-dismiss"])
+  for (const name of ["present.effect", "present.cancelEffect"]) assert.ok(find(catalog.methods, name));
+  for (const name of ["data-ae-trigger", "data-ae-target", "data-ae-dismiss", "data-ae-message-target", "data-ae-transform-target"])
+    assert.equal(find(catalog.attributes, name), undefined, name);
+  for (const name of ["data-ae-present-effect", "data-ae-feedback-message-target", "data-ae-feedback-effect-target"])
+    assert.ok(find(catalog.attributes, name), name);
+  assert.equal(find(catalog.attributes, "data-ae-present-target").extension, "present");
+  assert.deepEqual(find(catalog.attributes, "data-ae-present-trigger").values, ["", "toggle", "pop", "dismiss", "unpop", "effect"]);
+  for (const name of ["data-ae-auto-dismiss", "data-ae-dismiss-on-click", "data-ae-present-trigger"])
     assert.ok(find(catalog.attributes, name), name);
   for (const suffix of ["opacity", "transform", "height", "width", "duration", "ease", "aellux-ease", "progress"])
     assert.ok(find(catalog.cssProperties, `--ae-dismiss-${suffix}`), suffix);
@@ -47,8 +53,8 @@ for (const [name, schemaName] of [["aellux.html-data.json", "html"], ["aellux.cs
 
 test("open attribute grammars remain open while closed enums preserve string values", () => {
   const attributes = output["aellux.web-types.json"].contributions.html.attributes;
-  assert.equal(find(attributes, "data-ae-trigger").value.type, '\"\" | \"toggle\" | \"pop\" | \"dismiss\" | \"unpop\"');
-  assert.equal(find(attributes, "data-ae-target").value.type, "string");
+  assert.equal(find(attributes, "data-ae-present-trigger").value.type, '\"\" | \"toggle\" | \"pop\" | \"dismiss\" | \"unpop\" | \"effect\"');
+  assert.equal(find(attributes, "data-ae-present-target").value.type, "string");
   assert.equal(find(attributes, "data-ae-anchor").value.type, "string");
   assert.equal(find(attributes, "data-ae-present").value.type, "string");
   assert.equal(find(attributes, "data-ae-option").value.type, "string");
@@ -102,7 +108,7 @@ test("catalog uses the configured naming contract instead of hardcoded namespace
   constants.AELLUXJS_CSS_VAR_PREFFIX = "--demo-?";
   constants.AELLUXJS_EVENT_NAME_PREFFIX = "Demo?";
   const customized = await createSemanticCatalog(metadata, constants);
-  assert.ok(find(customized.attributes, "data-demo-trigger"));
+  assert.ok(find(customized.attributes, "data-demo-present-trigger"));
   assert.ok(find(customized.cssProperties, "--demo-pop-duration"));
   assert.ok(find(customized.events, "DemoBeforePop"));
   assert.ok(find(customized.classes, "demo--shape-square"));

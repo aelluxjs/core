@@ -8,7 +8,7 @@ For `from: scale(0.5)`, `pop: scale(1)` and `dismiss: scale(1.2)`, pop travels 0
 
 ## Implemented decisions
 
-- Public and mounted `unpop()` plus `data-ae-trigger="unpop"` invoke actual reversal. No independent unpop destinations, duration or easing properties were reintroduced. Old automatic unpop attributes remain inactive.
+- Public and mounted `unpop()` plus `data-ae-present-trigger="unpop"` invoke actual reversal. No independent unpop destinations, duration or easing properties were reintroduced. Old automatic unpop attributes remain inactive.
 - Opening effects retain original keyframes, easing and per-property timing. Reverse playback uses negative delay and reverse direction to travel only the already played segment on the existing CSS Motion scheduler or native timing. Completed openings retain serializable trajectory data, not animation resources. A region initially visible uses an implied full opening.
 - Native CSS-only fallback uses generated keyframes with captured endpoints and original CSS easing. Grid tracks retain their authored units because browsers can report identical current pixel tracks from `getKeyframes()`.
 - `BeforeUnpop` can veto before cancellation; Layout/Unpopping/Unpop and UnpopFocusLost preserve normal presentation routing/cleanup. Pop progress travels backwards; normalized unpop progress advances to one. Hidden/presented state endpoints are documented in the guide.

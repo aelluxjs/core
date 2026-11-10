@@ -618,18 +618,18 @@
         const motionOptions = ["shake", "yes", "no", "breathe", "tremble", "pulse", "alert"];
         const feedbackTypes = ["warning", "error", "success", "announce", "busy", "progress", "validate"];
         const handlers = /* @__PURE__ */ new Map();
-        const motionOperations = /* @__PURE__ */ new Map();
-        const motionIds = /* @__PURE__ */ new WeakMap();
         const feedbackAttribute = AelluxJs2.attr(extensionName);
-        const messageTargetAttribute = AelluxJs2.attr("messageTarget");
-        const transformTargetAttribute = AelluxJs2.attr("transformTarget");
+        const messageTargetAttribute = AelluxJs2.attr("feedback-message-target");
+        const effectTargetAttribute = AelluxJs2.attr("feedback-effect-target");
         const presentTargetAttribute = AelluxJs2.attr("presentTarget");
         const presentSelector = `[${AelluxJs2.attr("present")}]`;
-        const mountedFeedback = /* @__PURE__ */ new Set();
+        const mountedFeedback = /* @__PURE__ */ new Map();
+        const applications = /* @__PURE__ */ new WeakMap();
         function init() {
-          AelluxJs2.comm.handle("feedback.prepare", ({ boundary, feedback, element }) => {
-            if (!mountedFeedback.has(boundary) || !boundary.isConnected) return false;
-            applyFeedback(boundary, feedback, element);
+          AelluxJs2.comm.handle("feedback.prepare", (request) => {
+            const { boundary, feedback, element } = request;
+            if (!mountedFeedback.has(boundary) || !boundary.isConnected || !feedback || typeof feedback !== "object") return false;
+            applications.set(feedback, applyFeedback(boundary, feedback, element, false));
             return true;
           }, { owner: extensionName });
           AelluxJs2.mountManager.add({
@@ -645,15 +645,14 @@
           AelluxJs2.comm.removeOwner(extensionName);
           mountedFeedback.clear();
           AelluxJs2.mountManager.remove({ extensionName });
-          for (const operation of motionOperations.values()) AelluxJs2.motion.cancel(operation.id);
-          motionOperations.clear();
           handlers.clear();
         }
         function mountFeedback(element) {
-          mountedFeedback.add(element);
+          mountedFeedback.set(element, {});
           AelluxJs2.onEvent(element, "Feedback", onFeedback);
         }
         function unmountFeedback(element) {
+          applications.delete(element);
           mountedFeedback.delete(element);
           AelluxJs2.offEvent(element, "Feedback", onFeedback);
         }
@@ -670,34 +669,42 @@
             }
           }
           event.stopPropagation();
-          if (!event.detail) return;
+          if (!event.detail || typeof event.detail !== "object") return;
           const presentTarget = element.getAttribute(presentTargetAttribute);
           const presentElement = presentTarget !== null && presentTarget.trim() && (AelluxJs2.comm.has("present.pop") || AelluxJs2.comm.has("present.pop-next")) ? AelluxJs2.elementOrId(presentTarget) : null;
           if (presentElement == null ? void 0 : presentElement.hasAttribute(AelluxJs2.attr("present-group"))) {
+            const preparation = { boundary: element, feedback: event.detail };
             const result = AelluxJs2.comm.request("present.pop-next", {
               group: presentElement,
-              preparation: { contract: "feedback.prepare", payload: { boundary: element, feedback: event.detail } }
+              preparation: { contract: "feedback.prepare", payload: preparation }
             });
             if (result.handled) {
-              Promise.resolve(result.value).catch((cause) => AelluxJs2.diagnostics.error(
+              const application = applications.get(event.detail);
+              Promise.resolve(result.value).then((member) => {
+                if (member) requestEffect(element, application);
+              }).catch((cause) => AelluxJs2.diagnostics.error(
                 AelluxJs2.diagnostics.ERROR_EXTENSION_TRANSITION,
                 { cause, extension: extensionName, element: presentElement }
               ));
               return;
             }
           }
-          applyFeedback(element, event.detail, element, (messageElement, transformElement) => {
+          applyFeedback(element, event.detail, element, (messageElement, effectElement) => {
             if (presentTarget !== null) {
-              const target = presentElement || !presentTarget.trim() && ((messageElement == null ? void 0 : messageElement.closest(presentSelector)) || (transformElement == null ? void 0 : transformElement.closest(presentSelector)));
+              const target = presentElement || !presentTarget.trim() && ((messageElement == null ? void 0 : messageElement.closest(presentSelector)) || (effectElement == null ? void 0 : effectElement.closest(presentSelector)));
               if (target) AelluxJs2.comm.request("present.pop", { element: target });
             }
           });
         }
         function applyFeedback(element, { message, type, motion }, defaultElement = element, presentRequest) {
+          const application = { mount: mountedFeedback.get(element) };
           const messageTarget = element.getAttribute(messageTargetAttribute);
-          const transformTarget = element.getAttribute(transformTargetAttribute);
+          const effectTarget = element.getAttribute(effectTargetAttribute);
           const messageElement = AelluxJs2.elementOrId(messageTarget, { defaultElement });
-          const transformElement = AelluxJs2.elementOrId(transformTarget, { defaultElement });
+          const effectElement = AelluxJs2.elementOrId(effectTarget, { defaultElement });
+          application.effectElement = effectElement;
+          application.motion = motion;
+          if (effectElement) applications.set(effectElement, application);
           if (messageElement && typeof message === "string") {
             let textNode = null;
             for (const child of messageElement.childNodes) {
@@ -711,7 +718,7 @@
           }
           if (feedbackTypes.includes(type)) {
             const typeClass = AelluxJs2.className(`feedback-${type}`);
-            for (const target of [element, messageElement, transformElement]) {
+            for (const target of [element, messageElement, effectElement]) {
               if (target) {
                 if (defaultElement !== element) {
                   for (const previous of feedbackTypes) target.classList.remove(AelluxJs2.className(`feedback-${previous}`));
@@ -720,43 +727,19 @@
               }
             }
           }
-          if (presentRequest) presentRequest(messageElement, transformElement);
-          if (transformElement) {
-            const motionPrefix = AelluxJs2.className("feedback-motion-");
-            for (const className of Array.from(transformElement.classList)) {
-              if (className.startsWith(motionPrefix)) transformElement.classList.remove(className);
-            }
-            const previous = motionOperations.get(transformElement);
-            if (previous) AelluxJs2.motion.cancel(previous.id);
-            motionOperations.delete(transformElement);
-            if (typeof motion === "string") {
-              const motionClass = AelluxJs2.className(`feedback-motion-${motion}`);
-              let id = motionIds.get(transformElement);
-              if (id === void 0) {
-                id = AelluxJs2.motion.id();
-                motionIds.set(transformElement, id);
-              }
-              const operation = { id, className: motionClass };
-              motionOperations.set(transformElement, operation);
-              const advancedEase = root2.getComputedStyle(transformElement).getPropertyValue("--ae-feedback-aellux-ease").trim() || void 0;
-              AelluxJs2.motion.run(transformElement, {
-                extension: extensionName,
-                id,
-                apply: () => transformElement.classList.add(motionClass),
-                easing: advancedEase,
-                abort: () => !transformElement.isConnected
-              }).catch((cause) => {
-                AelluxJs2.diagnostics.error(
-                  AelluxJs2.diagnostics.ERROR_EXTENSION_TRANSITION,
-                  { cause, extension: extensionName, element: transformElement }
-                );
-              }).finally(() => {
-                if (motionOperations.get(transformElement) !== operation) return;
-                transformElement.classList.remove(motionClass);
-                motionOperations.delete(transformElement);
-              });
-            }
-          }
+          if (typeof presentRequest === "function") presentRequest(messageElement, effectElement);
+          if (presentRequest !== false) requestEffect(element, application);
+          return application;
+        }
+        function requestEffect(element, application) {
+          if (!application || application.mount !== mountedFeedback.get(element) || !element.isConnected) return;
+          const { effectElement, motion } = application;
+          if (!(effectElement == null ? void 0 : effectElement.isConnected) || applications.get(effectElement) !== application || typeof motion !== "string") return;
+          AelluxJs2.comm.request("present.effect", {
+            element: effectElement.closest(presentSelector) || effectElement,
+            effect: motion,
+            effectTarget: effectElement
+          });
         }
         function on(type, handler) {
           if (!handlers.has(type)) {
@@ -6279,12 +6262,147 @@
     }
   });
 
+  // src/internal/create-present-effects.js
+  function createPresentEffects(root2, api, controllers) {
+    const operations = /* @__PURE__ */ new Map();
+    const targets = /* @__PURE__ */ new Map();
+    const presets = /* @__PURE__ */ new Set(["shake", "yes", "no", "breathe", "tremble", "pulse", "alert"]);
+    const presentAttribute = api.attr("present");
+    function visible(element) {
+      if (!element.isConnected || !element.getClientRects().length) return false;
+      const style = root2.getComputedStyle(element);
+      if (["hidden", "collapse"].includes(style.visibility)) return false;
+      for (let node = element; node; node = node.parentElement) {
+        const computed = root2.getComputedStyle(node);
+        if (computed.display === "none" || computed.contentVisibility === "hidden" || Number(computed.opacity) === 0) return false;
+      }
+      return true;
+    }
+    function finish(operation, status) {
+      if (operations.get(operation.element) !== operation) return;
+      api.motion.cancel(operation.id);
+      if (!operation.authoredClass) operation.target.classList.remove(operation.className);
+      operations.delete(operation.element);
+      if (targets.get(operation.target) === operation) targets.delete(operation.target);
+      operation.resolve({ status });
+    }
+    function cancelWithin(element) {
+      for (const operation of operations.values()) {
+        if (element.contains(operation.element) || element.contains(operation.target)) finish(operation, "aborted");
+      }
+    }
+    function blocked(operation) {
+      var _a;
+      for (let node = operation.target; node; node = node.parentElement) {
+        const controller = controllers.get(node);
+        if (controller == null ? void 0 : controller.transition) operation.waiting.add(controller.transition);
+      }
+      const transition = (_a = controllers.get(operation.element)) == null ? void 0 : _a.transition;
+      if (transition) operation.waiting.add(transition);
+      return operation.waiting.size > 0;
+    }
+    function start(operation) {
+      if (operations.get(operation.element) !== operation) return;
+      if (!controllers.has(operation.element) || !operation.element.contains(operation.target) || !visible(operation.target) || api.currentPreference("reduced-motion") === "reduced") {
+        finish(operation, "skipped");
+        return;
+      }
+      if (blocked(operation)) return;
+      const transform = root2.getComputedStyle(operation.target).transform;
+      if (presets.has(operation.effect) && (operation.target.hasAttribute(api.attr("anchor")) || operation.target.hasAttribute(api.attr("scrollbox-elastic")) || (operation.target.getAttribute(presentAttribute) || "").split(/\s+/).includes("transform") || transform && transform !== "none" && transform !== "matrix(1, 0, 0, 1, 0, 0)")) {
+        const owners = [];
+        for (const name of ["anchor", "scrollbox-elastic"]) if (operation.target.hasAttribute(api.attr(name))) owners.push(name);
+        if (!operation.target.hasAttribute(api.attr("anchor")) && (operation.target.getAttribute(presentAttribute) || "").split(/\s+/).includes("transform")) owners.push("present");
+        if (!owners.length) owners.push("authored-transform");
+        if (api.options.environment === "development") for (const owner of owners) api.diagnostics.warn(api.diagnostics.WARN_RESOURCE_CONFLICT, {
+          extension: "present",
+          element: operation.target,
+          property: "transform",
+          writers: [owner, "present-effect"],
+          reason: "A preset effect would replace the stable transform.",
+          suggestion: "Pass an untransformed inner effectTarget to present.effect()."
+        });
+        finish(operation, "skipped");
+        return;
+      }
+      operation.target.getBoundingClientRect();
+      api.motion.run(operation.target, {
+        extension: "present-effect",
+        id: operation.id,
+        ownedOnly: true,
+        apply: () => operation.target.classList.add(operation.className),
+        easing: root2.getComputedStyle(operation.target).getPropertyValue("--ae-present-effect-aellux-ease").trim() || void 0,
+        abort: () => operations.get(operation.element) !== operation || !controllers.has(operation.element) || !operation.target.isConnected || !operation.element.contains(operation.target) || api.currentPreference("reduced-motion") === "reduced" || blocked(operation)
+      }).then((result) => finish(operation, result.status), (cause) => {
+        api.diagnostics.error(api.diagnostics.ERROR_EXTENSION_TRANSITION, { cause, extension: "present", element: operation.target });
+        finish(operation, "aborted");
+      });
+    }
+    function effect(element, effect2, effectTarget = element) {
+      const controller = controllers.get(element);
+      if (!controller) return Promise.resolve({ status: "skipped" });
+      if (typeof effect2 !== "string" || !/^[a-zA-Z_][\w-]*$/.test(effect2) || !effectTarget || effectTarget.nodeType !== 1 || !element.contains(effectTarget)) {
+        api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_VALUE, {
+          extension: "present",
+          element,
+          value: effect2,
+          reason: "An effect requires one CSS identifier and a target inside its mounted Present.",
+          suggestion: "Use a preset or custom effect name and an optional descendant Element."
+        });
+        return Promise.resolve({ status: "skipped" });
+      }
+      if (operations.has(element)) finish(operations.get(element), "aborted");
+      if (targets.has(effectTarget)) finish(targets.get(effectTarget), "aborted");
+      let resolve;
+      const promise = new Promise((done) => {
+        resolve = done;
+      });
+      const className = api.className(`present-effect-${effect2}`);
+      const operation = {
+        element,
+        target: effectTarget,
+        effect: effect2,
+        resolve,
+        className,
+        id: api.motion.id(),
+        waiting: /* @__PURE__ */ new Set(),
+        authoredClass: effectTarget.classList.contains(className)
+      };
+      operations.set(element, operation);
+      targets.set(effectTarget, operation);
+      if (api.currentPreference("reduced-motion") === "reduced") finish(operation, "skipped");
+      else if (!blocked(operation)) start(operation);
+      return promise;
+    }
+    function settled(transition) {
+      for (const operation of operations.values()) {
+        if (!operation.waiting.delete(transition)) continue;
+        if (!transition.completed) finish(operation, "aborted");
+        else if (!operation.waiting.size) start(operation);
+      }
+    }
+    function destroy() {
+      for (const operation of operations.values()) finish(operation, "aborted");
+    }
+    function preferences() {
+      if (api.currentPreference("reduced-motion") === "reduced")
+        for (const operation of operations.values()) finish(operation, "skipped");
+    }
+    return { effect, cancelWithin, settled, destroy, preferences };
+  }
+  var init_create_present_effects = __esm({
+    "src/internal/create-present-effects.js"() {
+      /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+    }
+  });
+
   // src/aellux.ext.present.js
   var aellux_ext_present_exports = {};
   var init_aellux_ext_present = __esm({
     "src/aellux.ext.present.js"() {
       init_create_present_playback();
       init_create_present_gestures();
+      init_create_present_effects();
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
@@ -6298,16 +6416,15 @@
           group: AelluxJs2.attr("present-group"),
           active: AelluxJs2.attr("present-active"),
           when: AelluxJs2.attr("present-when"),
-          triggerOn: AelluxJs2.attr("trigger-on"),
+          triggerOn: AelluxJs2.attr("present-trigger-on"),
           autoDismiss: AelluxJs2.attr("auto-dismiss"),
           presentMotion: AelluxJs2.attr("present-motion"),
           dismissOnClick: AelluxJs2.attr("dismiss-on-click"),
-          trigger: AelluxJs2.attr("trigger"),
-          //toggle,pop,dismiss,unpop
-          dismiss: AelluxJs2.attr("dismiss"),
+          trigger: AelluxJs2.attr("present-trigger"),
+          //toggle,pop,dismiss,unpop,effect
+          target: AelluxJs2.attr("present-target"),
           //target ID
-          target: AelluxJs2.attr("target")
-          //target ID
+          effect: AelluxJs2.attr("present-effect")
         };
         const className = {
           pop: AelluxJs2.className("pop"),
@@ -6331,12 +6448,15 @@
           trigger,
           show,
           selected,
-          popNext
+          popNext,
+          effect,
+          cancelEffect
         });
         const POP = "Pop", DISMISS = "Dismiss", UNPOP = "Unpop", BEFORE = "Before", MILLISECOND = "ms", SECOND = "s", DEFAULT_PRESENT = "opacity transform height width", OPACITY_SYNTAX = "<number> | <percentage>", TRANSFORM_SYNTAX = "<transform-list> | none";
         const TRANSITION_PREPARE_TIME = 100;
         const TAP_CLICK_WAIT_TIME = 32;
         const presentElements = /* @__PURE__ */ new Map();
+        const effects = createPresentEffects(root2, AelluxJs2, presentElements);
         const openPresentElements = /* @__PURE__ */ new Set();
         let fallbackMotionId = 5e6;
         const triggerElementsSet = /* @__PURE__ */ new Set();
@@ -6408,6 +6528,7 @@
           for (const [name, method] of Object.entries({ pop, unpop, dismiss }))
             AelluxJs2.comm.handle("present." + name, ({ element }) => method(element), communication);
           AelluxJs2.comm.handle("present.toggle", ({ element, goto }) => toggle(element, goto), communication);
+          AelluxJs2.comm.handle("present.effect", ({ element, effect: name, effectTarget }) => effect(element, name, effectTarget), communication);
           AelluxJs2.comm.handle("present.show", ({ group, member }) => show(group, member), communication);
           AelluxJs2.comm.handle("present.selection", ({ group }) => selected(group), communication);
           AelluxJs2.comm.handle("present.pop-next", (request) => popNext(request.group, (member) => {
@@ -6429,18 +6550,15 @@
             mount: mountPresentContainer,
             unmount: unmountPresentContainer,
             update: (element) => autoDismissSchedule(element, presentElements.get(element)),
-            controllers: ["pop", "dismiss", "unpop", "trigger", "toggle"]
+            controllers: ["pop", "dismiss", "unpop", "trigger", "toggle", "effect", "cancelEffect"]
           });
           AelluxJs2.mountManager.add({
             extensionName,
             priority: 0,
-            selector: `[${[
-              attr.trigger,
-              attr.dismiss,
-              attr.target
-            ].join("],[")}]`,
+            selector: `[${attr.trigger}]`,
             mount: mountTriggerElement,
-            unmount: unmountTriggerElement
+            unmount: unmountTriggerElement,
+            update: refreshTriggerTargets
           });
           AelluxJs2.mountManager.add({
             extensionName,
@@ -6452,6 +6570,7 @@
           });
           autoObserver = new root2.MutationObserver((records) => {
             for (const record of records) {
+              if (record.target === document.documentElement && record.attributeName === AelluxJs2.attr("reduced-motion")) effects.preferences();
               const controller = presentElements.get(record.target);
               if (controller) {
                 if (record.attributeName !== attr.autoDismiss) gestures.update(record.target);
@@ -6465,6 +6584,7 @@
           autoObserver.observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: [
             attr.autoDismiss,
             "id",
+            AelluxJs2.attr("reduced-motion"),
             ...["", "-source", "-unpop", "-dismiss"].map((suffix2) => AelluxJs2.attr(`present-gesture${suffix2}`))
           ] });
           document.addEventListener("pointerover", onHover);
@@ -6475,6 +6595,7 @@
         }
         function destroy() {
           AelluxJs2.comm.removeOwner(extensionName);
+          effects.destroy();
           gestures.destroy();
           autoObserver == null ? void 0 : autoObserver.disconnect();
           autoObserver = null;
@@ -6562,6 +6683,7 @@
             },
             stop: function(options = {}) {
               var _a, _b, _c;
+              effects.cancelWithin(element);
               (_a = this.gesture) == null ? void 0 : _a.abort();
               this.gesture = null;
               const replacement = options.replacement === true;
@@ -6612,7 +6734,7 @@
           }
           presentElements.set(element, presentController);
           for (const triggerElement of element.querySelectorAll(
-            `[${attr.trigger}],[${attr.dismiss}],[${attr.target}]`
+            `[${attr.trigger}]`
           )) {
             if (triggerTargets.get(triggerElement) === element) {
               presentController.triggers.add(triggerElement);
@@ -6654,7 +6776,7 @@
           queueGroups();
         }
         function mountTriggerElement(triggerElement) {
-          if (triggerElementsSet.has(triggerElement)) return;
+          if (triggerElementsSet.has(triggerElement) || !triggerElement.hasAttribute(attr.trigger)) return;
           triggerAriaHandlers.set(triggerElement, AelluxJs2.aria.register(triggerElement));
           triggerElementsSet.add(triggerElement);
           refreshTriggerTargets(triggerElement);
@@ -6720,22 +6842,29 @@
         }
         function refreshTriggerTargets(triggerElement) {
           var _a, _b, _c, _d, _e;
+          if (!triggerElement.hasAttribute(attr.trigger)) {
+            unmountTriggerElement(triggerElement);
+            return;
+          }
+          if (!triggerElementsSet.has(triggerElement)) {
+            mountTriggerElement(triggerElement);
+            return;
+          }
           const previousTarget = triggerTargets.get(triggerElement);
           const targetSelector = triggerElement.getAttribute(attr.target);
-          const dismiss2 = triggerElement.getAttribute(attr.dismiss);
-          indexTriggerTarget(triggerElement, dismiss2 || targetSelector);
+          indexTriggerTarget(triggerElement, targetSelector);
           const container = triggerElement.closest(presentSelector);
           if (previousTarget) {
             (_a = presentElements.get(previousTarget)) == null ? void 0 : _a.triggers.delete(triggerElement);
           }
           let target = null;
-          if (dismiss2 || targetSelector) {
-            target = targetById(dismiss2 || targetSelector);
-          } else if (container && container.id) {
+          if (targetSelector) {
+            target = targetById(targetSelector);
+          } else if (container) {
             target = container;
           }
           if (previousTarget !== target) hoveredTriggers.delete(triggerElement);
-          if (!target || !target.id) {
+          if (!target) {
             triggerTargets.delete(triggerElement);
             (_b = triggerAriaHandlers.get(triggerElement)) == null ? void 0 : _b.unset("expanded");
             (_c = triggerAriaHandlers.get(triggerElement)) == null ? void 0 : _c.unset("controls");
@@ -6743,13 +6872,14 @@
           }
           triggerTargets.set(triggerElement, target);
           (_d = presentElements.get(target)) == null ? void 0 : _d.triggers.add(triggerElement);
-          const targetIds = /* @__PURE__ */ new Set([target.id]);
+          const targetIds = new Set(target.id ? [target.id] : []);
           const initial = (_e = triggerAriaHandlers.get(triggerElement)) == null ? void 0 : _e.initial("controls");
           if (initial) {
             initial.trim().split(/\s+/).forEach((x) => targetIds.add(x));
           }
           updateTriggerAriaExpanded(triggerElement);
-          triggerAriaHandlers.get(triggerElement).set({ controls: [...targetIds] });
+          if (targetIds.size) triggerAriaHandlers.get(triggerElement).set({ controls: [...targetIds] });
+          else triggerAriaHandlers.get(triggerElement).unset("controls");
         }
         function updateTriggerAriaExpanded(triggerElement) {
           var _a, _b;
@@ -6770,8 +6900,15 @@
         function toggle(element, goto) {
           return presentTransition(element, goto);
         }
-        function trigger(element, trigger2) {
+        function effect(element, name, effectTarget) {
+          return effects.effect(element, name, effectTarget);
+        }
+        function cancelEffect(element) {
+          effects.cancelWithin(element);
+        }
+        function trigger(element, trigger2, name) {
           trigger2 = typeof trigger2 === "string" ? (trigger2 || "toggle").toLowerCase() : "toggle";
+          if (trigger2 === "effect") return effect(element, name);
           if (!["pop", "dismiss", "unpop", "toggle"].includes(trigger2)) AelluxJs2.diagnostics.warn(
             AelluxJs2.diagnostics.WARN_CONFIGURATION_VALUE,
             {
@@ -6919,6 +7056,7 @@
             if (!allowEvent || controller.operationRevision !== revision || presentElements.get(element) !== controller || !element.isConnected) return;
             if (!groupOperation && element !== group && (element.closest(groupSelector) !== group || groupState && (groups.get(group) !== groupState || groupState.revision !== groupRevision))) return;
             if (!hasCapacity()) return false;
+            effects.cancelWithin(element);
             controller.operationRevision++;
             const impliedReverse = reversing && !controller.opening && !controller.transition;
             const reverseTracks = reversing && controller.motionEnabled && ((_a = AelluxJs2.currentPreference) == null ? void 0 : _a.call(AelluxJs2, "reduced-motion")) !== "reduced" ? gesture ? playback.full(element, controller, false) : playback.snapshot(element, controller, interpolatedProgress) : [];
@@ -7208,6 +7346,7 @@
               restoreMeasuredStyles(element, controller);
               controller.transition = null;
               controller.classList.remove(className.willChange);
+              effects.settled(transition);
             }
           }
         }
@@ -7245,6 +7384,7 @@
             });
           }
           transition.timeout = null;
+          transition.completed = true;
         }
         function establishState(element, controller, state) {
           controller.state = state;
@@ -7328,7 +7468,7 @@
         }
         function refreshChangedTrigger(button) {
           if (!triggerElementsSet.has(button)) return;
-          const value = button.getAttribute(attr.dismiss) || button.getAttribute(attr.target);
+          const value = button.getAttribute(attr.target);
           if (value !== indexedTriggerValues.get(button)) refreshTriggerTargets(button);
         }
         function OnClick(event) {
@@ -7354,7 +7494,7 @@
         function onTap(event) {
           const target = activationTarget(event);
           if (!target) return;
-          const control = target.closest(`[${attr.trigger}],[${attr.dismiss}]`);
+          const control = target.closest(`[${attr.trigger}]`);
           if (control) refreshChangedTrigger(control);
           const pending = {
             event,
@@ -7395,37 +7535,15 @@
               diagnoseTarget(button, target, attr.target, targetSelector);
               if (target) {
                 exceptions.push(target);
-                if (!(hoverSuppressed != null ? hoverSuppressed : suppressHoverClick(button, event))) trigger(target, triggerAttr);
+                if (!(hoverSuppressed != null ? hoverSuppressed : suppressHoverClick(button, event))) trigger(target, triggerAttr, button.getAttribute(attr.effect));
               }
             } else if (container) {
               exceptions.push(container);
-              if (!(hoverSuppressed != null ? hoverSuppressed : suppressHoverClick(button, event))) trigger(container, triggerAttr);
+              if (!(hoverSuppressed != null ? hoverSuppressed : suppressHoverClick(button, event))) trigger(container, triggerAttr, button.getAttribute(attr.effect));
             } else {
               AelluxJs2.diagnostics.error(
                 AelluxJs2.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING,
-                { extension: extensionName, element: button, action: "trigger" }
-              );
-            }
-          }
-          button = eventTarget.closest(`[${attr.dismiss}]`);
-          if (button) {
-            refreshChangedTrigger(button);
-            const dismissTargetId = button.getAttribute(attr.dismiss);
-            const targetSelector = button.getAttribute(attr.target);
-            if (dismissTargetId || targetSelector) {
-              const target = targetById(dismissTargetId || targetSelector);
-              diagnoseTarget(button, target, dismissTargetId ? attr.dismiss : attr.target, dismissTargetId || targetSelector);
-              if (target) {
-                exceptions.push(target);
-                dismiss(target);
-              }
-            } else if (container) {
-              exceptions.push(container);
-              dismiss(container);
-            } else {
-              AelluxJs2.diagnostics.error(
-                AelluxJs2.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING,
-                { extension: extensionName, element: button, action: "dismiss" }
+                { extension: extensionName, element: button, action: triggerAttr === "dismiss" ? "dismiss" : "trigger" }
               );
             }
           }
@@ -7809,14 +7927,14 @@
                 hoveredTriggers.add(button);
                 const action = button.getAttribute(attr.trigger);
                 if (action === "pop") toggle(target, true);
-                else trigger(target, action);
+                else trigger(target, action, button.getAttribute(attr.effect));
               } else hoveredTriggers.delete(button);
             }
           }
           for (const target of openPresentElements) {
             if (!inHoverRegion(target, event.target)) continue;
             if (entering || inHoverRegion(target, event.relatedTarget)) cancelHoverClose(target);
-            else if ([...triggerElementsSet].some((control) => triggerTargets.get(control) === target && control.getAttribute(attr.triggerOn) === "hover" && !["dismiss", "unpop"].includes(control.getAttribute(attr.trigger)))) {
+            else if ([...triggerElementsSet].some((control) => triggerTargets.get(control) === target && control.getAttribute(attr.triggerOn) === "hover" && !["dismiss", "unpop", "effect"].includes(control.getAttribute(attr.trigger)))) {
               cancelHoverClose(target);
               hoverTimers.set(target, setTimeout(() => {
                 hoverTimers.delete(target);
@@ -8572,7 +8690,7 @@
     }
   }
   var attributesByExtension = {
-    present: "present present-group present-active present-when present-motion trigger trigger-on dismiss target auto-dismiss dismiss-on-click",
+    present: "present present-group present-active present-when present-motion present-trigger present-trigger-on present-target present-effect auto-dismiss dismiss-on-click",
     anchor: "anchor anchor-target anchor-match anchor-scroll-into-view",
     "overflow-marquee": "overflow-marquee overflow-marquee-fade overflow-marquee-viewport overflow-marquee-content overflow-marquee-active overflow-marquee-ready",
     scrollbox: "scrollbox scrollbox-fade scrollbox-fade-state scrollbox-wheel-horizontal scrollbox-momentum scrollbox-elastic scrollbar scrollbar-parent scrollbar-vertical scrollbar-horizontal",
@@ -8584,11 +8702,11 @@
     viewport: "viewport viewport-target",
     progress: "progress-target progress-fallback",
     preference: "preference option label next prev ready",
-    feedback: "feedback message-target transform-target present-target"
+    feedback: "feedback feedback-message-target feedback-effect-target present-target"
   };
   var coreAttributes = "maxfps wait-mounted ext ext-style dep load-when builds load-style weak-style full-style legacy esm theme-color";
   var activation = {
-    present: "present present-group trigger dismiss",
+    present: "present present-group present-trigger",
     anchor: "anchor",
     "overflow-marquee": "overflow-marquee",
     scrollbox: "scrollbox",
@@ -8627,25 +8745,25 @@
           invalid("present", "present", "Unknown animated Present property.", "Use opacity, transform, height, width, all, or an empty value to disable motion.");
         if (has("present-when") && /\s/.test(value("present-when")))
           invalid("present", "present-when", "A group condition must be one class token.", "Use one class name without spaces or a leading dot.", "WARN_PRESENT_GROUP_SELECTION");
-        for (const [name, allowed] of [["trigger", ["", "toggle", "pop", "dismiss", "unpop"]], ["trigger-on", ["", "click", "hover"]]])
-          if (has(name) && !allowed.includes(name === "trigger" ? value(name).toLowerCase() : value(name)))
+        for (const [name, allowed] of [["present-trigger", ["", "toggle", "pop", "dismiss", "unpop", "effect"]], ["present-trigger-on", ["", "click", "hover"]]])
+          if (has(name) && !allowed.includes(name === "present-trigger" ? value(name).toLowerCase() : value(name)))
             invalid("present", name, "Unknown Present control value.", `Use ${allowed.filter(Boolean).join(", ")}.`);
-        if (has("trigger") || has("dismiss")) {
-          const name = value("dismiss") ? "dismiss" : "target";
+        if (has("present-trigger")) {
+          const name = "present-target";
           const reference = value(name);
           if (reference) diagnosePresentTarget(api, element, root2.document.getElementById(reference.replace(/^#/, "")), attr(name), reference);
           else if (!element.closest(`[${attr("present")}]`))
             invalid(
               "present",
-              has("trigger") ? "trigger" : "dismiss",
+              "present-trigger",
               "Control has no target or enclosing Present container.",
-              "Set data-ae-target to an existing Present ID or place the control inside its Present container.",
+              "Set data-ae-present-target to an existing Present ID or place the control inside its Present container.",
               "WARN_CONFIGURATION_TARGET"
             );
           if (element.tabIndex < 0 && !element.matches(":disabled,[inert]"))
             invalid(
               "present",
-              has("trigger") ? "trigger" : "dismiss",
+              "present-trigger",
               "Control is not reachable with the keyboard.",
               "Prefer a native button; custom controls need focusability and appropriate keyboard activation.",
               "WARN_CONTROL_ACCESSIBILITY"
@@ -10353,7 +10471,7 @@
         if (name === "progress") loadWhen = "progress, meter";
         if (name === "ajax-href") loadWhen = "a" + loadWhen;
         if (name === "present") {
-          loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
+          loadWhen = ["present", "present-group", "present-trigger"].map(attr).join(",");
         }
         if (name === "input") loadWhen = ["point", "inputs", "shortcut", "shortcut-hint"].map(attr).join(",");
         if (name === "focus") loadWhen = ["focus", "focus-scope", "focus-nav", "shortcut"].map(attr).join(",");

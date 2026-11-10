@@ -664,6 +664,136 @@
     } };
   }
 
+  // src/internal/create-present-effects.js
+  /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
+  function createPresentEffects(root, api, controllers) {
+    const operations = /* @__PURE__ */ new Map();
+    const targets = /* @__PURE__ */ new Map();
+    const presets = /* @__PURE__ */ new Set(["shake", "yes", "no", "breathe", "tremble", "pulse", "alert"]);
+    const presentAttribute = api.attr("present");
+    function visible(element) {
+      if (!element.isConnected || !element.getClientRects().length) return false;
+      const style = root.getComputedStyle(element);
+      if (["hidden", "collapse"].includes(style.visibility)) return false;
+      for (let node = element; node; node = node.parentElement) {
+        const computed = root.getComputedStyle(node);
+        if (computed.display === "none" || computed.contentVisibility === "hidden" || Number(computed.opacity) === 0) return false;
+      }
+      return true;
+    }
+    function finish(operation, status) {
+      if (operations.get(operation.element) !== operation) return;
+      api.motion.cancel(operation.id);
+      if (!operation.authoredClass) operation.target.classList.remove(operation.className);
+      operations.delete(operation.element);
+      if (targets.get(operation.target) === operation) targets.delete(operation.target);
+      operation.resolve({ status });
+    }
+    function cancelWithin(element) {
+      for (const operation of operations.values()) {
+        if (element.contains(operation.element) || element.contains(operation.target)) finish(operation, "aborted");
+      }
+    }
+    function blocked(operation) {
+      var _a;
+      for (let node = operation.target; node; node = node.parentElement) {
+        const controller = controllers.get(node);
+        if (controller == null ? void 0 : controller.transition) operation.waiting.add(controller.transition);
+      }
+      const transition = (_a = controllers.get(operation.element)) == null ? void 0 : _a.transition;
+      if (transition) operation.waiting.add(transition);
+      return operation.waiting.size > 0;
+    }
+    function start(operation) {
+      if (operations.get(operation.element) !== operation) return;
+      if (!controllers.has(operation.element) || !operation.element.contains(operation.target) || !visible(operation.target) || api.currentPreference("reduced-motion") === "reduced") {
+        finish(operation, "skipped");
+        return;
+      }
+      if (blocked(operation)) return;
+      const transform = root.getComputedStyle(operation.target).transform;
+      if (presets.has(operation.effect) && (operation.target.hasAttribute(api.attr("anchor")) || operation.target.hasAttribute(api.attr("scrollbox-elastic")) || (operation.target.getAttribute(presentAttribute) || "").split(/\s+/).includes("transform") || transform && transform !== "none" && transform !== "matrix(1, 0, 0, 1, 0, 0)")) {
+        const owners = [];
+        for (const name of ["anchor", "scrollbox-elastic"]) if (operation.target.hasAttribute(api.attr(name))) owners.push(name);
+        if (!operation.target.hasAttribute(api.attr("anchor")) && (operation.target.getAttribute(presentAttribute) || "").split(/\s+/).includes("transform")) owners.push("present");
+        if (!owners.length) owners.push("authored-transform");
+        if (api.options.environment === "development") for (const owner of owners) api.diagnostics.warn(api.diagnostics.WARN_RESOURCE_CONFLICT, {
+          extension: "present",
+          element: operation.target,
+          property: "transform",
+          writers: [owner, "present-effect"],
+          reason: "A preset effect would replace the stable transform.",
+          suggestion: "Pass an untransformed inner effectTarget to present.effect()."
+        });
+        finish(operation, "skipped");
+        return;
+      }
+      operation.target.getBoundingClientRect();
+      api.motion.run(operation.target, {
+        extension: "present-effect",
+        id: operation.id,
+        ownedOnly: true,
+        apply: () => operation.target.classList.add(operation.className),
+        easing: root.getComputedStyle(operation.target).getPropertyValue("--ae-present-effect-aellux-ease").trim() || void 0,
+        abort: () => operations.get(operation.element) !== operation || !controllers.has(operation.element) || !operation.target.isConnected || !operation.element.contains(operation.target) || api.currentPreference("reduced-motion") === "reduced" || blocked(operation)
+      }).then((result) => finish(operation, result.status), (cause) => {
+        api.diagnostics.error(api.diagnostics.ERROR_EXTENSION_TRANSITION, { cause, extension: "present", element: operation.target });
+        finish(operation, "aborted");
+      });
+    }
+    function effect(element, effect2, effectTarget = element) {
+      const controller = controllers.get(element);
+      if (!controller) return Promise.resolve({ status: "skipped" });
+      if (typeof effect2 !== "string" || !/^[a-zA-Z_][\w-]*$/.test(effect2) || !effectTarget || effectTarget.nodeType !== 1 || !element.contains(effectTarget)) {
+        api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_VALUE, {
+          extension: "present",
+          element,
+          value: effect2,
+          reason: "An effect requires one CSS identifier and a target inside its mounted Present.",
+          suggestion: "Use a preset or custom effect name and an optional descendant Element."
+        });
+        return Promise.resolve({ status: "skipped" });
+      }
+      if (operations.has(element)) finish(operations.get(element), "aborted");
+      if (targets.has(effectTarget)) finish(targets.get(effectTarget), "aborted");
+      let resolve;
+      const promise = new Promise((done) => {
+        resolve = done;
+      });
+      const className = api.className(`present-effect-${effect2}`);
+      const operation = {
+        element,
+        target: effectTarget,
+        effect: effect2,
+        resolve,
+        className,
+        id: api.motion.id(),
+        waiting: /* @__PURE__ */ new Set(),
+        authoredClass: effectTarget.classList.contains(className)
+      };
+      operations.set(element, operation);
+      targets.set(effectTarget, operation);
+      if (api.currentPreference("reduced-motion") === "reduced") finish(operation, "skipped");
+      else if (!blocked(operation)) start(operation);
+      return promise;
+    }
+    function settled(transition) {
+      for (const operation of operations.values()) {
+        if (!operation.waiting.delete(transition)) continue;
+        if (!transition.completed) finish(operation, "aborted");
+        else if (!operation.waiting.size) start(operation);
+      }
+    }
+    function destroy() {
+      for (const operation of operations.values()) finish(operation, "aborted");
+    }
+    function preferences() {
+      if (api.currentPreference("reduced-motion") === "reduced")
+        for (const operation of operations.values()) finish(operation, "skipped");
+    }
+    return { effect, cancelWithin, settled, destroy, preferences };
+  }
+
   // src/aellux.ext.present.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
@@ -678,16 +808,15 @@
       group: AelluxJs.attr("present-group"),
       active: AelluxJs.attr("present-active"),
       when: AelluxJs.attr("present-when"),
-      triggerOn: AelluxJs.attr("trigger-on"),
+      triggerOn: AelluxJs.attr("present-trigger-on"),
       autoDismiss: AelluxJs.attr("auto-dismiss"),
       presentMotion: AelluxJs.attr("present-motion"),
       dismissOnClick: AelluxJs.attr("dismiss-on-click"),
-      trigger: AelluxJs.attr("trigger"),
-      //toggle,pop,dismiss,unpop
-      dismiss: AelluxJs.attr("dismiss"),
+      trigger: AelluxJs.attr("present-trigger"),
+      //toggle,pop,dismiss,unpop,effect
+      target: AelluxJs.attr("present-target"),
       //target ID
-      target: AelluxJs.attr("target")
-      //target ID
+      effect: AelluxJs.attr("present-effect")
     };
     const className = {
       pop: AelluxJs.className("pop"),
@@ -711,12 +840,15 @@
       trigger,
       show,
       selected,
-      popNext
+      popNext,
+      effect,
+      cancelEffect
     });
     const POP = "Pop", DISMISS = "Dismiss", UNPOP = "Unpop", BEFORE = "Before", MILLISECOND = "ms", SECOND = "s", DEFAULT_PRESENT = "opacity transform height width", OPACITY_SYNTAX = "<number> | <percentage>", TRANSFORM_SYNTAX = "<transform-list> | none";
     const TRANSITION_PREPARE_TIME = 100;
     const TAP_CLICK_WAIT_TIME = 32;
     const presentElements = /* @__PURE__ */ new Map();
+    const effects = createPresentEffects(root, AelluxJs, presentElements);
     const openPresentElements = /* @__PURE__ */ new Set();
     let fallbackMotionId = 5e6;
     const triggerElementsSet = /* @__PURE__ */ new Set();
@@ -788,6 +920,7 @@
       for (const [name, method] of Object.entries({ pop, unpop, dismiss }))
         AelluxJs.comm.handle("present." + name, ({ element }) => method(element), communication);
       AelluxJs.comm.handle("present.toggle", ({ element, goto }) => toggle(element, goto), communication);
+      AelluxJs.comm.handle("present.effect", ({ element, effect: name, effectTarget }) => effect(element, name, effectTarget), communication);
       AelluxJs.comm.handle("present.show", ({ group, member }) => show(group, member), communication);
       AelluxJs.comm.handle("present.selection", ({ group }) => selected(group), communication);
       AelluxJs.comm.handle("present.pop-next", (request) => popNext(request.group, (member) => {
@@ -809,18 +942,15 @@
         mount: mountPresentContainer,
         unmount: unmountPresentContainer,
         update: (element) => autoDismissSchedule(element, presentElements.get(element)),
-        controllers: ["pop", "dismiss", "unpop", "trigger", "toggle"]
+        controllers: ["pop", "dismiss", "unpop", "trigger", "toggle", "effect", "cancelEffect"]
       });
       AelluxJs.mountManager.add({
         extensionName,
         priority: 0,
-        selector: `[${[
-          attr.trigger,
-          attr.dismiss,
-          attr.target
-        ].join("],[")}]`,
+        selector: `[${attr.trigger}]`,
         mount: mountTriggerElement,
-        unmount: unmountTriggerElement
+        unmount: unmountTriggerElement,
+        update: refreshTriggerTargets
       });
       AelluxJs.mountManager.add({
         extensionName,
@@ -832,6 +962,7 @@
       });
       autoObserver = new root.MutationObserver((records) => {
         for (const record of records) {
+          if (record.target === document.documentElement && record.attributeName === AelluxJs.attr("reduced-motion")) effects.preferences();
           const controller = presentElements.get(record.target);
           if (controller) {
             if (record.attributeName !== attr.autoDismiss) gestures.update(record.target);
@@ -845,6 +976,7 @@
       autoObserver.observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: [
         attr.autoDismiss,
         "id",
+        AelluxJs.attr("reduced-motion"),
         ...["", "-source", "-unpop", "-dismiss"].map((suffix2) => AelluxJs.attr(`present-gesture${suffix2}`))
       ] });
       document.addEventListener("pointerover", onHover);
@@ -855,6 +987,7 @@
     }
     function destroy() {
       AelluxJs.comm.removeOwner(extensionName);
+      effects.destroy();
       gestures.destroy();
       autoObserver == null ? void 0 : autoObserver.disconnect();
       autoObserver = null;
@@ -942,6 +1075,7 @@
         },
         stop: function(options = {}) {
           var _a, _b, _c;
+          effects.cancelWithin(element);
           (_a = this.gesture) == null ? void 0 : _a.abort();
           this.gesture = null;
           const replacement = options.replacement === true;
@@ -992,7 +1126,7 @@
       }
       presentElements.set(element, presentController);
       for (const triggerElement of element.querySelectorAll(
-        `[${attr.trigger}],[${attr.dismiss}],[${attr.target}]`
+        `[${attr.trigger}]`
       )) {
         if (triggerTargets.get(triggerElement) === element) {
           presentController.triggers.add(triggerElement);
@@ -1034,7 +1168,7 @@
       queueGroups();
     }
     function mountTriggerElement(triggerElement) {
-      if (triggerElementsSet.has(triggerElement)) return;
+      if (triggerElementsSet.has(triggerElement) || !triggerElement.hasAttribute(attr.trigger)) return;
       triggerAriaHandlers.set(triggerElement, AelluxJs.aria.register(triggerElement));
       triggerElementsSet.add(triggerElement);
       refreshTriggerTargets(triggerElement);
@@ -1100,22 +1234,29 @@
     }
     function refreshTriggerTargets(triggerElement) {
       var _a, _b, _c, _d, _e;
+      if (!triggerElement.hasAttribute(attr.trigger)) {
+        unmountTriggerElement(triggerElement);
+        return;
+      }
+      if (!triggerElementsSet.has(triggerElement)) {
+        mountTriggerElement(triggerElement);
+        return;
+      }
       const previousTarget = triggerTargets.get(triggerElement);
       const targetSelector = triggerElement.getAttribute(attr.target);
-      const dismiss2 = triggerElement.getAttribute(attr.dismiss);
-      indexTriggerTarget(triggerElement, dismiss2 || targetSelector);
+      indexTriggerTarget(triggerElement, targetSelector);
       const container = triggerElement.closest(presentSelector);
       if (previousTarget) {
         (_a = presentElements.get(previousTarget)) == null ? void 0 : _a.triggers.delete(triggerElement);
       }
       let target = null;
-      if (dismiss2 || targetSelector) {
-        target = targetById(dismiss2 || targetSelector);
-      } else if (container && container.id) {
+      if (targetSelector) {
+        target = targetById(targetSelector);
+      } else if (container) {
         target = container;
       }
       if (previousTarget !== target) hoveredTriggers.delete(triggerElement);
-      if (!target || !target.id) {
+      if (!target) {
         triggerTargets.delete(triggerElement);
         (_b = triggerAriaHandlers.get(triggerElement)) == null ? void 0 : _b.unset("expanded");
         (_c = triggerAriaHandlers.get(triggerElement)) == null ? void 0 : _c.unset("controls");
@@ -1123,13 +1264,14 @@
       }
       triggerTargets.set(triggerElement, target);
       (_d = presentElements.get(target)) == null ? void 0 : _d.triggers.add(triggerElement);
-      const targetIds = /* @__PURE__ */ new Set([target.id]);
+      const targetIds = new Set(target.id ? [target.id] : []);
       const initial = (_e = triggerAriaHandlers.get(triggerElement)) == null ? void 0 : _e.initial("controls");
       if (initial) {
         initial.trim().split(/\s+/).forEach((x) => targetIds.add(x));
       }
       updateTriggerAriaExpanded(triggerElement);
-      triggerAriaHandlers.get(triggerElement).set({ controls: [...targetIds] });
+      if (targetIds.size) triggerAriaHandlers.get(triggerElement).set({ controls: [...targetIds] });
+      else triggerAriaHandlers.get(triggerElement).unset("controls");
     }
     function updateTriggerAriaExpanded(triggerElement) {
       var _a, _b;
@@ -1150,8 +1292,15 @@
     function toggle(element, goto) {
       return presentTransition(element, goto);
     }
-    function trigger(element, trigger2) {
+    function effect(element, name, effectTarget) {
+      return effects.effect(element, name, effectTarget);
+    }
+    function cancelEffect(element) {
+      effects.cancelWithin(element);
+    }
+    function trigger(element, trigger2, name) {
       trigger2 = typeof trigger2 === "string" ? (trigger2 || "toggle").toLowerCase() : "toggle";
+      if (trigger2 === "effect") return effect(element, name);
       if (!["pop", "dismiss", "unpop", "toggle"].includes(trigger2)) AelluxJs.diagnostics.warn(
         AelluxJs.diagnostics.WARN_CONFIGURATION_VALUE,
         {
@@ -1299,6 +1448,7 @@
         if (!allowEvent || controller.operationRevision !== revision || presentElements.get(element) !== controller || !element.isConnected) return;
         if (!groupOperation && element !== group && (element.closest(groupSelector) !== group || groupState && (groups.get(group) !== groupState || groupState.revision !== groupRevision))) return;
         if (!hasCapacity()) return false;
+        effects.cancelWithin(element);
         controller.operationRevision++;
         const impliedReverse = reversing && !controller.opening && !controller.transition;
         const reverseTracks = reversing && controller.motionEnabled && ((_a = AelluxJs.currentPreference) == null ? void 0 : _a.call(AelluxJs, "reduced-motion")) !== "reduced" ? gesture ? playback.full(element, controller, false) : playback.snapshot(element, controller, interpolatedProgress) : [];
@@ -1588,6 +1738,7 @@
           restoreMeasuredStyles(element, controller);
           controller.transition = null;
           controller.classList.remove(className.willChange);
+          effects.settled(transition);
         }
       }
     }
@@ -1625,6 +1776,7 @@
         });
       }
       transition.timeout = null;
+      transition.completed = true;
     }
     function establishState(element, controller, state) {
       controller.state = state;
@@ -1708,7 +1860,7 @@
     }
     function refreshChangedTrigger(button) {
       if (!triggerElementsSet.has(button)) return;
-      const value = button.getAttribute(attr.dismiss) || button.getAttribute(attr.target);
+      const value = button.getAttribute(attr.target);
       if (value !== indexedTriggerValues.get(button)) refreshTriggerTargets(button);
     }
     function OnClick(event) {
@@ -1734,7 +1886,7 @@
     function onTap(event) {
       const target = activationTarget(event);
       if (!target) return;
-      const control = target.closest(`[${attr.trigger}],[${attr.dismiss}]`);
+      const control = target.closest(`[${attr.trigger}]`);
       if (control) refreshChangedTrigger(control);
       const pending = {
         event,
@@ -1775,37 +1927,15 @@
           diagnoseTarget(button, target, attr.target, targetSelector);
           if (target) {
             exceptions.push(target);
-            if (!(hoverSuppressed != null ? hoverSuppressed : suppressHoverClick(button, event))) trigger(target, triggerAttr);
+            if (!(hoverSuppressed != null ? hoverSuppressed : suppressHoverClick(button, event))) trigger(target, triggerAttr, button.getAttribute(attr.effect));
           }
         } else if (container) {
           exceptions.push(container);
-          if (!(hoverSuppressed != null ? hoverSuppressed : suppressHoverClick(button, event))) trigger(container, triggerAttr);
+          if (!(hoverSuppressed != null ? hoverSuppressed : suppressHoverClick(button, event))) trigger(container, triggerAttr, button.getAttribute(attr.effect));
         } else {
           AelluxJs.diagnostics.error(
             AelluxJs.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING,
-            { extension: extensionName, element: button, action: "trigger" }
-          );
-        }
-      }
-      button = eventTarget.closest(`[${attr.dismiss}]`);
-      if (button) {
-        refreshChangedTrigger(button);
-        const dismissTargetId = button.getAttribute(attr.dismiss);
-        const targetSelector = button.getAttribute(attr.target);
-        if (dismissTargetId || targetSelector) {
-          const target = targetById(dismissTargetId || targetSelector);
-          diagnoseTarget(button, target, dismissTargetId ? attr.dismiss : attr.target, dismissTargetId || targetSelector);
-          if (target) {
-            exceptions.push(target);
-            dismiss(target);
-          }
-        } else if (container) {
-          exceptions.push(container);
-          dismiss(container);
-        } else {
-          AelluxJs.diagnostics.error(
-            AelluxJs.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING,
-            { extension: extensionName, element: button, action: "dismiss" }
+            { extension: extensionName, element: button, action: triggerAttr === "dismiss" ? "dismiss" : "trigger" }
           );
         }
       }
@@ -2189,14 +2319,14 @@
             hoveredTriggers.add(button);
             const action = button.getAttribute(attr.trigger);
             if (action === "pop") toggle(target, true);
-            else trigger(target, action);
+            else trigger(target, action, button.getAttribute(attr.effect));
           } else hoveredTriggers.delete(button);
         }
       }
       for (const target of openPresentElements) {
         if (!inHoverRegion(target, event.target)) continue;
         if (entering || inHoverRegion(target, event.relatedTarget)) cancelHoverClose(target);
-        else if ([...triggerElementsSet].some((control) => triggerTargets.get(control) === target && control.getAttribute(attr.triggerOn) === "hover" && !["dismiss", "unpop"].includes(control.getAttribute(attr.trigger)))) {
+        else if ([...triggerElementsSet].some((control) => triggerTargets.get(control) === target && control.getAttribute(attr.triggerOn) === "hover" && !["dismiss", "unpop", "effect"].includes(control.getAttribute(attr.trigger)))) {
           cancelHoverClose(target);
           hoverTimers.set(target, setTimeout(() => {
             hoverTimers.delete(target);

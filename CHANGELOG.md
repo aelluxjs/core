@@ -8,6 +8,9 @@ Changes in this section are pending for the `0.1.0` release candidate.
 
 ### Added
 
+- Present now owns temporary shake/yes/no/breathe/tremble/pulse/alert effects through public/controller `effect()` and internal `present.effect`, with latest-only pending requests, transition cancellation, reduced-motion skips, inner targets and automatic cleanup. Feedback retains semantic publication/rendering and delegates optional effects. Keyframes ship only with Present CSS.
+
+
 - Focus directional navigation now uses visual rectangles, perpendicular overlap and edge distances instead of DOM order. Added `data-ae-focus-nav="auto|spatial|native|none"`, scoped native scrolling, opt-in keyboard spatial regions, gamepad/independent-context defaults, and native editing/ARIA key protection. Existing `next`, shortcuts, routing and history remain available.
 
 - Added `$ae.comm` to the ES5 boot: named synchronous commands/queries, ordered notifications, explicit unavailable/value responses, async results, duplicate-provider diagnostics and cleanup by owner or AbortSignal. Runtime startup preserves the boot instance; failed initialization and destruction release owned records.
@@ -26,6 +29,9 @@ Changes in this section are pending for the `0.1.0` release candidate.
 - Added the Compatibility Commitment for AelluxJS `0.1.x`, effective from `0.1.0`, covering only minimal global initialization and declarative activation/mounting. Stable indicates maturity and validation, without an Extension API compatibility guarantee. Linked it from the documentation navigation and reference pages; recorded pending support policies and contract discrepancies separately for maintainer review without changing Extension stability or runtime behavior.
 
 ### Changed
+
+- Finalized declarative action naming before 0.1.0: migrate `data-ae-trigger`, `data-ae-target`, `data-ae-trigger-on` and `data-ae-dismiss` to `data-ae-present-trigger`, `data-ae-present-target`, `data-ae-present-trigger-on` and the dismiss action. Target-only elements no longer mount controls. Renamed Feedback destinations to `data-ae-feedback-message-target` and `data-ae-feedback-effect-target`; effects now require a containing mounted Present. Updated the normative convention, compatibility activation list, editor metadata and examples.
+
 
 - Anchor target switching now retains a fixed rendered origin, CSS easing and original completion deadline while scroll, resize and layout updates replace only its destination geometry. Genuine target changes start new timelines, including during automatic scrolling. Shared scheduled interpolation covers placement, pivots, origins and matching dimensions without competing native CSS transitions; Modern/Legacy and unavailable/disabled CSS Motion paths use the same model. Unrelated effects and authored transition priorities are preserved.
 

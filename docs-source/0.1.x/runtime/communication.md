@@ -50,6 +50,7 @@ The boot does not know contract names, players, components or devices. Dependenc
 | `focus.context` | Focus | `{ focusId }`; context snapshot or `null`. |
 | `input.mount-token` | Input | `{ element }`; opaque mount identity or `null`. Remount replaces the token. |
 | `present.pop`, `present.unpop`, `present.dismiss` | Present | `{ element }`; existing operation result, including its Promise when applicable. |
+| `present.effect` | Present | `{ element, effect, effectTarget? }`; Promise resolving to `{ status }`. The recipient must be a mounted Present; the optional effect target must be within it. Effects wait for valid idle completion. |
 | `present.toggle` | Present | `{ element, goto }`; existing toggle result. |
 | `present.show` | Present | `{ group, member }`; selects the member ID through the existing group operation. |
 | `present.selection` | Present | `{ group }`; selected element or `null`. |

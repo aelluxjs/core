@@ -151,7 +151,7 @@ When `data-ae-anchor-target` resolves to an element with `data-ae-present-group`
     Selection label
   </div>
 </div>
-<button type="button" data-ae-trigger="pop" data-ae-target="second">Second view</button>
+<button type="button" data-ae-present-trigger="pop" data-ae-present-target="second">Second view</button>
 ```
 
 Or select with `await $ae("views").present.show("second")`. Attribute changes, class selection and triggers all use the same accepted selection. The associated Anchor resolves the target as soon as that selection is confirmed and positions against it once its computed CSS passes the visibility checks; it does not wait for Pop completion. A canceled BeforePop/BeforeDismiss does not publish a new selection. The normal Present opacity-copying behavior remains; the example overrides opacity to keep its decorative marker opaque while the target fades in, once the target's opacity is greater than zero.

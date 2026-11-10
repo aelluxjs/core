@@ -150,13 +150,13 @@ test("production neither refetches initial HTML nor inspects duplicate AJAX attr
 
 for (const forceLegacy of [false, true]) test(`declarations diagnose typos, targets, values and keyboard access (${forceLegacy ? "Legacy" : "Modern"})`, async ({ page }) => {
   await start(page, `<div id="typo" data-ae-presnt></div>
-    <div id="control" data-ae-trigger="open" data-ae-target="missing"></div>
-    <button id="wrong" data-ae-trigger data-ae-target="plain"></button><div id="plain"></div>
+    <div id="control" data-ae-present-trigger="open" data-ae-present-target="missing"></div>
+    <button id="wrong" data-ae-present-trigger data-ae-present-target="plain"></button><div id="plain"></div>
     <div id="point" data-ae-point="2.5"></div>`, { forceLegacy });
   const entries = await diagnostics(page);
   expect(entries).toEqual(expect.arrayContaining([
     expect.objectContaining({ code: 2024, element: "typo", attribute: "data-ae-presnt", suggestion: expect.stringContaining("data-ae-present") }),
-    expect.objectContaining({ code: 2026, element: "control", attribute: "data-ae-trigger", value: "open" }),
+    expect.objectContaining({ code: 2026, element: "control", attribute: "data-ae-present-trigger", value: "open" }),
     expect.objectContaining({ code: 2027, element: "control", value: "missing" }),
     expect.objectContaining({ code: 2027, element: "wrong", reason: "Target is not a Present container." }),
     expect.objectContaining({ code: 2029, element: "control" }),
@@ -270,7 +270,7 @@ test("valid declarations and hidden Present targets remain quiet", async ({ page
   await start(page, `<div style="position:relative;width:300px;height:150px">
     <div id="target" data-ae-present hidden style="position:absolute;width:40px;height:20px"></div>
     <div id="anchor" data-ae-anchor="bottom-center:top-center" data-ae-anchor-target="target"></div>
-    </div><button data-ae-trigger="pop" data-ae-target="target"></button><input data-ae-focus="next">
+    </div><button data-ae-present-trigger="pop" data-ae-present-target="target"></button><input data-ae-focus="next">
     <div data-ae-point="0"></div>`);
   await page.evaluate(() => AelluxJs.mountManager.update(document));
   expect((await diagnostics(page)).filter(entry => entry.code >= 2024 && entry.code <= 2030)).toEqual([]);
@@ -307,7 +307,7 @@ test("computed CSS checks report blocked layout and malformed typed property dec
 });
 
 test("runtime target failures are diagnosed in production after declarations change", async ({ page }) => {
-  await start(page, '<button id="control" data-ae-trigger="pop" data-ae-target="missing">open</button>', { environment: "production" });
+  await start(page, '<button id="control" data-ae-present-trigger="pop" data-ae-present-target="missing">open</button>', { environment: "production" });
   await page.locator("#control").click();
   expect(await diagnostics(page)).toEqual(expect.arrayContaining([
     expect.objectContaining({ code: 2027, element: "control", value: "missing" })

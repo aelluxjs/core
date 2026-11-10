@@ -144,6 +144,14 @@
       });
     };
   }
+  function _typeof(o) {
+    "@babel/helpers - typeof";
+    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o2) {
+      return typeof o2;
+    } : function(o2) {
+      return o2 && "function" == typeof Symbol && o2.constructor === Symbol && o2 !== Symbol.prototype ? "symbol" : typeof o2;
+    }, _typeof(o);
+  }
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
@@ -169,19 +177,18 @@
     var motionOptions = ["shake", "yes", "no", "breathe", "tremble", "pulse", "alert"];
     var feedbackTypes = ["warning", "error", "success", "announce", "busy", "progress", "validate"];
     var handlers = /* @__PURE__ */ new Map();
-    var motionOperations = /* @__PURE__ */ new Map();
-    var motionIds = /* @__PURE__ */ new WeakMap();
     var feedbackAttribute = AelluxJs.attr(extensionName);
-    var messageTargetAttribute = AelluxJs.attr("messageTarget");
-    var transformTargetAttribute = AelluxJs.attr("transformTarget");
+    var messageTargetAttribute = AelluxJs.attr("feedback-message-target");
+    var effectTargetAttribute = AelluxJs.attr("feedback-effect-target");
     var presentTargetAttribute = AelluxJs.attr("presentTarget");
     var presentSelector = "[".concat(AelluxJs.attr("present"), "]");
-    var mountedFeedback = /* @__PURE__ */ new Set();
+    var mountedFeedback = /* @__PURE__ */ new Map();
+    var applications = /* @__PURE__ */ new WeakMap();
     function init() {
-      AelluxJs.comm.handle("feedback.prepare", function(_ref) {
-        var boundary = _ref.boundary, feedback = _ref.feedback, element = _ref.element;
-        if (!mountedFeedback.has(boundary) || !boundary.isConnected) return false;
-        applyFeedback(boundary, feedback, element);
+      AelluxJs.comm.handle("feedback.prepare", function(request) {
+        var boundary = request.boundary, feedback = request.feedback, element = request.element;
+        if (!mountedFeedback.has(boundary) || !boundary.isConnected || !feedback || _typeof(feedback) !== "object") return false;
+        applications.set(feedback, applyFeedback(boundary, feedback, element, false));
         return true;
       }, {
         owner: extensionName
@@ -200,7 +207,6 @@
     }
     function _destroy() {
       _destroy = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee() {
-        var _iterator3, _step3, operation;
         return _regenerator().w(function(_context) {
           while (1) switch (_context.n) {
             case 0:
@@ -209,18 +215,6 @@
               AelluxJs.mountManager.remove({
                 extensionName: extensionName
               });
-              _iterator3 = _createForOfIteratorHelper(motionOperations.values());
-              try {
-                for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
-                  operation = _step3.value;
-                  AelluxJs.motion.cancel(operation.id);
-                }
-              } catch (err) {
-                _iterator3.e(err);
-              } finally {
-                _iterator3.f();
-              }
-              motionOperations.clear();
               handlers.clear();
             case 1:
               return _context.a(2);
@@ -230,10 +224,11 @@
       return _destroy.apply(this, arguments);
     }
     function mountFeedback(element) {
-      mountedFeedback.add(element);
+      mountedFeedback.set(element, {});
       AelluxJs.onEvent(element, "Feedback", onFeedback);
     }
     function unmountFeedback(element) {
+      applications.delete(element);
       mountedFeedback.delete(element);
       AelluxJs.offEvent(element, "Feedback", onFeedback);
     }
@@ -250,22 +245,26 @@
         }
       }
       event.stopPropagation();
-      if (!event.detail) return;
+      if (!event.detail || _typeof(event.detail) !== "object") return;
       var presentTarget = element.getAttribute(presentTargetAttribute);
       var presentElement = presentTarget !== null && presentTarget.trim() && (AelluxJs.comm.has("present.pop") || AelluxJs.comm.has("present.pop-next")) ? AelluxJs.elementOrId(presentTarget) : null;
       if (presentElement !== null && presentElement !== void 0 && presentElement.hasAttribute(AelluxJs.attr("present-group"))) {
+        var preparation = {
+          boundary: element,
+          feedback: event.detail
+        };
         var result = AelluxJs.comm.request("present.pop-next", {
           group: presentElement,
           preparation: {
             contract: "feedback.prepare",
-            payload: {
-              boundary: element,
-              feedback: event.detail
-            }
+            payload: preparation
           }
         });
         if (result.handled) {
-          Promise.resolve(result.value).catch(function(cause) {
+          var application = applications.get(event.detail);
+          Promise.resolve(result.value).then(function(member) {
+            if (member) requestEffect(element, application);
+          }).catch(function(cause) {
             return AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION, {
               cause: cause,
               extension: extensionName,
@@ -275,27 +274,33 @@
           return;
         }
       }
-      applyFeedback(element, event.detail, element, function(messageElement, transformElement) {
+      applyFeedback(element, event.detail, element, function(messageElement, effectElement) {
         if (presentTarget !== null) {
-          var target = presentElement || !presentTarget.trim() && ((messageElement === null || messageElement === void 0 ? void 0 : messageElement.closest(presentSelector)) || (transformElement === null || transformElement === void 0 ? void 0 : transformElement.closest(presentSelector)));
+          var target = presentElement || !presentTarget.trim() && ((messageElement === null || messageElement === void 0 ? void 0 : messageElement.closest(presentSelector)) || (effectElement === null || effectElement === void 0 ? void 0 : effectElement.closest(presentSelector)));
           if (target) AelluxJs.comm.request("present.pop", {
             element: target
           });
         }
       });
     }
-    function applyFeedback(element, _ref2) {
-      var message = _ref2.message, type = _ref2.type, motion = _ref2.motion;
+    function applyFeedback(element, _ref) {
+      var message = _ref.message, type = _ref.type, motion = _ref.motion;
       var defaultElement = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : element;
       var presentRequest = arguments.length > 3 ? arguments[3] : void 0;
+      var application = {
+        mount: mountedFeedback.get(element)
+      };
       var messageTarget = element.getAttribute(messageTargetAttribute);
-      var transformTarget = element.getAttribute(transformTargetAttribute);
+      var effectTarget = element.getAttribute(effectTargetAttribute);
       var messageElement = AelluxJs.elementOrId(messageTarget, {
         defaultElement: defaultElement
       });
-      var transformElement = AelluxJs.elementOrId(transformTarget, {
+      var effectElement = AelluxJs.elementOrId(effectTarget, {
         defaultElement: defaultElement
       });
+      application.effectElement = effectElement;
+      application.motion = motion;
+      if (effectElement) applications.set(effectElement, application);
       if (messageElement && typeof message === "string") {
         var textNode = null;
         var _iterator = _createForOfIteratorHelper(messageElement.childNodes), _step;
@@ -317,7 +322,7 @@
       }
       if (feedbackTypes.includes(type)) {
         var typeClass = AelluxJs.className("feedback-".concat(type));
-        for (var _i = 0, _arr = [element, messageElement, transformElement]; _i < _arr.length; _i++) {
+        for (var _i = 0, _arr = [element, messageElement, effectElement]; _i < _arr.length; _i++) {
           var target = _arr[_i];
           if (target) {
             if (defaultElement !== element) {
@@ -337,52 +342,19 @@
           }
         }
       }
-      if (presentRequest) presentRequest(messageElement, transformElement);
-      if (transformElement) {
-        var motionPrefix = AelluxJs.className("feedback-motion-");
-        for (var _i2 = 0, _Array$from = Array.from(transformElement.classList); _i2 < _Array$from.length; _i2++) {
-          var className = _Array$from[_i2];
-          if (className.startsWith(motionPrefix)) transformElement.classList.remove(className);
-        }
-        var _previous = motionOperations.get(transformElement);
-        if (_previous) AelluxJs.motion.cancel(_previous.id);
-        motionOperations.delete(transformElement);
-        if (typeof motion === "string") {
-          var motionClass = AelluxJs.className("feedback-motion-".concat(motion));
-          var id = motionIds.get(transformElement);
-          if (id === void 0) {
-            id = AelluxJs.motion.id();
-            motionIds.set(transformElement, id);
-          }
-          var operation = {
-            id: id,
-            className: motionClass
-          };
-          motionOperations.set(transformElement, operation);
-          var advancedEase = root.getComputedStyle(transformElement).getPropertyValue("--ae-feedback-aellux-ease").trim() || void 0;
-          AelluxJs.motion.run(transformElement, {
-            extension: extensionName,
-            id: id,
-            apply: function apply() {
-              return transformElement.classList.add(motionClass);
-            },
-            easing: advancedEase,
-            abort: function abort() {
-              return !transformElement.isConnected;
-            }
-          }).catch(function(cause) {
-            AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION, {
-              cause: cause,
-              extension: extensionName,
-              element: transformElement
-            });
-          }).finally(function() {
-            if (motionOperations.get(transformElement) !== operation) return;
-            transformElement.classList.remove(motionClass);
-            motionOperations.delete(transformElement);
-          });
-        }
-      }
+      if (typeof presentRequest === "function") presentRequest(messageElement, effectElement);
+      if (presentRequest !== false) requestEffect(element, application);
+      return application;
+    }
+    function requestEffect(element, application) {
+      if (!application || application.mount !== mountedFeedback.get(element) || !element.isConnected) return;
+      var effectElement = application.effectElement, motion = application.motion;
+      if (!(effectElement !== null && effectElement !== void 0 && effectElement.isConnected) || applications.get(effectElement) !== application || typeof motion !== "string") return;
+      AelluxJs.comm.request("present.effect", {
+        element: effectElement.closest(presentSelector) || effectElement,
+        effect: motion,
+        effectTarget: effectElement
+      });
     }
     function on(type, handler) {
       if (!handlers.has(type)) {
@@ -434,7 +406,7 @@
       });
     }
     function send(input, payload) {
-      var _ref3 = payload || input, type = _ref3.type, message = _ref3.message, value = _ref3.value, target = _ref3.target, motion = _ref3.motion;
+      var _ref2 = payload || input, type = _ref2.type, message = _ref2.message, value = _ref2.value, target = _ref2.target, motion = _ref2.motion;
       if (input && input.nodeType === 1) target = input;
       if (typeof message !== "string") {
         reportInvalidArgument("message", message);

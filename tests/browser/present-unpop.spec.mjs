@@ -226,7 +226,7 @@ for (const forceLegacy of [false, true]) {
 }
 
 test("unpop trigger clears exclusive selection; groups and toggle still dismiss by default", async ({ page }) => {
-  await start(page, `<button id="reverse" data-ae-trigger="unpop" data-ae-target="panel">Reverse</button>
+  await start(page, `<button id="reverse" data-ae-present-trigger="unpop" data-ae-present-target="panel">Reverse</button>
     <div id="group" data-ae-present-group data-ae-present-active="panel">
       <div id="panel" data-ae-present="opacity" style="--ae-pop-duration:180ms">A</div>
       <div id="other" data-ae-present="opacity" hidden>B</div></div>`);

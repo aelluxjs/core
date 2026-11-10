@@ -379,7 +379,7 @@ test("a completed real mouse drag suppresses its click; a press remains a click"
 });
 
 test("group selection and trigger expansion follow the actual gesture destination", async ({ page }) => {
-  await start(page, '<button id="trigger" data-ae-target="panel" data-ae-trigger="pop">Open</button>' +
+  await start(page, '<button id="trigger" data-ae-present-target="panel" data-ae-present-trigger="pop">Open</button>' +
     '<div id="group" data-ae-present-group>' + panel() + '</div>');
   await page.evaluate(() => { pointer("pointerdown", 0, 200); pointer("pointermove", 0, 150); pointer("pointerup", 0, 150); });
   await expect(page.locator("#panel")).toHaveClass(/\bae--unpop\b/);

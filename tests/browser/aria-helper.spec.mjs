@@ -73,7 +73,7 @@ test("Present ARIA claims yield to a higher priority handler and resume afterwar
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => {
     document.body.innerHTML = `
-      <button id="trigger" data-ae-trigger="toggle" data-ae-target="#panel"
+      <button id="trigger" data-ae-present-trigger="toggle" data-ae-present-target="#panel"
         aria-controls="original"></button>
       <div id="panel" data-ae-present hidden></div>
     `;

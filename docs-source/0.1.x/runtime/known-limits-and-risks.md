@@ -87,6 +87,12 @@ Mounting, updates, detached-node cleanup and destruction use the shared lifecycl
 
 The unestablished scenarios above are **Validation Gaps**, not browser-specific Known Issues. Existing checks include lifecycle vetoes, async mounting/removal, resource integrity, storage-access fallback and several cross-Extension combinations. They do not cover every possible interleaving or deployment. Consult [Browser support](browser-support.md), [Compatibility](../compatibility.md), and [Validation scenarios](../validation-scenarios.md) for the current recorded scope. Test presence is distinct from a fresh successful run; preserve failures, infrastructure failures and capability skips as separate results.
 
+## Present effects and optional Feedback integration
+
+**Known limitation.** Feedback messages, semantic classes and subscriptions work without Present; visual effects require an initialized Present and a mounted containing region. A standalone target never mounts an interaction control. Pending effects await the exact active presentation operation; replacement or teardown discards them, and hidden or reduced-motion destinations are skipped. Requests are not retained for a future reveal.
+
+**Potential risk.** Preset effects replace transform. Present skips and diagnoses presets that would replace Anchor/Elastic ownership, a configured presentation transform or nonidentity authored transform; animate an untransformed descendant. Custom effects must be finite CSS animations and compose with the chosen target properties. No wrappers are generated. See [Present](../core-extensions/present.md#temporary-effects).
+
 ## Recommended Practices
 
 1. Deploy a consistent asset set and verify final lazy-load URLs, CSS, CSP and integrity configuration.

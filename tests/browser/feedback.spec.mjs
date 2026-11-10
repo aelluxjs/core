@@ -22,8 +22,9 @@ test("feedback boundaries update text, filter types, and load standard motion st
   await page.evaluate(() => {
     const section = document.createElement("section");
     section.setAttribute("data-ae-feedback", "error");
-    section.setAttribute("data-ae-message-target", "feedback-message");
-    section.setAttribute("data-ae-transform-target", "feedback-field");
+    section.setAttribute("data-ae-present", "");
+    section.setAttribute("data-ae-feedback-message-target", "feedback-message");
+    section.setAttribute("data-ae-feedback-effect-target", "feedback-field");
     section.innerHTML = '<input id="feedback-field"><p id="feedback-message"><strong>Label</strong></p>';
     document.body.appendChild(section);
   });
@@ -31,7 +32,7 @@ test("feedback boundaries update text, filter types, and load standard motion st
   await page.evaluate(() => AelluxJs.init({ mode: "full" }));
   await expect.poll(() => page.evaluate(() => AelluxJs.ext.feedback?.initialized)).toBe(true);
 
-  const result = await page.evaluate(() => {
+  const result = await page.evaluate(async () => {
     const section = document.querySelector("[data-ae-feedback]");
     const field = document.getElementById("feedback-field");
     const message = document.getElementById("feedback-message");
@@ -39,13 +40,14 @@ test("feedback boundaries update text, filter types, and load standard motion st
     document.addEventListener("AelluxJsFeedback", event => received.push(event.detail.type));
     AelluxJs.ext.feedback.warning("Ignored here", field);
     AelluxJs.ext.feedback.error("Check email", field, null, "shake");
+    await Promise.resolve();
     return {
       received,
       message: message.textContent,
       labelPreserved: message.querySelector("strong")?.textContent,
       boundaryClass: section.classList.contains("ae--feedback-error"),
       messageClass: message.classList.contains("ae--feedback-error"),
-      motionClass: field.classList.contains("ae--feedback-motion-shake"),
+      motionClass: field.classList.contains("ae--present-effect-shake"),
       styleLoaded: Boolean(document.querySelector('link[data-ae-full-style]'))
     };
   });
@@ -131,7 +133,7 @@ for (const options of [
 
   test(`feedback pops only the explicit target once per accepted event (${label})`, async ({ page }) => {
     await startFeedback(page, `<section id="boundary" data-ae-feedback="error"
-      data-ae-message-target="#message" data-ae-transform-target="message" data-ae-present-target="#panel"></section>
+      data-ae-feedback-message-target="#message" data-ae-feedback-effect-target="message" data-ae-present-target="#panel"></section>
       <aside id="ancestor" data-ae-present hidden><p id="message"><strong>Label:</strong></p></aside>
       <aside id="panel" data-ae-present hidden>Panel</aside>`, options);
     const result = await page.evaluate(async () => {
@@ -153,7 +155,7 @@ for (const options of [
       const ignored = calls.length === 0 && message.textContent === "Label:";
       const firstPop = new Promise(resolve => panel.addEventListener(AelluxJs.eventName("Pop"), resolve, { once: true }));
       feedback.error("first", boundary, null, "shake");
-      const motion = message.classList.contains("ae--feedback-motion-shake");
+      const motion = message.classList.contains("ae--present-effect-shake");
       await firstPop;
       const firstVisible = !panel.hidden;
       const secondPop = new Promise(resolve => panel.addEventListener(AelluxJs.eventName("Pop"), resolve, { once: true }));
@@ -165,12 +167,12 @@ for (const options of [
     });
     expect(result).toEqual({ ignored: true, calls: ["panel", "panel"],
       beforePop: [{ text: "Label:first", typeClass: true }, { text: "Label:second", typeClass: true }],
-      motion: true, firstVisible: true, visible: true, ancestorHidden: true, unknownAttributes: 0 });
+      motion: false, firstVisible: true, visible: true, ancestorHidden: true, unknownAttributes: 0 });
   });
 
   test(`feedback respects Present veto, retargeting and missing IDs (${label})`, async ({ page }) => {
-    await startFeedback(page, `<section id="boundary" data-ae-feedback data-ae-message-target="message"
-      data-ae-transform-target="motion" data-ae-present-target="panel"></section>
+    await startFeedback(page, `<section id="boundary" data-ae-feedback data-ae-feedback-message-target="message"
+      data-ae-feedback-effect-target="motion" data-ae-present-target="panel"></section>
       <p id="message"></p><span id="motion"></span>
       <aside id="panel" data-ae-present hidden>Panel</aside>
       <aside id="other" data-ae-present hidden>Other</aside>`, options);
@@ -189,12 +191,12 @@ for (const options of [
       AelluxJs.ext.feedback.error("still updates", boundary, null, "shake");
       return { vetoed, otherVisible: !other.hidden, panelHidden: panel.hidden,
         message: document.getElementById("message").textContent,
-        motion: document.getElementById("motion").classList.contains("ae--feedback-motion-shake"),
+        motion: document.getElementById("motion").classList.contains("ae--present-effect-shake"),
         missing: AelluxJs.diagnostics.showHistory().filter(entry => entry.code === 2011)
           .map(entry => entry.context.elementOrId) };
     });
     expect(result).toEqual({ vetoed: true, otherVisible: true, panelHidden: true,
-      message: "still updates", motion: true, missing: ["absent-panel"] });
+      message: "still updates", motion: false, missing: ["absent-panel"] });
   });
 
   test(`feedback leaves ancestor Present unchanged without a present target (${label})`, async ({ page }) => {
@@ -214,8 +216,8 @@ for (const options of [
   });
 
   test(`empty present target prefers the message container and falls back to the transform container (${label})`, async ({ page }) => {
-    await startFeedback(page, `<section id="boundary" data-ae-feedback data-ae-message-target="message"
-      data-ae-transform-target="motion" data-ae-present-target=""></section>
+    await startFeedback(page, `<section id="boundary" data-ae-feedback data-ae-feedback-message-target="message"
+      data-ae-feedback-effect-target="motion" data-ae-present-target=""></section>
       <aside id="outer" data-ae-present hidden>
         <aside id="message-panel" data-ae-present hidden><p id="message"></p></aside>
         <aside id="motion-panel" data-ae-present hidden><span id="motion"></span></aside>
@@ -237,16 +239,16 @@ for (const options of [
       await separate;
       const first = panels.map(panel => !panel.hidden);
       boundary.setAttribute("data-ae-present-target", "   ");
-      boundary.setAttribute("data-ae-transform-target", "#message");
+      boundary.setAttribute("data-ae-feedback-effect-target", "#message");
       const shared = opened(panels[0]);
       AelluxJs.ext.feedback.error("shared", boundary, null, "shake");
       await shared;
-      boundary.setAttribute("data-ae-transform-target", "motion");
-      boundary.setAttribute("data-ae-message-target", "outside");
+      boundary.setAttribute("data-ae-feedback-effect-target", "motion");
+      boundary.setAttribute("data-ae-feedback-message-target", "outside");
       const fallback = opened(panels[1]);
       $ae(boundary).feedback.error("fallback");
       await fallback;
-      boundary.setAttribute("data-ae-message-target", "missing-message");
+      boundary.setAttribute("data-ae-feedback-message-target", "missing-message");
       const missing = opened(panels[1]);
       $ae(boundary).feedback.error("missing");
       await missing;
@@ -270,13 +272,13 @@ for (const options of [
       const selfVisible = !boundary.hidden;
       // These new Present containers have not been mounted.
       boundary.insertAdjacentHTML("afterend", '<aside id="unmounted" data-ae-present hidden><p id="message"></p></aside><span id="outside"></span>');
-      boundary.setAttribute("data-ae-message-target", "message");
-      boundary.setAttribute("data-ae-transform-target", "outside");
+      boundary.setAttribute("data-ae-feedback-message-target", "message");
+      boundary.setAttribute("data-ae-feedback-effect-target", "outside");
       AelluxJs.ext.feedback.success("unmounted", boundary);
       const unmountedHidden = document.getElementById("unmounted").hidden;
       const rendered = document.getElementById("message").textContent;
-      boundary.setAttribute("data-ae-message-target", "missing-message");
-      boundary.setAttribute("data-ae-transform-target", "missing-motion");
+      boundary.setAttribute("data-ae-feedback-message-target", "missing-message");
+      boundary.setAttribute("data-ae-feedback-effect-target", "missing-motion");
       AelluxJs.ext.feedback.success("missing", boundary);
       return { requests, selfVisible, unmountedHidden, rendered,
         missing: AelluxJs.diagnostics.showHistory().filter(entry => entry.code === 2011)
@@ -289,15 +291,15 @@ for (const options of [
 }
 
 test("feedback continues rendering when Present is not registered", async ({ page }) => {
-  await startFeedback(page, `<section id="boundary" data-ae-feedback data-ae-message-target="message"
-    data-ae-transform-target="motion" data-ae-present-target="panel"></section>
+  await startFeedback(page, `<section id="boundary" data-ae-feedback data-ae-feedback-message-target="message"
+    data-ae-feedback-effect-target="motion" data-ae-present-target="panel"></section>
     <p id="message"></p><span id="motion"></span><aside id="panel" data-ae-present hidden>Panel</aside>`,
   { mode: "basic", withPresent: false });
   const result = await page.evaluate(() => {
     AelluxJs.ext.feedback.error("rendered", document.getElementById("boundary"), null, "shake");
     return { absent: !AelluxJs.ext.present, hidden: document.getElementById("panel").hidden,
       message: document.getElementById("message").textContent,
-      motion: document.getElementById("motion").classList.contains("ae--feedback-motion-shake") };
+      motion: document.getElementById("motion").classList.contains("ae--present-effect-shake") };
   });
-  expect(result).toEqual({ absent: true, hidden: true, message: "rendered", motion: true });
+  expect(result).toEqual({ absent: true, hidden: true, message: "rendered", motion: false });
 });

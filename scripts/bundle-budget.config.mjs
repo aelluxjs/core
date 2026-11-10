@@ -1,3 +1,5 @@
+// Present effect ownership and CSS migration: measured before/after costs in
+// core-extensions/present.md#effect-distribution-cost. Feedback budgets shrink.
 export const bundleBudget = Object.freeze([
   { file: "aellux.ext.pwa.min.js", maxRawBytes: 11 * 1024, maxGzipBytes: 4.5 * 1024 },
   { file: "aellux.ext.pwa.legacy.min.js", maxRawBytes: 18 * 1024, maxGzipBytes: 7 * 1024 },
@@ -55,8 +57,8 @@ export const bundleBudget = Object.freeze([
   // measured before/after costs: core-extensions/focus.md#bundle-cost.
   // Anchor dynamic destination interpolation and CSS easing; measured before/after
   // bytes and former budgets: core-extensions/anchor.md#dynamic-destination-cost.
-  { file: "aellux.full.min.js", maxRawBytes: 229.5 * 1024, maxGzipBytes: 72 * 1024 },
-  { file: "aellux.full.legacy.min.js", maxRawBytes: 562.5 * 1024, maxGzipBytes: 166.25 * 1024 },
+  { file: "aellux.full.min.js", maxRawBytes: 234 * 1024, maxGzipBytes: 73.25 * 1024 },
+  { file: "aellux.full.legacy.min.js", maxRawBytes: 569 * 1024, maxGzipBytes: 168 * 1024 },
   { file: "aellux.full.min.css", maxRawBytes: 124 * 1024, maxGzipBytes: 12 * 1024 },
   { file: "aellux.ext.adaptive.min.css", maxRawBytes: 121 * 1024, maxGzipBytes: 11 * 1024 },
   { file: "aellux.ext.adaptive.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
@@ -73,10 +75,10 @@ export const bundleBudget = Object.freeze([
   { file: "aellux.ext.overflow-marquee.legacy.min.js", maxRawBytes: 26 * 1024, maxGzipBytes: 8.25 * 1024 },
   { file: "aellux.ext.ajax-href.min.js", maxRawBytes: 7 * 1024, maxGzipBytes: 3 * 1024 },
   { file: "aellux.ext.ajax-href.legacy.min.js", maxRawBytes: 14.5 * 1024, maxGzipBytes: 5.5 * 1024 },
-  { file: "aellux.ext.feedback.min.css", maxRawBytes: 3 * 1024, maxGzipBytes: 2 * 1024 },
+  { file: "aellux.ext.feedback.min.css", maxRawBytes: 0.25 * 1024, maxGzipBytes: 0.25 * 1024 },
   // Explicit Present target integration; measured bytes: core-extensions/feedback.md.
-  { file: "aellux.ext.feedback.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 2.25 * 1024 },
-  { file: "aellux.ext.feedback.legacy.min.js", maxRawBytes: 9 * 1024, maxGzipBytes: 4 * 1024 },
+  { file: "aellux.ext.feedback.min.js", maxRawBytes: 4.75 * 1024, maxGzipBytes: 2.125 * 1024 },
+  { file: "aellux.ext.feedback.legacy.min.js", maxRawBytes: 8.875 * 1024, maxGzipBytes: 3.875 * 1024 },
   { file: "aellux.ext.focus.min.js", maxRawBytes: 14.5 * 1024, maxGzipBytes: 5.75 * 1024 },
   { file: "aellux.ext.focus.legacy.min.js", maxRawBytes: 19 * 1024, maxGzipBytes: 6.875 * 1024 },
   { file: "aellux.ext.input.min.js", maxRawBytes: 10 * 1024, maxGzipBytes: 4 * 1024 },
@@ -90,7 +92,7 @@ export const bundleBudget = Object.freeze([
   { file: "aellux.input.gamepad.legacy.min.js", maxRawBytes: 6.5 * 1024, maxGzipBytes: 2.75 * 1024 },
   { file: "aellux.ext.preference.min.js", maxRawBytes: 5 * 1024, maxGzipBytes: 3 * 1024 },
   { file: "aellux.ext.preference.legacy.min.js", maxRawBytes: 7 * 1024, maxGzipBytes: 3 * 1024 },
-  { file: "aellux.ext.present.min.css", maxRawBytes: 6.125 * 1024, maxGzipBytes: 2 * 1024 },
+  { file: "aellux.ext.present.min.css", maxRawBytes: 9 * 1024, maxGzipBytes: 1.5 * 1024 },
   // Present now reports invalid actions, missing/incompatible targets and
   // corrective context for group selections, plus consumer-local tap/click
   // arbitration and pending activation cleanup. Costs: core-extensions/present.md.
@@ -101,8 +103,8 @@ export const bundleBudget = Object.freeze([
   // superseded limits are recorded in core-extensions/present.md.
   // Opening trajectory capture/reversal and native CSS-only playback.
   // Scrollbox-compatible gesture controls and automatic source correction/warning.
-  { file: "aellux.ext.present.min.js", maxRawBytes: 50 * 1024, maxGzipBytes: 16.5 * 1024 },
-  { file: "aellux.ext.present.legacy.min.js", maxRawBytes: 69 * 1024, maxGzipBytes: 21 * 1024 },
+  { file: "aellux.ext.present.min.js", maxRawBytes: 54 * 1024, maxGzipBytes: 17.75 * 1024 },
+  { file: "aellux.ext.present.legacy.min.js", maxRawBytes: 75 * 1024, maxGzipBytes: 22.5 * 1024 },
   { file: "aellux.ext.scrollbox.min.js", maxRawBytes: 46 * 1024, maxGzipBytes: 14 * 1024 },
   // Progressive 2D overflow fade; measured deltas: core-extensions/scrollbox.md.
   { file: "aellux.ext.scrollbox.min.css", maxRawBytes: 6.5 * 1024, maxGzipBytes: 1.5 * 1024 },

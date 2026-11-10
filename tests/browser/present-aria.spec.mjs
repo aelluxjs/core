@@ -25,12 +25,12 @@ for (const options of [
     await page.goto("/tests/index.htm");
     await page.evaluate(motion => {
       document.body.innerHTML = `
-        <button id="trigger" data-ae-trigger="toggle" data-ae-target="#panel">Toggle</button>
-        <button id="dismiss" data-ae-dismiss="panel">Dismiss</button>
-        <button id="target" data-ae-target="panel">Target</button>
+        <button id="trigger" data-ae-present-trigger="toggle" data-ae-present-target="#panel">Toggle</button>
+        <button id="dismiss" data-ae-present-trigger="dismiss" data-ae-present-target="panel">Dismiss</button>
+        <button id="target" data-ae-present-target="panel">Target</button>
         <div id="panel" data-ae-present="${motion}" hidden
           style="--ae-pop-duration:120ms;--ae-dismiss-duration:120ms">
-          <button id="inside" data-ae-dismiss>Close</button>
+          <button id="inside" data-ae-present-trigger="dismiss">Close</button>
         </div>`;
     }, options.motion ?? "opacity");
     await page.addScriptTag({ url: "/dist/aellux.js" });
@@ -62,10 +62,10 @@ for (const options of [
       await closing;
       return { preparation, events };
     });
-    const closed = Array(5).fill("false");
-    const opened = Array(5).fill("true");
-    const opening = ["false", "true", "true", "true", "true"];
-    const closing = ["true", "false", "false", "false", "false"];
+    const closed = ["false", "false", "false", null, "false"];
+    const opened = ["true", "true", "true", null, "true"];
+    const opening = ["false", "true", "true", null, "true"];
+    const closing = ["true", "false", "false", null, "false"];
     expect(result.preparation).toEqual(opening);
     expect(result.events).toEqual([
       { name: "BeforePop", expanded: closed, hidden: true },
@@ -84,7 +84,7 @@ test("present keeps expanded state current through vetoes, reversals and newly m
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     document.body.innerHTML = `
-      <button id="trigger" data-ae-trigger="toggle" data-ae-target="panel">Toggle</button>
+      <button id="trigger" data-ae-present-trigger="toggle" data-ae-present-target="panel">Toggle</button>
       <div id="panel" data-ae-present="opacity" hidden
         style="--ae-pop-duration:600ms;--ae-dismiss-duration:600ms">Content</div>`;
   });
@@ -116,7 +116,7 @@ test("present keeps expanded state current through vetoes, reversals and newly m
 
     const closing = controller.dismiss();
     const reversing = { expanded: state(), hidden: panel.hidden };
-    document.body.insertAdjacentHTML("beforeend", '<button id="late" data-ae-trigger="toggle" data-ae-target="panel">Late</button>');
+    document.body.insertAdjacentHTML("beforeend", '<button id="late" data-ae-present-trigger="toggle" data-ae-present-target="panel">Late</button>');
     const late = document.getElementById("late");
     await AelluxJs.mount(late, "present");
     const mountedDuringClose = late.getAttribute("aria-expanded");
@@ -259,7 +259,7 @@ test("mounted present controller binds public methods to its element", async ({ 
   });
   expect(result).toEqual({
     sameController: true,
-    methods: ["dismiss", "pop", "toggle", "trigger", "unpop", "update"],
+    methods: ["cancelEffect", "dismiss", "effect", "pop", "toggle", "trigger", "unpop", "update"],
     update: "function",
     returnsPromise: true,
     presentUpdate: "function",
@@ -775,8 +775,8 @@ test("present keeps visibility on the container and diagnoses controls without a
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     document.body.innerHTML = `
-      <button id="orphan-trigger" data-ae-trigger="pop"></button>
-      <button id="orphan-dismiss" data-ae-dismiss></button>
+      <button id="orphan-trigger" data-ae-present-trigger="pop"></button>
+      <button id="orphan-dismiss" data-ae-present-trigger="dismiss"></button>
       <div id="panel" data-ae-present hidden>
         <div id="motion" data-ae-present-motion></div>
       </div>
@@ -807,7 +807,7 @@ test("present keeps visibility on the container and diagnoses controls without a
 test("present trigger tracks one target ID with or without a hash", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
-    document.body.innerHTML = `<button id="control" data-ae-trigger="toggle" data-ae-target="first"></button>
+    document.body.innerHTML = `<button id="control" data-ae-present-trigger="toggle" data-ae-present-target="first"></button>
       <div id="first" data-ae-present hidden><div data-ae-present-motion></div></div>
       <div id="second" data-ae-present hidden><div data-ae-present-motion></div></div>`;
   });
@@ -820,7 +820,7 @@ test("present trigger tracks one target ID with or without a hash", async ({ pag
   await control.click();
   await expect(page.locator("#first")).toHaveJSProperty("hidden", false);
   await expect(control).toHaveAttribute("aria-expanded", "true");
-  await page.evaluate(() => document.querySelector("#control").setAttribute("data-ae-target", "#second"));
+  await page.evaluate(() => document.querySelector("#control").setAttribute("data-ae-present-target", "#second"));
   await control.click();
   await expect(page.locator("#second")).toHaveJSProperty("hidden", false);
   await expect(control).toHaveAttribute("aria-controls", "second");
@@ -835,7 +835,7 @@ test("present trigger tracks one target ID with or without a hash", async ({ pag
 test("present dismiss accepts target ID with or without a hash", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
-    document.body.innerHTML = `<button id="dismiss" data-ae-dismiss="panel"></button>
+    document.body.innerHTML = `<button id="dismiss" data-ae-present-trigger="dismiss" data-ae-present-target="panel"></button>
       <div id="panel" data-ae-present><div data-ae-present-motion></div></div>`;
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
@@ -845,7 +845,7 @@ test("present dismiss accepts target ID with or without a hash", async ({ page }
   await page.locator("#dismiss").click();
   await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
   await page.evaluate(() => {
-    document.querySelector("#dismiss").setAttribute("data-ae-dismiss", "#panel");
+    document.querySelector("#dismiss").setAttribute("data-ae-present-target", "#panel");
     return AelluxJs.ext.present.pop(document.querySelector("#panel"));
   });
   await page.locator("#dismiss").click();
@@ -856,7 +856,7 @@ test("present restores initial attributes and captures fresh values on remount",
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     document.body.innerHTML = `
-      <button id="control" data-ae-trigger="toggle" data-ae-target="#panel"
+      <button id="control" data-ae-present-trigger="toggle" data-ae-present-target="#panel"
         aria-expanded="" aria-controls=""></button>
       <div id="panel" data-ae-present hidden aria-expanded="custom">
         <div id="motion" data-ae-present-motion></div>
@@ -903,8 +903,8 @@ test("present restores initial attributes and captures fresh values on remount",
       controlControls: control.getAttribute("aria-controls")
     };
 
-    panel.setAttribute("data-ae-trigger", "toggle");
-    panel.setAttribute("data-ae-target", "#panel");
+    panel.setAttribute("data-ae-present-trigger", "toggle");
+    panel.setAttribute("data-ae-present-target", "#panel");
     await AelluxJs.mount(panel, "present");
     await AelluxJs.unmount(panel, "present");
     const sharedElement = {
@@ -1119,7 +1119,7 @@ test("present reports invalid target IDs without throwing from click", async ({ 
   const pageErrors = [];
   page.on("pageerror", error => pageErrors.push(error.message));
   await page.evaluate(() => {
-    document.body.innerHTML = '<button id="dismiss" data-ae-dismiss="two ids"></button>';
+    document.body.innerHTML = '<button id="dismiss" data-ae-present-trigger="dismiss" data-ae-present-target="two ids"></button>';
     const reports = [];
     window.selectorReports = reports;
     window.AelluxJs = {
@@ -1147,7 +1147,7 @@ test("present reports invalid target IDs without throwing from click", async ({ 
   const reports = await page.evaluate(() => {
     const extension = window.presentExtension;
     extension.init();
-    const controls = window.mountEntries.get("[data-ae-trigger],[data-ae-dismiss],[data-ae-target]");
+    const controls = window.mountEntries.get("[data-ae-present-trigger]");
     controls.mount(document.querySelector("#dismiss"));
     document.querySelector("#dismiss").click();
     return window.selectorReports;
@@ -1162,7 +1162,7 @@ test("present reports invalid target IDs without throwing from click", async ({ 
 test("present restores a trigger without targets and can mount it again", async ({ page }) => {
   await page.goto("/tests/index.htm");
   const result = await page.evaluate(async () => {
-    document.body.innerHTML = '<button id="control" data-ae-trigger="toggle" data-ae-target="#later"></button>';
+    document.body.innerHTML = '<button id="control" data-ae-present-trigger="toggle" data-ae-present-target="#later"></button>';
     window.AelluxJs = {
       registerCssProperty: () => true,
       on: (event, handler, options) => document.addEventListener(event.slice(1), handler, options),
@@ -1187,7 +1187,7 @@ test("present restores a trigger without targets and can mount it again", async 
     const extension = window.presentExtension;
     extension.init();
     const panels = window.mountEntries.get("[data-ae-present]");
-    const controls = window.mountEntries.get("[data-ae-trigger],[data-ae-dismiss],[data-ae-target]");
+    const controls = window.mountEntries.get("[data-ae-present-trigger]");
     const control = document.querySelector("#control");
     controls.mount(control);
     controls.unmount(control);
@@ -1276,7 +1276,7 @@ test("present reports a transition callback failure with its own diagnostic", as
       import("/src/internal/create-aellux-constants.js")
     ]);
     document.body.innerHTML = `
-      <button id="control" data-ae-trigger="pop" data-ae-target="#panel"></button>
+      <button id="control" data-ae-present-trigger="pop" data-ae-present-target="#panel"></button>
       <div id="panel" data-ae-present hidden><div data-ae-present-motion></div></div>
     `;
     window.AelluxJs = {
@@ -1317,7 +1317,7 @@ test("present refreshes trigger controls from its initial value", async ({ page 
   await page.goto("/tests/index.htm");
   await page.evaluate(() => {
     document.body.innerHTML = `
-      <button id="control" data-ae-trigger="toggle" data-ae-target="#first" aria-controls="external"></button>
+      <button id="control" data-ae-present-trigger="toggle" data-ae-present-target="#first" aria-controls="external"></button>
       <div id="first" data-ae-present hidden><div data-ae-present-motion></div></div>
     `;
   });
@@ -1330,7 +1330,7 @@ test("present refreshes trigger controls from its initial value", async ({ page 
     const control = document.querySelector("#control");
     await AelluxJs.mount(document, "present");
     const before = control.getAttribute("aria-controls");
-    control.setAttribute("data-ae-target", "#second");
+    control.setAttribute("data-ae-present-target", "#second");
     control.click();
     document.body.insertAdjacentHTML("beforeend", '<div id="second" data-ae-present hidden><div data-ae-present-motion></div></div>');
     await AelluxJs.mount(document.querySelector("#second"), "present");

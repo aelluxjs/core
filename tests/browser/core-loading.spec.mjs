@@ -32,7 +32,7 @@ for (const boot of ["aellux.js", "aellux.min.js"]) for (const forceLegacy of [fa
       await page.evaluate(async () => {
         document.body.innerHTML = `<div id="scope">
           <button data-ae-point>Point</button><div data-ae-preference="color-scheme"></div>
-          <button data-ae-trigger="toggle" data-ae-target="#later">Present</button>
+          <button data-ae-present-trigger="toggle" data-ae-present-target="#later">Present</button>
           <div data-ae-scrollbox data-ae-scrollbox-snap style="width:100px;height:50px;overflow:auto"><div style="width:300px;height:100px" data-ae-snap-item></div></div>
           <a data-ae-ajax-href="#scope" href="/next">Next</a>
           <dialog></dialog><progress></progress><meter value=".5"></meter><button data-ae-pwa="install">Install</button><div data-ae-viewport></div>
@@ -48,7 +48,7 @@ for (const boot of ["aellux.js", "aellux.min.js"]) for (const forceLegacy of [fa
         await page.evaluate(async () => {
           for (const [name, loadWhen] of [
             ["input", "[data-ae-point]"], ["preference", "[data-ae-preference]"],
-            ["present", "[data-ae-trigger]"], ["scrollbox", "[data-ae-scrollbox]"],
+            ["present", "[data-ae-present-trigger]"], ["scrollbox", "[data-ae-scrollbox]"],
             ["scrollbox-snap", "[data-ae-scrollbox-snap]"], ["ajax-href", "a[data-ae-ajax-href]"],
             ["dialog", "dialog"], ["progress", "progress, meter"], ["pwa", "[data-ae-pwa]"], ["viewport", "[data-ae-viewport]"]
           ]) AelluxJs.ext(name, { loadWhen });

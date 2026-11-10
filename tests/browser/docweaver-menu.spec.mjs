@@ -20,9 +20,9 @@ for (const width of [1280, 390]) {
     const core = page.locator("#children-core-extensions");
     const optional = page.locator("#children2-optional");
     const bundled = page.locator("#children2-bundled");
-    const coreButton = page.locator('[data-ae-target="#children-core-extensions"]');
-    const optionalButton = page.locator('[data-ae-target="#children2-optional"]');
-    const bundledButton = page.locator('[data-ae-target="#children2-bundled"]');
+    const coreButton = page.locator('[data-ae-present-target="#children-core-extensions"]');
+    const optionalButton = page.locator('[data-ae-present-target="#children2-optional"]');
+    const bundledButton = page.locator('[data-ae-present-target="#children2-bundled"]');
     const selected = () => page.evaluate(() => {
       const parent = document.getElementById("children-core-extensions");
       const nested = document.getElementById("children2-optional");
@@ -63,7 +63,7 @@ for (const width of [1280, 390]) {
     await expect(optional).toBeVisible();
     await parentOpen();
 
-    await page.locator('[data-ae-target="#children-runtime"]').click();
+    await page.locator('[data-ae-present-target="#children-runtime"]').click();
     await expect(core).toHaveJSProperty("hidden", true);
     await coreButton.click();
     await expect(page.locator("#children-runtime")).toHaveJSProperty("hidden", true);

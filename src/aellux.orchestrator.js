@@ -140,7 +140,7 @@ import { officialExtensionDefinitions } from "./official-extension-definitions.j
       if (name === "progress") loadWhen = "progress, meter";
       if (name === "ajax-href") loadWhen = "a" + loadWhen;
       if (name === "present") {
-        loadWhen = ["present", "present-group", "trigger", "dismiss", "target"].map(attr).join(",");
+        loadWhen = ["present", "present-group", "present-trigger"].map(attr).join(",");
       }
       if (name === "input") loadWhen = ["point", "inputs", "shortcut", "shortcut-hint"].map(attr).join(",");
       if (name === "focus") loadWhen = ["focus", "focus-scope", "focus-nav", "shortcut"].map(attr).join(",");

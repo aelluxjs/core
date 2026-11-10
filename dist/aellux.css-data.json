@@ -467,6 +467,17 @@
       ]
     },
     {
+      "name": "--ae-present-effect-aellux-ease",
+      "description": "Optional Aellux easing name read from the effect target; unsupported sampling retains the authored CSS easing.\n\nValue syntax: <string>.",
+      "syntax": "<string>",
+      "references": [
+        {
+          "name": "AelluxJS present",
+          "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+        }
+      ]
+    },
+    {
       "name": "--ae-present-gesture-distance",
       "description": "Positive physical drag distance for full normalized travel. Auto uses reliable translation distance, otherwise the element dimension on the gesture axis. Read at the start of each gesture.\n\nValue syntax: auto | <length>.\n\nDefault behavior: \"auto\".",
       "syntax": "auto | <length>",

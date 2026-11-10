@@ -157,8 +157,8 @@ document.querySelectorAll("[data-example-source]").forEach(details => {
     summary.className = "source-toggle";
     summary.textContent = file;
     const fileSource = createSourcePanel(`source-file-${example}-${index}`);
-    summary.setAttribute("data-ae-trigger", "toggle");
-    summary.setAttribute("data-ae-target", `#${fileSource.panel.id}`);
+    summary.setAttribute("data-ae-present-trigger", "toggle");
+    summary.setAttribute("data-ae-present-target", `#${fileSource.panel.id}`);
     summary.setAttribute("aria-controls", fileSource.panel.id);
     summary.setAttribute("aria-expanded", "false");
     const wrapper = document.createElement("div");

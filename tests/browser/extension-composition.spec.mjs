@@ -17,11 +17,11 @@ const gallery = (attributes = "", wrapperAttributes = "") => `<div id="box" data
   </div></div>`;
 
 for (const cssMotionController of [true, false]) {
-  test(`Feedback replaces Anchor positioning during transform motion (controlled=${cssMotionController})`, async ({ page }) => {
+  test(`Present skips Feedback presets that would replace Anchor positioning (controlled=${cssMotionController})`, async ({ page }) => {
     await start(page, `<div style="position:relative;margin:100px;width:500px;height:300px">
       <button id="target" style="margin-left:150px">Target</button>
       <div id="anchor" data-ae-anchor="bottom-right:top-right" data-ae-anchor-target="target"
-        data-ae-anchor-match="width" data-ae-feedback style="height:50px">Panel</div></div>`, { cssMotionController });
+        data-ae-anchor-match="width" data-ae-present="" data-ae-feedback style="height:50px">Panel</div></div>`, { cssMotionController });
     await expect.poll(() => page.locator("#anchor").evaluate(el => Math.abs(el.getBoundingClientRect().right - document.getElementById("target").getBoundingClientRect().right))).toBeLessThan(1);
     const result = await page.evaluate(async () => {
       const el = document.getElementById("anchor");
@@ -31,7 +31,7 @@ for (const cssMotionController of [true, false]) {
       return { displacement: Math.abs(el.getBoundingClientRect().right - before),
         warnings: AelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).map(e => e.context.property) };
     });
-    expect(result.displacement).toBeGreaterThan(30);
+    expect(result.displacement).toBeLessThan(1);
     expect(result.warnings).toContain("transform");
   });
 }
@@ -41,10 +41,10 @@ test("Elastic wrapper conflicts are diagnosed but opacity and child motion remai
   await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).length)).toBe(1);
   await page.evaluate(() => AelluxJs.ext.feedback.error("", document.getElementById("wrapper"), null, "pulse"));
   await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).map(e => e.context.writers))).toEqual([
-    ["scrollbox-elastic", "present"], ["scrollbox-elastic", "feedback"], ["present", "feedback"]
+    ["scrollbox-elastic", "present"], ["scrollbox-elastic", "present-effect"], ["present", "present-effect"]
   ]);
   await start(page, gallery("", 'data-ae-scrollbox-elastic data-ae-present="opacity"') +
-    '<div data-ae-feedback data-ae-transform-target="child" data-ae-anchor="bottom-left:top-left"><span id="child">Child</span></div>');
+    '<div data-ae-present="" data-ae-feedback data-ae-feedback-effect-target="child" data-ae-anchor="bottom-left:top-left"><span id="child">Child</span></div>');
   await page.evaluate(() => AelluxJs.ext.feedback.error("", document.getElementById("child"), null, "shake"));
   await page.waitForTimeout(100);
   expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).length)).toBe(0);
@@ -100,8 +100,8 @@ for (const failure of ["network", "missing", "veto"]) {
   });
 }
 
-test("Feedback transform masks an active elastic transform", async ({ page }) => {
-  await start(page, gallery("", "data-ae-scrollbox-elastic data-ae-feedback"));
+test("Present preserves an active elastic transform when Feedback requests a preset", async ({ page }) => {
+  await start(page, gallery("", 'data-ae-scrollbox-elastic data-ae-present="" data-ae-feedback'));
   const result = await page.evaluate(async () => {
     const box = document.getElementById("box"), wrapper = document.getElementById("wrapper");
     box.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaX: -100 }));
@@ -109,13 +109,15 @@ test("Feedback transform masks an active elastic transform", async ({ page }) =>
     const elastic = wrapper.style.transform;
     AelluxJs.ext.feedback.error("", wrapper, null, "pulse");
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    return { elastic, inline: wrapper.style.transform, effective: getComputedStyle(wrapper).transform,
+    const effective = new DOMMatrix(getComputedStyle(wrapper).transform), inline = new DOMMatrix(wrapper.style.transform);
+    return { elastic, inline: wrapper.style.transform,
+      error: Math.max(...["m11", "m22", "m41", "m42"].map(key => Math.abs(effective[key] - inline[key]))),
       warnings: AelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).map(e => e.context.writers) };
   });
   expect(result.elastic).toContain("scale(");
   expect(result.inline).toContain("scale(");
-  expect(result.effective).not.toBe(await page.evaluate(value => new DOMMatrix(value).toString(), result.inline));
-  expect(result.warnings).toContainEqual(["scrollbox-elastic", "feedback"]);
+  expect(result.error).toBeLessThan(.001);
+  expect(result.warnings).toContainEqual(["scrollbox-elastic", "present-effect"]);
 });
 
 test("An active elastic inline transform prevents Present's requested transform", async ({ page }) => {
@@ -137,11 +139,11 @@ test("An active elastic inline transform prevents Present's requested transform"
 });
 
 for (const forceLegacy of [false, true]) test(`Minified composition diagnostics work in ${forceLegacy ? "Legacy" : "Modern"}`, async ({ page }) => {
-  await start(page, gallery('data-ae-scrollbox-snap', "data-ae-scrollbox-elastic data-ae-feedback") +
+  await start(page, gallery('data-ae-scrollbox-snap', 'data-ae-scrollbox-elastic data-ae-present="" data-ae-feedback') +
     '<style>#item1{transform:scale(.8)}</style>', { minified: true, forceLegacy });
   await page.evaluate(() => AelluxJs.ext.feedback.error("", document.getElementById("wrapper"), null, "shake"));
   await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).map(e => e.context.writers)))
-    .toEqual([["scrollbox-elastic", "feedback"]]);
+    .toEqual([["scrollbox-elastic", "present-effect"]]);
   expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(e => e.code === 2020).length)).toBe(1);
 });
 
@@ -165,9 +167,9 @@ test("Point tracking coexists with Scrollbox pointer dragging", async ({ page })
 for (const cssMotionController of [true, false]) {
   test(`Opacity-only and additive Feedback effects avoid transform warnings (controlled=${cssMotionController})`, async ({ page }) => {
     await start(page, `<style>
-      .ae--feedback-motion-fade{animation:fade 1s} @keyframes fade{from{opacity:.2}to{opacity:1}}
-      .ae--feedback-motion-add{animation:add 1s;animation-composition:add} @keyframes add{from{transform:translateX(0)}to{transform:translateX(5px)}}
-      </style><div id="anchor" data-ae-anchor="bottom-left:top-left" data-ae-feedback>Panel</div>`, { cssMotionController });
+      .ae--present-effect-fade{animation:fade 1s} @keyframes fade{from{opacity:.2}to{opacity:1}}
+      .ae--present-effect-add{animation:add 1s;animation-composition:add} @keyframes add{from{transform:translateX(0)}to{transform:translateX(5px)}}
+      </style><div id="anchor" data-ae-anchor="bottom-left:top-left" data-ae-present="" data-ae-feedback>Panel</div>`, { cssMotionController });
     for (const motion of ["fade", "add"]) {
       await page.evaluate(motion => AelluxJs.ext.feedback.error("", document.getElementById("anchor"), null, motion), motion);
       await page.waitForTimeout(100);

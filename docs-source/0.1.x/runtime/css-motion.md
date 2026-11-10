@@ -57,14 +57,14 @@ Disabling CSS Motion timeline control does not disable the shared adaptive caden
 
 Controlled motion can opt into an easing name supported by `$ae.ease()`. When the browser accepts CSS `linear()`, the controller samples the Aellux curve into a native timing function and lets the browser continue interpolating the CSS properties. Samples retain values outside `0..1`, preserving Back and Elastic overshoot without applying the original CSS easing a second time.
 
-Present reads `--ae-pop-aellux-ease` and `--ae-dismiss-aellux-ease`. Feedback reads `--ae-feedback-aellux-ease` from its transform target.
+Present reads `--ae-pop-aellux-ease` and `--ae-dismiss-aellux-ease`. Present effects read `--ae-present-effect-aellux-ease` from the effect target. Feedback only requests effects through `present.effect`.
 
 ```css
 .panel {
   --ae-pop-ease: ease-out;
   --ae-pop-aellux-ease: elasticOut;
 }
-.field { --ae-feedback-aellux-ease: bounceOut; }
+.field { --ae-present-effect-aellux-ease: bounceOut; }
 ```
 
 Always keep a valid CSS fallback such as `linear`, `ease`, `ease-in`, `ease-out`, or `ease-in-out`. Advanced Aellux names are never inserted directly into CSS timing properties. If sampled `linear()` is unsupported, the declared CSS easing remains in effect. Reduced motion bypasses intermediate controlled frames while preserving state and completion lifecycle.

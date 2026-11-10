@@ -28,7 +28,7 @@
           <div class="d-flex flex-wrap align-items-center gap-3">
             <span class="bg-warning rounded-3 p-3 text-dark fw-bold" aria-hidden="true">N.</span>
             <div class="flex-grow-1 text-break" style="min-width: 0;"><span class="eyebrow text-body-secondary">WORKSPACE</span><h2 class="h6 mb-1">Studio North</h2><p id="workspace-reminder" class="small text-body-secondary mb-0">Make something good today.</p></div>
-            <button id="edit-workspace" class="btn btn-sm btn-outline-secondary" type="button" data-ae-point data-ae-trigger="toggle" data-ae-target="floating-panel">Edit</button>
+            <button id="edit-workspace" class="btn btn-sm btn-outline-secondary" type="button" data-ae-point data-ae-present-trigger="toggle" data-ae-present-target="floating-panel">Edit</button>
           </div>
         </div>
         <div class="position-absolute z-1" data-ae-anchor-target="floating-trigger"
@@ -37,10 +37,10 @@
           <aside id="floating-panel" data-ae-present="opacity transform" data-ae-dismiss-on-click="false" aria-labelledby="floating-panel-title" hidden
             style="--ae-from-transform: translateY(.5rem) scale(.96); --ae-pop-transform: translateY(0) scale(1); --ae-dismiss-transform: translateY(-.3rem) scale(.98); --ae-pop-duration: 220ms; --ae-dismiss-duration: 160ms;">
             <div class="card p-3 shadow-sm">
-              <div class="d-flex justify-content-between align-items-center mb-2"><h2 id="floating-panel-title" class="h6 mb-0">A home for your ideas.</h2><button type="button" class="btn btn-sm btn-outline-secondary" data-ae-dismiss aria-label="Close editor">×</button></div>
+              <div class="d-flex justify-content-between align-items-center mb-2"><h2 id="floating-panel-title" class="h6 mb-0">A home for your ideas.</h2><button type="button" class="btn btn-sm btn-outline-secondary" data-ae-present-trigger="dismiss" aria-label="Close editor">×</button></div>
               <label class="small mb-1" for="workspace-name">Workspace name</label><input id="workspace-name" class="form-control form-control-sm mb-2" value="Studio North" data-ae-focus="next">
               <label class="small mb-1" for="workspace-note">A little reminder</label><input id="workspace-note" class="form-control form-control-sm mb-2" value="Make something good today." data-ae-focus="next">
-              <button type="button" class="btn btn-sm btn-warning align-self-start" data-ae-dismiss>Done</button>
+              <button type="button" class="btn btn-sm btn-warning align-self-start" data-ae-present-trigger="dismiss">Done</button>
             </div>
           </aside>
         </div>

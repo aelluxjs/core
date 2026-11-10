@@ -5,7 +5,7 @@ const fixture = `<style>
   .panel{position:absolute;width:90px;height:50px;--ae-pop-duration:400ms;--ae-dismiss-duration:400ms}
   #a{left:30px;top:50px} #b{left:280px;top:140px;width:150px;height:80px}
   #c{left:500px;top:260px;width:110px;height:60px}
-  </style><button id="trigger" data-ae-trigger="pop" data-ae-trigger-on="hover" data-ae-target="b">Open B</button>
+  </style><button id="trigger" data-ae-present-trigger="pop" data-ae-present-trigger-on="hover" data-ae-present-target="b">Open B</button>
   <div id="ref"><div id="group" data-ae-present-group data-ae-present-active="a">
   <div id="a" class="panel" data-ae-present="opacity">A</div>
   <div id="b" class="panel" data-ae-present="opacity" hidden><button id="inside">B</button></div>

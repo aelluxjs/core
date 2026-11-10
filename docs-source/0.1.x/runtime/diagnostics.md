@@ -102,7 +102,7 @@ Configuration diagnostics explain what happened, identify the element/attribute/
   context: {
     extension: "present",
     element: controlElement,
-    attribute: "data-ae-target",
+    attribute: "data-ae-present-target",
     value: "menu",
     reason: "Target element was not found.",
     suggestion: "Use one existing Present element ID, optionally prefixed with #, and mount it before interacting."
@@ -125,9 +125,9 @@ Configuration diagnostics explain what happened, identify the element/attribute/
 | `2033` | <span class="large">Behaviors replace the same CSS resource on one element. The context identifies the `property` and its `writers`.</span> |
 | `2034` | <span class="large">A two-axis Scrollbox has explicitly enabled fade and custom scrollbars inside the mask. Add a surrounding wrapper and set `data-ae-scrollbar-parent="wrapper"` on Scrollbox to keep its bars outside the fade.</span> |
 
-`WARN_RESOURCE_CONFLICT` (`2033`) checks persistent transform writers without a separate ownership registry. Development mounts and explicit updates diagnose Present transform on a valid Elastic wrapper. When CSS Motion captures an actual replacing transform effect, it compares that effect with Anchor, Elastic and Present on the effect's target. Feedback passes its resolved `data-ae-transform-target` destination, so animating a child remains valid. This works with controlled and native CSS Motion when Web Animations exposes keyframes. Opacity-only effects, additive composition, pseudo-elements and separate targets are excluded. Reduced motion with no active effect emits no motion conflict. Browsers without inspectable effects skip this runtime check; production skips all resource checks.
+`WARN_RESOURCE_CONFLICT` (`2033`) checks persistent transform writers without a separate ownership registry. Development mounts and explicit updates diagnose Present transform on a valid Elastic wrapper. When CSS Motion captures an actual replacing transform effect, it compares that effect with Anchor, Elastic and Present on the effect's target. Feedback forwards its resolved `data-ae-feedback-effect-target` destination to Present, so animating a child remains valid. This works with controlled and native CSS Motion when Web Animations exposes keyframes. Opacity-only effects, additive composition, pseudo-elements and separate targets are excluded. Reduced motion with no active effect emits no motion conflict. Browsers without inspectable effects skip this runtime check; production skips all resource checks.
 
-The checks report incompatible composition and preserve the requested animation. Move visual animation onto a child to keep positioning and elastic transforms independent. They do not automatically merge transforms, inspect arbitrary application animations outside CSS Motion, or infer a conflict merely from two Extension declarations.
+Present presets skip targets whose transform belongs to Anchor, Elastic, configured Present transform or a nonidentity authored transform, diagnosing 2033 in development. Generic CSS Motion checks for custom effects report incompatible composition while preserving the requested animation. Move visual animation onto a child to keep positioning and elastic transforms independent. They do not automatically merge transforms, inspect arbitrary application animations outside CSS Motion, or infer a conflict merely from two Extension declarations.
 
 `WARN_ATTRIBUTE_DUPLICATE` (`2032`) inspects original HTML text in development, since duplicate attributes no longer exist in the parsed DOM. After the first unscoped document mount, Core makes one asynchronous GET for the initial document URL with `cache: "force-cache"`, preferring the HTTP cache. This inspection does not delay mounting or `Ready`; unavailable source is skipped without failing the mount. Scoped mounts and explicit updates do not request source. AJAX Href inspects each response text before parsing, using the existing response without an additional request. Production skips both checks, even with warning verbosity enabled.
 

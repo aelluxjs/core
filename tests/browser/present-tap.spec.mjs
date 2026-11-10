@@ -4,13 +4,13 @@ async function start(page, mode, forceLegacy) {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(({ mode, forceLegacy }) => new Promise(resolve => {
-    document.body.innerHTML = `<button id="control" data-ae-point="2" data-ae-trigger="toggle" data-ae-target="panel">
+    document.body.innerHTML = `<button id="control" data-ae-point="2" data-ae-present-trigger="toggle" data-ae-present-target="panel">
       <span id="child">Toggle</span></button>
       <section id="panel" data-ae-present="" data-ae-dismiss-on-click="false" hidden>
-        <button id="dismiss" data-ae-point data-ae-dismiss>Dismiss</button>
+        <button id="dismiss" data-ae-point data-ae-present-trigger="dismiss">Dismiss</button>
         <button id="inside-child" data-ae-point><span>Inside</span></button>
       </section><button id="outside" data-ae-point>Outside</button>
-      <button id="other" data-ae-point data-ae-trigger="toggle" data-ae-target="other-panel">Other</button>
+      <button id="other" data-ae-point data-ae-present-trigger="toggle" data-ae-present-target="other-panel">Other</button>
       <section id="other-panel" data-ae-present="" data-ae-dismiss-on-click="false" hidden>Other panel</section>`;
     if (mode === "basic") {
       AelluxJs.ext("input");
@@ -215,7 +215,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
       await page.mouse.move(900, 600);
       await page.clock.install({ time: new Date("2026-10-23T12:00:00Z") });
       await page.clock.pauseAt(new Date("2026-10-23T12:00:01Z"));
-      await page.evaluate(() => document.getElementById("control").setAttribute("data-ae-trigger-on", "hover"));
+      await page.evaluate(() => document.getElementById("control").setAttribute("data-ae-present-trigger-on", "hover"));
       await page.evaluate(() => document.getElementById("child").dispatchEvent(new PointerEvent("pointerover", {
         bubbles: true, pointerId: 81, pointerType: "mouse", isPrimary: true
       })));

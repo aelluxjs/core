@@ -2,6 +2,8 @@
 
 import { presentPlaybackProperties } from "./internal/create-present-playback.js";
 
+import { generatePresentEffectsCSS } from "./internal/present-effects.css.js";
+
 export function generatePresentCSS(AelluxJs) {
   const presentAttribute = AelluxJs.attr("present");
   const motionAttribute = AelluxJs.attr("present-motion");
@@ -159,5 +161,5 @@ ${["height", "width"].map(dimension => `@keyframes ${AelluxJs.className(`present
   from { max-${dimension}: var(--ae-present-reverse-from-max-${dimension}); }
   to { max-${dimension}: var(--ae-present-reverse-to-max-${dimension}); }
 }`).join("\n")}
-`;
+` + "\n" + generatePresentEffectsCSS(AelluxJs);
 }

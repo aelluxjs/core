@@ -279,5 +279,5 @@ html[data-ae-reduced-motion="reduced"] { scroll-behavior: auto; }
 .demo-landscape-peak .demo-ridge { inset: 30% -10% -40%; border-radius: 0; transform: rotate(45deg); background: linear-gradient(135deg, #faf2d7 25%, #647678 25%, #334d55 70%); }
 .demo-landscape-dune { background: linear-gradient(#c8ad9f, #ead0aa); }
 .demo-landscape-dune .demo-ridge { background: #b9754f; box-shadow: 2rem -1.4rem 0 #d4a078; }
-[data-ae-point][data-ae-trigger][aria-expanded="true"] { background-color: var(--bs-warning); border-color: var(--bs-warning); color: var(--bs-dark); }
+[data-ae-point][data-ae-present-trigger][aria-expanded="true"] { background-color: var(--bs-warning); border-color: var(--bs-warning); color: var(--bs-dark); }
 nav [aria-current="step"] { background-color: var(--bs-warning); border-color: var(--bs-warning); color: var(--bs-dark); }

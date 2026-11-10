@@ -35,7 +35,7 @@ The following names retain their minimum role of identifying eligible markup for
 | Focus | `data-ae-focus`; `data-ae-focus-scope`, `data-ae-focus-nav` and `data-ae-shortcut` also trigger Full activation |
 | Input | `data-ae-point`, `data-ae-inputs`, `data-ae-shortcut-hint`; `data-ae-shortcut` also triggers Full activation |
 | Preference | `data-ae-preference` |
-| Present | `data-ae-present`, `data-ae-present-group`, `data-ae-trigger`, `data-ae-dismiss`, `data-ae-target` |
+| Present | `data-ae-present`, `data-ae-present-group`, `data-ae-present-trigger` |
 | Scrollbox | `data-ae-scrollbox` |
 | Viewport | `data-ae-viewport` |
 | Ajax Href | `data-ae-ajax-href` on eligible anchors; activates delegated navigation rather than a mounted controller |
@@ -45,6 +45,8 @@ The following names retain their minimum role of identifying eligible markup for
 | PWA | `data-ae-pwa` |
 | Scrollbox Snap | `data-ae-scrollbox` together with `data-ae-scrollbox-snap` |
 | State Navigation | Explicit registration in Basic, automatic startup registration in Full; no element mounting declaration |
+
+A standalone `data-ae-present-target` is a routing reference and does not activate or mount an interaction control. See the [Declarative Action Naming Convention](../extensions/declarative-action-naming.md).
 
 For attributes serving both activation and configuration, **only the activation/mounting role is protected**. For example, `data-ae-focus` remains a Focus mounting declaration, while its behavioral value `next` is not frozen. Input's modality list, Present actions/targets/group capacity, Anchor placement, Scrollbox settings, Snap strategies and all other behavioral values, formats and defaults may evolve. A mounting attribute's name does not guarantee the behavior currently configured by its value. Markup alone does not register Extensions in Basic.
 

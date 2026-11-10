@@ -2640,18 +2640,6 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/api.htm"
     },
     {
-      "name": "data-ae-dismiss",
-      "extension": "present",
-      "description": "Closes one Present ID, optionally prefixed with #. Empty uses data-ae-target or the closest Present ancestor.",
-      "syntax": "id",
-      "default": "",
-      "examples": [
-        "details"
-      ],
-      "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-    },
-    {
       "name": "data-ae-dismiss-on-click",
       "extension": "present",
       "description": "Close on outside/out clicks (default), inside/in clicks, or disable click dismissal with false/none.",
@@ -2710,6 +2698,28 @@
         "progress",
         "validate",
         "warning error success"
+      ],
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
+    },
+    {
+      "name": "data-ae-feedback-effect-target",
+      "extension": "feedback",
+      "description": "One element ID, optionally prefixed with #, receiving semantic classes and the effect requested from its closest mounted Present. Must be inside that Present; omission uses the boundary. Omitted uses the boundary itself.",
+      "syntax": "id",
+      "examples": [
+        "status-icon"
+      ],
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
+    },
+    {
+      "name": "data-ae-feedback-message-target",
+      "extension": "feedback",
+      "description": "One element ID, optionally prefixed with #, receiving message text. Omitted uses the boundary itself.",
+      "syntax": "id",
+      "examples": [
+        "status-message"
       ],
       "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
@@ -2890,17 +2900,6 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/wait-layout.htm"
     },
     {
-      "name": "data-ae-message-target",
-      "extension": "feedback",
-      "description": "One element ID, optionally prefixed with #, receiving message text. Omitted uses the boundary itself.",
-      "syntax": "id",
-      "examples": [
-        "status-message"
-      ],
-      "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
-    },
-    {
       "name": "data-ae-next",
       "extension": "preference",
       "description": "Cycles forward through the enclosing preference's built-in values; use a keyboard-operable control.",
@@ -3039,7 +3038,7 @@
     {
       "name": "data-ae-present",
       "extension": "present",
-      "description": "Present container. Empty disables motion; all expands to opacity transform height width. Property tokens are whitespace-separated.",
+      "description": "Present container. Empty disables presentation transitions while allowing temporary effects; all expands to opacity transform height width. Property tokens are whitespace-separated.",
       "syntax": "token-list",
       "values": [
         "",
@@ -3063,6 +3062,23 @@
       "default": "",
       "examples": [
         "details"
+      ],
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "data-ae-present-effect",
+      "extension": "present",
+      "description": "Temporary effect selected by present-trigger=effect. Presets or an application CSS identifier; runs only in an idle, visible mounted Present.",
+      "syntax": "string",
+      "values": [
+        "shake",
+        "yes",
+        "no",
+        "breathe",
+        "tremble",
+        "pulse",
+        "alert"
       ],
       "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
@@ -3146,17 +3162,46 @@
     },
     {
       "name": "data-ae-present-target",
-      "extension": "feedback",
-      "description": "One mounted Present or Present Group ID, optionally prefixed with #. Groups use popNext and prepare the reserved member before opening; without explicit message/transform targets, that member receives the content and classes. Empty uses the nearest message Present, then transform Present fallback. Omitted makes no Present request. Requires initialized Present.",
+      "extension": "present",
+      "description": "One Present target ID, optionally prefixed with #. Alone it creates no interaction control. With present-trigger it selects the action target; with Feedback it requests Pop or pooled popNext. Empty uses the closest Present for a trigger, or the message/effect Present for Feedback.",
       "syntax": "id",
       "examples": [
-        "",
-        "status-panel",
-        "#status-panel",
-        "notifications"
+        "details",
+        "#details"
       ],
       "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "data-ae-present-trigger",
+      "extension": "present",
+      "description": "Present action. unpop reverses opening; dismiss uses its independent outgoing destination. Target is one native ID, or the closest Present ancestor when omitted. Prefer a native button for keyboard activation.",
+      "syntax": "enum",
+      "values": [
+        "",
+        "toggle",
+        "pop",
+        "dismiss",
+        "unpop",
+        "effect"
+      ],
+      "default": "toggle",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "data-ae-present-trigger-on",
+      "extension": "present",
+      "description": "Use hover for delegated pointer hover opening/closing. Touch and keyboard activation keep click behavior.",
+      "syntax": "enum",
+      "values": [
+        "",
+        "click",
+        "hover"
+      ],
+      "default": "click",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     },
     {
       "name": "data-ae-present-when",
@@ -3520,18 +3565,6 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/scrollbox-snap.htm"
     },
     {
-      "name": "data-ae-target",
-      "extension": "present",
-      "description": "One Present target ID, optionally prefixed with #; CSS selector lists are not accepted.",
-      "syntax": "id",
-      "examples": [
-        "details",
-        "#details"
-      ],
-      "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-    },
-    {
       "name": "data-ae-theme-color",
       "extension": "core",
       "description": "Marker on the runtime-managed theme-color meta tag.",
@@ -3542,47 +3575,6 @@
       "role": "output",
       "doc": "runtime/api",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/api.htm"
-    },
-    {
-      "name": "data-ae-transform-target",
-      "extension": "feedback",
-      "description": "One element ID, optionally prefixed with #, receiving feedback classes and motion. Omitted uses the boundary itself.",
-      "syntax": "id",
-      "examples": [
-        "status-icon"
-      ],
-      "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
-    },
-    {
-      "name": "data-ae-trigger",
-      "extension": "present",
-      "description": "Present action. unpop reverses opening; dismiss uses its independent outgoing destination. Target is one native ID, or the closest Present ancestor when omitted. Prefer a native button for keyboard activation.",
-      "syntax": "enum",
-      "values": [
-        "",
-        "toggle",
-        "pop",
-        "dismiss",
-        "unpop"
-      ],
-      "default": "toggle",
-      "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
-    },
-    {
-      "name": "data-ae-trigger-on",
-      "extension": "present",
-      "description": "Use hover for delegated pointer hover opening/closing. Touch and keyboard activation keep click behavior.",
-      "syntax": "enum",
-      "values": [
-        "",
-        "click",
-        "hover"
-      ],
-      "default": "click",
-      "role": "input",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     },
     {
       "name": "data-ae-viewport",
@@ -3815,14 +3807,6 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     },
     {
-      "name": "--ae-feedback-aellux-ease",
-      "extension": "core",
-      "syntax": "*",
-      "description": "Private implementation property; not an application configuration contract.",
-      "role": "internal",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/api.htm"
-    },
-    {
       "name": "--ae-from-height",
       "extension": "present",
       "syntax": "<flex>",
@@ -4047,6 +4031,14 @@
       "syntax": "<number>",
       "description": "Gesture release decision threshold in [0,1]. Pop completes at or above its threshold; Unpop completes at or below its threshold; Dismiss completes at or above its threshold.",
       "default": "0.5",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "--ae-present-effect-aellux-ease",
+      "extension": "present",
+      "syntax": "<string>",
+      "description": "Optional Aellux easing name read from the effect target; unsupported sampling retains the authored CSS easing.",
       "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     },
@@ -4604,62 +4596,6 @@
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     },
     {
-      "name": "ae--feedback-motion-",
-      "extension": "feedback",
-      "role": "output",
-      "description": "Runtime-managed state class; useful in CSS selectors.",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
-    },
-    {
-      "name": "ae--feedback-motion-alert",
-      "extension": "feedback",
-      "role": "output",
-      "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
-    },
-    {
-      "name": "ae--feedback-motion-breathe",
-      "extension": "feedback",
-      "role": "output",
-      "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
-    },
-    {
-      "name": "ae--feedback-motion-no",
-      "extension": "feedback",
-      "role": "output",
-      "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
-    },
-    {
-      "name": "ae--feedback-motion-pulse",
-      "extension": "feedback",
-      "role": "output",
-      "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
-    },
-    {
-      "name": "ae--feedback-motion-shake",
-      "extension": "feedback",
-      "role": "output",
-      "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
-    },
-    {
-      "name": "ae--feedback-motion-tremble",
-      "extension": "feedback",
-      "role": "output",
-      "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
-    },
-    {
-      "name": "ae--feedback-motion-yes",
-      "extension": "feedback",
-      "role": "output",
-      "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
-      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
-    },
-    {
       "name": "ae--fits-compact",
       "extension": "adaptive",
       "role": "output",
@@ -4752,6 +4688,55 @@
     },
     {
       "name": "ae--popping",
+      "extension": "present",
+      "role": "output",
+      "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "ae--present-effect-alert",
+      "extension": "present",
+      "role": "output",
+      "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "ae--present-effect-breathe",
+      "extension": "present",
+      "role": "output",
+      "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "ae--present-effect-no",
+      "extension": "present",
+      "role": "output",
+      "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "ae--present-effect-pulse",
+      "extension": "present",
+      "role": "output",
+      "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "ae--present-effect-shake",
+      "extension": "present",
+      "role": "output",
+      "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "ae--present-effect-tremble",
+      "extension": "present",
+      "role": "output",
+      "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "ae--present-effect-yes",
       "extension": "present",
       "role": "output",
       "description": "Runtime-managed state class. Use in application CSS selectors; do not set it to command the runtime.",
@@ -15778,7 +15763,19 @@
     {
       "name": "present.trigger",
       "extension": "present",
-      "description": "trigger(element, action) routes pop, dismiss or toggle; an unknown action warns and toggles. Mounted controller: $ae(element).present.trigger(action).",
+      "description": "trigger(element, action) routes pop, unpop, dismiss, toggle or effect (third argument selects the effect); an unknown action warns and toggles. Mounted controller: $ae(element).present.trigger(action).",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "present.effect",
+      "extension": "present",
+      "description": "effect(element, name, effectTarget?) requests a temporary CSS effect in an idle visible mounted Present. Optional target must be a descendant Element. Latest pending request wins; accepted transitions abort effects. Returns Promise<{status}>: completed, aborted or skipped. Controller: $ae(element).present.effect(name, effectTarget?).",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
+    },
+    {
+      "name": "present.cancelEffect",
+      "extension": "present",
+      "description": "cancelEffect(element) aborts active and pending effects within the Present, releasing temporary classes and CSS Motion resources.",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     },
     {
