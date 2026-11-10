@@ -9,7 +9,7 @@ for (const forceLegacy of [false, true]) {
         document.body.innerHTML = '<div id="adaptive" data-ae-adaptive style="width: 0; height: 0"></div>';
       }, withoutObserver);
       await page.addScriptTag({ url: "/dist/aellux.js" });
-      await page.evaluate(forceLegacy => AelluxJs.init({ mode: "full", forceLegacy }), forceLegacy);
+      await page.evaluate(forceLegacy => aelluxJs.init({ mode: "full", forceLegacy }), forceLegacy);
       const sizes = { compact: 0, small: 480, medium: 768, large: 1024, xl: 1280, xxl: 1600 };
       for (const minimum of Object.values(sizes)) {
         for (const width of minimum ? [minimum - 1, minimum] : [0]) {
@@ -46,11 +46,11 @@ test("adaptive restores prior inline dimension variables on unmount", async ({ p
       <div id="unset" data-ae-adaptive style="width: 120px; height: 80px">
         <span id="adaptive-child"></span>
       </div>`;
-    AelluxJs.ext("adaptive");
+    aelluxJs.ext("adaptive");
   });
   await page.addScriptTag({ url: "/src/aellux.ext.adaptive.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
-  await expect.poll(() => page.evaluate(() => AelluxJs.ext.adaptive?.initialized)).toBe(true);
+  await page.evaluate(() => aelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => aelluxJs.ext.adaptive?.initialized)).toBe(true);
 
   const values = () => page.evaluate(() => ["custom", "unset"].map(id => {
     const style = document.getElementById(id).style;
@@ -66,7 +66,7 @@ test("adaptive restores prior inline dimension variables on unmount", async ({ p
   expect(await page.locator("#adaptive-child").evaluate(element =>
     Number(getComputedStyle(element).getPropertyValue("--ae-width")))).toBe(120);
 
-  await page.evaluate(() => AelluxJs.unmount(document.body, "adaptive"));
+  await page.evaluate(() => aelluxJs.unmount(document.body, "adaptive"));
   expect(await values()).toEqual([
     [{ value: "42", priority: "important" }, { value: "24px", priority: "" }],
     [{ value: "", priority: "" }, { value: "", priority: "" }]
@@ -82,7 +82,7 @@ test("adaptive updates shape and size classes as its dimensions change", async (
     `;
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
+  await page.evaluate(() => aelluxJs.init({ mode: "full" }));
   const element = page.locator("#adaptive");
   await expect(element).toHaveClass(/ae--shape-horizontal/);
   await expect(element).toHaveAttribute("aria-orientation", "horizontal");
@@ -105,7 +105,7 @@ test("adaptive updates shape and size classes as its dimensions change", async (
   await expect(element).not.toHaveClass(/ae--shape-horizontal/);
   await expect(element).not.toHaveClass(/ae--fits-small/);
 
-  await page.evaluate(() => AelluxJs.unmount(document.querySelector("#adaptive")));
+  await page.evaluate(() => aelluxJs.unmount(document.querySelector("#adaptive")));
   await expect(element).not.toHaveClass(/ae--fits-xl/);
   await expect(element).not.toHaveClass(/ae--shape-vertical/);
   await expect(element).not.toHaveClass(/ae--fits-small/);
@@ -113,7 +113,7 @@ test("adaptive updates shape and size classes as its dimensions change", async (
   await expect(element).toHaveCSS("width", "200px");
   await expect(element).toHaveCSS("height", "500px");
 
-  await page.evaluate(() => AelluxJs.mount(document.querySelector("#adaptive")));
+  await page.evaluate(() => aelluxJs.mount(document.querySelector("#adaptive")));
   await expect(element).toHaveClass(/ae--shape-vertical/);
   await expect(element).toHaveAttribute("aria-orientation", "vertical");
   await expect(element).not.toHaveClass(/ae--fits-xl/);
@@ -126,7 +126,7 @@ test("adaptive uses window resize when ResizeObserver is unavailable", async ({ 
     document.body.innerHTML = '<div id="adaptive" data-ae-adaptive style="width: 800px; height: 400px"></div>';
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "full", forceLegacy: true }));
+  await page.evaluate(() => aelluxJs.init({ mode: "full", forceLegacy: true }));
   const element = page.locator("#adaptive");
   await expect(element).toHaveClass(/ae--shape-horizontal/);
   await expect(element).toHaveClass(/ae--fits-medium/);
@@ -149,7 +149,7 @@ test("adaptive merges extension options with its default parameters", async ({ p
     document.body.innerHTML = '<div id="adaptive" data-ae-adaptive style="width: 800px; height: 400px"></div>';
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({
+  await page.evaluate(() => aelluxJs.init({
     mode: "full",
     extensions: {
       adaptive: {
@@ -165,14 +165,14 @@ test("adaptive merges extension options with its default parameters", async ({ p
   await expect(element).toHaveClass(/ae--shape-square/);
   await expect(element).toHaveClass(/ae--fits-tiny/);
   await expect(element).toHaveClass(/ae--fits-small/);
-  const params = await page.evaluate(() => AelluxJs.ext.adaptive.adaptiveParams);
+  const params = await page.evaluate(() => aelluxJs.ext.adaptive.adaptiveParams);
   expect(params).toEqual({
     experienceScale: { near: 1.2, far: 1.5 },
     minSizes: { compact: 0, small: 600, medium: 768, large: 1024, xl: 1280, xxl: 1600, tiny: 300 },
     ratioShapes: { vertical: 0.8, horizontal: 2 }
   });
   const immutable = await page.evaluate(() => {
-    const config = AelluxJs.ext.adaptive.adaptiveParams;
+    const config = aelluxJs.ext.adaptive.adaptiveParams;
     try { config.minSizes.small = 100; } catch (_) { }
     try { config.minSizes.extra = 100; } catch (_) { }
     return {
@@ -182,6 +182,6 @@ test("adaptive merges extension options with its default parameters", async ({ p
     };
   });
   expect(immutable).toEqual({ groupsFrozen: true, small: 600, hasExtra: false });
-  await page.evaluate(() => AelluxJs.unmount(document.querySelector("#adaptive")));
+  await page.evaluate(() => aelluxJs.unmount(document.querySelector("#adaptive")));
   await expect(element).not.toHaveClass(/ae--fits-tiny/);
 });

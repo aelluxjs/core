@@ -4,17 +4,17 @@ async function start(page, forceLegacy) {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(forceLegacy => new Promise(resolve => {
-    AelluxJs.on("Ready", resolve, { once: true });
-    AelluxJs.init({ mode: "basic", skipGlobalMount: true, forceLegacy });
+    aelluxJs.on("Ready", resolve, { once: true });
+    aelluxJs.init({ mode: "basic", skipGlobalMount: true, forceLegacy });
   }), forceLegacy);
   await page.evaluate(async () => {
     document.body.innerHTML = `<section id="scope" data-lifecycle-probe data-ae-wait-mounted
       aria-busy="initial" class="ae--initial"><div id="child" data-lifecycle-probe></div></section>`;
     window.calls = { mount: [], unmount: [], update: [], destroy: 0 };
-    AelluxJs.ext("lifecycle-probe");
-    AelluxJs.extAttach("lifecycle-probe", {
+    aelluxJs.ext("lifecycle-probe");
+    aelluxJs.extAttach("lifecycle-probe", {
       init() {
-        AelluxJs.mountManager.add({
+        aelluxJs.mountManager.add({
           extensionName: "lifecycle-probe", selector: "[data-lifecycle-probe]",
           mount: el => calls.mount.push(el.id),
           unmount: el => calls.unmount.push(el.id),
@@ -23,7 +23,7 @@ async function start(page, forceLegacy) {
       },
       destroy() { calls.destroy++; }
     });
-    await AelluxJs.wait("lifecycle-probe");
+    await aelluxJs.wait("lifecycle-probe");
   });
 }
 
@@ -35,18 +35,18 @@ for (const forceLegacy of [false, true]) {
       scope.insertAdjacentHTML("beforeend", '<link rel="aelluxjs-ext" href="/unused-ext.js">');
       const initial = scope.outerHTML;
       const events = [];
-      AelluxJs.ext("unused-lazy", { loadWhen: "[data-lifecycle-probe]" });
-      AelluxJs.on("BeforeMount", event => {
+      aelluxJs.ext("unused-lazy", { loadWhen: "[data-lifecycle-probe]" });
+      aelluxJs.on("BeforeMount", event => {
         events.push({ name: "BeforeMount", root: event.detail.root.id,
           extensions: event.detail.extensions, cancelable: event.cancelable,
           documentTarget: event.target === document, unchanged: scope.outerHTML === initial });
         event.preventDefault();
       });
-      AelluxJs.on("Mount", () => events.push({ name: "Mount" }));
-      const mounted = await AelluxJs.mount("#scope");
+      aelluxJs.on("Mount", () => events.push({ name: "Mount" }));
+      const mounted = await aelluxJs.mount("#scope");
       return { mounted, events, unchanged: scope.outerHTML === initial, calls,
-        lazyState: AelluxJs.registry.ext.unusedLazy.state,
-        declarativeRegistered: !!AelluxJs.registry.ext.unusedExt,
+        lazyState: aelluxJs.registry.ext.unusedLazy.state,
+        declarativeRegistered: !!aelluxJs.registry.ext.unusedExt,
         extensionScripts: document.querySelectorAll('script[data-ae-ext]').length };
     });
     expect(result).toEqual({
@@ -63,22 +63,22 @@ for (const forceLegacy of [false, true]) {
       const scope = document.getElementById("scope");
       const events = [];
       for (const name of ["BeforeMount", "Mount", "BeforeUnmount", "Unmount"]) {
-        AelluxJs.on(name, event => events.push({ name, root: event.detail.root.id,
+        aelluxJs.on(name, event => events.push({ name, root: event.detail.root.id,
           extensions: event.detail.extensions, elements: event.detail.elements?.map(el => el.id) }));
       }
       const cancelMount = event => event.preventDefault();
-      AelluxJs.on("BeforeMount", cancelMount);
-      const vetoedMount = await AelluxJs.mountManager.mount(scope, "lifecycleProbe");
-      AelluxJs.off("BeforeMount", cancelMount);
-      const mounted = await AelluxJs.mount(scope, ["lifecycleProbe"]);
+      aelluxJs.on("BeforeMount", cancelMount);
+      const vetoedMount = await aelluxJs.mountManager.mount(scope, "lifecycleProbe");
+      aelluxJs.off("BeforeMount", cancelMount);
+      const mounted = await aelluxJs.mount(scope, ["lifecycleProbe"]);
       const controller = $ae(scope);
       const cancelUnmount = event => event.preventDefault();
-      AelluxJs.on("BeforeUnmount", cancelUnmount);
+      aelluxJs.on("BeforeUnmount", cancelUnmount);
       const vetoedUnmount = await controller.unmount("lifecycleProbe");
       const retained = $ae(scope) === controller && scope.classList.contains("ae--mounted");
       await controller.update("lifecycleProbe");
-      AelluxJs.off("BeforeUnmount", cancelUnmount);
-      const accepted = await AelluxJs.mountManager.unmount(scope, "lifecycleProbe");
+      aelluxJs.off("BeforeUnmount", cancelUnmount);
+      const accepted = await aelluxJs.mountManager.unmount(scope, "lifecycleProbe");
       return { vetoedMount, mounted: mounted.map(el => el.id), vetoedUnmount, retained,
         accepted, calls, events };
     });
@@ -103,17 +103,17 @@ for (const forceLegacy of [false, true]) {
     const result = await page.evaluate(async forceLegacy => {
       document.body.innerHTML = '<div id="target" data-startup-probe></div>';
       const events = [];
-      AelluxJs.ext("startup-probe");
-      AelluxJs.extAttach("startup-probe", { init() {
-        AelluxJs.mountManager.add({ extensionName: "startup-probe", selector: "[data-startup-probe]",
+      aelluxJs.ext("startup-probe");
+      aelluxJs.extAttach("startup-probe", { init() {
+        aelluxJs.mountManager.add({ extensionName: "startup-probe", selector: "[data-startup-probe]",
           mount() { events.push("callback"); } });
       } });
-      AelluxJs.on("BeforeMount", event => { events.push("BeforeMount"); event.preventDefault(); }, { once: true });
-      AelluxJs.on("Mount", () => events.push("Mount"));
-      const ready = new Promise(resolve => AelluxJs.on("Ready", () => { events.push("Ready"); resolve(); }, { once: true }));
-      AelluxJs.init({ mode: "basic", forceLegacy });
+      aelluxJs.on("BeforeMount", event => { events.push("BeforeMount"); event.preventDefault(); }, { once: true });
+      aelluxJs.on("Mount", () => events.push("Mount"));
+      const ready = new Promise(resolve => aelluxJs.on("Ready", () => { events.push("Ready"); resolve(); }, { once: true }));
+      aelluxJs.init({ mode: "basic", forceLegacy });
       await ready;
-      const mounted = await AelluxJs.mount(document);
+      const mounted = await aelluxJs.mount(document);
       return { events, mounted: mounted.map(el => el.id) };
     }, forceLegacy);
     expect(result).toEqual({ events: ["BeforeMount", "Ready", "callback", "Mount"], mounted: ["target"] });
@@ -124,13 +124,13 @@ for (const forceLegacy of [false, true]) {
     const result = await page.evaluate(async () => {
       const events = [];
       for (const name of ["BeforeMount", "Mount", "BeforeUnmount", "Unmount"]) {
-        AelluxJs.on(name, event => events.push({ name, extensions: event.detail.extensions }));
+        aelluxJs.on(name, event => events.push({ name, extensions: event.detail.extensions }));
       }
-      const invalidMount = await AelluxJs.mount("missing");
-      const invalidUnmount = await AelluxJs.unmount("missing");
+      const invalidMount = await aelluxJs.mount("missing");
+      const invalidUnmount = await aelluxJs.unmount("missing");
       const invalidEvents = events.slice();
-      const emptyMount = await AelluxJs.mount("scope", []);
-      const emptyUnmount = await AelluxJs.unmount("scope", []);
+      const emptyMount = await aelluxJs.mount("scope", []);
+      const emptyUnmount = await aelluxJs.unmount("scope", []);
       return { invalidMount, invalidUnmount, invalidEvents, emptyMount, emptyUnmount, events };
     });
     expect(result).toEqual({ invalidMount: [], invalidUnmount: false, invalidEvents: [],
@@ -142,7 +142,7 @@ for (const forceLegacy of [false, true]) {
     await start(page, forceLegacy);
     const result = await page.evaluate(async () => {
       const scope = document.getElementById("scope");
-      await AelluxJs.mount(scope);
+      await aelluxJs.mount(scope);
       const controller = $ae(scope);
       let attempts = 0, completions = 0;
       let notified;
@@ -153,14 +153,14 @@ for (const forceLegacy of [false, true]) {
         event.preventDefault();
         notified();
       };
-      AelluxJs.on("BeforeUnmount", cancel);
-      AelluxJs.on("Unmount", () => completions++);
+      aelluxJs.on("BeforeUnmount", cancel);
+      aelluxJs.on("Unmount", () => completions++);
       scope.remove();
       await before;
       await new Promise(resolve => setTimeout(resolve, 50));
       const canceled = { attempts, completions, calls: calls.unmount.slice(), retained: $ae(scope) === controller };
-      AelluxJs.off("BeforeUnmount", cancel);
-      const retry = await AelluxJs.unmount(scope);
+      aelluxJs.off("BeforeUnmount", cancel);
+      const retry = await aelluxJs.unmount(scope);
       return { canceled, retry, completions, unmounts: calls.unmount };
     });
     expect(result).toEqual({ canceled: { attempts: 1, completions: 0, calls: [], retained: true },
@@ -171,26 +171,26 @@ for (const forceLegacy of [false, true]) {
     await start(page, forceLegacy);
     const result = await page.evaluate(async () => {
       const scope = document.getElementById("scope");
-      await AelluxJs.mount(scope);
+      await aelluxJs.mount(scope);
       const controller = $ae(scope);
       const cancel = event => event.preventDefault();
-      AelluxJs.on("BeforeUnmount", cancel);
+      aelluxJs.on("BeforeUnmount", cancel);
       let clears = 0, observerDestroys = 0, queuedRan = false;
-      const clear = AelluxJs.waitLayout.clear;
-      AelluxJs.waitLayout = { ...AelluxJs.waitLayout,
+      const clear = aelluxJs.waitLayout.clear;
+      aelluxJs.waitLayout = { ...aelluxJs.waitLayout,
         clear(...args) { clears++; return clear(...args); } };
-      const destroy = AelluxJs.mountManager.destroy;
-      AelluxJs.mountManager.destroy = () => { observerDestroys++; return destroy(); };
-      const task = AelluxJs.waitLayout.update(() => { queuedRan = true; });
-      const extensionResult = await AelluxJs.destroyExtensions("lifecycle-probe");
-      const coreResult = await AelluxJs.destroy();
+      const destroy = aelluxJs.mountManager.destroy;
+      aelluxJs.mountManager.destroy = () => { observerDestroys++; return destroy(); };
+      const task = aelluxJs.waitLayout.update(() => { queuedRan = true; });
+      const extensionResult = await aelluxJs.destroyExtensions("lifecycle-probe");
+      const coreResult = await aelluxJs.destroy();
       await task;
       const canceled = { extensionResult, coreResult, clears, observerDestroys, queuedRan,
-        retained: $ae(scope) === controller && !!AelluxJs.registry.ext.lifecycleProbe,
+        retained: $ae(scope) === controller && !!aelluxJs.registry.ext.lifecycleProbe,
         unmounts: calls.unmount.slice(), destroys: calls.destroy };
-      AelluxJs.off("BeforeUnmount", cancel);
-      await AelluxJs.destroy();
-      return { canceled, clears, observerDestroys, calls, registered: !!AelluxJs.registry.ext.lifecycleProbe };
+      aelluxJs.off("BeforeUnmount", cancel);
+      await aelluxJs.destroy();
+      return { canceled, clears, observerDestroys, calls, registered: !!aelluxJs.registry.ext.lifecycleProbe };
     });
     expect(result).toEqual({
       canceled: { extensionResult: false, coreResult: false, clears: 0, observerDestroys: 0,
@@ -206,17 +206,17 @@ for (const forceLegacy of [false, true]) {
       body: '<section id="scope" data-lifecycle-probe>New content</section>' }));
     const result = await page.evaluate(async () => {
       const scope = document.getElementById("scope");
-      await AelluxJs.mount(scope);
+      await aelluxJs.mount(scope);
       const controller = $ae(scope);
-      AelluxJs.ext("ajax-href");
-      await AelluxJs.wait("ajax-href");
+      aelluxJs.ext("ajax-href");
+      await aelluxJs.wait("ajax-href");
       const cancel = event => { if (event.detail.root === scope) event.preventDefault(); };
-      AelluxJs.on("BeforeUnmount", cancel);
-      await AelluxJs.ext.ajaxHref.load("/lifecycle-next.htm", "#scope", { ignoreHistory: true });
+      aelluxJs.on("BeforeUnmount", cancel);
+      await aelluxJs.ext.ajaxHref.load("/lifecycle-next.htm", "#scope", { ignoreHistory: true });
       const canceled = { sameElement: document.getElementById("scope") === scope,
         retained: $ae(scope) === controller, unmounts: calls.unmount.slice() };
-      AelluxJs.off("BeforeUnmount", cancel);
-      await AelluxJs.ext.ajaxHref.load("/lifecycle-next.htm", "#scope", { ignoreHistory: true });
+      aelluxJs.off("BeforeUnmount", cancel);
+      await aelluxJs.ext.ajaxHref.load("/lifecycle-next.htm", "#scope", { ignoreHistory: true });
       return { canceled, replaced: document.getElementById("scope") !== scope, calls };
     });
     expect(result).toEqual({ canceled: { sameElement: true, retained: true, unmounts: [] }, replaced: true,

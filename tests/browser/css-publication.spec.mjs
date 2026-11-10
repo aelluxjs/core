@@ -12,9 +12,9 @@ async function start(page, markup, forceLegacy, extensions, missing = []) {
   }, { markup, missing });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(({ forceLegacy, extensions }) => new Promise(resolve => {
-    for (const name of extensions) AelluxJs.ext(name, { loadStyle: name === "scrollbox" });
-    AelluxJs.on("Ready", resolve, { once: true });
-    AelluxJs.init({ mode: "basic", forceLegacy });
+    for (const name of extensions) aelluxJs.ext(name, { loadStyle: name === "scrollbox" });
+    aelluxJs.on("Ready", resolve, { once: true });
+    aelluxJs.init({ mode: "basic", forceLegacy });
   }), { forceLegacy, extensions });
 }
 
@@ -23,7 +23,7 @@ async function observeUpdates(page) {
     window.cssPublications = [];
     window.fallbackRenders = [];
     window.inLayoutUpdate = false;
-    const scheduler = AelluxJs.waitLayout;
+    const scheduler = aelluxJs.waitLayout;
     const updating = callback => (...values) => {
       window.inLayoutUpdate = true;
       const controls = [...document.querySelectorAll("[data-ae-progress-fallback]")];
@@ -41,7 +41,7 @@ async function observeUpdates(page) {
       }
       finally { window.inLayoutUpdate = false; }
     };
-    AelluxJs.waitLayout = { ...scheduler, update(...args) {
+    aelluxJs.waitLayout = { ...scheduler, update(...args) {
       const index = typeof args[0] === "number" ? 1 : 0;
       args[index] = updating(args[index]);
       return scheduler.update(...args);
@@ -60,7 +60,7 @@ async function observeUpdates(page) {
       return original.call(this, name, value, priority);
     };
     // Use a deterministic slow shared cadence to expose event-handler bypasses.
-    AelluxJs.waitLayout.setVisualFPSLimit(990001, 5);
+    aelluxJs.waitLayout.setVisualFPSLimit(990001, 5);
   });
 }
 
@@ -138,8 +138,8 @@ for (const forceLegacy of [false, true]) {
       const box = document.getElementById("box");
       box.scrollTop = 40;
       box.dispatchEvent(new Event("scroll"));
-      await AelluxJs.unmount(box, "scrollbox-snap");
-      await AelluxJs.unmount(box, "scrollbox");
+      await aelluxJs.unmount(box, "scrollbox-snap");
+      await aelluxJs.unmount(box, "scrollbox");
       return [...box.querySelectorAll("article")].map(e => e.getAttribute("style"));
     });
     await page.waitForTimeout(450);
@@ -199,7 +199,7 @@ test("Legacy Progress keeps values synchronous and publishes coalesced fallback 
   const detached = await page.evaluate(async () => {
     const element = document.getElementById("progress"), bar = element.firstElementChild;
     element.value = .3;
-    await AelluxJs.unmount(element, "progress");
+    await aelluxJs.unmount(element, "progress");
     window.detachedFallback = bar;
     return bar.getAttribute("style");
   });

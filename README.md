@@ -1,4 +1,4 @@
-# aellux.js
+# ællux.js
 
 [![CI](https://github.com/aelluxjs/core/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/aelluxjs/core/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/%40aelluxjs%2Fcore)](https://www.npmjs.com/package/@aelluxjs/core)
@@ -9,9 +9,9 @@
 
 During `0.1.x`, only minimal global initialization and declarative Extension activation/mounting are protected. Stable indicates implementation maturity and validation; Extension methods, behavioral settings, events and CSS may change incompatibly, with relevant changes documented. See the [Compatibility Commitment](docs-source/0.1.x/runtime/compatibility-commitment.md).
 
-aellux.js is a lightweight extension-management library for modular UX behaviors in browser interfaces. It complements [Bootstrap](https://getbootstrap.com/) and other visual systems with declarative HTML attributes and independently loadable JavaScript Extensions.
+aellux.js is a JavaScript implementation of the aellux semantic model for the Web Platform. The aellux brand encompasses the manifesto, principles and semantic model for interactive digital user interfaces. The library provides lightweight extension management for modular UX behaviors and complements [Bootstrap](https://getbootstrap.com/) and other visual systems with declarative HTML attributes and independently loadable JavaScript Extensions. See the authoritative [Brand Naming Guidelines](BRAND_GUIDELINES.md).
 
-An **EXT (aellux.js Extension)** owns one focused UX responsibility and exposes its API under `AelluxJs.ext` and its `$ae.ext` alias. The aellux.js boot script selects the runtime, while the orchestrator loads Extensions and coordinates `init`, `mount`, `unmount`, and `destroy`.
+An **EXT (aellux.js Extension)** owns one focused UX responsibility and exposes its API under `aelluxJs.ext` and its `$ae.ext` alias. The aellux.js boot script selects the runtime, while the orchestrator loads Extensions and coordinates `init`, `mount`, `unmount`, and `destroy`.
 
 aellux.js does not require or bundle [Bootstrap](https://getbootstrap.com/). Its `data-ae-*` and `ae--*` namespaces are designed to coexist with existing applications and frameworks.
 
@@ -37,9 +37,9 @@ Use `full` to automatically include all Core primitives: reusable building block
 Third-party modules and adapters can import the shared API:
 
 ```js
-import AelluxJs from "@aelluxjs/core";
+import aelluxJs from "@aelluxjs/core";
 
-AelluxJs.attr("preference");
+aelluxJs.attr("preference");
 ```
 
 The module creates the core API if needed. The browser boot script still starts the runtime through `$ae.init()`.
@@ -48,6 +48,7 @@ See [Getting Started](docs-source/0.1.x/getting-started.md) for build instructio
 
 ## Documentation
 
+- [Brand naming and global object migration](docs-source/0.1.x/brand-naming.md)
 - [Published documentation](https://aelluxjs.github.io/core/docs/0.1.x/)
 - [Documentation source index](docs-source/0.1.x/README.md)
 - [Core Extensions, distribution and stability](docs-source/0.1.x/core-extensions/README.md)
@@ -111,7 +112,7 @@ Review the [0.1.0 milestone](milestones/0.1.0.md), the [Beta 1 milestone](milest
 
 ## Acknowledgments
 
-Special thanks to [ChatGPT](https://chatgpt.com/), [Codex](https://openai.com/codex/), [Google](https://www.google.com/), [Gemini](https://gemini.google.com/), [Visual Studio Code](https://code.visualstudio.com/), [Bootstrap](https://getbootstrap.com/), and [GitHub](https://github.com/) for the tools and technologies that supported the development of Aellux.
+Special thanks to [ChatGPT](https://chatgpt.com/), [Codex](https://openai.com/codex/), [Google](https://www.google.com/), [Gemini](https://gemini.google.com/), [Visual Studio Code](https://code.visualstudio.com/), [Bootstrap](https://getbootstrap.com/), and [GitHub](https://github.com/) for the tools and technologies that supported the development of aellux.js.
 
 ## License
 

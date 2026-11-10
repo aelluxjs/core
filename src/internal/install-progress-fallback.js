@@ -7,7 +7,7 @@ let nextLayoutId = 8000000;
 export function installProgressFallback(root, element) {
   const tag = element.tagName.toLowerCase();
   if (hasProgressAPI(root, tag)) return null;
-  const api = root.AelluxJs;
+  const api = root.aelluxJs;
   const marker = api.attr("progress-fallback");
   const names = tag === "progress" ? ["value", "max", "position"] :
     ["value", "min", "max", "low", "high", "optimum"];

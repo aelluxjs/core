@@ -15,12 +15,12 @@ for (const axis of ["x", "y"]) {
             <div style="display:flex;flex-direction:${axis === "x" ? "row" : "column"};width:${axis === "x" ? sizes.reduce((a, b) => a + b) : 100}px">
               ${sizes.map(size => `<div data-ae-snap-item style="flex:none;width:${axis === "x" ? size : 100}px;height:${axis === "y" ? size : 100}px"></div>`).join("")}
             </div></div>`;
-          AelluxJs.ext("scrollbox", { loadStyle: true });
-          AelluxJs.ext("scrollbox-snap");
+          aelluxJs.ext("scrollbox", { loadStyle: true });
+          aelluxJs.ext("scrollbox-snap");
         }, { axis, viewport, sizes });
         await page.addScriptTag({ url: "/dist/aellux.ext.scrollbox.js" });
         await page.addScriptTag({ url: "/src/aellux.ext.scrollbox-snap.js" });
-        await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+        await page.evaluate(() => aelluxJs.init({ mode: "basic" }));
         await expect(page.locator("#gallery")).toHaveClass(/ae--snap-ready/);
         const held = await page.evaluate(async ({ axis, oversized }) => {
           const element = document.getElementById("gallery");
@@ -62,12 +62,12 @@ for (const axis of ["x", "y"]) {
                 style="display:flex;flex-direction:${axis === "y" ? "column" : "row"};width:${axis === "y" ? 300 : 900}px;height:${axis === "y" ? 900 : 300}px">
                 ${'<div data-ae-snap-item style="flex:none;width:300px;height:300px"></div>'.repeat(3)}
               </div></div>`;
-            AelluxJs.ext("scrollbox", { loadStyle: true });
-            AelluxJs.ext("scrollbox-snap");
+            aelluxJs.ext("scrollbox", { loadStyle: true });
+            aelluxJs.ext("scrollbox-snap");
           }, { axis, elastic });
           await page.addScriptTag({ url: "/dist/aellux.ext.scrollbox.js" });
           await page.addScriptTag({ url: "/src/aellux.ext.scrollbox-snap.js" });
-          await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+          await page.evaluate(() => aelluxJs.init({ mode: "basic" }));
           await expect(page.locator("#gallery")).toHaveClass(/ae--snap-ready/);
 
           const result = await page.evaluate(async ({ axis, flick }) => {
@@ -100,7 +100,7 @@ for (const axis of ["x", "y"]) {
             }
             const settled = element[property];
 
-            AelluxJs.ext.scrollboxSnap.goto(element, 0, "instant");
+            aelluxJs.ext.scrollboxSnap.goto(element, 0, "instant");
             while (element[property] > 1 && performance.now() < deadline + 3000) await frame();
             pointerId++;
             dispatch("pointerdown");
@@ -154,17 +154,17 @@ for (const axis of ["x", "y"]) {
                 window.dispatchEvent(event("pointermove", 180));
                 window.dispatchEvent(event("pointerup", 180));
               };
-              AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" });
-              AelluxJs.ext.scrollboxSnap.goto(element, 0, "instant");
+              aelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" });
+              aelluxJs.ext.scrollboxSnap.goto(element, 0, "instant");
               gesture(710);
               await Promise.resolve();
               const reduced = element[property];
               const reducedSuspended = element.classList.contains("ae--snap-suspended");
-              AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "no-preference" });
-              AelluxJs.ext.scrollboxSnap.goto(element, 0, "instant");
+              aelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "no-preference" });
+              aelluxJs.ext.scrollboxSnap.goto(element, 0, "instant");
               gesture(711);
               await wait(50);
-              AelluxJs.mountManager.unmount("gallery", "scrollbox-snap");
+              aelluxJs.mountManager.unmount("gallery", "scrollbox-snap");
               const unmounted = element[property];
               await wait(350);
               return { reduced, reducedSuspended, unmounted, after: element[property],

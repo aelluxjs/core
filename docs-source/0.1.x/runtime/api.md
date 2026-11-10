@@ -1,6 +1,8 @@
 # Runtime API
 
-The browser distribution exposes `AelluxJs` and its short alias `$ae` on the global object.
+The browser distribution exposes `aelluxJs` and its short alias `$ae` on the global object.
+
+The library is named `aellux.js`; the camelCase identifier names its JavaScript object. See [Brand Naming and Migration](../brand-naming.md) for the pre-0.1.0 global rename, deployment requirements and retained technical names.
 
 `$ae.comm` is the boot-level [shared communication mediator](communication.md): named commands/queries through `handle` / `request`, notifications through `on` / `emit`, availability checks and owned cleanup. Extensions exchange data contracts while application code retains access to public Extension APIs.
 
@@ -9,14 +11,14 @@ The [Compatibility Commitment](compatibility-commitment.md) protects only the ex
 Modules can import the shared API through `@aelluxjs/core`:
 
 ```js
-import AelluxJs from "@aelluxjs/core";
+import aelluxJs from "@aelluxjs/core";
 ```
 
 This entry creates the core API when it is absent. The browser boot script starts the runtime through `init()`.
 
 ## Naming and element lookup
 
-The naming helpers use the configured AelluxJs prefixes and convert camelCase names to kebab-case. For example, `$ae.attr("feedbackMessageTarget")` returns `data-ae-feedback-message-target`, `$ae.className("feedbackError")` returns `ae--feedback-error`, and `$ae.cssVar("panelWidth")` returns `--ae-panel-width`. `extFilename(name)` returns the matching Extension script filename for the current minified setting; `extName(filename)` extracts an Extension name from that filename.
+The naming helpers use the configured aellux.js prefixes and convert camelCase names to kebab-case. For example, `$ae.attr("feedbackMessageTarget")` returns `data-ae-feedback-message-target`, `$ae.className("feedbackError")` returns `ae--feedback-error`, and `$ae.cssVar("panelWidth")` returns `--ae-panel-width`. `extFilename(name)` returns the matching Extension script filename for the current minified setting; `extName(filename)` extracts an Extension name from that filename.
 
 `$ae.elementOrId(value, options?)` resolves a DOM element or an element ID, with or without a leading `#`. By default, only element nodes are accepted. Pass `{ defaultElement: element }` to use a fallback when `value` is `null` or `undefined`, or `{ allowedNodeTypes: [...] }` to accept other node types. Invalid values and missing IDs record `WARN_INVALID_ELEMENT_OR_ID` (`2011`) and return `null`; `options.method` can identify the caller in that diagnostic. This helper is available before runtime initialization.
 
@@ -46,7 +48,7 @@ The `skipGlobalMount` option defaults to `false`. Set it to `true` to finish orc
 
 The `cssMotionController` option defaults to `true`. Set it to `false` to leave CSS motion under native browser timing, without a `waitLayout` progress sequence. See [CSS Motion Controller](css-motion.md).
 The boot does not set `data-ae-low-hardware`. Present does not use this marker to change animation easing.
-`$ae.registerCssProperty(...descriptors)` accepts one or more descriptors in the same format as `CSS.registerProperty()`. When `inherits` is omitted, AelluxJs sets it to `true`; pass `inherits: false` only when the property must not reach descendants or pseudo-elements. It attempts every registration and returns `true` only when all succeed, or `false` when the API is unavailable, no descriptors are supplied, or any registration is rejected, including an already registered name. Extensions can call it during their `init()` without requiring Properties and Values API support for their basic behavior.
+`$ae.registerCssProperty(...descriptors)` accepts one or more descriptors in the same format as `CSS.registerProperty()`. When `inherits` is omitted, aelluxJs sets it to `true`; pass `inherits: false` only when the property must not reach descendants or pseudo-elements. It attempts every registration and returns `true` only when all succeed, or `false` when the API is unavailable, no descriptors are supplied, or any registration is rejected, including an already registered name. Extensions can call it during their `init()` without requiring Properties and Values API support for their basic behavior.
 Pass Extension-specific configuration through `extensions` in `init()` options:
 
 ```js
@@ -107,7 +109,7 @@ Omitting `selector` removes all registrations for the Extension. The manager's `
 
 The mount helper removes existing `ae--*` classes from an element before its first mount, leaving other classes intact. Extensions that change attributes or inline styles should save the specific values they own with `$ae.persist.element.save()` during mount and restore them during unmount. The mount manager does not restore attributes automatically. Library classes are managed by their Extensions rather than restored from the initial HTML.
 
-After an element mounts, use `$ae(elementOrId).{extensionName}.{mountedExtensionMethod}(...args)` to call its public Extension methods. `AelluxJs(elementOrId)` works the same way. Both calls resolve through `mountManager.controller(elementOrId)`. `elementOrId` can be a DOM element, an ID, or an ID prefixed with `#`. Invalid values and IDs that do not resolve emit a warning and return `null`. An element without a mounted controller emits an error explaining that it may not be mounted, then returns `null`. Before runtime initialization, the shortcut returns `null`. The `controllers` names registered by an Extension become methods under its camelCase namespace. Each method receives the element as its first argument, followed by `...args`:
+After an element mounts, use `$ae(elementOrId).{extensionName}.{mountedExtensionMethod}(...args)` to call its public Extension methods. `aelluxJs(elementOrId)` works the same way. Both calls resolve through `mountManager.controller(elementOrId)`. `elementOrId` can be a DOM element, an ID, or an ID prefixed with `#`. Invalid values and IDs that do not resolve emit a warning and return `null`. An element without a mounted controller emits an error explaining that it may not be mounted, then returns `null`. Before runtime initialization, the shortcut returns `null`. The `controllers` names registered by an Extension become methods under its camelCase namespace. Each method receives the element as its first argument, followed by `...args`:
 
 ```js
 await $ae("#panel").present.pop();
@@ -219,10 +221,10 @@ Snapshots are independent, so each Extension can save its own list.
 
 ## ARIA ownership
 
-After the runtime loads, `AelluxJs.aria.register(element, { priority })` returns a handler for one element. `priority` defaults to `0` and is independent of mount registration priority. Use `set()` during mount or update, `unset(name)` to withdraw one value, and `release()` during unmount. The helper saves each attribute's original presence and value when it first receives a claim, and restores them when the last claim ends.
+After the runtime loads, `aelluxJs.aria.register(element, { priority })` returns a handler for one element. `priority` defaults to `0` and is independent of mount registration priority. Use `set()` during mount or update, `unset(name)` to withdraw one value, and `release()` during unmount. The helper saves each attribute's original presence and value when it first receives a claim, and restores them when the last claim ends.
 
 ```js
-const aria = AelluxJs.aria.register(element, { priority: 10 });
+const aria = aelluxJs.aria.register(element, { priority: 10 });
 aria.set({ expanded: true, controls: ["panel-id"], label: "Open panel" });
 aria.unset("label");
 aria.release();

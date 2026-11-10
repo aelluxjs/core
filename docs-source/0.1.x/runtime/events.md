@@ -2,7 +2,7 @@
 
 `AelluxJsProgress` is a generic numeric notification emitted on the producer with `bubbles: false` and `cancelable: false`. Detail contains finite numbers `{ value, max }`, with `max > 0` and `0 <= value <= max`. Listen directly with `$ae.onEvent(producer, "Progress", handler)`. It is independent of Feedback; `feedback.progress()` still emits `AelluxJsFeedback`. Present auto-dismiss adds `status`, `elapsedMs`, `durationMs` and `remainingMs`; see [Progress](../core-extensions/optional/progress.md).
 
-AelluxJs uses the `AelluxJs` prefix for its DOM events by default. Its event helpers also accept exact names without this prefix. The main API listens on `document`; `onEvent` and `offEvent` listen on an explicit target; a mounted element controller listens on its element. A document listener also receives bubbling events from elements:
+aellux.js retains its DOM event prefix, as in `AelluxJsReady`, independently of the public global object's spelling. Its event helpers also accept exact names without this prefix. The main API listens on `document`; `onEvent` and `offEvent` listen on an explicit target; a mounted element controller listens on its element. A document listener also receives bubbling events from elements:
 
 ```js
 const onUpdate = event => console.log(event.type);
@@ -19,7 +19,7 @@ The modern runtime dispatches `CustomEvent` objects; the boot API uses a regular
 
 ## Event names and formatting
 
-`$ae.eventName(name)` returns the DOM event type used by AelluxJs. The same conversion applies to `on`, `off`, `onEvent`, `offEvent`, `dispatch`, `dispatchFrom`, and a mounted element controller's `on`, `off` and `dispatch`. Naming follows the same rules in the boot API and the Modern and Legacy runtimes.
+`$ae.eventName(name)` returns the DOM event type used by aellux.js. The same conversion applies to `on`, `off`, `onEvent`, `offEvent`, `dispatch`, `dispatchFrom`, and a mounted element controller's `on`, `off` and `dispatch`. Naming follows the same rules in the boot API and the Modern and Legacy runtimes.
 
 ```js
 $ae.eventName("ready");           // "AelluxJsReady"
@@ -28,7 +28,7 @@ $ae.eventName("viewport-change"); // "AelluxJsViewportChange"
 $ae.eventName("AelluxJsReady");   // "AelluxJsReady"
 ```
 
-For a name without an escape marker, a name already starting with the exact `AelluxJs` prefix is returned unchanged. Otherwise, the helper uppercases an initial lowercase ASCII letter and lowercase letters following `-`, removes those hyphens, and adds the prefix. Existing uppercase letters and other characters are preserved. The table below uses the default prefix shipped with aellux.js:
+For a name without an escape marker, a name already starting with the exact DOM event prefix shown above is returned unchanged. Otherwise, the helper uppercases an initial lowercase ASCII letter and lowercase letters following `-`, removes those hyphens, and adds the prefix. Existing uppercase letters and other characters are preserved. The table below uses the default prefix shipped with aellux.js:
 
 | Input | DOM event type |
 | --- | --- |
@@ -56,7 +56,7 @@ $ae.eventName("!my-CustomEvent"); // "my-CustomEvent"
 $ae.eventName("!!custom");        // "!custom"
 ```
 
-Use an exact name to listen for a native DOM event through the Aellux helpers:
+Use an exact name to listen for a native DOM event through the aellux.js helpers:
 
 ```js
 const button = document.createElement("button");
@@ -73,7 +73,7 @@ The markers only select the event name. They do not enable delegation, change pr
 
 ### Native DOM APIs and listener removal
 
-Native `addEventListener`, `removeEventListener`, `Event` and `CustomEvent` use the exact string supplied to them. They do not apply Aellux prefixes or remove escape markers. Use `click` directly for a native click listener, and use `$ae.eventName(name)` to obtain an Aellux event type:
+Native `addEventListener`, `removeEventListener`, `Event` and `CustomEvent` use the exact string supplied to them. They do not apply aellux.js prefixes or remove escape markers. Use `click` directly for a native click listener, and use `$ae.eventName(name)` to obtain an aellux.js event type:
 
 ```js
 const type = $ae.eventName("panel-ready");
@@ -222,4 +222,4 @@ See [State Navigation](../core-extensions/state-navigation.md) for validation ru
 
 ## Optional PWA notifications
 
-The external [PWA Extension](../core-extensions/optional/pwa.md) normalizes `PwaInstallAvailable`, `PwaInstallRequested`, `PwaInstallAccepted`, `PwaInstallDismissed`, `PwaInstallManual`, `PwaInstalled`, `PwaWorkerRegistered`, `PwaUpdateAvailable`, `PwaUpdateComplete` and `PwaError` through `AelluxJs.eventName()`. All include `detail.status`; worker notifications include `registration`, and errors include `operation` and `error`. They bubble from an initiating control or dispatch on `document`. No PWA event listener is installed until the Extension is explicitly initialized.
+The external [PWA Extension](../core-extensions/optional/pwa.md) normalizes `PwaInstallAvailable`, `PwaInstallRequested`, `PwaInstallAccepted`, `PwaInstallDismissed`, `PwaInstallManual`, `PwaInstalled`, `PwaWorkerRegistered`, `PwaUpdateAvailable`, `PwaUpdateComplete` and `PwaError` through `aelluxJs.eventName()`. All include `detail.status`; worker notifications include `registration`, and errors include `operation` and `error`. They bubble from an initiating control or dispatch on `document`. No PWA event listener is installed until the Extension is explicitly initialized.

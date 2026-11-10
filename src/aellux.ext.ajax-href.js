@@ -32,22 +32,22 @@ import { validateDoubleAttributeHTML } from "./internal/development-helpers.js";
 (function (root) {
   "use strict";
 
-  const AelluxJs = root.AelluxJs;
+  const aelluxJs = root.aelluxJs;
   const extensionName = "ajax-href";
-  if (!AelluxJs) {
-    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+  if (!aelluxJs) {
+    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.`);
   }
-  AelluxJs.extAttach(extensionName, { init, destroy, load });
-  const attribute = AelluxJs.attr(extensionName);
+  aelluxJs.extAttach(extensionName, { init, destroy, load });
+  const attribute = aelluxJs.attr(extensionName);
 
   function init() {
     document.addEventListener("click", onClick);
-    AelluxJs.on("SnapshotRestore", OnSnapshotRestoreAjax);
+    aelluxJs.on("SnapshotRestore", OnSnapshotRestoreAjax);
   }
 
   function destroy() {
     document.removeEventListener("click", onClick);
-    AelluxJs.off("SnapshotRestore", OnSnapshotRestoreAjax);
+    aelluxJs.off("SnapshotRestore", OnSnapshotRestoreAjax);
     if (previousController) { previousController.abort(); }
     previousController = null;
   }
@@ -56,7 +56,7 @@ import { validateDoubleAttributeHTML } from "./internal/development-helpers.js";
 
   async function load(url, selectors, options = {}) {
     options = options || {};
-    const selectorList = AelluxJs.parseSelectors(selectors, invalid =>
+    const selectorList = aelluxJs.parseSelectors(selectors, invalid =>
       selectorDiagnostic(invalid.value, invalid.reason));
     if (!selectorList) return null;
     const elements = new Map();
@@ -73,13 +73,13 @@ import { validateDoubleAttributeHTML } from "./internal/development-helpers.js";
         { signal: null, abort: () => null };
     previousController = controller;
 
-    AelluxJs.dispatch("AjaxHrefStart", { detail: { url, selectors } });
+    aelluxJs.dispatch("AjaxHrefStart", { detail: { url, selectors } });
 
     try {
-      const response = await AelluxJs.request(url, { signal: controller.signal });
+      const response = await aelluxJs.request(url, { signal: controller.signal });
       const html = await response.text();
       if (previousController !== controller) return null;
-      validateDoubleAttributeHTML(AelluxJs, html, response.url || String(url));
+      validateDoubleAttributeHTML(aelluxJs, html, response.url || String(url));
       const loadedDocument = new DOMParser().parseFromString(html, "text/html");
       let historyRequested = false;
 
@@ -89,7 +89,7 @@ import { validateDoubleAttributeHTML } from "./internal/development-helpers.js";
         if (!currentElement) continue;
 
         const loadedElement = loadedDocument.querySelector(selector);
-        if (!loadedElement || await AelluxJs.unmount(currentElement) === false) {
+        if (!loadedElement || await aelluxJs.unmount(currentElement) === false) {
           if (!loadedElement)
             selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
           continue;
@@ -100,22 +100,22 @@ import { validateDoubleAttributeHTML } from "./internal/development-helpers.js";
         // Commit navigation only after a response region has passed its unmount
         // veto. Keep the new base URL in effect when mounting imported content.
         if (!historyRequested && !options.ignoreHistory) {
-          AelluxJs.dispatch("PushAjaxReplace", { detail: { url, selectors } });
+          aelluxJs.dispatch("PushAjaxReplace", { detail: { url, selectors } });
           historyRequested = true;
         }
         currentElement.parentNode.replaceChild(replacement, currentElement);
 
         if (selector === "title") {
-          AelluxJs.dispatch("UpdateBaseTitle", {
+          aelluxJs.dispatch("UpdateBaseTitle", {
             detail: { title: replacement.textContent }
           });
         }
 
-        await AelluxJs.mount(replacement);
+        await aelluxJs.mount(replacement);
 
       }
 
-      AelluxJs.dispatch("AjaxHrefLoaded", { detail: { url, selectors } });
+      aelluxJs.dispatch("AjaxHrefLoaded", { detail: { url, selectors } });
     }
     catch (error) {
       // Superseded requests must not report failures for the active navigation.
@@ -123,18 +123,18 @@ import { validateDoubleAttributeHTML } from "./internal/development-helpers.js";
       if (controller.signal?.aborted || error?.name === "AbortError") return null;
 
       const status = error?.response?.status ?? error?.status ?? null;
-      AelluxJs.dispatch("AjaxHrefError", { detail: { url, selectors, error, status } });
+      aelluxJs.dispatch("AjaxHrefError", { detail: { url, selectors, error, status } });
       throw error;
     }
     finally {
       if (previousController === controller)
         previousController = null;
-      AelluxJs.dispatch("AjaxHrefComplete", { detail: { url, selectors } });
+      aelluxJs.dispatch("AjaxHrefComplete", { detail: { url, selectors } });
     }
   }
 
   function selectorDiagnostic(value, reason, element = null) {
-    AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_TARGET, {
+    aelluxJs.diagnostics.warn(aelluxJs.diagnostics.WARN_CONFIGURATION_TARGET, {
       extension: extensionName, element, attribute, value, reason,
       suggestion: "Use valid CSS selectors identifying content in both the current document and the AJAX response."
     });
@@ -159,16 +159,16 @@ import { validateDoubleAttributeHTML } from "./internal/development-helpers.js";
     const destinyUrl = comparableUrl(link.href);
     const currentUrl = comparableUrl(window.location.href);
     if (destinyUrl.origin !== currentUrl.origin) {
-      AelluxJs.dispatch("AjaxHrefDropOrigin");
+      aelluxJs.dispatch("AjaxHrefDropOrigin");
       return;
     }
     if (destinyUrl.href === currentUrl.href) {
       if (destinyUrl.hash && destinyUrl.hash !== currentUrl.hash) return;
       event.preventDefault();
       const url = link.href;
-      AelluxJs.dispatch("AjaxHrefStart", { detail: { url, selectors } });
-      AelluxJs.dispatch("AjaxHrefLoaded", { detail: { url, selectors } });
-      AelluxJs.dispatch("AjaxHrefComplete", { detail: { url, selectors } });
+      aelluxJs.dispatch("AjaxHrefStart", { detail: { url, selectors } });
+      aelluxJs.dispatch("AjaxHrefLoaded", { detail: { url, selectors } });
+      aelluxJs.dispatch("AjaxHrefComplete", { detail: { url, selectors } });
       return;
     }
 

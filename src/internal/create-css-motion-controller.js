@@ -38,7 +38,7 @@ export function createCssMotionController(root, getAelluxJs) {
   }
 
   function run(element, options = {}) {
-    const AelluxJs = getAelluxJs();
+    const aelluxJs = getAelluxJs();
     const operationId = options.id;
     if (!Number.isSafeInteger(operationId))
       return Promise.reject(new TypeError("motion.run() requires a safe integer ID"));
@@ -53,7 +53,7 @@ export function createCssMotionController(root, getAelluxJs) {
     };
     operations.set(operationId, operation);
 
-    if (AelluxJs.currentPreference("reduced-motion") === "reduced") {
+    if (aelluxJs.currentPreference("reduced-motion") === "reduced") {
       options.apply();
       operations.delete(operationId);
       return Promise.resolve({ id: operationId, status: "completed", mode: "reduced" });
@@ -70,12 +70,12 @@ export function createCssMotionController(root, getAelluxJs) {
     }
 
     const requestedMaxFPS = options.maxFPS === undefined
-      ? AelluxJs.layoutMaxFPS(element) : options.maxFPS;
+      ? aelluxJs.layoutMaxFPS(element) : options.maxFPS;
     const externalAbort = typeof options.abort === "function" ? options.abort : null;
     const shouldAbort = () => operation.cancelled || !element.isConnected ||
       (externalAbort ? externalAbort() : false);
 
-    const captureResult = AelluxJs.waitLayout.sequence(operationId, {
+    const captureResult = aelluxJs.waitLayout.sequence(operationId, {
       read: () => capture(operation),
       update: animations => prepare(operation, animations),
       abort: shouldAbort
@@ -98,11 +98,11 @@ export function createCssMotionController(root, getAelluxJs) {
         return nativeWait(operation);
       }
       const policyFPS = operation.conservative
-        ? propertyPolicyFPS(AelluxJs.options.cssMotionPropertyMaxFPS, AelluxJs) : undefined;
+        ? propertyPolicyFPS(aelluxJs.options.cssMotionPropertyMaxFPS, aelluxJs) : undefined;
       const maxFPS = minimumFPS(requestedMaxFPS, policyFPS);
       operation.visualFPS = maxFPS;
-      AelluxJs.waitLayout.setVisualFPSLimit(operation.id, maxFPS);
-      return AelluxJs.waitLayout.sequence(operationId, {
+      aelluxJs.waitLayout.setVisualFPSLimit(operation.id, maxFPS);
+      return aelluxJs.waitLayout.sequence(operationId, {
         update: () => advance(operation),
         repeat: { ms: 0 },
         abort: () => operation.done || shouldAbort()
@@ -202,14 +202,14 @@ export function createCssMotionController(root, getAelluxJs) {
     return Number.isFinite(number) && number > 0 ? number : fallback;
   }
 
-  function propertyPolicyFPS(value, AelluxJs) {
+  function propertyPolicyFPS(value, aelluxJs) {
     // null and zero intentionally mean no *special* property policy. The
     // element maxFPS and adaptive scheduler remain in effect.
     if (value === null || value === 0) return undefined;
     const number = Number(value);
     if (Number.isFinite(number) && number > 0) return number;
     if (value !== undefined) {
-      AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID,
+      aelluxJs.diagnostics.warn(aelluxJs.diagnostics.WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID,
         { extension: "core", option: "cssMotionPropertyMaxFPS", attribute: "cssMotionPropertyMaxFPS", value, fallback: 55,
           reason: "CSS Motion frame rate must be finite and greater than zero; using 55 FPS.",
           suggestion: "Use a positive finite number or omit the option for the default." });

@@ -38,7 +38,7 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-PgrxAHrkt22+F09vWG2iuTeiqQ+UCUeSkyAe/nibdP/XtRk8nTZ+VjetKW+okArJ" crossorigin="anonymous">
+  integrity="sha384-q4bpBk5Vqct9IR80W+4o8g4BlPq84mWWb0mV47Q76mgYStKp6AKgCBgxRwr2FPAE" crossorigin="anonymous">
 </head>
 
 <body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
@@ -192,6 +192,13 @@
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
                                         aellux.js Docs                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/brand-naming.htm" data-ae-overflow-marquee="190px">
+                                        Brand Naming and Migration                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -679,7 +686,7 @@
           <main id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content"
             ajax-load="doc-content">
             <h1>CSS Motion Controller</h1>
-<p><code>AelluxJs.motion</code> coordinates CSS transitions and CSS animations with <code>waitLayout</code>. CSS remains responsible for properties, keyframes, duration, delay, iterations and the normal CSS easing. In browsers with sufficient Web Animations API support, Aellux pauses only the animations created by the requested state change and advances their <code>currentTime</code> from a monotonic clock. <code>waitLayout.sequence()</code> decides which frames perform those updates, including adaptive FPS reduction and the element&#39;s optional <code>data-ae-maxfps</code> limit.</p>
+<p><code>aelluxJs.motion</code> coordinates CSS transitions and CSS animations with <code>waitLayout</code>. CSS remains responsible for properties, keyframes, duration, delay, iterations and the normal CSS easing. In browsers with sufficient Web Animations API support, aellux.js pauses only the animations created by the requested state change and advances their <code>currentTime</code> from a monotonic clock. <code>waitLayout.sequence()</code> decides which frames perform those updates, including adaptive FPS reduction and the element&#39;s optional <code>data-ae-maxfps</code> limit.</p>
 <p>The controller intentionally accepts a small main-thread cost under ideal conditions. Its purpose is predictable degradation: if the browser begins missing frames because of a constrained device or competing applications, the shared scheduler can reduce update frequency instead of allowing managed motion to contribute to stalls. A sustained severe delay selects the nearest compatible lower 15-FPS budget in one adjustment; an observed 10 FPS cadence reaches the 5 FPS floor immediately.</p>
 <p>Controlled operations containing animated properties beyond <code>transform</code>, <code>opacity</code>, and Present&#39;s internal progress channels have a conservative default ceiling of 55 FPS. The exempt progress properties are <code>--ae-pop-progress</code>, <code>--ae-dismiss-progress</code>, <code>--ae-unpop-progress</code>, <code>--ae-present-pop-phase</code>, and <code>--ae-present-dismiss-phase</code>; arbitrary custom properties remain conservative because they can drive layout. Configure the ceiling with <code>cssMotionPropertyMaxFPS</code> in <code>init()</code>. This is a workload policy, not a promise that exempt properties stay on the GPU: browser composition and painting still depend on the document and device. Classification applies to the whole operation. If one transition combines <code>opacity</code>, <code>transform</code>, and <code>height</code>, all captured animations share one clock at the lowest applicable limit from <code>data-ae-maxfps</code>, <code>run({ maxFPS })</code>, and <code>cssMotionPropertyMaxFPS</code>; properties never receive independent schedules.</p>
 <p>The shared scheduler applies that visual limit once, including before its native cadence has been calibrated. CSS Motion does not also impose a timer-based sequence limit: timer wakeups can miss the next animation frame and reduce a nominal 40 FPS operation to about 32 FPS on WebKit. Frame credit preserves the requested average cadence within the browser&#39;s available frames; it does not guarantee a frame rate when the device cannot sustain it.</p>
@@ -711,8 +718,8 @@ await $ae.motion.run(panel, {
 </code></pre>
 <p>The option defaults to <code>true</code>. When disabled, or when the browser lacks reliable <code>getAnimations()</code>, <code>pause()</code>, mutable <code>currentTime</code>, or computed timing, state classes and CSS are still applied normally. The controller does not pause frames, create a progress sequence, or impose a JavaScript FPS limit. No Web Animations polyfill is loaded.</p>
 <p>Disabling CSS Motion timeline control does not disable the shared adaptive cadence for other CSS publications scheduled through <code>waitLayout</code>.</p>
-<h2>Advanced Aellux easing</h2>
-<p>Controlled motion can opt into an easing name supported by <code>$ae.ease()</code>. When the browser accepts CSS <code>linear()</code>, the controller samples the Aellux curve into a native timing function and lets the browser continue interpolating the CSS properties. Samples retain values outside <code>0..1</code>, preserving Back and Elastic overshoot without applying the original CSS easing a second time.</p>
+<h2>Advanced aellux.js easing</h2>
+<p>Controlled motion can opt into an easing name supported by <code>$ae.ease()</code>. When the browser accepts CSS <code>linear()</code>, the controller samples the aellux.js curve into a native timing function and lets the browser continue interpolating the CSS properties. Samples retain values outside <code>0..1</code>, preserving Back and Elastic overshoot without applying the original CSS easing a second time.</p>
 <p>Present reads <code>--ae-pop-aellux-ease</code> and <code>--ae-dismiss-aellux-ease</code>. Present effects read <code>--ae-present-effect-aellux-ease</code> from the effect target. Feedback only requests effects through <code>present.effect</code>.</p>
 <pre><code class="language-css">.panel {
   --ae-pop-ease: ease-out;
@@ -720,7 +727,7 @@ await $ae.motion.run(panel, {
 }
 .field { --ae-present-effect-aellux-ease: bounceOut; }
 </code></pre>
-<p>Always keep a valid CSS fallback such as <code>linear</code>, <code>ease</code>, <code>ease-in</code>, <code>ease-out</code>, or <code>ease-in-out</code>. Advanced Aellux names are never inserted directly into CSS timing properties. If sampled <code>linear()</code> is unsupported, the declared CSS easing remains in effect. Reduced motion bypasses intermediate controlled frames while preserving state and completion lifecycle.</p>
+<p>Always keep a valid CSS fallback such as <code>linear</code>, <code>ease</code>, <code>ease-in</code>, <code>ease-out</code>, or <code>ease-in-out</code>. Advanced aellux.js names are never inserted directly into CSS timing properties. If sampled <code>linear()</code> is unsupported, the declared CSS easing remains in effect. Reduced motion bypasses intermediate controlled frames while preserving state and completion lifecycle.</p>
           </main>
 
           <div id="doc-navlinks2" ajax-load="doc-navlinks2">
@@ -751,7 +758,7 @@ await $ae.motion.run(panel, {
                 and
                 <a style="color:inherit!important;" href="https://github.com/" target="_blank"
                   rel="noopener noreferrer">GitHub</a>
-                for the tools and technologies that supported the development of Aellux.
+                for the tools and technologies that supported the development of aellux.js.
               </div>
             </div>
           </footer>

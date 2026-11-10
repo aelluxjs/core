@@ -9,34 +9,34 @@ export function createControllerHelper(root, element) {
     spawn, despawn, hasMounts,
 
     on(event, handler, options) {
-      root.AelluxJs.onEvent(element, event, handler, options);
+      root.aelluxJs.onEvent(element, event, handler, options);
     },
     off(event, handler, options) {
-      root.AelluxJs.offEvent(element, event, handler, options);
+      root.aelluxJs.offEvent(element, event, handler, options);
     },
     dispatch(event, options) {
-      return root.AelluxJs.dispatchFrom(element, event, options);
+      return root.aelluxJs.dispatchFrom(element, event, options);
     },
 
     mount(extensionNames = null) {
-      return root.AelluxJs.mountManager.mount(element, extensionNames);
+      return root.aelluxJs.mountManager.mount(element, extensionNames);
     },
     unmount(extensionNames = null) {
-      return root.AelluxJs.mountManager.unmount(element, extensionNames);
+      return root.aelluxJs.mountManager.unmount(element, extensionNames);
     },
     update(extensionNames = null) {
-      return root.AelluxJs.mountManager.update(element, extensionNames);
+      return root.aelluxJs.mountManager.update(element, extensionNames);
     }
   };
 
   function spawn(extensionName, mountId, methodNames, updatable = false) {
     const key = toCamelCase(fromCamelCase(extensionName));
-    const extension = root.AelluxJs.ext[key];
+    const extension = root.aelluxJs.ext[key];
     const methods = Array.isArray(methodNames) ? methodNames : [];
     for (const name of methods) {
       if (name === "update" && updatable) continue;
       if (typeof name === "string" && extension && typeof extension[name] === "function") continue;
-      const diagnostics = root.AelluxJs.diagnostics;
+      const diagnostics = root.aelluxJs.diagnostics;
       diagnostics.warn(diagnostics.WARN_CONTROLLER_METHOD_MISSING, {
         extension: key, method: name, mountId, element
       });
@@ -63,7 +63,7 @@ export function createControllerHelper(root, element) {
   }
 
   function refresh(key) {
-    const extension = root.AelluxJs.ext[key];
+    const extension = root.aelluxJs.ext[key];
     const registrations = Array.from(mounts.values())
       .filter(registration => registration.extension === key);
     const names = new Set();
@@ -91,12 +91,12 @@ export function createControllerHelper(root, element) {
     }
     for (const name of names) {
       namespace[name] = (...args) => {
-        const current = root.AelluxJs.ext[key];
+        const current = root.aelluxJs.ext[key];
         return current[name](element, ...args);
       };
     }
     namespace.update = registrations.some(registration => registration.updatable)
-      ? () => root.AelluxJs.mountManager.update(element, key)
+      ? () => root.aelluxJs.mountManager.update(element, key)
       : null;
     controller[key] = namespace;
   }

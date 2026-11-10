@@ -25,11 +25,11 @@ async function start(page, legacy, { markup = `<section id="panel" data-ae-focus
     };
     window.padButton = (index, button, pressed) => { window.padSlots[index].buttons[button] = { pressed, value: pressed ? 1 : 0 }; };
     document.addEventListener("click", event => { const button = event.target.closest("button"); if (button) window.clicks.push(button.id); });
-    AelluxJs.on("InputCommand", event => window.commands.push({ ...event.detail.command, originalEvent: undefined, target: undefined }));
-    AelluxJs.ext("input", { loadStyle: true });
-    if (focus) AelluxJs.ext("focus");
-    if (present) AelluxJs.ext("present");
-    return new Promise(resolve => { AelluxJs.on("Ready", resolve, { once: true }); AelluxJs.init({ mode: "basic", forceLegacy: legacy }); });
+    aelluxJs.on("InputCommand", event => window.commands.push({ ...event.detail.command, originalEvent: undefined, target: undefined }));
+    aelluxJs.ext("input", { loadStyle: true });
+    if (focus) aelluxJs.ext("focus");
+    if (present) aelluxJs.ext("present");
+    return new Promise(resolve => { aelluxJs.on("Ready", resolve, { once: true }); aelluxJs.init({ mode: "basic", forceLegacy: legacy }); });
   }, { markup, inputs, legacy, focus, present });
 }
 
@@ -40,7 +40,7 @@ for (const legacy of [false, true]) test.describe(`Input / Focus (Legacy=${legac
     await start(page, legacy, { inputs: "keyboard" });
     expect(scripts).toEqual([`aellux.input.keyboard${legacy ? ".legacy" : ""}.js`]);
     expect(await page.evaluate(() => window.padReads)).toBe(0);
-    await page.evaluate(async () => { document.getElementById("panel").setAttribute("data-ae-inputs", "keyboard gamepad"); await AelluxJs.mount("panel", "input"); });
+    await page.evaluate(async () => { document.getElementById("panel").setAttribute("data-ae-inputs", "keyboard gamepad"); await aelluxJs.mount("panel", "input"); });
     expect(scripts).toContain(`aellux.input.gamepad${legacy ? ".legacy" : ""}.js`);
     expect(scripts.some(name => name.includes(".point."))).toBe(false);
   });
@@ -53,7 +53,7 @@ for (const legacy of [false, true]) test.describe(`Input / Focus (Legacy=${legac
     expect(await page.evaluate(() => window.clicks)).toEqual(["one"]);
     await page.keyboard.press("Tab");
     await expect(page.locator("#two")).toBeFocused();
-    expect(await page.evaluate(() => AelluxJs.ext.focus.getContext().element.id)).toBe("two");
+    expect(await page.evaluate(() => aelluxJs.ext.focus.getContext().element.id)).toBe("two");
     await page.keyboard.press("i");
     expect(await page.evaluate(() => window.clicks)).toEqual(["one", "two"]);
     await page.locator("#editor").focus();
@@ -68,7 +68,7 @@ for (const legacy of [false, true]) test.describe(`Input / Focus (Legacy=${legac
   test("independent contexts share panels and elements, constrain navigation and clean detached scopes", async ({ page }) => {
     await start(page, legacy);
     const result = await page.evaluate(() => {
-      const focus = AelluxJs.ext.focus, panel = document.getElementById("panel"), one = document.getElementById("one");
+      const focus = aelluxJs.ext.focus, panel = document.getElementById("panel"), one = document.getElementById("one");
       one.focus();
       focus.createContext(2, { scope: panel }); focus.createContext(3, { scope: panel });
       focus.setFocus(2, "two"); focus.setFocus(3, "one");
@@ -86,24 +86,24 @@ for (const legacy of [false, true]) test.describe(`Input / Focus (Legacy=${legac
     expect(result.invalid).toBe(false);
     expect(result.after).not.toContain("ae--focus-player3");
     await page.locator("#panel").evaluate(element => element.remove());
-    await expect.poll(() => page.evaluate(() => AelluxJs.ext.focus.getContext(2))).toBeNull();
+    await expect.poll(() => page.evaluate(() => aelluxJs.ext.focus.getContext(2))).toBeNull();
   });
 
   test("Focus unmount clears programmatic contexts and remount restores native synchronization", async ({ page }) => {
     await start(page, legacy);
     await page.locator("#one").focus();
     await page.evaluate(async () => {
-      AelluxJs.ext.focus.createContext(2, { scope: document.getElementById("panel") });
-      AelluxJs.ext.focus.setFocus(2, "one");
-      await AelluxJs.unmount("panel", "focus");
+      aelluxJs.ext.focus.createContext(2, { scope: document.getElementById("panel") });
+      aelluxJs.ext.focus.setFocus(2, "one");
+      await aelluxJs.unmount("panel", "focus");
     });
-    expect(await page.evaluate(() => AelluxJs.ext.focus.getContext(2))).toBeNull();
+    expect(await page.evaluate(() => aelluxJs.ext.focus.getContext(2))).toBeNull();
     await expect(page.locator("#one")).not.toHaveClass(/ae--focus-player/);
-    await page.evaluate(() => AelluxJs.mount("panel", "focus"));
+    await page.evaluate(() => aelluxJs.mount("panel", "focus"));
     await expect(page.locator("#one")).toHaveClass(/ae--focus-player1/);
     await page.evaluate(async () => {
       const detached = document.createElement("button"); detached.setAttribute("data-ae-point", "");
-      document.body.append(detached); await AelluxJs.mount(detached, "input"); detached.remove();
+      document.body.append(detached); await aelluxJs.mount(detached, "input"); detached.remove();
     });
     await expect(page.locator("#one")).toHaveClass(/ae--focus-player1/);
   });
@@ -113,11 +113,11 @@ for (const legacy of [false, true]) test.describe(`Input / Focus (Legacy=${legac
       <button id="one" data-ae-shortcut="keyboard:KeyI; gamepad:north">One</button>
       <dialog id="modal"><button id="two" data-ae-shortcut="gamepad:north">Two</button></dialog></section>` });
     await page.evaluate(() => {
-      const focus = AelluxJs.ext.focus;
+      const focus = aelluxJs.ext.focus;
       focus.createContext(2, { scope: document.getElementById("panel") }); focus.setFocus(2, "one");
-      AelluxJs.ext.input.registerRouter(() => 2);
+      aelluxJs.ext.input.registerRouter(() => 2);
       document.getElementById("modal").showModal();
-      AelluxJs.ext.input.dispatchCommand({ deviceId: "test", source: "gamepad", code: "north", phase: "press" });
+      aelluxJs.ext.input.dispatchCommand({ deviceId: "test", source: "gamepad", code: "north", phase: "press" });
     });
     expect(await page.evaluate(() => window.clicks)).toEqual([]);
     await page.evaluate(() => { document.getElementById("modal").close(); document.getElementById("one").focus(); document.getElementById("one").addEventListener("keydown", event => event.preventDefault()); });
@@ -129,7 +129,7 @@ for (const legacy of [false, true]) test.describe(`Input / Focus (Legacy=${legac
     await start(page, legacy, { markup: `<section id="panel" data-ae-focus-scope><button id="one" data-ae-shortcut="gamepad:north">One</button></section>
       <section id="other" data-ae-focus-scope><button id="two" data-ae-shortcut="gamepad:north">Two</button></section>` });
     await page.evaluate(() => {
-      const focus = AelluxJs.ext.focus, input = AelluxJs.ext.input;
+      const focus = aelluxJs.ext.focus, input = aelluxJs.ext.input;
       document.getElementById("one").focus();
       focus.createContext(2, { scope: document.getElementById("other") }); focus.setFocus(2, "two");
       input.registerRouter(command => command.deviceId === "secondary" ? 2 : undefined);
@@ -181,7 +181,7 @@ for (const legacy of [false, true]) test.describe(`Input / Focus (Legacy=${legac
   test("two gamepads execute distinct shortcuts in one frame and routing can change, block and fall back", async ({ page }) => {
     await start(page, legacy);
     await page.evaluate(() => {
-      const input = AelluxJs.ext.input, focus = AelluxJs.ext.focus;
+      const input = aelluxJs.ext.input, focus = aelluxJs.ext.focus;
       document.getElementById("one").focus();
       focus.createContext(2, { scope: document.getElementById("panel") }); focus.setFocus(2, "two");
       window.connectPad(0); window.connectPad(1, "DualSense Wireless Controller");
@@ -192,7 +192,7 @@ for (const legacy of [false, true]) test.describe(`Input / Focus (Legacy=${legac
     });
     await expect.poll(() => page.evaluate(() => window.clicks)).toEqual(["one", "two"]);
     const result = await page.evaluate(() => {
-      const input = AelluxJs.ext.input;
+      const input = aelluxJs.ext.input;
       const deviceId = input.devices()[0].deviceId;
       const send = () => input.dispatchCommand({ deviceId, source: "gamepad", code: "north", phase: "press" });
       window.routes.set(deviceId, 2); send();
@@ -209,7 +209,7 @@ for (const legacy of [false, true]) test.describe(`Input / Focus (Legacy=${legac
   test("router precedence, cancellation, unknown contexts and lifecycle ownership never redirect invalid commands", async ({ page }) => {
     await start(page, legacy);
     const result = await page.evaluate(async () => {
-      const input = AelluxJs.ext.input;
+      const input = aelluxJs.ext.input;
       document.getElementById("one").focus();
       const send = () => input.dispatchCommand({ deviceId: "keyboard", source: "keyboard", code: "KeyI", phase: "press" });
       const first = input.registerRouter(() => 1, { priority: 5 });
@@ -217,13 +217,13 @@ for (const legacy of [false, true]) test.describe(`Input / Focus (Legacy=${legac
       const unknown = input.registerRouter(() => 999); send(); unknown();
       const asyncRouter = input.registerRouter(() => Promise.reject(new Error("Invalid async router"))); send(); asyncRouter();
       const abort = new AbortController(); input.registerRouter(() => null, { signal: abort.signal }); send(); abort.abort(); send();
-      AelluxJs.ext("router-owner");
-      AelluxJs.extAttach("router-owner", { init() { input.registerRouter(() => null, { owner: "router-owner" }); }, destroy() {} });
-      await AelluxJs.wait("router-owner"); send(); await AelluxJs.destroyExtensions("router-owner"); send();
+      aelluxJs.ext("router-owner");
+      aelluxJs.extAttach("router-owner", { init() { input.registerRouter(() => null, { owner: "router-owner" }); }, destroy() {} });
+      await aelluxJs.wait("router-owner"); send(); await aelluxJs.destroyExtensions("router-owner"); send();
       input.registerRouter(() => null, { owner: document.getElementById("panel") });
-      send(); await AelluxJs.unmount("panel", "input"); send(); await AelluxJs.mount("panel", "input");
+      send(); await aelluxJs.unmount("panel", "input"); send(); await aelluxJs.mount("panel", "input");
       const cancel = event => event.preventDefault();
-      AelluxJs.on("BeforeInputCommand", cancel); send(); AelluxJs.off("BeforeInputCommand", cancel);
+      aelluxJs.on("BeforeInputCommand", cancel); send(); aelluxJs.off("BeforeInputCommand", cancel);
       return window.clicks;
     });
     expect(result).toEqual(["one", "one", "one", "one"]);
@@ -240,7 +240,7 @@ for (const legacy of [false, true]) test.describe(`Input / Focus (Legacy=${legac
       <button id="three" data-ae-shortcut="keyboard:KeyI">Three</button></section>` });
     await page.evaluate(() => {
       window.actions = [];
-      AelluxJs.ext.focus.registerShortcutAction("record", element => window.actions.push(element.id));
+      aelluxJs.ext.focus.registerShortcutAction("record", element => window.actions.push(element.id));
       document.querySelectorAll("[data-ae-shortcut]").forEach(element => element.setAttribute("data-ae-shortcut-action", "record"));
     });
     await page.locator("#one").focus(); await page.keyboard.press("i");
@@ -257,26 +257,26 @@ for (const legacy of [false, true]) test.describe(`Input / Focus (Legacy=${legac
     await start(page, legacy, { focus: false, markup: `<kbd id="hint" data-ae-shortcut-hint="keyboard:KeyI; gamepad:north"></kbd>
       <kbd id="other" data-ae-shortcut-hint="gamepad:south" data-ae-shortcut-focus="2"></kbd>` });
     await expect(page.locator("#hint")).toHaveAttribute("data-ae-shortcut-label", "I");
-    await page.evaluate(() => { AelluxJs.ext.input.setHintContext(1, { source: "gamepad", family: "xbox" }); AelluxJs.ext.input.setHintContext(2, { source: "gamepad", family: "playstation" }); });
+    await page.evaluate(() => { aelluxJs.ext.input.setHintContext(1, { source: "gamepad", family: "xbox" }); aelluxJs.ext.input.setHintContext(2, { source: "gamepad", family: "playstation" }); });
     await expect(page.locator("#hint")).toHaveAttribute("data-ae-shortcut-label", "Y");
     await expect(page.locator("#other")).toHaveAttribute("data-ae-shortcut-label", "×");
     expect(await page.locator("#hint").evaluate(element => getComputedStyle(element, "::before").content)).toBe('"Y"');
-    await page.evaluate(() => AelluxJs.ext.input.setHintContext(1, { source: "gamepad", family: "nintendo" }));
+    await page.evaluate(() => aelluxJs.ext.input.setHintContext(1, { source: "gamepad", family: "nintendo" }));
     await expect(page.locator("#hint")).toHaveAttribute("data-ae-shortcut-label", "X");
   });
 
   test("gamepad reconnect and index changes create new sessions; noise and disabled adapters stay idle", async ({ page }) => {
     await start(page, legacy);
-    const first = await page.evaluate(() => { window.connectPad(0); return AelluxJs.ext.input.devices()[0].deviceId; });
+    const first = await page.evaluate(() => { window.connectPad(0); return aelluxJs.ext.input.devices()[0].deviceId; });
     await page.evaluate(() => { window.padSlots[0].axes[0] = .08; });
     // Wait for real polling, then inspect the absence of intentional noise commands.
     await expect.poll(() => page.evaluate(() => window.padReads)).toBeGreaterThan(3);
     expect(await page.evaluate(() => window.commands.length)).toBe(0);
     await page.evaluate(() => window.disconnectPad(0));
     await expect(page.locator("html")).toHaveAttribute("data-ae-gamepad", "false");
-    const second = await page.evaluate(() => { window.connectPad(0); return AelluxJs.ext.input.devices()[0].deviceId; });
+    const second = await page.evaluate(() => { window.connectPad(0); return aelluxJs.ext.input.devices()[0].deviceId; });
     expect(second).not.toBe(first);
-    const third = await page.evaluate(() => { window.disconnectPad(0); window.connectPad(3); return AelluxJs.ext.input.devices()[0]; });
+    const third = await page.evaluate(() => { window.disconnectPad(0); window.connectPad(3); return aelluxJs.ext.input.devices()[0]; });
     expect(third.deviceId).not.toBe(second); expect(third.index).toBe(3);
     await page.locator("html").evaluate(element => element.setAttribute("data-ae-inputs", "point keyboard"));
     await expect(page.locator("html")).toHaveAttribute("data-ae-gamepad", "false");
@@ -289,16 +289,16 @@ for (const legacy of [false, true]) test.describe(`Input / Focus (Legacy=${legac
     await start(page, legacy);
     await page.locator("#one").focus();
     await page.evaluate(async () => {
-      window.oldInput = AelluxJs.ext.input;
+      window.oldInput = aelluxJs.ext.input;
       window.oldInput.registerRouter(() => null);
-      await AelluxJs.destroyExtensions(["input", "focus"]);
+      await aelluxJs.destroyExtensions(["input", "focus"]);
     });
     await expect(page.locator("#one")).not.toHaveClass(/ae--focus-player1/);
     await expect(page.locator("#hint")).not.toHaveAttribute("data-ae-shortcut-label");
     await page.evaluate(async () => {
-      AelluxJs.ext("input", { loadStyle: true }); AelluxJs.ext("focus");
-      await Promise.all([AelluxJs.wait("input"), AelluxJs.wait("focus")]);
-      await AelluxJs.mount(document);
+      aelluxJs.ext("input", { loadStyle: true }); aelluxJs.ext("focus");
+      await Promise.all([aelluxJs.wait("input"), aelluxJs.wait("focus")]);
+      await aelluxJs.mount(document);
     });
     await page.keyboard.press("i");
     expect(await page.evaluate(() => window.clicks)).toEqual(["one"]);

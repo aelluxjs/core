@@ -5,8 +5,8 @@ import { readFile } from "node:fs/promises";
 async function startBasic(page, options = {}) {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(options => AelluxJs.init({ mode: "basic", skipGlobalMount: true, ...options }), options);
-  await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
+  await page.evaluate(options => aelluxJs.init({ mode: "basic", skipGlobalMount: true, ...options }), options);
+  await expect.poll(() => page.evaluate(() => aelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
 }
 
 test("basic uses the embedded official manifest and supplies integrity metadata", async ({ page }) => {
@@ -17,12 +17,12 @@ test("basic uses the embedded official manifest and supplies integrity metadata"
   await startBasic(page);
   expect(manifestRequests).toBe(0);
   const result = await page.evaluate(async () => {
-    AelluxJs.ext("preference");
-    AelluxJs.ext("input");
-    await Promise.all([AelluxJs.wait("preference"), AelluxJs.wait("input")]);
+    aelluxJs.ext("preference");
+    aelluxJs.ext("input");
+    await Promise.all([aelluxJs.wait("preference"), aelluxJs.wait("input")]);
     return {
-      preference: AelluxJs.registry.ext.preference,
-      input: AelluxJs.registry.ext.input
+      preference: aelluxJs.registry.ext.preference,
+      input: aelluxJs.registry.ext.input
     };
   });
   expect(manifestRequests).toBe(0);
@@ -41,9 +41,9 @@ test("full initializes a lazy bundled extension on demand without a network requ
   });
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "full", skipGlobalMount: true }));
-  await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
-  expect(await page.evaluate(async () => !!(await AelluxJs.wait("present")))).toBe(true);
+  await page.evaluate(() => aelluxJs.init({ mode: "full", skipGlobalMount: true }));
+  await expect.poll(() => page.evaluate(() => aelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
+  expect(await page.evaluate(async () => !!(await aelluxJs.wait("present")))).toBe(true);
   expect(manifestRequests).toBe(0);
   expect(extensionRequests).toBe(0);
 });
@@ -55,12 +55,12 @@ test("full resolves an unbundled official extension from its manifest", async ({
   });
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.min.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "full", skipGlobalMount: true }));
-  await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
+  await page.evaluate(() => aelluxJs.init({ mode: "full", skipGlobalMount: true }));
+  await expect.poll(() => page.evaluate(() => aelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
 
   const artifact = await page.evaluate(async () => {
-    await AelluxJs.wait("ajax-href");
-    return AelluxJs.registry.ext.ajaxHref.artifacts.modern;
+    await aelluxJs.wait("ajax-href");
+    return aelluxJs.registry.ext.ajaxHref.artifacts.modern;
   });
 
   expect(manifestRequests).toBe(0);
@@ -77,13 +77,13 @@ test("scrollbox-snap registers and awaits Scrollbox before mounting", async ({ p
       <div data-ae-snap-item style="width:100px;flex:none"></div>
       <div data-ae-snap-item style="width:100px;flex:none"></div>
     </div></div>`;
-    AelluxJs.ext("scrollbox-snap");
-    await AelluxJs.wait("scrollbox-snap");
-    await AelluxJs.mountManager.mount(document.body);
-    const controller = AelluxJs.mountManager.controller("gallery").scrollbox;
+    aelluxJs.ext("scrollbox-snap");
+    await aelluxJs.wait("scrollbox-snap");
+    await aelluxJs.mountManager.mount(document.body);
+    const controller = aelluxJs.mountManager.controller("gallery").scrollbox;
     return {
-      scrollbox: AelluxJs.ext.scrollbox?.initialized,
-      snap: AelluxJs.ext.scrollboxSnap?.initialized,
+      scrollbox: aelluxJs.ext.scrollbox?.initialized,
+      snap: aelluxJs.ext.scrollboxSnap?.initialized,
       mounted: !!controller,
       navigated: controller.goto(1)
     };
@@ -98,10 +98,10 @@ for (const boot of ["aellux.js", "aellux.min.js"]) {
       page.on("request", request => requests.push(new URL(request.url()).pathname.split("/").pop()));
       await page.goto("/tests/index.htm");
       await page.addScriptTag({ url: `/dist/${boot}` });
-      await page.evaluate(forceLegacy => AelluxJs.init({
+      await page.evaluate(forceLegacy => aelluxJs.init({
         mode: "full", forceLegacy, skipGlobalMount: true
       }), forceLegacy);
-      await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion))
+      await expect.poll(() => page.evaluate(() => aelluxJs.orchestratorVersion))
         .toBe("0.1.0-beta.10");
       const result = await page.evaluate(async () => {
         document.body.innerHTML = `<div id="gallery" data-ae-scrollbox data-ae-scrollbox-snap
@@ -109,12 +109,12 @@ for (const boot of ["aellux.js", "aellux.min.js"]) {
           <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
           <div data-ae-snap-item style="flex:none;width:100px;height:100px"></div>
         </div>`;
-        await AelluxJs.mountManager.mount(document.body);
+        await aelluxJs.mountManager.mount(document.body);
         return {
-          base: AelluxJs.ext.scrollbox?.initialized,
-          snap: AelluxJs.ext.scrollboxSnap?.initialized,
-          navigated: AelluxJs.mountManager.controller("gallery").scrollbox.goto(1),
-          legacy: AelluxJs.diagnostics.legacy
+          base: aelluxJs.ext.scrollbox?.initialized,
+          snap: aelluxJs.ext.scrollboxSnap?.initialized,
+          navigated: aelluxJs.mountManager.controller("gallery").scrollbox.goto(1),
+          legacy: aelluxJs.diagnostics.legacy
         };
       });
       expect(result).toEqual({ base: true, snap: true, navigated: true, legacy: forceLegacy });
@@ -128,9 +128,9 @@ for (const boot of ["aellux.js", "aellux.min.js"]) {
 test("the official manifest selects the Legacy artifact for a Legacy runtime", async ({ page }) => {
   await startBasic(page, { forceLegacy: true });
   const artifact = await page.evaluate(async () => {
-    AelluxJs.ext("input");
-    await AelluxJs.wait("input");
-    return AelluxJs.registry.ext.input.artifacts.legacy;
+    aelluxJs.ext("input");
+    await aelluxJs.wait("input");
+    return aelluxJs.registry.ext.input.artifacts.legacy;
   });
   // The non-minified boot script selects the matching non-minified Legacy
   // artifact; only a .min boot script selects the .legacy.min variant.
@@ -141,16 +141,16 @@ test("the official manifest selects the Legacy artifact for a Legacy runtime", a
 test("a Bootscript and Orchestrator version mismatch blocks startup", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => { AelluxJs.version = "99.0.0"; });
+  await page.evaluate(() => { aelluxJs.version = "99.0.0"; });
   await page.addScriptTag({ url: "/dist/aellux.orchestrator.js" });
   const result = await page.evaluate(async () => {
     let blocked = false;
-    try { await AelluxJs.startAelluxJs(); }
+    try { await aelluxJs.startAelluxJs(); }
     catch (_) { blocked = true; }
     return {
       blocked,
-      version: AelluxJs.orchestratorVersion,
-      codes: AelluxJs.diagnostics.showHistory(10).map(entry => entry.code)
+      version: aelluxJs.orchestratorVersion,
+      codes: aelluxJs.diagnostics.showHistory(10).map(entry => entry.code)
     };
   });
   expect(result.blocked).toBe(true);
@@ -162,25 +162,25 @@ test("extension compatibility blocks by default and explicit skip emits warn", a
   await startBasic(page, { verboseLevel: 2 });
   const result = await page.evaluate(async () => {
     function attach(name, compatibility, skip) {
-      AelluxJs.ext(`/virtual/aellux.ext.${name}.js`, {
+      aelluxJs.ext(`/virtual/aellux.ext.${name}.js`, {
         coreCompatibility: compatibility,
         skipCompatibilityCheck: skip
       });
-      AelluxJs.extAttach(name, { init() {} });
+      aelluxJs.extAttach(name, { init() {} });
     }
-    attach("compatible-test", AelluxJs.version, false);
+    attach("compatible-test", aelluxJs.version, false);
     attach("incompatible-test", "99.0.0", false);
     attach("forced-test", "99.0.0", true);
     attach("unspecified-test", undefined, false);
     const values = await Promise.all([
-      AelluxJs.wait("compatible-test"),
-      AelluxJs.wait("incompatible-test"),
-      AelluxJs.wait("forced-test"),
-      AelluxJs.wait("unspecified-test")
+      aelluxJs.wait("compatible-test"),
+      aelluxJs.wait("incompatible-test"),
+      aelluxJs.wait("forced-test"),
+      aelluxJs.wait("unspecified-test")
     ]);
     return {
       initialized: values.map(Boolean),
-      codes: AelluxJs.diagnostics.showHistory(30).map(entry => entry.code)
+      codes: aelluxJs.diagnostics.showHistory(30).map(entry => entry.code)
     };
   });
   expect(result.initialized).toEqual([true, false, true, true]);
@@ -190,14 +190,14 @@ test("extension compatibility blocks by default and explicit skip emits warn", a
 
 test("development enables info unless verboseLevel is explicitly overridden", async ({ page }) => {
   await startBasic(page, { environment: "development" });
-  expect(await page.evaluate(() => AelluxJs.diagnostics.verboseLevel)).toBe(2);
+  expect(await page.evaluate(() => aelluxJs.diagnostics.verboseLevel)).toBe(2);
 
   await page.reload();
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({
+  await page.evaluate(() => aelluxJs.init({
     mode: "basic", skipGlobalMount: true, environment: "development", verboseLevel: 0
   }));
-  expect(await page.evaluate(() => AelluxJs.diagnostics.verboseLevel)).toBe(0);
+  expect(await page.evaluate(() => aelluxJs.diagnostics.verboseLevel)).toBe(0);
 });
 
 test("official entries win over a custom fallback and invalid fallback data is diagnosed", async ({ page }) => {
@@ -212,15 +212,15 @@ test("official entries win over a custom fallback and invalid fallback data is d
   });
   await startBasic(page, { environment: "development", verboseLevel: 2 });
   const result = await page.evaluate(async () => {
-    AelluxJs.extIndex.setFallback("/invalid-index.json");
-    AelluxJs.ext("input");
-    const official = await AelluxJs.wait("input");
-    AelluxJs.ext("missing-from-both-indexes");
-    const missing = await AelluxJs.wait("missing-from-both-indexes");
+    aelluxJs.extIndex.setFallback("/invalid-index.json");
+    aelluxJs.ext("input");
+    const official = await aelluxJs.wait("input");
+    aelluxJs.ext("missing-from-both-indexes");
+    const missing = await aelluxJs.wait("missing-from-both-indexes");
     return {
       official: !!official,
       missing: !!missing,
-      codes: AelluxJs.diagnostics.showHistory(50).map(entry => entry.code)
+      codes: aelluxJs.diagnostics.showHistory(50).map(entry => entry.code)
     };
   });
   expect(result.official).toBe(true);
@@ -249,9 +249,9 @@ test("a custom manifest cannot bypass an invalid resource integrity hash", async
   });
   await startBasic(page, { environment: "development" });
   const loaded = await page.evaluate(async () => {
-    AelluxJs.extIndex.setFallback("/bad-integrity-index.json");
-    AelluxJs.ext("bad-integrity");
-    return !!(await AelluxJs.wait("bad-integrity"));
+    aelluxJs.extIndex.setFallback("/bad-integrity-index.json");
+    aelluxJs.ext("bad-integrity");
+    return !!(await aelluxJs.wait("bad-integrity"));
   });
   expect(loaded).toBe(false);
 });
@@ -275,11 +275,11 @@ test("a custom manifest rejects malformed remote dependency metadata", async ({ 
   });
   await startBasic(page, { environment: "development", verboseLevel: 2 });
   const result = await page.evaluate(async () => {
-    AelluxJs.extIndex.setFallback("/bad-dependency-index.json");
-    AelluxJs.ext("bad-dependency");
+    aelluxJs.extIndex.setFallback("/bad-dependency-index.json");
+    aelluxJs.ext("bad-dependency");
     return {
-      loaded: !!(await AelluxJs.wait("bad-dependency")),
-      codes: AelluxJs.diagnostics.showHistory(30).map(entry => entry.code)
+      loaded: !!(await aelluxJs.wait("bad-dependency")),
+      codes: aelluxJs.diagnostics.showHistory(30).map(entry => entry.code)
     };
   });
   expect(result.loaded).toBe(false);
@@ -309,9 +309,9 @@ test("custom manifest resolves only after an official miss", async ({ page }) =>
   });
   await startBasic(page, { environment: "development" });
   const loaded = await page.evaluate(async () => {
-    AelluxJs.extIndex.setFallback("/custom-index.json");
-    AelluxJs.ext("private-test");
-    const extension = await AelluxJs.wait("private-test");
+    aelluxJs.extIndex.setFallback("/custom-index.json");
+    aelluxJs.ext("private-test");
+    const extension = await aelluxJs.wait("private-test");
     return extension && extension.loaded;
   });
   expect(loaded).toBe(true);

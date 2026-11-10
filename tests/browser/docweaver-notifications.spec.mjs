@@ -36,13 +36,13 @@ for (const [label, html] of documents) for (const mode of ["basic", "full"]) for
     }, html);
     await page.addScriptTag({ url: "/dist/aellux.min.js" });
     await page.evaluate(async ({ mode, forceLegacy }) => {
-      if (mode === "basic") for (const name of ["present", "feedback"]) AelluxJs.ext(name, { loadStyle: true });
-      AelluxJs.ext("progress");
+      if (mode === "basic") for (const name of ["present", "feedback"]) aelluxJs.ext(name, { loadStyle: true });
+      aelluxJs.ext("progress");
       await new Promise(resolve => {
-        AelluxJs.on("Ready", resolve, { once: true });
-        AelluxJs.init({ mode, forceLegacy, skipGlobalMount: true });
+        aelluxJs.on("Ready", resolve, { once: true });
+        aelluxJs.init({ mode, forceLegacy, skipGlobalMount: true });
       });
-      await AelluxJs.mount(document);
+      await aelluxJs.mount(document);
     }, { mode, forceLegacy });
 
     await page.getByRole("button", { name: "First", exact: true }).click();

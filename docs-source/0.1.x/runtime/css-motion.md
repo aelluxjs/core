@@ -1,6 +1,6 @@
 # CSS Motion Controller
 
-`AelluxJs.motion` coordinates CSS transitions and CSS animations with `waitLayout`. CSS remains responsible for properties, keyframes, duration, delay, iterations and the normal CSS easing. In browsers with sufficient Web Animations API support, Aellux pauses only the animations created by the requested state change and advances their `currentTime` from a monotonic clock. `waitLayout.sequence()` decides which frames perform those updates, including adaptive FPS reduction and the element's optional `data-ae-maxfps` limit.
+`aelluxJs.motion` coordinates CSS transitions and CSS animations with `waitLayout`. CSS remains responsible for properties, keyframes, duration, delay, iterations and the normal CSS easing. In browsers with sufficient Web Animations API support, aellux.js pauses only the animations created by the requested state change and advances their `currentTime` from a monotonic clock. `waitLayout.sequence()` decides which frames perform those updates, including adaptive FPS reduction and the element's optional `data-ae-maxfps` limit.
 
 The controller intentionally accepts a small main-thread cost under ideal conditions. Its purpose is predictable degradation: if the browser begins missing frames because of a constrained device or competing applications, the shared scheduler can reduce update frequency instead of allowing managed motion to contribute to stalls. A sustained severe delay selects the nearest compatible lower 15-FPS budget in one adjustment; an observed 10 FPS cadence reaches the 5 FPS floor immediately.
 
@@ -53,9 +53,9 @@ The option defaults to `true`. When disabled, or when the browser lacks reliable
 
 Disabling CSS Motion timeline control does not disable the shared adaptive cadence for other CSS publications scheduled through `waitLayout`.
 
-## Advanced Aellux easing
+## Advanced aellux.js easing
 
-Controlled motion can opt into an easing name supported by `$ae.ease()`. When the browser accepts CSS `linear()`, the controller samples the Aellux curve into a native timing function and lets the browser continue interpolating the CSS properties. Samples retain values outside `0..1`, preserving Back and Elastic overshoot without applying the original CSS easing a second time.
+Controlled motion can opt into an easing name supported by `$ae.ease()`. When the browser accepts CSS `linear()`, the controller samples the aellux.js curve into a native timing function and lets the browser continue interpolating the CSS properties. Samples retain values outside `0..1`, preserving Back and Elastic overshoot without applying the original CSS easing a second time.
 
 Present reads `--ae-pop-aellux-ease` and `--ae-dismiss-aellux-ease`. Present effects read `--ae-present-effect-aellux-ease` from the effect target. Feedback only requests effects through `present.effect`.
 
@@ -67,4 +67,4 @@ Present reads `--ae-pop-aellux-ease` and `--ae-dismiss-aellux-ease`. Present eff
 .field { --ae-present-effect-aellux-ease: bounceOut; }
 ```
 
-Always keep a valid CSS fallback such as `linear`, `ease`, `ease-in`, `ease-out`, or `ease-in-out`. Advanced Aellux names are never inserted directly into CSS timing properties. If sampled `linear()` is unsupported, the declared CSS easing remains in effect. Reduced motion bypasses intermediate controlled frames while preserving state and completion lifecycle.
+Always keep a valid CSS fallback such as `linear`, `ease`, `ease-in`, `ease-out`, or `ease-in-out`. Advanced aellux.js names are never inserted directly into CSS timing properties. If sampled `linear()` is unsupported, the declared CSS easing remains in effect. Reduced motion bypasses intermediate controlled frames while preserving state and completion lifecycle.

@@ -11,7 +11,7 @@ function setup({ navigator = {}, secure = true, environment = "production", mani
   let extension;
   Object.assign(root, { navigator, isSecureContext: secure, location: new URL("https://app.test/sub/"),
     document: { baseURI: "https://app.test/sub/", documentElement: {}, querySelector: () => null, querySelectorAll: () => manifestLinks },
-    AelluxJs: { options: { environment }, attr: name => `data-ae-${name}`, eventName: name => name.startsWith("$") ? name.slice(1) : `Demo${name}`,
+    aelluxJs: { options: { environment }, attr: name => `data-ae-${name}`, eventName: name => name.startsWith("$") ? name.slice(1) : `Demo${name}`,
       diagnostics: { WARN_CONFIGURATION_STRUCTURE: { code: 2028 }, warn: (definition, context) => warnings.push({ code: definition.code, context }) },
       extAttach: (_, value) => { extension = value; },
       onEvent: (target, event, fn) => target.addEventListener(event.slice(1), fn),
@@ -224,9 +224,9 @@ test("application events may reenter fallback or destroy registration without du
   registration.addEventListener = () => { subscriptions++; };
   const container = Object.assign(new EventTarget(), { register: async () => registration });
   const { extension, root, events } = setup({ navigator: { serviceWorker: container } });
-  const dispatch = root.AelluxJs.dispatchFrom;
+  const dispatch = root.aelluxJs.dispatchFrom;
   let nested, rendered = 0;
-  root.AelluxJs.dispatchFrom = (...args) => {
+  root.aelluxJs.dispatchFrom = (...args) => {
     dispatch(...args);
     if (args[1] === "DemoPwaInstallRequested") nested = extension.install();
     if (args[1] === "DemoPwaWorkerRegistered") extension.destroy();

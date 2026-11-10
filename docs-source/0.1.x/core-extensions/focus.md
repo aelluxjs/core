@@ -132,7 +132,7 @@ $ae.ext("focus");
 $ae.init({ mode: "basic" });
 ```
 
-The Extension observes `focusin`, capture-phase `focus` and `blur` on the document, and `focus` and `blur` on the window. A blur preserves the last valid element target; repeated notifications for the same element do not create duplicate history entries. Focus changes are recorded in a bounded, in-memory history. Call `AelluxJs.ext.focus.restoreLastFocus()` to focus the previous connected, visible target. It returns `true` if focus moved and `false` when no valid target remains. Hidden, inert, disabled and detached targets are skipped.
+The Extension observes `focusin`, capture-phase `focus` and `blur` on the document, and `focus` and `blur` on the window. A blur preserves the last valid element target; repeated notifications for the same element do not create duplicate history entries. Focus changes are recorded in a bounded, in-memory history. Call `aelluxJs.ext.focus.restoreLastFocus()` to focus the previous connected, visible target. It returns `true` if focus moved and `false` when no valid target remains. Hidden, inert, disabled and detached targets are skipped.
 
 ```js
 const restored = $ae.ext.focus.restoreLastFocus();

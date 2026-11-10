@@ -205,11 +205,11 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
-    var AelluxJs = root.AelluxJs;
-    if (!AelluxJs) throw new Error("[aellux.js] Load the boot script before the viewport extension.");
+    var aelluxJs = root.aelluxJs;
+    if (!aelluxJs) throw new Error("[aellux.js] Load the boot script before the viewport extension.");
     var extensionName = "viewport";
-    var attribute = AelluxJs.attr(extensionName);
-    var targetAttribute = AelluxJs.attr("viewport-target");
+    var attribute = aelluxJs.attr(extensionName);
+    var targetAttribute = aelluxJs.attr("viewport-target");
     var properties = ["--ae-viewport-x", "--ae-viewport-y", "--ae-viewport-visible"];
     var EVENT_EPSILON = 1e-6;
     var document = root.document;
@@ -220,12 +220,12 @@
     var writtenStyles = /* @__PURE__ */ new WeakMap();
     var nextLayoutId = 6e6;
     var mutations = null, resizeObserver = null;
-    AelluxJs.extAttach(extensionName, {
+    aelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy
     });
     function init() {
-      AelluxJs.registerCssProperty.apply(AelluxJs, _toConsumableArray(properties.map(function(name) {
+      aelluxJs.registerCssProperty.apply(aelluxJs, _toConsumableArray(properties.map(function(name) {
         return {
           name: name,
           syntax: "<number>",
@@ -233,7 +233,7 @@
           inherits: false
         };
       })));
-      AelluxJs.mountManager.add({
+      aelluxJs.mountManager.add({
         extensionName: extensionName,
         selector: "[".concat(attribute, "]"),
         mount: mount,
@@ -253,7 +253,7 @@
       } finally {
         _iterator.f();
       }
-      AelluxJs.mountManager.remove({
+      aelluxJs.mountManager.remove({
         extensionName: extensionName
       });
     }
@@ -319,10 +319,10 @@
       if (!states.size) stopObserving();
     }
     function startObserving() {
-      AelluxJs.onEvent(root, "$resize", scheduleAll);
-      AelluxJs.onEvent(document, "$load", scheduleAll, true);
-      AelluxJs.onEvent(document, AelluxJs.eventName("Layout"), onLayout);
-      AelluxJs.onEvent(document, AelluxJs.eventName("BeforeUnmount"), onBeforeUnmount);
+      aelluxJs.onEvent(root, "$resize", scheduleAll);
+      aelluxJs.onEvent(document, "$load", scheduleAll, true);
+      aelluxJs.onEvent(document, aelluxJs.eventName("Layout"), onLayout);
+      aelluxJs.onEvent(document, aelluxJs.eventName("BeforeUnmount"), onBeforeUnmount);
       if (root.ResizeObserver) resizeObserver = new root.ResizeObserver(scheduleAll);
       if (root.MutationObserver) {
         mutations = new root.MutationObserver(function(records) {
@@ -341,10 +341,10 @@
     }
     function stopObserving() {
       var _mutations, _resizeObserver;
-      AelluxJs.offEvent(root, "$resize", scheduleAll);
-      AelluxJs.offEvent(document, "$load", scheduleAll, true);
-      AelluxJs.offEvent(document, AelluxJs.eventName("Layout"), onLayout);
-      AelluxJs.offEvent(document, AelluxJs.eventName("BeforeUnmount"), onBeforeUnmount);
+      aelluxJs.offEvent(root, "$resize", scheduleAll);
+      aelluxJs.offEvent(document, "$load", scheduleAll, true);
+      aelluxJs.offEvent(document, aelluxJs.eventName("Layout"), onLayout);
+      aelluxJs.offEvent(document, aelluxJs.eventName("BeforeUnmount"), onBeforeUnmount);
       (_mutations = mutations) === null || _mutations === void 0 || _mutations.disconnect();
       (_resizeObserver = resizeObserver) === null || _resizeObserver === void 0 || _resizeObserver.disconnect();
       mutations = resizeObserver = null;
@@ -418,7 +418,7 @@
         group.onScroll = function() {
           return schedule(group);
         };
-        AelluxJs.onEvent(reference === document ? root : reference, "$scroll", group.onScroll, {
+        aelluxJs.onEvent(reference === document ? root : reference, "$scroll", group.onScroll, {
           passive: true
         });
         if (root.IntersectionObserver) {
@@ -442,10 +442,10 @@
       state.group = null;
       if (group.states.size) return;
       group.active = false;
-      AelluxJs.waitLayout.cancel(group.id);
+      aelluxJs.waitLayout.cancel(group.id);
       if (group.timer !== null) root.clearTimeout(group.timer);
       (_group$intersection3 = group.intersection) === null || _group$intersection3 === void 0 || _group$intersection3.disconnect();
-      AelluxJs.offEvent(group.reference === document ? root : group.reference, "$scroll", group.onScroll);
+      aelluxJs.offEvent(group.reference === document ? root : group.reference, "$scroll", group.onScroll);
       groups.delete(group.reference);
     }
     function schedule(group) {
@@ -478,7 +478,7 @@
     }
     function reportError(group, operation, error) {
       var element = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : group.reference;
-      AelluxJs.dispatch("ViewportError", {
+      aelluxJs.dispatch("ViewportError", {
         detail: {
           error: error,
           operation: operation,
@@ -488,7 +488,7 @@
           })
         }
       });
-      AelluxJs.diagnostics.error(operation === "unmount" ? AelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT : AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT, {
+      aelluxJs.diagnostics.error(operation === "unmount" ? aelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT : aelluxJs.diagnostics.ERROR_EXTENSION_MOUNT, {
         extension: extensionName,
         cause: error,
         operation: operation,
@@ -505,7 +505,7 @@
           while (1) switch (_context2.n) {
             case 0:
               _context2.n = 1;
-              return AelluxJs.waitLayout.read(group.id, function() {
+              return aelluxJs.waitLayout.read(group.id, function() {
                 return measure(group);
               });
             case 1:
@@ -517,14 +517,14 @@
               return _context2.a(2);
             case 2:
               _context2.n = 3;
-              return AelluxJs.waitLayout.update(group.id, function() {
+              return aelluxJs.waitLayout.update(group.id, function() {
                 var _iterator9 = _createForOfIteratorHelper(measurements), _step9;
                 try {
                   var _loop = function _loop2() {
                     var _step9$value = _step9.value, state = _step9$value.state, target = _step9$value.target, values = _step9$value.values, snapshot = _step9$value.snapshot, changed = _step9$value.changed;
                     if (states.get(state.element) !== state || state.group !== group) return 0;
                     if (values === null) {
-                      AelluxJs.mountManager.unmount(state.element, extensionName).catch(function(error) {
+                      aelluxJs.mountManager.unmount(state.element, extensionName).catch(function(error) {
                         return reportError(group, "unmount", error, state.element);
                       });
                       return 0;
@@ -545,7 +545,7 @@
                       state.snapshot = snapshot;
                       var initial = previous === null;
                       var emit = function emit2(name) {
-                        return AelluxJs.dispatchFrom(state.element, name, {
+                        return aelluxJs.dispatchFrom(state.element, name, {
                           bubbles: true,
                           composed: true,
                           cancelable: false,
@@ -637,7 +637,7 @@
       state.configuration = value;
       state.axes = value === "x" || value === "y" ? value : "both";
       if (value !== "" && value !== "both" && value !== "x" && value !== "y") {
-        AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
+        aelluxJs.diagnostics.warn(aelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
           extension: extensionName,
           element: state.element,
           attribute: attribute,
@@ -656,7 +656,7 @@
       var id = value.trim().replace(/^#/, "");
       var target = id && !/\s/.test(id) ? document.getElementById(id) : null;
       if (!target || !target.style) {
-        if (state.targetWarning !== value) AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_TARGET, {
+        if (state.targetWarning !== value) aelluxJs.diagnostics.warn(aelluxJs.diagnostics.WARN_CONFIGURATION_TARGET, {
           extension: extensionName,
           element: state.element,
           attribute: targetAttribute,
@@ -695,7 +695,7 @@
       releaseTarget(state);
       var owner = owners.get(target);
       if (owner) {
-        if (state.conflict !== owner) AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_RESOURCE_CONFLICT, {
+        if (state.conflict !== owner) aelluxJs.diagnostics.warn(aelluxJs.diagnostics.WARN_RESOURCE_CONFLICT, {
           extension: extensionName,
           element: state.element,
           attribute: targetAttribute,
@@ -713,7 +713,7 @@
       owners.set(target, state);
       state.target = target;
       state.memories = properties.map(function(property) {
-        return AelluxJs.persist.element.save(target, [], [property]);
+        return aelluxJs.persist.element.save(target, [], [property]);
       });
     }
     function scrollable(element) {

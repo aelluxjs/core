@@ -87,12 +87,12 @@
   function attachDialogExtension(root2) {
     var prepareDialog = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : function() {
     };
-    var AelluxJs = root2.AelluxJs;
+    var aelluxJs = root2.aelluxJs;
     var extensionName = "dialog";
-    if (!AelluxJs) {
-      throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
+    if (!aelluxJs) {
+      throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.'));
     }
-    AelluxJs.extAttach(extensionName, {
+    aelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
       show: show,
@@ -102,7 +102,7 @@
     function init() {
       var _loop = function _loop2() {
         var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), name = _Object$entries$_i[0], method = _Object$entries$_i[1];
-        AelluxJs.comm.handle("dialog." + name, function(_ref) {
+        aelluxJs.comm.handle("dialog." + name, function(_ref) {
           var element = _ref.element, _ref$args = _ref.args, args = _ref$args === void 0 ? [] : _ref$args;
           return method.apply(void 0, [element].concat(_toConsumableArray(args)));
         }, {
@@ -116,7 +116,7 @@
       }); _i < _Object$entries.length; _i++) {
         _loop();
       }
-      AelluxJs.mountManager.add({
+      aelluxJs.mountManager.add({
         // Lower priorities mount first, before ordinary consuming Extensions.
         extensionName: extensionName,
         selector: "dialog",
@@ -128,8 +128,8 @@
       });
     }
     function destroy() {
-      AelluxJs.comm.removeOwner(extensionName);
-      AelluxJs.mountManager.remove({
+      aelluxJs.comm.removeOwner(extensionName);
+      aelluxJs.mountManager.remove({
         extensionName: extensionName
       });
     }
@@ -814,7 +814,7 @@
   function installDialogPolyfill(root2, dialog, css) {
     if (hasDialogAPI(dialog)) return;
     var document2 = root2.document;
-    var attribute = root2.AelluxJs.attr("dialog-polyfill-style");
+    var attribute = root2.aelluxJs.attr("dialog-polyfill-style");
     var style = document2.querySelector("style[" + attribute + "]");
     if (!style) {
       style = document2.createElement("style");

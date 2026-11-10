@@ -9,9 +9,9 @@ async function start(page, markup, options) {
   await page.evaluate(markup => { document.body.innerHTML = markup; }, markup);
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(options => new Promise(resolve => {
-    if (options.mode === "basic") AelluxJs.ext("present");
-    AelluxJs.on("Ready", resolve, { once: true });
-    AelluxJs.init(options);
+    if (options.mode === "basic") aelluxJs.ext("present");
+    aelluxJs.on("Ready", resolve, { once: true });
+    aelluxJs.init(options);
   }), options);
 }
 
@@ -45,14 +45,14 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
     const invalid = ["0", "-1", "1.5", "NaN", "Infinity", "wrong", "2e0", "+2", "9007199254740992"];
     await start(page, invalid.map((value, n) => groupMarkup(value, `g${n}`)).join(""), { mode, forceLegacy });
     expect(await page.evaluate(async () => {
-      const before = AelluxJs.diagnostics.showHistory().filter(e => e.code === 2026).length;
+      const before = aelluxJs.diagnostics.showHistory().filter(e => e.code === 2026).length;
       const reused = [];
       for (let n = 0; n < 9; n++) {
         const controller = $ae(`g${n}`).present;
         const first = await controller.popNext();
         reused.push(first === await controller.popNext());
       }
-      return { before, after: AelluxJs.diagnostics.showHistory().filter(e => e.code === 2026).length, reused };
+      return { before, after: aelluxJs.diagnostics.showHistory().filter(e => e.code === 2026).length, reused };
     })).toEqual({ before: 9, after: 9, reused: Array(9).fill(true) });
   });
 

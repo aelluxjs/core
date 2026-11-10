@@ -5,10 +5,10 @@ async function start(page, { mode = "full", forceLegacy = false, environment = "
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(async ({ mode, forceLegacy, environment, markup, options }) => {
     document.body.innerHTML = markup;
-    if (mode === "basic") AelluxJs.ext("pwa", { loadWhen: "[data-ae-pwa]" });
+    if (mode === "basic") aelluxJs.ext("pwa", { loadWhen: "[data-ae-pwa]" });
     await new Promise(resolve => {
-      AelluxJs.on("Ready", resolve, { once: true });
-      AelluxJs.init({ mode, forceLegacy, environment, verboseLevel: "error", extensions: { pwa: options } });
+      aelluxJs.on("Ready", resolve, { once: true });
+      aelluxJs.init({ mode, forceLegacy, environment, verboseLevel: "error", extensions: { pwa: options } });
     });
   }, { mode, forceLegacy, environment, markup, options });
 }
@@ -79,7 +79,7 @@ async function nativeEvent(page, outcome = "accepted") {
     window.promptCalls = 0;
     window.notifications = [];
     for (const name of ["PwaInstallRequested", "PwaInstallAccepted", "PwaInstallDismissed", "PwaInstalled"]) {
-      AelluxJs.on(name, event => notifications.push({ name, installed: event.detail.status.installed }));
+      aelluxJs.on(name, event => notifications.push({ name, installed: event.detail.status.installed }));
     }
     const event = new Event("beforeinstallprompt", { cancelable: true });
     event.prompt = () => {
@@ -109,8 +109,8 @@ for (const forceLegacy of [false, true]) {
       };
     });
     await start(page, { forceLegacy, markup: "<main>Application</main>" });
-    expect(await page.evaluate(() => ({ loaded: !!AelluxJs.ext.pwa, listeners: pwaListeners,
-      bundled: Object.keys(AelluxJs.bundledExtensions).includes("pwa") }))).toEqual({ loaded: false, listeners: [], bundled: false });
+    expect(await page.evaluate(() => ({ loaded: !!aelluxJs.ext.pwa, listeners: pwaListeners,
+      bundled: Object.keys(aelluxJs.bundledExtensions).includes("pwa") }))).toEqual({ loaded: false, listeners: [], bundled: false });
     expect(requests.some(url => /ext\.pwa|pwa\.sw/.test(url))).toBe(false);
     expect(await page.evaluate(() => navigator.serviceWorker.getRegistrations().then(values => values.length))).toBe(0);
     await expect(page.locator("dialog")).toHaveCount(0);
@@ -119,7 +119,7 @@ for (const forceLegacy of [false, true]) {
     test(`${mode} lazy mount, synchronous prompt, keyboard and remount (Legacy=${forceLegacy})`, async ({ page }) => {
       await start(page, { mode, forceLegacy });
       expect(await page.evaluate(() => !!$ae("install").pwa)).toBe(true);
-      await page.evaluate(async () => { await AelluxJs.mount(); await AelluxJs.mount(); });
+      await page.evaluate(async () => { await aelluxJs.mount(); await aelluxJs.mount(); });
       await nativeEvent(page);
       await page.locator("#install").focus();
       await page.keyboard.press("Enter");
@@ -129,8 +129,8 @@ for (const forceLegacy of [false, true]) {
       // userActivation is supplied by the real browser while the prompt API is controlled.
       expect(await page.evaluate(() => promptActivation)).toBe(true);
       await page.evaluate(async () => {
-        await AelluxJs.unmount("install", "pwa");
-        await AelluxJs.mount("install", "pwa");
+        await aelluxJs.unmount("install", "pwa");
+        await aelluxJs.mount("install", "pwa");
         window.dispatchEvent(new Event("appinstalled"));
         window.dispatchEvent(new Event("appinstalled"));
       });
@@ -141,28 +141,28 @@ for (const forceLegacy of [false, true]) {
   }
   test(`dynamic declaration loads once; destroy and explicit re-registration work (Legacy=${forceLegacy})`, async ({ page }) => {
     await start(page, { forceLegacy, markup: "<main></main>" });
-    expect(await page.evaluate(() => !!AelluxJs.ext.pwa)).toBe(false);
+    expect(await page.evaluate(() => !!aelluxJs.ext.pwa)).toBe(false);
     await page.evaluate(async () => {
       const button = document.createElement("button");
       button.id = "install";
       button.setAttribute("data-ae-pwa", "install");
       button.textContent = "Install";
       document.body.appendChild(button);
-      await AelluxJs.mount(button);
-      await AelluxJs.mount(button);
+      await aelluxJs.mount(button);
+      await aelluxJs.mount(button);
     });
     await nativeEvent(page, "dismissed");
     await page.locator("#install").click();
     await expect.poll(() => page.evaluate(() => notifications.map(value => value.name))).toEqual(["PwaInstallRequested", "PwaInstallDismissed"]);
     await page.evaluate(async () => {
-      await AelluxJs.destroyExtensions("pwa");
+      await aelluxJs.destroyExtensions("pwa");
       window.oldNotifications = notifications.length;
       window.dispatchEvent(new Event("appinstalled"));
     });
     expect(await page.evaluate(() => notifications.length === oldNotifications)).toBe(true);
     await page.evaluate(async () => {
-      AelluxJs.ext("pwa", { loadWhen: "[data-ae-pwa]" });
-      await AelluxJs.mount("install", "pwa");
+      aelluxJs.ext("pwa", { loadWhen: "[data-ae-pwa]" });
+      await aelluxJs.mount("install", "pwa");
     });
     expect(await page.evaluate(() => !!$ae("install").pwa)).toBe(true);
   });
@@ -228,7 +228,7 @@ test("manual guide uses existing Legacy dialog compatibility when native dialog 
     }
   });
   await start(page, { options: { language: "en" } });
-  expect(await page.evaluate(() => AelluxJs.diagnostics.legacy)).toBe(true);
+  expect(await page.evaluate(() => aelluxJs.diagnostics.legacy)).toBe(true);
   await page.locator("#install").click();
   await expect(page.getByRole("dialog", { name: "Add to Home Screen" })).toBeVisible();
   await page.getByRole("button", { name: "Close", exact: true }).click();

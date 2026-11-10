@@ -21,10 +21,10 @@ async function start(page, legacy, markup = layout, inputs = "keyboard gamepad",
       window.pads[index] = pad;
       const event = new Event("gamepadconnected"); Object.defineProperty(event, "gamepad", { value: pad }); dispatchEvent(event);
     };
-    window.send = (action, source = "gamepad", deviceId = "test") => AelluxJs.ext.input.dispatchCommand({
+    window.send = (action, source = "gamepad", deviceId = "test") => aelluxJs.ext.input.dispatchCommand({
       deviceId, source, code: action, action: `navigate-${action}`, phase: "press" });
-    if (mode === "basic") { AelluxJs.ext("focus"); AelluxJs.ext("input"); }
-    return new Promise(resolve => { AelluxJs.on("Ready", resolve, { once: true }); AelluxJs.init({ mode, forceLegacy: legacy }); });
+    if (mode === "basic") { aelluxJs.ext("focus"); aelluxJs.ext("input"); }
+    return new Promise(resolve => { aelluxJs.on("Ready", resolve, { once: true }); aelluxJs.init({ mode, forceLegacy: legacy }); });
   }, { markup, inputs, legacy, mode });
 }
 
@@ -100,7 +100,7 @@ for (const legacy of [false, true]) test.describe(`Spatial Focus (Legacy=${legac
     await page.setViewportSize({ width: 550, height: 500 });
     await page.locator("#a").focus(); await page.evaluate(() => window.send("right")); await expect(page.locator("#h")).toBeFocused();
     const changes = await page.evaluate(() => {
-      let count = 0; AelluxJs.on("FocusChange", () => count++);
+      let count = 0; aelluxJs.on("FocusChange", () => count++);
       window.send("right"); return count;
     });
     expect(changes).toBe(1);
@@ -130,19 +130,19 @@ for (const legacy of [false, true]) test.describe(`Spatial Focus (Legacy=${legac
     await page.locator("#a").focus(); await page.evaluate(() => window.send("right")); await expect(page.locator("#b")).toBeFocused();
     expect(await page.evaluate(() => window.send("right"))).toBe(false);
     await page.evaluate(() => {
-      AelluxJs.ext.focus.createContext(2, { scope: document.getElementById("inner") });
-      AelluxJs.ext.focus.setFocus(2, "a"); AelluxJs.ext.input.registerRouter(() => 2);
+      aelluxJs.ext.focus.createContext(2, { scope: document.getElementById("inner") });
+      aelluxJs.ext.focus.setFocus(2, "a"); aelluxJs.ext.input.registerRouter(() => 2);
       document.getElementById("modal").showModal();
     });
     expect(await page.evaluate(() => window.send("right"))).toBe(false);
-    expect(await page.evaluate(() => AelluxJs.ext.focus.getContext(2).element.id)).toBe("a");
+    expect(await page.evaluate(() => aelluxJs.ext.focus.getContext(2).element.id)).toBe("a");
   });
 
   test("two routed gamepads move independent contexts with D-pad and stick and clean disconnect metadata", async ({ page }) => {
     await start(page, legacy);
     await page.locator("#a").focus();
     await page.evaluate(() => {
-      const focus = AelluxJs.ext.focus, input = AelluxJs.ext.input;
+      const focus = aelluxJs.ext.focus, input = aelluxJs.ext.input;
       focus.createContext(2, { scope: document.getElementById("panel") }); focus.setFocus(2, "a");
       window.connectPad(0); window.connectPad(1);
       const devices = input.devices(); window.pad2 = devices[1].deviceId;
@@ -150,21 +150,21 @@ for (const legacy of [false, true]) test.describe(`Spatial Focus (Legacy=${legac
       window.pads[0].buttons[15] = { pressed: true, value: 1 }; window.pads[1].axes[1] = 1;
     });
     await expect(page.locator("#b")).toBeFocused();
-    await expect.poll(() => page.evaluate(() => AelluxJs.ext.focus.getContext(2).element.id)).toBe("d");
+    await expect.poll(() => page.evaluate(() => aelluxJs.ext.focus.getContext(2).element.id)).toBe("d");
     await page.evaluate(() => { window.pads[0].buttons[15] = { pressed: false, value: 0 }; window.pads[1].axes[1] = 0; });
     await expect(page.locator("#b")).toHaveClass(/ae--focus-player1/);
     await expect(page.locator("#d")).toHaveClass(/ae--focus-player2/);
-    await page.evaluate(() => AelluxJs.ext.focus.setFocus(2, "b"));
+    await page.evaluate(() => aelluxJs.ext.focus.setFocus(2, "b"));
     await expect(page.locator("#b")).toHaveClass(/ae--focus-player1/); await expect(page.locator("#b")).toHaveClass(/ae--focus-player2/);
     await page.evaluate(() => {
       const pad = window.pads[1]; window.pads[1] = null;
       const event = new Event("gamepaddisconnected"); Object.defineProperty(event, "gamepad", { value: pad }); dispatchEvent(event);
     });
-    expect(await page.evaluate(() => AelluxJs.ext.input.devices().some(device => device.deviceId === window.pad2))).toBe(false);
+    expect(await page.evaluate(() => aelluxJs.ext.input.devices().some(device => device.deviceId === window.pad2))).toBe(false);
     await page.evaluate(() => {
       const hint = document.createElement("kbd"); hint.id = "padHint";
       hint.setAttribute("data-ae-shortcut-hint", "keyboard:KeyI; gamepad:north"); hint.setAttribute("data-ae-shortcut-focus", "2");
-      document.body.append(hint); return AelluxJs.mount(hint, "input");
+      document.body.append(hint); return aelluxJs.mount(hint, "input");
     });
     await expect(page.locator("#padHint")).toHaveAttribute("data-ae-shortcut-label", "I");
   });
@@ -172,15 +172,15 @@ for (const legacy of [false, true]) test.describe(`Spatial Focus (Legacy=${legac
   test("independent context defaults, none, and application adapters with explicit spatial policy", async ({ page }) => {
     await start(page, legacy);
     const result = await page.evaluate(async () => {
-      const focus = AelluxJs.ext.focus, panel = document.getElementById("panel");
+      const focus = aelluxJs.ext.focus, panel = document.getElementById("panel");
       document.getElementById("a").focus(); focus.createContext(2, { scope: panel }); focus.setFocus(2, "a");
-      const off = AelluxJs.ext.input.registerRouter(() => 2);
+      const off = aelluxJs.ext.input.registerRouter(() => 2);
       const moved = window.send("right", "keyboard");
       panel.setAttribute("data-ae-focus-nav", "none"); const blocked = window.send("down", "keyboard");
       off(); panel.setAttribute("data-ae-focus-nav", "auto");
       document.documentElement.setAttribute("data-ae-inputs", "keyboard gamepad remote");
-      AelluxJs.ext.input.registerAdapter("remote", () => ({ init() {}, destroy() {} }));
-      await AelluxJs.mount(document, "input");
+      aelluxJs.ext.input.registerAdapter("remote", () => ({ init() {}, destroy() {} }));
+      await aelluxJs.mount(document, "input");
       const auto = window.send("right", "remote");
       panel.setAttribute("data-ae-focus-nav", "spatial");
       const spatial = window.send("right", "remote");
@@ -193,36 +193,36 @@ for (const legacy of [false, true]) test.describe(`Spatial Focus (Legacy=${legac
     await start(page, legacy, `<div id="scroller" data-ae-focus-scope data-ae-scrollbox style="height:100px;width:200px;overflow:auto">
       <button id="a">A</button><div style="height:500px"></div><button id="b">B</button></div>`);
     await page.evaluate(async () => {
-      AelluxJs.ext("scrollbox"); await AelluxJs.wait("scrollbox"); await AelluxJs.mount(document);
+      aelluxJs.ext("scrollbox"); await aelluxJs.wait("scrollbox"); await aelluxJs.mount(document);
       document.getElementById("a").focus();
-      AelluxJs.ext.focus.createContext(2, { scope: document.getElementById("scroller") });
-      AelluxJs.ext.focus.setFocus(2, "a"); AelluxJs.ext.input.registerRouter(() => 2);
+      aelluxJs.ext.focus.createContext(2, { scope: document.getElementById("scroller") });
+      aelluxJs.ext.focus.setFocus(2, "a"); aelluxJs.ext.input.registerRouter(() => 2);
     });
     expect(await page.evaluate(() => window.send("down"))).toBe(true);
     await expect.poll(() => page.locator("#scroller").evaluate(el => el.scrollTop)).toBeGreaterThan(400);
     await expect(page.locator("#a")).toBeFocused();
-    expect(await page.evaluate(() => AelluxJs.ext.focus.getContext(2).element.id)).toBe("b");
+    expect(await page.evaluate(() => aelluxJs.ext.focus.getContext(2).element.id)).toBe("b");
   });
 
   test("removal, insertion, unmount, remount, destroy and history keep their lifecycle", async ({ page }) => {
     await start(page, legacy);
     await page.locator("#a").focus(); await page.evaluate(() => window.send("right"));
-    expect(await page.evaluate(() => AelluxJs.ext.focus.restoreLastFocus())).toBe(true); await expect(page.locator("#a")).toBeFocused();
+    expect(await page.evaluate(() => aelluxJs.ext.focus.restoreLastFocus())).toBe(true); await expect(page.locator("#a")).toBeFocused();
     await page.evaluate(() => {
-      const focus = AelluxJs.ext.focus; focus.createContext(2, { scope: document.getElementById("panel") }); focus.setFocus(2, "b");
+      const focus = aelluxJs.ext.focus; focus.createContext(2, { scope: document.getElementById("panel") }); focus.setFocus(2, "b");
       document.getElementById("b").remove();
     });
-    await expect.poll(() => page.evaluate(() => AelluxJs.ext.focus.getContext(2).element)).toBeNull();
+    await expect.poll(() => page.evaluate(() => aelluxJs.ext.focus.getContext(2).element)).toBeNull();
     await page.evaluate(async () => {
       const button = document.createElement("button"); button.id = "new"; button.style.cssText = "left:120px;top:0";
-      document.getElementById("panel").append(button); await AelluxJs.mount("panel"); window.send("right");
+      document.getElementById("panel").append(button); await aelluxJs.mount("panel"); window.send("right");
     });
     await expect(page.locator("#new")).toBeFocused();
-    await page.evaluate(() => AelluxJs.unmount("panel", "focus"));
-    expect(await page.evaluate(() => AelluxJs.ext.focus.getContext(2))).toBeNull();
-    await page.evaluate(() => AelluxJs.mount("panel", "focus")); await expect(page.locator("#new")).toHaveClass(/ae--focus-player1/);
-    await page.evaluate(() => AelluxJs.destroyExtensions("focus")); await expect(page.locator("#new")).not.toHaveClass(/ae--focus-player1/);
-    await page.evaluate(async () => { AelluxJs.ext("focus"); await AelluxJs.wait("focus"); await AelluxJs.mount(document); });
+    await page.evaluate(() => aelluxJs.unmount("panel", "focus"));
+    expect(await page.evaluate(() => aelluxJs.ext.focus.getContext(2))).toBeNull();
+    await page.evaluate(() => aelluxJs.mount("panel", "focus")); await expect(page.locator("#new")).toHaveClass(/ae--focus-player1/);
+    await page.evaluate(() => aelluxJs.destroyExtensions("focus")); await expect(page.locator("#new")).not.toHaveClass(/ae--focus-player1/);
+    await page.evaluate(async () => { aelluxJs.ext("focus"); await aelluxJs.wait("focus"); await aelluxJs.mount(document); });
     await page.evaluate(() => window.send("left")); await expect(page.locator("#a")).toBeFocused();
   });
 
@@ -233,7 +233,7 @@ for (const legacy of [false, true]) test.describe(`Spatial Focus (Legacy=${legac
     await page.locator("#done").focus();
     expect(await page.evaluate(() => {
       document.getElementById("opening").hidden = true;
-      return AelluxJs.ext.focus.restoreLastFocus();
+      return aelluxJs.ext.focus.restoreLastFocus();
     })).toBe(true);
     await expect(page.locator("#trigger")).toBeFocused();
   });

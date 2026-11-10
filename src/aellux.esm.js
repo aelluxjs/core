@@ -4,9 +4,9 @@ import { createAelluxApi } from "./internal/aellux-api-integration.js";
 import { createAelluxConstants } from "./internal/create-aellux-constants.js";
 
 const root = typeof globalThis !== "undefined" ? globalThis : window;
-const AelluxJs = root.AelluxJs || createAelluxApi(root, createAelluxConstants());
+const aelluxJs = root.aelluxJs || createAelluxApi(root, createAelluxConstants());
 
-root.AelluxJs = AelluxJs;
-root[AelluxJs.shortJSName] = AelluxJs;
+root.aelluxJs = aelluxJs;
+root[aelluxJs.shortJSName] = aelluxJs;
 
-export default AelluxJs;
+export default aelluxJs;

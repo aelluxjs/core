@@ -26,7 +26,7 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   function validatePWAManifest(root, getManifestLink) {
     var _a, _b;
-    const api = root.AelluxJs;
+    const api = root.aelluxJs;
     if (api.options.environment !== "development") return;
     const link = getManifestLink();
     if ((_a = link == null ? void 0 : link.getAttribute("href")) == null ? void 0 : _a.trim()) return;
@@ -44,7 +44,7 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
-    const api = root.AelluxJs;
+    const api = root.aelluxJs;
     if (!api) throw new Error('[aellux.js] Load the boot script before the "pwa" extension.');
     const extensionName = "pwa", attribute = api.attr(extensionName);
     let active = false, revision = 0, settings = {}, promptEvent = null;

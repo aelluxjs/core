@@ -3,8 +3,8 @@ import { expect, test } from "@playwright/test";
 test("ARIA handlers arbitrate each attribute and restore its original value", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
-  await expect.poll(() => page.evaluate(() => typeof AelluxJs.aria?.register)).toBe("function");
+  await page.evaluate(() => aelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => typeof aelluxJs.aria?.register)).toBe("function");
 
   const result = await page.evaluate(() => {
     const element = document.createElement("button");
@@ -12,8 +12,8 @@ test("ARIA handlers arbitrate each attribute and restore its original value", as
     element.setAttribute("aria-controls", "original-panel");
     document.body.append(element);
 
-    const low = AelluxJs.aria.register(element);
-    const high = AelluxJs.aria.register(element, { priority: 10 });
+    const low = aelluxJs.aria.register(element);
+    const high = aelluxJs.aria.register(element, { priority: 10 });
     low.set({ label: "low", controls: ["one", "two"], hidden: true });
     high.set({ label: "high", controls: ["other"], hidden: false });
     const claimed = {
@@ -40,8 +40,8 @@ test("ARIA handlers arbitrate each attribute and restore its original value", as
       hidden: element.getAttribute("aria-hidden")
     };
 
-    const first = AelluxJs.aria.register(element);
-    const second = AelluxJs.aria.register(element);
+    const first = aelluxJs.aria.register(element);
+    const second = aelluxJs.aria.register(element);
     first.set({ expanded: true });
     second.set({ expanded: false });
     first.set({ expanded: true });
@@ -77,13 +77,13 @@ test("Present ARIA claims yield to a higher priority handler and resume afterwar
         aria-controls="original"></button>
       <div id="panel" data-ae-present hidden></div>
     `;
-    AelluxJs.init({ mode: "full" });
+    aelluxJs.init({ mode: "full" });
   });
   await expect(page.locator("#trigger")).toHaveAttribute("aria-controls", "panel original");
 
   const result = await page.evaluate(async () => {
     const trigger = document.getElementById("trigger");
-    const higher = AelluxJs.aria.register(trigger, { priority: 10 });
+    const higher = aelluxJs.aria.register(trigger, { priority: 10 });
     higher.set({ controls: ["other"], expanded: true });
     const overridden = {
       controls: trigger.getAttribute("aria-controls"),
@@ -94,7 +94,7 @@ test("Present ARIA claims yield to a higher priority handler and resume afterwar
       controls: trigger.getAttribute("aria-controls"),
       expanded: trigger.getAttribute("aria-expanded")
     };
-    await AelluxJs.unmount(trigger, "present");
+    await aelluxJs.unmount(trigger, "present");
     return {
       overridden, resumed,
       restored: {

@@ -91,11 +91,11 @@
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
-        const AelluxJs2 = root2.AelluxJs;
+        const aelluxJs2 = root2.aelluxJs;
         const { toCamelCase: toCamelCase2 } = utils_name_case_default;
         const extensionName = "preference";
-        if (!AelluxJs2) {
-          throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+        if (!aelluxJs2) {
+          throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.`);
         }
         const NO_PREFERENCE = "no-preference";
         const userPreferences = /* @__PURE__ */ Object.create(null);
@@ -106,17 +106,17 @@
         const containerLabels = /* @__PURE__ */ new Map();
         const labelMemories = /* @__PURE__ */ new WeakMap();
         const containerOptionAria = /* @__PURE__ */ new Map();
-        AelluxJs2.extAttach(extensionName, { init, destroy, update, get, set });
+        aelluxJs2.extAttach(extensionName, { init, destroy, update, get, set });
         const attr = {
-          preference: AelluxJs2.attr("preference"),
-          option: AelluxJs2.attr("option"),
-          label: AelluxJs2.attr("label"),
-          next: AelluxJs2.attr("next"),
-          prev: AelluxJs2.attr("prev"),
-          ready: AelluxJs2.attr("ready")
+          preference: aelluxJs2.attr("preference"),
+          option: aelluxJs2.attr("option"),
+          label: aelluxJs2.attr("label"),
+          next: aelluxJs2.attr("next"),
+          prev: aelluxJs2.attr("prev"),
+          ready: aelluxJs2.attr("ready")
         };
         const className = {
-          active: AelluxJs2.className("active")
+          active: aelluxJs2.className("active")
         };
         const prefOptions = {
           colorScheme: ["auto", "light", "dark"],
@@ -132,21 +132,21 @@
           sound: ["off", "on", "low"]
         };
         function init(options) {
-          AelluxJs2.mountManager.add({
+          aelluxJs2.mountManager.add({
             extensionName,
             selector: `[${attr.preference}]`,
             priority: 0,
             mount: mountPreferenceContainer,
             unmount: unmountPreferenceContainer
           });
-          AelluxJs2.onEvent(window, "$storage", storageEvent);
-          const allQueries = AelluxJs2.registry.preferenceMediaQueries;
+          aelluxJs2.onEvent(window, "$storage", storageEvent);
+          const allQueries = aelluxJs2.registry.preferenceMediaQueries;
           Object.values(allQueries).forEach(
             (queries) => Object.values(queries).forEach(
               (query) => {
                 if (!query) return;
                 if (query.addEventListener) {
-                  AelluxJs2.onEvent(query, "$change", update);
+                  aelluxJs2.onEvent(query, "$change", update);
                 } else if (query.addListener) {
                   query.addListener(update);
                 }
@@ -161,18 +161,18 @@
         }
         function destroy() {
           for (const container of containerPreferences.keys()) unmountPreferenceContainer(container);
-          AelluxJs2.mountManager.remove({ extensionName });
+          aelluxJs2.mountManager.remove({ extensionName });
           containersByPreference.clear();
           containerPreferences.clear();
-          AelluxJs2.offEvent(window, "$storage", storageEvent);
-          AelluxJs2.off("$DOMContentLoaded", update);
-          const allQueries = AelluxJs2.registry.preferenceMediaQueries;
+          aelluxJs2.offEvent(window, "$storage", storageEvent);
+          aelluxJs2.off("$DOMContentLoaded", update);
+          const allQueries = aelluxJs2.registry.preferenceMediaQueries;
           Object.values(allQueries).forEach(
             (queries) => Object.values(queries).forEach(
               (query) => {
                 if (!query) return;
                 if (query.removeEventListener) {
-                  AelluxJs2.offEvent(query, "$change", update);
+                  aelluxJs2.offEvent(query, "$change", update);
                 } else if (query.removeListener) {
                   query.removeListener(update);
                 }
@@ -212,7 +212,7 @@
             if (computedPreferences[key] !== nextPreferences[key]) changed.add(key);
             computedPreferences[key] = nextPreferences[key];
           }
-          AelluxJs2.updatePreferenceAttributesHTML(computedPreferences);
+          aelluxJs2.updatePreferenceAttributesHTML(computedPreferences);
           for (const container of containerPreferences.keys()) {
             if (indexContainer(container)) updateContainer(container);
           }
@@ -220,7 +220,7 @@
             const containers = containersByPreference.get(key);
             if (containers) for (const container of containers) updateContainer(container);
           }
-          AelluxJs2.dispatch("PreferencesChange", {
+          aelluxJs2.dispatch("PreferencesChange", {
             detail: {
               changed: Array.from(changed),
               preferences: Object.assign({}, computedPreferences)
@@ -270,7 +270,7 @@
               containerLabels.set(container, ownedLabels);
             }
             if (!ownedLabels.has(label)) {
-              labelMemories.set(label, AelluxJs2.persist.element.save(label, ["hidden"], []));
+              labelMemories.set(label, aelluxJs2.persist.element.save(label, ["hidden"], []));
               ownedLabels.add(label);
             }
             const value = label.getAttribute(attr.label);
@@ -282,7 +282,7 @@
             const selected = String(value) === String(currentValue);
             element.classList.toggle(className.active, selected);
             if (isOptionButton(element)) {
-              if (!optionAria.has(element)) optionAria.set(element, AelluxJs2.aria.register(element));
+              if (!optionAria.has(element)) optionAria.set(element, aelluxJs2.aria.register(element));
               optionAria.get(element).set({ pressed: selected });
             }
             const labelFor = element.getAttribute("for");
@@ -296,19 +296,19 @@
           });
         }
         function saveUserPreferences() {
-          AelluxJs2.persist.preferences.setObject(userPreferences);
+          aelluxJs2.persist.preferences.setObject(userPreferences);
         }
         function loadUserPreferences() {
-          Object.assign(userPreferences, AelluxJs2.persist.preferences.getObject());
+          Object.assign(userPreferences, aelluxJs2.persist.preferences.getObject());
         }
         function mountPreferenceContainer(container) {
           indexContainer(container);
           updateContainer(container);
-          AelluxJs2.onEvent(container, "$click", onContainerClick);
+          aelluxJs2.onEvent(container, "$click", onContainerClick);
         }
         function unmountPreferenceContainer(container) {
           var _a;
-          AelluxJs2.offEvent(container, "$click", onContainerClick);
+          aelluxJs2.offEvent(container, "$click", onContainerClick);
           const optionAria = containerOptionAria.get(container);
           if (optionAria) for (const handler of optionAria.values()) handler.release();
           containerOptionAria.delete(container);
@@ -362,14 +362,14 @@
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
-        const AelluxJs2 = root2.AelluxJs;
+        const aelluxJs2 = root2.aelluxJs;
         const extensionName = "state-navigation";
-        if (!AelluxJs2) {
-          throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+        if (!aelluxJs2) {
+          throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.`);
         }
         const PUSH_AJAX_REPLACE = "PushAjaxReplace", UPDATE_BASE_TITLE = "UpdateBaseTitle";
         const globalSnapshot = {};
-        AelluxJs2.extAttach(extensionName, {
+        aelluxJs2.extAttach(extensionName, {
           init,
           destroy,
           updateBaseTitle,
@@ -382,13 +382,13 @@
         let baseTitle = "";
         let useHash = true;
         function init(options) {
-          AelluxJs2.onEvent(window, "$popstate", onPopState);
-          AelluxJs2.onEvent(window, "$hashchange", onHashChange);
-          AelluxJs2.on("PushState", OnPushState);
-          AelluxJs2.on(PUSH_AJAX_REPLACE, OnPushAjaxReplace);
-          AelluxJs2.on(UPDATE_BASE_TITLE, OnUpdateBaseTitle);
-          if ("useHash" in AelluxJs2.options)
-            useHash = AelluxJs2.options.useHash;
+          aelluxJs2.onEvent(window, "$popstate", onPopState);
+          aelluxJs2.onEvent(window, "$hashchange", onHashChange);
+          aelluxJs2.on("PushState", OnPushState);
+          aelluxJs2.on(PUSH_AJAX_REPLACE, OnPushAjaxReplace);
+          aelluxJs2.on(UPDATE_BASE_TITLE, OnUpdateBaseTitle);
+          if ("useHash" in aelluxJs2.options)
+            useHash = aelluxJs2.options.useHash;
           baseTitle = document.title;
           onHashChange();
           history.replaceState(mergeHistoryState({
@@ -397,11 +397,11 @@
           }), "");
         }
         async function destroy() {
-          AelluxJs2.offEvent(window, "$popstate", onPopState);
-          AelluxJs2.offEvent(window, "$hashchange", onHashChange);
-          AelluxJs2.off("PushState", OnPushState);
-          AelluxJs2.off(PUSH_AJAX_REPLACE, OnPushAjaxReplace);
-          AelluxJs2.off(UPDATE_BASE_TITLE, OnUpdateBaseTitle);
+          aelluxJs2.offEvent(window, "$popstate", onPopState);
+          aelluxJs2.offEvent(window, "$hashchange", onHashChange);
+          aelluxJs2.off("PushState", OnPushState);
+          aelluxJs2.off(PUSH_AJAX_REPLACE, OnPushAjaxReplace);
+          aelluxJs2.off(UPDATE_BASE_TITLE, OnUpdateBaseTitle);
         }
         function updateBaseTitle(title = null) {
           baseTitle = title != null ? title : baseTitle;
@@ -423,7 +423,7 @@
             else history.pushState(state, "", url);
             dispatchSnapshotEvent("SnapshotChange");
           } catch (error) {
-            AelluxJs2.dispatch("StateNavigationError", {
+            aelluxJs2.dispatch("StateNavigationError", {
               detail: { operation: "setState", key, value, title, silent, error }
             });
             throw error;
@@ -458,7 +458,7 @@
             },
             bubbles: true
           };
-          AelluxJs2.dispatch(name, options);
+          aelluxJs2.dispatch(name, options);
         }
         function copyHistoryState(state) {
           if (!state || typeof state !== "object") return state;
@@ -523,7 +523,7 @@
           try {
             const detail = event && event.detail;
             if (!detail || typeof detail !== "object" || typeof detail.key !== "string" || !detail.key.trim() || typeof detail.value !== "string" || !detail.value.trim() || detail.title !== void 0 && typeof detail.title !== "string") {
-              AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
+              aelluxJs2.diagnostics.warn(aelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
                 extension: extensionName,
                 event: "PushState",
                 expected: "detail: { key: non-empty string, value: non-empty string, title?: string }"
@@ -531,14 +531,14 @@
               return;
             }
             setState(detail.key, detail.value, detail.title).catch((cause) => {
-              AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_CALLBACK, {
+              aelluxJs2.diagnostics.error(aelluxJs2.diagnostics.ERROR_CALLBACK, {
                 extension: extensionName,
                 event: "PushState",
                 cause
               });
             });
           } catch (cause) {
-            AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_CALLBACK, {
+            aelluxJs2.diagnostics.error(aelluxJs2.diagnostics.ERROR_CALLBACK, {
               extension: extensionName,
               event: "PushState",
               cause
@@ -549,7 +549,7 @@
           try {
             const detail = event && event.detail;
             if (!detail || typeof detail !== "object" || typeof detail.url !== "string" || !detail.url.trim() || !Object.prototype.hasOwnProperty.call(detail, "selectors") || detail.selectors == null) {
-              AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
+              aelluxJs2.diagnostics.warn(aelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
                 extension: extensionName,
                 event: PUSH_AJAX_REPLACE,
                 expected: "detail: { url: non-empty string, selectors: value }"
@@ -558,7 +558,7 @@
             }
             ajaxReplace(detail.url, detail.selectors);
           } catch (cause) {
-            AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_CALLBACK, {
+            aelluxJs2.diagnostics.error(aelluxJs2.diagnostics.ERROR_CALLBACK, {
               extension: extensionName,
               event: PUSH_AJAX_REPLACE,
               cause
@@ -569,7 +569,7 @@
           try {
             const detail = event && event.detail;
             if (!detail || typeof detail !== "object" || !Object.prototype.hasOwnProperty.call(detail, "title") || typeof detail.title !== "string") {
-              AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
+              aelluxJs2.diagnostics.warn(aelluxJs2.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
                 extension: extensionName,
                 event: UPDATE_BASE_TITLE,
                 expected: "detail: { title: string }"
@@ -578,7 +578,7 @@
             }
             updateBaseTitle(detail.title);
           } catch (cause) {
-            AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_CALLBACK, {
+            aelluxJs2.diagnostics.error(aelluxJs2.diagnostics.ERROR_CALLBACK, {
               extension: extensionName,
               event: UPDATE_BASE_TITLE,
               cause
@@ -596,12 +596,12 @@
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
-        const AelluxJs2 = root2.AelluxJs;
+        const aelluxJs2 = root2.aelluxJs;
         const extensionName = "feedback";
-        if (!AelluxJs2) {
-          throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+        if (!aelluxJs2) {
+          throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.`);
         }
-        AelluxJs2.extAttach(extensionName, {
+        aelluxJs2.extAttach(extensionName, {
           init,
           destroy,
           warning,
@@ -618,21 +618,21 @@
         const motionOptions = ["shake", "yes", "no", "breathe", "tremble", "pulse", "alert"];
         const feedbackTypes = ["warning", "error", "success", "announce", "busy", "progress", "validate"];
         const handlers = /* @__PURE__ */ new Map();
-        const feedbackAttribute = AelluxJs2.attr(extensionName);
-        const messageTargetAttribute = AelluxJs2.attr("feedback-message-target");
-        const effectTargetAttribute = AelluxJs2.attr("feedback-effect-target");
-        const presentTargetAttribute = AelluxJs2.attr("presentTarget");
-        const presentSelector = `[${AelluxJs2.attr("present")}]`;
+        const feedbackAttribute = aelluxJs2.attr(extensionName);
+        const messageTargetAttribute = aelluxJs2.attr("feedback-message-target");
+        const effectTargetAttribute = aelluxJs2.attr("feedback-effect-target");
+        const presentTargetAttribute = aelluxJs2.attr("presentTarget");
+        const presentSelector = `[${aelluxJs2.attr("present")}]`;
         const mountedFeedback = /* @__PURE__ */ new Map();
         const applications = /* @__PURE__ */ new WeakMap();
         function init() {
-          AelluxJs2.comm.handle("feedback.prepare", (request) => {
+          aelluxJs2.comm.handle("feedback.prepare", (request) => {
             const { boundary, feedback, element } = request;
             if (!mountedFeedback.has(boundary) || !boundary.isConnected || !feedback || typeof feedback !== "object") return false;
             applications.set(feedback, applyFeedback(boundary, feedback, element, false));
             return true;
           }, { owner: extensionName });
-          AelluxJs2.mountManager.add({
+          aelluxJs2.mountManager.add({
             extensionName,
             selector: `[${feedbackAttribute}]`,
             priority: 0,
@@ -642,19 +642,19 @@
           });
         }
         async function destroy() {
-          AelluxJs2.comm.removeOwner(extensionName);
+          aelluxJs2.comm.removeOwner(extensionName);
           mountedFeedback.clear();
-          AelluxJs2.mountManager.remove({ extensionName });
+          aelluxJs2.mountManager.remove({ extensionName });
           handlers.clear();
         }
         function mountFeedback(element) {
           mountedFeedback.set(element, {});
-          AelluxJs2.onEvent(element, "Feedback", onFeedback);
+          aelluxJs2.onEvent(element, "Feedback", onFeedback);
         }
         function unmountFeedback(element) {
           applications.delete(element);
           mountedFeedback.delete(element);
-          AelluxJs2.offEvent(element, "Feedback", onFeedback);
+          aelluxJs2.offEvent(element, "Feedback", onFeedback);
         }
         function onFeedback(event) {
           const element = event.currentTarget;
@@ -671,10 +671,10 @@
           event.stopPropagation();
           if (!event.detail || typeof event.detail !== "object") return;
           const presentTarget = element.getAttribute(presentTargetAttribute);
-          const presentElement = presentTarget !== null && presentTarget.trim() && (AelluxJs2.comm.has("present.pop") || AelluxJs2.comm.has("present.pop-next")) ? AelluxJs2.elementOrId(presentTarget) : null;
-          if (presentElement == null ? void 0 : presentElement.hasAttribute(AelluxJs2.attr("present-group"))) {
+          const presentElement = presentTarget !== null && presentTarget.trim() && (aelluxJs2.comm.has("present.pop") || aelluxJs2.comm.has("present.pop-next")) ? aelluxJs2.elementOrId(presentTarget) : null;
+          if (presentElement == null ? void 0 : presentElement.hasAttribute(aelluxJs2.attr("present-group"))) {
             const preparation = { boundary: element, feedback: event.detail };
-            const result = AelluxJs2.comm.request("present.pop-next", {
+            const result = aelluxJs2.comm.request("present.pop-next", {
               group: presentElement,
               preparation: { contract: "feedback.prepare", payload: preparation }
             });
@@ -682,8 +682,8 @@
               const application = applications.get(event.detail);
               Promise.resolve(result.value).then((member) => {
                 if (member) requestEffect(element, application);
-              }).catch((cause) => AelluxJs2.diagnostics.error(
-                AelluxJs2.diagnostics.ERROR_EXTENSION_TRANSITION,
+              }).catch((cause) => aelluxJs2.diagnostics.error(
+                aelluxJs2.diagnostics.ERROR_EXTENSION_TRANSITION,
                 { cause, extension: extensionName, element: presentElement }
               ));
               return;
@@ -692,7 +692,7 @@
           applyFeedback(element, event.detail, element, (messageElement, effectElement) => {
             if (presentTarget !== null) {
               const target = presentElement || !presentTarget.trim() && ((messageElement == null ? void 0 : messageElement.closest(presentSelector)) || (effectElement == null ? void 0 : effectElement.closest(presentSelector)));
-              if (target) AelluxJs2.comm.request("present.pop", { element: target });
+              if (target) aelluxJs2.comm.request("present.pop", { element: target });
             }
           });
         }
@@ -700,8 +700,8 @@
           const application = { mount: mountedFeedback.get(element) };
           const messageTarget = element.getAttribute(messageTargetAttribute);
           const effectTarget = element.getAttribute(effectTargetAttribute);
-          const messageElement = AelluxJs2.elementOrId(messageTarget, { defaultElement });
-          const effectElement = AelluxJs2.elementOrId(effectTarget, { defaultElement });
+          const messageElement = aelluxJs2.elementOrId(messageTarget, { defaultElement });
+          const effectElement = aelluxJs2.elementOrId(effectTarget, { defaultElement });
           application.effectElement = effectElement;
           application.motion = motion;
           if (effectElement) applications.set(effectElement, application);
@@ -717,11 +717,11 @@
             else messageElement.appendChild(messageElement.ownerDocument.createTextNode(message));
           }
           if (feedbackTypes.includes(type)) {
-            const typeClass = AelluxJs2.className(`feedback-${type}`);
+            const typeClass = aelluxJs2.className(`feedback-${type}`);
             for (const target of [element, messageElement, effectElement]) {
               if (target) {
                 if (defaultElement !== element) {
-                  for (const previous of feedbackTypes) target.classList.remove(AelluxJs2.className(`feedback-${previous}`));
+                  for (const previous of feedbackTypes) target.classList.remove(aelluxJs2.className(`feedback-${previous}`));
                 }
                 target.classList.add(typeClass);
               }
@@ -735,7 +735,7 @@
           if (!application || application.mount !== mountedFeedback.get(element) || !element.isConnected) return;
           const { effectElement, motion } = application;
           if (!(effectElement == null ? void 0 : effectElement.isConnected) || applications.get(effectElement) !== application || typeof motion !== "string") return;
-          AelluxJs2.comm.request("present.effect", {
+          aelluxJs2.comm.request("present.effect", {
             element: effectElement.closest(presentSelector) || effectElement,
             effect: motion,
             effectTarget: effectElement
@@ -803,7 +803,7 @@
             return;
           }
           if (typeof motion === "string" && !motionOptions.includes(motion)) {
-            AelluxJs2.diagnostics.info(AelluxJs2.diagnostics.INFO_FEEDBACK_MOTION_CUSTOM, {
+            aelluxJs2.diagnostics.info(aelluxJs2.diagnostics.INFO_FEEDBACK_MOTION_CUSTOM, {
               extension: extensionName,
               motion,
               standardMotions: motionOptions.slice()
@@ -815,12 +815,12 @@
             bubbles: true,
             cancelable: true
           };
-          AelluxJs2.dispatchFrom(target, "Feedback", options);
+          aelluxJs2.dispatchFrom(target, "Feedback", options);
           notifyHandlers(type, feedback);
           notifyHandlers("*", feedback);
         }
         function reportInvalidArgument(argument, value) {
-          AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_FEEDBACK_ARGUMENT, {
+          aelluxJs2.diagnostics.error(aelluxJs2.diagnostics.ERROR_FEEDBACK_ARGUMENT, {
             extension: extensionName,
             argument,
             value
@@ -840,7 +840,7 @@
           });
         }
         function reportCallbackError(error2, type) {
-          AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_CALLBACK, {
+          aelluxJs2.diagnostics.error(aelluxJs2.diagnostics.ERROR_CALLBACK, {
             cause: error2,
             extension: extensionName,
             type
@@ -939,12 +939,12 @@
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
-        const AelluxJs2 = root2.AelluxJs;
+        const aelluxJs2 = root2.aelluxJs;
         const extensionName = "focus";
-        if (!AelluxJs2) {
-          throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+        if (!aelluxJs2) {
+          throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.`);
         }
-        AelluxJs2.extAttach(extensionName, {
+        aelluxJs2.extAttach(extensionName, {
           init,
           destroy,
           restoreLastFocus,
@@ -956,7 +956,7 @@
           eligibleShortcuts,
           registerShortcutAction
         });
-        const attribute = AelluxJs2.attr(extensionName);
+        const attribute = aelluxJs2.attr(extensionName);
         const snapshotKey = "ae-focus";
         const entries = [];
         const hintMemories = /* @__PURE__ */ new WeakMap();
@@ -967,15 +967,15 @@
         const contexts = /* @__PURE__ */ new Map();
         const shortcutActions = /* @__PURE__ */ new Map();
         let contextObserver = null;
-        const scopeSelector = `[${AelluxJs2.attr("focus-scope")}], dialog, [aria-modal="true"]`;
-        const navAttribute = AelluxJs2.attr("focus-nav");
+        const scopeSelector = `[${aelluxJs2.attr("focus-scope")}], dialog, [aria-modal="true"]`;
+        const navAttribute = aelluxJs2.attr("focus-nav");
         const keyboardWidgetSelector = 'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="combobox"], [role="slider"], [role="spinbutton"], [role="scrollbar"], [role="tablist"], [role="tab"], [role="menu"], [role="menubar"], [role="menuitem"], [role="listbox"], [role="option"], [role="grid"], [role="treegrid"], [role="tree"], [role="treeitem"], [role="radiogroup"], [role="radio"], [role="toolbar"], audio[controls], video[controls]';
-        const focusClasses = [null, AelluxJs2.className("focus-player1"), AelluxJs2.className("focus-player2"), AelluxJs2.className("focus-player3")];
-        const focusClass = (id) => focusClasses[id] || AelluxJs2.className("focus-player" + id);
+        const focusClasses = [null, aelluxJs2.className("focus-player1"), aelluxJs2.className("focus-player2"), aelluxJs2.className("focus-player3")];
+        const focusClass = (id) => focusClasses[id] || aelluxJs2.className("focus-player" + id);
         function init() {
           createContext(1);
-          AelluxJs2.comm.handle("focus.command", consumeCommand, { owner: extensionName });
-          AelluxJs2.comm.handle("focus.context", ({ focusId }) => getContext(focusId), { owner: extensionName });
+          aelluxJs2.comm.handle("focus.command", consumeCommand, { owner: extensionName });
+          aelluxJs2.comm.handle("focus.context", ({ focusId }) => getContext(focusId), { owner: extensionName });
           contextObserver = new root2.MutationObserver((records) => {
             if (records.some((record) => Array.from(contexts.values()).some((context) => !context.scope.isConnected || context.element && (record.type === "attributes" && record.target.contains(context.element) || record.type === "childList" && Array.from(record.removedNodes).some((node) => node.contains(context.element)))))) pruneContexts();
           });
@@ -985,44 +985,44 @@
             attributes: true,
             attributeFilter: ["hidden", "inert", "disabled", "aria-disabled", "class", "style", "open", "aria-hidden"]
           });
-          AelluxJs2.mountManager.add({
+          aelluxJs2.mountManager.add({
             extensionName,
             selector: `[${attribute}]`,
             priority: 0,
             mount: mountFocusElement,
             unmount: unmountFocusElement
           });
-          AelluxJs2.on("$focusin", onFocusIn, true);
-          AelluxJs2.on("$focus", onFocusChange, true);
-          AelluxJs2.on("$blur", onBlur, true);
-          AelluxJs2.onEvent(root2, "$focus", onWindowFocus);
-          AelluxJs2.onEvent(root2, "$blur", onWindowBlur);
-          AelluxJs2.on("SnapshotRestore", onSnapshotRestore);
-          AelluxJs2.on("DismissFocusLost", onDismissFocusLost);
-          AelluxJs2.on("UnpopFocusLost", onDismissFocusLost);
-          AelluxJs2.on("Unmount", onContextUnmount);
-          AelluxJs2.on("Mount", onContextMount);
+          aelluxJs2.on("$focusin", onFocusIn, true);
+          aelluxJs2.on("$focus", onFocusChange, true);
+          aelluxJs2.on("$blur", onBlur, true);
+          aelluxJs2.onEvent(root2, "$focus", onWindowFocus);
+          aelluxJs2.onEvent(root2, "$blur", onWindowBlur);
+          aelluxJs2.on("SnapshotRestore", onSnapshotRestore);
+          aelluxJs2.on("DismissFocusLost", onDismissFocusLost);
+          aelluxJs2.on("UnpopFocusLost", onDismissFocusLost);
+          aelluxJs2.on("Unmount", onContextUnmount);
+          aelluxJs2.on("Mount", onContextMount);
           remember(document.activeElement, false);
           syncNative(document.activeElement);
         }
         function destroy() {
-          AelluxJs2.comm.removeOwner(extensionName);
+          aelluxJs2.comm.removeOwner(extensionName);
           contextObserver == null ? void 0 : contextObserver.disconnect();
           contextObserver = null;
           for (const context of contexts.values()) clearContext(context);
           contexts.clear();
           shortcutActions.clear();
-          AelluxJs2.off("$focusin", onFocusIn, true);
-          AelluxJs2.off("$focus", onFocusChange, true);
-          AelluxJs2.off("$blur", onBlur, true);
-          AelluxJs2.offEvent(root2, "$focus", onWindowFocus);
-          AelluxJs2.offEvent(root2, "$blur", onWindowBlur);
-          AelluxJs2.off("SnapshotRestore", onSnapshotRestore);
-          AelluxJs2.off("DismissFocusLost", onDismissFocusLost);
-          AelluxJs2.off("UnpopFocusLost", onDismissFocusLost);
-          AelluxJs2.off("Unmount", onContextUnmount);
-          AelluxJs2.off("Mount", onContextMount);
-          AelluxJs2.mountManager.remove({ extensionName });
+          aelluxJs2.off("$focusin", onFocusIn, true);
+          aelluxJs2.off("$focus", onFocusChange, true);
+          aelluxJs2.off("$blur", onBlur, true);
+          aelluxJs2.offEvent(root2, "$focus", onWindowFocus);
+          aelluxJs2.offEvent(root2, "$blur", onWindowBlur);
+          aelluxJs2.off("SnapshotRestore", onSnapshotRestore);
+          aelluxJs2.off("DismissFocusLost", onDismissFocusLost);
+          aelluxJs2.off("UnpopFocusLost", onDismissFocusLost);
+          aelluxJs2.off("Unmount", onContextUnmount);
+          aelluxJs2.off("Mount", onContextMount);
+          aelluxJs2.mountManager.remove({ extensionName });
           entries.length = 0;
           current = null;
         }
@@ -1030,10 +1030,10 @@
           const type = element.getAttribute(attribute);
           switch (type) {
             case "next":
-              AelluxJs2.onEvent(element, "$keydown", onNextKeyDown);
+              aelluxJs2.onEvent(element, "$keydown", onNextKeyDown);
               nextElements.add(element);
               if (!element.hasAttribute("enterkeyhint") && element.matches(textEntrySelector)) {
-                hintMemories.set(element, AelluxJs2.persist.element.save(element, ["enterkeyhint"], []));
+                hintMemories.set(element, aelluxJs2.persist.element.save(element, ["enterkeyhint"], []));
                 element.setAttribute("enterkeyhint", "next");
               }
               break;
@@ -1041,7 +1041,7 @@
         }
         function unmountFocusElement(element) {
           var _a;
-          if (nextElements.delete(element)) AelluxJs2.offEvent(element, "$keydown", onNextKeyDown);
+          if (nextElements.delete(element)) aelluxJs2.offEvent(element, "$keydown", onNextKeyDown);
           (_a = hintMemories.get(element)) == null ? void 0 : _a.restore();
           hintMemories.delete(element);
         }
@@ -1065,7 +1065,7 @@
             if (node.hidden || node.hasAttribute("inert") || spatial && node.getAttribute("aria-hidden") === "true") return false;
             const style = root2.getComputedStyle(node);
             if (style.display === "none" || style.visibility === "hidden" || style.visibility === "collapse" || spatial && (style.contentVisibility === "hidden" || Number(style.opacity) === 0)) return false;
-            if (spatial && node.hasAttribute(AelluxJs2.attr("present")) && (node.classList.contains(AelluxJs2.className("dismissed")) || node.classList.contains(AelluxJs2.className("unpop")))) return false;
+            if (spatial && node.hasAttribute(aelluxJs2.attr("present")) && (node.classList.contains(aelluxJs2.className("dismissed")) || node.classList.contains(aelluxJs2.className("unpop")))) return false;
           }
           return element.getClientRects().length > 0;
         }
@@ -1076,7 +1076,7 @@
           if (entries.length > 100) entries.shift();
           current = entry;
           if (!push || !stateNavigationEligible(element) || !element.id || !element.id.trim()) return;
-          AelluxJs2.dispatch("PushState", {
+          aelluxJs2.dispatch("PushState", {
             detail: { key: snapshotKey, value: element.id }
           });
         }
@@ -1145,7 +1145,7 @@
           restoreLastFocus();
         }
         function warn(reason, extra = {}) {
-          AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CONFIGURATION_VALUE, __spreadValues({ extension: extensionName, reason }, extra));
+          aelluxJs2.diagnostics.warn(aelluxJs2.diagnostics.WARN_CONFIGURATION_VALUE, __spreadValues({ extension: extensionName, reason }, extra));
         }
         function getContext(focusId = 1) {
           const context = contexts.get(focusId);
@@ -1163,15 +1163,15 @@
           if (previous) publishFocus({ focusId: context.focusId, element: null, previous });
         }
         function publishFocus(detail) {
-          AelluxJs2.comm.emit("focus.changed", detail);
-          AelluxJs2.dispatch("FocusChange", { detail });
+          aelluxJs2.comm.emit("focus.changed", detail);
+          aelluxJs2.dispatch("FocusChange", { detail });
         }
         function destroyContext(focusId) {
           if (focusId === 1 || !contexts.has(focusId)) return false;
           clearContext(contexts.get(focusId));
           contexts.delete(focusId);
-          AelluxJs2.comm.emit("focus.context-destroyed", { focusId });
-          AelluxJs2.dispatch("FocusContextDestroy", { detail: { focusId } });
+          aelluxJs2.comm.emit("focus.context-destroyed", { focusId });
+          aelluxJs2.dispatch("FocusContextDestroy", { detail: { focusId } });
           return true;
         }
         function updateContext(focusId, { scope, syncDOM } = {}) {
@@ -1313,14 +1313,14 @@
           if (!context || !context.element || !isValid(context.element)) return [];
           const scope = activeScope(context);
           if (!scope) return [];
-          const shortcutAttribute = AelluxJs2.attr("shortcut");
+          const shortcutAttribute = aelluxJs2.attr("shortcut");
           const candidates = [scope, ...scope.querySelectorAll(`[${shortcutAttribute}]`)].filter((element) => element.hasAttribute(shortcutAttribute) && available(element, scope));
           return candidates.map((element, order) => ({
             element,
             order,
             shortcuts: parseShortcuts(element.getAttribute(shortcutAttribute)),
             distance: distance(context.element, element, scope),
-            priority: Number(element.getAttribute(AelluxJs2.attr("shortcut-priority"))) || 0
+            priority: Number(element.getAttribute(aelluxJs2.attr("shortcut-priority"))) || 0
           })).filter((item) => !command || item.shortcuts.some((shortcut) => matchesShortcut(shortcut, command))).sort((a, b) => a.distance - b.distance || b.priority - a.priority || a.order - b.order);
         }
         function registerShortcutAction(name, handler, { signal } = {}) {
@@ -1336,25 +1336,25 @@
           return remove;
         }
         function executeShortcut(element, command) {
-          const action = element.getAttribute(AelluxJs2.attr("shortcut-action")) || "click";
-          if (!AelluxJs2.dispatchFrom(element, "BeforeShortcut", { cancelable: true, detail: { command, action } })) return false;
+          const action = element.getAttribute(aelluxJs2.attr("shortcut-action")) || "click";
+          if (!aelluxJs2.dispatchFrom(element, "BeforeShortcut", { cancelable: true, detail: { command, action } })) return false;
           if (action === "click") element.click();
           else {
             const handler = shortcutActions.get(action);
             if (handler) {
               if (handler(element, command) === false) return false;
             } else if (["pop", "unpop", "dismiss"].includes(action)) {
-              const id = element.getAttribute(AelluxJs2.attr("shortcut-target"));
+              const id = element.getAttribute(aelluxJs2.attr("shortcut-target"));
               const target = id ? document.getElementById(id.replace(/^#/, "")) : element;
               if (!target) return false;
-              const response = AelluxJs2.comm.request("present." + action, { element: target });
+              const response = aelluxJs2.comm.request("present." + action, { element: target });
               if (!response.handled) return false;
             } else {
               warn("Unknown shortcut action.", { value: action, element });
               return false;
             }
           }
-          AelluxJs2.dispatchFrom(element, "Shortcut", { detail: { command, action } });
+          aelluxJs2.dispatchFrom(element, "Shortcut", { detail: { command, action } });
           return true;
         }
         function consumeCommand(command) {
@@ -1367,8 +1367,8 @@
           if (!["press", "repeat"].includes(command.phase) || ((_a = command.originalEvent) == null ? void 0 : _a.defaultPrevented) || ((_b = command.originalEvent) == null ? void 0 : _b.isComposing) || ((_c = command.originalEvent) == null ? void 0 : _c.keyCode) === 229) return false;
           if (command.source === "point") return false;
           const focused = context.element;
-          const inputScope = (focused || context.scope).closest(`[${AelluxJs2.attr("inputs")}]`);
-          if (inputScope && !inputScope.getAttribute(AelluxJs2.attr("inputs")).split(/\s+/).includes(command.source)) return false;
+          const inputScope = (focused || context.scope).closest(`[${aelluxJs2.attr("inputs")}]`);
+          if (inputScope && !inputScope.getAttribute(aelluxJs2.attr("inputs")).split(/\s+/).includes(command.source)) return false;
           const origin = (_d = command.originalEvent) == null ? void 0 : _d.target;
           const editable = (element) => element == null ? void 0 : element.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]');
           const reserved = ((_e = command.modifiers) == null ? void 0 : _e.meta) || ((_f = command.modifiers) == null ? void 0 : _f.ctrl) && ["KeyW", "KeyT", "KeyN", "KeyR", "KeyL", "KeyF", "KeyP", "KeyS", "KeyC", "KeyV", "KeyX", "KeyA", "KeyZ", "KeyY"].includes(command.code) || ((_g = command.modifiers) == null ? void 0 : _g.alt) && ["ArrowLeft", "ArrowRight", "F4"].includes(command.code);
@@ -1399,7 +1399,7 @@
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
-        const api = root2.AelluxJs;
+        const api = root2.aelluxJs;
         if (!api) throw new Error("[aellux.js] Load the boot script before Input.");
         const extensionName = "input", attr = (name) => api.attr(name);
         const mounted = /* @__PURE__ */ new Set(), adapters = /* @__PURE__ */ new Map(), active = /* @__PURE__ */ new Map(), routers = [], families = [];
@@ -1812,21 +1812,21 @@
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
-        const AelluxJs2 = root2.AelluxJs;
+        const aelluxJs2 = root2.aelluxJs;
         const extensionName = "anchor";
-        if (!AelluxJs2) {
-          throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+        if (!aelluxJs2) {
+          throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.`);
         }
         const ORIGIN_X = "--ae-anchor-origin-x", ORIGIN_Y = "--ae-anchor-origin-y", ANCHOR_OPACITY = "--anchor-opacity";
-        const attribute = AelluxJs2.attr(extensionName);
-        const presentAttribute = AelluxJs2.attr("present");
-        const targetAttribute = AelluxJs2.attr("anchor-target");
-        const matchAttribute = AelluxJs2.attr("anchor-match");
-        const scrollIntoViewAttribute = AelluxJs2.attr("anchor-scroll-into-view");
-        const groupAttribute = AelluxJs2.attr("present-group");
-        const layoutEvent = AelluxJs2.eventName("Layout");
-        const anchoredClass = AelluxJs2.className("anchored");
-        const switchingClass = AelluxJs2.className("anchor-switching");
+        const attribute = aelluxJs2.attr(extensionName);
+        const presentAttribute = aelluxJs2.attr("present");
+        const targetAttribute = aelluxJs2.attr("anchor-target");
+        const matchAttribute = aelluxJs2.attr("anchor-match");
+        const scrollIntoViewAttribute = aelluxJs2.attr("anchor-scroll-into-view");
+        const groupAttribute = aelluxJs2.attr("present-group");
+        const layoutEvent = aelluxJs2.eventName("Layout");
+        const anchoredClass = aelluxJs2.className("anchored");
+        const switchingClass = aelluxJs2.className("anchor-switching");
         const baseProperties = ["position", "left", "top", "transform", "transform-origin"];
         const ownedProperties = [
           ...baseProperties,
@@ -1857,10 +1857,10 @@
         const requestedMaps = /* @__PURE__ */ new Map();
         let nextLayoutId = 2e6;
         let mutations = null;
-        AelluxJs2.extAttach(extensionName, { init, destroy, createPlacementMap });
+        aelluxJs2.extAttach(extensionName, { init, destroy, createPlacementMap });
         function init() {
-          AelluxJs2.comm.handle("anchor.placement", placementRequest, { owner: extensionName });
-          AelluxJs2.registerCssProperty(
+          aelluxJs2.comm.handle("anchor.placement", placementRequest, { owner: extensionName });
+          aelluxJs2.registerCssProperty(
             { name: "--ae-anchor-x", syntax: "<length>", initialValue: "0px" },
             { name: "--ae-anchor-y", syntax: "<length>", initialValue: "0px" },
             { name: "--ae-anchor-target-width", syntax: "<length>", initialValue: "0px" },
@@ -1870,7 +1870,7 @@
             { name: ORIGIN_Y, syntax: "<percentage>", initialValue: "0%" },
             { name: ANCHOR_OPACITY, syntax: "<number>", initialValue: "1" }
           );
-          AelluxJs2.mountManager.add({
+          aelluxJs2.mountManager.add({
             extensionName,
             selector: `[${attribute}]`,
             priority: 0,
@@ -1880,11 +1880,11 @@
           });
         }
         async function destroy() {
-          AelluxJs2.comm.removeOwner(extensionName);
+          aelluxJs2.comm.removeOwner(extensionName);
           for (const map of placementMaps) map.destroy();
           requestedMaps.clear();
           await Promise.all(Array.from(anchors.keys(), unmountAnchor));
-          AelluxJs2.mountManager.remove({ extensionName });
+          aelluxJs2.mountManager.remove({ extensionName });
         }
         function placementRequest({ action, owner, element, pairs, target, placement }) {
           if (action === "invisible") return isInvisible(element);
@@ -1911,7 +1911,7 @@
           const map = {
             mount(element) {
               if (!disposed && !memories.has(element))
-                memories.set(element, AelluxJs2.persist.element.save(element, ["class"], ownedProperties));
+                memories.set(element, aelluxJs2.persist.element.save(element, ["class"], ownedProperties));
             },
             unmount(element) {
               var _a;
@@ -1938,7 +1938,7 @@
         }
         function mountAnchor(element) {
           if (anchors.has(element)) return;
-          elementMemories.set(element, AelluxJs2.persist.element.save(element, [], ownedProperties));
+          elementMemories.set(element, aelluxJs2.persist.element.save(element, [], ownedProperties));
           const state = {
             invalidContext: false,
             active: false,
@@ -1949,7 +1949,7 @@
             group: null,
             lastPlacement: null,
             switchOperation: null,
-            motionId: AelluxJs2.motion.id(),
+            motionId: aelluxJs2.motion.id(),
             scrollVisible: false,
             scrollPending: false,
             ownClass: null,
@@ -1973,9 +1973,9 @@
           anchors.set(element, state);
           if (element.offsetParent) listenForLayout(state, element.offsetParent);
           if (anchors.size === 1) {
-            AelluxJs2.onEvent(root2, "$scroll", scheduleUpdate, { capture: true, passive: true });
-            AelluxJs2.onEvent(root2, "$resize", scheduleUpdate);
-            AelluxJs2.on("PresentGroupChange", onGroupChange);
+            aelluxJs2.onEvent(root2, "$scroll", scheduleUpdate, { capture: true, passive: true });
+            aelluxJs2.onEvent(root2, "$resize", scheduleUpdate);
+            aelluxJs2.on("PresentGroupChange", onGroupChange);
             if (typeof root2.MutationObserver === "function") {
               mutations = new root2.MutationObserver(onMutations);
               mutations.observe(document, {
@@ -1988,7 +1988,7 @@
                   matchAttribute,
                   scrollIntoViewAttribute,
                   groupAttribute,
-                  AelluxJs2.attr("reduced-motion"),
+                  aelluxJs2.attr("reduced-motion"),
                   "id",
                   "hidden",
                   "class",
@@ -2015,21 +2015,21 @@
           elementMemories.delete(element);
           state.revision++;
           stopSwitch(element, state);
-          if (state.reference) AelluxJs2.offEvent(state.reference, layoutEvent, state.layoutListener);
+          if (state.reference) aelluxJs2.offEvent(state.reference, layoutEvent, state.layoutListener);
           if (state.observer) state.observer.disconnect();
           if (state.intersectionObserver) state.intersectionObserver.disconnect();
           if (state.updateTimer !== null) root2.clearTimeout(state.updateTimer);
           anchors.delete(element);
           if (!anchors.size) {
-            AelluxJs2.offEvent(root2, "$scroll", scheduleUpdate, true);
-            AelluxJs2.offEvent(root2, "$resize", scheduleUpdate);
-            AelluxJs2.off("PresentGroupChange", onGroupChange);
+            aelluxJs2.offEvent(root2, "$scroll", scheduleUpdate, true);
+            aelluxJs2.offEvent(root2, "$resize", scheduleUpdate);
+            aelluxJs2.off("PresentGroupChange", onGroupChange);
             if (mutations) mutations.disconnect();
             mutations = null;
           }
-          AelluxJs2.waitLayout.cancel(state.layoutId);
-          AelluxJs2.waitLayout.cancel(state.styleLayoutId);
-          await AelluxJs2.waitLayout.update(state.styleLayoutId, deactivate, [element, state, memory]);
+          aelluxJs2.waitLayout.cancel(state.layoutId);
+          aelluxJs2.waitLayout.cancel(state.styleLayoutId);
+          await aelluxJs2.waitLayout.update(state.styleLayoutId, deactivate, [element, state, memory]);
         }
         function scheduleUpdate(event) {
           if (!anchors.size) return;
@@ -2074,8 +2074,8 @@
           return value && value.trim() && resolveElement(value) !== (state.group || state.resolvedTarget);
         }
         function associationDiagnostic(element, reason) {
-          AelluxJs2.diagnostics.warn(
-            AelluxJs2.diagnostics.WARN_ANCHOR_GROUP,
+          aelluxJs2.diagnostics.warn(
+            aelluxJs2.diagnostics.WARN_ANCHOR_GROUP,
             {
               extension: extensionName,
               element,
@@ -2090,7 +2090,7 @@
           const value = element.getAttribute(targetAttribute);
           const target = value && value.trim() ? resolveElement(value) : element.offsetParent;
           state.group = value && value.trim() && (target == null ? void 0 : target.hasAttribute(groupAttribute)) ? target : null;
-          return state.group ? AelluxJs2.comm.request("present.selection", { group: state.group }).value || null : target;
+          return state.group ? aelluxJs2.comm.request("present.selection", { group: state.group }).value || null : target;
         }
         function circularTarget(element, target) {
           const visited = /* @__PURE__ */ new Set([element]);
@@ -2111,7 +2111,7 @@
           }
           if (durationMs === 0) {
             for (const [element, state] of anchors) {
-              const maxFPS = AelluxJs2.layoutMaxFPS(element);
+              const maxFPS = aelluxJs2.layoutMaxFPS(element);
               state.layoutUntil = now() + 1e3 / (maxFPS || 60);
               state.layoutSingle = true;
               state.layoutFinalPending = true;
@@ -2134,7 +2134,7 @@
             state.repeatPending = state.repeatPending || repeat;
             return;
           }
-          const maxFPS = AelluxJs2.layoutMaxFPS(element);
+          const maxFPS = aelluxJs2.layoutMaxFPS(element);
           if (maxFPS && !repeat && !state.updateTimerDue) {
             if (state.updateTimer === null) {
               state.updateTimer = root2.setTimeout(() => {
@@ -2167,7 +2167,7 @@
             requestAnchorUpdate(element, state);
           };
           if (repeat) state.layoutPolling = true;
-          const sequence = AelluxJs2.waitLayout.sequence(state.layoutId, {
+          const sequence = aelluxJs2.waitLayout.sequence(state.layoutId, {
             update: run,
             repeat: repeat ? { ms: 0 } : void 0,
             maxFPS,
@@ -2187,8 +2187,8 @@
           state.updatePending = true;
           state.updateDirty = false;
           updateAnchor(element).catch((cause) => {
-            AelluxJs2.diagnostics.error(
-              AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
+            aelluxJs2.diagnostics.error(
+              aelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
               { cause, extension: extensionName, element, method: "update" }
             );
           }).finally(() => {
@@ -2216,54 +2216,54 @@
           if (!target || !target.isConnected || !candidates.length || circularTarget(element, target)) {
             if (target && circularTarget(element, target))
               associationDiagnostic(element, "Circular target reference.");
-            await AelluxJs2.waitLayout.update(state.styleLayoutId, () => {
+            await aelluxJs2.waitLayout.update(state.styleLayoutId, () => {
               if (current()) deactivate(element, state);
             });
             if (!current()) return retry();
             return;
           }
-          let placement = await AelluxJs2.waitLayout.read(
+          let placement = await aelluxJs2.waitLayout.read(
             state.styleLayoutId,
             () => current() ? readPlacement(element, target, candidates, state.active) : null
           );
           if (!current()) return retry();
           if (!placement) return;
           if (placement.hidden) {
-            await AelluxJs2.waitLayout.update(state.styleLayoutId, () => {
+            await aelluxJs2.waitLayout.update(state.styleLayoutId, () => {
               if (current()) hideForTarget(element, state, placement);
             });
             if (!current()) return retry();
             return;
           }
           if (!placement.valid) {
-            await AelluxJs2.waitLayout.update(state.styleLayoutId, () => {
+            await aelluxJs2.waitLayout.update(state.styleLayoutId, () => {
               if (current()) invalidContext(element, state, placement);
             });
             if (!current()) return retry();
             return;
           }
           if (!state.active) {
-            await AelluxJs2.waitLayout.update(state.styleLayoutId, () => {
+            await aelluxJs2.waitLayout.update(state.styleLayoutId, () => {
               if (!current()) return;
               state.active = true;
               if (state.lastPlacement) writePlacement(element, state.lastPlacement);
             });
             if (!current()) return retry();
-            placement = await AelluxJs2.waitLayout.read(
+            placement = await aelluxJs2.waitLayout.read(
               state.styleLayoutId,
               () => current() ? readPlacement(element, target, candidates, true) : null
             );
             if (!current()) return retry();
             if (!placement) return;
             if (placement.hidden) {
-              await AelluxJs2.waitLayout.update(state.styleLayoutId, () => {
+              await aelluxJs2.waitLayout.update(state.styleLayoutId, () => {
                 if (current()) hideForTarget(element, state, placement);
               });
               if (!current()) return retry();
               return;
             }
             if (!placement.valid) {
-              await AelluxJs2.waitLayout.update(state.styleLayoutId, () => {
+              await aelluxJs2.waitLayout.update(state.styleLayoutId, () => {
                 if (current()) invalidContext(element, state, placement);
               });
               if (!current()) return retry();
@@ -2271,7 +2271,7 @@
             }
           }
           let applied = false;
-          await AelluxJs2.waitLayout.update(state.styleLayoutId, () => {
+          await aelluxJs2.waitLayout.update(state.styleLayoutId, () => {
             if (!current()) return;
             if (effectiveTarget(element, state) !== placement.target) return;
             state.invalidContext = false;
@@ -2282,7 +2282,7 @@
             const moved = !previous || previous.signature !== placement.signature;
             if (switching && placement.duration > 0) {
               startSwitch(element, state, placement);
-            } else if (state.switchOperation && !switching && AelluxJs2.currentPreference("reduced-motion") !== "reduced") {
+            } else if (state.switchOperation && !switching && aelluxJs2.currentPreference("reduced-motion") !== "reduced") {
               state.switchOperation.toGeometry = placement;
             } else if (state.switchOperation) {
               writePlacement(element, placement);
@@ -2304,12 +2304,12 @@
           });
           if (!applied && anchors.get(element) === state) return updateAnchor(element, ensureLatest);
           if (!applied || !element.hasAttribute(scrollIntoViewAttribute)) return;
-          const visible = await AelluxJs2.waitLayout.read(state.styleLayoutId, () => current() && !isInvisible(element));
+          const visible = await aelluxJs2.waitLayout.read(state.styleLayoutId, () => current() && !isInvisible(element));
           if (!current()) return retry();
           if (visible && !state.scrollVisible) state.scrollPending = true;
           state.scrollVisible = visible;
           if (!visible || !state.scrollPending) return;
-          await AelluxJs2.waitLayout.update(state.styleLayoutId, () => {
+          await aelluxJs2.waitLayout.update(state.styleLayoutId, () => {
             if (!current() || effectiveTarget(element, state) !== placement.target) return;
             state.scrollPending = false;
             scrollTargetIntoView(element, placement.target);
@@ -2321,7 +2321,7 @@
           target.scrollIntoView({
             block: tokens[0],
             inline: tokens[1],
-            behavior: AelluxJs2.currentPreference("reduced-motion") === "reduced" ? "instant" : "smooth"
+            behavior: aelluxJs2.currentPreference("reduced-motion") === "reduced" ? "instant" : "smooth"
           });
         }
         function rememberVisual(element, state) {
@@ -2338,8 +2338,8 @@
           const style = root2.getComputedStyle(element);
           const tokens = (element.getAttribute(matchAttribute) || "").trim().split(/\s+/).filter(Boolean);
           if (element.hasAttribute(matchAttribute) && (!tokens.length || tokens.some((token) => token !== "width" && token !== "height")))
-            AelluxJs2.diagnostics.warn(
-              AelluxJs2.diagnostics.WARN_ANCHOR_MATCH,
+            aelluxJs2.diagnostics.warn(
+              aelluxJs2.diagnostics.WARN_ANCHOR_MATCH,
               { extension: extensionName, element, value: element.getAttribute(matchAttribute) }
             );
           if ((tokens.includes("width") || tokens.includes("height")) && style.position !== "absolute" && style.position !== "fixed") {
@@ -2411,7 +2411,7 @@
           const present = target.closest(`[${presentAttribute}]`);
           const opacity = present ? root2.getComputedStyle(present).opacity : "1";
           const rawDuration = style.getPropertyValue("--ae-anchor-switch-duration").trim();
-          const duration = AelluxJs2.currentPreference("reduced-motion") === "reduced" ? 0 : Math.max(0, (parseFloat(rawDuration) || 0) * (rawDuration.endsWith("ms") ? 1 : 1e3));
+          const duration = aelluxJs2.currentPreference("reduced-motion") === "reduced" ? 0 : Math.max(0, (parseFloat(rawDuration) || 0) * (rawDuration.endsWith("ms") ? 1 : 1e3));
           const position = tokens.includes("width") || tokens.includes("height") ? [selected.pivotX, selected.pivotY] : [selected.x, selected.y];
           return {
             valid: true,
@@ -2465,8 +2465,8 @@
           if (placement.reference)
             listenForLayout(state, placement.reference);
           if (state.invalidContext) return;
-          AelluxJs2.diagnostics.error(
-            AelluxJs2.diagnostics.ERROR_ANCHOR_REFERENCE_CONTEXT,
+          aelluxJs2.diagnostics.error(
+            aelluxJs2.diagnostics.ERROR_ANCHOR_REFERENCE_CONTEXT,
             {
               extension: extensionName,
               element,
@@ -2493,13 +2493,13 @@
         }
         function listenForLayout(state, reference) {
           if (state.reference === reference) return;
-          if (state.reference) AelluxJs2.offEvent(state.reference, layoutEvent, state.layoutListener);
+          if (state.reference) aelluxJs2.offEvent(state.reference, layoutEvent, state.layoutListener);
           state.reference = reference;
-          if (reference) AelluxJs2.onEvent(reference, layoutEvent, state.layoutListener);
+          if (reference) aelluxJs2.onEvent(reference, layoutEvent, state.layoutListener);
         }
         function deactivate(element, state, memory = elementMemories.get(element)) {
           stopSwitch(element, state);
-          if (state.reference) AelluxJs2.offEvent(state.reference, layoutEvent, state.layoutListener);
+          if (state.reference) aelluxJs2.offEvent(state.reference, layoutEvent, state.layoutListener);
           if (state.observer) state.observer.disconnect();
           if (state.intersectionObserver) state.intersectionObserver.disconnect();
           state.target = state.reference = null;
@@ -2514,8 +2514,8 @@
         function stopSwitch(element, state, keepStyles = false) {
           const operation = state.switchOperation;
           state.switchOperation = null;
-          AelluxJs2.waitLayout.cancel(state.motionId);
-          AelluxJs2.waitLayout.setVisualFPSLimit(state.motionId, null);
+          aelluxJs2.waitLayout.cancel(state.motionId);
+          aelluxJs2.waitLayout.setVisualFPSLimit(state.motionId, null);
           element.classList.remove(switchingClass);
           if (!keepStyles && (operation == null ? void 0 : operation.styles)) {
             element.getBoundingClientRect();
@@ -2537,7 +2537,7 @@
           const horizontal = !style.writingMode || style.writingMode.startsWith("horizontal");
           if (controlled.includes("width")) controlled.push(horizontal ? "inline-size" : "block-size");
           if (controlled.includes("height")) controlled.push(horizontal ? "block-size" : "inline-size");
-          const memory = AelluxJs2.persist.element.save(element, [], ["transition-property", "transition-duration", "transition-delay", "transition-timing-function"]);
+          const memory = aelluxJs2.persist.element.save(element, [], ["transition-property", "transition-duration", "transition-delay", "transition-timing-function"]);
           const durations = style.transitionDuration.split(","), delays = style.transitionDelay.split(",");
           const timing = style.transitionTimingFunction.match(/(?:[^,(]|\([^)]*\))+/g) || ["ease"];
           const retained = [], times = [], waits = [], easings = [];
@@ -2578,7 +2578,7 @@
             target: placement.target,
             startedAt: now(),
             duration: placement.duration,
-            easing: createCssEasing(placement.easing, AelluxJs2),
+            easing: createCssEasing(placement.easing, aelluxJs2),
             fromGeometry: from,
             toGeometry: placement,
             rendered: from,
@@ -2587,15 +2587,15 @@
           state.switchOperation = operation;
           element.classList.add(switchingClass);
           renderSwitch(element, state, operation);
-          const limits = [AelluxJs2.layoutMaxFPS(element)];
+          const limits = [aelluxJs2.layoutMaxFPS(element)];
           const matching = (element.getAttribute(matchAttribute) || "").split(/\s+/).some((axis) => axis === "width" || axis === "height");
-          const policy = AelluxJs2.options.cssMotionPropertyMaxFPS;
+          const policy = aelluxJs2.options.cssMotionPropertyMaxFPS;
           if (matching && policy !== null && policy !== 0) {
             const value = Number(policy);
             if (Number.isFinite(value) && value > 0) limits.push(value);
             else {
-              if (policy !== void 0) AelluxJs2.diagnostics.warn(
-                AelluxJs2.diagnostics.WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID,
+              if (policy !== void 0) aelluxJs2.diagnostics.warn(
+                aelluxJs2.diagnostics.WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID,
                 {
                   extension: "core",
                   option: "cssMotionPropertyMaxFPS",
@@ -2609,16 +2609,16 @@
             }
           }
           const maxFPS = limits.filter((value) => Number.isFinite(value) && value > 0).reduce((min, value) => Math.min(min, value), Infinity);
-          AelluxJs2.waitLayout.setVisualFPSLimit(state.motionId, maxFPS === Infinity ? null : maxFPS);
-          AelluxJs2.waitLayout.sequence(state.motionId, {
+          aelluxJs2.waitLayout.setVisualFPSLimit(state.motionId, maxFPS === Infinity ? null : maxFPS);
+          aelluxJs2.waitLayout.sequence(state.motionId, {
             update: () => renderSwitch(element, state, operation),
             repeat: { ms: 0 },
             maxFPS: maxFPS === Infinity ? void 0 : maxFPS,
             abort: () => anchors.get(element) !== state || state.switchOperation !== operation
           }).catch((cause) => {
             if (state.switchOperation === operation) stopSwitch(element, state);
-            AelluxJs2.diagnostics.error(
-              AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
+            aelluxJs2.diagnostics.error(
+              aelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
               { cause, extension: extensionName, element, method: "switch" }
             );
           });
@@ -2645,7 +2645,7 @@
           };
           operation.rendered = progress === 1 ? to : geometry;
           writePlacement(element, operation.rendered);
-          if (progress === 1 || AelluxJs2.currentPreference("reduced-motion") === "reduced") {
+          if (progress === 1 || aelluxJs2.currentPreference("reduced-motion") === "reduced") {
             writePlacement(element, to);
             stopSwitch(element, state);
             scheduleAnchor(element);
@@ -2692,11 +2692,11 @@
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
-        const AelluxJs2 = root2.AelluxJs;
-        if (!AelluxJs2) throw new Error("[aellux.js] Load the boot script before the viewport extension.");
+        const aelluxJs2 = root2.aelluxJs;
+        if (!aelluxJs2) throw new Error("[aellux.js] Load the boot script before the viewport extension.");
         const extensionName = "viewport";
-        const attribute = AelluxJs2.attr(extensionName);
-        const targetAttribute = AelluxJs2.attr("viewport-target");
+        const attribute = aelluxJs2.attr(extensionName);
+        const targetAttribute = aelluxJs2.attr("viewport-target");
         const properties = ["--ae-viewport-x", "--ae-viewport-y", "--ae-viewport-visible"];
         const EVENT_EPSILON = 1e-6;
         const document2 = root2.document;
@@ -2707,10 +2707,10 @@
         const writtenStyles = /* @__PURE__ */ new WeakMap();
         let nextLayoutId = 6e6;
         let mutations = null, resizeObserver = null;
-        AelluxJs2.extAttach(extensionName, { init, destroy });
+        aelluxJs2.extAttach(extensionName, { init, destroy });
         function init() {
-          AelluxJs2.registerCssProperty(...properties.map((name) => ({ name, syntax: "<number>", initialValue: "0", inherits: false })));
-          AelluxJs2.mountManager.add({
+          aelluxJs2.registerCssProperty(...properties.map((name) => ({ name, syntax: "<number>", initialValue: "0", inherits: false })));
+          aelluxJs2.mountManager.add({
             extensionName,
             selector: `[${attribute}]`,
             mount,
@@ -2720,7 +2720,7 @@
         }
         function destroy() {
           for (const element of states.keys()) unmount(element);
-          AelluxJs2.mountManager.remove({ extensionName });
+          aelluxJs2.mountManager.remove({ extensionName });
         }
         function mount(element) {
           if (states.has(element)) return;
@@ -2762,10 +2762,10 @@
           if (!states.size) stopObserving();
         }
         function startObserving() {
-          AelluxJs2.onEvent(root2, "$resize", scheduleAll);
-          AelluxJs2.onEvent(document2, "$load", scheduleAll, true);
-          AelluxJs2.onEvent(document2, AelluxJs2.eventName("Layout"), onLayout);
-          AelluxJs2.onEvent(document2, AelluxJs2.eventName("BeforeUnmount"), onBeforeUnmount);
+          aelluxJs2.onEvent(root2, "$resize", scheduleAll);
+          aelluxJs2.onEvent(document2, "$load", scheduleAll, true);
+          aelluxJs2.onEvent(document2, aelluxJs2.eventName("Layout"), onLayout);
+          aelluxJs2.onEvent(document2, aelluxJs2.eventName("BeforeUnmount"), onBeforeUnmount);
           if (root2.ResizeObserver) resizeObserver = new root2.ResizeObserver(scheduleAll);
           if (root2.MutationObserver) {
             mutations = new root2.MutationObserver((records) => {
@@ -2783,10 +2783,10 @@
           }
         }
         function stopObserving() {
-          AelluxJs2.offEvent(root2, "$resize", scheduleAll);
-          AelluxJs2.offEvent(document2, "$load", scheduleAll, true);
-          AelluxJs2.offEvent(document2, AelluxJs2.eventName("Layout"), onLayout);
-          AelluxJs2.offEvent(document2, AelluxJs2.eventName("BeforeUnmount"), onBeforeUnmount);
+          aelluxJs2.offEvent(root2, "$resize", scheduleAll);
+          aelluxJs2.offEvent(document2, "$load", scheduleAll, true);
+          aelluxJs2.offEvent(document2, aelluxJs2.eventName("Layout"), onLayout);
+          aelluxJs2.offEvent(document2, aelluxJs2.eventName("BeforeUnmount"), onBeforeUnmount);
           mutations == null ? void 0 : mutations.disconnect();
           resizeObserver == null ? void 0 : resizeObserver.disconnect();
           mutations = resizeObserver = null;
@@ -2833,7 +2833,7 @@
               intersection: null
             };
             group.onScroll = () => schedule(group);
-            AelluxJs2.onEvent(reference === document2 ? root2 : reference, "$scroll", group.onScroll, { passive: true });
+            aelluxJs2.onEvent(reference === document2 ? root2 : reference, "$scroll", group.onScroll, { passive: true });
             if (root2.IntersectionObserver) {
               group.intersection = new root2.IntersectionObserver(
                 group.onScroll,
@@ -2855,10 +2855,10 @@
           state.group = null;
           if (group.states.size) return;
           group.active = false;
-          AelluxJs2.waitLayout.cancel(group.id);
+          aelluxJs2.waitLayout.cancel(group.id);
           if (group.timer !== null) root2.clearTimeout(group.timer);
           (_b = group.intersection) == null ? void 0 : _b.disconnect();
-          AelluxJs2.offEvent(group.reference === document2 ? root2 : group.reference, "$scroll", group.onScroll);
+          aelluxJs2.offEvent(group.reference === document2 ? root2 : group.reference, "$scroll", group.onScroll);
           groups.delete(group.reference);
         }
         function schedule(group) {
@@ -2888,7 +2888,7 @@
           return group.pending;
         }
         function reportError(group, operation, error, element = group.reference) {
-          AelluxJs2.dispatch("ViewportError", {
+          aelluxJs2.dispatch("ViewportError", {
             detail: {
               error,
               operation,
@@ -2896,7 +2896,7 @@
               elements: operation === "unmount" ? [element] : Array.from(group.states, (state) => state.element)
             }
           });
-          AelluxJs2.diagnostics.error(operation === "unmount" ? AelluxJs2.diagnostics.ERROR_EXTENSION_UNMOUNT : AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
+          aelluxJs2.diagnostics.error(operation === "unmount" ? aelluxJs2.diagnostics.ERROR_EXTENSION_UNMOUNT : aelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
             extension: extensionName,
             cause: error,
             operation,
@@ -2904,13 +2904,13 @@
           });
         }
         async function refresh(group) {
-          const measurements = await AelluxJs2.waitLayout.read(group.id, () => measure(group));
+          const measurements = await aelluxJs2.waitLayout.read(group.id, () => measure(group));
           if (!group.active || !measurements) return;
-          await AelluxJs2.waitLayout.update(group.id, () => {
+          await aelluxJs2.waitLayout.update(group.id, () => {
             for (const { state, target, values, snapshot, changed } of measurements) {
               if (states.get(state.element) !== state || state.group !== group) continue;
               if (values === null) {
-                AelluxJs2.mountManager.unmount(state.element, extensionName).catch((error) => reportError(group, "unmount", error, state.element));
+                aelluxJs2.mountManager.unmount(state.element, extensionName).catch((error) => reportError(group, "unmount", error, state.element));
                 continue;
               }
               if (!current(state, group)) continue;
@@ -2932,7 +2932,7 @@
                 const previous = state.snapshot;
                 state.snapshot = snapshot;
                 const initial = previous === null;
-                const emit = (name) => AelluxJs2.dispatchFrom(state.element, name, {
+                const emit = (name) => aelluxJs2.dispatchFrom(state.element, name, {
                   bubbles: true,
                   composed: true,
                   cancelable: false,
@@ -2992,7 +2992,7 @@
           state.configuration = value;
           state.axes = value === "x" || value === "y" ? value : "both";
           if (value !== "" && value !== "both" && value !== "x" && value !== "y") {
-            AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CONFIGURATION_VALUE, {
+            aelluxJs2.diagnostics.warn(aelluxJs2.diagnostics.WARN_CONFIGURATION_VALUE, {
               extension: extensionName,
               element: state.element,
               attribute,
@@ -3011,7 +3011,7 @@
           const id = value.trim().replace(/^#/, "");
           const target = id && !/\s/.test(id) ? document2.getElementById(id) : null;
           if (!target || !target.style) {
-            if (state.targetWarning !== value) AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CONFIGURATION_TARGET, {
+            if (state.targetWarning !== value) aelluxJs2.diagnostics.warn(aelluxJs2.diagnostics.WARN_CONFIGURATION_TARGET, {
               extension: extensionName,
               element: state.element,
               attribute: targetAttribute,
@@ -3040,7 +3040,7 @@
           releaseTarget(state);
           const owner = owners.get(target);
           if (owner) {
-            if (state.conflict !== owner) AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_RESOURCE_CONFLICT, {
+            if (state.conflict !== owner) aelluxJs2.diagnostics.warn(aelluxJs2.diagnostics.WARN_RESOURCE_CONFLICT, {
               extension: extensionName,
               element: state.element,
               attribute: targetAttribute,
@@ -3057,7 +3057,7 @@
           if (!target) return;
           owners.set(target, state);
           state.target = target;
-          state.memories = properties.map((property) => AelluxJs2.persist.element.save(target, [], [property]));
+          state.memories = properties.map((property) => aelluxJs2.persist.element.save(target, [], [property]));
         }
         function scrollable(element) {
           const style = root2.getComputedStyle(element);
@@ -3181,33 +3181,33 @@
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
-        const AelluxJs2 = root2.AelluxJs;
+        const aelluxJs2 = root2.aelluxJs;
         const extensionName = "scrollbox";
-        if (!AelluxJs2) throw new Error("[aellux.js] Load the boot script before the scrollbox extension.");
-        const { onEvent, offEvent } = AelluxJs2;
+        if (!aelluxJs2) throw new Error("[aellux.js] Load the boot script before the scrollbox extension.");
+        const { onEvent, offEvent } = aelluxJs2;
         const POINTER = "pointer", POINTER_DOWN = `${POINTER}down`, POINTER_MOVE = `${POINTER}move`, POINTER_UP = `${POINTER}up`, POINTER_CANCEL = `${POINTER}cancel`, POINTER_OVER = `${POINTER}over`, POINTER_OUT = `${POINTER}out`, POINTER_ENTER = `${POINTER}enter`, POINTER_LEAVE = `${POINTER}leave`, POINTER_DOWN_TARGET = `$${POINTER_DOWN}`, POINTER_MOVE_TARGET = `$${POINTER_MOVE}`, POINTER_UP_TARGET = `$${POINTER_UP}`, POINTER_CANCEL_TARGET = `$${POINTER_CANCEL}`;
-        const attribute = AelluxJs2.attr(extensionName);
-        const wheelAttribute = AelluxJs2.attr("scrollbox-wheel-horizontal");
-        const momentumAttribute = AelluxJs2.attr("scrollbox-momentum");
-        const snapAttribute = AelluxJs2.attr("scrollbox-snap");
-        const elasticAttribute = AelluxJs2.attr("scrollbox-elastic");
-        const fadeAttribute = AelluxJs2.attr("scrollbox-fade");
-        const fadeStateAttribute = AelluxJs2.attr("scrollbox-fade-state");
-        const layoutEvents = ["Layout", "Pop", "Dismiss", "Unpop"].map((name) => AelluxJs2.eventName(name));
-        const scrollbarAttribute = AelluxJs2.attr("scrollbar");
-        const scrollbarParentAttribute = AelluxJs2.attr("scrollbar-parent");
-        const scrollbarVerticalAttribute = AelluxJs2.attr("scrollbar-vertical");
-        const scrollbarHorizontalAttribute = AelluxJs2.attr("scrollbar-horizontal");
-        const elasticReleaseClass = AelluxJs2.className("scrollbox-elastic-release");
-        const pointerScrollingClass = AelluxJs2.className("pointerscrolling");
-        const nativeScrollbarHideClass = AelluxJs2.className("native-sb-hide");
-        const scrollbarVisibleClass = AelluxJs2.className("scrollbar-visible");
-        const scrollbarWrapperClass = AelluxJs2.className("scrollbar-wrapper");
+        const attribute = aelluxJs2.attr(extensionName);
+        const wheelAttribute = aelluxJs2.attr("scrollbox-wheel-horizontal");
+        const momentumAttribute = aelluxJs2.attr("scrollbox-momentum");
+        const snapAttribute = aelluxJs2.attr("scrollbox-snap");
+        const elasticAttribute = aelluxJs2.attr("scrollbox-elastic");
+        const fadeAttribute = aelluxJs2.attr("scrollbox-fade");
+        const fadeStateAttribute = aelluxJs2.attr("scrollbox-fade-state");
+        const layoutEvents = ["Layout", "Pop", "Dismiss", "Unpop"].map((name) => aelluxJs2.eventName(name));
+        const scrollbarAttribute = aelluxJs2.attr("scrollbar");
+        const scrollbarParentAttribute = aelluxJs2.attr("scrollbar-parent");
+        const scrollbarVerticalAttribute = aelluxJs2.attr("scrollbar-vertical");
+        const scrollbarHorizontalAttribute = aelluxJs2.attr("scrollbar-horizontal");
+        const elasticReleaseClass = aelluxJs2.className("scrollbox-elastic-release");
+        const pointerScrollingClass = aelluxJs2.className("pointerscrolling");
+        const nativeScrollbarHideClass = aelluxJs2.className("native-sb-hide");
+        const scrollbarVisibleClass = aelluxJs2.className("scrollbar-visible");
+        const scrollbarWrapperClass = aelluxJs2.className("scrollbar-wrapper");
         const scrollEdgeClasses = [
-          AelluxJs2.className("scroll-v-start"),
-          AelluxJs2.className("scroll-v-end"),
-          AelluxJs2.className("scroll-h-start"),
-          AelluxJs2.className("scroll-h-end")
+          aelluxJs2.className("scroll-v-start"),
+          aelluxJs2.className("scroll-v-end"),
+          aelluxJs2.className("scroll-h-start"),
+          aelluxJs2.className("scroll-h-end")
         ];
         const pointerScrollControlSelector = "a[draggable='false'], button[draggable='false']";
         const pointerScrollExceptionSelector = `a:not([draggable='false']), button:not([draggable='false']), input, select, textarea, [contenteditable], [draggable='true'], [${scrollbarVerticalAttribute}], [${scrollbarHorizontalAttribute}]`;
@@ -3346,7 +3346,7 @@
         const elasticMemories = /* @__PURE__ */ new WeakMap();
         const pointerScrollMemories = /* @__PURE__ */ new WeakMap();
         let activePointerScrollState = null;
-        AelluxJs2.extAttach(extensionName, {
+        aelluxJs2.extAttach(extensionName, {
           init,
           destroy,
           next,
@@ -3355,7 +3355,7 @@
         });
         function init() {
           layoutEvents.forEach((name) => onEvent(root2.document, name, onLayout));
-          AelluxJs2.registerCssProperty(
+          aelluxJs2.registerCssProperty(
             ...properties.map((name) => ({ name, syntax: "<number>", initialValue: "0" })),
             ...fadeProperties.map((name) => ({ name, syntax: "<length>", initialValue: "0px", inherits: false })),
             { name: "--ae-scrollbox-fade-size", syntax: "<length>", initialValue: "16px" },
@@ -3376,7 +3376,7 @@
             },
             { name: "--ae-scrollbar-size", syntax: "<length>", initialValue: "8px" }
           );
-          AelluxJs2.mountManager.add({
+          aelluxJs2.mountManager.add({
             extensionName,
             selector: `[${attribute}]`,
             priority: 0,
@@ -3389,24 +3389,24 @@
         function destroy() {
           layoutEvents.forEach((name) => offEvent(root2.document, name, onLayout));
           for (const element of scrollboxes.keys()) unmountScrollbox(element);
-          AelluxJs2.mountManager.remove({ extensionName });
+          aelluxJs2.mountManager.remove({ extensionName });
         }
         function goto(element, index, behavior) {
-          return AelluxJs2.comm.request("scrollbox-snap.goto", { element, index, behavior }).value || false;
+          return aelluxJs2.comm.request("scrollbox-snap.goto", { element, index, behavior }).value || false;
         }
         function next(element) {
-          return AelluxJs2.comm.request("scrollbox-snap.next", { element }).value || false;
+          return aelluxJs2.comm.request("scrollbox-snap.next", { element }).value || false;
         }
         function previous(element) {
-          return AelluxJs2.comm.request("scrollbox-snap.previous", { element }).value || false;
+          return aelluxJs2.comm.request("scrollbox-snap.previous", { element }).value || false;
         }
         function dispatchInteraction(state, reason, active) {
-          AelluxJs2.dispatchFrom(state.element, "ScrollboxInteraction", {
+          aelluxJs2.dispatchFrom(state.element, "ScrollboxInteraction", {
             detail: { reason, active: !!active }
           });
         }
         function dispatchSnapGesture(state, phase, pointerScroll) {
-          return AelluxJs2.dispatchFrom(state.element, "ScrollboxSnapGesture", {
+          return aelluxJs2.dispatchFrom(state.element, "ScrollboxSnapGesture", {
             cancelable: phase !== "start",
             detail: {
               phase,
@@ -3422,15 +3422,15 @@
           });
         }
         function dispatchWheel(state, event) {
-          return AelluxJs2.dispatchFrom(state.element, "ScrollboxWheel", {
+          return aelluxJs2.dispatchFrom(state.element, "ScrollboxWheel", {
             cancelable: true,
             detail: { event }
           });
         }
         function mountScrollbox(element) {
           if (scrollboxes.has(element)) return;
-          elementMemories.set(element, AelluxJs2.persist.element.save(element, [fadeStateAttribute], [...properties, ...fadeProperties]));
-          cursorMemories.set(element, AelluxJs2.persist.element.save(element, [], ["cursor"]));
+          elementMemories.set(element, aelluxJs2.persist.element.save(element, [fadeStateAttribute], [...properties, ...fadeProperties]));
+          cursorMemories.set(element, aelluxJs2.persist.element.save(element, [], ["cursor"]));
           const elastic = {
             wrapper: null,
             baseTransform: "",
@@ -3620,8 +3620,8 @@
             else if (state.desktopMedia.removeListener)
               state.desktopMedia.removeListener(state.onDesktopMediaChange);
           }
-          AelluxJs2.waitLayout.cancel(state.resizeLayoutId);
-          AelluxJs2.waitLayout.cancel(state.publishLayoutId);
+          aelluxJs2.waitLayout.cancel(state.resizeLayoutId);
+          aelluxJs2.waitLayout.cancel(state.publishLayoutId);
           offEvent(root2, "$resize", state.onResize);
           (_a = elementMemories.get(element)) == null ? void 0 : _a.restore();
           elementMemories.delete(element);
@@ -3705,7 +3705,7 @@
               if (!wrapper) {
                 wrapper = { users: 0, memory: null };
                 if (root2.getComputedStyle(parent).position === "static") {
-                  wrapper.memory = AelluxJs2.persist.element.save(parent, [], ["position"]);
+                  wrapper.memory = aelluxJs2.persist.element.save(parent, [], ["position"]);
                   parent.style.setProperty("position", "relative", "important");
                 }
                 scrollbarWrappers.set(parent, wrapper);
@@ -3727,12 +3727,12 @@
             scrollbar.mouseHover = element.matches(":hover") && supportsMouseHover();
             scrollbar.hoverVisible = scrollbar.mouseHover;
             setListeners(element, state, scrollbarHoverListeners, true);
-            AelluxJs2.on(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
+            aelluxJs2.on(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
             scrollbar.listening = true;
             syncScrollbarVisibility(state);
           } else if (!enabled && scrollbar.listening) {
             setListeners(element, state, scrollbarHoverListeners, false);
-            AelluxJs2.off(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
+            aelluxJs2.off(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
             scrollbar.listening = false;
             clearScrollbarInteractionVisibility(state);
             clearScrollbarHover(state);
@@ -3766,7 +3766,7 @@
           }
           const marker = owned ? null : root2.document.createComment("scrollbar position");
           if (marker) scrollbarElement.before(marker);
-          if (!owned) scrollbarMemories.set(scrollbarElement, AelluxJs2.persist.element.save(
+          if (!owned) scrollbarMemories.set(scrollbarElement, aelluxJs2.persist.element.save(
             scrollbarElement,
             [],
             [...scrollbarProperties, ...scrollbarThemeProperties]
@@ -3846,7 +3846,7 @@
           scrollbar.parent = null;
           if (scrollbar.listening) {
             setListeners(state.element, state, scrollbarHoverListeners, false);
-            AelluxJs2.off(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
+            aelluxJs2.off(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
             scrollbar.listening = false;
           }
           if (scrollbar.hideOwned) state.element.classList.remove(nativeScrollbarHideClass);
@@ -4084,8 +4084,8 @@
           const display = root2.getComputedStyle(wrapper).display;
           if (display.startsWith("inline")) return;
           if (inline.reportedDisplay !== display) {
-            AelluxJs2.diagnostics.warn(
-              AelluxJs2.diagnostics.WARN_SCROLLBOX_WRAPPER_DISPLAY,
+            aelluxJs2.diagnostics.warn(
+              aelluxJs2.diagnostics.WARN_SCROLLBOX_WRAPPER_DISPLAY,
               { element: wrapper, display }
             );
             inline.reportedDisplay = display;
@@ -4098,7 +4098,7 @@
             table: "inline-table"
           }[display];
           if (!replacement) return;
-          if (!inline.owned) inlineMemories.set(wrapper, AelluxJs2.persist.element.save(
+          if (!inline.owned) inlineMemories.set(wrapper, aelluxJs2.persist.element.save(
             wrapper,
             [],
             ["display"]
@@ -4127,8 +4127,8 @@
             state.elastic.wrapper = null;
             const requested = element.hasAttribute(elasticAttribute) || children.some((item) => item.hasAttribute(elasticAttribute) && item.getAttribute(elasticAttribute) !== "false");
             if (requested && !state.elastic.invalidReported) {
-              AelluxJs2.diagnostics.error(
-                AelluxJs2.diagnostics.ERROR_SCROLLBOX_ELASTIC_WRAPPER,
+              aelluxJs2.diagnostics.error(
+                aelluxJs2.diagnostics.ERROR_SCROLLBOX_ELASTIC_WRAPPER,
                 {
                   extension: extensionName,
                   element,
@@ -4156,7 +4156,7 @@
               bottom: computed.marginBottom,
               left: computed.marginLeft
             };
-            elasticMemories.set(wrapper, AelluxJs2.persist.element.save(
+            elasticMemories.set(wrapper, aelluxJs2.persist.element.save(
               wrapper,
               [],
               [
@@ -4175,8 +4175,8 @@
           const limits = tokens.map(parseElasticLimit);
           if (tokens.length > 2 || limits.some((limit) => !limit)) {
             if (state.elastic.invalidLimit !== value) {
-              AelluxJs2.diagnostics.warn(
-                AelluxJs2.diagnostics.WARN_SCROLLBOX_ELASTIC_LIMIT_INVALID,
+              aelluxJs2.diagnostics.warn(
+                aelluxJs2.diagnostics.WARN_SCROLLBOX_ELASTIC_LIMIT_INVALID,
                 {
                   extension: extensionName,
                   element: wrapper,
@@ -4212,8 +4212,8 @@
         function readMode(element) {
           const value = (element.getAttribute(attribute) || "").trim().toLowerCase() || "native";
           if (value === "native" || value === POINTER) return value;
-          AelluxJs2.diagnostics.warn(
-            AelluxJs2.diagnostics.WARN_SCROLLBOX_MODE_INVALID,
+          aelluxJs2.diagnostics.warn(
+            aelluxJs2.diagnostics.WARN_SCROLLBOX_MODE_INVALID,
             {
               extension: extensionName,
               element,
@@ -4519,7 +4519,7 @@
           for (const member of pointerScroll.chain) {
             if (pointerAxisMaximum(member, axis, pointerScroll) <= 0) continue;
             const element = member.element;
-            pointerScrollMemories.set(element, AelluxJs2.persist.element.save(
+            pointerScrollMemories.set(element, aelluxJs2.persist.element.save(
               element,
               [],
               ["scroll-behavior"]
@@ -4537,7 +4537,7 @@
           dispatchPointerScroll(state, pointerScroll, "PointerScrollStart");
         }
         function dispatchPointerScroll(state, pointerScroll, name) {
-          AelluxJs2.dispatchFrom(state.element, name, {
+          aelluxJs2.dispatchFrom(state.element, name, {
             detail: {
               axis: pointerScroll.axis,
               pointerId: pointerScroll.pointerId,
@@ -4882,13 +4882,13 @@
           if (state.disposed || elastic.publication) return;
           const publication = {};
           elastic.publication = publication;
-          AelluxJs2.waitLayout.update(elastic.layoutId, () => {
+          aelluxJs2.waitLayout.update(elastic.layoutId, () => {
             if (elastic.publication !== publication || state.disposed || !elastic.owned) return;
             elastic.publication = null;
             writeElasticTransform(state);
           }).catch((cause) => {
-            AelluxJs2.diagnostics.error(
-              AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
+            aelluxJs2.diagnostics.error(
+              aelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
               { cause, extension: extensionName, element: state.element, method: "update" }
             );
           }).finally(() => {
@@ -4972,7 +4972,7 @@
             resetElastic(state);
             return;
           }
-          if (AelluxJs2.currentPreference("reduced-motion") === "reduced") {
+          if (aelluxJs2.currentPreference("reduced-motion") === "reduced") {
             resetElastic(state);
             refresh(state);
             return;
@@ -5004,7 +5004,7 @@
           var _a;
           const elastic = state.elastic;
           const wasOwned = elastic.owned;
-          AelluxJs2.waitLayout.cancel(elastic.layoutId);
+          aelluxJs2.waitLayout.cancel(elastic.layoutId);
           elastic.publication = null;
           if (elastic.releaseFrame !== null) root2.cancelAnimationFrame(elastic.releaseFrame);
           if (elastic.wheelTimeout !== null) root2.clearTimeout(elastic.wheelTimeout);
@@ -5076,13 +5076,13 @@
         function scheduleResize(state) {
           if (state.disposed) return;
           let complete = false;
-          AelluxJs2.waitLayout.sequence(state.resizeLayoutId, {
+          aelluxJs2.waitLayout.sequence(state.resizeLayoutId, {
             update: () => {
               complete = now() >= state.layoutUntil;
               refresh(state);
             },
             repeat: { ms: 0 },
-            maxFPS: AelluxJs2.layoutMaxFPS(state.element),
+            maxFPS: aelluxJs2.layoutMaxFPS(state.element),
             abort: () => state.disposed || complete
           });
         }
@@ -5169,7 +5169,7 @@
           state.publishDirty = true;
           if (state.publishPending) return;
           state.publishPending = true;
-          AelluxJs2.waitLayout.read(state.publishLayoutId, () => {
+          aelluxJs2.waitLayout.read(state.publishLayoutId, () => {
             if (state.disposed) return null;
             state.publishDirty = false;
             const metrics = nativeMetrics(state.element);
@@ -5202,7 +5202,7 @@
               state.publishDirty = false;
               return;
             }
-            return AelluxJs2.waitLayout.update(state.publishLayoutId, () => {
+            return aelluxJs2.waitLayout.update(state.publishLayoutId, () => {
               if (state.disposed || state.layoutRevision !== values.revision) return;
               if (state.element.scrollTop !== values.scrollTop || state.element.scrollLeft !== values.scrollLeft) {
                 state.publishDirty = true;
@@ -5217,8 +5217,8 @@
               updateScrollbars(state, values.scrollbars);
             });
           }).catch((cause) => {
-            AelluxJs2.diagnostics.error(
-              AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
+            aelluxJs2.diagnostics.error(
+              aelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
               { cause, extension: extensionName, element: state.element, method: "update" }
             );
           }).finally(() => {
@@ -5376,18 +5376,18 @@
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
-        const AelluxJs2 = root2.AelluxJs;
+        const aelluxJs2 = root2.aelluxJs;
         const extensionName = "adaptive";
-        if (!AelluxJs2) {
-          throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+        if (!aelluxJs2) {
+          throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.`);
         }
         const attr = {
-          adaptive: AelluxJs2.attr(extensionName)
+          adaptive: aelluxJs2.attr(extensionName)
         };
         const modifier = {
-          shapeHorizontal: AelluxJs2.className("shape-horizontal"),
-          shapeVertical: AelluxJs2.className("shape-vertical"),
-          shapeSquare: AelluxJs2.className("shape-square")
+          shapeHorizontal: aelluxJs2.className("shape-horizontal"),
+          shapeVertical: aelluxJs2.className("shape-vertical"),
+          shapeSquare: aelluxJs2.className("shape-square")
         };
         const adaptiveElements = /* @__PURE__ */ new Set();
         const elementMemories = /* @__PURE__ */ new WeakMap();
@@ -5413,9 +5413,9 @@
         let managedClasses;
         let sizeThresholds = [];
         const resizeObserver = typeof root2.ResizeObserver === "function" ? new root2.ResizeObserver(onResize) : null;
-        AelluxJs2.extAttach(extensionName, { init, destroy, adaptiveParams });
+        aelluxJs2.extAttach(extensionName, { init, destroy, adaptiveParams });
         function init(options = {}) {
-          AelluxJs2.registerCssProperty(
+          aelluxJs2.registerCssProperty(
             { name: "--ae-width", syntax: "<number>", initialValue: "0" },
             { name: "--ae-height", syntax: "<number>", initialValue: "0" }
           );
@@ -5453,7 +5453,7 @@
           managedClasses = getManagedClasses();
           for (const group of Object.keys(adaptiveParams)) Object.freeze(adaptiveParams[group]);
           Object.freeze(adaptiveParams);
-          AelluxJs2.mountManager.add({
+          aelluxJs2.mountManager.add({
             extensionName,
             selector: `[${attr.adaptive}]`,
             priority: 0,
@@ -5469,14 +5469,14 @@
           ];
           sizeThresholds = [];
           for (const [size, minimum] of Object.entries(adaptiveParams.minSizes)) {
-            const className = AelluxJs2.className("fits-" + size);
+            const className = aelluxJs2.className("fits-" + size);
             sizeThresholds.push({ className, minimum });
             classes.push(className);
           }
           return classes;
         }
         function parameterDiagnostic(attribute, value, reason) {
-          AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CONFIGURATION_VALUE, {
+          aelluxJs2.diagnostics.warn(aelluxJs2.diagnostics.WARN_CONFIGURATION_VALUE, {
             extension: extensionName,
             attribute: `adaptiveParams${attribute ? "." + attribute : ""}`,
             value,
@@ -5489,22 +5489,22 @@
           pendingResizeElements.clear();
           for (const element of adaptiveElements) unmountAdaptive(element);
           if (resizeObserver) resizeObserver.disconnect();
-          AelluxJs2.mountManager.remove({ extensionName });
+          aelluxJs2.mountManager.remove({ extensionName });
         }
         function mountAdaptive(element) {
           if (adaptiveElements.has(element)) return;
-          elementMemories.set(element, AelluxJs2.persist.element.save(
+          elementMemories.set(element, aelluxJs2.persist.element.save(
             element,
             [],
             dimensionProperties
           ));
-          ariaHandlers.set(element, AelluxJs2.aria.register(element));
+          ariaHandlers.set(element, aelluxJs2.aria.register(element));
           adaptiveElements.add(element);
           layoutIds.set(element, nextLayoutId++);
           if (resizeObserver) resizeObserver.observe(element);
           else {
             scheduleElement(element, null);
-            if (adaptiveElements.size === 1) AelluxJs2.onEvent(root2, "$resize", onWindowResize);
+            if (adaptiveElements.size === 1) aelluxJs2.onEvent(root2, "$resize", onWindowResize);
           }
         }
         function unmountAdaptive(element) {
@@ -5513,10 +5513,10 @@
           pendingResizeEntries.delete(element);
           pendingResizeElements.delete(element);
           const id = layoutIds.get(element);
-          if (id !== void 0) AelluxJs2.waitLayout.cancel(id);
+          if (id !== void 0) aelluxJs2.waitLayout.cancel(id);
           layoutIds.delete(element);
           if (resizeObserver) resizeObserver.unobserve(element);
-          else if (adaptiveElements.size === 0) AelluxJs2.offEvent(root2, "$resize", onWindowResize);
+          else if (adaptiveElements.size === 0) aelluxJs2.offEvent(root2, "$resize", onWindowResize);
           for (const name of managedClasses) {
             element.classList.remove(name);
           }
@@ -5554,17 +5554,17 @@
         function scheduleElement(element, contentRect) {
           const id = layoutIds.get(element);
           if (id === void 0) return;
-          const maxFPS = AelluxJs2.layoutMaxFPS(element);
+          const maxFPS = aelluxJs2.layoutMaxFPS(element);
           const abort = () => !adaptiveElements.has(element);
           if (contentRect) {
-            AelluxJs2.waitLayout.sequence(id, {
+            aelluxJs2.waitLayout.sequence(id, {
               update: () => updateAdaptive(element, contentRect.width, contentRect.height),
               maxFPS,
               abort
             });
             return;
           }
-          AelluxJs2.waitLayout.sequence(id, {
+          aelluxJs2.waitLayout.sequence(id, {
             read: () => element.getBoundingClientRect(),
             update: (rect) => updateAdaptive(element, rect.width, rect.height),
             maxFPS,
@@ -5602,7 +5602,7 @@
           }
           element.style.setProperty("--ae-width", width);
           element.style.setProperty("--ae-height", height);
-          AelluxJs2.dispatchFrom(element, "AdaptiveUpdate", {
+          aelluxJs2.dispatchFrom(element, "AdaptiveUpdate", {
             detail: { width, height, ratio }
           });
         }
@@ -5612,7 +5612,7 @@
             id = nextLayoutId++;
             orientationLayoutIds.set(flexBox, id);
           }
-          return AelluxJs2.waitLayout.read(id, () => {
+          return aelluxJs2.waitLayout.read(id, () => {
             const fallback2 = "horizontal";
             var style = getComputedStyle(flexBox);
             if (style.display === "flex" || style.display === "inline-flex") {
@@ -6406,39 +6406,39 @@
       /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
       (function(root2) {
         "use strict";
-        const AelluxJs2 = root2.AelluxJs;
+        const aelluxJs2 = root2.aelluxJs;
         const extensionName = "present";
-        if (!AelluxJs2) {
-          throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+        if (!aelluxJs2) {
+          throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.`);
         }
         const attr = {
-          present: AelluxJs2.attr(extensionName),
-          group: AelluxJs2.attr("present-group"),
-          active: AelluxJs2.attr("present-active"),
-          when: AelluxJs2.attr("present-when"),
-          triggerOn: AelluxJs2.attr("present-trigger-on"),
-          autoDismiss: AelluxJs2.attr("auto-dismiss"),
-          presentMotion: AelluxJs2.attr("present-motion"),
-          dismissOnClick: AelluxJs2.attr("dismiss-on-click"),
-          trigger: AelluxJs2.attr("present-trigger"),
+          present: aelluxJs2.attr(extensionName),
+          group: aelluxJs2.attr("present-group"),
+          active: aelluxJs2.attr("present-active"),
+          when: aelluxJs2.attr("present-when"),
+          triggerOn: aelluxJs2.attr("present-trigger-on"),
+          autoDismiss: aelluxJs2.attr("auto-dismiss"),
+          presentMotion: aelluxJs2.attr("present-motion"),
+          dismissOnClick: aelluxJs2.attr("dismiss-on-click"),
+          trigger: aelluxJs2.attr("present-trigger"),
           //toggle,pop,dismiss,unpop,effect
-          target: AelluxJs2.attr("present-target"),
+          target: aelluxJs2.attr("present-target"),
           //target ID
-          effect: AelluxJs2.attr("present-effect")
+          effect: aelluxJs2.attr("present-effect")
         };
         const className = {
-          pop: AelluxJs2.className("pop"),
-          popping: AelluxJs2.className("popping"),
-          dismissing: AelluxJs2.className("dismissing"),
-          unpopping: AelluxJs2.className("unpopping"),
-          unpop: AelluxJs2.className("unpop"),
-          dismissed: AelluxJs2.className("dismissed"),
-          willChange: AelluxJs2.className("will-change"),
-          grid: AelluxJs2.className("present-grid")
+          pop: aelluxJs2.className("pop"),
+          popping: aelluxJs2.className("popping"),
+          dismissing: aelluxJs2.className("dismissing"),
+          unpopping: aelluxJs2.className("unpopping"),
+          unpop: aelluxJs2.className("unpop"),
+          dismissed: aelluxJs2.className("dismissed"),
+          willChange: aelluxJs2.className("will-change"),
+          grid: aelluxJs2.className("present-grid")
         };
         const presentSelector = `[${attr.present}]`;
         const groupSelector = `[${attr.group}]`;
-        AelluxJs2.extAttach(extensionName, {
+        aelluxJs2.extAttach(extensionName, {
           init,
           destroy,
           pop,
@@ -6456,7 +6456,7 @@
         const TRANSITION_PREPARE_TIME = 100;
         const TAP_CLICK_WAIT_TIME = 32;
         const presentElements = /* @__PURE__ */ new Map();
-        const effects = createPresentEffects(root2, AelluxJs2, presentElements);
+        const effects = createPresentEffects(root2, aelluxJs2, presentElements);
         const openPresentElements = /* @__PURE__ */ new Set();
         let fallbackMotionId = 5e6;
         const triggerElementsSet = /* @__PURE__ */ new Set();
@@ -6475,8 +6475,8 @@
         let groupsQueued = false;
         let interpolatedProgress = false;
         let interpolatedUnpop = false;
-        const playback = createPresentPlayback(root2, AelluxJs2);
-        const gestures = createPresentGestures(root2, AelluxJs2, {
+        const playback = createPresentPlayback(root2, aelluxJs2);
+        const gestures = createPresentGestures(root2, aelluxJs2, {
           state: (element) => {
             var _a;
             return (_a = presentElements.get(element)) == null ? void 0 : _a.state;
@@ -6526,24 +6526,24 @@
         function init(options) {
           const communication = { owner: extensionName };
           for (const [name, method] of Object.entries({ pop, unpop, dismiss }))
-            AelluxJs2.comm.handle("present." + name, ({ element }) => method(element), communication);
-          AelluxJs2.comm.handle("present.toggle", ({ element, goto }) => toggle(element, goto), communication);
-          AelluxJs2.comm.handle("present.effect", ({ element, effect: name, effectTarget }) => effect(element, name, effectTarget), communication);
-          AelluxJs2.comm.handle("present.show", ({ group, member }) => show(group, member), communication);
-          AelluxJs2.comm.handle("present.selection", ({ group }) => selected(group), communication);
-          AelluxJs2.comm.handle("present.pop-next", (request) => popNext(request.group, (member) => {
+            aelluxJs2.comm.handle("present." + name, ({ element }) => method(element), communication);
+          aelluxJs2.comm.handle("present.toggle", ({ element, goto }) => toggle(element, goto), communication);
+          aelluxJs2.comm.handle("present.effect", ({ element, effect: name, effectTarget }) => effect(element, name, effectTarget), communication);
+          aelluxJs2.comm.handle("present.show", ({ group, member }) => show(group, member), communication);
+          aelluxJs2.comm.handle("present.selection", ({ group }) => selected(group), communication);
+          aelluxJs2.comm.handle("present.pop-next", (request) => popNext(request.group, (member) => {
             if (request.preparation) {
-              const result = AelluxJs2.comm.request(request.preparation.contract, __spreadProps(__spreadValues({}, request.preparation.payload), { element: member }));
+              const result = aelluxJs2.comm.request(request.preparation.contract, __spreadProps(__spreadValues({}, request.preparation.payload), { element: member }));
               if (!result.handled || result.value === false) throw new Error("Present preparation is unavailable.");
             }
           }), communication);
           playback.init();
           const descriptors = cssProperties.map(([name, syntax, initialValue]) => ({ name: `--ae-${name}`, syntax, initialValue }));
-          const progressRegistered = AelluxJs2.registerCssProperty(...descriptors.slice(0, 4));
+          const progressRegistered = aelluxJs2.registerCssProperty(...descriptors.slice(0, 4));
           interpolatedProgress = !!(progressRegistered && root2.CSS.supports && root2.CSS.supports("opacity", "clamp(0, 0.5, 1)"));
-          interpolatedUnpop = !!AelluxJs2.registerCssProperty({ name: "--ae-unpop-progress", syntax: "<number>", initialValue: "1" });
-          AelluxJs2.registerCssProperty(...descriptors.slice(4));
-          AelluxJs2.mountManager.add({
+          interpolatedUnpop = !!aelluxJs2.registerCssProperty({ name: "--ae-unpop-progress", syntax: "<number>", initialValue: "1" });
+          aelluxJs2.registerCssProperty(...descriptors.slice(4));
+          aelluxJs2.mountManager.add({
             extensionName,
             selector: presentSelector,
             priority: 0,
@@ -6552,7 +6552,7 @@
             update: (element) => autoDismissSchedule(element, presentElements.get(element)),
             controllers: ["pop", "dismiss", "unpop", "trigger", "toggle", "effect", "cancelEffect"]
           });
-          AelluxJs2.mountManager.add({
+          aelluxJs2.mountManager.add({
             extensionName,
             priority: 0,
             selector: `[${attr.trigger}]`,
@@ -6560,7 +6560,7 @@
             unmount: unmountTriggerElement,
             update: refreshTriggerTargets
           });
-          AelluxJs2.mountManager.add({
+          aelluxJs2.mountManager.add({
             extensionName,
             selector: groupSelector,
             priority: 1,
@@ -6570,7 +6570,7 @@
           });
           autoObserver = new root2.MutationObserver((records) => {
             for (const record of records) {
-              if (record.target === document.documentElement && record.attributeName === AelluxJs2.attr("reduced-motion")) effects.preferences();
+              if (record.target === document.documentElement && record.attributeName === aelluxJs2.attr("reduced-motion")) effects.preferences();
               const controller = presentElements.get(record.target);
               if (controller) {
                 if (record.attributeName !== attr.autoDismiss) gestures.update(record.target);
@@ -6578,32 +6578,32 @@
               }
             }
             if (records.some((record) => record.type === "childList" || record.attributeName === "id")) {
-              for (const element of presentElements.keys()) if (element.hasAttribute(AelluxJs2.attr("present-gesture-source"))) gestures.update(element);
+              for (const element of presentElements.keys()) if (element.hasAttribute(aelluxJs2.attr("present-gesture-source"))) gestures.update(element);
             }
           });
           autoObserver.observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: [
             attr.autoDismiss,
             "id",
-            AelluxJs2.attr("reduced-motion"),
-            ...["", "-source", "-unpop", "-dismiss"].map((suffix2) => AelluxJs2.attr(`present-gesture${suffix2}`))
+            aelluxJs2.attr("reduced-motion"),
+            ...["", "-source", "-unpop", "-dismiss"].map((suffix2) => aelluxJs2.attr(`present-gesture${suffix2}`))
           ] });
           document.addEventListener("pointerover", onHover);
           document.addEventListener("pointerout", onHover);
-          AelluxJs2.on("$click", OnClick);
-          AelluxJs2.on("tap", onTap);
-          AelluxJs2.onEvent(root2, "$resize", refreshExpandedStates);
+          aelluxJs2.on("$click", OnClick);
+          aelluxJs2.on("tap", onTap);
+          aelluxJs2.onEvent(root2, "$resize", refreshExpandedStates);
         }
         function destroy() {
-          AelluxJs2.comm.removeOwner(extensionName);
+          aelluxJs2.comm.removeOwner(extensionName);
           effects.destroy();
           gestures.destroy();
           autoObserver == null ? void 0 : autoObserver.disconnect();
           autoObserver = null;
-          AelluxJs2.mountManager.remove({ extensionName });
-          AelluxJs2.off("$click", OnClick);
-          AelluxJs2.off("tap", onTap);
+          aelluxJs2.mountManager.remove({ extensionName });
+          aelluxJs2.off("$click", OnClick);
+          aelluxJs2.off("tap", onTap);
           for (const pending of pendingTaps) cancelPendingTap(pending);
-          AelluxJs2.offEvent(root2, "$resize", refreshExpandedStates);
+          aelluxJs2.offEvent(root2, "$resize", refreshExpandedStates);
           document.removeEventListener("pointerover", onHover);
           document.removeEventListener("pointerout", onHover);
           for (const group of groups.keys()) unmountGroup(group);
@@ -6619,7 +6619,7 @@
         }
         function mountPresentContainer(element) {
           if (presentElements.has(element)) return;
-          elementMemories.set(element, AelluxJs2.persist.element.save(
+          elementMemories.set(element, aelluxJs2.persist.element.save(
             element,
             [attr.present, attr.presentMotion, "hidden"],
             [
@@ -6630,7 +6630,7 @@
               "--ae-present-dismiss-phase"
             ]
           ));
-          containerAriaHandlers.set(element, AelluxJs2.aria.register(element));
+          containerAriaHandlers.set(element, aelluxJs2.aria.register(element));
           const initialState = element.classList.contains(className.dismissed) ? DISMISS : element.classList.contains(className.unpop) || element.hidden ? UNPOP : POP;
           const legacyHidden = element.hidden || ![className.pop, className.unpop, className.dismissed].some((name) => element.classList.contains(name));
           if ((element.getAttribute(attr.present) || "").trim().toLowerCase() === "all") {
@@ -6645,8 +6645,8 @@
           const measuredWidth = !presentMotion && tokens.includes("width");
           if (presentMotion) element.classList.add(className.grid);
           else if (measuredHeight || measuredWidth) {
-            AelluxJs2.diagnostics.info(
-              AelluxJs2.diagnostics.INFO_PRESENT_MEASURED_LAYOUT,
+            aelluxJs2.diagnostics.info(
+              aelluxJs2.diagnostics.INFO_PRESENT_MEASURED_LAYOUT,
               { extension: extensionName, element }
             );
           }
@@ -6660,7 +6660,7 @@
             measuredHeight,
             measuredWidth,
             motionEnabled: (element.getAttribute(attr.present) || "").trim() !== "",
-            motionId: AelluxJs2.motion ? AelluxJs2.motion.id() : fallbackMotionId++,
+            motionId: aelluxJs2.motion ? aelluxJs2.motion.id() : fallbackMotionId++,
             transition: null,
             handoff: null,
             opening: null,
@@ -6692,7 +6692,7 @@
               if (transition) {
                 transition.cancelled = true;
                 transition.replacement = replacement;
-                if (AelluxJs2.motion) AelluxJs2.motion.cancel(this.motionId);
+                if (aelluxJs2.motion) aelluxJs2.motion.cancel(this.motionId);
                 if (transition.timeout !== null) {
                   clearTimeout(transition.timeout);
                   transition.timeout = null;
@@ -6702,8 +6702,8 @@
                 }
                 this.transition = null;
                 transition.interrupt(
-                  AelluxJs2.diagnostics.create(
-                    AelluxJs2.diagnostics.WARN_INTERRUPTION,
+                  aelluxJs2.diagnostics.create(
+                    aelluxJs2.diagnostics.WARN_INTERRUPTION,
                     { extensionName, replacement }
                   )
                 );
@@ -6762,7 +6762,7 @@
           cancelHoverClose(element);
           for (const button of controller.triggers) hoveredTriggers.delete(button);
           controller.stop();
-          (_a = AelluxJs2.waitLayout) == null ? void 0 : _a.cancel(controller.motionId);
+          (_a = aelluxJs2.waitLayout) == null ? void 0 : _a.cancel(controller.motionId);
           element.classList.remove(className.grid);
           element.classList.remove(className.pop, className.unpop, className.dismissed);
           element.classList.add(...controller.initialClasses);
@@ -6777,7 +6777,7 @@
         }
         function mountTriggerElement(triggerElement) {
           if (triggerElementsSet.has(triggerElement) || !triggerElement.hasAttribute(attr.trigger)) return;
-          triggerAriaHandlers.set(triggerElement, AelluxJs2.aria.register(triggerElement));
+          triggerAriaHandlers.set(triggerElement, aelluxJs2.aria.register(triggerElement));
           triggerElementsSet.add(triggerElement);
           refreshTriggerTargets(triggerElement);
         }
@@ -6805,7 +6805,7 @@
         function targetById(value) {
           const id = targetIdFor(value);
           if (!id) {
-            AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_SELECTOR, {
+            aelluxJs2.diagnostics.error(aelluxJs2.diagnostics.ERROR_EXTENSION_SELECTOR, {
               cause: new SyntaxError(),
               extension: extensionName,
               selector: value,
@@ -6909,8 +6909,8 @@
         function trigger(element, trigger2, name) {
           trigger2 = typeof trigger2 === "string" ? (trigger2 || "toggle").toLowerCase() : "toggle";
           if (trigger2 === "effect") return effect(element, name);
-          if (!["pop", "dismiss", "unpop", "toggle"].includes(trigger2)) AelluxJs2.diagnostics.warn(
-            AelluxJs2.diagnostics.WARN_CONFIGURATION_VALUE,
+          if (!["pop", "dismiss", "unpop", "toggle"].includes(trigger2)) aelluxJs2.diagnostics.warn(
+            aelluxJs2.diagnostics.WARN_CONFIGURATION_VALUE,
             {
               extension: extensionName,
               element,
@@ -6936,12 +6936,12 @@
         }
         function captureHandoff(element, controller) {
           if ((controller.measuredHeight || controller.measuredWidth) && !measuredMemories.has(element)) {
-            measuredMemories.set(element, AelluxJs2.persist.element.save(element, [], ["max-height", "max-width"]));
+            measuredMemories.set(element, aelluxJs2.persist.element.save(element, [], ["max-height", "max-width"]));
           }
           const tokens = (element.getAttribute(attr.present) || "").split(/\s+/);
           const properties = [];
           if (tokens.includes("opacity")) properties.push("opacity");
-          if (tokens.includes("transform") && !element.hasAttribute(AelluxJs2.attr("anchor"))) properties.push("transform");
+          if (tokens.includes("transform") && !element.hasAttribute(aelluxJs2.attr("anchor"))) properties.push("transform");
           if (tokens.includes("height")) properties.push(...controller.presentMotion ? ["grid-template-rows", "height"] : ["max-height"]);
           if (tokens.includes("width")) properties.push(...controller.presentMotion ? ["grid-template-columns", "width"] : ["max-width"]);
           properties.push(
@@ -6965,8 +6965,8 @@
             controller.reverse = null;
             restoreHandoff(controller);
           }
-          const memory = AelluxJs2.persist.element.save(element, [], [...properties, "transition-property"]);
-          const transition = AelluxJs2.persist.element.save(element, [], ["transition-property"]);
+          const memory = aelluxJs2.persist.element.save(element, [], [...properties, "transition-property"]);
+          const transition = aelluxJs2.persist.element.save(element, [], ["transition-property"]);
           const freeze = () => {
             element.style.setProperty("transition-property", "none", "important");
             for (const [property, value] of values) element.style.setProperty(property, value, property.startsWith("--") ? "" : "important");
@@ -6978,7 +6978,7 @@
         async function prepareMeasuredSize(element, controller, gotoVisible, previousSize, waitForPreparation) {
           if (!controller.measuredHeight && !controller.measuredWidth) return null;
           if (!measuredMemories.has(element)) {
-            measuredMemories.set(element, AelluxJs2.persist.element.save(
+            measuredMemories.set(element, aelluxJs2.persist.element.save(
               element,
               [],
               ["max-height", "max-width"]
@@ -7006,7 +7006,7 @@
             element.style.setProperty("max-width", `${Math.max(0, start.width)}px`, "important");
           }
           if (!waitForPreparation)
-            await AelluxJs2.waitLayout.read(
+            await aelluxJs2.waitLayout.read(
               controller.motionId,
               () => element.getBoundingClientRect()
             );
@@ -7048,7 +7048,7 @@
           let transition = null;
           try {
             const revision = controller.operationRevision;
-            const allowEvent = groupOperation || AelluxJs2.dispatchFrom(
+            const allowEvent = groupOperation || aelluxJs2.dispatchFrom(
               element,
               `${BEFORE}${newDirection}`,
               { bubbles: true, cancelable: true }
@@ -7059,7 +7059,7 @@
             effects.cancelWithin(element);
             controller.operationRevision++;
             const impliedReverse = reversing && !controller.opening && !controller.transition;
-            const reverseTracks = reversing && controller.motionEnabled && ((_a = AelluxJs2.currentPreference) == null ? void 0 : _a.call(AelluxJs2, "reduced-motion")) !== "reduced" ? gesture ? playback.full(element, controller, false) : playback.snapshot(element, controller, interpolatedProgress) : [];
+            const reverseTracks = reversing && controller.motionEnabled && ((_a = aelluxJs2.currentPreference) == null ? void 0 : _a.call(aelluxJs2, "reduced-motion")) !== "reduced" ? gesture ? playback.full(element, controller, false) : playback.snapshot(element, controller, interpolatedProgress) : [];
             if (gotoVisible) controller.opening = null;
             if (gotoVisible) controller.presentationOrder = presentationOrder === void 0 ? ++presentationSequence : presentationOrder;
             if (!gotoVisible || !groupOperation) (_b = groups.get(group)) == null ? void 0 : _b.reservations.delete(element);
@@ -7111,7 +7111,7 @@
             });
             element.hidden = false;
             if (gesture && root2.getComputedStyle(element).display === "none") {
-              controller.gestureDisplay = AelluxJs2.persist.element.save(element, [], ["display"]);
+              controller.gestureDisplay = aelluxJs2.persist.element.save(element, [], ["display"]);
               element.style.setProperty("display", controller.presentMotion ? "inline-grid" : "block", "important");
             }
             openPresentElements.add(element);
@@ -7255,11 +7255,11 @@
               apply: activateTransition,
               easing: reversing && !impliedReverse ? void 0 : advancedEase,
               nativeDuration: timeMs,
-              maxFPS: AelluxJs2.layoutMaxFPS ? AelluxJs2.layoutMaxFPS(element) : void 0,
+              maxFPS: aelluxJs2.layoutMaxFPS ? aelluxJs2.layoutMaxFPS(element) : void 0,
               abort: () => controller.transition !== transition || !element.isConnected
             };
-            const completed = gesture ? (activateTransition(), gesture.settled) : AelluxJs2.motion ? AelluxJs2.motion.run(element, motionOptions) : legacyMotionRun(motionOptions, transition);
-            AelluxJs2.dispatchFrom(element, "Layout", {
+            const completed = gesture ? (activateTransition(), gesture.settled) : aelluxJs2.motion ? aelluxJs2.motion.run(element, motionOptions) : legacyMotionRun(motionOptions, transition);
+            aelluxJs2.dispatchFrom(element, "Layout", {
               detail: {
                 origin: `present.${newDirection}`.toLowerCase(),
                 durationMs: Number.isFinite(timeMs) ? Math.max(0, timeMs) : 0
@@ -7275,7 +7275,7 @@
               }
             }
             if (controller.transition !== transition || !element.isConnected) return;
-            AelluxJs2.dispatchFrom(element, gotoVisible ? "Popping" : reversing ? "Unpopping" : "Dismissing", { bubbles: true });
+            aelluxJs2.dispatchFrom(element, gotoVisible ? "Popping" : reversing ? "Unpopping" : "Dismissing", { bubbles: true });
             const motionResult = await Promise.race([completed, interrupted]);
             if (controller.transition !== transition || gesture && !motionResult || !gesture && motionResult && motionResult.status !== "completed") return;
             if (gesture) {
@@ -7291,7 +7291,7 @@
                 publishGroup(group, groupState, selected2);
               }
               controller.gesture = null;
-              AelluxJs2.dispatchFrom(element, motionResult, { bubbles: true });
+              aelluxJs2.dispatchFrom(element, motionResult, { bubbles: true });
               if (finalVisible) autoDismissSchedule(element, controller);
               return;
             }
@@ -7300,10 +7300,10 @@
             if (gotoVisible && !element.hidden) {
               autoDismissSchedule(element, controller);
               controller.classList.add(className.pop);
-              AelluxJs2.dispatchFrom(element, POP, { bubbles: true });
+              aelluxJs2.dispatchFrom(element, POP, { bubbles: true });
             }
             if (!gotoVisible && controller.state !== POP) {
-              AelluxJs2.dispatchFrom(element, newDirection, { bubbles: true });
+              aelluxJs2.dispatchFrom(element, newDirection, { bubbles: true });
             }
           } catch (error) {
             const ownsTransition = transition && controller.transition === transition;
@@ -7315,10 +7315,10 @@
               controller.classList.remove(transition.className);
             }
             switch (error && error.code) {
-              case AelluxJs2.diagnostics.WARN_INTERRUPTION.code:
+              case aelluxJs2.diagnostics.WARN_INTERRUPTION.code:
                 if (transition && transition.cancelled) break;
-                AelluxJs2.diagnostics.warn(
-                  AelluxJs2.diagnostics.WARN_INTERRUPTION,
+                aelluxJs2.diagnostics.warn(
+                  aelluxJs2.diagnostics.WARN_INTERRUPTION,
                   {
                     cause: error,
                     extension: extensionName,
@@ -7328,8 +7328,8 @@
                 );
                 break;
               default:
-                AelluxJs2.diagnostics.error(
-                  AelluxJs2.diagnostics.ERROR_EXTENSION_TRANSITION,
+                aelluxJs2.diagnostics.error(
+                  aelluxJs2.diagnostics.ERROR_EXTENSION_TRANSITION,
                   { cause: error, extension: extensionName, element }
                 );
                 break;
@@ -7379,7 +7379,7 @@
           else openPresentElements.add(element);
           if (focused && !controller.expanded) {
             if (document.activeElement === focused) focused.blur();
-            if (document.activeElement !== focused) AelluxJs2.dispatch(`${controller.direction}FocusLost`, {
+            if (document.activeElement !== focused) aelluxJs2.dispatch(`${controller.direction}FocusLost`, {
               detail: { element, focused }
             });
           }
@@ -7413,7 +7413,7 @@
               return;
             }
             const now = root2.performance.now();
-            const fps = ((_a = AelluxJs2.layoutMaxFPS) == null ? void 0 : _a.call(AelluxJs2, element)) || AelluxJs2.options.cssMotionPropertyMaxFPS || 55;
+            const fps = ((_a = aelluxJs2.layoutMaxFPS) == null ? void 0 : _a.call(aelluxJs2, element)) || aelluxJs2.options.cssMotionPropertyMaxFPS || 55;
             if (now - countdown.last >= 1e3 / fps) {
               countdown.last = now;
               emit(false);
@@ -7437,7 +7437,7 @@
           if (valid()) countdown.frame = root2.requestAnimationFrame(tick);
         }
         function emitAutoDismissProgress(element, elapsedMs, duration, completed = false) {
-          AelluxJs2.dispatchFrom(element, "Progress", {
+          aelluxJs2.dispatchFrom(element, "Progress", {
             bubbles: false,
             cancelable: false,
             detail: {
@@ -7501,13 +7501,13 @@
             target,
             hoverSuppressed: control && suppressHoverClick(control, event),
             present: triggerTargets.get(control),
-            input: AelluxJs2.comm.request("input.mount-token", { element: target }).value,
+            input: aelluxJs2.comm.request("input.mount-token", { element: target }).value,
             timer: null
           };
           pendingTaps.add(pending);
           pending.timer = setTimeout(() => {
             pendingTaps.delete(pending);
-            if (!target.isConnected || pending.input && AelluxJs2.comm.request("input.mount-token", { element: target }).value !== pending.input) return;
+            if (!target.isConnected || pending.input && aelluxJs2.comm.request("input.mount-token", { element: target }).value !== pending.input) return;
             activate(event, target, pending.hoverSuppressed);
           }, TAP_CLICK_WAIT_TIME);
         }
@@ -7541,8 +7541,8 @@
               exceptions.push(container);
               if (!(hoverSuppressed != null ? hoverSuppressed : suppressHoverClick(button, event))) trigger(container, triggerAttr, button.getAttribute(attr.effect));
             } else {
-              AelluxJs2.diagnostics.error(
-                AelluxJs2.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING,
+              aelluxJs2.diagnostics.error(
+                aelluxJs2.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING,
                 { extension: extensionName, element: button, action: triggerAttr === "dismiss" ? "dismiss" : "trigger" }
               );
             }
@@ -7552,7 +7552,7 @@
         function diagnoseTarget(element, target, attribute, value) {
           if (!targetIdFor(value)) return;
           if (target && target.hasAttribute(attr.present)) return;
-          AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CONFIGURATION_TARGET, {
+          aelluxJs2.diagnostics.warn(aelluxJs2.diagnostics.WARN_CONFIGURATION_TARGET, {
             extension: extensionName,
             element,
             attribute,
@@ -7598,7 +7598,7 @@
           const limit = text === "" ? 1 : Number(text);
           const valid = text === "" || /^\d+$/.test(text) && Number.isSafeInteger(limit) && limit > 0;
           state.limit = valid ? limit : 1;
-          if (!valid) AelluxJs2.diagnostics.warn(AelluxJs2.diagnostics.WARN_CONFIGURATION_VALUE, {
+          if (!valid) aelluxJs2.diagnostics.warn(aelluxJs2.diagnostics.WARN_CONFIGURATION_VALUE, {
             extension: extensionName,
             element: group,
             attribute: attr.group,
@@ -7631,7 +7631,7 @@
             revision: 0,
             pending: Promise.resolve(true),
             jobs: /* @__PURE__ */ new Map(),
-            memory: AelluxJs2.persist.element.save(group, [attr.active])
+            memory: aelluxJs2.persist.element.save(group, [attr.active])
           });
           groupLimit(group, groups.get(group));
           if (!groupObserver && typeof root2.MutationObserver === "function") {
@@ -7686,8 +7686,8 @@
           });
         }
         function groupDiagnostic(group, reason) {
-          AelluxJs2.diagnostics.warn(
-            AelluxJs2.diagnostics.WARN_PRESENT_GROUP_SELECTION,
+          aelluxJs2.diagnostics.warn(
+            aelluxJs2.diagnostics.WARN_PRESENT_GROUP_SELECTION,
             {
               extension: extensionName,
               element: group,
@@ -7803,7 +7803,7 @@
               return Promise.resolve(null);
             }
             if (typeof prepare === "function") prepare(member);
-            if (!valid(true) || !AelluxJs2.dispatchFrom(member, "BeforePop", { bubbles: true, cancelable: true }) || !valid(true)) {
+            if (!valid(true) || !aelluxJs2.dispatchFrom(member, "BeforePop", { bubbles: true, cancelable: true }) || !valid(true)) {
               release(true);
               return Promise.resolve(null);
             }
@@ -7824,7 +7824,7 @@
           if (state.announced === current) return;
           const previous = state.announced || null;
           state.announced = current;
-          AelluxJs2.dispatchFrom(group, "PresentGroupChange", {
+          aelluxJs2.dispatchFrom(group, "PresentGroupChange", {
             bubbles: true,
             detail: { group, previous, current, key: current && current.id }
           });
@@ -7845,7 +7845,7 @@
           const conditions = members.map((member) => member.getAttribute(attr.when));
           const valid = () => groups.get(group) === state && state.revision === revision && group.isConnected && group.hasAttribute(attr.group) && group.getAttribute(attr.active) === active && group.getAttribute("class") === classes && groupMembers(group).length === members.length && members.every((member, index) => presentElements.has(member) && member.isConnected && member.closest(groupSelector) === group && member.id === ids[index] && member.getAttribute(attr.when) === conditions[index]);
           for (const member of changes) {
-            const allowed = AelluxJs2.dispatchFrom(
+            const allowed = aelluxJs2.dispatchFrom(
               member,
               member === selected2 ? "BeforePop" : `${BEFORE}${closingDirection}`,
               { bubbles: true, cancelable: true }
@@ -8537,32 +8537,32 @@
       despawn,
       hasMounts,
       on(event, handler, options) {
-        root2.AelluxJs.onEvent(element, event, handler, options);
+        root2.aelluxJs.onEvent(element, event, handler, options);
       },
       off(event, handler, options) {
-        root2.AelluxJs.offEvent(element, event, handler, options);
+        root2.aelluxJs.offEvent(element, event, handler, options);
       },
       dispatch(event, options) {
-        return root2.AelluxJs.dispatchFrom(element, event, options);
+        return root2.aelluxJs.dispatchFrom(element, event, options);
       },
       mount(extensionNames = null) {
-        return root2.AelluxJs.mountManager.mount(element, extensionNames);
+        return root2.aelluxJs.mountManager.mount(element, extensionNames);
       },
       unmount(extensionNames = null) {
-        return root2.AelluxJs.mountManager.unmount(element, extensionNames);
+        return root2.aelluxJs.mountManager.unmount(element, extensionNames);
       },
       update(extensionNames = null) {
-        return root2.AelluxJs.mountManager.update(element, extensionNames);
+        return root2.aelluxJs.mountManager.update(element, extensionNames);
       }
     };
     function spawn(extensionName, mountId, methodNames, updatable = false) {
       const key = toCamelCase2(fromCamelCase2(extensionName));
-      const extension = root2.AelluxJs.ext[key];
+      const extension = root2.aelluxJs.ext[key];
       const methods = Array.isArray(methodNames) ? methodNames : [];
       for (const name of methods) {
         if (name === "update" && updatable) continue;
         if (typeof name === "string" && extension && typeof extension[name] === "function") continue;
-        const diagnostics = root2.AelluxJs.diagnostics;
+        const diagnostics = root2.aelluxJs.diagnostics;
         diagnostics.warn(diagnostics.WARN_CONTROLLER_METHOD_MISSING, {
           extension: key,
           method: name,
@@ -8589,7 +8589,7 @@
       return mounts.size > 0;
     }
     function refresh(key) {
-      const extension = root2.AelluxJs.ext[key];
+      const extension = root2.aelluxJs.ext[key];
       const registrations = Array.from(mounts.values()).filter((registration) => registration.extension === key);
       const names = /* @__PURE__ */ new Set();
       for (const registration of registrations) {
@@ -8613,11 +8613,11 @@
       }
       for (const name of names) {
         namespace[name] = (...args) => {
-          const current = root2.AelluxJs.ext[key];
+          const current = root2.aelluxJs.ext[key];
           return current[name](element, ...args);
         };
       }
-      namespace.update = registrations.some((registration) => registration.updatable) ? () => root2.AelluxJs.mountManager.update(element, key) : null;
+      namespace.update = registrations.some((registration) => registration.updatable) ? () => root2.aelluxJs.mountManager.update(element, key) : null;
       controller[key] = namespace;
     }
     return controller;
@@ -8640,7 +8640,7 @@
     if (elementOrId && allowedNodeTypes.indexOf(elementOrId.nodeType) !== -1) {
       return elementOrId;
     }
-    var diagnostics = root2.AelluxJs.diagnostics;
+    var diagnostics = root2.aelluxJs.diagnostics;
     diagnostics.warn(diagnostics.WARN_INVALID_ELEMENT_OR_ID, {
       elementOrId: requested,
       method: options.method
@@ -8655,7 +8655,7 @@
     const sourceURL = root2.document.URL;
     let sourceChecked = false;
     return function validateDocumentDoubleAttributeHTML() {
-      const api = root2.AelluxJs;
+      const api = root2.aelluxJs;
       if (api.options.environment !== "development" || sourceChecked || root2.document.contentType !== "text/html" || !/^https?:/i.test(sourceURL)) return;
       sourceChecked = true;
       Promise.resolve().then(() => api.request(sourceURL, { cache: "force-cache" })).then((response) => response.text()).then((html) => validateDoubleAttributeHTML(api, html, sourceURL)).catch(() => {
@@ -8721,7 +8721,7 @@
   };
   function validateExtensionDeclarations(root2, scope, extensionNames = null, method = "mount") {
     var _a, _b;
-    const api = root2.AelluxJs;
+    const api = root2.aelluxJs;
     if (api.options.environment !== "development") return;
     const selected = extensionNames === null ? null : new Set(
       (Array.isArray(extensionNames) ? extensionNames : [extensionNames]).map(utils_name_case_default.fromCamelCase)
@@ -8911,7 +8911,7 @@
             element,
             attribute: attribute.name,
             value: attribute.value,
-            reason: "Unknown Aellux attribute.",
+            reason: "Unknown aellux.js attribute.",
             suggestion: `Check the spelling; did you mean ${candidate}?`
           });
         }
@@ -9144,7 +9144,7 @@
     const pendingUnmounts = /* @__PURE__ */ new WeakMap();
     const mountRecords = /* @__PURE__ */ new WeakMap();
     let mountOrder = 0;
-    const classPrefix = root2.AelluxJs.className("");
+    const classPrefix = root2.aelluxJs.className("");
     const validateDocumentDoubleAttributeHTML = createDocumentHTMLValidator(root2);
     return { mount, unmount, unmountDetached, update };
     async function update(elementOrId, extensionNames = null) {
@@ -9171,42 +9171,42 @@
       return AelluxJsMounted(root2.document, UNMOUNT, null, true);
     }
     async function mount(elementOrId, extensionNames = null) {
-      const AelluxJs2 = root2.AelluxJs;
+      const aelluxJs2 = root2.aelluxJs;
       const newlyMounted = /* @__PURE__ */ new Set();
       const rootElement = resolveMountElement(elementOrId, "mount");
       if (!rootElement) return [];
-      if (!AelluxJs2.dispatch("BeforeMount", {
+      if (!aelluxJs2.dispatch("BeforeMount", {
         cancelable: true,
         detail: {
           root: rootElement,
           extensions: extensionNames == null ? null : (typeof extensionNames === "string" ? [extensionNames] : extensionNames).map((name) => fromCamelCase2(name))
         }
       })) return [];
-      const waitMountedAttr = AelluxJs2.attr("wait-mounted");
+      const waitMountedAttr = aelluxJs2.attr("wait-mounted");
       const allWaiters = findElements(rootElement, `[${waitMountedAttr}]`);
       allWaiters.forEach((waiter) => waiter.setAttribute("aria-busy", "true"));
       try {
         const allLinks = findElements(rootElement, "link[rel='aelluxjs-ext']");
         for (const link of allLinks) {
           const href = link.getAttribute("href");
-          const loadWhen = link.getAttribute(AelluxJs2.attr("load-when")) || void 0;
-          const builds = link.getAttribute(AelluxJs2.attr("builds")) || void 0;
-          const loadStyleValue = link.getAttribute(AelluxJs2.attr("load-style"));
+          const loadWhen = link.getAttribute(aelluxJs2.attr("load-when")) || void 0;
+          const builds = link.getAttribute(aelluxJs2.attr("builds")) || void 0;
+          const loadStyleValue = link.getAttribute(aelluxJs2.attr("load-style"));
           const loadStyle = loadStyleValue === null || loadStyleValue === "false" ? false : loadStyleValue || true;
           link.setAttribute("rel", "aelluxjs-ext-registered");
-          AelluxJs2.ext(href, { builds, loadWhen, loadStyle });
+          aelluxJs2.ext(href, { builds, loadWhen, loadStyle });
         }
         const waitExtensions = [];
-        for (const [key, options] of Object.entries(root2.AelluxJs.registry.ext)) {
+        for (const [key, options] of Object.entries(root2.aelluxJs.registry.ext)) {
           if (options.load === false) continue;
-          waitExtensions.push(AelluxJs2.wait(key));
+          waitExtensions.push(aelluxJs2.wait(key));
         }
         await Promise.all(waitExtensions);
         await AelluxJsMount(rootElement, extensionNames, newlyMounted);
         validateExtensionDeclarations(root2, rootElement, extensionNames);
         if (rootElement === root2.document && extensionNames == null) validateDocumentDoubleAttributeHTML();
       } catch (error) {
-        AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_MOUNT, {
+        aelluxJs2.diagnostics.error(aelluxJs2.diagnostics.ERROR_MOUNT, {
           cause: error,
           root: rootElement,
           extensions: extensionNames
@@ -9217,26 +9217,26 @@
       return Array.from(newlyMounted);
     }
     async function AelluxJsMount(rootElement, extensionNames, newlyMounted) {
-      const AelluxJs2 = root2.AelluxJs;
+      const aelluxJs2 = root2.aelluxJs;
       if (typeof extensionNames === "string")
         extensionNames = [extensionNames];
       var filter;
       if (!extensionNames) {
-        const mounterSelectors = Object.values(AelluxJs2.registry.extMounters);
-        const lazySelectors = Object.values(AelluxJs2.registry.lazyExtSelectors);
+        const mounterSelectors = Object.values(aelluxJs2.registry.extMounters);
+        const lazySelectors = Object.values(aelluxJs2.registry.lazyExtSelectors);
         filter = [...mounterSelectors, ...lazySelectors];
       } else {
         filter = [];
         extensionNames = extensionNames.map((_) => fromCamelCase2(_));
-        for (const [key, selectorString] of Object.entries(AelluxJs2.registry.extMounters))
+        for (const [key, selectorString] of Object.entries(aelluxJs2.registry.extMounters))
           if (extensionNames.indexOf(fromCamelCase2(key)) !== -1)
             filter.push(selectorString);
-        for (const [key, selectorString] of Object.entries(AelluxJs2.registry.lazyExtSelectors))
+        for (const [key, selectorString] of Object.entries(aelluxJs2.registry.lazyExtSelectors))
           if (extensionNames.indexOf(fromCamelCase2(key)) !== -1)
             filter.push(selectorString);
       }
       if (filter.length === 0) {
-        AelluxJs2.dispatch("Mount", {
+        aelluxJs2.dispatch("Mount", {
           detail: { root: rootElement, extensions: extensionNames, elements: [] }
         });
         return;
@@ -9249,10 +9249,10 @@
           localExtensionNames = extensionNames;
         } else {
           localExtensionNames = /* @__PURE__ */ new Set();
-          for (const [key, selector] of Object.entries(AelluxJs2.registry.lazyExtSelectors))
+          for (const [key, selector] of Object.entries(aelluxJs2.registry.lazyExtSelectors))
             if (element.matches(selector) && filter.indexOf(selector) !== -1)
               localExtensionNames.add(fromCamelCase2(key));
-          for (const [key, selector] of Object.entries(AelluxJs2.registry.extMounters))
+          for (const [key, selector] of Object.entries(aelluxJs2.registry.extMounters))
             if (element.matches(selector) && filter.indexOf(selector) !== -1)
               localExtensionNames.add(fromCamelCase2(key));
         }
@@ -9267,7 +9267,7 @@
       }
       const extensions = Array.from(candidatesByExtension);
       const loaded = await Promise.all(
-        extensions.map(([extensionName]) => AelluxJs2.wait(extensionName).then(
+        extensions.map(([extensionName]) => aelluxJs2.wait(extensionName).then(
           (value) => ({ value }),
           (error) => ({ error })
         ))
@@ -9307,7 +9307,7 @@
               continue;
             }
             if (!isMounted(mountable)) {
-              const presentStates = mountable.hasAttribute(AelluxJs2.attr("present")) ? ["pop", "unpop", "dismissed"].map((name) => AelluxJs2.className(name)) : [];
+              const presentStates = mountable.hasAttribute(aelluxJs2.attr("present")) ? ["pop", "unpop", "dismissed"].map((name) => aelluxJs2.className(name)) : [];
               for (const name of Array.from(mountable.classList)) {
                 if (name.startsWith(classPrefix) && !presentStates.includes(name)) mountable.classList.remove(name);
               }
@@ -9336,8 +9336,8 @@
                 elementController.despawn(mountId);
                 if (!elementController.hasMounts()) elementControllers.delete(mountable);
               }
-              AelluxJs2.diagnostics.error(
-                AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
+              aelluxJs2.diagnostics.error(
+                aelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
                 {
                   cause: error,
                   extension: extensionName,
@@ -9351,8 +9351,8 @@
             }
           }
         } catch (error) {
-          AelluxJs2.diagnostics.error(
-            AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
+          aelluxJs2.diagnostics.error(
+            aelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT,
             {
               cause: error,
               extension: extensionName,
@@ -9368,9 +9368,9 @@
           newlyMounted.delete(affected);
           continue;
         }
-        affected.classList.toggle(AelluxJs2.className("mounted"), true);
+        affected.classList.toggle(aelluxJs2.className("mounted"), true);
       }
-      AelluxJs2.dispatch("Mount", {
+      aelluxJs2.dispatch("Mount", {
         detail: {
           root: rootElement,
           extensions: extensionNames,
@@ -9379,9 +9379,9 @@
       });
     }
     async function AelluxJsMounted(rootElement, method, extensionNames = null, detachedOnly = false) {
-      const AelluxJs2 = root2.AelluxJs;
+      const aelluxJs2 = root2.aelluxJs;
       const selectedNames = extensionNames === null ? null : new Set((typeof extensionNames === "string" ? [extensionNames] : extensionNames).map((name) => fromCamelCase2(name)));
-      if (method === UNMOUNT && !AelluxJs2.dispatch("BeforeUnmount", {
+      if (method === UNMOUNT && !aelluxJs2.dispatch("BeforeUnmount", {
         cancelable: true,
         detail: {
           root: rootElement,
@@ -9413,7 +9413,7 @@
               await controller[method](element);
             }
           } catch (error) {
-            AelluxJs2.diagnostics.error(AelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
+            aelluxJs2.diagnostics.error(aelluxJs2.diagnostics.ERROR_EXTENSION_MOUNT, {
               cause: error,
               extension: extensionName,
               method,
@@ -9429,7 +9429,7 @@
             affected.add(element);
         }
       }
-      AelluxJs2.dispatch(toCapitalized2(method), {
+      aelluxJs2.dispatch(toCapitalized2(method), {
         detail: __spreadValues({
           root: rootElement,
           extensions: selectedNames ? Array.from(selectedNames) : null,
@@ -9455,8 +9455,8 @@
       tasks.set(mountId, new Promise((resolve) => {
         finish = resolve;
       }));
-      const AelluxJs2 = root2.AelluxJs;
-      const diagnostics = AelluxJs2.diagnostics;
+      const aelluxJs2 = root2.aelluxJs;
+      const diagnostics = aelluxJs2.diagnostics;
       try {
         try {
           if (controller && controller.unmount) await controller.unmount(element);
@@ -9475,7 +9475,7 @@
             elementController.despawn(mountId);
             if (!elementController.hasMounts()) elementControllers.delete(element);
           }
-          element.classList.toggle(AelluxJs2.className("mounted"), isMounted(element));
+          element.classList.toggle(aelluxJs2.className("mounted"), isMounted(element));
         } catch (cause) {
           diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
             cause,
@@ -9665,7 +9665,7 @@
       scheduleUnmount(() => helper.unmountDetached()).then(
         finishDetachedUnmount,
         (error) => {
-          const diagnostics = root2.AelluxJs.diagnostics;
+          const diagnostics = root2.aelluxJs.diagnostics;
           diagnostics.error(diagnostics.ERROR_EXTENSION_UNMOUNT, { cause: error });
           finishDetachedUnmount();
         }
@@ -9678,7 +9678,7 @@
       if (hasDetachedMountedElement()) scheduleDetachedUnmount();
     }
     function controller(elementOrId) {
-      const diagnostics = root2.AelluxJs.diagnostics;
+      const diagnostics = root2.aelluxJs.diagnostics;
       elementOrId = resolveElementOrId(root2, elementOrId, { method: "controller" });
       if (!elementOrId) return null;
       const found = elementControllers.get(elementOrId);
@@ -9695,7 +9695,7 @@
       return toCamelCase2(fromCamelCase2(extensionName));
     }
     function add(options) {
-      const diagnostics = root2.AelluxJs.diagnostics;
+      const diagnostics = root2.aelluxJs.diagnostics;
       function reject(argument, cause) {
         diagnostics.error(diagnostics.ERROR_MOUNT_REGISTRATION, {
           extension: options && options.extensionName,
@@ -9714,7 +9714,7 @@
       const key = keyFor(extensionName);
       if (key in Object.prototype || key === "prototype")
         return reject("extensionName");
-      if (!Object.prototype.hasOwnProperty.call(root2.AelluxJs.registry.ext, key))
+      if (!Object.prototype.hasOwnProperty.call(root2.aelluxJs.registry.ext, key))
         return reject("extensionName");
       const invalidSelector = validateSelector(root2.document, selector);
       if (invalidSelector) return reject("selector", invalidSelector.cause);
@@ -9734,7 +9734,7 @@
       }
       if (map.has(selector)) return reject("selector");
       map.set(selector, { mount, unmount, update, controllers, priority });
-      root2.AelluxJs.registry.extMounters[key] = [...map.keys()].join(",");
+      root2.aelluxJs.registry.extMounters[key] = [...map.keys()].join(",");
       return manager;
     }
     function remove({ extensionName, selector } = {}) {
@@ -9743,7 +9743,7 @@
       const map = maps.get(key);
       if (!map) return false;
       if (hasMountedRegistration(extensionName, selector)) {
-        const diagnostics = root2.AelluxJs.diagnostics;
+        const diagnostics = root2.aelluxJs.diagnostics;
         diagnostics.error(diagnostics.ERROR_MOUNT_MAP_IN_USE, {
           extension: fromCamelCase2(extensionName),
           selector
@@ -9753,9 +9753,9 @@
       const removed = selector === void 0 ? true : map.delete(selector);
       if (selector === void 0 || map.size === 0) {
         maps.delete(key);
-        delete root2.AelluxJs.registry.extMounters[key];
+        delete root2.aelluxJs.registry.extMounters[key];
       } else if (removed) {
-        root2.AelluxJs.registry.extMounters[key] = [...map.keys()].join(",");
+        root2.aelluxJs.registry.extMounters[key] = [...map.keys()].join(",");
       }
       return removed;
     }
@@ -9915,7 +9915,7 @@
       return true;
     }
     function run(element, options = {}) {
-      const AelluxJs2 = getAelluxJs();
+      const aelluxJs2 = getAelluxJs();
       const operationId = options.id;
       if (!Number.isSafeInteger(operationId))
         return Promise.reject(new TypeError("motion.run() requires a safe integer ID"));
@@ -9939,7 +9939,7 @@
         nativeResolve: null
       };
       operations.set(operationId, operation);
-      if (AelluxJs2.currentPreference("reduced-motion") === "reduced") {
+      if (aelluxJs2.currentPreference("reduced-motion") === "reduced") {
         options.apply();
         operations.delete(operationId);
         return Promise.resolve({ id: operationId, status: "completed", mode: "reduced" });
@@ -9952,10 +9952,10 @@
         operations.delete(operationId);
         return Promise.reject(error);
       }
-      const requestedMaxFPS = options.maxFPS === void 0 ? AelluxJs2.layoutMaxFPS(element) : options.maxFPS;
+      const requestedMaxFPS = options.maxFPS === void 0 ? aelluxJs2.layoutMaxFPS(element) : options.maxFPS;
       const externalAbort = typeof options.abort === "function" ? options.abort : null;
       const shouldAbort = () => operation.cancelled || !element.isConnected || (externalAbort ? externalAbort() : false);
-      const captureResult = AelluxJs2.waitLayout.sequence(operationId, {
+      const captureResult = aelluxJs2.waitLayout.sequence(operationId, {
         read: () => capture(operation),
         update: (animations) => prepare(operation, animations),
         abort: shouldAbort
@@ -9974,11 +9974,11 @@
           operations.set(operationId, operation);
           return nativeWait(operation);
         }
-        const policyFPS = operation.conservative ? propertyPolicyFPS(AelluxJs2.options.cssMotionPropertyMaxFPS, AelluxJs2) : void 0;
+        const policyFPS = operation.conservative ? propertyPolicyFPS(aelluxJs2.options.cssMotionPropertyMaxFPS, aelluxJs2) : void 0;
         const maxFPS = minimumFPS(requestedMaxFPS, policyFPS);
         operation.visualFPS = maxFPS;
-        AelluxJs2.waitLayout.setVisualFPSLimit(operation.id, maxFPS);
-        return AelluxJs2.waitLayout.sequence(operationId, {
+        aelluxJs2.waitLayout.setVisualFPSLimit(operation.id, maxFPS);
+        return aelluxJs2.waitLayout.sequence(operationId, {
           update: () => advance(operation),
           repeat: { ms: 0 },
           abort: () => operation.done || shouldAbort()
@@ -10062,13 +10062,13 @@
       const number = Number(value);
       return Number.isFinite(number) && number > 0 ? number : fallback2;
     }
-    function propertyPolicyFPS(value, AelluxJs2) {
+    function propertyPolicyFPS(value, aelluxJs2) {
       if (value === null || value === 0) return void 0;
       const number = Number(value);
       if (Number.isFinite(number) && number > 0) return number;
       if (value !== void 0) {
-        AelluxJs2.diagnostics.warn(
-          AelluxJs2.diagnostics.WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID,
+        aelluxJs2.diagnostics.warn(
+          aelluxJs2.diagnostics.WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID,
           {
             extension: "core",
             option: "cssMotionPropertyMaxFPS",
@@ -10368,54 +10368,54 @@
     const { toCamelCase: toCamelCase2, fromCamelCase: fromCamelCase2 } = utils_name_case_default;
     const officialPackage = "@aelluxjs/core";
     const orchestratorVersion = true ? "0.1.0-beta.10" : "0.1.0-beta.10";
-    if (root2.AelluxJs.version !== orchestratorVersion) {
-      const error = root2.AelluxJs.diagnostics.error(
-        root2.AelluxJs.diagnostics.ERROR_RUNTIME_VERSION_MISMATCH,
-        { expected: root2.AelluxJs.version, found: orchestratorVersion }
+    if (root2.aelluxJs.version !== orchestratorVersion) {
+      const error = root2.aelluxJs.diagnostics.error(
+        root2.aelluxJs.diagnostics.ERROR_RUNTIME_VERSION_MISMATCH,
+        { expected: root2.aelluxJs.version, found: orchestratorVersion }
       );
-      root2.AelluxJs.orchestratorVersion = orchestratorVersion;
-      root2.AelluxJs.startAelluxJs = () => Promise.reject(error);
+      root2.aelluxJs.orchestratorVersion = orchestratorVersion;
+      root2.aelluxJs.startAelluxJs = () => Promise.reject(error);
       return;
     }
-    root2.AelluxJs.orchestratorVersion = orchestratorVersion;
+    root2.aelluxJs.orchestratorVersion = orchestratorVersion;
     const extensionPromises = {};
     const aria = createAriaHelper();
     const mountManager = buildMountMapManager(root2);
     const layoutScheduler = buildLayoutScheduler();
-    const motion = createCssMotionController(root2, () => root2.AelluxJs);
-    root2.AelluxJs = Object.assign(
-      root2.AelluxJs,
+    const motion = createCssMotionController(root2, () => root2.aelluxJs);
+    root2.aelluxJs = Object.assign(
+      root2.aelluxJs,
       {
         async startAelluxJs() {
-          if (root2.AelluxJs.bundledExtensions) {
-            Object.keys(root2.AelluxJs.bundledExtensions).forEach((key) => {
-              if (!(key in AelluxJs.registry.ext)) AelluxJs.ext(key);
+          if (root2.aelluxJs.bundledExtensions) {
+            Object.keys(root2.aelluxJs.bundledExtensions).forEach((key) => {
+              if (!(key in aelluxJs.registry.ext)) aelluxJs.ext(key);
               const name = fromCamelCase2(key);
-              const metadata = AelluxJs.extIndex.official && AelluxJs.extIndex.official.extensions[name];
+              const metadata = aelluxJs.extIndex.official && aelluxJs.extIndex.official.extensions[name];
               if (metadata && metadata.coreCompatibility) {
-                AelluxJs.registry.ext[key].coreCompatibility = metadata.coreCompatibility;
-                AelluxJs.registry.ext[key].official = true;
+                aelluxJs.registry.ext[key].coreCompatibility = metadata.coreCompatibility;
+                aelluxJs.registry.ext[key].official = true;
               }
             });
           }
           await new Promise((resolve, reject) => {
             const startCallback = function() {
-              AelluxJs.off("$DOMContentLoaded", startCallback);
-              if (AelluxJs.options.skipGlobalMount === true) {
+              aelluxJs.off("$DOMContentLoaded", startCallback);
+              if (aelluxJs.options.skipGlobalMount === true) {
                 resolve();
                 return;
               }
-              Promise.resolve().then(() => AelluxJs.mount()).then(resolve, reject);
+              Promise.resolve().then(() => aelluxJs.mount()).then(resolve, reject);
             };
             if (document.readyState === "loading")
-              AelluxJs.on("$DOMContentLoaded", startCallback, { once: true });
+              aelluxJs.on("$DOMContentLoaded", startCallback, { once: true });
             else
               startCallback();
           }).catch((error) => {
-            AelluxJs.dispatch("RuntimeStartError", { detail: { error, operation: "mount" } });
+            aelluxJs.dispatch("RuntimeStartError", { detail: { error, operation: "mount" } });
             throw error;
           });
-          AelluxJs.dispatch("Ready");
+          aelluxJs.dispatch("Ready");
           return true;
         },
         async mount(elementOrId, extensionNames = null) {
@@ -10425,10 +10425,10 @@
           return mountManager.unmount(elementOrId, extensionNames);
         },
         async destroy() {
-          if (await destroyExtensions(null, () => AelluxJs.waitLayout.clear()) === false)
+          if (await destroyExtensions(null, () => aelluxJs.waitLayout.clear()) === false)
             return false;
           mountManager.destroy();
-          AelluxJs.comm.clear();
+          aelluxJs.comm.clear();
         },
         async destroyExtensions(extensionNames) {
           return destroyExtensions(extensionNames);
@@ -10443,7 +10443,7 @@
           }
           return from.dispatchEvent(
             new CustomEvent(
-              AelluxJs.eventName(event),
+              aelluxJs.eventName(event),
               options
             )
           );
@@ -10459,10 +10459,10 @@
         mountManager
       }
     );
-    root2[root2.AelluxJs.shortJSName] = root2.AelluxJs;
-    if (root2.AelluxJs.options.mode === "full") registerCoreExtensions();
+    root2[root2.aelluxJs.shortJSName] = root2.aelluxJs;
+    if (root2.aelluxJs.options.mode === "full") registerCoreExtensions();
     function registerCoreExtensions() {
-      const api = root2.AelluxJs;
+      const api = root2.aelluxJs;
       const attr = (name) => `[${api.attr(name)}]`;
       for (const { name, optional, style } of officialExtensionDefinitions) {
         const key = toCamelCase2(name);
@@ -10482,13 +10482,13 @@
     }
     async function destroyExtensions(extensionNames, onUnmounted) {
       if (typeof extensionNames === "string") extensionNames = [extensionNames];
-      if (!extensionNames) extensionNames = Object.keys(AelluxJs.registry.ext);
+      if (!extensionNames) extensionNames = Object.keys(aelluxJs.registry.ext);
       extensionNames = extensionNames.map((_) => fromCamelCase2(_));
       try {
-        if (await AelluxJs.unmount(document, extensionNames) === false) return false;
+        if (await aelluxJs.unmount(document, extensionNames) === false) return false;
       } catch (error) {
-        AelluxJs.diagnostics.error(
-          AelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT,
+        aelluxJs.diagnostics.error(
+          aelluxJs.diagnostics.ERROR_EXTENSION_UNMOUNT,
           { cause: error, extensions: extensionNames }
         );
       }
@@ -10501,20 +10501,20 @@
           extension = await extensionPromises[key];
           if (extension && extension.destroy) await extension.destroy();
         } catch (error) {
-          AelluxJs.diagnostics.error(
-            AelluxJs.diagnostics.ERROR_EXTENSION_DESTROY,
+          aelluxJs.diagnostics.error(
+            aelluxJs.diagnostics.ERROR_EXTENSION_DESTROY,
             { cause: error, extension: extensionName }
           );
         } finally {
-          AelluxJs.comm.removeOwner(extensionName);
-          if (key !== extensionName) AelluxJs.comm.removeOwner(key);
-          AelluxJs.comm.emit("extension.destroyed", { extension: extensionName });
-          AelluxJs.dispatch("ExtensionDestroy", { detail: { extension: extensionName } });
-          delete AelluxJs.ext[key];
+          aelluxJs.comm.removeOwner(extensionName);
+          if (key !== extensionName) aelluxJs.comm.removeOwner(key);
+          aelluxJs.comm.emit("extension.destroyed", { extension: extensionName });
+          aelluxJs.dispatch("ExtensionDestroy", { detail: { extension: extensionName } });
+          delete aelluxJs.ext[key];
           delete extensionPromises[key];
-          delete AelluxJs.registry.ext[key];
+          delete aelluxJs.registry.ext[key];
           mountManager.remove({ extensionName });
-          delete AelluxJs.registry.lazyExtSelectors[key];
+          delete aelluxJs.registry.lazyExtSelectors[key];
           removeExtensionAssets(extensionName);
           if (extension) extension.initialized = false;
         }
@@ -10526,22 +10526,22 @@
       const key = toCamelCase2(extensionName);
       if (extensionPromises[key])
         return extensionPromises[key];
-      if (!(key in AelluxJs.registry.ext)) {
-        return Promise.reject(AelluxJs.diagnostics.error(
-          AelluxJs.diagnostics.ERROR_EXTENSION_NOT_REGISTERED,
+      if (!(key in aelluxJs.registry.ext)) {
+        return Promise.reject(aelluxJs.diagnostics.error(
+          aelluxJs.diagnostics.ERROR_EXTENSION_NOT_REGISTERED,
           { extension: extensionName }
         ));
       }
-      AelluxJs.registry.ext[key].automatic = false;
-      if (AelluxJs.ext[key]) {
-        if (AelluxJs.ext[key].initialized) {
-          extensionPromises[key] = Promise.resolve(AelluxJs.ext[key]);
+      aelluxJs.registry.ext[key].automatic = false;
+      if (aelluxJs.ext[key]) {
+        if (aelluxJs.ext[key].initialized) {
+          extensionPromises[key] = Promise.resolve(aelluxJs.ext[key]);
         } else {
-          const registration = AelluxJs.registry.ext[key];
+          const registration = aelluxJs.registry.ext[key];
           extensionPromises[key] = (registration.loadStyle && registration.loadStyle !== "false" ? appendExtensionAssets(extensionName) : Promise.resolve()).then(() => extensionInitialize(extensionName)).catch((error) => {
             if (!error || !error.aelluxCompatibility) {
-              AelluxJs.diagnostics.error(
-                AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
+              aelluxJs.diagnostics.error(
+                aelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
                 { cause: error, extension: extensionName }
               );
             }
@@ -10551,37 +10551,37 @@
         }
         return extensionPromises[key];
       }
-      const bundledLoader = AelluxJs.bundledExtensions ? AelluxJs.bundledExtensions[key] : null;
+      const bundledLoader = aelluxJs.bundledExtensions ? aelluxJs.bundledExtensions[key] : null;
       extensionPromises[key] = Promise.resolve().then(() => {
-        const registration = AelluxJs.registry.ext[key];
-        return (registration.implicit || request.version) && !bundledLoader && !AelluxJs.ext[key] ? resolveImplicitRegistration(extensionName, registration, request.version) : registration;
+        const registration = aelluxJs.registry.ext[key];
+        return (registration.implicit || request.version) && !bundledLoader && !aelluxJs.ext[key] ? resolveImplicitRegistration(extensionName, registration, request.version) : registration;
       }).then(async (data) => {
         if (!hasCompatibleBuild(data)) {
-          AelluxJs.diagnostics.error(
-            AelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE,
+          aelluxJs.diagnostics.error(
+            aelluxJs.diagnostics.ERROR_EXTENSION_INCOMPATIBLE,
             {
               extension: extensionName,
-              runtime: AelluxJs.diagnostics.legacy ? "legacy" : "modern",
+              runtime: aelluxJs.diagnostics.legacy ? "legacy" : "modern",
               builds: data && data.builds
             }
           );
-          delete AelluxJs.registry.lazyExtSelectors[key];
+          delete aelluxJs.registry.lazyExtSelectors[key];
           return null;
         }
-        if (!AelluxJs.ext[key]) await appendExtensionAssets(extensionName, bundledLoader);
-        if (!AelluxJs.ext[key].initialized) return extensionInitialize(extensionName);
-        return AelluxJs.ext[key];
+        if (!aelluxJs.ext[key]) await appendExtensionAssets(extensionName, bundledLoader);
+        if (!aelluxJs.ext[key].initialized) return extensionInitialize(extensionName);
+        return aelluxJs.ext[key];
       }).catch((error) => {
         if (!error || !error.aelluxCompatibility) {
-          const registration = AelluxJs.registry.ext[key];
+          const registration = aelluxJs.registry.ext[key];
           if (registration && registration.implicit && !registration.manifestResolved) {
-            AelluxJs.diagnostics.error(
-              AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_NOT_FOUND,
+            aelluxJs.diagnostics.error(
+              aelluxJs.diagnostics.ERROR_EXTENSION_INDEX_NOT_FOUND,
               { extension: extensionName }
             );
           }
-          AelluxJs.diagnostics.error(
-            AelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
+          aelluxJs.diagnostics.error(
+            aelluxJs.diagnostics.ERROR_EXTENSION_INITIALIZE,
             { cause: error, extension: extensionName }
           );
         }
@@ -10598,53 +10598,53 @@
     async function extensionInitialize(extensionName) {
       extensionName = fromCamelCase2(extensionName);
       const key = toCamelCase2(extensionName);
-      const registration = AelluxJs.registry.ext[key];
-      if (registration.coreCompatibility && !versionSatisfies(AelluxJs.version, registration.coreCompatibility)) {
+      const registration = aelluxJs.registry.ext[key];
+      if (registration.coreCompatibility && !versionSatisfies(aelluxJs.version, registration.coreCompatibility)) {
         const context = {
           extension: extensionName,
-          coreVersion: AelluxJs.version,
+          coreVersion: aelluxJs.version,
           coreCompatibility: registration.coreCompatibility
         };
         if (registration.skipCompatibilityCheck === true) {
-          AelluxJs.diagnostics.warn(
-            AelluxJs.diagnostics.WARN_EXTENSION_COMPATIBILITY_SKIPPED,
+          aelluxJs.diagnostics.warn(
+            aelluxJs.diagnostics.WARN_EXTENSION_COMPATIBILITY_SKIPPED,
             __spreadProps(__spreadValues({}, context), { explicitlySkipped: true })
           );
         } else {
-          const error = AelluxJs.diagnostics.error(
-            AelluxJs.diagnostics.ERROR_EXTENSION_VERSION_INCOMPATIBLE,
+          const error = aelluxJs.diagnostics.error(
+            aelluxJs.diagnostics.ERROR_EXTENSION_VERSION_INCOMPATIBLE,
             context
           );
           error.aelluxCompatibility = true;
           throw error;
         }
       }
-      const options = AelluxJs.options.extensions[key] || {};
+      const options = aelluxJs.options.extensions[key] || {};
       try {
-        await AelluxJs.ext[key].init(options);
+        await aelluxJs.ext[key].init(options);
       } catch (cause) {
-        AelluxJs.comm.removeOwner(extensionName);
-        if (key !== extensionName) AelluxJs.comm.removeOwner(key);
+        aelluxJs.comm.removeOwner(extensionName);
+        if (key !== extensionName) aelluxJs.comm.removeOwner(key);
         throw cause;
       }
-      AelluxJs.ext[key].initialized = true;
-      delete AelluxJs.registry.lazyExtSelectors[key];
-      return AelluxJs.ext[key];
+      aelluxJs.ext[key].initialized = true;
+      delete aelluxJs.registry.lazyExtSelectors[key];
+      return aelluxJs.ext[key];
     }
     async function appendExtensionAssets(extensionName, bundledLoader = null) {
       extensionName = fromCamelCase2(extensionName);
       const key = toCamelCase2(extensionName);
-      const data = AelluxJs.registry.ext[key];
-      const useLegacyBuild = AelluxJs.diagnostics.legacy || data.builds.indexOf("modern") === -1;
+      const data = aelluxJs.registry.ext[key];
+      const useLegacyBuild = aelluxJs.diagnostics.legacy || data.builds.indexOf("modern") === -1;
       const artifact = data.artifacts && data.artifacts[useLegacyBuild ? "legacy" : "modern"];
-      const url = data.url.replace(/^\.\//, AelluxJs.aelluxBasePath);
+      const url = data.url.replace(/^\.\//, aelluxJs.aelluxBasePath);
       const scriptURL = artifact ? artifact.url : useLegacyBuild ? toLegacyScriptURL(url) : url;
       const minifiedScript = /\.min\.js(?=[?#]|$)/.test(scriptURL);
       const scriptVariant = useLegacyBuild ? minifiedScript ? "legacyMin" : "legacy" : minifiedScript ? "modernMin" : "modern";
       const loadPromises = [];
       for (const dependency of data.dependencies || []) {
         if (typeof dependency === "string") continue;
-        loadPromises.push(AelluxJs.dep(
+        loadPromises.push(aelluxJs.dep(
           dependency.label,
           dependency.url,
           { integrity: dependency.integrity, crossOrigin: dependency.crossOrigin }
@@ -10652,10 +10652,10 @@
       }
       if (bundledLoader) {
         loadPromises.push(Promise.resolve().then(() => bundledLoader()));
-      } else if (!AelluxJs.ext[key]) {
+      } else if (!aelluxJs.ext[key]) {
         loadPromises.push(new Promise(
           (resolve, reject) => {
-            const attr = AelluxJs.attr("ext");
+            const attr = aelluxJs.attr("ext");
             const script = document.createElement("script");
             script.src = scriptURL;
             script.setAttribute(attr, extensionName);
@@ -10668,13 +10668,13 @@
         ));
       }
       const defaultStyle = data.loadStyle === true || data.loadStyle === "true";
-      const fullStyle = bundledLoader && document.querySelector(`link[${AelluxJs.attr("full-style")}]`);
+      const fullStyle = bundledLoader && document.querySelector(`link[${aelluxJs.attr("full-style")}]`);
       if (data.loadStyle && data.loadStyle !== "false" && !(defaultStyle && fullStyle)) {
         loadPromises.push(new Promise(
           (resolve) => {
             const styleDefaultURL = data.loadStyle === true || data.loadStyle === "true" || data.loadStyle === "";
             const href = data.styleArtifact ? data.styleArtifact.url : styleDefaultURL ? url.replace(/\.js(?=[?#]|$)/, ".css") : data.loadStyle;
-            const attrStyle = AelluxJs.attr("ext-style");
+            const attrStyle = aelluxJs.attr("ext-style");
             const link = document.createElement("link");
             link.href = href;
             link.rel = "stylesheet";
@@ -10683,8 +10683,8 @@
             assetLoadHelper(link, {
               loadCallback: resolve,
               errorCallback: () => {
-                AelluxJs.diagnostics.warn(
-                  AelluxJs.diagnostics.WARN_EXTENSION_STYLE_LOAD,
+                aelluxJs.diagnostics.warn(
+                  aelluxJs.diagnostics.WARN_EXTENSION_STYLE_LOAD,
                   {
                     extension: extensionName,
                     element: link,
@@ -10707,27 +10707,27 @@
       const declared = data.integrity;
       const explicit = typeof declared === "string" ? variant === "style" ? null : declared : declared && declared[variant];
       if (explicit) return explicit;
-      const basePath = AelluxJs.aelluxBasePath;
+      const basePath = aelluxJs.aelluxBasePath;
       if (!url.startsWith(basePath)) return null;
       const filename = url.slice(basePath.length);
-      const builtin = AelluxJs.coreAssetIntegrity;
+      const builtin = aelluxJs.coreAssetIntegrity;
       return builtin && Object.prototype.hasOwnProperty.call(builtin, filename) ? builtin[filename] : null;
     }
     function applyAssetIntegrity(asset, integrity, crossOrigin) {
       if (integrity) asset.setAttribute("integrity", integrity);
-      if (integrity || crossOrigin || AelluxJs.options.crossOrigin) {
-        asset.setAttribute("crossorigin", crossOrigin || AelluxJs.options.crossOrigin || "anonymous");
+      if (integrity || crossOrigin || aelluxJs.options.crossOrigin) {
+        asset.setAttribute("crossorigin", crossOrigin || aelluxJs.options.crossOrigin || "anonymous");
       }
     }
     function toLegacyScriptURL(url) {
       return url.replace(
         /(?:\.legacy)?(?:\.min)?\.js(?=[?#]|$)/,
-        ".legacy" + (AelluxJs.minified ? ".min" : "") + ".js"
+        ".legacy" + (aelluxJs.minified ? ".min" : "") + ".js"
       );
     }
     function removeExtensionAssets(extensionName) {
-      const scriptAttribute = AelluxJs.attr("ext");
-      const styleAttribute = AelluxJs.attr("ext-style");
+      const scriptAttribute = aelluxJs.attr("ext");
+      const styleAttribute = aelluxJs.attr("ext-style");
       document.querySelectorAll(`script[${scriptAttribute}], link[${styleAttribute}]`).forEach((asset) => {
         if (asset.getAttribute(scriptAttribute) === extensionName || asset.getAttribute(styleAttribute) === extensionName) {
           asset.remove();
@@ -10735,22 +10735,22 @@
       });
     }
     async function resolveImplicitRegistration(extensionName, registration, requestedVersion = null) {
-      const officialURL = AelluxJs.extIndex.officialURL || AelluxJs.aelluxBasePath + "aellux.extensions.min.json";
-      const requestedURL = requestedVersion && requestedVersion !== AelluxJs.version ? `https://cdn.jsdelivr.net/npm/${officialPackage}@${encodeURIComponent(requestedVersion)}/dist/aellux.extensions.min.json` : officialURL;
+      const officialURL = aelluxJs.extIndex.officialURL || aelluxJs.aelluxBasePath + "aellux.extensions.min.json";
+      const requestedURL = requestedVersion && requestedVersion !== aelluxJs.version ? `https://cdn.jsdelivr.net/npm/${officialPackage}@${encodeURIComponent(requestedVersion)}/dist/aellux.extensions.min.json` : officialURL;
       let entry = null;
       let sourceURL = requestedURL;
       try {
-        const embeddedOfficial = requestedVersion ? null : AelluxJs.extIndex.official;
+        const embeddedOfficial = requestedVersion ? null : aelluxJs.extIndex.official;
         const embeddedEntry = embeddedOfficial && embeddedOfficial.extensions[extensionName];
         const official = embeddedEntry && embeddedEntry.builds ? embeddedOfficial : await loadExtensionIndex(requestedVersion ? `official@${requestedVersion}` : "official", requestedURL);
         entry = official.extensions[extensionName] || null;
       } catch (error) {
         reportIndexFailure(error, "official", requestedURL);
       }
-      if (!entry && AelluxJs.extIndex.fallbackURL) {
-        sourceURL = AelluxJs.extIndex.fallbackURL;
+      if (!entry && aelluxJs.extIndex.fallbackURL) {
+        sourceURL = aelluxJs.extIndex.fallbackURL;
         try {
-          const fallback2 = AelluxJs.extIndex.fallback || await loadExtensionIndex("fallback", sourceURL);
+          const fallback2 = aelluxJs.extIndex.fallback || await loadExtensionIndex("fallback", sourceURL);
           entry = fallback2.extensions[extensionName] || null;
         } catch (error) {
           reportIndexFailure(error, "custom", sourceURL);
@@ -10762,21 +10762,21 @@
     }
     function loadExtensionIndex(kind, url) {
       const promiseKey = kind + "Promise";
-      if (AelluxJs.extIndex[promiseKey]) return AelluxJs.extIndex[promiseKey];
+      if (aelluxJs.extIndex[promiseKey]) return aelluxJs.extIndex[promiseKey];
       validateManifestURL(url, kind);
-      AelluxJs.extIndex[promiseKey] = AelluxJs.request(url).then((response) => response.json()).then((index) => {
+      aelluxJs.extIndex[promiseKey] = aelluxJs.request(url).then((response) => response.json()).then((index) => {
         validateExtensionIndex(index, kind, url);
-        AelluxJs.extIndex[kind] = index;
-        AelluxJs.diagnostics.info(
-          AelluxJs.diagnostics.INFO_EXTENSION_INDEX_LOADED,
+        aelluxJs.extIndex[kind] = index;
+        aelluxJs.diagnostics.info(
+          aelluxJs.diagnostics.INFO_EXTENSION_INDEX_LOADED,
           { source: kind, url, extensions: Object.keys(index.extensions).length }
         );
         return index;
       }).catch((error) => {
-        AelluxJs.extIndex[promiseKey] = null;
+        aelluxJs.extIndex[promiseKey] = null;
         throw error;
       });
-      return AelluxJs.extIndex[promiseKey];
+      return aelluxJs.extIndex[promiseKey];
     }
     function validateManifestURL(url, kind) {
       let parsed;
@@ -10785,7 +10785,7 @@
       } catch (_) {
         throw manifestError(kind, url, "valid URL");
       }
-      const development = AelluxJs.options.environment === "development";
+      const development = aelluxJs.options.environment === "development";
       if (parsed.protocol !== "https:" && parsed.origin !== location.origin && !development) {
         throw manifestError(kind, url, "HTTPS for external manifests");
       }
@@ -10794,11 +10794,11 @@
       if (!index || index.schemaVersion !== 1 || typeof index.coreVersion !== "string" || !index.extensions || typeof index.extensions !== "object" || Array.isArray(index.extensions)) {
         throw manifestError(kind, url, "schemaVersion 1, coreVersion, and extensions object");
       }
-      if (index.coreVersion !== AelluxJs.version) {
+      if (index.coreVersion !== aelluxJs.version) {
         throw manifestError(
           kind,
           url,
-          `coreVersion ${AelluxJs.version} (received ${index.coreVersion})`
+          `coreVersion ${aelluxJs.version} (received ${index.coreVersion})`
         );
       }
       for (const [name, entry] of Object.entries(index.extensions)) {
@@ -10852,25 +10852,25 @@
       } catch (_) {
         throw manifestError(kind, manifestURL, `valid artifact URL: ${url}`);
       }
-      const development = AelluxJs.options.environment === "development";
+      const development = aelluxJs.options.environment === "development";
       if (parsed.protocol !== "https:" && parsed.origin !== location.origin && !development)
         throw manifestError(kind, manifestURL, `HTTPS artifact URL: ${url}`);
     }
     function manifestError(kind, url, expected) {
-      return AelluxJs.diagnostics.create(
-        AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_INVALID,
+      return aelluxJs.diagnostics.create(
+        aelluxJs.diagnostics.ERROR_EXTENSION_INDEX_INVALID,
         { source: kind, url, expected }
       );
     }
     function reportIndexFailure(error, source, url) {
-      if (error && error.code === AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_INVALID.code) {
-        AelluxJs.diagnostics.error(
-          AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_INVALID,
+      if (error && error.code === aelluxJs.diagnostics.ERROR_EXTENSION_INDEX_INVALID.code) {
+        aelluxJs.diagnostics.error(
+          aelluxJs.diagnostics.ERROR_EXTENSION_INDEX_INVALID,
           { source, url, expected: error.context && error.context.expected, cause: error }
         );
       } else {
-        AelluxJs.diagnostics.error(
-          AelluxJs.diagnostics.ERROR_EXTENSION_INDEX_LOAD,
+        aelluxJs.diagnostics.error(
+          aelluxJs.diagnostics.ERROR_EXTENSION_INDEX_LOAD,
           { source, url, cause: error }
         );
       }
@@ -10880,14 +10880,14 @@
       const artifacts = {};
       for (const variant of ["modern", "legacy"]) {
         if (entry.builds[variant] && (!registration.explicitBuilds || registration.builds.includes(variant))) {
-          const declared = !AelluxJs.minified && entry.builds[variant].regular ? entry.builds[variant].regular : entry.builds[variant];
+          const declared = !aelluxJs.minified && entry.builds[variant].regular ? entry.builds[variant].regular : entry.builds[variant];
           artifacts[variant] = {
             url: new URL(declared.url, base).href,
             integrity: declared.integrity
           };
         }
       }
-      const selected = artifacts[AelluxJs.diagnostics.legacy ? "legacy" : "modern"] || !AelluxJs.diagnostics.legacy && artifacts.legacy;
+      const selected = artifacts[aelluxJs.diagnostics.legacy ? "legacy" : "modern"] || !aelluxJs.diagnostics.legacy && artifacts.legacy;
       registration.artifacts = artifacts;
       registration.manifestResolved = true;
       registration.builds = Object.keys(artifacts);
@@ -10896,9 +10896,9 @@
       registration.dependencies = (entry.dependencies || []).map((dependency) => typeof dependency === "string" ? dependency : __spreadProps(__spreadValues({}, dependency), {
         url: new URL(dependency.url, base).href
       }));
-      registration.official = AelluxJs.extIndex.official && AelluxJs.extIndex.official.extensions[extensionName] === entry;
+      registration.official = aelluxJs.extIndex.official && aelluxJs.extIndex.official.extensions[extensionName] === entry;
       if (entry.style && registration.loadStyle && registration.loadStyle !== "false") {
-        const declaredStyle = !AelluxJs.minified && entry.style.regular ? entry.style.regular : entry.style;
+        const declaredStyle = !aelluxJs.minified && entry.style.regular ? entry.style.regular : entry.style;
         registration.styleArtifact = {
           url: new URL(declaredStyle.url, base).href,
           integrity: declaredStyle.integrity
@@ -10941,7 +10941,7 @@
     }
     function hasCompatibleBuild(data) {
       if (!data || !Array.isArray(data.builds) || data.builds.length === 0) return false;
-      if (AelluxJs.diagnostics.legacy) return data.builds.indexOf("legacy") !== -1;
+      if (aelluxJs.diagnostics.legacy) return data.builds.indexOf("legacy") !== -1;
       return data.builds.indexOf("modern") !== -1 || data.builds.indexOf("legacy") !== -1;
     }
     function defaultRequest(url, options) {
@@ -10969,7 +10969,7 @@
   // src/aellux.full.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   var root = typeof globalThis !== "undefined" ? globalThis : window;
-  root.AelluxJs.bundledExtensions = Object.freeze({
+  root.aelluxJs.bundledExtensions = Object.freeze({
     "preference": () => Promise.resolve().then(() => (init_aellux_ext_preference(), aellux_ext_preference_exports)),
     "stateNavigation": () => Promise.resolve().then(() => (init_aellux_ext_state_navigation(), aellux_ext_state_navigation_exports)),
     "feedback": () => Promise.resolve().then(() => (init_aellux_ext_feedback(), aellux_ext_feedback_exports)),

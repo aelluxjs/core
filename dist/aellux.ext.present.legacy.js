@@ -1631,39 +1631,39 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
-    var AelluxJs = root.AelluxJs;
+    var aelluxJs = root.aelluxJs;
     var extensionName = "present";
-    if (!AelluxJs) {
-      throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
+    if (!aelluxJs) {
+      throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.'));
     }
     var attr = {
-      present: AelluxJs.attr(extensionName),
-      group: AelluxJs.attr("present-group"),
-      active: AelluxJs.attr("present-active"),
-      when: AelluxJs.attr("present-when"),
-      triggerOn: AelluxJs.attr("present-trigger-on"),
-      autoDismiss: AelluxJs.attr("auto-dismiss"),
-      presentMotion: AelluxJs.attr("present-motion"),
-      dismissOnClick: AelluxJs.attr("dismiss-on-click"),
-      trigger: AelluxJs.attr("present-trigger"),
+      present: aelluxJs.attr(extensionName),
+      group: aelluxJs.attr("present-group"),
+      active: aelluxJs.attr("present-active"),
+      when: aelluxJs.attr("present-when"),
+      triggerOn: aelluxJs.attr("present-trigger-on"),
+      autoDismiss: aelluxJs.attr("auto-dismiss"),
+      presentMotion: aelluxJs.attr("present-motion"),
+      dismissOnClick: aelluxJs.attr("dismiss-on-click"),
+      trigger: aelluxJs.attr("present-trigger"),
       //toggle,pop,dismiss,unpop,effect
-      target: AelluxJs.attr("present-target"),
+      target: aelluxJs.attr("present-target"),
       //target ID
-      effect: AelluxJs.attr("present-effect")
+      effect: aelluxJs.attr("present-effect")
     };
     var className = {
-      pop: AelluxJs.className("pop"),
-      popping: AelluxJs.className("popping"),
-      dismissing: AelluxJs.className("dismissing"),
-      unpopping: AelluxJs.className("unpopping"),
-      unpop: AelluxJs.className("unpop"),
-      dismissed: AelluxJs.className("dismissed"),
-      willChange: AelluxJs.className("will-change"),
-      grid: AelluxJs.className("present-grid")
+      pop: aelluxJs.className("pop"),
+      popping: aelluxJs.className("popping"),
+      dismissing: aelluxJs.className("dismissing"),
+      unpopping: aelluxJs.className("unpopping"),
+      unpop: aelluxJs.className("unpop"),
+      dismissed: aelluxJs.className("dismissed"),
+      willChange: aelluxJs.className("will-change"),
+      grid: aelluxJs.className("present-grid")
     };
     var presentSelector = "[".concat(attr.present, "]");
     var groupSelector = "[".concat(attr.group, "]");
-    AelluxJs.extAttach(extensionName, {
+    aelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
       pop: pop,
@@ -1681,7 +1681,7 @@
     var TRANSITION_PREPARE_TIME = 100;
     var TAP_CLICK_WAIT_TIME = 32;
     var presentElements = /* @__PURE__ */ new Map();
-    var effects = createPresentEffects(root, AelluxJs, presentElements);
+    var effects = createPresentEffects(root, aelluxJs, presentElements);
     var openPresentElements = /* @__PURE__ */ new Set();
     var fallbackMotionId = 5e6;
     var triggerElementsSet = /* @__PURE__ */ new Set();
@@ -1700,8 +1700,8 @@
     var groupsQueued = false;
     var interpolatedProgress = false;
     var interpolatedUnpop = false;
-    var playback = createPresentPlayback(root, AelluxJs);
-    var gestures = createPresentGestures(root, AelluxJs, {
+    var playback = createPresentPlayback(root, aelluxJs);
+    var gestures = createPresentGestures(root, aelluxJs, {
       state: function state(element) {
         var _presentElements$get;
         return (_presentElements$get = presentElements.get(element)) === null || _presentElements$get === void 0 ? void 0 : _presentElements$get.state;
@@ -1733,7 +1733,7 @@
       };
       var _loop = function _loop2() {
         var _Object$entries$_i = _slicedToArray2(_Object$entries[_i], 2), name = _Object$entries$_i[0], method = _Object$entries$_i[1];
-        AelluxJs.comm.handle("present." + name, function(_ref) {
+        aelluxJs.comm.handle("present." + name, function(_ref) {
           var element = _ref.element;
           return method(element);
         }, communication);
@@ -1745,26 +1745,26 @@
       }); _i < _Object$entries.length; _i++) {
         _loop();
       }
-      AelluxJs.comm.handle("present.toggle", function(_ref2) {
+      aelluxJs.comm.handle("present.toggle", function(_ref2) {
         var element = _ref2.element, goto = _ref2.goto;
         return toggle(element, goto);
       }, communication);
-      AelluxJs.comm.handle("present.effect", function(_ref3) {
+      aelluxJs.comm.handle("present.effect", function(_ref3) {
         var element = _ref3.element, name = _ref3.effect, effectTarget = _ref3.effectTarget;
         return effect(element, name, effectTarget);
       }, communication);
-      AelluxJs.comm.handle("present.show", function(_ref4) {
+      aelluxJs.comm.handle("present.show", function(_ref4) {
         var group = _ref4.group, member = _ref4.member;
         return show(group, member);
       }, communication);
-      AelluxJs.comm.handle("present.selection", function(_ref5) {
+      aelluxJs.comm.handle("present.selection", function(_ref5) {
         var group = _ref5.group;
         return selected(group);
       }, communication);
-      AelluxJs.comm.handle("present.pop-next", function(request) {
+      aelluxJs.comm.handle("present.pop-next", function(request) {
         return popNext(request.group, function(member) {
           if (request.preparation) {
-            var result = AelluxJs.comm.request(request.preparation.contract, _objectSpread3(_objectSpread3({}, request.preparation.payload), {}, {
+            var result = aelluxJs.comm.request(request.preparation.contract, _objectSpread3(_objectSpread3({}, request.preparation.payload), {}, {
               element: member
             }));
             if (!result.handled || result.value === false) throw new Error("Present preparation is unavailable.");
@@ -1780,15 +1780,15 @@
           initialValue: initialValue
         };
       });
-      var progressRegistered = AelluxJs.registerCssProperty.apply(AelluxJs, _toConsumableArray3(descriptors.slice(0, 4)));
+      var progressRegistered = aelluxJs.registerCssProperty.apply(aelluxJs, _toConsumableArray3(descriptors.slice(0, 4)));
       interpolatedProgress = !!(progressRegistered && root.CSS.supports && root.CSS.supports("opacity", "clamp(0, 0.5, 1)"));
-      interpolatedUnpop = !!AelluxJs.registerCssProperty({
+      interpolatedUnpop = !!aelluxJs.registerCssProperty({
         name: "--ae-unpop-progress",
         syntax: "<number>",
         initialValue: "1"
       });
-      AelluxJs.registerCssProperty.apply(AelluxJs, _toConsumableArray3(descriptors.slice(4)));
-      AelluxJs.mountManager.add({
+      aelluxJs.registerCssProperty.apply(aelluxJs, _toConsumableArray3(descriptors.slice(4)));
+      aelluxJs.mountManager.add({
         extensionName: extensionName,
         selector: presentSelector,
         priority: 0,
@@ -1799,7 +1799,7 @@
         },
         controllers: ["pop", "dismiss", "unpop", "trigger", "toggle", "effect", "cancelEffect"]
       });
-      AelluxJs.mountManager.add({
+      aelluxJs.mountManager.add({
         extensionName: extensionName,
         priority: 0,
         selector: "[".concat(attr.trigger, "]"),
@@ -1807,7 +1807,7 @@
         unmount: unmountTriggerElement,
         update: refreshTriggerTargets
       });
-      AelluxJs.mountManager.add({
+      aelluxJs.mountManager.add({
         extensionName: extensionName,
         selector: groupSelector,
         priority: 1,
@@ -1820,7 +1820,7 @@
         try {
           for (_iterator.s(); !(_step = _iterator.n()).done; ) {
             var record = _step.value;
-            if (record.target === document.documentElement && record.attributeName === AelluxJs.attr("reduced-motion")) effects.preferences();
+            if (record.target === document.documentElement && record.attributeName === aelluxJs.attr("reduced-motion")) effects.preferences();
             var controller = presentElements.get(record.target);
             if (controller) {
               if (record.attributeName !== attr.autoDismiss) gestures.update(record.target);
@@ -1839,7 +1839,7 @@
           try {
             for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
               var element = _step2.value;
-              if (element.hasAttribute(AelluxJs.attr("present-gesture-source"))) gestures.update(element);
+              if (element.hasAttribute(aelluxJs.attr("present-gesture-source"))) gestures.update(element);
             }
           } catch (err) {
             _iterator2.e(err);
@@ -1852,28 +1852,28 @@
         subtree: true,
         childList: true,
         attributes: true,
-        attributeFilter: [attr.autoDismiss, "id", AelluxJs.attr("reduced-motion")].concat(_toConsumableArray3(["", "-source", "-unpop", "-dismiss"].map(function(suffix3) {
-          return AelluxJs.attr("present-gesture".concat(suffix3));
+        attributeFilter: [attr.autoDismiss, "id", aelluxJs.attr("reduced-motion")].concat(_toConsumableArray3(["", "-source", "-unpop", "-dismiss"].map(function(suffix3) {
+          return aelluxJs.attr("present-gesture".concat(suffix3));
         })))
       });
       document.addEventListener("pointerover", onHover);
       document.addEventListener("pointerout", onHover);
-      AelluxJs.on("$click", OnClick);
-      AelluxJs.on("tap", onTap);
-      AelluxJs.onEvent(root, "$resize", refreshExpandedStates);
+      aelluxJs.on("$click", OnClick);
+      aelluxJs.on("tap", onTap);
+      aelluxJs.onEvent(root, "$resize", refreshExpandedStates);
     }
     function destroy() {
       var _autoObserver;
-      AelluxJs.comm.removeOwner(extensionName);
+      aelluxJs.comm.removeOwner(extensionName);
       effects.destroy();
       gestures.destroy();
       (_autoObserver = autoObserver) === null || _autoObserver === void 0 || _autoObserver.disconnect();
       autoObserver = null;
-      AelluxJs.mountManager.remove({
+      aelluxJs.mountManager.remove({
         extensionName: extensionName
       });
-      AelluxJs.off("$click", OnClick);
-      AelluxJs.off("tap", onTap);
+      aelluxJs.off("$click", OnClick);
+      aelluxJs.off("tap", onTap);
       var _iterator3 = _createForOfIteratorHelper4(pendingTaps), _step3;
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
@@ -1885,7 +1885,7 @@
       } finally {
         _iterator3.f();
       }
-      AelluxJs.offEvent(root, "$resize", refreshExpandedStates);
+      aelluxJs.offEvent(root, "$resize", refreshExpandedStates);
       document.removeEventListener("pointerover", onHover);
       document.removeEventListener("pointerout", onHover);
       var _iterator4 = _createForOfIteratorHelper4(groups.keys()), _step4;
@@ -1937,8 +1937,8 @@
     }
     function mountPresentContainer(element) {
       if (presentElements.has(element)) return;
-      elementMemories.set(element, AelluxJs.persist.element.save(element, [attr.present, attr.presentMotion, "hidden"], ["--ae-pop-progress", "--ae-dismiss-progress", "--ae-unpop-progress", "--ae-present-pop-phase", "--ae-present-dismiss-phase"]));
-      containerAriaHandlers.set(element, AelluxJs.aria.register(element));
+      elementMemories.set(element, aelluxJs.persist.element.save(element, [attr.present, attr.presentMotion, "hidden"], ["--ae-pop-progress", "--ae-dismiss-progress", "--ae-unpop-progress", "--ae-present-pop-phase", "--ae-present-dismiss-phase"]));
+      containerAriaHandlers.set(element, aelluxJs.aria.register(element));
       var initialState = element.classList.contains(className.dismissed) ? DISMISS : element.classList.contains(className.unpop) || element.hidden ? UNPOP : POP;
       var legacyHidden = element.hidden || ![className.pop, className.unpop, className.dismissed].some(function(name) {
         return element.classList.contains(name);
@@ -1955,7 +1955,7 @@
       var measuredWidth = !presentMotion && tokens.includes("width");
       if (presentMotion) element.classList.add(className.grid);
       else if (measuredHeight || measuredWidth) {
-        AelluxJs.diagnostics.info(AelluxJs.diagnostics.INFO_PRESENT_MEASURED_LAYOUT, {
+        aelluxJs.diagnostics.info(aelluxJs.diagnostics.INFO_PRESENT_MEASURED_LAYOUT, {
           extension: extensionName,
           element: element
         });
@@ -1972,7 +1972,7 @@
         measuredHeight: measuredHeight,
         measuredWidth: measuredWidth,
         motionEnabled: (element.getAttribute(attr.present) || "").trim() !== "",
-        motionId: AelluxJs.motion ? AelluxJs.motion.id() : fallbackMotionId++,
+        motionId: aelluxJs.motion ? aelluxJs.motion.id() : fallbackMotionId++,
         transition: null,
         handoff: null,
         opening: null,
@@ -2007,7 +2007,7 @@
           if (transition) {
             transition.cancelled = true;
             transition.replacement = replacement;
-            if (AelluxJs.motion) AelluxJs.motion.cancel(this.motionId);
+            if (aelluxJs.motion) aelluxJs.motion.cancel(this.motionId);
             if (transition.timeout !== null) {
               clearTimeout(transition.timeout);
               transition.timeout = null;
@@ -2016,7 +2016,7 @@
               this.classList.remove(transition.className);
             }
             this.transition = null;
-            transition.interrupt(AelluxJs.diagnostics.create(AelluxJs.diagnostics.WARN_INTERRUPTION, {
+            transition.interrupt(aelluxJs.diagnostics.create(aelluxJs.diagnostics.WARN_INTERRUPTION, {
               extensionName: extensionName,
               replacement: replacement
             }));
@@ -2075,7 +2075,7 @@
       gestures.update(element);
     }
     function unmountPresentContainer(element) {
-      var _AelluxJs$waitLayout, _element$classList, _containerAriaHandler, _elementMemories$get;
+      var _aelluxJs$waitLayout, _element$classList, _containerAriaHandler, _elementMemories$get;
       if (!presentElements.has(element)) return;
       cancelElementTaps(element);
       var controller = presentElements.get(element);
@@ -2093,7 +2093,7 @@
         _iterator0.f();
       }
       controller.stop();
-      (_AelluxJs$waitLayout = AelluxJs.waitLayout) === null || _AelluxJs$waitLayout === void 0 || _AelluxJs$waitLayout.cancel(controller.motionId);
+      (_aelluxJs$waitLayout = aelluxJs.waitLayout) === null || _aelluxJs$waitLayout === void 0 || _aelluxJs$waitLayout.cancel(controller.motionId);
       element.classList.remove(className.grid);
       element.classList.remove(className.pop, className.unpop, className.dismissed);
       (_element$classList = element.classList).add.apply(_element$classList, _toConsumableArray3(controller.initialClasses));
@@ -2108,7 +2108,7 @@
     }
     function mountTriggerElement(triggerElement) {
       if (triggerElementsSet.has(triggerElement) || !triggerElement.hasAttribute(attr.trigger)) return;
-      triggerAriaHandlers.set(triggerElement, AelluxJs.aria.register(triggerElement));
+      triggerAriaHandlers.set(triggerElement, aelluxJs.aria.register(triggerElement));
       triggerElementsSet.add(triggerElement);
       refreshTriggerTargets(triggerElement);
     }
@@ -2137,7 +2137,7 @@
     function targetById(value) {
       var id = targetIdFor(value);
       if (!id) {
-        AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_SELECTOR, {
+        aelluxJs.diagnostics.error(aelluxJs.diagnostics.ERROR_EXTENSION_SELECTOR, {
           cause: new SyntaxError(),
           extension: extensionName,
           selector: value,
@@ -2249,7 +2249,7 @@
     function trigger(element, trigger2, name) {
       trigger2 = typeof trigger2 === "string" ? (trigger2 || "toggle").toLowerCase() : "toggle";
       if (trigger2 === "effect") return effect(element, name);
-      if (!["pop", "dismiss", "unpop", "toggle"].includes(trigger2)) AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
+      if (!["pop", "dismiss", "unpop", "toggle"].includes(trigger2)) aelluxJs.diagnostics.warn(aelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
         extension: extensionName,
         element: element,
         attribute: attr.trigger,
@@ -2273,12 +2273,12 @@
     }
     function captureHandoff(element, controller) {
       if ((controller.measuredHeight || controller.measuredWidth) && !measuredMemories.has(element)) {
-        measuredMemories.set(element, AelluxJs.persist.element.save(element, [], ["max-height", "max-width"]));
+        measuredMemories.set(element, aelluxJs.persist.element.save(element, [], ["max-height", "max-width"]));
       }
       var tokens = (element.getAttribute(attr.present) || "").split(/\s+/);
       var properties = [];
       if (tokens.includes("opacity")) properties.push("opacity");
-      if (tokens.includes("transform") && !element.hasAttribute(AelluxJs.attr("anchor"))) properties.push("transform");
+      if (tokens.includes("transform") && !element.hasAttribute(aelluxJs.attr("anchor"))) properties.push("transform");
       if (tokens.includes("height")) properties.push.apply(properties, _toConsumableArray3(controller.presentMotion ? ["grid-template-rows", "height"] : ["max-height"]));
       if (tokens.includes("width")) properties.push.apply(properties, _toConsumableArray3(controller.presentMotion ? ["grid-template-columns", "width"] : ["max-width"]));
       properties.push("--ae-present-pop-phase", "--ae-present-dismiss-phase", "--ae-pop-progress", "--ae-dismiss-progress", "--ae-unpop-progress");
@@ -2296,8 +2296,8 @@
         controller.reverse = null;
         restoreHandoff(controller);
       }
-      var memory = AelluxJs.persist.element.save(element, [], [].concat(properties, ["transition-property"]));
-      var transition = AelluxJs.persist.element.save(element, [], ["transition-property"]);
+      var memory = aelluxJs.persist.element.save(element, [], [].concat(properties, ["transition-property"]));
+      var transition = aelluxJs.persist.element.save(element, [], ["transition-property"]);
       var freeze = function freeze2() {
         element.style.setProperty("transition-property", "none", "important");
         var _iterator1 = _createForOfIteratorHelper4(values), _step1;
@@ -2337,7 +2337,7 @@
               return _context.a(2, null);
             case 1:
               if (!measuredMemories.has(element)) {
-                measuredMemories.set(element, AelluxJs.persist.element.save(element, [], ["max-height", "max-width"]));
+                measuredMemories.set(element, aelluxJs.persist.element.save(element, [], ["max-height", "max-width"]));
               }
               if (gotoVisible || !previousSize) measuredMemories.get(element).restore();
               size = previousSize;
@@ -2370,7 +2370,7 @@
                 break;
               }
               _context.n = 2;
-              return AelluxJs.waitLayout.read(controller.motionId, function() {
+              return aelluxJs.waitLayout.read(controller.motionId, function() {
                 return element.getBoundingClientRect();
               });
             case 2:
@@ -2385,7 +2385,7 @@
     }
     function _presentTransition() {
       _presentTransition = _asyncToGenerator(/* @__PURE__ */ _regenerator().m(function _callee2(element, gotoVisible) {
-        var forceRepop, groupOperation, presentationOrder, closingDirection, controller, gesture, reversing, group, groupState, groupRevision, hasCapacity, newDirection, transition, _AelluxJs$currentPref, _groups$get, revision, allowEvent, impliedReverse, reverseTracks, reusePreparation, waitForPreparation, previousSize, handoff, computed, interrupted, size, prepared, configurationDirection, duration, timeMs, applyDestination, activateTransition, advancedEase, motionOptions, completed, autoDismissValue, _duration, motionResult, finalVisible, _selected, active, ownsTransition, _controller$gesture, _controller$reverse2, _controller$gestureDi2, _args2 = arguments, _t, _t2;
+        var forceRepop, groupOperation, presentationOrder, closingDirection, controller, gesture, reversing, group, groupState, groupRevision, hasCapacity, newDirection, transition, _aelluxJs$currentPref, _groups$get, revision, allowEvent, impliedReverse, reverseTracks, reusePreparation, waitForPreparation, previousSize, handoff, computed, interrupted, size, prepared, configurationDirection, duration, timeMs, applyDestination, activateTransition, advancedEase, motionOptions, completed, autoDismissValue, _duration, motionResult, finalVisible, _selected, active, ownsTransition, _controller$gesture, _controller$reverse2, _controller$gestureDi2, _args2 = arguments, _t, _t2;
         return _regenerator().w(function(_context2) {
           while (1) switch (_context2.p = _context2.n) {
             case 0:
@@ -2463,7 +2463,7 @@
               transition = null;
               _context2.p = 9;
               revision = controller.operationRevision;
-              allowEvent = groupOperation || AelluxJs.dispatchFrom(element, "".concat(BEFORE).concat(newDirection), {
+              allowEvent = groupOperation || aelluxJs.dispatchFrom(element, "".concat(BEFORE).concat(newDirection), {
                 bubbles: true,
                 cancelable: true
               });
@@ -2488,7 +2488,7 @@
               effects.cancelWithin(element);
               controller.operationRevision++;
               impliedReverse = reversing && !controller.opening && !controller.transition;
-              reverseTracks = reversing && controller.motionEnabled && ((_AelluxJs$currentPref = AelluxJs.currentPreference) === null || _AelluxJs$currentPref === void 0 ? void 0 : _AelluxJs$currentPref.call(AelluxJs, "reduced-motion")) !== "reduced" ? gesture ? playback.full(element, controller, false) : playback.snapshot(element, controller, interpolatedProgress) : [];
+              reverseTracks = reversing && controller.motionEnabled && ((_aelluxJs$currentPref = aelluxJs.currentPreference) === null || _aelluxJs$currentPref === void 0 ? void 0 : _aelluxJs$currentPref.call(aelluxJs, "reduced-motion")) !== "reduced" ? gesture ? playback.full(element, controller, false) : playback.snapshot(element, controller, interpolatedProgress) : [];
               if (gotoVisible) controller.opening = null;
               if (gotoVisible) controller.presentationOrder = presentationOrder === void 0 ? ++presentationSequence : presentationOrder;
               if (!gotoVisible || !groupOperation) (_groups$get = groups.get(group)) === null || _groups$get === void 0 || _groups$get.reservations.delete(element);
@@ -2543,7 +2543,7 @@
               });
               element.hidden = false;
               if (gesture && root.getComputedStyle(element).display === "none") {
-                controller.gestureDisplay = AelluxJs.persist.element.save(element, [], ["display"]);
+                controller.gestureDisplay = aelluxJs.persist.element.save(element, [], ["display"]);
                 element.style.setProperty("display", controller.presentMotion ? "inline-grid" : "block", "important");
               }
               openPresentElements.add(element);
@@ -2711,13 +2711,13 @@
                 apply: activateTransition,
                 easing: reversing && !impliedReverse ? void 0 : advancedEase,
                 nativeDuration: timeMs,
-                maxFPS: AelluxJs.layoutMaxFPS ? AelluxJs.layoutMaxFPS(element) : void 0,
+                maxFPS: aelluxJs.layoutMaxFPS ? aelluxJs.layoutMaxFPS(element) : void 0,
                 abort: function abort() {
                   return controller.transition !== transition || !element.isConnected;
                 }
               };
-              completed = gesture ? (activateTransition(), gesture.settled) : AelluxJs.motion ? AelluxJs.motion.run(element, motionOptions) : legacyMotionRun(motionOptions, transition);
-              AelluxJs.dispatchFrom(element, "Layout", {
+              completed = gesture ? (activateTransition(), gesture.settled) : aelluxJs.motion ? aelluxJs.motion.run(element, motionOptions) : legacyMotionRun(motionOptions, transition);
+              aelluxJs.dispatchFrom(element, "Layout", {
                 detail: {
                   origin: "present.".concat(newDirection).toLowerCase(),
                   durationMs: Number.isFinite(timeMs) ? Math.max(0, timeMs) : 0
@@ -2743,7 +2743,7 @@
               }
               return _context2.a(2);
             case 18:
-              AelluxJs.dispatchFrom(element, gotoVisible ? "Popping" : reversing ? "Unpopping" : "Dismissing", {
+              aelluxJs.dispatchFrom(element, gotoVisible ? "Popping" : reversing ? "Unpopping" : "Dismissing", {
                 bubbles: true
               });
               _context2.n = 19;
@@ -2772,7 +2772,7 @@
                 publishGroup(group, groupState, _selected);
               }
               controller.gesture = null;
-              AelluxJs.dispatchFrom(element, motionResult, {
+              aelluxJs.dispatchFrom(element, motionResult, {
                 bubbles: true
               });
               if (finalVisible) autoDismissSchedule(element, controller);
@@ -2783,12 +2783,12 @@
               if (gotoVisible && !element.hidden) {
                 autoDismissSchedule(element, controller);
                 controller.classList.add(className.pop);
-                AelluxJs.dispatchFrom(element, POP, {
+                aelluxJs.dispatchFrom(element, POP, {
                   bubbles: true
                 });
               }
               if (!gotoVisible && controller.state !== POP) {
-                AelluxJs.dispatchFrom(element, newDirection, {
+                aelluxJs.dispatchFrom(element, newDirection, {
                   bubbles: true
                 });
               }
@@ -2806,7 +2806,7 @@
                 controller.classList.remove(transition.className);
               }
               _t2 = _t && _t.code;
-              _context2.n = _t2 === AelluxJs.diagnostics.WARN_INTERRUPTION.code ? 23 : 25;
+              _context2.n = _t2 === aelluxJs.diagnostics.WARN_INTERRUPTION.code ? 23 : 25;
               break;
             case 23:
               if (!(transition && transition.cancelled)) {
@@ -2815,7 +2815,7 @@
               }
               return _context2.a(3, 26);
             case 24:
-              AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_INTERRUPTION, {
+              aelluxJs.diagnostics.warn(aelluxJs.diagnostics.WARN_INTERRUPTION, {
                 cause: _t,
                 extension: extensionName,
                 element: element,
@@ -2823,7 +2823,7 @@
               });
               return _context2.a(3, 26);
             case 25:
-              AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION, {
+              aelluxJs.diagnostics.error(aelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION, {
                 cause: _t,
                 extension: extensionName,
                 element: element
@@ -2885,7 +2885,7 @@
       else openPresentElements.add(element);
       if (focused && !controller.expanded) {
         if (document.activeElement === focused) focused.blur();
-        if (document.activeElement !== focused) AelluxJs.dispatch("".concat(controller.direction, "FocusLost"), {
+        if (document.activeElement !== focused) aelluxJs.dispatch("".concat(controller.direction, "FocusLost"), {
           detail: {
             element: element,
             focused: focused
@@ -2924,13 +2924,13 @@
         emitAutoDismissProgress(element, elapsedMs, duration, completed);
       };
       var _tick = function tick() {
-        var _AelluxJs$layoutMaxFP;
+        var _aelluxJs$layoutMaxFP;
         if (!valid()) {
           if (controller.autoCountdown === countdown) cancelAutoDismiss(controller);
           return;
         }
         var now = root.performance.now();
-        var fps = ((_AelluxJs$layoutMaxFP = AelluxJs.layoutMaxFPS) === null || _AelluxJs$layoutMaxFP === void 0 ? void 0 : _AelluxJs$layoutMaxFP.call(AelluxJs, element)) || AelluxJs.options.cssMotionPropertyMaxFPS || 55;
+        var fps = ((_aelluxJs$layoutMaxFP = aelluxJs.layoutMaxFPS) === null || _aelluxJs$layoutMaxFP === void 0 ? void 0 : _aelluxJs$layoutMaxFP.call(aelluxJs, element)) || aelluxJs.options.cssMotionPropertyMaxFPS || 55;
         if (now - countdown.last >= 1e3 / fps) {
           countdown.last = now;
           emit(false);
@@ -2955,7 +2955,7 @@
     }
     function emitAutoDismissProgress(element, elapsedMs, duration) {
       var completed = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : false;
-      AelluxJs.dispatchFrom(element, "Progress", {
+      aelluxJs.dispatchFrom(element, "Progress", {
         bubbles: false,
         cancelable: false,
         detail: {
@@ -3040,7 +3040,7 @@
         target: target,
         hoverSuppressed: control && suppressHoverClick(control, event),
         present: triggerTargets.get(control),
-        input: AelluxJs.comm.request("input.mount-token", {
+        input: aelluxJs.comm.request("input.mount-token", {
           element: target
         }).value,
         timer: null
@@ -3048,7 +3048,7 @@
       pendingTaps.add(pending);
       pending.timer = setTimeout(function() {
         pendingTaps.delete(pending);
-        if (!target.isConnected || pending.input && AelluxJs.comm.request("input.mount-token", {
+        if (!target.isConnected || pending.input && aelluxJs.comm.request("input.mount-token", {
           element: target
         }).value !== pending.input) return;
         activate(event, target, pending.hoverSuppressed);
@@ -3091,7 +3091,7 @@
           exceptions.push(container);
           if (!(hoverSuppressed !== null && hoverSuppressed !== void 0 ? hoverSuppressed : suppressHoverClick(button, event))) trigger(container, triggerAttr, button.getAttribute(attr.effect));
         } else {
-          AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING, {
+          aelluxJs.diagnostics.error(aelluxJs.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING, {
             extension: extensionName,
             element: button,
             action: triggerAttr === "dismiss" ? "dismiss" : "trigger"
@@ -3103,7 +3103,7 @@
     function diagnoseTarget(element, target, attribute, value) {
       if (!targetIdFor(value)) return;
       if (target && target.hasAttribute(attr.present)) return;
-      AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_TARGET, {
+      aelluxJs.diagnostics.warn(aelluxJs.diagnostics.WARN_CONFIGURATION_TARGET, {
         extension: extensionName,
         element: element,
         attribute: attribute,
@@ -3160,7 +3160,7 @@
       var limit = text === "" ? 1 : Number(text);
       var valid = text === "" || /^\d+$/.test(text) && Number.isSafeInteger(limit) && limit > 0;
       state.limit = valid ? limit : 1;
-      if (!valid) AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
+      if (!valid) aelluxJs.diagnostics.warn(aelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
         extension: extensionName,
         element: group,
         attribute: attr.group,
@@ -3195,7 +3195,7 @@
         revision: 0,
         pending: Promise.resolve(true),
         jobs: /* @__PURE__ */ new Map(),
-        memory: AelluxJs.persist.element.save(group, [attr.active])
+        memory: aelluxJs.persist.element.save(group, [attr.active])
       });
       groupLimit(group, groups.get(group));
       if (!groupObserver && typeof root.MutationObserver === "function") {
@@ -3260,7 +3260,7 @@
       });
     }
     function groupDiagnostic(group, reason) {
-      AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_PRESENT_GROUP_SELECTION, {
+      aelluxJs.diagnostics.warn(aelluxJs.diagnostics.WARN_PRESENT_GROUP_SELECTION, {
         extension: extensionName,
         element: group,
         attribute: attr.active,
@@ -3394,7 +3394,7 @@
           return Promise.resolve(null);
         }
         if (typeof prepare === "function") prepare(member);
-        if (!valid(true) || !AelluxJs.dispatchFrom(member, "BeforePop", {
+        if (!valid(true) || !aelluxJs.dispatchFrom(member, "BeforePop", {
           bubbles: true,
           cancelable: true
         }) || !valid(true)) {
@@ -3422,7 +3422,7 @@
       if (state.announced === current) return;
       var previous = state.announced || null;
       state.announced = current;
-      AelluxJs.dispatchFrom(group, "PresentGroupChange", {
+      aelluxJs.dispatchFrom(group, "PresentGroupChange", {
         bubbles: true,
         detail: {
           group: group,
@@ -3461,7 +3461,7 @@
       try {
         for (_iterator15.s(); !(_step15 = _iterator15.n()).done; ) {
           var member = _step15.value;
-          var allowed = AelluxJs.dispatchFrom(member, member === selected2 ? "BeforePop" : "".concat(BEFORE).concat(closingDirection), {
+          var allowed = aelluxJs.dispatchFrom(member, member === selected2 ? "BeforePop" : "".concat(BEFORE).concat(closingDirection), {
             bubbles: true,
             cancelable: true
           });

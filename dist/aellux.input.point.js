@@ -1,12 +1,12 @@
 (() => {
   // src/internal/create-input-point.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  function createPointAdapter(AelluxJs, root, emit, accepts) {
+  function createPointAdapter(aelluxJs, root, emit, accepts) {
     const extensionName = "input";
     const POINTER = "pointer";
     const trackedPointers = /* @__PURE__ */ new Map();
     const pointableElements = /* @__PURE__ */ new Set();
-    const pointableAttribute = AelluxJs.attr("point");
+    const pointableAttribute = aelluxJs.attr("point");
     const pointableSelector = `[${pointableAttribute}]`;
     const tapSelector = 'button, a, [role="button"]';
     const tapDuration = 300;
@@ -20,11 +20,11 @@
     ];
     function init() {
       for (const [suffix, handler] of pointerEvents)
-        AelluxJs.on(`$${POINTER}${suffix}`, handler, true);
+        aelluxJs.on(`$${POINTER}${suffix}`, handler, true);
     }
     function destroy() {
       for (const [suffix, handler] of pointerEvents)
-        AelluxJs.off(`$${POINTER}${suffix}`, handler, true);
+        aelluxJs.off(`$${POINTER}${suffix}`, handler, true);
       trackedPointers.clear();
       pointableElements.clear();
     }
@@ -69,7 +69,7 @@
     }
     function dispatchPointer(name, pointer, originalEvent, recipient, hover, target = pointer.target, pressStart = pointer.pressStart) {
       if (!recipient) return;
-      AelluxJs.dispatchFrom(recipient, name, {
+      aelluxJs.dispatchFrom(recipient, name, {
         bubbles: false,
         detail: {
           pointer,
@@ -203,7 +203,7 @@
       pointer.target = targetFor(event.target, pointer);
       const tap = finishTap(pointer, event);
       dispatchRelease("PointerUp", pointer, event);
-      if (tap && canTap(tap.element)) AelluxJs.dispatchFrom(tap.element, "tap", {
+      if (tap && canTap(tap.element)) aelluxJs.dispatchFrom(tap.element, "tap", {
         bubbles: true,
         composed: true,
         detail: tap.detail
@@ -322,7 +322,7 @@
 
   // src/aellux.input.point.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  var api = (typeof globalThis !== "undefined" ? globalThis : window).AelluxJs;
+  var api = (typeof globalThis !== "undefined" ? globalThis : window).aelluxJs;
   api.registry.inputAdapters = api.registry.inputAdapters || {};
   api.registry.inputAdapters.point = ({ root, emit, accepts }) => createPointAdapter(api, root, emit, accepts);
 })();

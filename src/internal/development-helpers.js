@@ -9,7 +9,7 @@ export function createDocumentHTMLValidator(root) {
   const sourceURL = root.document.URL;
   let sourceChecked = false;
   return function validateDocumentDoubleAttributeHTML() {
-    const api = root.AelluxJs;
+    const api = root.aelluxJs;
     if (api.options.environment !== "development" || sourceChecked ||
         root.document.contentType !== "text/html" || !/^https?:/i.test(sourceURL)) return;
     sourceChecked = true;
@@ -39,7 +39,7 @@ export function validateDoubleAttributeHTML(api, html, source) {
 }
 
 export function validatePWAManifest(root, getManifestLink) {
-  const api = root.AelluxJs;
+  const api = root.aelluxJs;
   if (api.options.environment !== "development") return;
   const link = getManifestLink();
   if (link?.getAttribute("href")?.trim()) return;
@@ -92,7 +92,7 @@ const activation = {
 };
 
 export function validateExtensionDeclarations(root, scope, extensionNames = null, method = "mount") {
-  const api = root.AelluxJs;
+  const api = root.aelluxJs;
   if (api.options.environment !== "development") return;
   const selected = extensionNames === null ? null : new Set(
     (Array.isArray(extensionNames) ? extensionNames : [extensionNames]).map(utilsNameCase.fromCamelCase));
@@ -119,11 +119,11 @@ export function validateExtensionDeclarations(root, scope, extensionNames = null
       if (selected && (!owner || !selected.has(owner))) continue;
       if (!selected && attribute.name.startsWith(prefix) && !known.has(attribute.name)) {
         // Only suggest a close spelling; arbitrary custom data is not assumed
-        // to be an Aellux typo merely because it shares the prefix.
+        // to be an aellux.js typo merely because it shares the prefix.
         const candidate = [...known].find(name => oneEditApart(attribute.name, name));
         if (candidate) reportConfiguration(api, "WARN_ATTRIBUTE_UNKNOWN", {
           extension: owners.get(candidate) || "core", element, attribute: attribute.name,
-          value: attribute.value, reason: "Unknown Aellux attribute.",
+          value: attribute.value, reason: "Unknown aellux.js attribute.",
           suggestion: `Check the spelling; did you mean ${candidate}?`
         });
       }

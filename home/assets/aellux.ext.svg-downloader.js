@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const api = window.AelluxJs;
+  const api = window.aelluxJs;
   const attribute = api.attr("svg-downloader");
   const fontDownloads = new Map();
   // Freeze presentation while the original still has its theme ancestors.

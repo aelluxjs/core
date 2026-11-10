@@ -85,7 +85,7 @@ Define the applicable fields on the Extension's page. State `Not applicable` wit
 
 ### Visual and adaptive presentation
 
-- Respect the applicable AelluxJs preferences when the Extension produces behavior related to motion, contrast, transparency, forced colors, text scale, or interface scale.
+- Respect the applicable aelluxJs preferences when the Extension produces behavior related to motion, contrast, transparency, forced colors, text scale, or interface scale.
 - Do not communicate state through color alone.
 - Enlarged text, zoom, and interface scaling must not remove essential content or make an owned control unreachable in supported layouts.
 - Adaptation based on viewport or input characteristics must not remove the only available path to essential content or actions.
@@ -117,7 +117,7 @@ Define the applicable fields on the Extension's page. State `Not applicable` wit
 
 ## Lifecycle Requirements
 
-`mount` may add temporary ARIA and AelluxJs data attributes to its mounted element. Each Extension must save the specific attributes and inline styles it changes and restore them during `unmount`, including changes to descendants. Use `AelluxJs.persist.element.save(element, attributes, cssProperties)` to create an independent snapshot for each element.
+`mount` may add temporary ARIA and aelluxJs data attributes to its mounted element. Each Extension must save the specific attributes and inline styles it changes and restore them during `unmount`, including changes to descendants. Use `aelluxJs.persist.element.save(element, attributes, cssProperties)` to create an independent snapshot for each element.
 
 For every resource or user-facing state it owns, an Extension must:
 

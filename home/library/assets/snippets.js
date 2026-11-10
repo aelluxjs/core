@@ -63,7 +63,7 @@ window.librarySource = {
       extensions: ["input","present"],
       dependencies: ["Bootstrap 5.3.8"],
       features: ["Responsivo","Teclado","Touch"],
-      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; AelluxJS Input e Present registrados no host. Renomeie IDs e referências para repetir o componente. -->
+      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; aellux.js Input e Present registrados no host. Renomeie IDs e referências para repetir o componente. -->
 <style>
   .ae-lib-welcome [data-ae-present] { --ae-from-transform: translateY(12px); --ae-pop-duration: 250ms; }
   @media (prefers-reduced-motion: reduce) { .ae-lib-welcome [data-ae-present] { --ae-pop-duration: 0s; --ae-dismiss-duration: 0s; } }
@@ -89,7 +89,7 @@ window.librarySource = {
       extensions: ["adaptive","present","focus"],
       dependencies: ["Bootstrap 5.3.8"],
       features: ["Responsivo","Teclado","Touch"],
-      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; AelluxJS Adaptive, Present e Focus registrados no host. Renomeie IDs e referências para repetir o componente. -->
+      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; aellux.js Adaptive, Present e Focus registrados no host. Renomeie IDs e referências para repetir o componente. -->
 <style>
   .ae-lib-navbar { position: relative; background: var(--bs-tertiary-bg); }
   .ae-lib-navbar__bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; padding: 1rem; }
@@ -141,7 +141,7 @@ window.librarySource = {
       extensions: ["present","adaptive","focus"],
       dependencies: [],
       features: ["Responsivo","Teclado","Touch","Movimento reduzido"],
-      code: String.raw`<!-- Requisitos: AelluxJS Present, Adaptive e Focus registrados no host. CSS próprio. Renomeie IDs e referências para repetir o componente. -->
+      code: String.raw`<!-- Requisitos: aellux.js Present, Adaptive e Focus registrados no host. CSS próprio. Renomeie IDs e referências para repetir o componente. -->
 <style>
   .ae-lib-sidebar {
     --sidebar-width: 256px; --sidebar-surface: #fff; --sidebar-foreground: #202b3c;
@@ -350,7 +350,7 @@ window.librarySource = {
       extensions: ["scrollbox","scrollbox-snap"],
       dependencies: ["Bootstrap 5.3.8"],
       features: ["Responsivo","Teclado","Touch"],
-      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; AelluxJS Scrollbox e Scrollbox Snap registrados no host. Renomeie IDs e referências para repetir o componente. -->
+      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; aellux.js Scrollbox e Scrollbox Snap registrados no host. Renomeie IDs e referências para repetir o componente. -->
 <style>
   .ae-lib-cards { container-type: inline-size; }
   .ae-lib-cards__track { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem; overscroll-behavior-x: contain; }
@@ -387,7 +387,7 @@ window.librarySource = {
       extensions: ["scrollbox","scrollbox-snap","viewport"],
       dependencies: ["Bootstrap 5.3.8"],
       features: ["Responsivo","Teclado","Touch"],
-      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; AelluxJS Scrollbox, Scrollbox Snap e Viewport registrados no host. Renomeie IDs e referências para repetir o componente. -->
+      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; aellux.js Scrollbox, Scrollbox Snap e Viewport registrados no host. Renomeie IDs e referências para repetir o componente. -->
 <style>
   .ae-lib-parallax__track { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem; overscroll-behavior-x: contain; }
   .ae-lib-parallax__slide { flex: 0 0 min(85%, 600px); min-width: 0; }
@@ -423,7 +423,7 @@ window.librarySource = {
       extensions: ["adaptive","present"],
       dependencies: ["Bootstrap 5.3.8"],
       features: ["Responsivo","Teclado","Touch"],
-      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; AelluxJS Adaptive e Present registrados no host. Renomeie IDs e referências para repetir o componente. -->
+      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; aellux.js Adaptive e Present registrados no host. Renomeie IDs e referências para repetir o componente. -->
 <style>
   .ae-lib-bottomnav { display: flex; flex-direction: column; min-height: 280px; background: var(--bs-tertiary-bg); }
   .ae-lib-bottomnav nav { display: flex; order: 2; position: sticky; bottom: 0; gap: .5rem; padding: .75rem; background: var(--bs-body-bg); border-top: 1px solid var(--bs-border-color); }
@@ -463,7 +463,7 @@ window.librarySource = {
       extensions: ["present","input","focus"],
       dependencies: ["Bootstrap 5.3.8"],
       features: ["Responsivo","Teclado","Touch"],
-      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; AelluxJS Present, Input e Focus registrados no host. Renomeie IDs e referências para repetir o componente. -->
+      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; aellux.js Present, Input e Focus registrados no host. Renomeie IDs e referências para repetir o componente. -->
 <style>
   .ae-lib-sheet__dialog { position: fixed; inset: auto 0 0; width: min(100%, 560px); max-width: 100%; max-height: 85dvh; margin: 0 auto; padding: 0; border: 0; border-radius: 1.5rem 1.5rem 0 0; color: var(--bs-body-color); background: var(--bs-body-bg); }
   .ae-lib-sheet__dialog::backdrop { background: #10182788; }
@@ -503,7 +503,7 @@ window.librarySource = {
       extensions: ["present","feedback"],
       dependencies: ["Bootstrap 5.3.8"],
       features: ["Responsivo","Teclado","Touch"],
-      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; AelluxJS Present e Feedback registrados no host. -->
+      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; aellux.js Present e Feedback registrados no host. -->
 <style>
   .ae-lib-toasts__stack { display: grid; gap: .75rem; max-width: 420px; margin-top: 1rem; }
   .ae-lib-toasts__item { position: relative; overflow: hidden; padding: 1rem; border: 1px solid var(--bs-border-color); border-radius: .75rem; background: var(--bs-tertiary-bg); --ae-from-transform: translateY(12px); --ae-pop-duration: 160ms; }
@@ -543,7 +543,7 @@ window.librarySource = {
       extensions: ["anchor","present","focus"],
       dependencies: ["Bootstrap 5.3.8"],
       features: ["Responsivo","Teclado","Touch"],
-      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; AelluxJS Anchor, Present e Focus registrados no host. Renomeie IDs e referências para repetir o componente. -->
+      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; aellux.js Anchor, Present e Focus registrados no host. Renomeie IDs e referências para repetir o componente. -->
 <style>
   .ae-lib-popover { position: relative; min-height: 340px; padding: 1.5rem; }
   .ae-lib-popover__position { position: absolute; z-index: 1; width: min(280px, calc(100% - 2rem)); }
@@ -577,7 +577,7 @@ window.librarySource = {
       extensions: ["focus","feedback"],
       dependencies: ["Bootstrap 5.3.8"],
       features: ["Responsivo","Teclado","Touch"],
-      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; AelluxJS Focus e Feedback registrados no host. Renomeie IDs e referências para repetir o componente. -->
+      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; aellux.js Focus e Feedback registrados no host. Renomeie IDs e referências para repetir o componente. -->
 <section class="ae-lib-steps p-4" aria-label="Briefing do projeto">
   <h2 class="h4">Vamos começar pelo essencial.</h2><p class="small text-body-secondary" data-step-status role="status">Etapa 1 de 2 · Contato</p><progress class="w-100 mb-3" max="2" value="1" aria-label="Etapa do formulário"></progress>
   <form>
@@ -605,7 +605,7 @@ window.librarySource = {
       extensions: ["adaptive","feedback"],
       dependencies: ["Bootstrap 5.3.8"],
       features: ["Responsivo","Teclado","Touch"],
-      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; AelluxJS Adaptive e Feedback registrados no host. -->
+      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; aellux.js Adaptive e Feedback registrados no host. -->
 <style>
   .ae-lib-toolbar__controls { display: grid; gap: .75rem; padding: 1rem; border: 1px solid var(--bs-border-color); border-radius: .75rem; }
   .ae-lib-toolbar.ae--fits-medium .ae-lib-toolbar__controls { display: flex; align-items: end; flex-wrap: wrap; }
@@ -637,7 +637,7 @@ window.librarySource = {
       extensions: ["input","focus"],
       dependencies: ["Bootstrap 5.3.8"],
       features: ["Responsivo","Teclado","Touch"],
-      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; AelluxJS Input e Focus registrados no host. -->
+      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; aellux.js Input e Focus registrados no host. -->
 <style>
   .ae-lib-gamepad__controls { display: flex; flex-wrap: wrap; align-items: center; gap: 2rem; justify-content: space-between; max-width: 400px; }
   .ae-lib-gamepad__directions { display: grid; grid-template: repeat(3, 48px) / repeat(3, 48px); gap: 4px; }
@@ -682,7 +682,7 @@ window.librarySource = {
       extensions: ["input","present"],
       dependencies: ["Bootstrap 5.3.8"],
       features: ["Responsivo","Teclado","Touch"],
-      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; AelluxJS Input e Present registrados no host. Renomeie IDs e referências para repetir o componente. -->
+      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; aellux.js Input e Present registrados no host. Renomeie IDs e referências para repetir o componente. -->
 <style>
   .ae-lib-tabs [role="tablist"] { display: flex; gap: .5rem; overflow-x: auto; }
   .ae-lib-tabs [role="tabpanel"] { --ae-pop-duration: 160ms; }
@@ -726,7 +726,7 @@ window.librarySource = {
       extensions: ["viewport"],
       dependencies: ["Bootstrap 5.3.8"],
       features: ["Responsivo","Teclado","Movimento reduzido"],
-      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; AelluxJS Viewport registrado no host. Renomeie IDs e referências para repetir o componente. -->
+      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; aellux.js Viewport registrado no host. Renomeie IDs e referências para repetir o componente. -->
 <style>
   .ae-lib-reveal__scroller { height: 240px; overflow: auto; padding: 1rem; border: 1px solid var(--bs-border-color); border-radius: .75rem; }
   .ae-lib-reveal__card { padding: 1.5rem; margin-block: 3rem; background: var(--bs-tertiary-bg); border-radius: .75rem; }
@@ -752,7 +752,7 @@ window.librarySource = {
       dependencies: ["Bootstrap 5.3.8"],
       features: ["Responsivo","Teclado","Touch"],
       integration: "Inicialize o host com syncBootstrapThemeTag: true para publicar as cores do Bootstrap. A escolha de tema afeta a aplicação hospedeira inteira.",
-      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; AelluxJS Preference registrado no host com syncBootstrapThemeTag habilitado na inicialização. -->
+      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; aellux.js Preference registrado no host com syncBootstrapThemeTag habilitado na inicialização. -->
 <section class="ae-lib-theme p-4" aria-label="Preferência de tema">
   <p class="small text-secondary">O SEU ESPAÇO</p>
   <h2 class="h4">Qual é a sua luz?</h2>
@@ -776,7 +776,7 @@ window.librarySource = {
       extensions: ["focus"],
       dependencies: ["Bootstrap 5.3.8"],
       features: ["Responsivo","Teclado","Touch"],
-      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; AelluxJS Focus registrado no host. Renomeie IDs e referências para repetir o componente. -->
+      code: String.raw`<!-- Requisitos: Bootstrap 5.3.8; aellux.js Focus registrado no host. Renomeie IDs e referências para repetir o componente. -->
 <section class="ae-lib-focus-form p-4" aria-label="Registrar uma ideia">
   <h2 class="h4 mb-1">Vamos dar nome à ideia?</h2><p class="small text-body-secondary">Digite e pressione Enter para continuar.</p>
   <form>

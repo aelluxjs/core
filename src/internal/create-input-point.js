@@ -1,12 +1,12 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
-export function createPointAdapter(AelluxJs, root, emit, accepts) {
+export function createPointAdapter(aelluxJs, root, emit, accepts) {
   const extensionName = "input";
   const POINTER = "pointer";
 
   const trackedPointers = new Map();
   const pointableElements = new Set();
-  const pointableAttribute = AelluxJs.attr("point");
+  const pointableAttribute = aelluxJs.attr("point");
   const pointableSelector = `[${pointableAttribute}]`;
   const tapSelector = "button, a, [role=\"button\"]";
   const tapDuration = 300;
@@ -17,12 +17,12 @@ export function createPointAdapter(AelluxJs, root, emit, accepts) {
 
   function init() {
     for (const [suffix, handler] of pointerEvents)
-      AelluxJs.on(`$${POINTER}${suffix}`, handler, true);
+      aelluxJs.on(`$${POINTER}${suffix}`, handler, true);
   }
 
   function destroy() {
     for (const [suffix, handler] of pointerEvents)
-      AelluxJs.off(`$${POINTER}${suffix}`, handler, true);
+      aelluxJs.off(`$${POINTER}${suffix}`, handler, true);
     trackedPointers.clear();
     pointableElements.clear();
   }
@@ -74,7 +74,7 @@ export function createPointAdapter(AelluxJs, root, emit, accepts) {
   function dispatchPointer(name, pointer, originalEvent, recipient, hover,
     target = pointer.target, pressStart = pointer.pressStart) {
     if (!recipient) return;
-    AelluxJs.dispatchFrom(recipient, name, {
+    aelluxJs.dispatchFrom(recipient, name, {
       bubbles: false,
       detail: {
         pointer, target, pressStart,
@@ -224,7 +224,7 @@ export function createPointAdapter(AelluxJs, root, emit, accepts) {
     pointer.target = targetFor(event.target, pointer);
     const tap = finishTap(pointer, event);
     dispatchRelease("PointerUp", pointer, event);
-    if (tap && canTap(tap.element)) AelluxJs.dispatchFrom(tap.element, "tap", {
+    if (tap && canTap(tap.element)) aelluxJs.dispatchFrom(tap.element, "tap", {
       bubbles: true, composed: true, detail: tap.detail
     });
     if (!pointer.hover) trackedPointers.delete(event.pointerId);

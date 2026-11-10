@@ -53,7 +53,7 @@ for (const forceLegacy of [false, true]) {
     const values = await page.evaluate(() => {
       const ease = $ae.ease;
       return {
-        sameAlias: ease === AelluxJs.ease,
+        sameAlias: ease === aelluxJs.ease,
         presentAbsent: $ae.ext.present === undefined,
         backOut: ease("backOut", 0.5),
         prefixed: ease("easeBackOut", 0.5),

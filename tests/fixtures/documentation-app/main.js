@@ -3,9 +3,9 @@ const tocbotReady = (async () => {
   const initUrl = new URL("toc-init.js", document.currentScript.src).href;
   const baseUrl = "https://cdn.jsdelivr.net/npm/tocbot@4.32/dist/tocbot.min.js";
   await Promise.all([
-    AelluxJs.dep("tocbot", baseUrl),
-    AelluxJs.dep("tocbot-css", css),
-    AelluxJs.dep("tocbot-init", initUrl)
+    aelluxJs.dep("tocbot", baseUrl),
+    aelluxJs.dep("tocbot-css", css),
+    aelluxJs.dep("tocbot-init", initUrl)
   ]);
   await initOrRefreshToc();
   return window.tocbot;
@@ -19,16 +19,16 @@ const highlightReady = (async () => {
   const cssUrl = baseUrl + "styles/github.min.css";
   const cssDarkUrl = baseUrl + "styles/github-dark.min.css";
   await Promise.all([
-    AelluxJs.dep("highlightjs", `${baseUrl}highlight.min.js`),
-    AelluxJs.dep("highlightjs-css", cssUrl),
-    AelluxJs.dep("highlightjs-css-dark", cssDarkUrl)
+    aelluxJs.dep("highlightjs", `${baseUrl}highlight.min.js`),
+    aelluxJs.dep("highlightjs-css", cssUrl),
+    aelluxJs.dep("highlightjs-css-dark", cssDarkUrl)
   ]);
   await Promise.all(["xml", "json", "bash", "javascript"].map(language =>
-    AelluxJs.dep(`highlightjs-${language}`, `${baseUrl}languages/${language}.min.js`)
+    aelluxJs.dep(`highlightjs-${language}`, `${baseUrl}languages/${language}.min.js`)
   ));
 
   updateHljsScheme();
-  AelluxJs.on("PreferencesChange", () => {
+  aelluxJs.on("PreferencesChange", () => {
     try { updateHljsScheme(); }
     catch (error) { reportDocweaverError("highlight-scheme", error); }
   });
@@ -40,7 +40,7 @@ const highlightReady = (async () => {
 });
 
 function reportDocweaverError(operation, error) {
-  AelluxJs.dispatch("DocweaverError", { detail: { operation, error } });
+  aelluxJs.dispatch("DocweaverError", { detail: { operation, error } });
   console.error(`Docweaver ${operation} failed.`, error);
 }
 
@@ -71,12 +71,12 @@ async function highlightCode() {
   });
 }
 
-/** INITIALIZE AELLUXJS **/
+/** Initialize aellux.js **/
 
-AelluxJs.init({ mode: "full", environment: "development" });
+aelluxJs.init({ mode: "full", environment: "development" });
 
 function prepareAjaxLinks() {
-  const ajaxAttr = AelluxJs.attr("ajax-href");
+  const ajaxAttr = aelluxJs.attr("ajax-href");
   document.querySelectorAll(`.article a[href]:not([${ajaxAttr}]),nav a[href]:not([${ajaxAttr}])`)
     .forEach((link) => {
       if (link.getAttribute("href")?.startsWith("#")) return;
@@ -84,7 +84,7 @@ function prepareAjaxLinks() {
     });
 }
 
-AelluxJs.on("BeforeMount", (event) => {
+aelluxJs.on("BeforeMount", (event) => {
   if ("initOrRefreshToc" in window) {
     Promise.resolve().then(() => initOrRefreshToc())
       .catch(error => reportDocweaverError("toc", error));
@@ -118,7 +118,7 @@ AelluxJs.on("BeforeMount", (event) => {
     });
 });
 
-AelluxJs.on("AjaxHrefStart", (e) => {
+aelluxJs.on("AjaxHrefStart", (e) => {
   const container = document.querySelector("#doc-content");
   container.style.transition = null;
   container.style.opacity = .2;
@@ -127,13 +127,13 @@ AelluxJs.on("AjaxHrefStart", (e) => {
   window.scrollTo({ top: 0 });
 });
 
-AelluxJs.on("AjaxHrefComplete", (e) => {
+aelluxJs.on("AjaxHrefComplete", (e) => {
   const container = document.querySelector("#doc-content");
   container.style.transition = "opacity .25s linear";
   container.style.opacity = null;
 });
 
-AelluxJs.on("AjaxHrefError", (e) => {
+aelluxJs.on("AjaxHrefError", (e) => {
   const { error, status } = e.detail;
   if (error?.name === "AbortError") return;
 
@@ -172,7 +172,7 @@ function openAllParentCollapses(element) {
   let collapse = element.closest(".docs-menu-panel");
 
   while (collapse) {
-    AelluxJs(collapse).present.toggle(true);
+    aelluxJs(collapse).present.toggle(true);
     collapse = collapse.parentElement?.closest(".docs-menu-panel");
   }
 }
@@ -182,8 +182,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let progressTimer = null, progressTimer1 = null, progressTimer2 = null;
   const progressBar = document.querySelector("#page-progress");
 
-  AelluxJs.on("AjaxHrefStart", startProgress);
-  AelluxJs.on("AjaxHrefComplete", finishProgress);
+  aelluxJs.on("AjaxHrefStart", startProgress);
+  aelluxJs.on("AjaxHrefComplete", finishProgress);
 
   function startProgress() {
     if (!progressBar) return;

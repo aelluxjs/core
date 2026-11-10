@@ -1,6 +1,6 @@
 # Editor support
 
-Aellux ships generated semantic metadata for HTML/CSS completion, hover documentation and values. These files are development tooling; browsers do not load them and they add no code to the runtime bundles.
+aellux.js ships generated semantic metadata for HTML/CSS completion, hover documentation and values. These files are development tooling; browsers do not load them and they add no code to the runtime bundles.
 
 | File in `dist/` | Purpose |
 | --- | --- |
@@ -24,7 +24,7 @@ Add the files to your application's `.vscode/settings.json` after installing `@a
 }
 ```
 
-Paths are relative to the workspace. In an Aellux checkout, use `./dist/aellux.html-data.json` and `./dist/aellux.css-data.json`; the repository settings already reference these paths. Reload the VS Code window after changing Custom Data settings. The built-in HTML/CSS language services consume these files; other template-language extensions may require their own configuration.
+Paths are relative to the workspace. In an aellux.js checkout, use `./dist/aellux.html-data.json` and `./dist/aellux.css-data.json`; the repository settings already reference these paths. Reload the VS Code window after changing Custom Data settings. The built-in HTML/CSS language services consume these files; other template-language extensions may require their own configuration.
 
 These are the native [VS Code Custom Data](https://code.visualstudio.com/api/extension-guides/custom-data-extension) formats. Custom Data does not supply JavaScript signatures or a runtime linter. VS Code's CSS Custom Data format has no custom class contribution kind; the class catalog is available through Web Types and the shared semantic file.
 
@@ -46,7 +46,7 @@ This is the [Web Types package discovery convention](https://github.com/JetBrain
 }
 ```
 
-Use `./dist/aellux.web-types.json` in an Aellux checkout. Existing native HTML tags are extended rather than replaced. DOM events are contributed in the JS namespace. Closed attribute sets use TypeScript literal unions; selectors, IDs, pivot lists, property lists and preference values remain open strings. The metadata does not override the library's normal JavaScript symbols or claim to provide TypeScript declarations.
+Use `./dist/aellux.web-types.json` in an aellux.js checkout. Existing native HTML tags are extended rather than replaced. DOM events are contributed in the JS namespace. Closed attribute sets use TypeScript literal unions; selectors, IDs, pivot lists, property lists and preference values remain open strings. The metadata does not override the library's normal JavaScript symbols or claim to provide TypeScript declarations.
 
 ## Semantic coverage
 

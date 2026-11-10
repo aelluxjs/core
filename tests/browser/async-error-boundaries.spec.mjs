@@ -7,22 +7,22 @@ for (const forceLegacy of [false, true]) {
     await page.goto("/tests/index.htm");
     await page.addScriptTag({ url: "/dist/aellux.js" });
     const result = await page.evaluate(async forceLegacy => {
-      AelluxJs.ext("state-navigation", { load: false });
-      AelluxJs.ext("viewport", { load: false });
+      aelluxJs.ext("state-navigation", { load: false });
+      aelluxJs.ext("viewport", { load: false });
       await new Promise(resolve => {
-        AelluxJs.on("Ready", resolve, { once: true });
-        AelluxJs.init({ mode: "basic", forceLegacy });
+        aelluxJs.on("Ready", resolve, { once: true });
+        aelluxJs.init({ mode: "basic", forceLegacy });
       });
-      const navigation = await AelluxJs.wait("state-navigation");
-      await AelluxJs.wait("viewport");
+      const navigation = await aelluxJs.wait("state-navigation");
+      await aelluxJs.wait("viewport");
       window.asyncFailureEvents = [];
       const navigationError = new DOMException("History denied", "SecurityError");
       const push = history.pushState;
       history.pushState = () => { throw navigationError; };
-      AelluxJs.on("StateNavigationError", event => asyncFailureEvents.push({
+      aelluxJs.on("StateNavigationError", event => asyncFailureEvents.push({
         operation: event.detail.operation, original: event.detail.error === navigationError
       }));
-      AelluxJs.dispatch("PushState", { detail: { key: "panel", value: "open" } });
+      aelluxJs.dispatch("PushState", { detail: { key: "panel", value: "open" } });
       let rejected = false;
       try { await navigation.setState("panel", "closed"); }
       catch (error) { rejected = error === navigationError; }
@@ -32,16 +32,16 @@ for (const forceLegacy of [false, true]) {
       element.style.cssText = "width:100px;height:100px";
       element.setAttribute("data-ae-viewport", "");
       document.body.append(element);
-      await AelluxJs.mount(element);
-      const layout = AelluxJs.waitLayout;
+      await aelluxJs.mount(element);
+      const layout = aelluxJs.waitLayout;
       const viewportError = new Error("Viewport read failed");
       let fail = true;
-      AelluxJs.waitLayout = { ...layout, read(id, ...args) {
+      aelluxJs.waitLayout = { ...layout, read(id, ...args) {
         if (fail && id >= 6000000) return Promise.reject(viewportError);
         return layout.read(id, ...args);
       } };
       await new Promise(resolve => {
-        AelluxJs.on("ViewportError", event => {
+        aelluxJs.on("ViewportError", event => {
           asyncFailureEvents.push({ operation: event.detail.operation,
             original: event.detail.error === viewportError,
             includesSource: event.detail.elements.includes(element) });
@@ -50,8 +50,8 @@ for (const forceLegacy of [false, true]) {
         }, { once: true });
         window.dispatchEvent(new Event("resize"));
       });
-      await AelluxJs.mountManager.update(element);
-      AelluxJs.waitLayout = layout;
+      await aelluxJs.mountManager.update(element);
+      aelluxJs.waitLayout = layout;
       return { rejected, events: asyncFailureEvents };
     }, forceLegacy);
     expect(result).toEqual({ rejected: true, events: [

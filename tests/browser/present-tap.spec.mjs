@@ -13,19 +13,19 @@ async function start(page, mode, forceLegacy) {
       <button id="other" data-ae-point data-ae-present-trigger="toggle" data-ae-present-target="other-panel">Other</button>
       <section id="other-panel" data-ae-present="" data-ae-dismiss-on-click="false" hidden>Other panel</section>`;
     if (mode === "basic") {
-      AelluxJs.ext("input");
-      AelluxJs.ext("present", { loadStyle: true });
+      aelluxJs.ext("input");
+      aelluxJs.ext("present", { loadStyle: true });
     }
-    AelluxJs.on("Ready", resolve, { once: true });
-    AelluxJs.init({ mode, forceLegacy });
+    aelluxJs.on("Ready", resolve, { once: true });
+    aelluxJs.init({ mode, forceLegacy });
   }), { mode, forceLegacy });
   await page.evaluate(() => {
     window.actions = [];
     window.tapCount = 0;
-    for (const name of ["BeforePop", "BeforeDismiss"]) document.addEventListener(AelluxJs.eventName(name), event => {
+    for (const name of ["BeforePop", "BeforeDismiss"]) document.addEventListener(aelluxJs.eventName(name), event => {
       actions.push({ name, target: event.target.id });
     });
-    document.addEventListener(AelluxJs.eventName("tap"), () => tapCount++);
+    document.addEventListener(aelluxJs.eventName("tap"), () => tapCount++);
     window.tapGesture = (id = "control", pointerId = 71, pointerType = "touch") => {
       const target = document.getElementById(id);
       const rect = target.getBoundingClientRect();
@@ -187,8 +187,8 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
         await start(page, mode, forceLegacy);
         await page.evaluate(async ({ id, extension }) => {
           tapGesture();
-          await AelluxJs.unmount(id, extension);
-          await AelluxJs.mount(id, extension);
+          await aelluxJs.unmount(id, extension);
+          await aelluxJs.mount(id, extension);
         }, { id, extension });
         await page.waitForTimeout(64);
         expect(await page.evaluate(() => actions)).toEqual([]);
@@ -203,7 +203,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
       await start(page, mode, forceLegacy);
       await page.evaluate(async () => {
         tapGesture();
-        await AelluxJs.destroyExtensions("present");
+        await aelluxJs.destroyExtensions("present");
         tapGesture();
       });
       await page.waitForTimeout(64);

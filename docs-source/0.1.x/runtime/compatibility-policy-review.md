@@ -1,4 +1,4 @@
-# Compatibility Policy Review — AelluxJS 0.1.x
+# Compatibility Policy Review — aellux.js 0.1.x
 
 **Status:** Pending maintainer review; non-normative. These proposals do not create support obligations or authorize exceptions.
 

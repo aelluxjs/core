@@ -38,7 +38,7 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-PgrxAHrkt22+F09vWG2iuTeiqQ+UCUeSkyAe/nibdP/XtRk8nTZ+VjetKW+okArJ" crossorigin="anonymous">
+  integrity="sha384-q4bpBk5Vqct9IR80W+4o8g4BlPq84mWWb0mV47Q76mgYStKp6AKgCBgxRwr2FPAE" crossorigin="anonymous">
 </head>
 
 <body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
@@ -192,6 +192,13 @@
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
                                         aellux.js Docs                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/brand-naming.htm" data-ae-overflow-marquee="190px">
+                                        Brand Naming and Migration                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -778,7 +785,7 @@ await $ae.mountManager.update(anchor, &quot;anchor&quot;);
 <p>Anchor publishes interpolated position, pivots, origins and matching inputs together through <code>waitLayout</code>. Every frame uses elapsed time from the original start, a fixed origin and the most recently measured destination. It does not use the preceding frame as a new origin. Coordinates compensate for reference scale and scroll offsets; native scrolling moves the containing content independently, without a second scroll compensation. Weak CSS applies the interpolated inputs, so authored sizing constraints and overrides still control the actual box.</p>
 <p>At the first eligible update at or beyond the original deadline, Anchor publishes its latest destination and removes <code>ae--anchor-switching</code>. Scrolling may continue afterward: ordinary placement tracking stays directly aligned without starting another transition. No <code>scrollend</code> listener or scroll-settling timer is needed. A target change between measurement and publication discards the older measurement, and queued frames from replaced or unmounted operations cannot publish an old target. Hidden, removed or invalid targets retain their existing deactivation behavior; reduced motion places directly.</p>
 <p>Geometry measurement and temporal publication may run at different eligible cadences. Both reuse WaitLayout&#39;s adaptive scheduling and <code>data-ae-maxfps</code>; matching width or height also applies the shared <code>cssMotionPropertyMaxFPS</code> ceiling (55 FPS by default). Progress depends on elapsed time, so a lower update rate does not lengthen the configured duration. The finite progress sequence ends on completion or teardown; there is no permanent animation polling.</p>
-<p>Anchor owns numeric geometry interpolation rather than changing the endpoints of a native CSS Transition. This keeps the same behavior when <code>cssMotionController</code> is <code>false</code> or Web Animations APIs are unavailable, without changing the public <a href="../runtime/css-motion.htm">CSS Motion</a> API. <code>--ae-anchor-switch-ease</code> accepts CSS keywords, <code>cubic-bezier(...)</code>, <code>steps(...)</code> including jump variants, and piecewise <code>linear(...)</code>; overshoot and step boundaries are retained. Aellux easing family names are not interpreted as CSS easing values.</p>
+<p>Anchor owns numeric geometry interpolation rather than changing the endpoints of a native CSS Transition. This keeps the same behavior when <code>cssMotionController</code> is <code>false</code> or Web Animations APIs are unavailable, without changing the public <a href="../runtime/css-motion.htm">CSS Motion</a> API. <code>--ae-anchor-switch-ease</code> accepts CSS keywords, <code>cubic-bezier(...)</code>, <code>steps(...)</code> including jump variants, and piecewise <code>linear(...)</code>; overshoot and step boundaries are retained. aellux.js easing family names are not interpreted as CSS easing values.</p>
 <p>During a switch, Anchor temporarily excludes transform, transform-origin, matching dimensions and its geometry variables from authored transition lists, including <code>transition: all</code> and logical size aliases. Unrelated transitions retain their existing timing, delays and easing. Completion and teardown restore the authored transition declarations and priorities. Direct tracking suppresses competing transitions only for the bounded geometry publication when required. Existing unrelated Web Animations are not captured or canceled. Unmount/destroy cancels pending reads, publications and progress tasks and restores original inline geometry.</p>
 <h2>Present Group Anchor</h2>
 <p>When <code>data-ae-anchor-target</code> resolves to an element with <code>data-ae-present-group</code>, Anchor automatically uses that group&#39;s accepted selected member as its effective target. The reference accepts the usual ID, optionally prefixed with <code>#</code>, or a CSS selector. Each Anchor declares its own target, so multiple Anchors can follow the same group from inside or outside it. Present owns the accepted selection and publishes its changes; Anchor queries the optional public Present interface. Neither Extension imports the other&#39;s implementation.</p>
@@ -1016,7 +1023,7 @@ await $ae.mountManager.update(anchor, &quot;anchor&quot;);
                 and
                 <a style="color:inherit!important;" href="https://github.com/" target="_blank"
                   rel="noopener noreferrer">GitHub</a>
-                for the tools and technologies that supported the development of Aellux.
+                for the tools and technologies that supported the development of aellux.js.
               </div>
             </div>
           </footer>

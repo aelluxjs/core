@@ -72,21 +72,21 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
-    const AelluxJs = root.AelluxJs;
+    const aelluxJs = root.aelluxJs;
     const extensionName = "anchor";
-    if (!AelluxJs) {
-      throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+    if (!aelluxJs) {
+      throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.`);
     }
     const ORIGIN_X = "--ae-anchor-origin-x", ORIGIN_Y = "--ae-anchor-origin-y", ANCHOR_OPACITY = "--anchor-opacity";
-    const attribute = AelluxJs.attr(extensionName);
-    const presentAttribute = AelluxJs.attr("present");
-    const targetAttribute = AelluxJs.attr("anchor-target");
-    const matchAttribute = AelluxJs.attr("anchor-match");
-    const scrollIntoViewAttribute = AelluxJs.attr("anchor-scroll-into-view");
-    const groupAttribute = AelluxJs.attr("present-group");
-    const layoutEvent = AelluxJs.eventName("Layout");
-    const anchoredClass = AelluxJs.className("anchored");
-    const switchingClass = AelluxJs.className("anchor-switching");
+    const attribute = aelluxJs.attr(extensionName);
+    const presentAttribute = aelluxJs.attr("present");
+    const targetAttribute = aelluxJs.attr("anchor-target");
+    const matchAttribute = aelluxJs.attr("anchor-match");
+    const scrollIntoViewAttribute = aelluxJs.attr("anchor-scroll-into-view");
+    const groupAttribute = aelluxJs.attr("present-group");
+    const layoutEvent = aelluxJs.eventName("Layout");
+    const anchoredClass = aelluxJs.className("anchored");
+    const switchingClass = aelluxJs.className("anchor-switching");
     const baseProperties = ["position", "left", "top", "transform", "transform-origin"];
     const ownedProperties = [
       ...baseProperties,
@@ -117,10 +117,10 @@
     const requestedMaps = /* @__PURE__ */ new Map();
     let nextLayoutId = 2e6;
     let mutations = null;
-    AelluxJs.extAttach(extensionName, { init, destroy, createPlacementMap });
+    aelluxJs.extAttach(extensionName, { init, destroy, createPlacementMap });
     function init() {
-      AelluxJs.comm.handle("anchor.placement", placementRequest, { owner: extensionName });
-      AelluxJs.registerCssProperty(
+      aelluxJs.comm.handle("anchor.placement", placementRequest, { owner: extensionName });
+      aelluxJs.registerCssProperty(
         { name: "--ae-anchor-x", syntax: "<length>", initialValue: "0px" },
         { name: "--ae-anchor-y", syntax: "<length>", initialValue: "0px" },
         { name: "--ae-anchor-target-width", syntax: "<length>", initialValue: "0px" },
@@ -130,7 +130,7 @@
         { name: ORIGIN_Y, syntax: "<percentage>", initialValue: "0%" },
         { name: ANCHOR_OPACITY, syntax: "<number>", initialValue: "1" }
       );
-      AelluxJs.mountManager.add({
+      aelluxJs.mountManager.add({
         extensionName,
         selector: `[${attribute}]`,
         priority: 0,
@@ -140,11 +140,11 @@
       });
     }
     async function destroy() {
-      AelluxJs.comm.removeOwner(extensionName);
+      aelluxJs.comm.removeOwner(extensionName);
       for (const map of placementMaps) map.destroy();
       requestedMaps.clear();
       await Promise.all(Array.from(anchors.keys(), unmountAnchor));
-      AelluxJs.mountManager.remove({ extensionName });
+      aelluxJs.mountManager.remove({ extensionName });
     }
     function placementRequest({ action, owner, element, pairs, target, placement }) {
       if (action === "invisible") return isInvisible(element);
@@ -171,7 +171,7 @@
       const map = {
         mount(element) {
           if (!disposed && !memories.has(element))
-            memories.set(element, AelluxJs.persist.element.save(element, ["class"], ownedProperties));
+            memories.set(element, aelluxJs.persist.element.save(element, ["class"], ownedProperties));
         },
         unmount(element) {
           var _a;
@@ -198,7 +198,7 @@
     }
     function mountAnchor(element) {
       if (anchors.has(element)) return;
-      elementMemories.set(element, AelluxJs.persist.element.save(element, [], ownedProperties));
+      elementMemories.set(element, aelluxJs.persist.element.save(element, [], ownedProperties));
       const state = {
         invalidContext: false,
         active: false,
@@ -209,7 +209,7 @@
         group: null,
         lastPlacement: null,
         switchOperation: null,
-        motionId: AelluxJs.motion.id(),
+        motionId: aelluxJs.motion.id(),
         scrollVisible: false,
         scrollPending: false,
         ownClass: null,
@@ -233,9 +233,9 @@
       anchors.set(element, state);
       if (element.offsetParent) listenForLayout(state, element.offsetParent);
       if (anchors.size === 1) {
-        AelluxJs.onEvent(root, "$scroll", scheduleUpdate, { capture: true, passive: true });
-        AelluxJs.onEvent(root, "$resize", scheduleUpdate);
-        AelluxJs.on("PresentGroupChange", onGroupChange);
+        aelluxJs.onEvent(root, "$scroll", scheduleUpdate, { capture: true, passive: true });
+        aelluxJs.onEvent(root, "$resize", scheduleUpdate);
+        aelluxJs.on("PresentGroupChange", onGroupChange);
         if (typeof root.MutationObserver === "function") {
           mutations = new root.MutationObserver(onMutations);
           mutations.observe(document, {
@@ -248,7 +248,7 @@
               matchAttribute,
               scrollIntoViewAttribute,
               groupAttribute,
-              AelluxJs.attr("reduced-motion"),
+              aelluxJs.attr("reduced-motion"),
               "id",
               "hidden",
               "class",
@@ -275,21 +275,21 @@
       elementMemories.delete(element);
       state.revision++;
       stopSwitch(element, state);
-      if (state.reference) AelluxJs.offEvent(state.reference, layoutEvent, state.layoutListener);
+      if (state.reference) aelluxJs.offEvent(state.reference, layoutEvent, state.layoutListener);
       if (state.observer) state.observer.disconnect();
       if (state.intersectionObserver) state.intersectionObserver.disconnect();
       if (state.updateTimer !== null) root.clearTimeout(state.updateTimer);
       anchors.delete(element);
       if (!anchors.size) {
-        AelluxJs.offEvent(root, "$scroll", scheduleUpdate, true);
-        AelluxJs.offEvent(root, "$resize", scheduleUpdate);
-        AelluxJs.off("PresentGroupChange", onGroupChange);
+        aelluxJs.offEvent(root, "$scroll", scheduleUpdate, true);
+        aelluxJs.offEvent(root, "$resize", scheduleUpdate);
+        aelluxJs.off("PresentGroupChange", onGroupChange);
         if (mutations) mutations.disconnect();
         mutations = null;
       }
-      AelluxJs.waitLayout.cancel(state.layoutId);
-      AelluxJs.waitLayout.cancel(state.styleLayoutId);
-      await AelluxJs.waitLayout.update(state.styleLayoutId, deactivate, [element, state, memory]);
+      aelluxJs.waitLayout.cancel(state.layoutId);
+      aelluxJs.waitLayout.cancel(state.styleLayoutId);
+      await aelluxJs.waitLayout.update(state.styleLayoutId, deactivate, [element, state, memory]);
     }
     function scheduleUpdate(event) {
       if (!anchors.size) return;
@@ -334,8 +334,8 @@
       return value && value.trim() && resolveElement(value) !== (state.group || state.resolvedTarget);
     }
     function associationDiagnostic(element, reason) {
-      AelluxJs.diagnostics.warn(
-        AelluxJs.diagnostics.WARN_ANCHOR_GROUP,
+      aelluxJs.diagnostics.warn(
+        aelluxJs.diagnostics.WARN_ANCHOR_GROUP,
         {
           extension: extensionName,
           element,
@@ -350,7 +350,7 @@
       const value = element.getAttribute(targetAttribute);
       const target = value && value.trim() ? resolveElement(value) : element.offsetParent;
       state.group = value && value.trim() && (target == null ? void 0 : target.hasAttribute(groupAttribute)) ? target : null;
-      return state.group ? AelluxJs.comm.request("present.selection", { group: state.group }).value || null : target;
+      return state.group ? aelluxJs.comm.request("present.selection", { group: state.group }).value || null : target;
     }
     function circularTarget(element, target) {
       const visited = /* @__PURE__ */ new Set([element]);
@@ -371,7 +371,7 @@
       }
       if (durationMs === 0) {
         for (const [element, state] of anchors) {
-          const maxFPS = AelluxJs.layoutMaxFPS(element);
+          const maxFPS = aelluxJs.layoutMaxFPS(element);
           state.layoutUntil = now() + 1e3 / (maxFPS || 60);
           state.layoutSingle = true;
           state.layoutFinalPending = true;
@@ -394,7 +394,7 @@
         state.repeatPending = state.repeatPending || repeat;
         return;
       }
-      const maxFPS = AelluxJs.layoutMaxFPS(element);
+      const maxFPS = aelluxJs.layoutMaxFPS(element);
       if (maxFPS && !repeat && !state.updateTimerDue) {
         if (state.updateTimer === null) {
           state.updateTimer = root.setTimeout(() => {
@@ -427,7 +427,7 @@
         requestAnchorUpdate(element, state);
       };
       if (repeat) state.layoutPolling = true;
-      const sequence = AelluxJs.waitLayout.sequence(state.layoutId, {
+      const sequence = aelluxJs.waitLayout.sequence(state.layoutId, {
         update: run,
         repeat: repeat ? { ms: 0 } : void 0,
         maxFPS,
@@ -447,8 +447,8 @@
       state.updatePending = true;
       state.updateDirty = false;
       updateAnchor(element).catch((cause) => {
-        AelluxJs.diagnostics.error(
-          AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
+        aelluxJs.diagnostics.error(
+          aelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
           { cause, extension: extensionName, element, method: "update" }
         );
       }).finally(() => {
@@ -476,54 +476,54 @@
       if (!target || !target.isConnected || !candidates.length || circularTarget(element, target)) {
         if (target && circularTarget(element, target))
           associationDiagnostic(element, "Circular target reference.");
-        await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
+        await aelluxJs.waitLayout.update(state.styleLayoutId, () => {
           if (current()) deactivate(element, state);
         });
         if (!current()) return retry();
         return;
       }
-      let placement = await AelluxJs.waitLayout.read(
+      let placement = await aelluxJs.waitLayout.read(
         state.styleLayoutId,
         () => current() ? readPlacement(element, target, candidates, state.active) : null
       );
       if (!current()) return retry();
       if (!placement) return;
       if (placement.hidden) {
-        await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
+        await aelluxJs.waitLayout.update(state.styleLayoutId, () => {
           if (current()) hideForTarget(element, state, placement);
         });
         if (!current()) return retry();
         return;
       }
       if (!placement.valid) {
-        await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
+        await aelluxJs.waitLayout.update(state.styleLayoutId, () => {
           if (current()) invalidContext(element, state, placement);
         });
         if (!current()) return retry();
         return;
       }
       if (!state.active) {
-        await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
+        await aelluxJs.waitLayout.update(state.styleLayoutId, () => {
           if (!current()) return;
           state.active = true;
           if (state.lastPlacement) writePlacement(element, state.lastPlacement);
         });
         if (!current()) return retry();
-        placement = await AelluxJs.waitLayout.read(
+        placement = await aelluxJs.waitLayout.read(
           state.styleLayoutId,
           () => current() ? readPlacement(element, target, candidates, true) : null
         );
         if (!current()) return retry();
         if (!placement) return;
         if (placement.hidden) {
-          await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
+          await aelluxJs.waitLayout.update(state.styleLayoutId, () => {
             if (current()) hideForTarget(element, state, placement);
           });
           if (!current()) return retry();
           return;
         }
         if (!placement.valid) {
-          await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
+          await aelluxJs.waitLayout.update(state.styleLayoutId, () => {
             if (current()) invalidContext(element, state, placement);
           });
           if (!current()) return retry();
@@ -531,7 +531,7 @@
         }
       }
       let applied = false;
-      await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
+      await aelluxJs.waitLayout.update(state.styleLayoutId, () => {
         if (!current()) return;
         if (effectiveTarget(element, state) !== placement.target) return;
         state.invalidContext = false;
@@ -542,7 +542,7 @@
         const moved = !previous || previous.signature !== placement.signature;
         if (switching && placement.duration > 0) {
           startSwitch(element, state, placement);
-        } else if (state.switchOperation && !switching && AelluxJs.currentPreference("reduced-motion") !== "reduced") {
+        } else if (state.switchOperation && !switching && aelluxJs.currentPreference("reduced-motion") !== "reduced") {
           state.switchOperation.toGeometry = placement;
         } else if (state.switchOperation) {
           writePlacement(element, placement);
@@ -564,12 +564,12 @@
       });
       if (!applied && anchors.get(element) === state) return updateAnchor(element, ensureLatest);
       if (!applied || !element.hasAttribute(scrollIntoViewAttribute)) return;
-      const visible = await AelluxJs.waitLayout.read(state.styleLayoutId, () => current() && !isInvisible(element));
+      const visible = await aelluxJs.waitLayout.read(state.styleLayoutId, () => current() && !isInvisible(element));
       if (!current()) return retry();
       if (visible && !state.scrollVisible) state.scrollPending = true;
       state.scrollVisible = visible;
       if (!visible || !state.scrollPending) return;
-      await AelluxJs.waitLayout.update(state.styleLayoutId, () => {
+      await aelluxJs.waitLayout.update(state.styleLayoutId, () => {
         if (!current() || effectiveTarget(element, state) !== placement.target) return;
         state.scrollPending = false;
         scrollTargetIntoView(element, placement.target);
@@ -581,7 +581,7 @@
       target.scrollIntoView({
         block: tokens[0],
         inline: tokens[1],
-        behavior: AelluxJs.currentPreference("reduced-motion") === "reduced" ? "instant" : "smooth"
+        behavior: aelluxJs.currentPreference("reduced-motion") === "reduced" ? "instant" : "smooth"
       });
     }
     function rememberVisual(element, state) {
@@ -598,8 +598,8 @@
       const style = root.getComputedStyle(element);
       const tokens = (element.getAttribute(matchAttribute) || "").trim().split(/\s+/).filter(Boolean);
       if (element.hasAttribute(matchAttribute) && (!tokens.length || tokens.some((token) => token !== "width" && token !== "height")))
-        AelluxJs.diagnostics.warn(
-          AelluxJs.diagnostics.WARN_ANCHOR_MATCH,
+        aelluxJs.diagnostics.warn(
+          aelluxJs.diagnostics.WARN_ANCHOR_MATCH,
           { extension: extensionName, element, value: element.getAttribute(matchAttribute) }
         );
       if ((tokens.includes("width") || tokens.includes("height")) && style.position !== "absolute" && style.position !== "fixed") {
@@ -671,7 +671,7 @@
       const present = target.closest(`[${presentAttribute}]`);
       const opacity = present ? root.getComputedStyle(present).opacity : "1";
       const rawDuration = style.getPropertyValue("--ae-anchor-switch-duration").trim();
-      const duration = AelluxJs.currentPreference("reduced-motion") === "reduced" ? 0 : Math.max(0, (parseFloat(rawDuration) || 0) * (rawDuration.endsWith("ms") ? 1 : 1e3));
+      const duration = aelluxJs.currentPreference("reduced-motion") === "reduced" ? 0 : Math.max(0, (parseFloat(rawDuration) || 0) * (rawDuration.endsWith("ms") ? 1 : 1e3));
       const position = tokens.includes("width") || tokens.includes("height") ? [selected.pivotX, selected.pivotY] : [selected.x, selected.y];
       return {
         valid: true,
@@ -725,8 +725,8 @@
       if (placement.reference)
         listenForLayout(state, placement.reference);
       if (state.invalidContext) return;
-      AelluxJs.diagnostics.error(
-        AelluxJs.diagnostics.ERROR_ANCHOR_REFERENCE_CONTEXT,
+      aelluxJs.diagnostics.error(
+        aelluxJs.diagnostics.ERROR_ANCHOR_REFERENCE_CONTEXT,
         {
           extension: extensionName,
           element,
@@ -753,13 +753,13 @@
     }
     function listenForLayout(state, reference) {
       if (state.reference === reference) return;
-      if (state.reference) AelluxJs.offEvent(state.reference, layoutEvent, state.layoutListener);
+      if (state.reference) aelluxJs.offEvent(state.reference, layoutEvent, state.layoutListener);
       state.reference = reference;
-      if (reference) AelluxJs.onEvent(reference, layoutEvent, state.layoutListener);
+      if (reference) aelluxJs.onEvent(reference, layoutEvent, state.layoutListener);
     }
     function deactivate(element, state, memory = elementMemories.get(element)) {
       stopSwitch(element, state);
-      if (state.reference) AelluxJs.offEvent(state.reference, layoutEvent, state.layoutListener);
+      if (state.reference) aelluxJs.offEvent(state.reference, layoutEvent, state.layoutListener);
       if (state.observer) state.observer.disconnect();
       if (state.intersectionObserver) state.intersectionObserver.disconnect();
       state.target = state.reference = null;
@@ -774,8 +774,8 @@
     function stopSwitch(element, state, keepStyles = false) {
       const operation = state.switchOperation;
       state.switchOperation = null;
-      AelluxJs.waitLayout.cancel(state.motionId);
-      AelluxJs.waitLayout.setVisualFPSLimit(state.motionId, null);
+      aelluxJs.waitLayout.cancel(state.motionId);
+      aelluxJs.waitLayout.setVisualFPSLimit(state.motionId, null);
       element.classList.remove(switchingClass);
       if (!keepStyles && (operation == null ? void 0 : operation.styles)) {
         element.getBoundingClientRect();
@@ -797,7 +797,7 @@
       const horizontal = !style.writingMode || style.writingMode.startsWith("horizontal");
       if (controlled.includes("width")) controlled.push(horizontal ? "inline-size" : "block-size");
       if (controlled.includes("height")) controlled.push(horizontal ? "block-size" : "inline-size");
-      const memory = AelluxJs.persist.element.save(element, [], ["transition-property", "transition-duration", "transition-delay", "transition-timing-function"]);
+      const memory = aelluxJs.persist.element.save(element, [], ["transition-property", "transition-duration", "transition-delay", "transition-timing-function"]);
       const durations = style.transitionDuration.split(","), delays = style.transitionDelay.split(",");
       const timing = style.transitionTimingFunction.match(/(?:[^,(]|\([^)]*\))+/g) || ["ease"];
       const retained = [], times = [], waits = [], easings = [];
@@ -838,7 +838,7 @@
         target: placement.target,
         startedAt: now(),
         duration: placement.duration,
-        easing: createCssEasing(placement.easing, AelluxJs),
+        easing: createCssEasing(placement.easing, aelluxJs),
         fromGeometry: from,
         toGeometry: placement,
         rendered: from,
@@ -847,15 +847,15 @@
       state.switchOperation = operation;
       element.classList.add(switchingClass);
       renderSwitch(element, state, operation);
-      const limits = [AelluxJs.layoutMaxFPS(element)];
+      const limits = [aelluxJs.layoutMaxFPS(element)];
       const matching = (element.getAttribute(matchAttribute) || "").split(/\s+/).some((axis) => axis === "width" || axis === "height");
-      const policy = AelluxJs.options.cssMotionPropertyMaxFPS;
+      const policy = aelluxJs.options.cssMotionPropertyMaxFPS;
       if (matching && policy !== null && policy !== 0) {
         const value = Number(policy);
         if (Number.isFinite(value) && value > 0) limits.push(value);
         else {
-          if (policy !== void 0) AelluxJs.diagnostics.warn(
-            AelluxJs.diagnostics.WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID,
+          if (policy !== void 0) aelluxJs.diagnostics.warn(
+            aelluxJs.diagnostics.WARN_CSS_MOTION_PROPERTY_MAX_FPS_INVALID,
             {
               extension: "core",
               option: "cssMotionPropertyMaxFPS",
@@ -869,16 +869,16 @@
         }
       }
       const maxFPS = limits.filter((value) => Number.isFinite(value) && value > 0).reduce((min, value) => Math.min(min, value), Infinity);
-      AelluxJs.waitLayout.setVisualFPSLimit(state.motionId, maxFPS === Infinity ? null : maxFPS);
-      AelluxJs.waitLayout.sequence(state.motionId, {
+      aelluxJs.waitLayout.setVisualFPSLimit(state.motionId, maxFPS === Infinity ? null : maxFPS);
+      aelluxJs.waitLayout.sequence(state.motionId, {
         update: () => renderSwitch(element, state, operation),
         repeat: { ms: 0 },
         maxFPS: maxFPS === Infinity ? void 0 : maxFPS,
         abort: () => anchors.get(element) !== state || state.switchOperation !== operation
       }).catch((cause) => {
         if (state.switchOperation === operation) stopSwitch(element, state);
-        AelluxJs.diagnostics.error(
-          AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
+        aelluxJs.diagnostics.error(
+          aelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
           { cause, extension: extensionName, element, method: "switch" }
         );
       });
@@ -905,7 +905,7 @@
       };
       operation.rendered = progress === 1 ? to : geometry;
       writePlacement(element, operation.rendered);
-      if (progress === 1 || AelluxJs.currentPreference("reduced-motion") === "reduced") {
+      if (progress === 1 || aelluxJs.currentPreference("reduced-motion") === "reduced") {
         writePlacement(element, to);
         stopSwitch(element, state);
         scheduleAnchor(element);

@@ -3,14 +3,14 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
-    const AelluxJs = root.AelluxJs;
+    const aelluxJs = root.aelluxJs;
     const extensionName = "state-navigation";
-    if (!AelluxJs) {
-      throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+    if (!aelluxJs) {
+      throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.`);
     }
     const PUSH_AJAX_REPLACE = "PushAjaxReplace", UPDATE_BASE_TITLE = "UpdateBaseTitle";
     const globalSnapshot = {};
-    AelluxJs.extAttach(extensionName, {
+    aelluxJs.extAttach(extensionName, {
       init,
       destroy,
       updateBaseTitle,
@@ -23,13 +23,13 @@
     let baseTitle = "";
     let useHash = true;
     function init(options) {
-      AelluxJs.onEvent(window, "$popstate", onPopState);
-      AelluxJs.onEvent(window, "$hashchange", onHashChange);
-      AelluxJs.on("PushState", OnPushState);
-      AelluxJs.on(PUSH_AJAX_REPLACE, OnPushAjaxReplace);
-      AelluxJs.on(UPDATE_BASE_TITLE, OnUpdateBaseTitle);
-      if ("useHash" in AelluxJs.options)
-        useHash = AelluxJs.options.useHash;
+      aelluxJs.onEvent(window, "$popstate", onPopState);
+      aelluxJs.onEvent(window, "$hashchange", onHashChange);
+      aelluxJs.on("PushState", OnPushState);
+      aelluxJs.on(PUSH_AJAX_REPLACE, OnPushAjaxReplace);
+      aelluxJs.on(UPDATE_BASE_TITLE, OnUpdateBaseTitle);
+      if ("useHash" in aelluxJs.options)
+        useHash = aelluxJs.options.useHash;
       baseTitle = document.title;
       onHashChange();
       history.replaceState(mergeHistoryState({
@@ -38,11 +38,11 @@
       }), "");
     }
     async function destroy() {
-      AelluxJs.offEvent(window, "$popstate", onPopState);
-      AelluxJs.offEvent(window, "$hashchange", onHashChange);
-      AelluxJs.off("PushState", OnPushState);
-      AelluxJs.off(PUSH_AJAX_REPLACE, OnPushAjaxReplace);
-      AelluxJs.off(UPDATE_BASE_TITLE, OnUpdateBaseTitle);
+      aelluxJs.offEvent(window, "$popstate", onPopState);
+      aelluxJs.offEvent(window, "$hashchange", onHashChange);
+      aelluxJs.off("PushState", OnPushState);
+      aelluxJs.off(PUSH_AJAX_REPLACE, OnPushAjaxReplace);
+      aelluxJs.off(UPDATE_BASE_TITLE, OnUpdateBaseTitle);
     }
     function updateBaseTitle(title = null) {
       baseTitle = title != null ? title : baseTitle;
@@ -64,7 +64,7 @@
         else history.pushState(state, "", url);
         dispatchSnapshotEvent("SnapshotChange");
       } catch (error) {
-        AelluxJs.dispatch("StateNavigationError", {
+        aelluxJs.dispatch("StateNavigationError", {
           detail: { operation: "setState", key, value, title, silent, error }
         });
         throw error;
@@ -99,7 +99,7 @@
         },
         bubbles: true
       };
-      AelluxJs.dispatch(name, options);
+      aelluxJs.dispatch(name, options);
     }
     function copyHistoryState(state) {
       if (!state || typeof state !== "object") return state;
@@ -164,7 +164,7 @@
       try {
         const detail = event && event.detail;
         if (!detail || typeof detail !== "object" || typeof detail.key !== "string" || !detail.key.trim() || typeof detail.value !== "string" || !detail.value.trim() || detail.title !== void 0 && typeof detail.title !== "string") {
-          AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
+          aelluxJs.diagnostics.warn(aelluxJs.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
             extension: extensionName,
             event: "PushState",
             expected: "detail: { key: non-empty string, value: non-empty string, title?: string }"
@@ -172,14 +172,14 @@
           return;
         }
         setState(detail.key, detail.value, detail.title).catch((cause) => {
-          AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_CALLBACK, {
+          aelluxJs.diagnostics.error(aelluxJs.diagnostics.ERROR_CALLBACK, {
             extension: extensionName,
             event: "PushState",
             cause
           });
         });
       } catch (cause) {
-        AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_CALLBACK, {
+        aelluxJs.diagnostics.error(aelluxJs.diagnostics.ERROR_CALLBACK, {
           extension: extensionName,
           event: "PushState",
           cause
@@ -190,7 +190,7 @@
       try {
         const detail = event && event.detail;
         if (!detail || typeof detail !== "object" || typeof detail.url !== "string" || !detail.url.trim() || !Object.prototype.hasOwnProperty.call(detail, "selectors") || detail.selectors == null) {
-          AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
+          aelluxJs.diagnostics.warn(aelluxJs.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
             extension: extensionName,
             event: PUSH_AJAX_REPLACE,
             expected: "detail: { url: non-empty string, selectors: value }"
@@ -199,7 +199,7 @@
         }
         ajaxReplace(detail.url, detail.selectors);
       } catch (cause) {
-        AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_CALLBACK, {
+        aelluxJs.diagnostics.error(aelluxJs.diagnostics.ERROR_CALLBACK, {
           extension: extensionName,
           event: PUSH_AJAX_REPLACE,
           cause
@@ -210,7 +210,7 @@
       try {
         const detail = event && event.detail;
         if (!detail || typeof detail !== "object" || !Object.prototype.hasOwnProperty.call(detail, "title") || typeof detail.title !== "string") {
-          AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
+          aelluxJs.diagnostics.warn(aelluxJs.diagnostics.WARN_NAVIGATION_EVENT_INVALID, {
             extension: extensionName,
             event: UPDATE_BASE_TITLE,
             expected: "detail: { title: string }"
@@ -219,7 +219,7 @@
         }
         updateBaseTitle(detail.title);
       } catch (cause) {
-        AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_CALLBACK, {
+        aelluxJs.diagnostics.error(aelluxJs.diagnostics.ERROR_CALLBACK, {
           extension: extensionName,
           event: UPDATE_BASE_TITLE,
           cause

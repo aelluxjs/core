@@ -297,7 +297,7 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
-    var api = root.AelluxJs;
+    var api = root.aelluxJs;
     if (!api) throw new Error("[aellux.js] Load the boot script before Input.");
     var extensionName = "input", attr = function attr2(name) {
       return api.attr(name);

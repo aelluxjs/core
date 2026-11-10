@@ -91,7 +91,7 @@ export const semanticCSSProperties = [
   property("shortcut-anchor", "input", "<dashed-ident>", "Optional CSS anchor name for positioned shortcut hints.", { default: "--ae-shortcut" }),
   ...["pop", "unpop", "dismiss"].map(name => property(`present-${name}-threshold`, "present", "<number>", "Gesture release decision threshold in [0,1]. Pop completes at or above its threshold; Unpop completes at or below its threshold; Dismiss completes at or above its threshold.", { default: "0.5" })),
   property("present-gesture-distance", "present", "auto | <length>", "Positive physical drag distance for full normalized travel. Auto uses reliable translation distance, otherwise the element dimension on the gesture axis. Read at the start of each gesture.", { default: "auto" }),
-  property("present-effect-aellux-ease", "present", "<string>", "Optional Aellux easing name read from the effect target; unsupported sampling retains the authored CSS easing."),
+  property("present-effect-aellux-ease", "present", "<string>", "Optional aellux.js easing name read from the effect target; unsupported sampling retains the authored CSS easing."),
   property("unpop-progress", "present", "<number>", "Normalized progress of reverse playback, from 0 to 1. Hidden regions settle at 1; presented regions at 0. No independent unpop destination, duration or easing exists.", { role: "output" }),
   ...["height", "width"].map(dimension => property(`present-reverse-max-${dimension}`, "present", "<length>", "Private native reverse dimension interpolation.", { role: "internal" })),
   ...["opacity", "transform", "grid-template-rows", "grid-template-columns", "max-height", "max-width", "pop-phase"].flatMap(name =>

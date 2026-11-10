@@ -222,12 +222,12 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
-    var AelluxJs = root.AelluxJs;
+    var aelluxJs = root.aelluxJs;
     var extensionName = "focus";
-    if (!AelluxJs) {
-      throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
+    if (!aelluxJs) {
+      throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.'));
     }
-    AelluxJs.extAttach(extensionName, {
+    aelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
       restoreLastFocus: restoreLastFocus,
@@ -239,7 +239,7 @@
       eligibleShortcuts: eligibleShortcuts,
       registerShortcutAction: registerShortcutAction
     });
-    var attribute = AelluxJs.attr(extensionName);
+    var attribute = aelluxJs.attr(extensionName);
     var snapshotKey = "ae-focus";
     var entries = [];
     var hintMemories = /* @__PURE__ */ new WeakMap();
@@ -250,19 +250,19 @@
     var contexts = /* @__PURE__ */ new Map();
     var shortcutActions = /* @__PURE__ */ new Map();
     var contextObserver = null;
-    var scopeSelector = "[".concat(AelluxJs.attr("focus-scope"), '], dialog, [aria-modal="true"]');
-    var navAttribute = AelluxJs.attr("focus-nav");
+    var scopeSelector = "[".concat(aelluxJs.attr("focus-scope"), '], dialog, [aria-modal="true"]');
+    var navAttribute = aelluxJs.attr("focus-nav");
     var keyboardWidgetSelector = 'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="combobox"], [role="slider"], [role="spinbutton"], [role="scrollbar"], [role="tablist"], [role="tab"], [role="menu"], [role="menubar"], [role="menuitem"], [role="listbox"], [role="option"], [role="grid"], [role="treegrid"], [role="tree"], [role="treeitem"], [role="radiogroup"], [role="radio"], [role="toolbar"], audio[controls], video[controls]';
-    var focusClasses = [null, AelluxJs.className("focus-player1"), AelluxJs.className("focus-player2"), AelluxJs.className("focus-player3")];
+    var focusClasses = [null, aelluxJs.className("focus-player1"), aelluxJs.className("focus-player2"), aelluxJs.className("focus-player3")];
     var focusClass = function focusClass2(id) {
-      return focusClasses[id] || AelluxJs.className("focus-player" + id);
+      return focusClasses[id] || aelluxJs.className("focus-player" + id);
     };
     function init() {
       createContext(1);
-      AelluxJs.comm.handle("focus.command", consumeCommand, {
+      aelluxJs.comm.handle("focus.command", consumeCommand, {
         owner: extensionName
       });
-      AelluxJs.comm.handle("focus.context", function(_ref) {
+      aelluxJs.comm.handle("focus.context", function(_ref) {
         var focusId = _ref.focusId;
         return getContext(focusId);
       }, {
@@ -283,29 +283,29 @@
         attributes: true,
         attributeFilter: ["hidden", "inert", "disabled", "aria-disabled", "class", "style", "open", "aria-hidden"]
       });
-      AelluxJs.mountManager.add({
+      aelluxJs.mountManager.add({
         extensionName: extensionName,
         selector: "[".concat(attribute, "]"),
         priority: 0,
         mount: mountFocusElement,
         unmount: unmountFocusElement
       });
-      AelluxJs.on("$focusin", onFocusIn, true);
-      AelluxJs.on("$focus", onFocusChange, true);
-      AelluxJs.on("$blur", onBlur, true);
-      AelluxJs.onEvent(root, "$focus", onWindowFocus);
-      AelluxJs.onEvent(root, "$blur", onWindowBlur);
-      AelluxJs.on("SnapshotRestore", onSnapshotRestore);
-      AelluxJs.on("DismissFocusLost", onDismissFocusLost);
-      AelluxJs.on("UnpopFocusLost", onDismissFocusLost);
-      AelluxJs.on("Unmount", onContextUnmount);
-      AelluxJs.on("Mount", onContextMount);
+      aelluxJs.on("$focusin", onFocusIn, true);
+      aelluxJs.on("$focus", onFocusChange, true);
+      aelluxJs.on("$blur", onBlur, true);
+      aelluxJs.onEvent(root, "$focus", onWindowFocus);
+      aelluxJs.onEvent(root, "$blur", onWindowBlur);
+      aelluxJs.on("SnapshotRestore", onSnapshotRestore);
+      aelluxJs.on("DismissFocusLost", onDismissFocusLost);
+      aelluxJs.on("UnpopFocusLost", onDismissFocusLost);
+      aelluxJs.on("Unmount", onContextUnmount);
+      aelluxJs.on("Mount", onContextMount);
       remember(document.activeElement, false);
       syncNative(document.activeElement);
     }
     function destroy() {
       var _contextObserver;
-      AelluxJs.comm.removeOwner(extensionName);
+      aelluxJs.comm.removeOwner(extensionName);
       (_contextObserver = contextObserver) === null || _contextObserver === void 0 || _contextObserver.disconnect();
       contextObserver = null;
       var _iterator = _createForOfIteratorHelper2(contexts.values()), _step;
@@ -321,17 +321,17 @@
       }
       contexts.clear();
       shortcutActions.clear();
-      AelluxJs.off("$focusin", onFocusIn, true);
-      AelluxJs.off("$focus", onFocusChange, true);
-      AelluxJs.off("$blur", onBlur, true);
-      AelluxJs.offEvent(root, "$focus", onWindowFocus);
-      AelluxJs.offEvent(root, "$blur", onWindowBlur);
-      AelluxJs.off("SnapshotRestore", onSnapshotRestore);
-      AelluxJs.off("DismissFocusLost", onDismissFocusLost);
-      AelluxJs.off("UnpopFocusLost", onDismissFocusLost);
-      AelluxJs.off("Unmount", onContextUnmount);
-      AelluxJs.off("Mount", onContextMount);
-      AelluxJs.mountManager.remove({
+      aelluxJs.off("$focusin", onFocusIn, true);
+      aelluxJs.off("$focus", onFocusChange, true);
+      aelluxJs.off("$blur", onBlur, true);
+      aelluxJs.offEvent(root, "$focus", onWindowFocus);
+      aelluxJs.offEvent(root, "$blur", onWindowBlur);
+      aelluxJs.off("SnapshotRestore", onSnapshotRestore);
+      aelluxJs.off("DismissFocusLost", onDismissFocusLost);
+      aelluxJs.off("UnpopFocusLost", onDismissFocusLost);
+      aelluxJs.off("Unmount", onContextUnmount);
+      aelluxJs.off("Mount", onContextMount);
+      aelluxJs.mountManager.remove({
         extensionName: extensionName
       });
       entries.length = 0;
@@ -341,10 +341,10 @@
       var type = element.getAttribute(attribute);
       switch (type) {
         case "next":
-          AelluxJs.onEvent(element, "$keydown", onNextKeyDown);
+          aelluxJs.onEvent(element, "$keydown", onNextKeyDown);
           nextElements.add(element);
           if (!element.hasAttribute("enterkeyhint") && element.matches(textEntrySelector)) {
-            hintMemories.set(element, AelluxJs.persist.element.save(element, ["enterkeyhint"], []));
+            hintMemories.set(element, aelluxJs.persist.element.save(element, ["enterkeyhint"], []));
             element.setAttribute("enterkeyhint", "next");
           }
           break;
@@ -352,7 +352,7 @@
     }
     function unmountFocusElement(element) {
       var _hintMemories$get;
-      if (nextElements.delete(element)) AelluxJs.offEvent(element, "$keydown", onNextKeyDown);
+      if (nextElements.delete(element)) aelluxJs.offEvent(element, "$keydown", onNextKeyDown);
       (_hintMemories$get = hintMemories.get(element)) === null || _hintMemories$get === void 0 || _hintMemories$get.restore();
       hintMemories.delete(element);
     }
@@ -385,7 +385,7 @@
         if (node.hidden || node.hasAttribute("inert") || spatial && node.getAttribute("aria-hidden") === "true") return false;
         var style = root.getComputedStyle(node);
         if (style.display === "none" || style.visibility === "hidden" || style.visibility === "collapse" || spatial && (style.contentVisibility === "hidden" || Number(style.opacity) === 0)) return false;
-        if (spatial && node.hasAttribute(AelluxJs.attr("present")) && (node.classList.contains(AelluxJs.className("dismissed")) || node.classList.contains(AelluxJs.className("unpop")))) return false;
+        if (spatial && node.hasAttribute(aelluxJs.attr("present")) && (node.classList.contains(aelluxJs.className("dismissed")) || node.classList.contains(aelluxJs.className("unpop")))) return false;
       }
       return element.getClientRects().length > 0;
     }
@@ -398,7 +398,7 @@
       if (entries.length > 100) entries.shift();
       current = entry;
       if (!push || !stateNavigationEligible(element) || !element.id || !element.id.trim()) return;
-      AelluxJs.dispatch("PushState", {
+      aelluxJs.dispatch("PushState", {
         detail: {
           key: snapshotKey,
           value: element.id
@@ -475,7 +475,7 @@
     }
     function warn(reason) {
       var extra = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
-      AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, _objectSpread({
+      aelluxJs.diagnostics.warn(aelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, _objectSpread({
         extension: extensionName,
         reason: reason
       }, extra));
@@ -507,8 +507,8 @@
       });
     }
     function publishFocus(detail) {
-      AelluxJs.comm.emit("focus.changed", detail);
-      AelluxJs.dispatch("FocusChange", {
+      aelluxJs.comm.emit("focus.changed", detail);
+      aelluxJs.dispatch("FocusChange", {
         detail: detail
       });
     }
@@ -516,10 +516,10 @@
       if (focusId === 1 || !contexts.has(focusId)) return false;
       clearContext(contexts.get(focusId));
       contexts.delete(focusId);
-      AelluxJs.comm.emit("focus.context-destroyed", {
+      aelluxJs.comm.emit("focus.context-destroyed", {
         focusId: focusId
       });
-      AelluxJs.dispatch("FocusContextDestroy", {
+      aelluxJs.dispatch("FocusContextDestroy", {
         detail: {
           focusId: focusId
         }
@@ -719,7 +719,7 @@
       if (!context || !context.element || !isValid(context.element)) return [];
       var scope = activeScope(context);
       if (!scope) return [];
-      var shortcutAttribute = AelluxJs.attr("shortcut");
+      var shortcutAttribute = aelluxJs.attr("shortcut");
       var candidates = [scope].concat(_toConsumableArray(scope.querySelectorAll("[".concat(shortcutAttribute, "]")))).filter(function(element) {
         return element.hasAttribute(shortcutAttribute) && available(element, scope);
       });
@@ -729,7 +729,7 @@
           order: order,
           shortcuts: parseShortcuts(element.getAttribute(shortcutAttribute)),
           distance: distance(context.element, element, scope),
-          priority: Number(element.getAttribute(AelluxJs.attr("shortcut-priority"))) || 0
+          priority: Number(element.getAttribute(aelluxJs.attr("shortcut-priority"))) || 0
         };
       }).filter(function(item) {
         return !command || item.shortcuts.some(function(shortcut) {
@@ -755,8 +755,8 @@
       return _remove;
     }
     function executeShortcut(element, command) {
-      var action = element.getAttribute(AelluxJs.attr("shortcut-action")) || "click";
-      if (!AelluxJs.dispatchFrom(element, "BeforeShortcut", {
+      var action = element.getAttribute(aelluxJs.attr("shortcut-action")) || "click";
+      if (!aelluxJs.dispatchFrom(element, "BeforeShortcut", {
         cancelable: true,
         detail: {
           command: command,
@@ -769,10 +769,10 @@
         if (handler) {
           if (handler(element, command) === false) return false;
         } else if (["pop", "unpop", "dismiss"].includes(action)) {
-          var id = element.getAttribute(AelluxJs.attr("shortcut-target"));
+          var id = element.getAttribute(aelluxJs.attr("shortcut-target"));
           var target = id ? document.getElementById(id.replace(/^#/, "")) : element;
           if (!target) return false;
-          var response = AelluxJs.comm.request("present." + action, {
+          var response = aelluxJs.comm.request("present." + action, {
             element: target
           });
           if (!response.handled) return false;
@@ -784,7 +784,7 @@
           return false;
         }
       }
-      AelluxJs.dispatchFrom(element, "Shortcut", {
+      aelluxJs.dispatchFrom(element, "Shortcut", {
         detail: {
           command: command,
           action: action
@@ -804,8 +804,8 @@
       if (!["press", "repeat"].includes(command.phase) || (_command$originalEven = command.originalEvent) !== null && _command$originalEven !== void 0 && _command$originalEven.defaultPrevented || (_command$originalEven2 = command.originalEvent) !== null && _command$originalEven2 !== void 0 && _command$originalEven2.isComposing || ((_command$originalEven3 = command.originalEvent) === null || _command$originalEven3 === void 0 ? void 0 : _command$originalEven3.keyCode) === 229) return false;
       if (command.source === "point") return false;
       var focused = context.element;
-      var inputScope = (focused || context.scope).closest("[".concat(AelluxJs.attr("inputs"), "]"));
-      if (inputScope && !inputScope.getAttribute(AelluxJs.attr("inputs")).split(/\s+/).includes(command.source)) return false;
+      var inputScope = (focused || context.scope).closest("[".concat(aelluxJs.attr("inputs"), "]"));
+      if (inputScope && !inputScope.getAttribute(aelluxJs.attr("inputs")).split(/\s+/).includes(command.source)) return false;
       var origin = (_command$originalEven4 = command.originalEvent) === null || _command$originalEven4 === void 0 ? void 0 : _command$originalEven4.target;
       var editable = function editable2(element) {
         return element === null || element === void 0 ? void 0 : element.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]');

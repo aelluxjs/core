@@ -27,6 +27,8 @@ jobs:
         run: npm run build
       - name: Unit tests
         run: npm run test:unit
+      - name: Brand naming compliance
+        run: npm run test:naming
       - name: Bundle budget
         run: npm run test:budget
       - name: Browser tests (Chromium, Firefox, WebKit)

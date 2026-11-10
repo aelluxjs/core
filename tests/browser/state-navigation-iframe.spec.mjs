@@ -22,7 +22,7 @@ test("iframe ajaxReplace traverses before parent state and restores only its own
     path: location.pathname,
     search: location.search,
     events: window.fixtureEvents,
-    snapshot: AelluxJs.ext.stateNavigation.globalSnapshot
+    snapshot: aelluxJs.ext.stateNavigation.globalSnapshot
   }))).toMatchObject({
     path: "/tests/browser/state-navigation-iframe-child.html",
     search: "",
@@ -37,7 +37,7 @@ test("iframe ajaxReplace traverses before parent state and restores only its own
   await expect.poll(() => page.evaluate(() => window.fixtureEvents.length)).toBe(2);
   expect(await page.evaluate(() => ({
     events: window.fixtureEvents,
-    snapshot: AelluxJs.ext.stateNavigation.globalSnapshot
+    snapshot: aelluxJs.ext.stateNavigation.globalSnapshot
   }))).toMatchObject({
     events: [
       { type: "popstate", state: { aelluxJsState: true, snapshot: {} } },

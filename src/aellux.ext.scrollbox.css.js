@@ -1,23 +1,23 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
-export function generateScrollboxCSS(AelluxJs) {
-  const scrollboxAttribute = AelluxJs.attr("scrollbox");
-  const scrollboxElasticAttribute = AelluxJs.attr("scrollbox-elastic");
-  const fadeStateAttribute = AelluxJs.attr("scrollbox-fade-state");
-  const scrollboxSnapAttribute = AelluxJs.attr("scrollbox-snap");
-  const snapReadyClass = AelluxJs.className("snap-ready");
-  const snapSuspendedClass = AelluxJs.className("snap-suspended");
-  const snapItemAttribute = AelluxJs.attr("snap-item");
-  const pointerscrollingClass = AelluxJs.className("pointerscrolling");
-  const nativeSbHideClass = AelluxJs.className("native-sb-hide");
-  const scrollbarVerticalAttribute = AelluxJs.attr("scrollbar-vertical");
-  const scrollbarHorizontalAttribute = AelluxJs.attr("scrollbar-horizontal");
-  const scrollbarVisibleClass = AelluxJs.className("scrollbar-visible");
-  const scrollbarWrapperClass = AelluxJs.className("scrollbar-wrapper");
+export function generateScrollboxCSS(aelluxJs) {
+  const scrollboxAttribute = aelluxJs.attr("scrollbox");
+  const scrollboxElasticAttribute = aelluxJs.attr("scrollbox-elastic");
+  const fadeStateAttribute = aelluxJs.attr("scrollbox-fade-state");
+  const scrollboxSnapAttribute = aelluxJs.attr("scrollbox-snap");
+  const snapReadyClass = aelluxJs.className("snap-ready");
+  const snapSuspendedClass = aelluxJs.className("snap-suspended");
+  const snapItemAttribute = aelluxJs.attr("snap-item");
+  const pointerscrollingClass = aelluxJs.className("pointerscrolling");
+  const nativeSbHideClass = aelluxJs.className("native-sb-hide");
+  const scrollbarVerticalAttribute = aelluxJs.attr("scrollbar-vertical");
+  const scrollbarHorizontalAttribute = aelluxJs.attr("scrollbar-horizontal");
+  const scrollbarVisibleClass = aelluxJs.className("scrollbar-visible");
+  const scrollbarWrapperClass = aelluxJs.className("scrollbar-wrapper");
   const verticalBar = `[${scrollbarVerticalAttribute}]`;
   const horizontalBar = `[${scrollbarHorizontalAttribute}]`;
   const bars = `${verticalBar}, ${horizontalBar}`;
-  const reducedMotionAttribute = AelluxJs.attr("reduced-motion");
+  const reducedMotionAttribute = aelluxJs.attr("reduced-motion");
 
   return `/*! aellux.js Scrollbox Extension | SPDX-License-Identifier: Apache-2.0 */
 

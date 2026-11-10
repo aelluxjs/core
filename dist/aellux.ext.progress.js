@@ -2,14 +2,14 @@
   // src/aellux.ext.progress.js
   (function(root) {
     "use strict";
-    const AelluxJs = root.AelluxJs;
+    const aelluxJs = root.aelluxJs;
     const extensionName = "progress";
-    if (!AelluxJs) throw new Error("[aellux.js] Load the boot script before the progress Extension.");
-    const targetAttribute = AelluxJs.attr("progress-target");
+    if (!aelluxJs) throw new Error("[aellux.js] Load the boot script before the progress Extension.");
+    const targetAttribute = aelluxJs.attr("progress-target");
     const mounted = /* @__PURE__ */ new Map();
-    AelluxJs.extAttach(extensionName, { init, destroy });
+    aelluxJs.extAttach(extensionName, { init, destroy });
     function init() {
-      AelluxJs.mountManager.add({
+      aelluxJs.mountManager.add({
         extensionName,
         selector: "progress, meter",
         priority: -1,
@@ -19,14 +19,14 @@
       });
     }
     function destroy() {
-      AelluxJs.mountManager.remove({ extensionName });
+      aelluxJs.mountManager.remove({ extensionName });
       for (const element of mounted.keys()) unmount(element);
     }
     function mount(element) {
       if (mounted.has(element)) return;
       const state = {
         target: null,
-        memory: AelluxJs.persist.element.save(element, ["value"]),
+        memory: aelluxJs.persist.element.save(element, ["value"]),
         fallback: false ? installProgressFallback(root, element) : null,
         observer: null,
         listener: null
@@ -49,10 +49,10 @@
     function connect(element) {
       const state = mounted.get(element);
       if (!state || element.tagName.toLowerCase() !== "progress") return;
-      if (state.target) AelluxJs.offEvent(state.target, "Progress", state.listener);
+      if (state.target) aelluxJs.offEvent(state.target, "Progress", state.listener);
       const id = element.getAttribute(targetAttribute);
-      state.target = id === null ? null : AelluxJs.elementOrId(id, { method: "progress.target" });
-      if (state.target) AelluxJs.onEvent(state.target, "Progress", state.listener);
+      state.target = id === null ? null : aelluxJs.elementOrId(id, { method: "progress.target" });
+      if (state.target) aelluxJs.onEvent(state.target, "Progress", state.listener);
     }
     function unmount(element) {
       var _a, _b;
@@ -60,7 +60,7 @@
       if (!state) return;
       mounted.delete(element);
       (_a = state.observer) == null ? void 0 : _a.disconnect();
-      if (state.target) AelluxJs.offEvent(state.target, "Progress", state.listener);
+      if (state.target) aelluxJs.offEvent(state.target, "Progress", state.listener);
       state.memory.restore();
       (_b = state.fallback) == null ? void 0 : _b.destroy();
     }

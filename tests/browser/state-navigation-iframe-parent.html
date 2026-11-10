@@ -24,14 +24,14 @@
       record("SnapshotRestore", event.detail.popState);
     });
     document.getElementById("parent-push").addEventListener("click", function () {
-      AelluxJs.ext.stateNavigation.setState("page", "parent-entry");
+      aelluxJs.ext.stateNavigation.setState("page", "parent-entry");
     });
     document.getElementById("back").addEventListener("click", function () {
       history.back();
     });
-    AelluxJs.ext("state-navigation");
-    AelluxJs.init({ mode: "basic", useHash: false });
-    window.fixtureReady = AelluxJs.wait("state-navigation");
+    aelluxJs.ext("state-navigation");
+    aelluxJs.init({ mode: "basic", useHash: false });
+    window.fixtureReady = aelluxJs.wait("state-navigation");
   </script>
 </body>
 </html>

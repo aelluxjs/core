@@ -3,7 +3,7 @@
 import utilsNameCase from "./utils-name-case.js";
 
 // Build-time imports aside, this helper must remain ES5-compatible for the boot bundle.
-// getApi lets the boot publish AelluxJs after creating this helper.
+// getApi lets the boot publish aelluxJs after creating this helper.
 export function createPreferenceHtmlHelper(root, getApi) {
   var document = root.document;
   var fromCamelCase = utilsNameCase.fromCamelCase;

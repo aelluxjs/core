@@ -38,7 +38,7 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-PgrxAHrkt22+F09vWG2iuTeiqQ+UCUeSkyAe/nibdP/XtRk8nTZ+VjetKW+okArJ" crossorigin="anonymous">
+  integrity="sha384-q4bpBk5Vqct9IR80W+4o8g4BlPq84mWWb0mV47Q76mgYStKp6AKgCBgxRwr2FPAE" crossorigin="anonymous">
 </head>
 
 <body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
@@ -192,6 +192,13 @@
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
                                         aellux.js Docs                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/brand-naming.htm" data-ae-overflow-marquee="190px">
+                                        Brand Naming and Migration                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -729,10 +736,10 @@ $ae.init({ mode: &quot;basic&quot; });
 <h2>Extension dependencies</h2>
 <p>When an Extension needs another aellux.js Extension, declare and await that Extension from its own <code>init()</code>. This is required before using the dependency&#39;s public API, controllers, or events. Do not add the Extension name to <code>$ae.dep()</code> or to a manifest <code>dependencies</code> list; those APIs describe third-party script assets, not aellux.js Extensions.</p>
 <pre><code class="language-js">async function init() {
-  if (!AelluxJs.registry.ext.input)
-    AelluxJs.ext(&quot;input&quot;);
+  if (!aelluxJs.registry.ext.input)
+    aelluxJs.ext(&quot;input&quot;);
 
-  const input = await AelluxJs.wait(&quot;input&quot;);
+  const input = await aelluxJs.wait(&quot;input&quot;);
   if (!input) throw new Error(&quot;The Input extension could not initialize.&quot;);
 
   // Input is loaded and initialized here.
@@ -743,24 +750,24 @@ $ae.init({ mode: &quot;basic&quot; });
 <h2>Shared script and stylesheet dependencies</h2>
 <p>Call <code>$ae.dep(label, url)</code> before or after <code>$ae.init()</code>, including from an Extension&#39;s <code>init()</code>, to load a classic script or stylesheet immediately. URLs whose path ends in <code>.css</code> (case-insensitive, with optional query string or fragment) create a <code>&lt;link rel=&quot;stylesheet&quot;&gt;</code>; other URLs create a <code>&lt;script&gt;</code>. It returns a Promise that resolves to the created element only after the browser&#39;s <code>load</code> event. Await it before using a global supplied by the dependency:</p>
 <pre><code class="language-js">async function init() {
-  await AelluxJs.dep(&quot;shared-widget@1.0&quot;, &quot;/vendor/shared-widget.min.js&quot;);
-  await AelluxJs.dep(&quot;shared-widget-css@1.0&quot;, &quot;/vendor/shared-widget.min.css&quot;);
+  await aelluxJs.dep(&quot;shared-widget@1.0&quot;, &quot;/vendor/shared-widget.min.js&quot;);
+  await aelluxJs.dep(&quot;shared-widget-css@1.0&quot;, &quot;/vendor/shared-widget.min.css&quot;);
   // The script and stylesheet are ready here.
 }
 </code></pre>
 <p>The first call owns the label. Calls from other Extensions with the same label and URL return the same Promise, including while the asset is still loading, so the element is inserted only once. A later call with the same label but a different URL rejects with <code>ERROR_DEPENDENCY_CONFLICT</code> (<code>1117</code>). A failed load rejects with <code>ERROR_DEPENDENCY_LOAD</code> (<code>1118</code>), removes its element and registry entry, and lets a later call retry. Empty labels or URLs reject with <code>ERROR_DEPENDENCY_ARGUMENT</code> (<code>1116</code>). Records are available at <code>$ae.registry.dep[label]</code> and remain cached when an Extension is destroyed.</p>
 <p>As with Extension assets, a URL beginning with <code>./</code> resolves relative to the aellux.js base path. Other relative URLs follow normal browser URL resolution. Optional arguments <code>integrity, crossOrigin</code>, or a third argument <code>{ integrity, crossOrigin }</code>, apply SRI and CORS attributes to either asset type.</p>
 <h2>Extension Attachment</h2>
-<p>An Extension script exposes its API through <code>AelluxJs.extAttach()</code>:</p>
+<p>An Extension script exposes its API through <code>aelluxJs.extAttach()</code>:</p>
 <pre><code class="language-js">(function (root) {
   &quot;use strict&quot;;
 
-  const AelluxJs = root.AelluxJs;
+  const aelluxJs = root.aelluxJs;
   const extensionName = &quot;example&quot;;
-  if (!AelluxJs) {
-    throw new Error(`[aellux.js] Cannot attach the &quot;${extensionName}&quot; extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+  if (!aelluxJs) {
+    throw new Error(`[aellux.js] Cannot attach the &quot;${extensionName}&quot; extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.`);
   }
-  AelluxJs.extAttach(extensionName, { init, destroy });
+  aelluxJs.extAttach(extensionName, { init, destroy });
 
   function init() {}
   function destroy() {}
@@ -812,7 +819,7 @@ Review <a href="csp-and-trust.htm">CSP requirements and Extension trust</a> befo
                 and
                 <a style="color:inherit!important;" href="https://github.com/" target="_blank"
                   rel="noopener noreferrer">GitHub</a>
-                for the tools and technologies that supported the development of Aellux.
+                for the tools and technologies that supported the development of aellux.js.
               </div>
             </div>
           </footer>

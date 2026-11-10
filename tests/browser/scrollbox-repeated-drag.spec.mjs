@@ -3,8 +3,8 @@ import { expect, test } from "@playwright/test";
 test.beforeEach(async ({ page }) => {
   await page.goto("/tests/browser/fixtures/scrollbox-interactions.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
-  await page.waitForFunction(() => window.AelluxJs?.ext.scrollboxSnap?.initialized);
+  await page.evaluate(() => aelluxJs.init({ mode: "full" }));
+  await page.waitForFunction(() => window.aelluxJs?.ext.scrollboxSnap?.initialized);
 });
 
 for (const edge of ["start", "end"]) for (const delay of [0, 16, 100]) {

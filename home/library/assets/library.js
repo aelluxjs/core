@@ -383,7 +383,7 @@
     input.type = "hidden";
     input.name = "data";
     input.value = JSON.stringify({
-      title: `${state.snippet.title} · AelluxJS`, description: state.snippet.description,
+      title: `${state.snippet.title} · aellux.js`, description: state.snippet.description,
       html: fragment.innerHTML.trim(), css: css.join("\n\n"), js: js.join("\n\n"),
       head: state.exportHead + inlineScript(`document.documentElement.lang="pt-BR";document.documentElement.dataset.bsTheme=${serialize(theme)};${state.snippet.extensions.length ? `$ae.persist.preferences.setObject({colorScheme:${serialize(theme)}});` : ""}`),
       css_starter: "neither", css_prefix: "neither"

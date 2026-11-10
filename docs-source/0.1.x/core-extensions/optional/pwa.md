@@ -93,7 +93,7 @@ $ae.ext.pwa.install({ template: ({ texts }) => {
 
 ## Semantic events
 
-Subscribe through `$ae.on(name, handler)` or `AelluxJs.eventName(name)`. All names use the existing normalization contract. Events bubble from an initiating element or are dispatched on `document`. Every `detail` includes a fresh `status` snapshot.
+Subscribe through `$ae.on(name, handler)` or `aelluxJs.eventName(name)`. All names use the existing normalization contract. Events bubble from an initiating element or are dispatched on `document`. Every `detail` includes a fresh `status` snapshot.
 
 | Name | Meaning / additional detail |
 | --- | --- |
@@ -145,11 +145,11 @@ For the available properties and their meanings, use the [MDN manifest members r
 
 When PWA initializes or `install()` is requested with `environment: "development"`, it checks for a native `link` whose `rel` contains the `manifest` token and whose `href` is nonempty. A missing link or missing/blank `href` records `WARN_CONFIGURATION_STRUCTURE` (`2028`), with `extension: "pwa"`, the relevant element/attribute, reason and corrective suggestion. Repeated equivalent warnings use the existing diagnostic deduplication. A manifest added later is recognized on the next installation request. Production performs no diagnostic presence scan, and pages that never load PWA gain no check or listener.
 
-This check examines the declaration only: it does not fetch the manifest, parse its JSON, verify icons, validate its members or establish installability. Use browser developer tools to inspect the actual manifest response and installation issues. The warning does not block mounting, installation APIs or independent offline support. Aellux never generates a manifest in the browser.
+This check examines the declaration only: it does not fetch the manifest, parse its JSON, verify icons, validate its members or establish installability. Use browser developer tools to inspect the actual manifest response and installation issues. The warning does not block mounting, installation APIs or independent offline support. aellux.js never generates a manifest in the browser.
 
 ## Minimal `sw.js` with `importScripts()`
 
-Host the principal worker in the application's origin, for example `/my-app/sw.js`, and deploy the reusable script beside the other Aellux assets:
+Host the principal worker in the application's origin, for example `/my-app/sw.js`, and deploy the reusable script beside the other aellux.js assets:
 
 ```js
 // /my-app/sw.js — classic worker, executed outside the page
@@ -164,7 +164,7 @@ const pwa = await $ae.wait("pwa");
 await pwa.register({ script: "./sw.js", scope: "./", type: "classic" });
 ```
 
-`importScripts()` synchronously executes the shared script inside the same classic worker. Assign `self.AelluxPWAConfig` **before** importing so that the shared implementation reads your settings while registering its handlers. The relative import above resolves against the principal worker URL, giving `/my-app/vendor/aellux.pwa.sw.min.js`; Aellux cache/offline configuration URLs instead resolve against the registration scope. This API is named `importScripts()` (plural), works in workers, and cannot be used with `type: "module"`. See the [external `importScripts()` reference](https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope/importScripts).
+`importScripts()` synchronously executes the shared script inside the same classic worker. Assign `self.AelluxPWAConfig` **before** importing so that the shared implementation reads your settings while registering its handlers. The relative import above resolves against the principal worker URL, giving `/my-app/vendor/aellux.pwa.sw.min.js`; aellux.js cache/offline configuration URLs instead resolve against the registration scope. This API is named `importScripts()` (plural), works in workers, and cannot be used with `type: "module"`. See the [external `importScripts()` reference](https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope/importScripts).
 
 This minimum registers worker lifecycle handlers but enables no precache, managed request caching or offline fallback. Add an explicit `offline` page and `cache` policies as in the complete example below to enable those capabilities. The manifest link remains in the page; `sw.js` does not replace it. The principal worker must be same-origin; only the imported reusable script may use a CDN, subject to the applicable security policies. Serve the scripts with a JavaScript MIME type over HTTPS or a trusted local development origin.
 
@@ -245,7 +245,7 @@ Copy the generated worker to `vendor/`, or import the version-pinned CDN file fr
 importScripts("https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.10/dist/aellux.pwa.sw.min.js");
 ```
 
-This is a deployment URL for the package version; it requires that version to be published. Configure your CSP, import policies, response headers and availability for your chosen CDN. Never pass a CDN URL as the principal `register({ script })`. Local hosting avoids this external import dependency. The worker has no Aellux runtime or DOM dependency.
+This is a deployment URL for the package version; it requires that version to be published. Configure your CSP, import policies, response headers and availability for your chosen CDN. Never pass a CDN URL as the principal `register({ script })`. Local hosting avoids this external import dependency. The worker has no aellux.js runtime or DOM dependency.
 
 ## Cache policies and safety
 

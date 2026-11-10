@@ -18,7 +18,7 @@
         "Bootstrap stylesheet was not loaded from the local fixture");
       assert(getComputedStyle(button).getPropertyValue("--bs-btn-bg").trim(),
         "Bootstrap button styles were not applied");
-      assert(AelluxJs.ext.preference, "Preference extension was not initialized with Bootstrap present");
+      assert(aelluxJs.ext.preference, "Preference extension was not initialized with Bootstrap present");
       assert(target.classList.contains("ae--mounted"), "Bootstrap component was not mounted");
       assert(target.classList.contains("card"), "aellux.js removed a Bootstrap class");
       assert(button.classList.contains("btn-primary"), "aellux.js changed a Bootstrap utility class");

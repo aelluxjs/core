@@ -97,11 +97,11 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
-    var AelluxJs = root.AelluxJs;
+    var aelluxJs = root.aelluxJs;
     var toCamelCase2 = utils_name_case_default.toCamelCase;
     var extensionName = "preference";
-    if (!AelluxJs) {
-      throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
+    if (!aelluxJs) {
+      throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.'));
     }
     var NO_PREFERENCE = "no-preference";
     var userPreferences = /* @__PURE__ */ Object.create(null);
@@ -112,7 +112,7 @@
     var containerLabels = /* @__PURE__ */ new Map();
     var labelMemories = /* @__PURE__ */ new WeakMap();
     var containerOptionAria = /* @__PURE__ */ new Map();
-    AelluxJs.extAttach(extensionName, {
+    aelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
       update: update,
@@ -120,15 +120,15 @@
       set: set
     });
     var attr = {
-      preference: AelluxJs.attr("preference"),
-      option: AelluxJs.attr("option"),
-      label: AelluxJs.attr("label"),
-      next: AelluxJs.attr("next"),
-      prev: AelluxJs.attr("prev"),
-      ready: AelluxJs.attr("ready")
+      preference: aelluxJs.attr("preference"),
+      option: aelluxJs.attr("option"),
+      label: aelluxJs.attr("label"),
+      next: aelluxJs.attr("next"),
+      prev: aelluxJs.attr("prev"),
+      ready: aelluxJs.attr("ready")
     };
     var className = {
-      active: AelluxJs.className("active")
+      active: aelluxJs.className("active")
     };
     var prefOptions = {
       colorScheme: ["auto", "light", "dark"],
@@ -144,20 +144,20 @@
       sound: ["off", "on", "low"]
     };
     function init(options) {
-      AelluxJs.mountManager.add({
+      aelluxJs.mountManager.add({
         extensionName: extensionName,
         selector: "[".concat(attr.preference, "]"),
         priority: 0,
         mount: mountPreferenceContainer,
         unmount: unmountPreferenceContainer
       });
-      AelluxJs.onEvent(window, "$storage", storageEvent);
-      var allQueries = AelluxJs.registry.preferenceMediaQueries;
+      aelluxJs.onEvent(window, "$storage", storageEvent);
+      var allQueries = aelluxJs.registry.preferenceMediaQueries;
       Object.values(allQueries).forEach(function(queries) {
         return Object.values(queries).forEach(function(query) {
           if (!query) return;
           if (query.addEventListener) {
-            AelluxJs.onEvent(query, "$change", update);
+            aelluxJs.onEvent(query, "$change", update);
           } else if (query.addListener) {
             query.addListener(update);
           }
@@ -182,19 +182,19 @@
       } finally {
         _iterator.f();
       }
-      AelluxJs.mountManager.remove({
+      aelluxJs.mountManager.remove({
         extensionName: extensionName
       });
       containersByPreference.clear();
       containerPreferences.clear();
-      AelluxJs.offEvent(window, "$storage", storageEvent);
-      AelluxJs.off("$DOMContentLoaded", update);
-      var allQueries = AelluxJs.registry.preferenceMediaQueries;
+      aelluxJs.offEvent(window, "$storage", storageEvent);
+      aelluxJs.off("$DOMContentLoaded", update);
+      var allQueries = aelluxJs.registry.preferenceMediaQueries;
       Object.values(allQueries).forEach(function(queries) {
         return Object.values(queries).forEach(function(query) {
           if (!query) return;
           if (query.removeEventListener) {
-            AelluxJs.offEvent(query, "$change", update);
+            aelluxJs.offEvent(query, "$change", update);
           } else if (query.removeListener) {
             query.removeListener(update);
           }
@@ -235,7 +235,7 @@
         if (computedPreferences[_key] !== nextPreferences[_key]) changed.add(_key);
         computedPreferences[_key] = nextPreferences[_key];
       }
-      AelluxJs.updatePreferenceAttributesHTML(computedPreferences);
+      aelluxJs.updatePreferenceAttributesHTML(computedPreferences);
       var _iterator2 = _createForOfIteratorHelper(containerPreferences.keys()), _step2;
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
@@ -271,7 +271,7 @@
       } finally {
         _iterator3.f();
       }
-      AelluxJs.dispatch("PreferencesChange", {
+      aelluxJs.dispatch("PreferencesChange", {
         detail: {
           changed: Array.from(changed),
           preferences: Object.assign({}, computedPreferences)
@@ -329,7 +329,7 @@
           containerLabels.set(container, ownedLabels);
         }
         if (!ownedLabels.has(label)) {
-          labelMemories.set(label, AelluxJs.persist.element.save(label, ["hidden"], []));
+          labelMemories.set(label, aelluxJs.persist.element.save(label, ["hidden"], []));
           ownedLabels.add(label);
         }
         var value = label.getAttribute(attr.label);
@@ -341,7 +341,7 @@
         var selected = String(value) === String(currentValue);
         element2.classList.toggle(className.active, selected);
         if (isOptionButton(element2)) {
-          if (!optionAria.has(element2)) optionAria.set(element2, AelluxJs.aria.register(element2));
+          if (!optionAria.has(element2)) optionAria.set(element2, aelluxJs.aria.register(element2));
           optionAria.get(element2).set({
             pressed: selected
           });
@@ -357,18 +357,18 @@
       });
     }
     function saveUserPreferences() {
-      AelluxJs.persist.preferences.setObject(userPreferences);
+      aelluxJs.persist.preferences.setObject(userPreferences);
     }
     function loadUserPreferences() {
-      Object.assign(userPreferences, AelluxJs.persist.preferences.getObject());
+      Object.assign(userPreferences, aelluxJs.persist.preferences.getObject());
     }
     function mountPreferenceContainer(container) {
       indexContainer(container);
       updateContainer(container);
-      AelluxJs.onEvent(container, "$click", onContainerClick);
+      aelluxJs.onEvent(container, "$click", onContainerClick);
     }
     function unmountPreferenceContainer(container) {
-      AelluxJs.offEvent(container, "$click", onContainerClick);
+      aelluxJs.offEvent(container, "$click", onContainerClick);
       var optionAria = containerOptionAria.get(container);
       if (optionAria) {
         var _iterator6 = _createForOfIteratorHelper(optionAria.values()), _step6;

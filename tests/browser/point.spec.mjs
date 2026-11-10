@@ -4,12 +4,12 @@ async function openPoint(page) {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => {
-    document.body.setAttribute(AelluxJs.attr("point"), "2");
-    AelluxJs.ext("input");
-    return AelluxJs.init({ mode: "basic" });
+    document.body.setAttribute(aelluxJs.attr("point"), "2");
+    aelluxJs.ext("input");
+    return aelluxJs.init({ mode: "basic" });
   });
-  await expect.poll(() => page.evaluate(() => AelluxJs.ext.input?.initialized)).toBe(true);
-  await expect.poll(() => page.evaluate(() => !!AelluxJs.mountManager.controller(document.body)?.input)).toBe(true);
+  await expect.poll(() => page.evaluate(() => aelluxJs.ext.input?.initialized)).toBe(true);
+  await expect.poll(() => page.evaluate(() => !!aelluxJs.mountManager.controller(document.body)?.input)).toBe(true);
 }
 
 test("pointer tracks independent presses, cumulative deltas, and release", async ({ page }) => {
@@ -24,7 +24,7 @@ test("pointer tracks independent presses, cumulative deltas, and release", async
     emit("pointerdown", 11, 10, 20);
     emit("pointerdown", 12, 100, 200);
     emit("pointermove", 11, 18, 16);
-    const pointers = () => AelluxJs.mountManager.controller(target).input.pointers();
+    const pointers = () => aelluxJs.mountManager.controller(target).input.pointers();
     const first = pointers().find(pointer => pointer.pointerId === 11);
     const beforeRelease = {
       ids: pointers().map(pointer => pointer.pointerId),
@@ -93,7 +93,7 @@ test("AePointer times an active press and freezes its duration on release", asyn
       bubbles: true, pointerId: 62, pointerType: "mouse"
     }));
     emit("pointerover");
-    const pointer = AelluxJs.ext.input.pointers(target)[0];
+    const pointer = aelluxJs.ext.input.pointers(target)[0];
     const before = { time: { ...pointer.time }, deltaTime: pointer.deltaTime };
     emit("pointerdown");
     const firstStart = pointer.time.pressStart;
@@ -134,10 +134,10 @@ test("release reaches the current target and press origin once each", async ({ p
     const second = document.createElement("div");
     first.id = "first";
     second.id = "second";
-    first.setAttribute(AelluxJs.attr("point"), "");
-    second.setAttribute(AelluxJs.attr("point"), "");
+    first.setAttribute(aelluxJs.attr("point"), "");
+    second.setAttribute(aelluxJs.attr("point"), "");
     outer.append(first, second);
-    await AelluxJs.mount(outer, "input");
+    await aelluxJs.mount(outer, "input");
 
     const events = [];
     for (const element of [first, second, outer]) {
@@ -181,10 +181,10 @@ test("pointerup outside marked elements reaches the press origin", async ({ page
   await openPoint(page);
 
   const result = await page.evaluate(async () => {
-    await AelluxJs.unmount(document.body, "input");
-    document.body.removeAttribute(AelluxJs.attr("point"));
+    await aelluxJs.unmount(document.body, "input");
+    document.body.removeAttribute(aelluxJs.attr("point"));
     document.body.innerHTML = '<div id="origin" data-ae-point></div><div id="outside"></div>';
-    await AelluxJs.mount(document, "input");
+    await aelluxJs.mount(document, "input");
 
     const origin = document.getElementById("origin");
     const outside = document.getElementById("outside");
@@ -201,7 +201,7 @@ test("pointerup outside marked elements reaches the press origin", async ({ page
     outside.dispatchEvent(new PointerEvent("pointerup", {
       bubbles: true, pointerId: 42, pointerType: "touch"
     }));
-    return { received, remaining: AelluxJs.ext.input.pointers(origin).length };
+    return { received, remaining: aelluxJs.ext.input.pointers(origin).length };
   });
 
   expect(result).toEqual({
@@ -218,10 +218,10 @@ test("unmounted press origin does not receive release", async ({ page }) => {
     const second = document.createElement("div");
     first.id = "first";
     second.id = "second";
-    first.setAttribute(AelluxJs.attr("point"), "");
-    second.setAttribute(AelluxJs.attr("point"), "");
+    first.setAttribute(aelluxJs.attr("point"), "");
+    second.setAttribute(aelluxJs.attr("point"), "");
     document.body.append(first, second);
-    await AelluxJs.mount(document.body, "input");
+    await aelluxJs.mount(document.body, "input");
     const received = [];
     first.addEventListener("AelluxJsPointerUp", () => received.push("first"));
     second.addEventListener("AelluxJsPointerUp", event => received.push({
@@ -231,7 +231,7 @@ test("unmounted press origin does not receive release", async ({ page }) => {
     first.dispatchEvent(new PointerEvent("pointerdown", {
       bubbles: true, pointerId: 41, pointerType: "touch"
     }));
-    await AelluxJs.unmount(first, "input");
+    await aelluxJs.unmount(first, "input");
     second.dispatchEvent(new PointerEvent("pointerup", {
       bubbles: true, pointerId: 41, pointerType: "touch"
     }));
@@ -248,7 +248,7 @@ test("pointer retains hover across child elements and clears it on document exit
     const first = document.createElement("div");
     const second = document.createElement("div");
     document.body.append(first, second);
-    const pointers = () => AelluxJs.mountManager.controller(document.body).input.pointers();
+    const pointers = () => aelluxJs.mountManager.controller(document.body).input.pointers();
     const hoverEvents = [];
     document.body.addEventListener("AelluxJsPointerHover", event => {
       hoverEvents.push({
@@ -307,9 +307,9 @@ test("pointable limits select one nearest available target", async ({ page }) =>
     outer.id = "outer";
     const inner = document.createElement("div");
     inner.id = "inner";
-    inner.setAttribute(AelluxJs.attr("point"), "");
+    inner.setAttribute(aelluxJs.attr("point"), "");
     outer.append(inner);
-    await AelluxJs.mount(inner, "input");
+    await aelluxJs.mount(inner, "input");
 
     const events = [];
     let firstTarget;
@@ -332,25 +332,25 @@ test("pointable limits select one nearest available target", async ({ page }) =>
       }));
     emit(inner, "pointerdown", 21, 1);
     emit(inner, "pointerdown", 22, 2);
-    const innerPointers = AelluxJs.mountManager.controller(inner).input.pointers()
+    const innerPointers = aelluxJs.mountManager.controller(inner).input.pointers()
       .map(pointer => pointer.pointerId);
-    const outerPointers = AelluxJs.mountManager.controller(outer).input.pointers()
+    const outerPointers = aelluxJs.mountManager.controller(outer).input.pointers()
       .map(pointer => pointer.pointerId);
     emit(outer, "pointermove", 21, 5);
-    const movedTarget = AelluxJs.ext.input.pointers(outer)
+    const movedTarget = aelluxJs.ext.input.pointers(outer)
       .find(pointer => pointer.pointerId === 21).target.id;
     const firstEventTargetAfterMove = firstTarget.id;
-    inner.setAttribute(AelluxJs.attr("point"), "0");
+    inner.setAttribute(aelluxJs.attr("point"), "0");
     emit(inner, "pointerup", 22, 2);
     emit(inner, "pointerdown", 23, 3);
     const afterZeroLimit = {
-      inner: AelluxJs.ext.input.pointers(inner).map(pointer => pointer.pointerId),
-      outer: AelluxJs.ext.input.pointers(outer).map(pointer => pointer.pointerId)
+      inner: aelluxJs.ext.input.pointers(inner).map(pointer => pointer.pointerId),
+      outer: aelluxJs.ext.input.pointers(outer).map(pointer => pointer.pointerId)
     };
-    await AelluxJs.unmount(inner, "input");
+    await aelluxJs.unmount(inner, "input");
     return {
       events, innerPointers, outerPointers, movedTarget, firstEventTargetAfterMove, afterZeroLimit,
-      afterUnmount: AelluxJs.ext.input.pointers(inner).length
+      afterUnmount: aelluxJs.ext.input.pointers(inner).length
     };
   });
 
@@ -371,11 +371,11 @@ test("an excluded ancestor does not receive a pointable event", async ({ page })
 
   const result = await page.evaluate(async () => {
     const outer = document.body;
-    outer.setAttribute(AelluxJs.attr("point"), "0");
+    outer.setAttribute(aelluxJs.attr("point"), "0");
     const inner = document.createElement("div");
-    inner.setAttribute(AelluxJs.attr("point"), "");
+    inner.setAttribute(aelluxJs.attr("point"), "");
     outer.append(inner);
-    await AelluxJs.mount(inner, "input");
+    await aelluxJs.mount(inner, "input");
     const received = [];
     inner.addEventListener("AelluxJsPointerDown", event => received.push({
       receiver: "inner", targetIsInner: event.detail.target === inner,
@@ -387,8 +387,8 @@ test("an excluded ancestor does not receive a pointable event", async ({ page })
     }));
     return {
       received,
-      outerPointers: AelluxJs.mountManager.controller(outer).input.pointers().length,
-      innerPointers: AelluxJs.mountManager.controller(inner).input.pointers().length
+      outerPointers: aelluxJs.mountManager.controller(outer).input.pointers().length,
+      innerPointers: aelluxJs.mountManager.controller(inner).input.pointers().length
     };
   });
 
@@ -406,12 +406,12 @@ test("hover enters and leaves the selected target once", async ({ page }) => {
     outer.id = "outer";
     const first = document.createElement("div");
     first.id = "first";
-    first.setAttribute(AelluxJs.attr("point"), "");
+    first.setAttribute(aelluxJs.attr("point"), "");
     const second = document.createElement("div");
     second.id = "second";
-    second.setAttribute(AelluxJs.attr("point"), "");
+    second.setAttribute(aelluxJs.attr("point"), "");
     outer.append(first, second);
-    await AelluxJs.mount(outer, "input");
+    await aelluxJs.mount(outer, "input");
     const events = [];
     for (const element of [outer, first, second]) {
       element.addEventListener("AelluxJsPointerHover", event => {
@@ -446,12 +446,12 @@ test("pointer destroy clears records and detaches listeners", async ({ page }) =
   await openPoint(page);
 
   const result = await page.evaluate(async () => {
-    const pointer = AelluxJs.ext.input;
+    const pointer = aelluxJs.ext.input;
     document.body.dispatchEvent(new PointerEvent("pointerdown", {
       bubbles: true, pointerId: 7, pointerType: "touch", clientX: 1, clientY: 2
     }));
     const beforeDestroy = pointer.pointers(document.body).length;
-    await AelluxJs.destroyExtensions("input");
+    await aelluxJs.destroyExtensions("input");
     document.body.dispatchEvent(new PointerEvent("pointerdown", {
       bubbles: true, pointerId: 8, pointerType: "touch", clientX: 3, clientY: 4
     }));

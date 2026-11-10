@@ -1176,7 +1176,7 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
-    var api = root.AelluxJs;
+    var api = root.aelluxJs;
     var extensionName = "overflow-marquee";
     if (!api) throw new Error("[aellux.js] Load the boot script before the overflow-marquee extension.");
     var marquee = null, placements = null;

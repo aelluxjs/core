@@ -31,14 +31,14 @@ async function start(page, options = {}, html = fixture) {
   }), minified ? "/dist/aellux.min.js" : "/dist/aellux.js");
   await page.evaluate(options => {
     if (options.mode === "basic") {
-      AelluxJs.ext("present", { loadStyle: true });
-      AelluxJs.ext("anchor", { loadStyle: true });
+      aelluxJs.ext("present", { loadStyle: true });
+      aelluxJs.ext("anchor", { loadStyle: true });
     }
-    AelluxJs.init({ mode: "full", ...options });
+    aelluxJs.init({ mode: "full", ...options });
   }, runtimeOptions);
   await expect.poll(() => page.evaluate(() =>
-    (!document.querySelector("[data-ae-present-group]") || !!AelluxJs.ext.present?.initialized) && !!AelluxJs.ext.anchor?.initialized)).toBe(true);
-  await page.evaluate(() => AelluxJs.mount(document));
+    (!document.querySelector("[data-ae-present-group]") || !!aelluxJs.ext.present?.initialized) && !!aelluxJs.ext.anchor?.initialized)).toBe(true);
+  await page.evaluate(() => aelluxJs.mount(document));
 }
 
 for (const forceLegacy of [false, true]) for (const cssMotionController of [true, false]) for (const grid of [true, false]) {
@@ -72,7 +72,7 @@ for (const forceLegacy of [false, true]) for (const cssMotionController of [true
     await page.evaluate(async () => {
       document.getElementById("trigger").style.left = "70px";
       document.getElementById("trigger").style.top = "40px";
-      await AelluxJs.mountManager.update("menu", "anchor");
+      await aelluxJs.mountManager.update("menu", "anchor");
     });
     await expect.poll(alignment).toEqual({ right: 0, top: 0, width: 0, opacity: "1" });
     await page.evaluate(() => $ae("menu").present.dismiss());
@@ -204,16 +204,16 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) f
     const result = await page.evaluate(async () => {
       const group = document.getElementById("group"), anchor = document.getElementById("indicator");
       const pending = $ae("group").present.show("a");
-      await AelluxJs.unmount(group, "present");
-      await AelluxJs.unmount(anchor, "anchor");
+      await aelluxJs.unmount(group, "present");
+      await aelluxJs.unmount(anchor, "anchor");
       const accepted = await pending;
-      await AelluxJs.mount(group, "present");
-      await AelluxJs.mount(anchor, "anchor");
+      await aelluxJs.mount(group, "present");
+      await aelluxJs.mount(anchor, "anchor");
       await $ae("group").present.show("b");
-      await AelluxJs.destroy();
+      await aelluxJs.destroy();
       return { accepted, classes: document.querySelectorAll(".ae--popping,.ae--dismissing,.ae--will-change,.ae--anchor-switching,.ae--anchored").length,
         paused: document.getAnimations().filter(a => a.playState === "paused").length,
-        warnings: AelluxJs.diagnostics.showHistory().filter(e => e.level <= AelluxJs.diagnostics.levels.warn).map(e => e.code) };
+        warnings: aelluxJs.diagnostics.showHistory().filter(e => e.level <= aelluxJs.diagnostics.levels.warn).map(e => e.code) };
     });
     expect(result).toEqual({ accepted: false, classes: 0, paused: 0, warnings: [] });
   });
@@ -223,7 +223,7 @@ test("Anchor placement preserves application inline styles while mounted and on 
   await start(page, {}, fixture.replace('--ae-anchor-switch-duration:350ms;', 'left:17px!important;top:19px;transform:translateX(7px)!important;--ae-anchor-switch-duration:350ms;'));
   const read = () => page.locator("#indicator").evaluate(e => [e.style.left, e.style.getPropertyPriority("left"), e.style.top, e.style.transform, e.style.getPropertyPriority("transform")]);
   expect(await read()).toEqual(["17px", "important", "19px", "translateX(7px)", "important"]);
-  await page.evaluate(() => AelluxJs.unmount(document.getElementById("indicator"), "anchor"));
+  await page.evaluate(() => aelluxJs.unmount(document.getElementById("indicator"), "anchor"));
   expect(await read()).toEqual(["17px", "important", "19px", "translateX(7px)", "important"]);
 });
 
@@ -305,7 +305,7 @@ test("member replacement during Pop, veto, clearing and scrolling follow the log
     const old = document.getElementById("b"), replacement = old.cloneNode(true);
     old.replaceWith(replacement);
     replacement.hidden = true;
-    await AelluxJs.mount(replacement, "present");
+    await aelluxJs.mount(replacement, "present");
     return { obsolete: await window.pending, latest: await $ae("group").present.show("b") };
   });
   expect(result).toEqual({ obsolete: false, latest: true });
@@ -326,17 +326,17 @@ test("Anchor initialized before Present recovers when the group mounts", async (
   await page.goto("/tests/index.htm");
   await page.evaluate(html => { document.body.innerHTML = html; }, groupFixture);
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => { AelluxJs.ext("anchor", { loadStyle: true }); AelluxJs.init({ mode: "basic", skipGlobalMount: true }); });
-  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
-  await page.evaluate(() => AelluxJs.wait("anchor"));
-  await page.evaluate(() => AelluxJs.mount(document, "anchor"));
+  await page.evaluate(() => { aelluxJs.ext("anchor", { loadStyle: true }); aelluxJs.init({ mode: "basic", skipGlobalMount: true }); });
+  await expect.poll(() => page.evaluate(() => aelluxJs.diagnostics.supported)).toBe(true);
+  await page.evaluate(() => aelluxJs.wait("anchor"));
+  await page.evaluate(() => aelluxJs.mount(document, "anchor"));
   await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
   await page.evaluate(async () => {
-    AelluxJs.ext("present", { loadStyle: true });
-    await AelluxJs.mount(document, "present");
+    aelluxJs.ext("present", { loadStyle: true });
+    await aelluxJs.mount(document, "present");
   });
-  await expect.poll(() => page.evaluate(() => !!AelluxJs.ext.present?.initialized)).toBe(true);
-  await page.evaluate(() => AelluxJs.mount(document, "present"));
+  await expect.poll(() => page.evaluate(() => !!aelluxJs.ext.present?.initialized)).toBe(true);
+  await page.evaluate(() => aelluxJs.mount(document, "present"));
   await aligned(page, "a");
 });
 
@@ -364,7 +364,7 @@ test("destroy during combined motion disconnects observers and leaves no delayed
   await page.mouse.move(900, 650);
   const snapshot = await page.evaluate(async () => {
     window.pending = $ae("group").present.show("c");
-    await AelluxJs.destroy();
+    await aelluxJs.destroy();
     return { result: await window.pending, html: document.body.innerHTML,
       observers: Object.fromEntries(Object.entries(window.liveObservers).map(([name, live]) => [name, live.size])) };
   });
@@ -418,16 +418,16 @@ test("external-only CSP permits Anchor CSS and lifecycle remains idempotent", as
     body: '<!doctype html><div style="position:relative"><div id="indicator" data-ae-anchor="bottom-left:top-left" data-ae-anchor-match="width"></div></div><script src="/dist/aellux.js"></script>'
   }));
   await page.goto("/tests/csp-audit.htm");
-  await page.evaluate(() => { AelluxJs.ext("anchor", { loadStyle: true }); AelluxJs.init({ mode: "basic" }); });
-  await expect.poll(() => page.evaluate(() => !!AelluxJs.ext.anchor?.initialized)).toBe(true);
+  await page.evaluate(() => { aelluxJs.ext("anchor", { loadStyle: true }); aelluxJs.init({ mode: "basic" }); });
+  await expect.poll(() => page.evaluate(() => !!aelluxJs.ext.anchor?.initialized)).toBe(true);
   await expect.poll(() => page.evaluate(() => window.styleViolations.filter(uri => uri === "inline").length)).toBeGreaterThanOrEqual(1);
   expect(await page.locator('link[data-ae-ext-style="anchor"]').evaluate(style => style.sheet !== null)).toBe(true);
   await page.evaluate(async () => {
-    await AelluxJs.mount(document, "anchor");
-    await AelluxJs.unmount(document.getElementById("indicator"), "anchor");
-    await AelluxJs.mount(document, "anchor");
+    await aelluxJs.mount(document, "anchor");
+    await aelluxJs.unmount(document.getElementById("indicator"), "anchor");
+    await aelluxJs.mount(document, "anchor");
   });
   await expect(page.locator('link[data-ae-ext-style="anchor"]')).toHaveCount(1);
-  await page.evaluate(() => AelluxJs.destroy());
+  await page.evaluate(() => aelluxJs.destroy());
   await expect(page.locator('link[data-ae-ext-style="anchor"]')).toHaveCount(0);
 });

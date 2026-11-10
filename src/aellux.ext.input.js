@@ -33,7 +33,7 @@ import { parseShortcuts, shortcutLabel } from "./internal/input-shortcuts.js";
 
 (function (root) {
   "use strict";
-  const api = root.AelluxJs;
+  const api = root.aelluxJs;
   if (!api) throw new Error('[aellux.js] Load the boot script before Input.');
   const extensionName = "input", attr = name => api.attr(name);
   const mounted = new Set(), adapters = new Map(), active = new Map(), routers = [], families = [];

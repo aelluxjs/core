@@ -38,7 +38,7 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-PgrxAHrkt22+F09vWG2iuTeiqQ+UCUeSkyAe/nibdP/XtRk8nTZ+VjetKW+okArJ" crossorigin="anonymous">
+  integrity="sha384-q4bpBk5Vqct9IR80W+4o8g4BlPq84mWWb0mV47Q76mgYStKp6AKgCBgxRwr2FPAE" crossorigin="anonymous">
 </head>
 
 <body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
@@ -192,6 +192,13 @@
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
                                         aellux.js Docs                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/brand-naming.htm" data-ae-overflow-marquee="190px">
+                                        Brand Naming and Migration                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -716,7 +723,7 @@
 <p><a href="../core-extensions/optional/pwa.htm">PWA</a> remains external and lazy in both Full variants. Its Legacy Extension detects missing installation and worker APIs without polyfilling them. The independent classic <code>aellux.pwa.sw.js</code> runs only in browsers supporting Service Workers; it is never imported into either page runtime.</p>
 <p>For <code>0.1.0</code>, automated validation forces this profile in the same current Chromium, Firefox, and WebKit engines used by the Modern suite. It verifies boot selection, the Legacy orchestrator, shared polyfill setup, and compatible Extension variants. The release does not claim support for historical Chrome, Firefox, Safari, Edge Legacy, or Internet Explorer versions. A historical browser enters the support matrix only after a separate run on that exact browser and operating system.</p>
 <h2>Selection Rules</h2>
-<p>The boot script checks the capabilities required by the orchestrator before loading it. Missing capabilities are recorded in <code>AelluxJs.diagnostics.notAvailable</code>.</p>
+<p>The boot script checks the capabilities required by the orchestrator before loading it. Missing capabilities are recorded in <code>aelluxJs.diagnostics.notAvailable</code>.</p>
 <p>The required APIs include <code>HTMLDialogElement.prototype.show</code>, <code>showModal</code>, and <code>close</code>. If any are missing, Legacy is selected. The fallback and its inline CSS belong exclusively to the <a href="../core-extensions/optional/dialog.htm">Dialog Extension</a> Legacy files, and are installed only when that Extension mounts an element lacking the complete API. Full supplies lazy Dialog registration for <code>dialog</code>; Basic requires an explicit Extension declaration. Once declared, existing and dynamically inserted dialogs are mounted through <code>$ae.mount(root)</code>; see <a href="es5-support.htm">ES5 support level</a> for usage and fallback limitations.</p>
 <p>Force Legacy through initialization options or the development query parameter:</p>
 <pre><code class="language-js">$ae.init({ mode: &quot;basic&quot;, forceLegacy: true });
@@ -765,7 +772,7 @@
                 and
                 <a style="color:inherit!important;" href="https://github.com/" target="_blank"
                   rel="noopener noreferrer">GitHub</a>
-                for the tools and technologies that supported the development of Aellux.
+                for the tools and technologies that supported the development of aellux.js.
               </div>
             </div>
           </footer>

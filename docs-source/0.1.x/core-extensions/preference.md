@@ -31,7 +31,7 @@ html[data-ae-reduced-motion="reduced"] .animated-panel {
 }
 ```
 
-In JavaScript, check `$ae.currentPreference("reduced-motion") === "reduced"` before starting optional motion. The method reads the resolved value from `<html>` and returns `null` when no value is published. The same approach applies to other resolved preferences, such as `contrast` and `forced-colors`. Device media queries remain an input to AelluxJs preference resolution.
+In JavaScript, check `$ae.currentPreference("reduced-motion") === "reduced"` before starting optional motion. The method reads the resolved value from `<html>` and returns `null` when no value is published. The same approach applies to other resolved preferences, such as `contrast` and `forced-colors`. Device media queries remain an input to aellux.js preference resolution.
 
 `AelluxJsPreferencesChange` carries a changed-key array and a copy of the current values. The array is empty when an update finds no changed values:
 
@@ -44,7 +44,7 @@ $ae.on("PreferencesChange", event => {
 
 ## Bootstrap color mode
 
-Set the top-level boot initialization option `syncBootstrapThemeTag` to `true` to synchronize Bootstrap's root color-mode attribute with the resolved AelluxJS color scheme:
+Set the top-level boot initialization option `syncBootstrapThemeTag` to `true` to synchronize Bootstrap's root color-mode attribute with the resolved aellux.js color scheme:
 
 ```js
 $ae.init({

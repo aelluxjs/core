@@ -47,7 +47,7 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
-    const api = root.AelluxJs;
+    const api = root.aelluxJs;
     if (!api) throw new Error("[aellux.js] Load the boot script before Input.");
     const extensionName = "input", attr = (name) => api.attr(name);
     const mounted = /* @__PURE__ */ new Set(), adapters = /* @__PURE__ */ new Map(), active = /* @__PURE__ */ new Map(), routers = [], families = [];

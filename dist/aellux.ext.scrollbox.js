@@ -3,33 +3,33 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
-    const AelluxJs = root.AelluxJs;
+    const aelluxJs = root.aelluxJs;
     const extensionName = "scrollbox";
-    if (!AelluxJs) throw new Error("[aellux.js] Load the boot script before the scrollbox extension.");
-    const { onEvent, offEvent } = AelluxJs;
+    if (!aelluxJs) throw new Error("[aellux.js] Load the boot script before the scrollbox extension.");
+    const { onEvent, offEvent } = aelluxJs;
     const POINTER = "pointer", POINTER_DOWN = `${POINTER}down`, POINTER_MOVE = `${POINTER}move`, POINTER_UP = `${POINTER}up`, POINTER_CANCEL = `${POINTER}cancel`, POINTER_OVER = `${POINTER}over`, POINTER_OUT = `${POINTER}out`, POINTER_ENTER = `${POINTER}enter`, POINTER_LEAVE = `${POINTER}leave`, POINTER_DOWN_TARGET = `$${POINTER_DOWN}`, POINTER_MOVE_TARGET = `$${POINTER_MOVE}`, POINTER_UP_TARGET = `$${POINTER_UP}`, POINTER_CANCEL_TARGET = `$${POINTER_CANCEL}`;
-    const attribute = AelluxJs.attr(extensionName);
-    const wheelAttribute = AelluxJs.attr("scrollbox-wheel-horizontal");
-    const momentumAttribute = AelluxJs.attr("scrollbox-momentum");
-    const snapAttribute = AelluxJs.attr("scrollbox-snap");
-    const elasticAttribute = AelluxJs.attr("scrollbox-elastic");
-    const fadeAttribute = AelluxJs.attr("scrollbox-fade");
-    const fadeStateAttribute = AelluxJs.attr("scrollbox-fade-state");
-    const layoutEvents = ["Layout", "Pop", "Dismiss", "Unpop"].map((name) => AelluxJs.eventName(name));
-    const scrollbarAttribute = AelluxJs.attr("scrollbar");
-    const scrollbarParentAttribute = AelluxJs.attr("scrollbar-parent");
-    const scrollbarVerticalAttribute = AelluxJs.attr("scrollbar-vertical");
-    const scrollbarHorizontalAttribute = AelluxJs.attr("scrollbar-horizontal");
-    const elasticReleaseClass = AelluxJs.className("scrollbox-elastic-release");
-    const pointerScrollingClass = AelluxJs.className("pointerscrolling");
-    const nativeScrollbarHideClass = AelluxJs.className("native-sb-hide");
-    const scrollbarVisibleClass = AelluxJs.className("scrollbar-visible");
-    const scrollbarWrapperClass = AelluxJs.className("scrollbar-wrapper");
+    const attribute = aelluxJs.attr(extensionName);
+    const wheelAttribute = aelluxJs.attr("scrollbox-wheel-horizontal");
+    const momentumAttribute = aelluxJs.attr("scrollbox-momentum");
+    const snapAttribute = aelluxJs.attr("scrollbox-snap");
+    const elasticAttribute = aelluxJs.attr("scrollbox-elastic");
+    const fadeAttribute = aelluxJs.attr("scrollbox-fade");
+    const fadeStateAttribute = aelluxJs.attr("scrollbox-fade-state");
+    const layoutEvents = ["Layout", "Pop", "Dismiss", "Unpop"].map((name) => aelluxJs.eventName(name));
+    const scrollbarAttribute = aelluxJs.attr("scrollbar");
+    const scrollbarParentAttribute = aelluxJs.attr("scrollbar-parent");
+    const scrollbarVerticalAttribute = aelluxJs.attr("scrollbar-vertical");
+    const scrollbarHorizontalAttribute = aelluxJs.attr("scrollbar-horizontal");
+    const elasticReleaseClass = aelluxJs.className("scrollbox-elastic-release");
+    const pointerScrollingClass = aelluxJs.className("pointerscrolling");
+    const nativeScrollbarHideClass = aelluxJs.className("native-sb-hide");
+    const scrollbarVisibleClass = aelluxJs.className("scrollbar-visible");
+    const scrollbarWrapperClass = aelluxJs.className("scrollbar-wrapper");
     const scrollEdgeClasses = [
-      AelluxJs.className("scroll-v-start"),
-      AelluxJs.className("scroll-v-end"),
-      AelluxJs.className("scroll-h-start"),
-      AelluxJs.className("scroll-h-end")
+      aelluxJs.className("scroll-v-start"),
+      aelluxJs.className("scroll-v-end"),
+      aelluxJs.className("scroll-h-start"),
+      aelluxJs.className("scroll-h-end")
     ];
     const pointerScrollControlSelector = "a[draggable='false'], button[draggable='false']";
     const pointerScrollExceptionSelector = `a:not([draggable='false']), button:not([draggable='false']), input, select, textarea, [contenteditable], [draggable='true'], [${scrollbarVerticalAttribute}], [${scrollbarHorizontalAttribute}]`;
@@ -168,7 +168,7 @@
     const elasticMemories = /* @__PURE__ */ new WeakMap();
     const pointerScrollMemories = /* @__PURE__ */ new WeakMap();
     let activePointerScrollState = null;
-    AelluxJs.extAttach(extensionName, {
+    aelluxJs.extAttach(extensionName, {
       init,
       destroy,
       next,
@@ -177,7 +177,7 @@
     });
     function init() {
       layoutEvents.forEach((name) => onEvent(root.document, name, onLayout));
-      AelluxJs.registerCssProperty(
+      aelluxJs.registerCssProperty(
         ...properties.map((name) => ({ name, syntax: "<number>", initialValue: "0" })),
         ...fadeProperties.map((name) => ({ name, syntax: "<length>", initialValue: "0px", inherits: false })),
         { name: "--ae-scrollbox-fade-size", syntax: "<length>", initialValue: "16px" },
@@ -198,7 +198,7 @@
         },
         { name: "--ae-scrollbar-size", syntax: "<length>", initialValue: "8px" }
       );
-      AelluxJs.mountManager.add({
+      aelluxJs.mountManager.add({
         extensionName,
         selector: `[${attribute}]`,
         priority: 0,
@@ -211,24 +211,24 @@
     function destroy() {
       layoutEvents.forEach((name) => offEvent(root.document, name, onLayout));
       for (const element of scrollboxes.keys()) unmountScrollbox(element);
-      AelluxJs.mountManager.remove({ extensionName });
+      aelluxJs.mountManager.remove({ extensionName });
     }
     function goto(element, index, behavior) {
-      return AelluxJs.comm.request("scrollbox-snap.goto", { element, index, behavior }).value || false;
+      return aelluxJs.comm.request("scrollbox-snap.goto", { element, index, behavior }).value || false;
     }
     function next(element) {
-      return AelluxJs.comm.request("scrollbox-snap.next", { element }).value || false;
+      return aelluxJs.comm.request("scrollbox-snap.next", { element }).value || false;
     }
     function previous(element) {
-      return AelluxJs.comm.request("scrollbox-snap.previous", { element }).value || false;
+      return aelluxJs.comm.request("scrollbox-snap.previous", { element }).value || false;
     }
     function dispatchInteraction(state, reason, active) {
-      AelluxJs.dispatchFrom(state.element, "ScrollboxInteraction", {
+      aelluxJs.dispatchFrom(state.element, "ScrollboxInteraction", {
         detail: { reason, active: !!active }
       });
     }
     function dispatchSnapGesture(state, phase, pointerScroll) {
-      return AelluxJs.dispatchFrom(state.element, "ScrollboxSnapGesture", {
+      return aelluxJs.dispatchFrom(state.element, "ScrollboxSnapGesture", {
         cancelable: phase !== "start",
         detail: {
           phase,
@@ -244,15 +244,15 @@
       });
     }
     function dispatchWheel(state, event) {
-      return AelluxJs.dispatchFrom(state.element, "ScrollboxWheel", {
+      return aelluxJs.dispatchFrom(state.element, "ScrollboxWheel", {
         cancelable: true,
         detail: { event }
       });
     }
     function mountScrollbox(element) {
       if (scrollboxes.has(element)) return;
-      elementMemories.set(element, AelluxJs.persist.element.save(element, [fadeStateAttribute], [...properties, ...fadeProperties]));
-      cursorMemories.set(element, AelluxJs.persist.element.save(element, [], ["cursor"]));
+      elementMemories.set(element, aelluxJs.persist.element.save(element, [fadeStateAttribute], [...properties, ...fadeProperties]));
+      cursorMemories.set(element, aelluxJs.persist.element.save(element, [], ["cursor"]));
       const elastic = {
         wrapper: null,
         baseTransform: "",
@@ -442,8 +442,8 @@
         else if (state.desktopMedia.removeListener)
           state.desktopMedia.removeListener(state.onDesktopMediaChange);
       }
-      AelluxJs.waitLayout.cancel(state.resizeLayoutId);
-      AelluxJs.waitLayout.cancel(state.publishLayoutId);
+      aelluxJs.waitLayout.cancel(state.resizeLayoutId);
+      aelluxJs.waitLayout.cancel(state.publishLayoutId);
       offEvent(root, "$resize", state.onResize);
       (_a = elementMemories.get(element)) == null ? void 0 : _a.restore();
       elementMemories.delete(element);
@@ -527,7 +527,7 @@
           if (!wrapper) {
             wrapper = { users: 0, memory: null };
             if (root.getComputedStyle(parent).position === "static") {
-              wrapper.memory = AelluxJs.persist.element.save(parent, [], ["position"]);
+              wrapper.memory = aelluxJs.persist.element.save(parent, [], ["position"]);
               parent.style.setProperty("position", "relative", "important");
             }
             scrollbarWrappers.set(parent, wrapper);
@@ -549,12 +549,12 @@
         scrollbar.mouseHover = element.matches(":hover") && supportsMouseHover();
         scrollbar.hoverVisible = scrollbar.mouseHover;
         setListeners(element, state, scrollbarHoverListeners, true);
-        AelluxJs.on(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
+        aelluxJs.on(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
         scrollbar.listening = true;
         syncScrollbarVisibility(state);
       } else if (!enabled && scrollbar.listening) {
         setListeners(element, state, scrollbarHoverListeners, false);
-        AelluxJs.off(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
+        aelluxJs.off(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
         scrollbar.listening = false;
         clearScrollbarInteractionVisibility(state);
         clearScrollbarHover(state);
@@ -588,7 +588,7 @@
       }
       const marker = owned ? null : root.document.createComment("scrollbar position");
       if (marker) scrollbarElement.before(marker);
-      if (!owned) scrollbarMemories.set(scrollbarElement, AelluxJs.persist.element.save(
+      if (!owned) scrollbarMemories.set(scrollbarElement, aelluxJs.persist.element.save(
         scrollbarElement,
         [],
         [...scrollbarProperties, ...scrollbarThemeProperties]
@@ -668,7 +668,7 @@
       scrollbar.parent = null;
       if (scrollbar.listening) {
         setListeners(state.element, state, scrollbarHoverListeners, false);
-        AelluxJs.off(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
+        aelluxJs.off(POINTER_DOWN_TARGET, state.onScrollbarOutsideDown, true);
         scrollbar.listening = false;
       }
       if (scrollbar.hideOwned) state.element.classList.remove(nativeScrollbarHideClass);
@@ -906,8 +906,8 @@
       const display = root.getComputedStyle(wrapper).display;
       if (display.startsWith("inline")) return;
       if (inline.reportedDisplay !== display) {
-        AelluxJs.diagnostics.warn(
-          AelluxJs.diagnostics.WARN_SCROLLBOX_WRAPPER_DISPLAY,
+        aelluxJs.diagnostics.warn(
+          aelluxJs.diagnostics.WARN_SCROLLBOX_WRAPPER_DISPLAY,
           { element: wrapper, display }
         );
         inline.reportedDisplay = display;
@@ -920,7 +920,7 @@
         table: "inline-table"
       }[display];
       if (!replacement) return;
-      if (!inline.owned) inlineMemories.set(wrapper, AelluxJs.persist.element.save(
+      if (!inline.owned) inlineMemories.set(wrapper, aelluxJs.persist.element.save(
         wrapper,
         [],
         ["display"]
@@ -949,8 +949,8 @@
         state.elastic.wrapper = null;
         const requested = element.hasAttribute(elasticAttribute) || children.some((item) => item.hasAttribute(elasticAttribute) && item.getAttribute(elasticAttribute) !== "false");
         if (requested && !state.elastic.invalidReported) {
-          AelluxJs.diagnostics.error(
-            AelluxJs.diagnostics.ERROR_SCROLLBOX_ELASTIC_WRAPPER,
+          aelluxJs.diagnostics.error(
+            aelluxJs.diagnostics.ERROR_SCROLLBOX_ELASTIC_WRAPPER,
             {
               extension: extensionName,
               element,
@@ -978,7 +978,7 @@
           bottom: computed.marginBottom,
           left: computed.marginLeft
         };
-        elasticMemories.set(wrapper, AelluxJs.persist.element.save(
+        elasticMemories.set(wrapper, aelluxJs.persist.element.save(
           wrapper,
           [],
           [
@@ -997,8 +997,8 @@
       const limits = tokens.map(parseElasticLimit);
       if (tokens.length > 2 || limits.some((limit) => !limit)) {
         if (state.elastic.invalidLimit !== value) {
-          AelluxJs.diagnostics.warn(
-            AelluxJs.diagnostics.WARN_SCROLLBOX_ELASTIC_LIMIT_INVALID,
+          aelluxJs.diagnostics.warn(
+            aelluxJs.diagnostics.WARN_SCROLLBOX_ELASTIC_LIMIT_INVALID,
             {
               extension: extensionName,
               element: wrapper,
@@ -1034,8 +1034,8 @@
     function readMode(element) {
       const value = (element.getAttribute(attribute) || "").trim().toLowerCase() || "native";
       if (value === "native" || value === POINTER) return value;
-      AelluxJs.diagnostics.warn(
-        AelluxJs.diagnostics.WARN_SCROLLBOX_MODE_INVALID,
+      aelluxJs.diagnostics.warn(
+        aelluxJs.diagnostics.WARN_SCROLLBOX_MODE_INVALID,
         {
           extension: extensionName,
           element,
@@ -1341,7 +1341,7 @@
       for (const member of pointerScroll.chain) {
         if (pointerAxisMaximum(member, axis, pointerScroll) <= 0) continue;
         const element = member.element;
-        pointerScrollMemories.set(element, AelluxJs.persist.element.save(
+        pointerScrollMemories.set(element, aelluxJs.persist.element.save(
           element,
           [],
           ["scroll-behavior"]
@@ -1359,7 +1359,7 @@
       dispatchPointerScroll(state, pointerScroll, "PointerScrollStart");
     }
     function dispatchPointerScroll(state, pointerScroll, name) {
-      AelluxJs.dispatchFrom(state.element, name, {
+      aelluxJs.dispatchFrom(state.element, name, {
         detail: {
           axis: pointerScroll.axis,
           pointerId: pointerScroll.pointerId,
@@ -1704,13 +1704,13 @@
       if (state.disposed || elastic.publication) return;
       const publication = {};
       elastic.publication = publication;
-      AelluxJs.waitLayout.update(elastic.layoutId, () => {
+      aelluxJs.waitLayout.update(elastic.layoutId, () => {
         if (elastic.publication !== publication || state.disposed || !elastic.owned) return;
         elastic.publication = null;
         writeElasticTransform(state);
       }).catch((cause) => {
-        AelluxJs.diagnostics.error(
-          AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
+        aelluxJs.diagnostics.error(
+          aelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
           { cause, extension: extensionName, element: state.element, method: "update" }
         );
       }).finally(() => {
@@ -1794,7 +1794,7 @@
         resetElastic(state);
         return;
       }
-      if (AelluxJs.currentPreference("reduced-motion") === "reduced") {
+      if (aelluxJs.currentPreference("reduced-motion") === "reduced") {
         resetElastic(state);
         refresh(state);
         return;
@@ -1826,7 +1826,7 @@
       var _a;
       const elastic = state.elastic;
       const wasOwned = elastic.owned;
-      AelluxJs.waitLayout.cancel(elastic.layoutId);
+      aelluxJs.waitLayout.cancel(elastic.layoutId);
       elastic.publication = null;
       if (elastic.releaseFrame !== null) root.cancelAnimationFrame(elastic.releaseFrame);
       if (elastic.wheelTimeout !== null) root.clearTimeout(elastic.wheelTimeout);
@@ -1898,13 +1898,13 @@
     function scheduleResize(state) {
       if (state.disposed) return;
       let complete = false;
-      AelluxJs.waitLayout.sequence(state.resizeLayoutId, {
+      aelluxJs.waitLayout.sequence(state.resizeLayoutId, {
         update: () => {
           complete = now() >= state.layoutUntil;
           refresh(state);
         },
         repeat: { ms: 0 },
-        maxFPS: AelluxJs.layoutMaxFPS(state.element),
+        maxFPS: aelluxJs.layoutMaxFPS(state.element),
         abort: () => state.disposed || complete
       });
     }
@@ -1991,7 +1991,7 @@
       state.publishDirty = true;
       if (state.publishPending) return;
       state.publishPending = true;
-      AelluxJs.waitLayout.read(state.publishLayoutId, () => {
+      aelluxJs.waitLayout.read(state.publishLayoutId, () => {
         if (state.disposed) return null;
         state.publishDirty = false;
         const metrics = nativeMetrics(state.element);
@@ -2024,7 +2024,7 @@
           state.publishDirty = false;
           return;
         }
-        return AelluxJs.waitLayout.update(state.publishLayoutId, () => {
+        return aelluxJs.waitLayout.update(state.publishLayoutId, () => {
           if (state.disposed || state.layoutRevision !== values.revision) return;
           if (state.element.scrollTop !== values.scrollTop || state.element.scrollLeft !== values.scrollLeft) {
             state.publishDirty = true;
@@ -2039,8 +2039,8 @@
           updateScrollbars(state, values.scrollbars);
         });
       }).catch((cause) => {
-        AelluxJs.diagnostics.error(
-          AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
+        aelluxJs.diagnostics.error(
+          aelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
           { cause, extension: extensionName, element: state.element, method: "update" }
         );
       }).finally(() => {

@@ -15,7 +15,7 @@ import { validatePWAManifest } from "./internal/development-helpers.js";
 
 (function (root) {
   "use strict";
-  const api = root.AelluxJs;
+  const api = root.aelluxJs;
   if (!api) throw new Error('[aellux.js] Load the boot script before the "pwa" extension.');
   const extensionName = "pwa", attribute = api.attr(extensionName);
   let active = false, revision = 0, settings = {}, promptEvent = null;

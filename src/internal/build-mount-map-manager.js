@@ -77,7 +77,7 @@ export function buildMountMapManager(root) {
     scheduleUnmount(() => helper.unmountDetached()).then(
       finishDetachedUnmount,
       error => {
-        const diagnostics = root.AelluxJs.diagnostics;
+        const diagnostics = root.aelluxJs.diagnostics;
         diagnostics.error(diagnostics.ERROR_EXTENSION_UNMOUNT, { cause: error });
         finishDetachedUnmount();
       }
@@ -92,7 +92,7 @@ export function buildMountMapManager(root) {
   }
 
   function controller(elementOrId) {
-    const diagnostics = root.AelluxJs.diagnostics;
+    const diagnostics = root.aelluxJs.diagnostics;
     elementOrId = resolveElementOrId(root, elementOrId, { method: "controller" });
     if (!elementOrId) return null;
 
@@ -112,7 +112,7 @@ export function buildMountMapManager(root) {
   }
 
   function add(options) {
-    const diagnostics = root.AelluxJs.diagnostics;
+    const diagnostics = root.aelluxJs.diagnostics;
     function reject(argument, cause) {
       diagnostics.error(diagnostics.ERROR_MOUNT_REGISTRATION, {
         extension: options && options.extensionName,
@@ -132,7 +132,7 @@ export function buildMountMapManager(root) {
     const key = keyFor(extensionName);
     if (key in Object.prototype || key === "prototype")
       return reject("extensionName");
-    if (!Object.prototype.hasOwnProperty.call(root.AelluxJs.registry.ext, key))
+    if (!Object.prototype.hasOwnProperty.call(root.aelluxJs.registry.ext, key))
       return reject("extensionName");
     const invalidSelector = validateSelector(root.document, selector);
     if (invalidSelector) return reject("selector", invalidSelector.cause);
@@ -154,7 +154,7 @@ export function buildMountMapManager(root) {
     }
     if (map.has(selector)) return reject("selector");
     map.set(selector, { mount, unmount, update, controllers, priority });
-    root.AelluxJs.registry.extMounters[key] = [...map.keys()].join(",");
+    root.aelluxJs.registry.extMounters[key] = [...map.keys()].join(",");
     return manager;
   }
 
@@ -164,7 +164,7 @@ export function buildMountMapManager(root) {
     const map = maps.get(key);
     if (!map) return false;
     if (hasMountedRegistration(extensionName, selector)) {
-      const diagnostics = root.AelluxJs.diagnostics;
+      const diagnostics = root.aelluxJs.diagnostics;
       diagnostics.error(diagnostics.ERROR_MOUNT_MAP_IN_USE, {
         extension: fromCamelCase(extensionName), selector
       });
@@ -174,9 +174,9 @@ export function buildMountMapManager(root) {
     const removed = selector === undefined ? true : map.delete(selector);
     if (selector === undefined || map.size === 0) {
       maps.delete(key);
-      delete root.AelluxJs.registry.extMounters[key];
+      delete root.aelluxJs.registry.extMounters[key];
     } else if (removed) {
-      root.AelluxJs.registry.extMounters[key] = [...map.keys()].join(",");
+      root.aelluxJs.registry.extMounters[key] = [...map.keys()].join(",");
     }
     return removed;
   }

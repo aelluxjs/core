@@ -34,18 +34,18 @@ import { selectSpatialCandidate } from "./internal/focus-spatial.js";
 (function (root) {
   "use strict";
 
-  const AelluxJs = root.AelluxJs;
+  const aelluxJs = root.aelluxJs;
   const extensionName = "focus";
-  if (!AelluxJs) {
-    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+  if (!aelluxJs) {
+    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.`);
   }
-  AelluxJs.extAttach(extensionName, {
+  aelluxJs.extAttach(extensionName, {
     init, destroy,
     restoreLastFocus, createContext, destroyContext, getContext, setFocus, updateContext,
     eligibleShortcuts, registerShortcutAction
   });
 
-  const attribute = AelluxJs.attr(extensionName);
+  const attribute = aelluxJs.attr(extensionName);
   const snapshotKey = "ae-focus";
   const entries = [];
   const hintMemories = new WeakMap();
@@ -57,20 +57,20 @@ import { selectSpatialCandidate } from "./internal/focus-spatial.js";
   const contexts = new Map();
   const shortcutActions = new Map();
   let contextObserver = null;
-  const scopeSelector = `[${AelluxJs.attr("focus-scope")}], dialog, [aria-modal="true"]`;
-  const navAttribute = AelluxJs.attr("focus-nav");
+  const scopeSelector = `[${aelluxJs.attr("focus-scope")}], dialog, [aria-modal="true"]`;
+  const navAttribute = aelluxJs.attr("focus-nav");
   const keyboardWidgetSelector = 'input, textarea, select, [contenteditable]:not([contenteditable="false"]), ' +
     '[role="textbox"], [role="combobox"], [role="slider"], [role="spinbutton"], [role="scrollbar"], ' +
     '[role="tablist"], [role="tab"], [role="menu"], [role="menubar"], [role="menuitem"], ' +
     '[role="listbox"], [role="option"], [role="grid"], [role="treegrid"], [role="tree"], [role="treeitem"], ' +
     '[role="radiogroup"], [role="radio"], [role="toolbar"], audio[controls], video[controls]';
-  const focusClasses = [null, AelluxJs.className("focus-player1"), AelluxJs.className("focus-player2"), AelluxJs.className("focus-player3")];
-  const focusClass = id => focusClasses[id] || AelluxJs.className("focus-player" + id);
+  const focusClasses = [null, aelluxJs.className("focus-player1"), aelluxJs.className("focus-player2"), aelluxJs.className("focus-player3")];
+  const focusClass = id => focusClasses[id] || aelluxJs.className("focus-player" + id);
 
   function init() {
     createContext(1);
-    AelluxJs.comm.handle("focus.command", consumeCommand, { owner: extensionName });
-    AelluxJs.comm.handle("focus.context", ({ focusId }) => getContext(focusId), { owner: extensionName });
+    aelluxJs.comm.handle("focus.command", consumeCommand, { owner: extensionName });
+    aelluxJs.comm.handle("focus.context", ({ focusId }) => getContext(focusId), { owner: extensionName });
     contextObserver = new root.MutationObserver(records => {
       if (records.some(record => Array.from(contexts.values()).some(context =>
         !context.scope.isConnected || (context.element &&
@@ -79,42 +79,42 @@ import { selectSpatialCandidate } from "./internal/focus-spatial.js";
     });
     contextObserver.observe(document.documentElement, { childList: true, subtree: true, attributes: true,
       attributeFilter: ["hidden", "inert", "disabled", "aria-disabled", "class", "style", "open", "aria-hidden"] });
-    AelluxJs.mountManager.add({
+    aelluxJs.mountManager.add({
       extensionName, selector: `[${attribute}]`,
       priority: 0,
       mount: mountFocusElement,
       unmount: unmountFocusElement
     });
-    AelluxJs.on("$focusin", onFocusIn, true);
-    AelluxJs.on("$focus", onFocusChange, true);
-    AelluxJs.on("$blur", onBlur, true);
-    AelluxJs.onEvent(root, "$focus", onWindowFocus);
-    AelluxJs.onEvent(root, "$blur", onWindowBlur);
-    AelluxJs.on("SnapshotRestore", onSnapshotRestore);
-    AelluxJs.on("DismissFocusLost", onDismissFocusLost);
-    AelluxJs.on("UnpopFocusLost", onDismissFocusLost);
-    AelluxJs.on("Unmount", onContextUnmount);
-    AelluxJs.on("Mount", onContextMount);
+    aelluxJs.on("$focusin", onFocusIn, true);
+    aelluxJs.on("$focus", onFocusChange, true);
+    aelluxJs.on("$blur", onBlur, true);
+    aelluxJs.onEvent(root, "$focus", onWindowFocus);
+    aelluxJs.onEvent(root, "$blur", onWindowBlur);
+    aelluxJs.on("SnapshotRestore", onSnapshotRestore);
+    aelluxJs.on("DismissFocusLost", onDismissFocusLost);
+    aelluxJs.on("UnpopFocusLost", onDismissFocusLost);
+    aelluxJs.on("Unmount", onContextUnmount);
+    aelluxJs.on("Mount", onContextMount);
     remember(document.activeElement, false);
     syncNative(document.activeElement);
   }
 
   function destroy() {
-    AelluxJs.comm.removeOwner(extensionName);
+    aelluxJs.comm.removeOwner(extensionName);
     contextObserver?.disconnect(); contextObserver = null;
     for (const context of contexts.values()) clearContext(context);
     contexts.clear(); shortcutActions.clear();
-    AelluxJs.off("$focusin", onFocusIn, true);
-    AelluxJs.off("$focus", onFocusChange, true);
-    AelluxJs.off("$blur", onBlur, true);
-    AelluxJs.offEvent(root, "$focus", onWindowFocus);
-    AelluxJs.offEvent(root, "$blur", onWindowBlur);
-    AelluxJs.off("SnapshotRestore", onSnapshotRestore);
-    AelluxJs.off("DismissFocusLost", onDismissFocusLost);
-    AelluxJs.off("UnpopFocusLost", onDismissFocusLost);
-    AelluxJs.off("Unmount", onContextUnmount);
-    AelluxJs.off("Mount", onContextMount);
-    AelluxJs.mountManager.remove({ extensionName });
+    aelluxJs.off("$focusin", onFocusIn, true);
+    aelluxJs.off("$focus", onFocusChange, true);
+    aelluxJs.off("$blur", onBlur, true);
+    aelluxJs.offEvent(root, "$focus", onWindowFocus);
+    aelluxJs.offEvent(root, "$blur", onWindowBlur);
+    aelluxJs.off("SnapshotRestore", onSnapshotRestore);
+    aelluxJs.off("DismissFocusLost", onDismissFocusLost);
+    aelluxJs.off("UnpopFocusLost", onDismissFocusLost);
+    aelluxJs.off("Unmount", onContextUnmount);
+    aelluxJs.off("Mount", onContextMount);
+    aelluxJs.mountManager.remove({ extensionName });
     entries.length = 0;
     current = null;
   }
@@ -123,10 +123,10 @@ import { selectSpatialCandidate } from "./internal/focus-spatial.js";
     const type = element.getAttribute(attribute);
     switch (type) {
       case "next":
-        AelluxJs.onEvent(element, "$keydown", onNextKeyDown);
+        aelluxJs.onEvent(element, "$keydown", onNextKeyDown);
         nextElements.add(element);
         if (!element.hasAttribute("enterkeyhint") && element.matches(textEntrySelector)) {
-          hintMemories.set(element, AelluxJs.persist.element.save(element, ["enterkeyhint"], []));
+          hintMemories.set(element, aelluxJs.persist.element.save(element, ["enterkeyhint"], []));
           element.setAttribute("enterkeyhint", "next");
         }
         break;
@@ -134,7 +134,7 @@ import { selectSpatialCandidate } from "./internal/focus-spatial.js";
   }
 
   function unmountFocusElement(element) {
-    if (nextElements.delete(element)) AelluxJs.offEvent(element, "$keydown", onNextKeyDown);
+    if (nextElements.delete(element)) aelluxJs.offEvent(element, "$keydown", onNextKeyDown);
     hintMemories.get(element)?.restore();
     hintMemories.delete(element);
   }
@@ -166,8 +166,8 @@ import { selectSpatialCandidate } from "./internal/focus-spatial.js";
         (spatial && (style.contentVisibility === "hidden" || Number(style.opacity) === 0))) return false;
       // Native history follows actual focus, including opening preparation.
       // Only directional candidate selection rejects presentation state.
-      if (spatial && node.hasAttribute(AelluxJs.attr("present")) &&
-        (node.classList.contains(AelluxJs.className("dismissed")) || node.classList.contains(AelluxJs.className("unpop")))) return false;
+      if (spatial && node.hasAttribute(aelluxJs.attr("present")) &&
+        (node.classList.contains(aelluxJs.className("dismissed")) || node.classList.contains(aelluxJs.className("unpop")))) return false;
     }
     return element.getClientRects().length > 0;
   }
@@ -179,7 +179,7 @@ import { selectSpatialCandidate } from "./internal/focus-spatial.js";
     if (entries.length > 100) entries.shift();
     current = entry;
     if (!push || !stateNavigationEligible(element) || !element.id || !element.id.trim()) return;
-    AelluxJs.dispatch("PushState", {
+    aelluxJs.dispatch("PushState", {
       detail: { key: snapshotKey, value: element.id }
     });
   }
@@ -259,7 +259,7 @@ import { selectSpatialCandidate } from "./internal/focus-spatial.js";
   }
 
   function warn(reason, extra = {}) {
-    AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, { extension: extensionName, reason, ...extra });
+    aelluxJs.diagnostics.warn(aelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, { extension: extensionName, reason, ...extra });
   }
   function getContext(focusId = 1) {
     const context = contexts.get(focusId);
@@ -278,14 +278,14 @@ import { selectSpatialCandidate } from "./internal/focus-spatial.js";
     if (previous) publishFocus({ focusId: context.focusId, element: null, previous });
   }
   function publishFocus(detail) {
-    AelluxJs.comm.emit("focus.changed", detail);
-    AelluxJs.dispatch("FocusChange", { detail });
+    aelluxJs.comm.emit("focus.changed", detail);
+    aelluxJs.dispatch("FocusChange", { detail });
   }
   function destroyContext(focusId) {
     if (focusId === 1 || !contexts.has(focusId)) return false;
     clearContext(contexts.get(focusId)); contexts.delete(focusId);
-    AelluxJs.comm.emit("focus.context-destroyed", { focusId });
-    AelluxJs.dispatch("FocusContextDestroy", { detail: { focusId } });
+    aelluxJs.comm.emit("focus.context-destroyed", { focusId });
+    aelluxJs.dispatch("FocusContextDestroy", { detail: { focusId } });
     return true;
   }
   function updateContext(focusId, { scope, syncDOM } = {}) {
@@ -422,13 +422,13 @@ import { selectSpatialCandidate } from "./internal/focus-spatial.js";
     if (!context || !context.element || !isValid(context.element)) return [];
     const scope = activeScope(context);
     if (!scope) return [];
-    const shortcutAttribute = AelluxJs.attr("shortcut");
+    const shortcutAttribute = aelluxJs.attr("shortcut");
     const candidates = [scope, ...scope.querySelectorAll(`[${shortcutAttribute}]`)]
       .filter(element => element.hasAttribute(shortcutAttribute) && available(element, scope));
     return candidates.map((element, order) => ({ element, order,
       shortcuts: parseShortcuts(element.getAttribute(shortcutAttribute)),
       distance: distance(context.element, element, scope),
-      priority: Number(element.getAttribute(AelluxJs.attr("shortcut-priority"))) || 0 }))
+      priority: Number(element.getAttribute(aelluxJs.attr("shortcut-priority"))) || 0 }))
       .filter(item => !command || item.shortcuts.some(shortcut => matchesShortcut(shortcut, command)))
       .sort((a, b) => a.distance - b.distance || b.priority - a.priority || a.order - b.order);
   }
@@ -439,21 +439,21 @@ import { selectSpatialCandidate } from "./internal/focus-spatial.js";
     return remove;
   }
   function executeShortcut(element, command) {
-    const action = element.getAttribute(AelluxJs.attr("shortcut-action")) || "click";
-    if (!AelluxJs.dispatchFrom(element, "BeforeShortcut", { cancelable: true, detail: { command, action } })) return false;
+    const action = element.getAttribute(aelluxJs.attr("shortcut-action")) || "click";
+    if (!aelluxJs.dispatchFrom(element, "BeforeShortcut", { cancelable: true, detail: { command, action } })) return false;
     if (action === "click") element.click();
     else {
       const handler = shortcutActions.get(action);
       if (handler) { if (handler(element, command) === false) return false; }
       else if (["pop", "unpop", "dismiss"].includes(action)) {
-        const id = element.getAttribute(AelluxJs.attr("shortcut-target"));
+        const id = element.getAttribute(aelluxJs.attr("shortcut-target"));
         const target = id ? document.getElementById(id.replace(/^#/, "")) : element;
         if (!target) return false;
-        const response = AelluxJs.comm.request("present." + action, { element: target });
+        const response = aelluxJs.comm.request("present." + action, { element: target });
         if (!response.handled) return false;
       } else { warn("Unknown shortcut action.", { value: action, element }); return false; }
     }
-    AelluxJs.dispatchFrom(element, "Shortcut", { detail: { command, action } });
+    aelluxJs.dispatchFrom(element, "Shortcut", { detail: { command, action } });
     return true;
   }
   function consumeCommand(command) {
@@ -463,8 +463,8 @@ import { selectSpatialCandidate } from "./internal/focus-spatial.js";
       command.originalEvent?.isComposing || command.originalEvent?.keyCode === 229) return false;
     if (command.source === "point") return false; // Native pointer focus/click owns activation.
     const focused = context.element;
-    const inputScope = (focused || context.scope).closest(`[${AelluxJs.attr("inputs")}]`);
-    if (inputScope && !inputScope.getAttribute(AelluxJs.attr("inputs")).split(/\s+/).includes(command.source)) return false;
+    const inputScope = (focused || context.scope).closest(`[${aelluxJs.attr("inputs")}]`);
+    if (inputScope && !inputScope.getAttribute(aelluxJs.attr("inputs")).split(/\s+/).includes(command.source)) return false;
     const origin = command.originalEvent?.target;
     const editable = element => element?.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]');
     // Preserve text editing, IME, browser/system modifier shortcuts and Tab.

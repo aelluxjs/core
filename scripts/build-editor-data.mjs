@@ -25,7 +25,7 @@ export async function createSemanticCatalog(metadata, constants = createAelluxCo
   api.extAttach = (name, extension) => { api.ext[name] = extension; };
   // Adaptive's public defaults are read from the actual Extension; no init or
   // DOM emulation is needed to generate its utility classes.
-  runInNewContext(await readFile(join(projectRoot, "src/aellux.ext.adaptive.js"), "utf8"), { AelluxJs: api });
+  runInNewContext(await readFile(join(projectRoot, "src/aellux.ext.adaptive.js"), "utf8"), { aelluxJs: api });
   const release = `${metadata.version.split(".").slice(0, 2).join(".")}.x`;
   const apiContext = {};
   runInNewContext(await readFile(join(projectRoot, "src/internal/aellux-api-contract.js"), "utf8"), apiContext);
@@ -94,7 +94,7 @@ function describe(entry) {
 
 export function renderEditorData(catalog) {
   const exposed = entries => entries.filter(entry => entry.role !== "internal");
-  const references = entry => [{ name: `AelluxJS ${entry.extension}`, url: entry.docURL }];
+  const references = entry => [{ name: `aellux.js ${entry.extension}`, url: entry.docURL }];
   const htmlAttribute = entry => ({ name: entry.name, description: describe(entry), references: references(entry),
     ...(entry.syntax === "presence" ? { valueSet: "v" } : {}),
     ...((entry.values || entry.examples)?.length ? { values: (entry.values || entry.examples).map(name => ({ name })) } : {}) });
@@ -114,7 +114,7 @@ export function renderEditorData(catalog) {
   }
   const linkRel = {
     name: "rel", extension: "core", role: "input", syntax: "string", values: ["aelluxjs-ext"],
-    description: "Registers an Aellux Extension declared by this link. href is an official name or compatible Extension URL; data-ae-load-when enables lazy loading.",
+    description: "Registers an aellux.js Extension declared by this link. href is an official name or compatible Extension URL; data-ae-load-when enables lazy loading.",
     docURL: catalog.attributes.find(entry => entry.name.endsWith("load-when")).docURL
   };
   const htmlTags = [...tags].map(([name, attributes]) => ({ name, attributes: attributes.map(htmlAttribute) }));

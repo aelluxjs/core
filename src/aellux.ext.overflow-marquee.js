@@ -31,7 +31,7 @@ import { createOverflowMarquee } from "./internal/create-overflow-marquee.js";
 
 (function (root) {
   "use strict";
-  const api = root.AelluxJs;
+  const api = root.aelluxJs;
   const extensionName = "overflow-marquee";
   if (!api) throw new Error('[aellux.js] Load the boot script before the overflow-marquee extension.');
   let marquee = null, placements = null;

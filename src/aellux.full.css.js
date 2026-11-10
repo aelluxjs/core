@@ -8,18 +8,18 @@ import { generateScrollboxCSS } from "./aellux.ext.scrollbox.css.js";
 import { generateAnchorCSS } from "./aellux.ext.anchor.css.js";
 import { generateInputCSS } from "./aellux.ext.input.css.js";
 
-export function generateFullCSS(AelluxJs) {
+export function generateFullCSS(aelluxJs) {
   const core = createWeakCss()
-    .replace(/\?([a-z][0-9a-z-]*)/gi, (_, name) => AelluxJs.attr(name))
-    .replace(/%([a-z][0-9a-z-]*)/gi, (_, name) => AelluxJs.className(name));
+    .replace(/\?([a-z][0-9a-z-]*)/gi, (_, name) => aelluxJs.attr(name))
+    .replace(/%([a-z][0-9a-z-]*)/gi, (_, name) => aelluxJs.className(name));
   return [
     "/*! aellux.js Full Styles | SPDX-License-Identifier: Apache-2.0 */",
     core,
-    generateAdaptiveCSS(AelluxJs),
-    generatePresentCSS(AelluxJs),
-    generateFeedbackCSS(AelluxJs),
-    generateScrollboxCSS(AelluxJs),
-    generateAnchorCSS(AelluxJs),
-    generateInputCSS(AelluxJs)
+    generateAdaptiveCSS(aelluxJs),
+    generatePresentCSS(aelluxJs),
+    generateFeedbackCSS(aelluxJs),
+    generateScrollboxCSS(aelluxJs),
+    generateAnchorCSS(aelluxJs),
+    generateInputCSS(aelluxJs)
   ].join("\n\n");
 }

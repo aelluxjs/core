@@ -1,6 +1,6 @@
 # waitLayout
 
-`AelluxJs.waitLayout` schedules layout work in two phases: `read()` runs measurements together at the start of a rendering frame, then `update()` runs DOM and CSS changes after those reads. Both methods return a Promise that resolves with the callback's return value. The API is available after the runtime initializes; `$ae.waitLayout` is the same object.
+`aelluxJs.waitLayout` schedules layout work in two phases: `read()` runs measurements together at the start of a rendering frame, then `update()` runs DOM and CSS changes after those reads. Both methods return a Promise that resolves with the callback's return value. The API is available after the runtime initializes; `$ae.waitLayout` is the same object.
 
 ```js
 await $ae.waitLayout.read(() => element.getBoundingClientRect());

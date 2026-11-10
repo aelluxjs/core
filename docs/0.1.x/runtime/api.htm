@@ -38,7 +38,7 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-PgrxAHrkt22+F09vWG2iuTeiqQ+UCUeSkyAe/nibdP/XtRk8nTZ+VjetKW+okArJ" crossorigin="anonymous">
+  integrity="sha384-q4bpBk5Vqct9IR80W+4o8g4BlPq84mWWb0mV47Q76mgYStKp6AKgCBgxRwr2FPAE" crossorigin="anonymous">
 </head>
 
 <body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
@@ -192,6 +192,13 @@
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
                                         aellux.js Docs                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/brand-naming.htm" data-ae-overflow-marquee="190px">
+                                        Brand Naming and Migration                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -697,15 +704,16 @@
           <main id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content"
             ajax-load="doc-content">
             <h1>Runtime API</h1>
-<p>The browser distribution exposes <code>AelluxJs</code> and its short alias <code>$ae</code> on the global object.</p>
+<p>The browser distribution exposes <code>aelluxJs</code> and its short alias <code>$ae</code> on the global object.</p>
+<p>The library is named <code>aellux.js</code>; the camelCase identifier names its JavaScript object. See <a href="../brand-naming.htm">Brand Naming and Migration</a> for the pre-0.1.0 global rename, deployment requirements and retained technical names.</p>
 <p><code>$ae.comm</code> is the boot-level <a href="communication.htm">shared communication mediator</a>: named commands/queries through <code>handle</code> / <code>request</code>, notifications through <code>on</code> / <code>emit</code>, availability checks and owned cleanup. Extensions exchange data contracts while application code retains access to public Extension APIs.</p>
 <p>The <a href="compatibility-commitment.htm">Compatibility Commitment</a> protects only the explicitly listed global initialization and declarative activation/mounting subset during <code>0.1.x</code>. This reference documents current usage; global availability does not guarantee compatibility of every method. Programmatic mounting, lifecycle controls, helpers and Extension APIs may change incompatibly. Stable describes maturity, not API preservation.</p>
 <p>Modules can import the shared API through <code>@aelluxjs/core</code>:</p>
-<pre><code class="language-js">import AelluxJs from &quot;@aelluxjs/core&quot;;
+<pre><code class="language-js">import aelluxJs from &quot;@aelluxjs/core&quot;;
 </code></pre>
 <p>This entry creates the core API when it is absent. The browser boot script starts the runtime through <code>init()</code>.</p>
 <h2>Naming and element lookup</h2>
-<p>The naming helpers use the configured AelluxJs prefixes and convert camelCase names to kebab-case. For example, <code>$ae.attr(&quot;feedbackMessageTarget&quot;)</code> returns <code>data-ae-feedback-message-target</code>, <code>$ae.className(&quot;feedbackError&quot;)</code> returns <code>ae--feedback-error</code>, and <code>$ae.cssVar(&quot;panelWidth&quot;)</code> returns <code>--ae-panel-width</code>. <code>extFilename(name)</code> returns the matching Extension script filename for the current minified setting; <code>extName(filename)</code> extracts an Extension name from that filename.</p>
+<p>The naming helpers use the configured aellux.js prefixes and convert camelCase names to kebab-case. For example, <code>$ae.attr(&quot;feedbackMessageTarget&quot;)</code> returns <code>data-ae-feedback-message-target</code>, <code>$ae.className(&quot;feedbackError&quot;)</code> returns <code>ae--feedback-error</code>, and <code>$ae.cssVar(&quot;panelWidth&quot;)</code> returns <code>--ae-panel-width</code>. <code>extFilename(name)</code> returns the matching Extension script filename for the current minified setting; <code>extName(filename)</code> extracts an Extension name from that filename.</p>
 <p><code>$ae.elementOrId(value, options?)</code> resolves a DOM element or an element ID, with or without a leading <code>#</code>. By default, only element nodes are accepted. Pass <code>{ defaultElement: element }</code> to use a fallback when <code>value</code> is <code>null</code> or <code>undefined</code>, or <code>{ allowedNodeTypes: [...] }</code> to accept other node types. Invalid values and missing IDs record <code>WARN_INVALID_ELEMENT_OR_ID</code> (<code>2011</code>) and return <code>null</code>; <code>options.method</code> can identify the caller in that diagnostic. This helper is available before runtime initialization.</p>
 <p><code>$ae.isValidSelector(value)</code> returns whether a nonempty string is a valid CSS selector in the current browser, even when no element matches. <code>$ae.parseSelectors(value, onInvalid?)</code> accepts a selector string or an array of strings and returns a trimmed, deduplicated array in input order, or <code>null</code> if any input is invalid or the array is empty. Only top-level commas split selectors; functions, attribute values, escapes and CSS comments are preserved. Neither helper records diagnostics automatically. The optional <code>onInvalid</code> callback receives <code>{ value, reason, cause }</code> once on failure; <code>cause</code> contains the native selector exception when available. Both helpers are available before runtime initialization.</p>
 <pre><code class="language-js">$ae.isValidSelector(&quot;#future-content&quot;); // true, even before it exists
@@ -724,7 +732,7 @@ The top-level <code>syncBootstrapThemeTag</code> option defaults to <code>false<
 The <code>skipGlobalMount</code> option defaults to <code>false</code>. Set it to <code>true</code> to finish orchestrator initialization and dispatch <code>Ready</code> without automatically mounting the document. Call <code>$ae.mount(document)</code> later to mount it explicitly.</p>
 <p>The <code>cssMotionController</code> option defaults to <code>true</code>. Set it to <code>false</code> to leave CSS motion under native browser timing, without a <code>waitLayout</code> progress sequence. See <a href="css-motion.htm">CSS Motion Controller</a>.
 The boot does not set <code>data-ae-low-hardware</code>. Present does not use this marker to change animation easing.
-<code>$ae.registerCssProperty(...descriptors)</code> accepts one or more descriptors in the same format as <code>CSS.registerProperty()</code>. When <code>inherits</code> is omitted, AelluxJs sets it to <code>true</code>; pass <code>inherits: false</code> only when the property must not reach descendants or pseudo-elements. It attempts every registration and returns <code>true</code> only when all succeed, or <code>false</code> when the API is unavailable, no descriptors are supplied, or any registration is rejected, including an already registered name. Extensions can call it during their <code>init()</code> without requiring Properties and Values API support for their basic behavior.
+<code>$ae.registerCssProperty(...descriptors)</code> accepts one or more descriptors in the same format as <code>CSS.registerProperty()</code>. When <code>inherits</code> is omitted, aelluxJs sets it to <code>true</code>; pass <code>inherits: false</code> only when the property must not reach descendants or pseudo-elements. It attempts every registration and returns <code>true</code> only when all succeed, or <code>false</code> when the API is unavailable, no descriptors are supplied, or any registration is rejected, including an already registered name. Extensions can call it during their <code>init()</code> without requiring Properties and Values API support for their basic behavior.
 Pass Extension-specific configuration through <code>extensions</code> in <code>init()</code> options:</p>
 <pre><code class="language-js">$ae.init({
   extensions: {
@@ -763,7 +771,7 @@ $ae.mountManager.remove({ extensionName: &quot;example&quot; });
 <p>Omitting <code>selector</code> removes all registrations for the Extension. The manager&#39;s <code>mount(elementOrId, extensionNames)</code> and <code>unmount(elementOrId, extensionNames)</code> use the same single-root resolution and lifecycle execution as <code>$ae.mount()</code> and <code>$ae.unmount()</code>. Its <code>update(elementOrId, extensionNames)</code> runs <code>update</code> handlers only for elements already mounted; registrations without an <code>update</code> handler are skipped.</p>
 <p><code>add()</code> requires a previously declared Extension name, valid CSS selector, and <code>mount</code> function. <code>unmount</code> and <code>update</code> are optional functions; <code>controllers</code> is an optional array of nonempty method names. <code>priority</code> is an optional finite number, defaulting to <code>0</code>. Mount registrations run in ascending priority order across Extensions and selectors; registrations with equal priority keep their previous discovery order. Unmount runs in descending priority order, reversing the actual mount order for equal priorities. Invalid registration arguments and attempts to replace an existing <code>extensionName</code> and <code>selector</code> pair report <code>ERROR_MOUNT_REGISTRATION</code> (<code>1113</code>), return <code>false</code>, and leave the mount map unchanged. <code>remove()</code> returns <code>false</code> and reports <code>ERROR_MOUNT_MAP_IN_USE</code> (<code>1115</code>) if any matching element is still mounted or mounting; unmount those elements before removing the map.</p>
 <p>The mount helper removes existing <code>ae--*</code> classes from an element before its first mount, leaving other classes intact. Extensions that change attributes or inline styles should save the specific values they own with <code>$ae.persist.element.save()</code> during mount and restore them during unmount. The mount manager does not restore attributes automatically. Library classes are managed by their Extensions rather than restored from the initial HTML.</p>
-<p>After an element mounts, use <code>$ae(elementOrId).{extensionName}.{mountedExtensionMethod}(...args)</code> to call its public Extension methods. <code>AelluxJs(elementOrId)</code> works the same way. Both calls resolve through <code>mountManager.controller(elementOrId)</code>. <code>elementOrId</code> can be a DOM element, an ID, or an ID prefixed with <code>#</code>. Invalid values and IDs that do not resolve emit a warning and return <code>null</code>. An element without a mounted controller emits an error explaining that it may not be mounted, then returns <code>null</code>. Before runtime initialization, the shortcut returns <code>null</code>. The <code>controllers</code> names registered by an Extension become methods under its camelCase namespace. Each method receives the element as its first argument, followed by <code>...args</code>:</p>
+<p>After an element mounts, use <code>$ae(elementOrId).{extensionName}.{mountedExtensionMethod}(...args)</code> to call its public Extension methods. <code>aelluxJs(elementOrId)</code> works the same way. Both calls resolve through <code>mountManager.controller(elementOrId)</code>. <code>elementOrId</code> can be a DOM element, an ID, or an ID prefixed with <code>#</code>. Invalid values and IDs that do not resolve emit a warning and return <code>null</code>. An element without a mounted controller emits an error explaining that it may not be mounted, then returns <code>null</code>. Before runtime initialization, the shortcut returns <code>null</code>. The <code>controllers</code> names registered by an Extension become methods under its camelCase namespace. Each method receives the element as its first argument, followed by <code>...args</code>:</p>
 <pre><code class="language-js">await $ae(&quot;#panel&quot;).present.pop();
 await $ae(&quot;#panel&quot;).present.toggle(false);
 </code></pre>
@@ -834,8 +842,8 @@ function unmount(element) {
 </code></pre>
 <p>Snapshots are independent, so each Extension can save its own list.</p>
 <h2>ARIA ownership</h2>
-<p>After the runtime loads, <code>AelluxJs.aria.register(element, { priority })</code> returns a handler for one element. <code>priority</code> defaults to <code>0</code> and is independent of mount registration priority. Use <code>set()</code> during mount or update, <code>unset(name)</code> to withdraw one value, and <code>release()</code> during unmount. The helper saves each attribute&#39;s original presence and value when it first receives a claim, and restores them when the last claim ends.</p>
-<pre><code class="language-js">const aria = AelluxJs.aria.register(element, { priority: 10 });
+<p>After the runtime loads, <code>aelluxJs.aria.register(element, { priority })</code> returns a handler for one element. <code>priority</code> defaults to <code>0</code> and is independent of mount registration priority. Use <code>set()</code> during mount or update, <code>unset(name)</code> to withdraw one value, and <code>release()</code> during unmount. The helper saves each attribute&#39;s original presence and value when it first receives a claim, and restores them when the last claim ends.</p>
+<pre><code class="language-js">const aria = aelluxJs.aria.register(element, { priority: 10 });
 aria.set({ expanded: true, controls: [&quot;panel-id&quot;], label: &quot;Open panel&quot; });
 aria.unset(&quot;label&quot;);
 aria.release();
@@ -887,7 +895,7 @@ aria.release();
                 and
                 <a style="color:inherit!important;" href="https://github.com/" target="_blank"
                   rel="noopener noreferrer">GitHub</a>
-                for the tools and technologies that supported the development of Aellux.
+                for the tools and technologies that supported the development of aellux.js.
               </div>
             </div>
           </footer>

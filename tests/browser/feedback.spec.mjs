@@ -6,14 +6,14 @@ async function startFeedback(page, markup, { mode = "full", forceLegacy = false,
   await page.addScriptTag({ url: `/dist/${boot}` });
   await page.evaluate(async ({ mode, forceLegacy, withPresent }) => {
     if (mode === "basic") {
-      AelluxJs.ext("feedback", { loadStyle: true });
-      if (withPresent) AelluxJs.ext("present", { loadStyle: true });
+      aelluxJs.ext("feedback", { loadStyle: true });
+      if (withPresent) aelluxJs.ext("present", { loadStyle: true });
     }
     await new Promise(resolve => {
-      AelluxJs.on("Ready", resolve, { once: true });
-      AelluxJs.init({ mode, forceLegacy, skipGlobalMount: true, environment: "development" });
+      aelluxJs.on("Ready", resolve, { once: true });
+      aelluxJs.init({ mode, forceLegacy, skipGlobalMount: true, environment: "development" });
     });
-    await AelluxJs.mount(document);
+    await aelluxJs.mount(document);
   }, { mode, forceLegacy, withPresent });
 }
 
@@ -29,8 +29,8 @@ test("feedback boundaries update text, filter types, and load standard motion st
     document.body.appendChild(section);
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
-  await expect.poll(() => page.evaluate(() => AelluxJs.ext.feedback?.initialized)).toBe(true);
+  await page.evaluate(() => aelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => aelluxJs.ext.feedback?.initialized)).toBe(true);
 
   const result = await page.evaluate(async () => {
     const section = document.querySelector("[data-ae-feedback]");
@@ -38,8 +38,8 @@ test("feedback boundaries update text, filter types, and load standard motion st
     const message = document.getElementById("feedback-message");
     const received = [];
     document.addEventListener("AelluxJsFeedback", event => received.push(event.detail.type));
-    AelluxJs.ext.feedback.warning("Ignored here", field);
-    AelluxJs.ext.feedback.error("Check email", field, null, "shake");
+    aelluxJs.ext.feedback.warning("Ignored here", field);
+    aelluxJs.ext.feedback.error("Check email", field, null, "shake");
     await Promise.resolve();
     return {
       received,
@@ -65,22 +65,22 @@ test("feedback boundaries update text, filter types, and load standard motion st
 test("feedback rejects invalid arguments before dispatch", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
-  await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
-  await page.evaluate(() => AelluxJs.wait("feedback"));
-  await expect.poll(() => page.evaluate(() => AelluxJs.ext.feedback?.initialized)).toBe(true);
+  await page.evaluate(() => aelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => aelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
+  await page.evaluate(() => aelluxJs.wait("feedback"));
+  await expect.poll(() => page.evaluate(() => aelluxJs.ext.feedback?.initialized)).toBe(true);
 
   const result = await page.evaluate(() => {
     let events = 0;
     document.addEventListener("AelluxJsFeedback", () => events++);
-    const feedback = AelluxJs.ext.feedback;
+    const feedback = aelluxJs.ext.feedback;
     feedback.warning(42);
     feedback.send({ type: "custom", message: "bad type" });
     feedback.error("bad target", document);
     feedback.error("bad motion", undefined, null, 1);
     return {
       events,
-      arguments: AelluxJs.diagnostics.showHistory()
+      arguments: aelluxJs.diagnostics.showHistory()
         .filter(entry => entry.code === 1122)
         .map(entry => entry.context.argument)
     };
@@ -100,11 +100,11 @@ for (const options of [
     const result = await page.evaluate(async () => {
       const boundary = document.getElementById("boundary");
       const other = document.getElementById("other");
-      const controller = AelluxJs.mountManager.controller(boundary);
+      const controller = aelluxJs.mountManager.controller(boundary);
       const feedback = controller.feedback;
       const types = ["warning", "error", "success", "announce", "busy", "validate", "progress"];
       const received = [];
-      const subscription = AelluxJs.ext.feedback.on("*", detail => received.push({
+      const subscription = aelluxJs.ext.feedback.on("*", detail => received.push({
         type: detail.type, message: detail.message, value: detail.value,
         target: detail.target.id, motion: detail.motion
       }));
@@ -115,7 +115,7 @@ for (const options of [
       await controller.unmount("feedback");
       const removed = !controller.feedback && Object.keys(feedback).length === 0;
       await controller.mount("feedback");
-      AelluxJs.mountManager.controller(boundary).feedback.error("remounted");
+      aelluxJs.mountManager.controller(boundary).feedback.error("remounted");
       subscription.off();
       return { received, rendered, otherText, removed, remounted: boundary.textContent };
     });
@@ -140,30 +140,30 @@ for (const options of [
       const boundary = document.getElementById("boundary");
       const panel = document.getElementById("panel");
       const message = document.getElementById("message");
-      const feedback = AelluxJs.ext.feedback;
+      const feedback = aelluxJs.ext.feedback;
       const calls = [];
       const beforePop = [];
-      const request = AelluxJs.comm.request;
-      AelluxJs.comm.request = (name, payload) => {
+      const request = aelluxJs.comm.request;
+      aelluxJs.comm.request = (name, payload) => {
         if (name === "present.pop") calls.push(payload.element.id);
         return request(name, payload);
       };
-      panel.addEventListener(AelluxJs.eventName("BeforePop"), () => beforePop.push({
+      panel.addEventListener(aelluxJs.eventName("BeforePop"), () => beforePop.push({
         text: message.textContent, typeClass: message.classList.contains("ae--feedback-error")
       }));
       feedback.warning("ignored", boundary, null, "shake");
       const ignored = calls.length === 0 && message.textContent === "Label:";
-      const firstPop = new Promise(resolve => panel.addEventListener(AelluxJs.eventName("Pop"), resolve, { once: true }));
+      const firstPop = new Promise(resolve => panel.addEventListener(aelluxJs.eventName("Pop"), resolve, { once: true }));
       feedback.error("first", boundary, null, "shake");
       const motion = message.classList.contains("ae--present-effect-shake");
       await firstPop;
       const firstVisible = !panel.hidden;
-      const secondPop = new Promise(resolve => panel.addEventListener(AelluxJs.eventName("Pop"), resolve, { once: true }));
+      const secondPop = new Promise(resolve => panel.addEventListener(aelluxJs.eventName("Pop"), resolve, { once: true }));
       feedback.error("second", boundary);
       await secondPop;
       return { ignored, calls, beforePop, motion, firstVisible, visible: !panel.hidden,
         ancestorHidden: document.getElementById("ancestor").hidden,
-        unknownAttributes: AelluxJs.diagnostics.showHistory().filter(entry => entry.code === 2024).length };
+        unknownAttributes: aelluxJs.diagnostics.showHistory().filter(entry => entry.code === 2024).length };
     });
     expect(result).toEqual({ ignored: true, calls: ["panel", "panel"],
       beforePop: [{ text: "Label:first", typeClass: true }, { text: "Label:second", typeClass: true }],
@@ -180,19 +180,19 @@ for (const options of [
       const boundary = document.getElementById("boundary");
       const panel = document.getElementById("panel");
       const other = document.getElementById("other");
-      panel.addEventListener(AelluxJs.eventName("BeforePop"), event => event.preventDefault());
-      AelluxJs.ext.feedback.error("vetoed", boundary);
+      panel.addEventListener(aelluxJs.eventName("BeforePop"), event => event.preventDefault());
+      aelluxJs.ext.feedback.error("vetoed", boundary);
       const vetoed = panel.hidden;
       boundary.setAttribute("data-ae-present-target", "#other");
-      const opened = new Promise(resolve => other.addEventListener(AelluxJs.eventName("Pop"), resolve, { once: true }));
-      AelluxJs.ext.feedback.success("retargeted", boundary);
+      const opened = new Promise(resolve => other.addEventListener(aelluxJs.eventName("Pop"), resolve, { once: true }));
+      aelluxJs.ext.feedback.success("retargeted", boundary);
       await opened;
       boundary.setAttribute("data-ae-present-target", "absent-panel");
-      AelluxJs.ext.feedback.error("still updates", boundary, null, "shake");
+      aelluxJs.ext.feedback.error("still updates", boundary, null, "shake");
       return { vetoed, otherVisible: !other.hidden, panelHidden: panel.hidden,
         message: document.getElementById("message").textContent,
         motion: document.getElementById("motion").classList.contains("ae--present-effect-shake"),
-        missing: AelluxJs.diagnostics.showHistory().filter(entry => entry.code === 2011)
+        missing: aelluxJs.diagnostics.showHistory().filter(entry => entry.code === 2011)
           .map(entry => entry.context.elementOrId) };
     });
     expect(result).toEqual({ vetoed: true, otherVisible: true, panelHidden: true,
@@ -203,13 +203,13 @@ for (const options of [
     await startFeedback(page, '<aside id="panel" data-ae-present hidden><p id="boundary" data-ae-feedback></p></aside>', options);
     const result = await page.evaluate(() => {
       let calls = 0;
-      const request = AelluxJs.comm.request;
-      AelluxJs.comm.request = (name, payload) => {
+      const request = aelluxJs.comm.request;
+      aelluxJs.comm.request = (name, payload) => {
         if (name === "present.pop") calls++;
         return request(name, payload);
       };
       const boundary = document.getElementById("boundary");
-      AelluxJs.ext.feedback.announce("default targets", boundary);
+      aelluxJs.ext.feedback.announce("default targets", boundary);
       return { calls, hidden: document.getElementById("panel").hidden, message: boundary.textContent };
     });
     expect(result).toEqual({ calls: 0, hidden: true, message: "default targets" });
@@ -226,13 +226,13 @@ for (const options of [
       const boundary = document.getElementById("boundary");
       const panels = ["message-panel", "motion-panel"].map(id => document.getElementById(id));
       const calls = [];
-      const request = AelluxJs.comm.request;
-      AelluxJs.comm.request = (name, payload) => {
+      const request = aelluxJs.comm.request;
+      aelluxJs.comm.request = (name, payload) => {
         if (name === "present.pop") calls.push(payload.element.id);
         return request(name, payload);
       };
       function opened(panel) {
-        return new Promise(resolve => panel.addEventListener(AelluxJs.eventName("Pop"), resolve, { once: true }));
+        return new Promise(resolve => panel.addEventListener(aelluxJs.eventName("Pop"), resolve, { once: true }));
       }
       const separate = opened(panels[0]);
       $ae(boundary).feedback.error("separate");
@@ -241,7 +241,7 @@ for (const options of [
       boundary.setAttribute("data-ae-present-target", "   ");
       boundary.setAttribute("data-ae-feedback-effect-target", "#message");
       const shared = opened(panels[0]);
-      AelluxJs.ext.feedback.error("shared", boundary, null, "shake");
+      aelluxJs.ext.feedback.error("shared", boundary, null, "shake");
       await shared;
       boundary.setAttribute("data-ae-feedback-effect-target", "motion");
       boundary.setAttribute("data-ae-feedback-message-target", "outside");
@@ -254,7 +254,7 @@ for (const options of [
       await missing;
       return { calls, first, outerHidden: document.getElementById("outer").hidden,
         message: document.getElementById("message").textContent,
-        invalidIDs: AelluxJs.diagnostics.showHistory().filter(entry => entry.code === 2011).length };
+        invalidIDs: aelluxJs.diagnostics.showHistory().filter(entry => entry.code === 2011).length };
     });
     expect(result).toEqual({ calls: ["message-panel", "message-panel", "motion-panel", "motion-panel"], first: [true, false],
       outerHidden: true, message: "shared", invalidIDs: 1 });
@@ -265,25 +265,25 @@ for (const options of [
     const result = await page.evaluate(async () => {
       const boundary = document.getElementById("boundary");
       let requests = 0;
-      boundary.addEventListener(AelluxJs.eventName("BeforePop"), () => requests++);
-      const opened = new Promise(resolve => boundary.addEventListener(AelluxJs.eventName("Pop"), resolve, { once: true }));
-      AelluxJs.ext.feedback.success("self", boundary);
+      boundary.addEventListener(aelluxJs.eventName("BeforePop"), () => requests++);
+      const opened = new Promise(resolve => boundary.addEventListener(aelluxJs.eventName("Pop"), resolve, { once: true }));
+      aelluxJs.ext.feedback.success("self", boundary);
       await opened;
       const selfVisible = !boundary.hidden;
       // These new Present containers have not been mounted.
       boundary.insertAdjacentHTML("afterend", '<aside id="unmounted" data-ae-present hidden><p id="message"></p></aside><span id="outside"></span>');
       boundary.setAttribute("data-ae-feedback-message-target", "message");
       boundary.setAttribute("data-ae-feedback-effect-target", "outside");
-      AelluxJs.ext.feedback.success("unmounted", boundary);
+      aelluxJs.ext.feedback.success("unmounted", boundary);
       const unmountedHidden = document.getElementById("unmounted").hidden;
       const rendered = document.getElementById("message").textContent;
       boundary.setAttribute("data-ae-feedback-message-target", "missing-message");
       boundary.setAttribute("data-ae-feedback-effect-target", "missing-motion");
-      AelluxJs.ext.feedback.success("missing", boundary);
+      aelluxJs.ext.feedback.success("missing", boundary);
       return { requests, selfVisible, unmountedHidden, rendered,
-        missing: AelluxJs.diagnostics.showHistory().filter(entry => entry.code === 2011)
+        missing: aelluxJs.diagnostics.showHistory().filter(entry => entry.code === 2011)
           .map(entry => entry.context.elementOrId),
-        controllerErrors: AelluxJs.diagnostics.showHistory().filter(entry => entry.code === 1004).length };
+        controllerErrors: aelluxJs.diagnostics.showHistory().filter(entry => entry.code === 1004).length };
     });
     expect(result).toEqual({ requests: 1, selfVisible: true, unmountedHidden: true, rendered: "unmounted",
       missing: ["missing-message", "missing-motion"], controllerErrors: 0 });
@@ -296,8 +296,8 @@ test("feedback continues rendering when Present is not registered", async ({ pag
     <p id="message"></p><span id="motion"></span><aside id="panel" data-ae-present hidden>Panel</aside>`,
   { mode: "basic", withPresent: false });
   const result = await page.evaluate(() => {
-    AelluxJs.ext.feedback.error("rendered", document.getElementById("boundary"), null, "shake");
-    return { absent: !AelluxJs.ext.present, hidden: document.getElementById("panel").hidden,
+    aelluxJs.ext.feedback.error("rendered", document.getElementById("boundary"), null, "shake");
+    return { absent: !aelluxJs.ext.present, hidden: document.getElementById("panel").hidden,
       message: document.getElementById("message").textContent,
       motion: document.getElementById("motion").classList.contains("ae--present-effect-shake") };
   });

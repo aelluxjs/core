@@ -6,7 +6,7 @@ aellux.js complements [Bootstrap](https://getbootstrap.com/); it does not replac
 
 - aellux.js declarations use `data-ae-*`.
 - Runtime state classes use `ae--*`.
-- aellux.js events use the `AelluxJs` prefix.
+- aellux.js events retain their existing prefix, as in `AelluxJsReady`.
 
 These namespaces are designed to avoid collisions with [Bootstrap](https://getbootstrap.com/)'s public classes and data attributes.
 
@@ -22,7 +22,7 @@ When an application's Extension stylesheet should take precedence over [Bootstra
 
 The application controls the selectors and priority of its Extension stylesheet.
 
-When adding motion or accessibility rules alongside [Bootstrap](https://getbootstrap.com/), target AelluxJs preference attributes on `<html>` so a saved local choice and the device setting both affect the result. For example, use `html[data-ae-reduced-motion="reduced"] .custom-transition { transition: none; }` for application owned motion. Apply this convention to future integration styles and scripts; use `$ae.currentPreference("reduced-motion")` in JavaScript before starting optional animations.
+When adding motion or accessibility rules alongside [Bootstrap](https://getbootstrap.com/), target aelluxJs preference attributes on `<html>` so a saved local choice and the device setting both affect the result. For example, use `html[data-ae-reduced-motion="reduced"] .custom-transition { transition: none; }` for application owned motion. Apply this convention to future integration styles and scripts; use `$ae.currentPreference("reduced-motion")` in JavaScript before starting optional animations.
 
 ## Color Modes
 

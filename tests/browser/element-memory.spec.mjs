@@ -13,7 +13,7 @@ test("global element memory restores selected attributes and inline CSS", async 
     element.style.setProperty("color", "red");
     document.body.append(element);
 
-    const memory = AelluxJs.persist.element.save(
+    const memory = aelluxJs.persist.element.save(
       element,
       ["aria-label", "data-empty", "hidden"],
       ["max-height", "transform-origin", "--panel-progress"]
@@ -43,8 +43,8 @@ test("global element memory restores selected attributes and inline CSS", async 
       origin: element.style.getPropertyValue("transform-origin"),
       progress: element.style.getPropertyValue("--panel-progress"),
       color: element.style.getPropertyValue("color"),
-      legacyAttrMem: "attrMem" in AelluxJs,
-      existingStorage: typeof AelluxJs.persist.local.set
+      legacyAttrMem: "attrMem" in aelluxJs,
+      existingStorage: typeof aelluxJs.persist.local.set
     };
     element.remove();
     return { snapshot, state };
@@ -97,7 +97,7 @@ test("element memories are independent and restore detached elements", async ({ 
     const secondValue = element.getAttribute("title");
     const firstRestored = first.restore();
     return {
-      sameAlias: $ae === AelluxJs,
+      sameAlias: $ae === aelluxJs,
       secondRestored,
       secondValue,
       firstRestored,

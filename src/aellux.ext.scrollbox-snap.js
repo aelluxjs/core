@@ -32,9 +32,9 @@
 (function (root) {
   "use strict";
 
-  const AelluxJs = root.AelluxJs;
+  const aelluxJs = root.aelluxJs;
   const extensionName = "scrollbox-snap";
-  if (!AelluxJs) throw new Error('[aellux.js] Load the boot script before the scrollbox-snap extension.');
+  if (!aelluxJs) throw new Error('[aellux.js] Load the boot script before the scrollbox-snap extension.');
 
   const
     POINTER = "pointer",
@@ -68,30 +68,30 @@
   const SNAP_FLICK_FAST_TIME_MS = 50;
   const SNAP_FLICK_MAX_DISTANCE_PX = 100;
   const SNAP_FLICK_MIN_DISTANCE_PX = 1;
-  const scrollboxAttribute = AelluxJs.attr("scrollbox");
-  const wheelAttribute = AelluxJs.attr("scrollbox-wheel-horizontal");
-  const snapAttribute = AelluxJs.attr("scrollbox-snap");
-  const itemAttribute = AelluxJs.attr("snap-item");
-  const elasticAttribute = AelluxJs.attr("scrollbox-elastic");
-  const readyClass = AelluxJs.className("snap-ready");
-  const suspendedClass = AelluxJs.className("snap-suspended");
+  const scrollboxAttribute = aelluxJs.attr("scrollbox");
+  const wheelAttribute = aelluxJs.attr("scrollbox-wheel-horizontal");
+  const snapAttribute = aelluxJs.attr("scrollbox-snap");
+  const itemAttribute = aelluxJs.attr("snap-item");
+  const elasticAttribute = aelluxJs.attr("scrollbox-elastic");
+  const readyClass = aelluxJs.className("snap-ready");
+  const suspendedClass = aelluxJs.className("snap-suspended");
   const properties = ["--ae-snap-focus"];
   const states = new Map();
   let nextLayoutId = 7000000;
 
-  AelluxJs.extAttach(extensionName, { init, destroy, next, previous, goto });
+  aelluxJs.extAttach(extensionName, { init, destroy, next, previous, goto });
 
   function init() {
-    if (!AelluxJs.registry.ext.scrollbox) AelluxJs.ext("scrollbox");
-    return AelluxJs.wait("scrollbox").then(loaded => {
+    if (!aelluxJs.registry.ext.scrollbox) aelluxJs.ext("scrollbox");
+    return aelluxJs.wait("scrollbox").then(loaded => {
       if (!loaded) throw new Error("[aellux.js] Scrollbox Snap requires the Scrollbox extension.");
 
-      AelluxJs.registerCssProperty(...properties.map(name =>
+      aelluxJs.registerCssProperty(...properties.map(name =>
         ({ name, syntax: "<number>", initialValue: "0" })));
       for (const [name, method] of Object.entries({ next, previous, goto }))
-        AelluxJs.comm.handle("scrollbox-snap." + name,
+        aelluxJs.comm.handle("scrollbox-snap." + name,
           ({ element, index, behavior }) => method(element, index, behavior), { owner: extensionName });
-      AelluxJs.mountManager.add({
+      aelluxJs.mountManager.add({
         extensionName,
         selector: `[${scrollboxAttribute}][${snapAttribute}]:not([${snapAttribute}="${FALSE}"])`,
         priority: 1,
@@ -103,8 +103,8 @@
 
   function destroy() {
     for (const element of states.keys()) unmount(element);
-    AelluxJs.comm.removeOwner(extensionName);
-    AelluxJs.mountManager.remove({ extensionName });
+    aelluxJs.comm.removeOwner(extensionName);
+    aelluxJs.mountManager.remove({ extensionName });
   }
 
   function mount(element) {
@@ -146,18 +146,18 @@
     state.onSnapGesture = event => handlePointerScroll(state, event);
     states.set(element, state);
 
-    AelluxJs.onEvent(element, SCROLL_EVENT, state.onScroll, { passive: true });
-    AelluxJs.onEvent(element, SCROLL_END_EVENT, state.onScrollEnd, { passive: true });
-    AelluxJs.onEvent(element, POINTER_DOWN_EVENT, state.onPointerDown, true);
-    AelluxJs.onEvent(element, TOUCH_START_EVENT, state.onTouchStart, { passive: true, capture: true });
-    AelluxJs.onEvent(element, INTERACTION_EVENT, state.onInteraction);
-    AelluxJs.onEvent(element, SNAP_GESTURE_EVENT, state.onSnapGesture);
-    AelluxJs.onEvent(element, SCROLLBOX_WHEEL_EVENT, state.onScrollboxWheel);
-    AelluxJs.onEvent(root, POINTER_UP_EVENT, state.onPointerEnd, true);
-    AelluxJs.onEvent(root, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
-    AelluxJs.onEvent(root, TOUCH_END_EVENT, state.onTouchEnd, true);
-    AelluxJs.onEvent(root, TOUCH_CANCEL_EVENT, state.onTouchEnd, true);
-    AelluxJs.onEvent(root, "$blur", state.onBlur);
+    aelluxJs.onEvent(element, SCROLL_EVENT, state.onScroll, { passive: true });
+    aelluxJs.onEvent(element, SCROLL_END_EVENT, state.onScrollEnd, { passive: true });
+    aelluxJs.onEvent(element, POINTER_DOWN_EVENT, state.onPointerDown, true);
+    aelluxJs.onEvent(element, TOUCH_START_EVENT, state.onTouchStart, { passive: true, capture: true });
+    aelluxJs.onEvent(element, INTERACTION_EVENT, state.onInteraction);
+    aelluxJs.onEvent(element, SNAP_GESTURE_EVENT, state.onSnapGesture);
+    aelluxJs.onEvent(element, SCROLLBOX_WHEEL_EVENT, state.onScrollboxWheel);
+    aelluxJs.onEvent(root, POINTER_UP_EVENT, state.onPointerEnd, true);
+    aelluxJs.onEvent(root, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
+    aelluxJs.onEvent(root, TOUCH_END_EVENT, state.onTouchEnd, true);
+    aelluxJs.onEvent(root, TOUCH_CANCEL_EVENT, state.onTouchEnd, true);
+    aelluxJs.onEvent(root, "$blur", state.onBlur);
     observe(state);
     configure(state);
   }
@@ -171,25 +171,25 @@
     const state = states.get(element);
     if (!state) return;
     state.disposed = true;
-    AelluxJs.waitLayout.cancel(state.valuesLayoutId);
+    aelluxJs.waitLayout.cancel(state.valuesLayoutId);
     cancelRelease(state);
     clearTimer(state, "timeout");
     clearTimer(state, "wheelTimeout");
     clearTimer(state, "edgeWheelTimeout");
     state.observer?.disconnect();
     state.resizeObserver?.disconnect();
-    AelluxJs.offEvent(element, SCROLL_EVENT, state.onScroll);
-    AelluxJs.offEvent(element, SCROLL_END_EVENT, state.onScrollEnd);
-    AelluxJs.offEvent(element, POINTER_DOWN_EVENT, state.onPointerDown, true);
-    AelluxJs.offEvent(element, TOUCH_START_EVENT, state.onTouchStart, true);
-    AelluxJs.offEvent(element, INTERACTION_EVENT, state.onInteraction);
-    AelluxJs.offEvent(element, SNAP_GESTURE_EVENT, state.onSnapGesture);
-    AelluxJs.offEvent(element, SCROLLBOX_WHEEL_EVENT, state.onScrollboxWheel);
-    AelluxJs.offEvent(root, POINTER_UP_EVENT, state.onPointerEnd, true);
-    AelluxJs.offEvent(root, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
-    AelluxJs.offEvent(root, TOUCH_END_EVENT, state.onTouchEnd, true);
-    AelluxJs.offEvent(root, TOUCH_CANCEL_EVENT, state.onTouchEnd, true);
-    AelluxJs.offEvent(root, "$blur", state.onBlur);
+    aelluxJs.offEvent(element, SCROLL_EVENT, state.onScroll);
+    aelluxJs.offEvent(element, SCROLL_END_EVENT, state.onScrollEnd);
+    aelluxJs.offEvent(element, POINTER_DOWN_EVENT, state.onPointerDown, true);
+    aelluxJs.offEvent(element, TOUCH_START_EVENT, state.onTouchStart, true);
+    aelluxJs.offEvent(element, INTERACTION_EVENT, state.onInteraction);
+    aelluxJs.offEvent(element, SNAP_GESTURE_EVENT, state.onSnapGesture);
+    aelluxJs.offEvent(element, SCROLLBOX_WHEEL_EVENT, state.onScrollboxWheel);
+    aelluxJs.offEvent(root, POINTER_UP_EVENT, state.onPointerEnd, true);
+    aelluxJs.offEvent(root, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
+    aelluxJs.offEvent(root, TOUCH_END_EVENT, state.onTouchEnd, true);
+    aelluxJs.offEvent(root, TOUCH_CANCEL_EVENT, state.onTouchEnd, true);
+    aelluxJs.offEvent(root, "$blur", state.onBlur);
     restoreItems(state);
     element.classList.remove(readyClass, suspendedClass);
     states.delete(element);
@@ -211,7 +211,7 @@
       for (const item of items) state.resizeObserver.observe(item);
     }
     if (!items.length) {
-      AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_SCROLLBOX_SNAP_ITEMS,
+      aelluxJs.diagnostics.error(aelluxJs.diagnostics.ERROR_SCROLLBOX_SNAP_ITEMS,
         { extension: extensionName, element: state.element, attribute: itemAttribute,
           reason: "No eligible snap items belong to this Scrollbox.",
           suggestion: "Add data-ae-snap-item to content items inside this Scrollbox, outside nested Scrollboxes." });
@@ -274,7 +274,7 @@
   function updateValues(state) {
     if (state.disposed) return;
     // Reusing the ID replaces any pending publication with the latest sample.
-    AelluxJs.waitLayout.sequence(state.valuesLayoutId, { read: () => {
+    aelluxJs.waitLayout.sequence(state.valuesLayoutId, { read: () => {
       const axis = axisFor(state), element = state.element, root = state.root;
       const rect = element.getBoundingClientRect();
       const size = axis === HORIZONTAL ? element.clientWidth : element.clientHeight;
@@ -288,13 +288,13 @@
         if (!state.root.contains(item) || !item.hasAttribute(itemAttribute) ||
           item.closest(`[${scrollboxAttribute}]`) !== state.element) continue;
         if (!state.savedItems.has(item))
-          state.savedItems.set(item, AelluxJs.persist.element.save(item, [], properties));
+          state.savedItems.set(item, aelluxJs.persist.element.save(item, [], properties));
         // WebKit cannot downgrade an important registered value in one write.
         if (item.style.getPropertyPriority(properties[0])) item.style.removeProperty(properties[0]);
         item.style.setProperty(properties[0], value);
       }
     }, abort: () => state.disposed }).catch(cause => {
-      AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
+      aelluxJs.diagnostics.error(aelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
         { cause, extension: extensionName, element: state.element, method: "update" });
     });
   }
@@ -515,7 +515,7 @@
     const flick = state.flick;
     state.flick = null;
     goto(state.element, flick !== null ? flick : selectedIndex(state, true),
-      AelluxJs.currentPreference("reduced-motion") === "reduced" ? INSTANT : SMOOTH, flick === null);
+      aelluxJs.currentPreference("reduced-motion") === "reduced" ? INSTANT : SMOOTH, flick === null);
   }
 
   function releaseReady(state) {
@@ -546,7 +546,7 @@
     state.index = index;
     state.notifiedItem = item;
     state.notifiedIndex = index;
-    AelluxJs.dispatchFrom(state.element, "ScrollboxSnapChange", {
+    aelluxJs.dispatchFrom(state.element, "ScrollboxSnapChange", {
       detail: { item, index, previousIndex, axis: axisFor(state) }
     });
   }

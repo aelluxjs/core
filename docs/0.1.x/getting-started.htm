@@ -38,7 +38,7 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-PgrxAHrkt22+F09vWG2iuTeiqQ+UCUeSkyAe/nibdP/XtRk8nTZ+VjetKW+okArJ" crossorigin="anonymous">
+  integrity="sha384-q4bpBk5Vqct9IR80W+4o8g4BlPq84mWWb0mV47Q76mgYStKp6AKgCBgxRwr2FPAE" crossorigin="anonymous">
 </head>
 
 <body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
@@ -191,6 +191,13 @@
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
                                         aellux.js Docs                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/brand-naming.htm" data-ae-overflow-marquee="190px">
+                                        Brand Naming and Migration                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1 active"
@@ -675,10 +682,10 @@
 
           <div id="doc-navlinks" ajax-load="doc-navlinks">
             <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
-      <a href="/core/docs/0.1.x/index.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
+      <a href="/core/docs/0.1.x/brand-naming.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
       ← <span class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill"
         style="max-width:200px" data-ae-overflow-marquee="80">
-        Home      </span>
+        Brand Naming and Migration      </span>
     </a>
 
                   <a href="/core/docs/0.1.x/compatibility.htm"
@@ -704,7 +711,7 @@ npm run build
 <p>Full automatically bundles all Core primitives, the reusable building blocks for components and new behaviors. It does not embed every Extension available in Core: optional navigation and environment Extensions, such as Ajax Href and PWA, load separately on demand. Full registers them automatically through the boot script and runtime:</p>
 <pre><code class="language-html">&lt;script src=&quot;./dist/aellux.js&quot;&gt;&lt;/script&gt;
 &lt;script&gt;
-  AelluxJs.init({ mode: &quot;full&quot; });
+  aelluxJs.init({ mode: &quot;full&quot; });
 &lt;/script&gt;
 </code></pre>
 <p>The Full runtime is loaded by the aellux.js boot script. Its <strong>Bundled Extensions</strong> are Adaptive, Anchor, Feedback, Focus, Input, Preference, Present, Scrollbox, State Navigation and Viewport. Preference and State Navigation initialize at startup; the remaining implementations initialize when matching markup is mounted, without separate script requests.</p>
@@ -730,8 +737,8 @@ $ae.init({ mode: &quot;basic&quot; });
 <p>Use <code>aellux.min.js</code> to select the matching minified runtime and Extension files.</p>
 <h2>Distribution</h2>
 <p>The boot, runtimes, and Extensions are classic scripts isolated in IIFEs. The separate <code>aellux.esm.js</code> and <code>aellux.esm.min.js</code> module entries export the shared Core API as their default. They do not replace the browser boot script, which starts the runtime through <code>$ae.init()</code>:</p>
-<pre><code class="language-js">import AelluxJs from &quot;@aelluxjs/core&quot;;
-console.log(AelluxJs.attr(&quot;scrollbox&quot;));
+<pre><code class="language-js">import aelluxJs from &quot;@aelluxjs/core&quot;;
+console.log(aelluxJs.attr(&quot;scrollbox&quot;));
 </code></pre>
 <p>The source file <code>src/aellux.full.js</code> is the bundler entry used to generate <code>aellux.full.js</code> and <code>aellux.full.min.js</code>.</p>
 <p>Serve the repository over HTTP to run the browser validation pages linked from <code>tests/index.htm</code>.</p>
@@ -739,10 +746,10 @@ console.log(AelluxJs.attr(&quot;scrollbox&quot;));
 
           <div id="doc-navlinks2" ajax-load="doc-navlinks2">
             <div class="d-flex justify-content-between flex-row gap-2 p-2 pb-4 px-0">
-      <a href="/core/docs/0.1.x/index.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
+      <a href="/core/docs/0.1.x/brand-naming.htm" class="text-decoration-none d-inline-flex flex-row gap-2" style="max-width: 45%;">
       ← <span class="text-decoration-underline text-truncate overflow-hidden d-inline-block align-middle flex-fill"
         style="max-width:200px" data-ae-overflow-marquee="80">
-        Home      </span>
+        Brand Naming and Migration      </span>
     </a>
 
                   <a href="/core/docs/0.1.x/compatibility.htm"
@@ -776,7 +783,7 @@ console.log(AelluxJs.attr(&quot;scrollbox&quot;));
                 and
                 <a style="color:inherit!important;" href="https://github.com/" target="_blank"
                   rel="noopener noreferrer">GitHub</a>
-                for the tools and technologies that supported the development of Aellux.
+                for the tools and technologies that supported the development of aellux.js.
               </div>
             </div>
           </footer>

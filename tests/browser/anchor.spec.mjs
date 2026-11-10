@@ -9,11 +9,11 @@ async function startAnchor(page, markup, options = {}) {
       window.IntersectionObserver = class { observe() {} disconnect() {} };
     }
     document.body.innerHTML = html;
-    AelluxJs.ext("anchor", { loadStyle: true });
+    aelluxJs.ext("anchor", { loadStyle: true });
   }, { html: markup, disableObservers: options.disableObservers });
   await page.addScriptTag({ url: "/dist/aellux.ext.anchor.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
-  await expect.poll(() => page.evaluate(() => AelluxJs.ext.anchor?.initialized)).toBe(true);
+  await page.evaluate(() => aelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => aelluxJs.ext.anchor?.initialized)).toBe(true);
 }
 
 const properties = [
@@ -57,7 +57,7 @@ test("anchor follows its target's nearest Present opacity and allows CSS overrid
 
   await page.locator("#anchor").evaluate(element =>
     element.setAttribute("data-ae-anchor-target", "plain"));
-  await page.evaluate(() => AelluxJs.mountManager.update(document.getElementById("anchor"), "anchor"));
+  await page.evaluate(() => aelluxJs.mountManager.update(document.getElementById("anchor"), "anchor"));
   await expect.poll(opacity).toEqual({ variable: "1", computed: "0.9" });
 });
 
@@ -144,7 +144,7 @@ test("anchor positions against a shared containing block and updates without mov
   await page.evaluate(() => {
     const element = document.getElementById("anchor");
     element.setAttribute("data-ae-anchor", "bottom-right:top-left");
-    return AelluxJs.mountManager.update(element, "anchor");
+    return aelluxJs.mountManager.update(element, "anchor");
   });
   expect(await read()).toMatchObject({ x: "200px", y: "100px", originX: "0%", originY: "0%" });
   expect((await read()).targetStyle).toContain("left: 100px");
@@ -167,7 +167,7 @@ test("anchor maps every self pivot and changes origin with viewport fallback", a
     const actual = await page.evaluate(async pivot => {
       const element = document.getElementById("anchor");
       element.setAttribute("data-ae-anchor", `center:${pivot}`);
-      await AelluxJs.mountManager.update(element, "anchor");
+      await aelluxJs.mountManager.update(element, "anchor");
       return {
         variables: ["--ae-anchor-origin-x", "--ae-anchor-origin-y"]
           .map(name => element.style.getPropertyValue(name)),
@@ -186,7 +186,7 @@ test("anchor maps every self pivot and changes origin with viewport fallback", a
     target.style.top = "550px";
     const element = document.getElementById("anchor");
     element.setAttribute("data-ae-anchor", "bottom-center:top-center,top-center:bottom-center");
-    await AelluxJs.mountManager.update(element, "anchor");
+    await aelluxJs.mountManager.update(element, "anchor");
   });
   expect(await page.locator("#anchor").evaluate(element => ({
     y: element.style.getPropertyValue("--ae-anchor-y"),
@@ -232,10 +232,10 @@ test("intersection changes schedule placement updates and unmount disconnects th
       <div id="target" style="position:absolute;left:20px;top:10px;width:30px;height:20px"></div>
       <div id="anchor" data-ae-anchor-target="target" data-ae-anchor="top-left:top-left"
         style="width:10px;height:10px"></div></div>`;
-    AelluxJs.ext("anchor", { loadStyle: true });
+    aelluxJs.ext("anchor", { loadStyle: true });
   });
   await page.addScriptTag({ url: "/dist/aellux.ext.anchor.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await page.evaluate(() => aelluxJs.init({ mode: "basic" }));
   await expect.poll(() => page.locator("#anchor").evaluate(element =>
     element.style.getPropertyValue("--ae-anchor-x"))).toBe("20px");
   expect(await page.evaluate(() => Array.from(window.anchorIntersectionObservers[0].observed,
@@ -246,7 +246,7 @@ test("intersection changes schedule placement updates and unmount disconnects th
   });
   await expect.poll(() => page.locator("#anchor").evaluate(element =>
     element.style.getPropertyValue("--ae-anchor-x"))).toBe("45px");
-  await page.evaluate(() => AelluxJs.unmount(document.getElementById("anchor"), "anchor"));
+  await page.evaluate(() => aelluxJs.unmount(document.getElementById("anchor"), "anchor"));
   expect(await page.evaluate(() => window.anchorIntersectionObservers[0].observed.size)).toBe(0);
 });
 
@@ -270,10 +270,10 @@ test("layout event on the shared positioning parent replaces position polling", 
         style="width:10px;height:10px"></div>
       <div id="other" data-ae-anchor-target="target" data-ae-anchor="top-left:top-left"
         style="width:10px;height:10px"></div></div>`;
-    AelluxJs.ext("anchor", { loadStyle: true });
+    aelluxJs.ext("anchor", { loadStyle: true });
   });
   await page.addScriptTag({ url: "/dist/aellux.ext.anchor.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
+  await page.evaluate(() => aelluxJs.init({ mode: "basic" }));
   const x = () => page.locator("#anchor").evaluate(element =>
     element.style.getPropertyValue("--ae-anchor-x")
   );
@@ -286,7 +286,7 @@ test("layout event on the shared positioning parent replaces position polling", 
   ));
   await expect.poll(x).toBe("45px");
   await page.evaluate(async () => {
-    await AelluxJs.unmount(document.getElementById("anchor"), "anchor");
+    await aelluxJs.unmount(document.getElementById("anchor"), "anchor");
     document.getElementById("target").style.left = "60px";
     document.getElementById("target").dispatchEvent(
       new CustomEvent("AelluxJsLayout", { bubbles: true })
@@ -380,7 +380,7 @@ test("present layout event activates an anchor whose target started hidden", asy
       <div id="anchor" data-ae-anchor-target="target" data-ae-anchor="top-left:top-left"
         style="width:10px;height:10px"></div>
     </div>`;
-    AelluxJs.init({ mode: "full" });
+    aelluxJs.init({ mode: "full" });
   });
   await expect.poll(() => page.evaluate(() =>
     typeof $ae("panel")?.present?.pop === "function"
@@ -410,10 +410,10 @@ test("Anchor follows intermediate Present frames under CSS Motion control", asyn
         <div id="anchor" data-ae-anchor-target="panel" data-ae-anchor="top-left:top-left"
           style="width:10px;height:10px"></div>
       </div>`;
-    AelluxJs.init({ mode: "full", cssMotionController: true });
+    aelluxJs.init({ mode: "full", cssMotionController: true });
   });
   await expect.poll(() => page.evaluate(() =>
-    typeof AelluxJs("panel")?.present?.pop)).toBe("function");
+    typeof aelluxJs("panel")?.present?.pop)).toBe("function");
 
   const sample = await page.evaluate(async () => {
     const panel = document.getElementById("panel");
@@ -428,7 +428,7 @@ test("Anchor follows intermediate Present frames under CSS Motion control", asyn
     panel.addEventListener("AelluxJsLayout", event => { layoutDetail = event.detail; }, { once: true });
     const started = new Promise(resolve =>
       panel.addEventListener("AelluxJsPopping", resolve, { once: true }));
-    const completed = AelluxJs(panel).present.pop();
+    const completed = aelluxJs(panel).present.pop();
     await started;
     await completed;
     while (Math.abs(parseFloat(anchor.style.getPropertyValue("--ae-anchor-x")) - 140) > 0.5) {
@@ -460,11 +460,11 @@ test("hidden Present targets hide their anchors without a reference context diag
     </div>`);
 
   const update = () => page.evaluate(async () => {
-    await AelluxJs.mountManager.update(document.getElementById("anchor"), "anchor");
+    await aelluxJs.mountManager.update(document.getElementById("anchor"), "anchor");
     return {
       anchored: document.getElementById("anchor").classList.contains("ae--anchored"),
-      diagnostics: AelluxJs.diagnostics.showHistory(100).filter(entry =>
-        entry.code === AelluxJs.diagnostics.ERROR_ANCHOR_REFERENCE_CONTEXT.code).length
+      diagnostics: aelluxJs.diagnostics.showHistory(100).filter(entry =>
+        entry.code === aelluxJs.diagnostics.ERROR_ANCHOR_REFERENCE_CONTEXT.code).length
     };
   });
   expect(await update()).toEqual({ anchored: false, diagnostics: 0 });
@@ -535,8 +535,8 @@ test("different containing blocks report once and preserve positioning", async (
   expect(initial[5]).toEqual(["7px", ""]);
 
   const count = () => page.evaluate(() =>
-    AelluxJs.diagnostics.showHistory(100).filter(entry =>
-      entry.code === AelluxJs.diagnostics.ERROR_ANCHOR_REFERENCE_CONTEXT.code
+    aelluxJs.diagnostics.showHistory(100).filter(entry =>
+      entry.code === aelluxJs.diagnostics.ERROR_ANCHOR_REFERENCE_CONTEXT.code
     ).length
   );
   await expect.poll(count).toBe(1);
@@ -566,7 +566,7 @@ test("unmount restores owned inline values and priorities", async ({ page }) => 
   await expect(page.locator("#anchor")).toHaveClass(/ae--anchored/);
   // Application positioning overrides the weak defaults while mounted too.
   await expect(page.locator("#anchor")).toHaveCSS("position", "relative");
-  await page.evaluate(() => AelluxJs.unmount(document.getElementById("anchor"), "anchor"));
+  await page.evaluate(() => aelluxJs.unmount(document.getElementById("anchor"), "anchor"));
   await expect(page.locator("#anchor")).not.toHaveClass(/ae--anchored/);
   const restored = await page.locator("#anchor").evaluate((element, names) =>
     names.map(name => [element.style.getPropertyValue(name), element.style.getPropertyPriority(name)]),
@@ -594,18 +594,18 @@ test("legacy bundle completes asynchronous anchor updates", async ({ page }) => 
       </div>`;
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "full", forceLegacy: true }));
+  await page.evaluate(() => aelluxJs.init({ mode: "full", forceLegacy: true }));
   await expect.poll(() => page.locator("#anchor").evaluate(element =>
     element.style.getPropertyValue("--ae-anchor-x")
   )).toBe("30px");
   await page.evaluate(async () => {
     document.getElementById("target").style.left = "50px";
-    await AelluxJs.mountManager.update(document.getElementById("anchor"), "anchor");
+    await aelluxJs.mountManager.update(document.getElementById("anchor"), "anchor");
   });
   expect(await page.locator("#anchor").evaluate(element =>
     element.style.getPropertyValue("--ae-anchor-x")
   )).toBe("50px");
-  await page.evaluate(() => AelluxJs.unmount(document.getElementById("anchor"), "anchor"));
+  await page.evaluate(() => aelluxJs.unmount(document.getElementById("anchor"), "anchor"));
   expect(await page.locator("#anchor").evaluate(element =>
     element.style.getPropertyValue("--ae-anchor-x")
   )).toBe("");

@@ -4,20 +4,20 @@ async function start(page, markup, { deferPresent = false, ...options } = {}) {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(({ deferPresent, options }) => {
-    if (deferPresent) AelluxJs.ext("present", { load: false });
-    AelluxJs.init({
+    if (deferPresent) aelluxJs.ext("present", { load: false });
+    aelluxJs.init({
       mode: "full", environment: "development", verboseLevel: "error", skipGlobalMount: true, ...options
     });
   }, { deferPresent, options });
-  await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
+  await expect.poll(() => page.evaluate(() => aelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
   await page.evaluate(async markup => {
     document.body.innerHTML = markup;
-    await AelluxJs.mount(document);
+    await aelluxJs.mount(document);
   }, markup);
 }
 
 async function diagnostics(page) {
-  return page.evaluate(() => AelluxJs.diagnostics.showHistory().map(entry => ({
+  return page.evaluate(() => aelluxJs.diagnostics.showHistory().map(entry => ({
     code: entry.code, element: entry.context?.element?.id,
     attribute: entry.context?.attribute, value: entry.context?.value,
     reason: entry.context?.reason, suggestion: entry.context?.suggestion
@@ -39,7 +39,7 @@ for (const environment of ["development", "production"]) test(`two-axis fade wit
   const warnings = (await diagnostics(page)).filter(entry => entry.code === 2034);
   expect(warnings.map(entry => entry.element).sort()).toEqual(environment === "development" ? ["empty", "warn"] : []);
   if (warnings.length) expect(warnings[0].suggestion).toContain('data-ae-scrollbar-parent="wrapper"');
-  await page.evaluate(() => AelluxJs.mountManager.update(document));
+  await page.evaluate(() => aelluxJs.mountManager.update(document));
   expect((await diagnostics(page)).filter(entry => entry.code === 2034)).toHaveLength(warnings.length);
 });
 
@@ -54,11 +54,11 @@ for (const forceLegacy of [false, true]) test(`initial HTML source diagnoses dup
   });
   await page.goto("/duplicate-source.html");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(forceLegacy => AelluxJs.init({
+  await page.evaluate(forceLegacy => aelluxJs.init({
     mode: "basic", environment: "development", verboseLevel: "error", forceLegacy
   }), forceLegacy);
-  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(entry => entry.code === 2032).length)).toBe(3);
-  const entries = await page.evaluate(() => AelluxJs.diagnostics.showHistory()
+  await expect.poll(() => page.evaluate(() => aelluxJs.diagnostics.showHistory().filter(entry => entry.code === 2032).length)).toBe(3);
+  const entries = await page.evaluate(() => aelluxJs.diagnostics.showHistory()
     .filter(entry => entry.code === 2032).map(entry => entry.context));
   expect(entries).toEqual(expect.arrayContaining([
     expect.objectContaining({ attribute: "class", value: "first", values: ["first", "discarded"], line: 2,
@@ -69,8 +69,8 @@ for (const forceLegacy of [false, true]) test(`initial HTML source diagnoses dup
   await expect(page.locator("#duplicate")).toHaveClass("first");
   await expect(page.locator("#duplicate")).toBeVisible();
   await page.evaluate(async () => {
-    await AelluxJs.mount(document);
-    await AelluxJs.mountManager.update(document);
+    await aelluxJs.mount(document);
+    await aelluxJs.mountManager.update(document);
   });
   expect((await diagnostics(page)).filter(entry => entry.code === 2032)).toHaveLength(3);
   expect(requests).toBe(2); // Initial navigation and one source inspection.
@@ -79,17 +79,17 @@ for (const forceLegacy of [false, true]) test(`initial HTML source diagnoses dup
 test("source inspection respects mount scope and never blocks a mount on a pending request", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic", environment: "development", skipGlobalMount: true }));
-  await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
+  await page.evaluate(() => aelluxJs.init({ mode: "basic", environment: "development", skipGlobalMount: true }));
+  await expect.poll(() => page.evaluate(() => aelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
   const result = await page.evaluate(async () => {
     let requests = 0;
-    AelluxJs.request = () => { requests++; return new Promise(() => {}); };
-    await AelluxJs.mount(document.body);
-    await AelluxJs.mount(document, []);
-    await AelluxJs.mountManager.update(document);
+    aelluxJs.request = () => { requests++; return new Promise(() => {}); };
+    await aelluxJs.mount(document.body);
+    await aelluxJs.mount(document, []);
+    await aelluxJs.mountManager.update(document);
     const scopedRequests = requests;
-    await AelluxJs.mount(document);
-    await AelluxJs.mount(document);
+    await aelluxJs.mount(document);
+    await aelluxJs.mount(document);
     return { scopedRequests, requests };
   });
   expect(result).toEqual({ scopedRequests: 0, requests: 1 });
@@ -98,29 +98,29 @@ test("source inspection respects mount scope and never blocks a mount on a pendi
 test("unavailable initial source remains optional and is not requested repeatedly", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic", environment: "development", skipGlobalMount: true }));
-  await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
+  await page.evaluate(() => aelluxJs.init({ mode: "basic", environment: "development", skipGlobalMount: true }));
+  await expect.poll(() => page.evaluate(() => aelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
   const result = await page.evaluate(async () => {
     let requests = 0;
-    AelluxJs.request = () => { requests++; return Promise.reject(new Error("Source unavailable")); };
-    const mounted = await AelluxJs.mount(document);
-    await AelluxJs.mount(document);
-    return { requests, mounted, errors: AelluxJs.diagnostics.showHistory().filter(entry => entry.level === 0) };
+    aelluxJs.request = () => { requests++; return Promise.reject(new Error("Source unavailable")); };
+    const mounted = await aelluxJs.mount(document);
+    await aelluxJs.mount(document);
+    return { requests, mounted, errors: aelluxJs.diagnostics.showHistory().filter(entry => entry.level === 0) };
   });
   expect(result).toEqual({ requests: 1, mounted: [], errors: [] });
 });
 
 for (const forceLegacy of [false, true]) test(`AJAX diagnoses the raw response before duplicate attributes are discarded (${forceLegacy ? "Legacy" : "Modern"})`, async ({ page }) => {
   await start(page, '<main id="content">old</main>', { forceLegacy });
-  await page.evaluate(async () => { AelluxJs.ext("ajax-href"); await AelluxJs.wait("ajax-href"); });
+  await page.evaluate(async () => { aelluxJs.ext("ajax-href"); await aelluxJs.wait("ajax-href"); });
   let requests = 0;
   await page.route("**/duplicate-response", route => {
     requests++;
     return route.fulfill({ contentType: "text/html", body: '<main id="content" class="first" class="second" style="color:red" STYLE="display:none">new</main>' });
   });
   await page.evaluate(async () => {
-    await AelluxJs.ext.ajaxHref.load("/duplicate-response", "#content", { ignoreHistory: true });
-    await AelluxJs.ext.ajaxHref.load("/duplicate-response", "#content", { ignoreHistory: true });
+    await aelluxJs.ext.ajaxHref.load("/duplicate-response", "#content", { ignoreHistory: true });
+    await aelluxJs.ext.ajaxHref.load("/duplicate-response", "#content", { ignoreHistory: true });
   });
   expect(requests).toBe(2); // No source refetch for either AJAX response.
   const entries = (await diagnostics(page)).filter(entry => entry.code === 2032);
@@ -133,14 +133,14 @@ for (const forceLegacy of [false, true]) test(`AJAX diagnoses the raw response b
 
 test("production neither refetches initial HTML nor inspects duplicate AJAX attributes", async ({ page }) => {
   await start(page, '<main id="content">old</main>', { environment: "production", verboseLevel: "warn" });
-  await page.evaluate(async () => { AelluxJs.ext("ajax-href"); await AelluxJs.wait("ajax-href"); });
+  await page.evaluate(async () => { aelluxJs.ext("ajax-href"); await aelluxJs.wait("ajax-href"); });
   await page.route("**/duplicate-response", route => route.fulfill({ contentType: "text/html", body: '<main id="content" class="a" class="b">new</main>' }));
   const requests = await page.evaluate(async () => {
-    const original = AelluxJs.request;
+    const original = aelluxJs.request;
     const requests = [];
-    AelluxJs.request = (...args) => { requests.push(args[0]); return original(...args); };
-    await AelluxJs.mount(document);
-    await AelluxJs.ext.ajaxHref.load("/duplicate-response", "#content", { ignoreHistory: true });
+    aelluxJs.request = (...args) => { requests.push(args[0]); return original(...args); };
+    await aelluxJs.mount(document);
+    await aelluxJs.ext.ajaxHref.load("/duplicate-response", "#content", { ignoreHistory: true });
     return requests;
   });
   expect(requests).toEqual(["/duplicate-response"]);
@@ -168,13 +168,13 @@ for (const forceLegacy of [false, true]) test(`declarations diagnose typos, targ
     expect(entry.attribute).toBeTruthy();
   }
   const count = entries.length;
-  await page.evaluate(() => AelluxJs.mount(document));
+  await page.evaluate(() => aelluxJs.mount(document));
   expect((await diagnostics(page)).length).toBe(count);
 });
 
 test("basic reports missing Extensions after mounting and gives actionable controller errors", async ({ page }) => {
   await start(page, '<div id="unmounted" data-ae-present></div>', { mode: "basic", deferPresent: true });
-  await page.evaluate(() => AelluxJs("unmounted"));
+  await page.evaluate(() => aelluxJs("unmounted"));
   expect(await diagnostics(page)).toEqual(expect.arrayContaining([
     expect.objectContaining({ code: 2025, element: "unmounted", suggestion: expect.stringContaining('wait("present")') }),
     expect.objectContaining({ code: 1004, element: "unmounted", suggestion: expect.stringContaining("await $ae.mount") })
@@ -194,11 +194,11 @@ for (const forceLegacy of [false, true]) test(`Present/Anchor transform conflict
     expect.objectContaining({ element: "conflict", attribute: "data-ae-present", value: "opacity transform",
       reason: expect.stringContaining("Anchor takes priority"), suggestion: expect.stringContaining("child") })
   ]));
-  await page.evaluate(() => AelluxJs.mount(document));
+  await page.evaluate(() => aelluxJs.mount(document));
   expect((await diagnostics(page)).filter(entry => entry.code === 2031)).toHaveLength(2);
   await page.evaluate(async () => {
     document.getElementById("safe").setAttribute("data-ae-present", "transform");
-    await AelluxJs.mountManager.update("safe", "anchor");
+    await aelluxJs.mountManager.update("safe", "anchor");
   });
   expect((await diagnostics(page)).filter(entry => entry.code === 2031).map(entry => entry.element))
     .toContain("safe");
@@ -213,7 +213,7 @@ test("scoped mounts validate only the requested Extensions", async ({ page }) =>
   await start(page, "");
   await page.evaluate(async () => {
     document.body.innerHTML = '<div data-ae-presnt></div><div data-ae-point="bad"></div><input data-ae-focus="wrong">';
-    await AelluxJs.mount(document, "input");
+    await aelluxJs.mount(document, "input");
   });
   const entries = (await diagnostics(page)).filter(entry => entry.code >= 2024 && entry.code <= 2030);
   expect(entries).toHaveLength(1);
@@ -223,12 +223,12 @@ test("scoped mounts validate only the requested Extensions", async ({ page }) =>
 test("custom selector attributes and unrelated application data are accepted", async ({ page }) => {
   await start(page, "");
   await page.evaluate(async () => {
-    AelluxJs.ext("custom", { loadWhen: "[data-ae-presnt]" });
-    AelluxJs.extAttach("custom", { init() {
-      AelluxJs.mountManager.add({ extensionName: "custom", selector: "[data-ae-presnt]", mount() {} });
+    aelluxJs.ext("custom", { loadWhen: "[data-ae-presnt]" });
+    aelluxJs.extAttach("custom", { init() {
+      aelluxJs.mountManager.add({ extensionName: "custom", selector: "[data-ae-presnt]", mount() {} });
     }});
     document.body.innerHTML = '<div data-ae-presnt data-ae-application-owned></div>';
-    await AelluxJs.mount(document);
+    await aelluxJs.mount(document);
   });
   expect((await diagnostics(page)).filter(entry => entry.code === 2024)).toEqual([]);
 });
@@ -272,7 +272,7 @@ test("valid declarations and hidden Present targets remain quiet", async ({ page
     <div id="anchor" data-ae-anchor="bottom-center:top-center" data-ae-anchor-target="target"></div>
     </div><button data-ae-present-trigger="pop" data-ae-present-target="target"></button><input data-ae-focus="next">
     <div data-ae-point="0"></div>`);
-  await page.evaluate(() => AelluxJs.mountManager.update(document));
+  await page.evaluate(() => aelluxJs.mountManager.update(document));
   expect((await diagnostics(page)).filter(entry => entry.code >= 2024 && entry.code <= 2030)).toEqual([]);
 });
 
@@ -281,7 +281,7 @@ test("Anchor targeting a group with no selected member remains quiet", async ({ 
     <section id="group" data-ae-present-group data-ae-present-active="">
       <div id="member" data-ae-present hidden style="position:absolute"></div></section>
     <div id="anchor" data-ae-anchor="bottom-center:top-center" data-ae-anchor-target="group"></div></div>`);
-  await page.evaluate(() => AelluxJs.mountManager.update(document));
+  await page.evaluate(() => aelluxJs.mountManager.update(document));
   expect((await diagnostics(page)).filter(entry => entry.code === 2027)).toEqual([]);
 });
 
@@ -289,7 +289,7 @@ test("Anchor group targets explain a missing Present Extension", async ({ page }
   await start(page, `<div style="position:relative"><section id="group" data-ae-present-group>
     <div id="member" data-ae-present>Member</div></section>
     <div id="anchor" data-ae-anchor="bottom-left:top-left" data-ae-anchor-target="group"></div></div>`, { mode: "basic", deferPresent: true });
-  await page.evaluate(async () => { AelluxJs.ext("anchor", { loadStyle: true }); await AelluxJs.mount(document, "anchor"); });
+  await page.evaluate(async () => { aelluxJs.ext("anchor", { loadStyle: true }); await aelluxJs.mount(document, "anchor"); });
   expect(await diagnostics(page)).toEqual(expect.arrayContaining([
     expect.objectContaining({ code: 2025, element: "anchor", attribute: "data-ae-anchor-target", reason: "A Present Group target requires Present." })
   ]));
@@ -317,31 +317,31 @@ test("runtime target failures are diagnosed in production after declarations cha
 test("Adaptive rejects invalid numeric boundaries and preserves finite defaults", async ({ page }) => {
   await start(page, "");
   await page.evaluate(async () => {
-    AelluxJs.options.extensions.adaptive = { adaptiveParams: {
+    aelluxJs.options.extensions.adaptive = { adaptiveParams: {
       ratioShapes: { vertical: 3, horizontal: 1 }, minSizes: { small: -1, large: "huge" }
     }};
     document.body.innerHTML = '<div data-ae-adaptive></div>';
-    await AelluxJs.mount(document);
+    await aelluxJs.mount(document);
   });
   const entries = (await diagnostics(page)).filter(entry => entry.code === 2026);
   expect(entries.map(entry => entry.attribute)).toEqual(expect.arrayContaining([
     "adaptiveParams.ratioShapes", "adaptiveParams.minSizes.small", "adaptiveParams.minSizes.large"
   ]));
-  expect(await page.evaluate(() => AelluxJs.ext.adaptive.adaptiveParams.minSizes.small)).toBe(480);
+  expect(await page.evaluate(() => aelluxJs.ext.adaptive.adaptiveParams.minSizes.small)).toBe(480);
 });
 
 test("AJAX reports invalid, absent current, and absent response selectors", async ({ page }) => {
   await start(page, '<main id="content">original</main>');
-  await page.evaluate(() => AelluxJs.wait("ajax-href"));
+  await page.evaluate(() => aelluxJs.wait("ajax-href"));
   const requests = [];
   await page.route("**/diagnostic-response", route => {
     requests.push(route.request().url());
     return route.fulfill({ contentType: "text/html", body: "<main id=other>response</main>" });
   });
   await page.evaluate(async () => {
-    await AelluxJs.ext.ajaxHref.load("/diagnostic-response", "[");
-    await AelluxJs.ext.ajaxHref.load("/diagnostic-response", "#absent");
-    await AelluxJs.ext.ajaxHref.load("/diagnostic-response", "#content");
+    await aelluxJs.ext.ajaxHref.load("/diagnostic-response", "[");
+    await aelluxJs.ext.ajaxHref.load("/diagnostic-response", "#absent");
+    await aelluxJs.ext.ajaxHref.load("/diagnostic-response", "#content");
   });
   expect(requests).toHaveLength(1);
   await expect(page.locator("#content")).toHaveText("original");
@@ -367,9 +367,9 @@ test("AJAX declarations accept empty defaults and diagnose each selector in a li
 
 test("AJAX preserves commas within valid selectors and replaces multiple regions", async ({ page }) => {
   await start(page, '<main id="content">old</main><aside data-region="a,b">old</aside>');
-  await page.evaluate(() => AelluxJs.wait("ajax-href"));
+  await page.evaluate(() => aelluxJs.wait("ajax-href"));
   await page.route("**/diagnostic-response", route => route.fulfill({ contentType: "text/html", body: '<main id="content">new</main><aside data-region="a,b">new</aside>' }));
-  await page.evaluate(() => AelluxJs.ext.ajaxHref.load("/diagnostic-response", ':is(#content, #other), [data-region="a,b"]'));
+  await page.evaluate(() => aelluxJs.ext.ajaxHref.load("/diagnostic-response", ':is(#content, #other), [data-region="a,b"]'));
   await expect(page.locator("#content")).toHaveText("new");
   await expect(page.locator("aside")).toHaveText("new");
   expect((await diagnostics(page)).filter(entry => entry.code === 2027)).toEqual([]);
@@ -381,7 +381,7 @@ test("explicit updates diagnose changed declarations and respect CSS ownership",
   await page.evaluate(async () => {
     const element = document.getElementById("anchor");
     element.setAttribute("data-ae-anchor", "bottom:top");
-    await AelluxJs.mountManager.update(element, "anchor");
+    await aelluxJs.mountManager.update(element, "anchor");
   });
   expect(await diagnostics(page)).toEqual(expect.arrayContaining([
     expect.objectContaining({ code: 2026, element: "anchor", value: "bottom:top" })
@@ -392,12 +392,12 @@ test("spelling checks use the configured attribute prefix", async ({ page }) => 
   await start(page, "");
   await page.evaluate(async () => {
     const { validateExtensionDeclarations } = await import("/src/internal/development-helpers.js");
-    const original = AelluxJs.attr;
-    AelluxJs.attr = name => original(name).replace("data-ae-", "data-ui-");
+    const original = aelluxJs.attr;
+    aelluxJs.attr = name => original(name).replace("data-ae-", "data-ui-");
     try {
       document.body.innerHTML = '<div id="typo" data-ui-presnt></div>';
       validateExtensionDeclarations(window, document.body);
-    } finally { AelluxJs.attr = original; }
+    } finally { aelluxJs.attr = original; }
   });
   expect(await diagnostics(page)).toEqual(expect.arrayContaining([
     expect.objectContaining({ code: 2024, attribute: "data-ui-presnt", suggestion: expect.stringContaining("data-ui-present") })

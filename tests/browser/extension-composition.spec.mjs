@@ -5,9 +5,9 @@ async function start(page, markup, options = {}) {
   await page.goto("/tests/index.htm");
   await page.evaluate(markup => { document.body.innerHTML = markup; }, markup);
   await page.addScriptTag({ url: minified ? "/dist/aellux.min.js" : "/dist/aellux.js" });
-  await page.evaluate(options => AelluxJs.init({ mode: "full", environment: "development", ...options }), runtimeOptions);
-  await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
-  await page.evaluate(() => AelluxJs.mount(document));
+  await page.evaluate(options => aelluxJs.init({ mode: "full", environment: "development", ...options }), runtimeOptions);
+  await expect.poll(() => page.evaluate(() => aelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
+  await page.evaluate(() => aelluxJs.mount(document));
 }
 
 const gallery = (attributes = "", wrapperAttributes = "") => `<div id="box" data-ae-scrollbox="pointer" ${attributes}
@@ -26,10 +26,10 @@ for (const cssMotionController of [true, false]) {
     const result = await page.evaluate(async () => {
       const el = document.getElementById("anchor");
       const before = el.getBoundingClientRect().right;
-      AelluxJs.ext.feedback.error("", el, null, "shake");
+      aelluxJs.ext.feedback.error("", el, null, "shake");
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
       return { displacement: Math.abs(el.getBoundingClientRect().right - before),
-        warnings: AelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).map(e => e.context.property) };
+        warnings: aelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).map(e => e.context.property) };
     });
     expect(result.displacement).toBeLessThan(1);
     expect(result.warnings).toContain("transform");
@@ -38,32 +38,32 @@ for (const cssMotionController of [true, false]) {
 
 test("Elastic wrapper conflicts are diagnosed but opacity and child motion remain composable", async ({ page }) => {
   await start(page, gallery("", 'data-ae-scrollbox-elastic data-ae-present="transform" data-ae-feedback'));
-  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).length)).toBe(1);
-  await page.evaluate(() => AelluxJs.ext.feedback.error("", document.getElementById("wrapper"), null, "pulse"));
-  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).map(e => e.context.writers))).toEqual([
+  await expect.poll(() => page.evaluate(() => aelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).length)).toBe(1);
+  await page.evaluate(() => aelluxJs.ext.feedback.error("", document.getElementById("wrapper"), null, "pulse"));
+  await expect.poll(() => page.evaluate(() => aelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).map(e => e.context.writers))).toEqual([
     ["scrollbox-elastic", "present"], ["scrollbox-elastic", "present-effect"], ["present", "present-effect"]
   ]);
   await start(page, gallery("", 'data-ae-scrollbox-elastic data-ae-present="opacity"') +
     '<div data-ae-present="" data-ae-feedback data-ae-feedback-effect-target="child" data-ae-anchor="bottom-left:top-left"><span id="child">Child</span></div>');
-  await page.evaluate(() => AelluxJs.ext.feedback.error("", document.getElementById("child"), null, "shake"));
+  await page.evaluate(() => aelluxJs.ext.feedback.error("", document.getElementById("child"), null, "shake"));
   await page.waitForTimeout(100);
-  expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).length)).toBe(0);
+  expect(await page.evaluate(() => aelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).length)).toBe(0);
 });
 
 test("Snap diagnoses item transforms while allowing child transforms and disabled Snap", async ({ page }) => {
   await start(page, gallery('data-ae-scrollbox-snap').replace('id="item1"', 'id="item1" class="scaled"') +
     '<style>.scaled{transform:scale(.8)}</style>');
-  expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(e => e.code === 2020).map(e => e.context.element.id))).toEqual(["item1"]);
+  expect(await page.evaluate(() => aelluxJs.diagnostics.showHistory().filter(e => e.code === 2020).map(e => e.context.element.id))).toEqual(["item1"]);
   await start(page, gallery('data-ae-scrollbox-snap="false"').replace('id="item1"', 'id="item1" class="scaled"') +
     '<style>.scaled{transform:scale(.8)}</style>');
-  expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(e => e.code === 2020).length)).toBe(0);
+  expect(await page.evaluate(() => aelluxJs.diagnostics.showHistory().filter(e => e.code === 2020).length)).toBe(0);
   await start(page, gallery('data-ae-scrollbox-snap') +
     '<style>#item1>span{display:block;transform:scale(.8)}</style>');
   await page.evaluate(async () => {
     document.getElementById("item1").innerHTML = "<span>Child</span>";
-    await AelluxJs.mountManager.update(document);
+    await aelluxJs.mountManager.update(document);
   });
-  expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(e => e.code === 2020).length)).toBe(0);
+  expect(await page.evaluate(() => aelluxJs.diagnostics.showHistory().filter(e => e.code === 2020).length)).toBe(0);
 });
 
 test("Snap defers initial alignment until its Present container is measurable", async ({ page }) => {
@@ -89,10 +89,10 @@ for (const failure of ["network", "missing", "veto"]) {
     await start(page, '<a data-ae-ajax-href="#content" href="/next.htm">Next</a><main id="content">Original</main>');
     const result = await page.evaluate(async failure => {
       const before = { url: location.href, length: history.length };
-      AelluxJs.request = failure === "network" ? async () => { throw new Error("offline"); } :
+      aelluxJs.request = failure === "network" ? async () => { throw new Error("offline"); } :
         async () => ({ url: "/next.htm", text: async () => failure === "missing" ? "<p>Missing</p>" : '<main id="content">New</main>' });
-      if (failure === "veto") AelluxJs.on("BeforeUnmount", e => e.preventDefault());
-      try { await AelluxJs.ext.ajaxHref.load("/next.htm", "#content"); } catch (_) { /* Expected network failure. */ }
+      if (failure === "veto") aelluxJs.on("BeforeUnmount", e => e.preventDefault());
+      try { await aelluxJs.ext.ajaxHref.load("/next.htm", "#content"); } catch (_) { /* Expected network failure. */ }
       return { before, after: { url: location.href, length: history.length }, content: document.getElementById("content").textContent };
     }, failure);
     expect(result.after).toEqual(result.before);
@@ -105,14 +105,14 @@ test("Present preserves an active elastic transform when Feedback requests a pre
   const result = await page.evaluate(async () => {
     const box = document.getElementById("box"), wrapper = document.getElementById("wrapper");
     box.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaX: -100 }));
-    await AelluxJs.waitLayout.update(() => {});
+    await aelluxJs.waitLayout.update(() => {});
     const elastic = wrapper.style.transform;
-    AelluxJs.ext.feedback.error("", wrapper, null, "pulse");
+    aelluxJs.ext.feedback.error("", wrapper, null, "pulse");
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     const effective = new DOMMatrix(getComputedStyle(wrapper).transform), inline = new DOMMatrix(wrapper.style.transform);
     return { elastic, inline: wrapper.style.transform,
       error: Math.max(...["m11", "m22", "m41", "m42"].map(key => Math.abs(effective[key] - inline[key]))),
-      warnings: AelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).map(e => e.context.writers) };
+      warnings: aelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).map(e => e.context.writers) };
   });
   expect(result.elastic).toContain("scale(");
   expect(result.inline).toContain("scale(");
@@ -127,7 +127,7 @@ test("An active elastic inline transform prevents Present's requested transform"
     wrapper.style.transition = "none";
     getComputedStyle(wrapper).transform;
     box.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaX: -100 }));
-    await AelluxJs.waitLayout.update(() => {});
+    await aelluxJs.waitLayout.update(() => {});
     wrapper.style.setProperty("--ae-pop-transform", "scale(2)");
     const inline = new DOMMatrix(wrapper.style.transform), effective = new DOMMatrix(getComputedStyle(wrapper).transform);
     return { difference: Math.max(...["a", "d", "e", "f"].map(key => Math.abs(inline[key] - effective[key]))), scale: effective.a,
@@ -141,10 +141,10 @@ test("An active elastic inline transform prevents Present's requested transform"
 for (const forceLegacy of [false, true]) test(`Minified composition diagnostics work in ${forceLegacy ? "Legacy" : "Modern"}`, async ({ page }) => {
   await start(page, gallery('data-ae-scrollbox-snap', 'data-ae-scrollbox-elastic data-ae-present="" data-ae-feedback') +
     '<style>#item1{transform:scale(.8)}</style>', { minified: true, forceLegacy });
-  await page.evaluate(() => AelluxJs.ext.feedback.error("", document.getElementById("wrapper"), null, "shake"));
-  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).map(e => e.context.writers)))
+  await page.evaluate(() => aelluxJs.ext.feedback.error("", document.getElementById("wrapper"), null, "shake"));
+  await expect.poll(() => page.evaluate(() => aelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).map(e => e.context.writers)))
     .toEqual([["scrollbox-elastic", "present-effect"]]);
-  expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(e => e.code === 2020).length)).toBe(1);
+  expect(await page.evaluate(() => aelluxJs.diagnostics.showHistory().filter(e => e.code === 2020).length)).toBe(1);
 });
 
 test("Point tracking coexists with Scrollbox pointer dragging", async ({ page }) => {
@@ -156,10 +156,10 @@ test("Point tracking coexists with Scrollbox pointer dragging", async ({ page })
       clientX: rect.left + x, clientY: rect.top + 40 }));
     emit("pointerdown", 200);
     emit("pointermove", 100);
-    const pointers = AelluxJs.ext.input.pointers(box);
+    const pointers = aelluxJs.ext.input.pointers(box);
     const held = { scroll: box.scrollLeft, pointers: pointers.length, pressed: pointers[0]?.pressed };
     emit("pointerup", 100);
-    return { held, released: AelluxJs.ext.input.pointers(box).filter(pointer => pointer.pressed).length };
+    return { held, released: aelluxJs.ext.input.pointers(box).filter(pointer => pointer.pressed).length };
   });
   expect(result).toEqual({ held: { scroll: 100, pointers: 1, pressed: true }, released: 0 });
 });
@@ -171,42 +171,42 @@ for (const cssMotionController of [true, false]) {
       .ae--present-effect-add{animation:add 1s;animation-composition:add} @keyframes add{from{transform:translateX(0)}to{transform:translateX(5px)}}
       </style><div id="anchor" data-ae-anchor="bottom-left:top-left" data-ae-present="" data-ae-feedback>Panel</div>`, { cssMotionController });
     for (const motion of ["fade", "add"]) {
-      await page.evaluate(motion => AelluxJs.ext.feedback.error("", document.getElementById("anchor"), null, motion), motion);
+      await page.evaluate(motion => aelluxJs.ext.feedback.error("", document.getElementById("anchor"), null, motion), motion);
       await page.waitForTimeout(100);
     }
-    expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).length)).toBe(0);
+    expect(await page.evaluate(() => aelluxJs.diagnostics.showHistory().filter(e => e.code === 2033).length)).toBe(0);
   });
 }
 
 test("Production skips resource and transformed Snap diagnostics", async ({ page }) => {
   await start(page, gallery('data-ae-scrollbox-snap', 'data-ae-scrollbox-elastic data-ae-present="transform" data-ae-feedback') +
     '<style>#item1{transform:scale(.8)}</style>', { environment: "production" });
-  await page.evaluate(() => AelluxJs.ext.feedback.error("", document.getElementById("wrapper"), null, "pulse"));
+  await page.evaluate(() => aelluxJs.ext.feedback.error("", document.getElementById("wrapper"), null, "pulse"));
   await page.waitForTimeout(100);
-  expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(e => [2020, 2033].includes(e.code)).length)).toBe(0);
+  expect(await page.evaluate(() => aelluxJs.diagnostics.showHistory().filter(e => [2020, 2033].includes(e.code)).length)).toBe(0);
 });
 
 test("Ajax commits one history entry after a partial veto with external Feedback listeners", async ({ page }) => {
   await start(page, '<a data-ae-ajax-href="#one,#two" href="/next.htm">Next</a><main id="one">Old one</main><aside id="two">Old two</aside>');
   const result = await page.evaluate(async () => {
-    await AelluxJs.wait("feedback");
+    await aelluxJs.wait("feedback");
     const payloads = [];
-    AelluxJs.ext.feedback.on("*", payload => payloads.push({ type: payload.type, target: payload.target.id, value: payload.value }));
+    aelluxJs.ext.feedback.on("*", payload => payloads.push({ type: payload.type, target: payload.target.id, value: payload.value }));
     // The application owns this connection; Ajax Href only emits lifecycle events.
     for (const [name, busy] of [["AjaxHrefStart", true], ["AjaxHrefComplete", false]]) {
-      AelluxJs.on(name, () => {
+      aelluxJs.on(name, () => {
         for (const id of ["one", "two"]) {
-          AelluxJs.ext.feedback.busy("Navigation", document.getElementById(id), busy);
+          aelluxJs.ext.feedback.busy("Navigation", document.getElementById(id), busy);
         }
       });
     }
-    AelluxJs.request = async () => ({ url: "/next.htm", text: async () => '<main id="one">New one</main><aside id="two">New two</aside>' });
-    AelluxJs.on("BeforeUnmount", event => { if (event.detail.root.id === "two") event.preventDefault(); });
+    aelluxJs.request = async () => ({ url: "/next.htm", text: async () => '<main id="one">New one</main><aside id="two">New two</aside>' });
+    aelluxJs.on("BeforeUnmount", event => { if (event.detail.root.id === "two") event.preventDefault(); });
     const before = history.length;
-    await AelluxJs.ext.ajaxHref.load("/next.htm", "#one,#two");
+    await aelluxJs.ext.ajaxHref.load("/next.htm", "#one,#two");
     return { added: history.length - before, path: location.pathname, one: document.getElementById("one").textContent,
       two: document.getElementById("two").textContent, payloads,
-      invalid: AelluxJs.diagnostics.showHistory().filter(e => e.code === 1122).length };
+      invalid: aelluxJs.diagnostics.showHistory().filter(e => e.code === 1122).length };
   });
   expect(result).toMatchObject({ added: 1, path: "/next.htm", one: "New one", two: "Old two", invalid: 0 });
   expect(result.payloads).toContainEqual({ type: "busy", target: "one", value: true });
@@ -217,11 +217,11 @@ test("A superseded Ajax response cannot replace content or create a stale histor
   await start(page, '<a data-ae-ajax-href="#content" href="/next.htm">Next</a><main id="content">Original</main>');
   const result = await page.evaluate(async () => {
     let resolveOld;
-    AelluxJs.request = url => url === "/old.htm" ? new Promise(resolve => { resolveOld = resolve; }) :
+    aelluxJs.request = url => url === "/old.htm" ? new Promise(resolve => { resolveOld = resolve; }) :
       Promise.resolve({ url, text: async () => '<main id="content">Newest</main>' });
     const before = history.length;
-    const old = AelluxJs.ext.ajaxHref.load("/old.htm", "#content");
-    await AelluxJs.ext.ajaxHref.load("/new.htm", "#content");
+    const old = aelluxJs.ext.ajaxHref.load("/old.htm", "#content");
+    await aelluxJs.ext.ajaxHref.load("/new.htm", "#content");
     resolveOld({ url: "/old.htm", text: async () => '<main id="content">Stale</main>' });
     await old;
     return { added: history.length - before, path: location.pathname, text: document.getElementById("content").textContent };

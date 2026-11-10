@@ -6,7 +6,7 @@ export function installDialogPolyfill(root, dialog, css) {
   if (hasDialogAPI(dialog)) return;
   var document = root.document;
 
-  var attribute = root.AelluxJs.attr("dialog-polyfill-style");
+  var attribute = root.aelluxJs.attr("dialog-polyfill-style");
   var style = document.querySelector("style[" + attribute + "]");
   if (!style) {
     style = document.createElement("style");

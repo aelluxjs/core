@@ -108,12 +108,12 @@
     return n;
   }
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  function createPointAdapter(AelluxJs, root, emit, accepts) {
+  function createPointAdapter(aelluxJs, root, emit, accepts) {
     var extensionName = "input";
     var POINTER = "pointer";
     var trackedPointers = /* @__PURE__ */ new Map();
     var pointableElements = /* @__PURE__ */ new Set();
-    var pointableAttribute = AelluxJs.attr("point");
+    var pointableAttribute = aelluxJs.attr("point");
     var pointableSelector = "[".concat(pointableAttribute, "]");
     var tapSelector = 'button, a, [role="button"]';
     var tapDuration = 300;
@@ -123,7 +123,7 @@
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done; ) {
           var _step$value = _slicedToArray(_step.value, 2), suffix = _step$value[0], handler = _step$value[1];
-          AelluxJs.on("$".concat(POINTER).concat(suffix), handler, true);
+          aelluxJs.on("$".concat(POINTER).concat(suffix), handler, true);
         }
       } catch (err) {
         _iterator.e(err);
@@ -136,7 +136,7 @@
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
           var _step2$value = _slicedToArray(_step2.value, 2), suffix = _step2$value[0], handler = _step2$value[1];
-          AelluxJs.off("$".concat(POINTER).concat(suffix), handler, true);
+          aelluxJs.off("$".concat(POINTER).concat(suffix), handler, true);
         }
       } catch (err) {
         _iterator2.e(err);
@@ -213,7 +213,7 @@
       var target = arguments.length > 5 && arguments[5] !== void 0 ? arguments[5] : pointer.target;
       var pressStart = arguments.length > 6 && arguments[6] !== void 0 ? arguments[6] : pointer.pressStart;
       if (!recipient) return;
-      AelluxJs.dispatchFrom(recipient, name, {
+      aelluxJs.dispatchFrom(recipient, name, {
         bubbles: false,
         detail: {
           pointer: pointer,
@@ -363,7 +363,7 @@
       pointer.target = targetFor(event.target, pointer);
       var tap = finishTap(pointer, event);
       dispatchRelease("PointerUp", pointer, event);
-      if (tap && canTap(tap.element)) AelluxJs.dispatchFrom(tap.element, "tap", {
+      if (tap && canTap(tap.element)) aelluxJs.dispatchFrom(tap.element, "tap", {
         bubbles: true,
         composed: true,
         detail: tap.detail
@@ -522,7 +522,7 @@
 
   // src/src/aellux.input.point.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  var api = (typeof globalThis !== "undefined" ? globalThis : window).AelluxJs;
+  var api = (typeof globalThis !== "undefined" ? globalThis : window).aelluxJs;
   api.registry.inputAdapters = api.registry.inputAdapters || {};
   api.registry.inputAdapters.point = function(_ref) {
     var root = _ref.root, emit = _ref.emit, accepts = _ref.accepts;

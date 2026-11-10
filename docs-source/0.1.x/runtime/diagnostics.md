@@ -1,6 +1,6 @@
 # Diagnostics
 
-The aellux.js boot script exposes structured diagnostics through `AelluxJs.diagnostics` and `$ae.diagnostics`. This capability is available before the orchestrator starts, allowing boot, runtime, and Extension failures to use the same catalog.
+The aellux.js boot script exposes structured diagnostics through `aelluxJs.diagnostics` and `$ae.diagnostics`. This capability is available before the orchestrator starts, allowing boot, runtime, and Extension failures to use the same catalog.
 
 Runtime status is also available there: `diagnostics.legacy` identifies the selected Legacy runtime, `diagnostics.supported` indicates that the Modern runtime started successfully, and `diagnostics.notAvailable` lists missing Modern browser capabilities.
 
@@ -113,7 +113,7 @@ Configuration diagnostics explain what happened, identify the element/attribute/
 | Code | Meaning |
 | --- | --- |
 | `2020` | <span class="large">An effective CSS transform is applied directly to a Snap item. Apply visual transforms to its children instead.</span> |
-| `2024` | <span class="large">Likely misspelled Aellux attribute, with a suggested spelling.</span> |
+| `2024` | <span class="large">Likely misspelled aellux.js attribute, with a suggested spelling.</span> |
 | `2025` | <span class="large">Declared behavior requires an Extension that is not initialized.</span> |
 | `2026` | Invalid attribute, numeric parameter, or pivot. |
 | `2027` | <span class="large">Missing/incompatible target, unmeasurable explicitly updated Anchor target, or invalid/missing AJAX selector.</span> |

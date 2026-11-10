@@ -4,11 +4,11 @@ import { presentPlaybackProperties } from "./internal/create-present-playback.js
 
 import { generatePresentEffectsCSS } from "./internal/present-effects.css.js";
 
-export function generatePresentCSS(AelluxJs) {
-  const presentAttribute = AelluxJs.attr("present");
-  const motionAttribute = AelluxJs.attr("present-motion");
-  const anchorAttribute = AelluxJs.attr("anchor");
-  const reducedMotionAttribute = AelluxJs.attr("reduced-motion");
+export function generatePresentCSS(aelluxJs) {
+  const presentAttribute = aelluxJs.attr("present");
+  const motionAttribute = aelluxJs.attr("present-motion");
+  const anchorAttribute = aelluxJs.attr("anchor");
+  const reducedMotionAttribute = aelluxJs.attr("reduced-motion");
   const motion = `[${motionAttribute}]`;
   const present = `[${presentAttribute}]`;
   const presentWithoutMotion = `[${presentAttribute}=""]`;
@@ -16,13 +16,13 @@ export function generatePresentCSS(AelluxJs) {
   const presentTransform = `[${presentAttribute}~="transform"]:not([${anchorAttribute}])`;
   const presentHeight = `[${presentAttribute}~="height"]`;
   const presentWidth = `[${presentAttribute}~="width"]`;
-  const pop = AelluxJs.className("pop");
-  const popping = AelluxJs.className("popping");
-  const dismissing = AelluxJs.className("dismissing");
-  const dismissed = AelluxJs.className("dismissed");
-  const unpop = AelluxJs.className("unpop");
-  const willChange = AelluxJs.className("will-change");
-  const grid = AelluxJs.className("present-grid");
+  const pop = aelluxJs.className("pop");
+  const popping = aelluxJs.className("popping");
+  const dismissing = aelluxJs.className("dismissing");
+  const dismissed = aelluxJs.className("dismissed");
+  const unpop = aelluxJs.className("unpop");
+  const willChange = aelluxJs.className("will-change");
+  const grid = aelluxJs.className("present-grid");
   const gridPresent = `${present}.${grid}`;
   const measuredPresent = `${present}:not(.${grid})`;
 
@@ -152,14 +152,14 @@ ${present}[hidden] { display: none; }
 ${presentPlaybackProperties.map(property => {
   const name = property.replace(/^--ae-present-/, "");
   const output = property.startsWith("max-") ? `--ae-present-reverse-${property}` : property;
-  return `@keyframes ${AelluxJs.className(`present-reverse-${name}`)} {
+  return `@keyframes ${aelluxJs.className(`present-reverse-${name}`)} {
   from { ${output}: var(--ae-present-reverse-from-${name}); }
   to { ${output}: var(--ae-present-reverse-to-${name}); }
 }`;
 }).join("\n")}
-${["height", "width"].map(dimension => `@keyframes ${AelluxJs.className(`present-reverse-max-${dimension}-plain`)} {
+${["height", "width"].map(dimension => `@keyframes ${aelluxJs.className(`present-reverse-max-${dimension}-plain`)} {
   from { max-${dimension}: var(--ae-present-reverse-from-max-${dimension}); }
   to { max-${dimension}: var(--ae-present-reverse-to-max-${dimension}); }
 }`).join("\n")}
-` + "\n" + generatePresentEffectsCSS(AelluxJs);
+` + "\n" + generatePresentEffectsCSS(aelluxJs);
 }

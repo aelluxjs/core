@@ -6,13 +6,13 @@ test("focus hint, history restoration and navigation back", async ({ page }) => 
   expect(await page.locator("#first").getAttribute("enterkeyhint")).toBe("next");
   expect(await page.locator("#second").getAttribute("enterkeyhint")).toBe("done");
 
-  await page.evaluate(() => AelluxJs.unmount(document.querySelector("#first")));
+  await page.evaluate(() => aelluxJs.unmount(document.querySelector("#first")));
   expect(await page.locator("#first").getAttribute("enterkeyhint")).toBeNull();
-  await page.evaluate(() => AelluxJs.unmount(document.querySelector("#second")));
+  await page.evaluate(() => aelluxJs.unmount(document.querySelector("#second")));
   expect(await page.locator("#second").getAttribute("enterkeyhint")).toBe("done");
   await page.evaluate(async () => {
-    await AelluxJs.mount(document.querySelector("#first"));
-    await AelluxJs.mount(document.querySelector("#second"));
+    await aelluxJs.mount(document.querySelector("#first"));
+    await aelluxJs.mount(document.querySelector("#second"));
   });
 
   const pushedStates = [];
@@ -38,7 +38,7 @@ test("focus hint, history restoration and navigation back", async ({ page }) => 
   await expect(page.locator("#second")).toBeFocused();
 
   await page.locator("#second").evaluate(element => element.hidden = true);
-  expect(await page.evaluate(() => AelluxJs.ext.focus.restoreLastFocus())).toBe(true);
+  expect(await page.evaluate(() => aelluxJs.ext.focus.restoreLastFocus())).toBe(true);
   await expect(page.locator("#first")).toBeFocused();
 });
 
@@ -47,16 +47,16 @@ test("focus hashes element IDs and keeps ID-less targets in local history only",
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => {
     document.body.innerHTML = `<input id="first"><input><input id="second">`;
-    AelluxJs.ext("state-navigation");
-    AelluxJs.ext("focus");
+    aelluxJs.ext("state-navigation");
+    aelluxJs.ext("focus");
     window.focusPushes = [];
     document.addEventListener("AelluxJsPushState", event => window.focusPushes.push(event.detail));
   });
   await page.addScriptTag({ url: "/src/aellux.ext.state-navigation.js" });
   await page.addScriptTag({ url: "/dist/aellux.ext.focus.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
-  await expect.poll(() => page.evaluate(() => AelluxJs.ext.focus?.initialized)).toBe(true);
-  await page.evaluate(() => AelluxJs.wait("state-navigation"));
+  await page.evaluate(() => aelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => aelluxJs.ext.focus?.initialized)).toBe(true);
+  await page.evaluate(() => aelluxJs.wait("state-navigation"));
 
   await page.locator("#first").focus();
   expect(await page.evaluate(() => ({ hash: location.hash, pushes: window.focusPushes })))
@@ -67,10 +67,10 @@ test("focus hashes element IDs and keeps ID-less targets in local history only",
     historyLength: history.length }))).toEqual({
     hash: "#ae-focus=first", pushes: [{ key: "ae-focus", value: "first" }], historyLength
   });
-  expect(await page.evaluate(() => AelluxJs.ext.focus.restoreLastFocus())).toBe(true);
+  expect(await page.evaluate(() => aelluxJs.ext.focus.restoreLastFocus())).toBe(true);
   await expect(page.locator("#first")).toBeFocused();
 
-  await page.evaluate(() => AelluxJs.dispatch("SnapshotRestore", {
+  await page.evaluate(() => aelluxJs.dispatch("SnapshotRestore", {
     detail: { snapshot: { "ae-focus": "second" } }
   }));
   await expect(page.locator("#second")).toBeFocused();
@@ -94,7 +94,7 @@ test("Enter advances focus and respects unmount and unavailable controls", async
   await page.keyboard.press("Enter");
   await expect(page.locator("#after-editable")).toBeFocused();
 
-  await page.evaluate(() => AelluxJs.unmount(document.querySelector("#first")));
+  await page.evaluate(() => aelluxJs.unmount(document.querySelector("#first")));
   await expect(page.locator("#first")).not.toHaveAttribute("enterkeyhint");
   await page.locator("#first").focus();
   await page.keyboard.press("Enter");

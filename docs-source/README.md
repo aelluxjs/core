@@ -2,6 +2,8 @@
 
 Versioned pages live under `0.1.x/`; `summary.json` controls their navigation. Edit the Markdown sources and run `npm run build:docs` to update the rendered pages.
 
+Follow the authoritative [Brand Naming Guidelines](../BRAND_GUIDELINES.md): `aellux` is the semantic model, `aellux.js` its JavaScript implementation, and `aelluxJs` the public global object. The [public migration guide](0.1.x/brand-naming.md) explains the pre-0.1.0 global rename and technical exceptions.
+
 Classify official Core Extensions by their delivery in Full: **Bundled Extensions** are included in the Full JavaScript bundle; **Optional Extensions** load separate signed scripts on demand. Keep these groups aligned with `src/aellux.full.js` and the `optional` entries in `src/official-extension-definitions.js`. The labels describe packaging, rather than maturity or stability. Full registers all official Extensions automatically. Basic starts with no registrations and requires explicit JavaScript or link declarations for the chosen Extensions.
 
 Declare distribution and stability below each Extension page heading. Ajax Href, Dialog, Focus, Input, Progress, PWA and Viewport are **Not stable**; the remaining official Extensions are **Stable**. Stable indicates implementation maturity, usage documentation and adequate validation for the documented scope, not API compatibility. Only the minimal initialization and declarative activation/mounting subset in the Compatibility Commitment is protected during `0.1.x`. Keep stability on the pages without creating stability groups in `summary.json`.

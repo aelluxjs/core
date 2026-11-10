@@ -1,18 +1,18 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
 export function attachDialogExtension(root, prepareDialog = () => {}) {
-  const AelluxJs = root.AelluxJs;
+  const aelluxJs = root.aelluxJs;
   const extensionName = "dialog";
-  if (!AelluxJs) {
-    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+  if (!aelluxJs) {
+    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.`);
   }
 
-  AelluxJs.extAttach(extensionName, { init, destroy, show, showModal, close });
+  aelluxJs.extAttach(extensionName, { init, destroy, show, showModal, close });
 
   function init() {
     for (const [name, method] of Object.entries({ show, showModal, close }))
-      AelluxJs.comm.handle("dialog." + name, ({ element, args = [] }) => method(element, ...args), { owner: extensionName });
-    AelluxJs.mountManager.add({
+      aelluxJs.comm.handle("dialog." + name, ({ element, args = [] }) => method(element, ...args), { owner: extensionName });
+    aelluxJs.mountManager.add({
       // Lower priorities mount first, before ordinary consuming Extensions.
       extensionName, selector: "dialog", priority: -1,
       mount: element => prepareDialog(element),
@@ -21,8 +21,8 @@ export function attachDialogExtension(root, prepareDialog = () => {}) {
   }
 
   function destroy() {
-    AelluxJs.comm.removeOwner(extensionName);
-    AelluxJs.mountManager.remove({ extensionName });
+    aelluxJs.comm.removeOwner(extensionName);
+    aelluxJs.mountManager.remove({ extensionName });
   }
 
   function show(element, ...args) { return element.show(...args); }

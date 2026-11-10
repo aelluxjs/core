@@ -15,15 +15,15 @@ for (const forceLegacy of [false, true]) {
     await page.addScriptTag({ url: "/dist/aellux.js" });
     const result = await page.evaluate(async ({ integrity, forceLegacy }) => {
       const url = "./dependency.CSS?version=1#theme";
-      const first = AelluxJs.dep("theme", url, integrity, "anonymous");
-      const pending = AelluxJs.registry.dep.theme.state;
-      AelluxJs.init({ mode: "basic", forceLegacy });
-      const second = AelluxJs.dep("theme", url);
+      const first = aelluxJs.dep("theme", url, integrity, "anonymous");
+      const pending = aelluxJs.registry.dep.theme.state;
+      aelluxJs.init({ mode: "basic", forceLegacy });
+      const second = aelluxJs.dep("theme", url);
       const link = await first;
       return {
-        shared: first === second && first === AelluxJs.dep("theme", url),
+        shared: first === second && first === aelluxJs.dep("theme", url),
         pending,
-        loaded: AelluxJs.registry.dep.theme.state,
+        loaded: aelluxJs.registry.dep.theme.state,
         tag: link.tagName,
         rel: link.rel,
         url: link.href.slice(location.origin.length),
@@ -52,13 +52,13 @@ test("dep rejects a failed stylesheet, removes it and allows retry", async ({ pa
   await startRuntime(page);
   const result = await page.evaluate(async () => {
     const url = "/virtual/retry-dependency.css";
-    const first = AelluxJs.dep("theme-retry", url);
-    const second = AelluxJs.dep("theme-retry", url);
-    const conflict = await AelluxJs.dep("theme-retry", "/virtual/other.js").catch(error => error.code);
+    const first = aelluxJs.dep("theme-retry", url);
+    const second = aelluxJs.dep("theme-retry", url);
+    const conflict = await aelluxJs.dep("theme-retry", "/virtual/other.js").catch(error => error.code);
     const failed = await first.catch(error => error.code);
-    const cleaned = !Object.hasOwn(AelluxJs.registry.dep, "theme-retry") &&
+    const cleaned = !Object.hasOwn(aelluxJs.registry.dep, "theme-retry") &&
       !document.querySelector('[data-ae-dep="theme-retry"]');
-    const link = await AelluxJs.dep("theme-retry", url, { crossOrigin: "anonymous" });
+    const link = await aelluxJs.dep("theme-retry", url, { crossOrigin: "anonymous" });
     return {
       shared: first === second, conflict, failed, cleaned,
       tag: link.tagName, crossOrigin: link.crossOrigin,
@@ -75,8 +75,8 @@ test("dep rejects a failed stylesheet, removes it and allows retry", async ({ pa
 async function startRuntime(page, forceLegacy = false) {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(forceLegacy => AelluxJs.init({ mode: "basic", forceLegacy }), forceLegacy);
-  await expect.poll(() => page.evaluate(() => AelluxJs.mountManager !== null)).toBe(true);
+  await page.evaluate(forceLegacy => aelluxJs.init({ mode: "basic", forceLegacy }), forceLegacy);
+  await expect.poll(() => page.evaluate(() => aelluxJs.mountManager !== null)).toBe(true);
 }
 
 test("dep loads immediately before init and retains the registration afterward", async ({ page }) => {
@@ -92,16 +92,16 @@ test("dep loads immediately before init and retains the registration afterward",
   await page.addScriptTag({ url: "/dist/aellux.js" });
 
   const result = await page.evaluate(async () => {
-    const first = AelluxJs.dep("early@1.0", "/virtual/early-dependency.js");
+    const first = aelluxJs.dep("early@1.0", "/virtual/early-dependency.js");
     const insertedBeforeInit = document.querySelectorAll('script[data-ae-dep="early@1.0"]').length;
-    AelluxJs.init({ mode: "basic" });
-    const second = AelluxJs.dep("early@1.0", "/virtual/early-dependency.js");
+    aelluxJs.init({ mode: "basic" });
+    const second = aelluxJs.dep("early@1.0", "/virtual/early-dependency.js");
     await first;
     return {
       insertedBeforeInit,
       sharedPromise: first === second,
       ready: window.earlyDependencyReady === true,
-      state: AelluxJs.registry.dep["early@1.0"].state
+      state: aelluxJs.registry.dep["early@1.0"].state
     };
   });
 
@@ -131,12 +131,12 @@ test("dep accepts positional SRI and crossorigin and keeps the options-object ov
 
   const result = await page.evaluate(async integrity => {
     const url = "/virtual/secure-dependency-positional.js";
-    const first = AelluxJs.dep("secure-positional", url, integrity, "anonymous");
-    const second = AelluxJs.dep("secure-positional", url);
+    const first = aelluxJs.dep("secure-positional", url, integrity, "anonymous");
+    const second = aelluxJs.dep("secure-positional", url);
     const script = await first;
-    const objectScript = await AelluxJs.dep("secure-object",
+    const objectScript = await aelluxJs.dep("secure-object",
       "/virtual/secure-dependency-object.js", { integrity, crossOrigin: "anonymous" });
-    const invalid = await AelluxJs.dep("secure-invalid", url, 42, "anonymous")
+    const invalid = await aelluxJs.dep("secure-invalid", url, 42, "anonymous")
       .catch(error => error.code);
     return {
       shared: first === second,
@@ -171,32 +171,32 @@ for (const forceLegacy of [false, true]) {
 
     const result = await page.evaluate(async () => {
       const url = "/virtual/shared-dependency.js";
-      const first = AelluxJs.dep("shared-widget@1.0", url);
-      const second = AelluxJs.dep("shared-widget@1.0", url);
+      const first = aelluxJs.dep("shared-widget@1.0", url);
+      const second = aelluxJs.dep("shared-widget@1.0", url);
       const immediate = document.querySelectorAll('script[data-ae-dep="shared-widget@1.0"]').length;
-      const pending = AelluxJs.registry.dep["shared-widget@1.0"].state;
+      const pending = aelluxJs.registry.dep["shared-widget@1.0"].state;
       const readyBeforeLoad = window.sharedDependencyReady === true;
 
       for (const name of ["first-dep", "second-dep"]) {
-        AelluxJs.ext(name);
-        AelluxJs.extAttach(name, {
+        aelluxJs.ext(name);
+        aelluxJs.extAttach(name, {
           async init() {
-            await AelluxJs.dep("shared-widget@1.0", url);
+            await aelluxJs.dep("shared-widget@1.0", url);
             if (!window.sharedDependencyReady) throw new Error("Dependency is not ready");
           }
         });
       }
       const [script, firstExtension, secondExtension] = await Promise.all([
-        first, AelluxJs.wait("first-dep"), AelluxJs.wait("second-dep")
+        first, aelluxJs.wait("first-dep"), aelluxJs.wait("second-dep")
       ]);
-      const afterLoad = AelluxJs.dep("shared-widget@1.0", url);
+      const afterLoad = aelluxJs.dep("shared-widget@1.0", url);
       return {
         sharedPromise: first === second && first === afterLoad,
         immediate,
         pending,
         readyBeforeLoad,
-        loaded: AelluxJs.registry.dep["shared-widget@1.0"].state,
-        scriptMatches: script === AelluxJs.registry.dep["shared-widget@1.0"].script,
+        loaded: aelluxJs.registry.dep["shared-widget@1.0"].state,
+        scriptMatches: script === aelluxJs.registry.dep["shared-widget@1.0"].script,
         extensionsReady: firstExtension.initialized && secondExtension.initialized,
         scriptCount: document.querySelectorAll('script[data-ae-dep="shared-widget@1.0"]').length
       };
@@ -228,21 +228,21 @@ test("dep rejects conflicting URLs and retries a failed load", async ({ page }) 
   const result = await page.evaluate(async () => {
     const label = "retry@1.0";
     const url = "/virtual/retry-dependency.js";
-    const first = AelluxJs.dep(label, url);
-    const concurrent = AelluxJs.dep(label, url);
-    const conflict = await AelluxJs.dep(label, "/virtual/other.js").catch(error => error.code);
+    const first = aelluxJs.dep(label, url);
+    const concurrent = aelluxJs.dep(label, url);
+    const conflict = await aelluxJs.dep(label, "/virtual/other.js").catch(error => error.code);
     const failed = await first.catch(error => error.code);
-    const registeredAfterFailure = Object.hasOwn(AelluxJs.registry.dep, label);
+    const registeredAfterFailure = Object.hasOwn(aelluxJs.registry.dep, label);
     const scriptAfterFailure = document.querySelectorAll('script[data-ae-dep="retry@1.0"]').length;
-    const retried = await AelluxJs.dep(label, url);
-    const invalid = await AelluxJs.dep("", url).catch(error => error.code);
+    const retried = await aelluxJs.dep(label, url);
+    const invalid = await aelluxJs.dep("", url).catch(error => error.code);
     return {
       sharedFailure: first === concurrent,
       conflict,
       failed,
       registeredAfterFailure,
       scriptAfterFailure,
-      retryReady: window.retryDependencyReady === true && retried === AelluxJs.registry.dep[label].script,
+      retryReady: window.retryDependencyReady === true && retried === aelluxJs.registry.dep[label].script,
       invalid
     };
   });

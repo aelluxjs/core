@@ -15,13 +15,13 @@ async function start(page, html, options = {}) {
       }
     }
     if (mode === "basic") {
-      AelluxJs.ext("anchor", { loadStyle: true });
-      if (document.querySelector("[data-ae-present-group]")) AelluxJs.ext("present", { loadStyle: true });
+      aelluxJs.ext("anchor", { loadStyle: true });
+      if (document.querySelector("[data-ae-present-group]")) aelluxJs.ext("present", { loadStyle: true });
     }
-    AelluxJs.init({ mode, forceLegacy, ...initialization });
+    aelluxJs.init({ mode, forceLegacy, ...initialization });
   }, options);
-  await expect.poll(() => page.evaluate(() => AelluxJs.ext.anchor?.initialized)).toBe(true);
-  await page.evaluate(() => AelluxJs.mount(document));
+  await expect.poll(() => page.evaluate(() => aelluxJs.ext.anchor?.initialized)).toBe(true);
+  await page.evaluate(() => aelluxJs.mount(document));
   await installAnchorProbe(page);
 }
 
@@ -76,7 +76,7 @@ for (const forceLegacy of [false, true]) {
     await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
     await page.locator("#panel").evaluate(element => element.classList.remove("concealed"));
     await aligned(page, "a");
-    expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(entry => entry.code === 1119))).toEqual([]);
+    expect(await page.evaluate(() => aelluxJs.diagnostics.showHistory().filter(entry => entry.code === 1119))).toEqual([]);
   });
 
   test(`target can restore inherited visibility but cannot escape ancestor opacity (legacy=${forceLegacy})`, async ({ page }) => {
@@ -114,11 +114,11 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
     await expect.poll(async () => Math.abs((await geometry(page)).right - (await geometry(page)).targetRight)).toBeLessThan(1);
     await expect(page.locator("#indicator")).toHaveCSS("width", "50px");
     await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-match", "width invalid"));
-    await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.showHistory().some(entry => entry.code === 2022))).toBe(true);
+    await expect.poll(() => page.evaluate(() => aelluxJs.diagnostics.showHistory().some(entry => entry.code === 2022))).toBe(true);
     await page.locator("#indicator").evaluate(element => element.removeAttribute("data-ae-anchor-match"));
     await page.evaluate(() => $ae("indicator").anchor.update());
     expect((await geometry(page)).publishedWidth).toBeGreaterThan(130);
-    await page.evaluate(() => AelluxJs.unmount(document.getElementById("indicator"), "anchor"));
+    await page.evaluate(() => aelluxJs.unmount(document.getElementById("indicator"), "anchor"));
     expect(await page.locator("#indicator").evaluate(element => [
       element.style.getPropertyValue("--ae-anchor-target-width"),
       element.style.getPropertyPriority("--ae-anchor-target-width"),
@@ -163,7 +163,7 @@ test("known layout motion tracks intermediate dimensions without ResizeObserver 
     getComputedStyle(target).width;
     target.style.width = "180px";
     target.style.height = "90px";
-    AelluxJs.dispatchFrom(target, "Layout", { bubbles: true, detail: { durationMs: 400 } });
+    aelluxJs.dispatchFrom(target, "Layout", { bubbles: true, detail: { durationMs: 400 } });
     await new Promise(resolve => setTimeout(resolve, 800));
     const after = widths.length;
     await new Promise(resolve => setTimeout(resolve, 250));
@@ -595,7 +595,7 @@ for (const transition of ["all", "transform, width, height, opacity"]) for (cons
     await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "a"));
     await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" }));
+    await page.evaluate(() => aelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" }));
     await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
     expect(await page.evaluate(() => inspectAnimations().filter(animation => ["transform", "width", "height"].includes(animation.transitionProperty)).length)).toBe(0);
     await aligned(page, "a");
@@ -611,8 +611,8 @@ test("scrolling an independent region and synthetic scroll notifications preserv
   await page.evaluate(async () => {
     document.getElementById("independent").scrollTop = 200;
     window.dispatchEvent(new Event("scroll"));
-    await AelluxJs.waitLayout.update(() => {});
-    await AelluxJs.waitLayout.update(() => {});
+    await aelluxJs.waitLayout.update(() => {});
+    await aelluxJs.waitLayout.update(() => {});
   });
   await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
   await aligned(page, "b");
@@ -622,7 +622,7 @@ test("scrolling an independent region and synthetic scroll notifications preserv
 for (const forceLegacy of [false, true]) test(`wheel scrolling a Scrollbox preserves the Anchor timeline (legacy=${forceLegacy})`, async ({ page }) => {
   await start(page, `${stage}<div id="ref" data-ae-scrollbox="native" style="overflow:auto">
     ${targets}${indicator.replace("500ms", "900ms")}<div style="height:1800px"></div></div>`, { forceLegacy });
-  await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollbox?.initialized)).toBe(true);
+  await expect.poll(() => page.evaluate(() => aelluxJs.ext.scrollbox?.initialized)).toBe(true);
   await aligned(page, "a");
   await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "b"));
   await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
@@ -648,7 +648,7 @@ for (const forceLegacy of [false, true]) test(`scroll tracking settles without s
   await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
   await aligned(page, "b");
   await expect.poll(() => page.locator("#ref").evaluate(element => element.scrollTop)).toBe(1300);
-  await page.evaluate(async () => { for (let frame = 0; frame < 8; frame++) await AelluxJs.waitLayout.update(() => {}); });
+  await page.evaluate(async () => { for (let frame = 0; frame < 8; frame++) await aelluxJs.waitLayout.update(() => {}); });
   await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "c"));
   await expect(page.locator("#indicator")).toHaveClass(/ae--anchor-switching/);
   await aligned(page, "c");
@@ -774,8 +774,8 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
     // Retargeting an ordinary element leaves group selection independent.
     await expect(page.locator("#indicator")).toHaveAttribute("data-ae-anchor-target", "a");
     await page.evaluate(async () => {
-      await AelluxJs.unmount(document.getElementById("group"), "present");
-      await AelluxJs.mount(document.getElementById("group"), "present");
+      await aelluxJs.unmount(document.getElementById("group"), "present");
+      await aelluxJs.mount(document.getElementById("group"), "present");
       document.getElementById("indicator").setAttribute("data-ae-anchor-target", "#group");
     });
     await aligned(page, "a");
@@ -805,20 +805,20 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) t
   await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
   await page.evaluate(async () => {
     document.getElementById("group").insertAdjacentHTML("afterbegin", '<section id="a" class="target" data-ae-present="opacity" hidden>A replacement</section>');
-    await AelluxJs.mount(document.getElementById("a"));
+    await aelluxJs.mount(document.getElementById("a"));
   });
   await aligned(page, "a");
   await page.locator("#other").evaluate(element => element.setAttribute("data-ae-anchor-target", "#group"));
   await expect.poll(async () => (await geometry(page, "other", "a")).width).toBe(80);
   await page.evaluate(async () => {
     document.getElementById("other").setAttribute("data-ae-anchor-target", "b");
-    await AelluxJs.unmount(document.getElementById("other"), "anchor");
+    await aelluxJs.unmount(document.getElementById("other"), "anchor");
   });
   await expect(page.locator("#other")).not.toHaveClass(/ae--anchored|ae--anchor-switching/);
   expect(await page.locator("#other").evaluate(element => element.style.getPropertyValue("--ae-anchor-target-width"))).toBe("");
   await page.evaluate(() => $ae("group").present.show("b"));
   await aligned(page, "b");
-  expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(entry => entry.code === 2023 || entry.code === 1119))).toEqual([]);
+  expect(await page.evaluate(() => aelluxJs.diagnostics.showHistory().filter(entry => entry.code === 2023 || entry.code === 1119))).toEqual([]);
 });
 
 for (const forceLegacy of [false, true]) test(`Anchor retargets groups, selectors, recreated groups and plain elements (legacy=${forceLegacy})`, async ({ page }) => {
@@ -849,7 +849,7 @@ for (const forceLegacy of [false, true]) test(`Anchor retargets groups, selector
   await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
   await page.evaluate(async markup => {
     document.getElementById("ref").insertAdjacentHTML("afterbegin", markup);
-    await AelluxJs.mount(document.getElementById("group"));
+    await aelluxJs.mount(document.getElementById("group"));
   }, group);
   await aligned(page, "a");
   await page.locator("#indicator").evaluate(element => element.setAttribute("data-ae-anchor-target", "d"));
@@ -861,8 +861,8 @@ test("circular associations and incompatible positioning contexts are diagnosed"
     <div id="self" data-ae-present data-ae-anchor="top-left:top-left" data-ae-anchor-target="group"></div></div>
     <div style="position:relative"><div id="nested" style="width:30px;height:30px"></div></div>
     <div id="indicator" data-ae-anchor="top-left:top-left" data-ae-anchor-target="nested"></div></div>`);
-  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.showHistory().some(entry => entry.code === 2023))).toBe(true);
-  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.showHistory().some(entry => entry.code === 1119))).toBe(true);
+  await expect.poll(() => page.evaluate(() => aelluxJs.diagnostics.showHistory().some(entry => entry.code === 2023))).toBe(true);
+  await expect.poll(() => page.evaluate(() => aelluxJs.diagnostics.showHistory().some(entry => entry.code === 1119))).toBe(true);
   await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
 });
 
@@ -871,19 +871,19 @@ test("Anchor loaded after Present reads the accepted selection without replaying
   await page.evaluate(html => { document.body.innerHTML = html; }, `${stage}<div id="ref">${group}${groupIndicator}</div>`);
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => {
-    AelluxJs.ext("present", { loadStyle: true });
-    AelluxJs.ext("anchor", { load: false, loadStyle: true });
-    AelluxJs.init({ mode: "basic" });
+    aelluxJs.ext("present", { loadStyle: true });
+    aelluxJs.ext("anchor", { load: false, loadStyle: true });
+    aelluxJs.init({ mode: "basic" });
   });
-  await expect.poll(() => page.evaluate(() => AelluxJs.ext.present?.initialized)).toBe(true);
-  await page.evaluate(() => AelluxJs.mount(document, "present"));
+  await expect.poll(() => page.evaluate(() => aelluxJs.ext.present?.initialized)).toBe(true);
+  await page.evaluate(() => aelluxJs.mount(document, "present"));
   await page.evaluate(async () => {
     await $ae("group").present.show("b");
-    await AelluxJs.wait("anchor");
-    await AelluxJs.mount(document, "anchor");
+    await aelluxJs.wait("anchor");
+    await aelluxJs.mount(document, "anchor");
   });
-  await expect.poll(() => page.evaluate(() => AelluxJs.ext.anchor?.initialized)).toBe(true);
-  await page.evaluate(() => AelluxJs.mount(document, "anchor"));
+  await expect.poll(() => page.evaluate(() => aelluxJs.ext.anchor?.initialized)).toBe(true);
+  await page.evaluate(() => aelluxJs.mount(document, "anchor"));
   await aligned(page, "b");
   await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchor-switching/);
 });
@@ -910,16 +910,16 @@ test("zero duration, CSS steps easing and unmount during a switch leave no delay
   expect(stepFrames.every(width => [160, 140, 120, 100, 80].some(value => Math.abs(width - value) < .1))).toBe(true);
   const snapshot = await page.evaluate(async () => {
     const element = document.getElementById("indicator");
-    await AelluxJs.unmount(element, "anchor");
+    await aelluxJs.unmount(element, "anchor");
     return element.getAttribute("style");
   });
   await page.waitForTimeout(800);
   expect(await page.locator("#indicator").getAttribute("style")).toBe(snapshot);
   await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored|ae--anchor-switching/);
-  await page.evaluate(() => AelluxJs.mount(document.getElementById("indicator"), "anchor"));
+  await page.evaluate(() => aelluxJs.mount(document.getElementById("indicator"), "anchor"));
   await aligned(page, "a");
   await expect(page.locator("link[data-ae-full-style]")).toHaveCount(1);
-  await page.evaluate(() => AelluxJs.destroy());
+  await page.evaluate(() => aelluxJs.destroy());
   await expect(page.locator("link[data-ae-full-style]")).toHaveCount(1);
 });
 
@@ -927,7 +927,7 @@ test("matching rejects an in-flow Anchor before a containing layout can feed bac
   await start(page, `<style>#indicator{position:relative}</style>
     <div id="ref" style="position:relative;display:inline-block">
       <div id="indicator" data-ae-anchor="bottom-right:bottom-right" data-ae-anchor-match="width height">Content</div></div>`);
-  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.showHistory().some(entry => entry.code === 2023))).toBe(true);
+  await expect.poll(() => page.evaluate(() => aelluxJs.diagnostics.showHistory().some(entry => entry.code === 2023))).toBe(true);
   await expect(page.locator("#indicator")).not.toHaveClass(/ae--anchored/);
   expect(await page.locator("#indicator").evaluate(element => element.style.getPropertyValue("--ae-anchor-target-width"))).toBe("");
 });
@@ -943,9 +943,9 @@ test("group switches under a low FPS ceiling follow the last selection and track
   // Remount the member to select Present's measured sizing strategy.
   await page.evaluate(async () => {
     const member = document.getElementById("b");
-    await AelluxJs.unmount(member, "present");
+    await aelluxJs.unmount(member, "present");
     member.setAttribute("data-ae-present", "width height");
-    await AelluxJs.mount(member, "present");
+    await aelluxJs.mount(member, "present");
     const controller = $ae("group").present;
     window.latest = controller.show("b");
     controller.show("c");

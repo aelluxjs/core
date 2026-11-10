@@ -7,16 +7,16 @@
   <script src="../../dist/aellux.js"></script>
   <script>
     var diagnosticCodes = [];
-    var originalError = AelluxJs.diagnostics.error;
-    AelluxJs.diagnostics.error = function (definition, details) {
+    var originalError = aelluxJs.diagnostics.error;
+    aelluxJs.diagnostics.error = function (definition, details) {
       diagnosticCodes.push(definition.code);
-      return originalError.call(AelluxJs.diagnostics, definition, details);
+      return originalError.call(aelluxJs.diagnostics, definition, details);
     };
 
     AelluxJsValidation.run(async function (assert) {
       var missing = await $ae.wait("missing-validation");
-      assert(AelluxJs.ext.feedback, "A valid extension did not survive another extension failure");
-      assert(AelluxJs.ext.feedback.initialized === true, "Valid extension initialization was interrupted");
+      assert(aelluxJs.ext.feedback, "A valid extension did not survive another extension failure");
+      assert(aelluxJs.ext.feedback.initialized === true, "Valid extension initialization was interrupted");
       assert(missing === null, "Failed extension did not resolve to null");
       assert(diagnosticCodes.indexOf(1102) !== -1, "Extension failure diagnostic was not emitted");
     });

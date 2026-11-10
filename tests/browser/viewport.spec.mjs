@@ -4,31 +4,31 @@ async function setup(page, markup, forceLegacy = false, fallback = false, events
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(async ({ forceLegacy, fallback, events }) => {
-    AelluxJs.ext("viewport", { loadWhen: "[data-ae-viewport]" });
+    aelluxJs.ext("viewport", { loadWhen: "[data-ae-viewport]" });
     await new Promise(resolve => {
-      AelluxJs.on("Ready", resolve, { once: true });
-      AelluxJs.init({ mode: "basic", forceLegacy, environment: "development" });
+      aelluxJs.on("Ready", resolve, { once: true });
+      aelluxJs.init({ mode: "basic", forceLegacy, environment: "development" });
     });
     if (fallback) {
       window.ResizeObserver = window.IntersectionObserver = undefined;
       Object.defineProperty(CSS, "registerProperty", { configurable: true, value: undefined });
     }
     window.viewportProbe = { listeners: new Map(), reads: 0, writes: 0, observers: [] };
-    const on = AelluxJs.onEvent, off = AelluxJs.offEvent;
-    AelluxJs.onEvent = function (target, name, callback, ...args) {
+    const on = aelluxJs.onEvent, off = aelluxJs.offEvent;
+    aelluxJs.onEvent = function (target, name, callback, ...args) {
       if (name === "$scroll") viewportProbe.listeners.set(callback, target);
       return on.call(this, target, name, callback, ...args);
     };
-    AelluxJs.offEvent = function (target, name, callback, ...args) {
+    aelluxJs.offEvent = function (target, name, callback, ...args) {
       if (name === "$scroll") viewportProbe.listeners.delete(callback);
       return off.call(this, target, name, callback, ...args);
     };
     // The scheduler's method table is frozen. Wrap the exposed table rather
     // than silently assigning methods that cannot be replaced.
-    AelluxJs.waitLayout = { ...AelluxJs.waitLayout };
+    aelluxJs.waitLayout = { ...aelluxJs.waitLayout };
     for (const phase of ["read", "update"]) {
-      const original = AelluxJs.waitLayout[phase];
-      AelluxJs.waitLayout[phase] = function (...args) {
+      const original = aelluxJs.waitLayout[phase];
+      aelluxJs.waitLayout[phase] = function (...args) {
         if (args[0] >= 6000000) viewportProbe[phase === "read" ? "reads" : "writes"]++;
         return original.apply(this, args);
       };
@@ -56,7 +56,7 @@ async function setup(page, markup, forceLegacy = false, fallback = false, events
       const snapshot = value => value && ({ ...value,
         viewport: value.viewport === document ? "document" : value.viewport.id });
       for (const name of ["ViewportChange", "ViewportFullyInside", "ViewportFullyOutside"]) {
-        document.addEventListener(AelluxJs.eventName(name), event => {
+        document.addEventListener(aelluxJs.eventName(name), event => {
           viewportDetails.push(event.detail);
           viewportEvents.push({ name, target: event.target.id,
             bubbles: event.bubbles, composed: event.composed, cancelable: event.cancelable,
@@ -72,10 +72,10 @@ async function setup(page, markup, forceLegacy = false, fallback = false, events
             viewportEventAction = null;
             if (action === "remove") event.target.removeAttribute("data-ae-viewport");
             else if (action === "detach") event.target.remove();
-            else if (action === "destroy") window.viewportLifecycle = AelluxJs.destroyExtensions("viewport");
+            else if (action === "destroy") window.viewportLifecycle = aelluxJs.destroyExtensions("viewport");
             else {
-              if (action === "cancel") AelluxJs.on("BeforeUnmount", event => event.preventDefault(), { once: true });
-              window.viewportLifecycle = AelluxJs.unmount(event.target, "viewport");
+              if (action === "cancel") aelluxJs.on("BeforeUnmount", event => event.preventDefault(), { once: true });
+              window.viewportLifecycle = aelluxJs.unmount(event.target, "viewport");
             }
           }
         });
@@ -85,10 +85,10 @@ async function setup(page, markup, forceLegacy = false, fallback = false, events
   await page.evaluate(async markup => {
     document.body.style.margin = "0";
     document.body.innerHTML = markup;
-    await AelluxJs.mount(document.body);
+    await aelluxJs.mount(document.body);
   }, markup);
   if (markup.includes("data-ae-viewport") && events !== "destroy")
-    await expect.poll(() => page.evaluate(() => AelluxJs.ext.viewport?.initialized)).toBe(true);
+    await expect.poll(() => page.evaluate(() => aelluxJs.ext.viewport?.initialized)).toBe(true);
 }
 
 const fixture = (extra = "", item = "", overflow = "auto") => `
@@ -150,9 +150,9 @@ for (const legacy of [false, true]) test.describe(`Viewport ${legacy ? "Legacy" 
     await expectGeometry(page, [0, 0, 1]);
     expect(await values(page, "second")).toEqual(["", "", ""]);
     await page.locator("#item").evaluate(el => el.removeAttribute("data-ae-viewport-target"));
-    await page.evaluate(() => AelluxJs.mountManager.update(document.getElementById("item"), "viewport"));
+    await page.evaluate(() => aelluxJs.mountManager.update(document.getElementById("item"), "viewport"));
     await expectGeometry(page, [0, 0, 1]);
-    await page.evaluate(() => AelluxJs.unmount(document.getElementById("item"), "viewport"));
+    await page.evaluate(() => aelluxJs.unmount(document.getElementById("item"), "viewport"));
     expect(await values(page)).toEqual(["9", "", ""]);
   });
 
@@ -160,10 +160,10 @@ for (const legacy of [false, true]) test.describe(`Viewport ${legacy ? "Legacy" 
     await setup(page, fixture("", "", "hidden") + '<div id="indicator"></div>', legacy);
     for (const target of ["", "#", "missing", "div, #indicator"]) {
       await page.locator("#item").evaluate((el, target) => el.setAttribute("data-ae-viewport-target", target), target);
-      await page.evaluate(() => AelluxJs.mountManager.update(document.getElementById("item"), "viewport"));
+      await page.evaluate(() => aelluxJs.mountManager.update(document.getElementById("item"), "viewport"));
       expect(await values(page)).toEqual(["", "", ""]);
-      expect(await page.evaluate(value => AelluxJs.diagnostics.showHistory().some(entry =>
-        entry.code === AelluxJs.diagnostics.WARN_CONFIGURATION_TARGET.code && entry.context?.value === value), target)).toBe(true);
+      expect(await page.evaluate(value => aelluxJs.diagnostics.showHistory().some(entry =>
+        entry.code === aelluxJs.diagnostics.WARN_CONFIGURATION_TARGET.code && entry.context?.value === value), target)).toBe(true);
     }
     await page.locator("#item").evaluate(el => el.setAttribute("data-ae-viewport-target", "indicator"));
     await expectGeometry(page, [0, 0, 1], "indicator");
@@ -175,7 +175,7 @@ for (const legacy of [false, true]) test.describe(`Viewport ${legacy ? "Legacy" 
     await expect.poll(() => page.evaluate(() => detachedTarget.style.getPropertyValue("--ae-viewport-visible"))).toBe("");
     await page.evaluate(() => document.body.appendChild(detachedTarget));
     await expectGeometry(page, [0, 0, 1], "indicator");
-    await page.evaluate(() => AelluxJs.destroyExtensions("viewport"));
+    await page.evaluate(() => aelluxJs.destroyExtensions("viewport"));
     expect(await values(page, "indicator")).toEqual(["", "", ""]);
   });
 
@@ -188,16 +188,16 @@ for (const legacy of [false, true]) test.describe(`Viewport ${legacy ? "Legacy" 
       const box = document.getElementById("box").cloneNode(); box.id = "second-box";
       const content = document.createElement("div"); content.style.cssText = "position:relative;width:1000px;height:1000px";
       content.appendChild(second); box.appendChild(content); document.body.appendChild(box);
-      await AelluxJs.mount(second, "viewport");
+      await aelluxJs.mount(second, "viewport");
     });
     await expectGeometry(page, [0, 0, 1], "indicator");
-    expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().some(entry =>
-      entry.code === AelluxJs.diagnostics.WARN_RESOURCE_CONFLICT.code && entry.context?.extension === "viewport"))).toBe(true);
+    expect(await page.evaluate(() => aelluxJs.diagnostics.showHistory().some(entry =>
+      entry.code === aelluxJs.diagnostics.WARN_RESOURCE_CONFLICT.code && entry.context?.extension === "viewport"))).toBe(true);
     expect(await page.evaluate(() => viewportEvents.some(event => event.target === "second" && event.name === "ViewportChange"))).toBe(true);
     await page.locator("#item").evaluate(el => el.removeAttribute("data-ae-viewport-target"));
     await expectGeometry(page, [0, 0, 1]);
     await expectGeometry(page, [-.5, 0, 1], "indicator");
-    await page.evaluate(() => AelluxJs.unmount(document.getElementById("second"), "viewport"));
+    await page.evaluate(() => aelluxJs.unmount(document.getElementById("second"), "viewport"));
     expect(await values(page, "indicator")).toEqual(["7", "", ""]);
     expect(await page.locator("#indicator").evaluate(el => el.style.getPropertyPriority("--ae-viewport-x"))).toBe("important");
   });
@@ -304,7 +304,7 @@ for (const legacy of [false, true]) test.describe(`Viewport ${legacy ? "Legacy" 
     await expectGeometry(page, [0, 0, 1]);
     // Neutral geometry can already match before the asynchronous invalid-axis
     // update runs, so wait for its diagnostic independently.
-    await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.showHistory().some(entry =>
+    await expect.poll(() => page.evaluate(() => aelluxJs.diagnostics.showHistory().some(entry =>
       entry.context?.extension === "viewport" && entry.context?.value === "invalid"))).toBe(true);
   });
 
@@ -331,10 +331,10 @@ for (const legacy of [false, true]) test.describe(`Viewport ${legacy ? "Legacy" 
     await expectGeometry(page, [0, 0, 1]);
     await page.evaluate(() => document.getElementById("other").appendChild(document.getElementById("item")));
     await expectGeometry(page, [-.5, -.5, 1]);
-    await page.evaluate(() => AelluxJs.unmount(document.getElementById("item"), "viewport"));
+    await page.evaluate(() => aelluxJs.unmount(document.getElementById("item"), "viewport"));
     expect(await values(page)).toEqual(["9", "", ""]);
     expect(await page.locator("#item").evaluate(el => el.style.getPropertyPriority("--ae-viewport-x"))).toBe("important");
-    await page.evaluate(() => AelluxJs.mount(document.getElementById("item"), "viewport"));
+    await page.evaluate(() => aelluxJs.mount(document.getElementById("item"), "viewport"));
     await expectGeometry(page, [-.5, -.5, 1]);
   });
 
@@ -345,13 +345,13 @@ for (const legacy of [false, true]) test.describe(`Viewport ${legacy ? "Legacy" 
       const element = document.getElementById("item").cloneNode(); element.id = "second";
       for (const name of ["x", "y", "visible"]) element.style.removeProperty(`--ae-viewport-${name}`);
       document.getElementById("item").parentElement.appendChild(element);
-      await AelluxJs.mount(element);
+      await aelluxJs.mount(element);
     });
     await expectGeometry(page, [0, 0, 1], "second");
     await expect.poll(() => page.evaluate(() => viewportProbe.listeners.size)).toBe(1);
     await page.locator("#second").evaluate(el => { window.detachedViewport = el; el.remove(); });
     await expect.poll(() => page.evaluate(() => detachedViewport.style.getPropertyValue("--ae-viewport-x"))).toBe("");
-    await page.evaluate(() => AelluxJs.destroy("viewport"));
+    await page.evaluate(() => aelluxJs.destroy("viewport"));
     expect(await values(page)).toEqual(["", "", ""]);
     expect(await page.evaluate(() => ({ listeners: viewportProbe.listeners.size,
       targets: viewportProbe.observers.reduce((sum, observer) => sum + observer.targets.size, 0) }))).toEqual({ listeners: 0, targets: 0 });
@@ -378,7 +378,7 @@ for (const legacy of [false, true]) test.describe(`Viewport ${legacy ? "Legacy" 
     await expectGeometry(page, [-.5, -.5, 1]);
     await page.locator("#item").evaluate(el => el.style.width = "200px");
     await expectGeometry(page, [0, -.5, 1]);
-    await page.evaluate(() => AelluxJs.unmount(document.body, "viewport"));
+    await page.evaluate(() => aelluxJs.unmount(document.body, "viewport"));
     expect(await values(page)).toEqual(["", "", ""]);
   });
 
@@ -395,7 +395,7 @@ for (const legacy of [false, true]) test.describe(`Viewport ${legacy ? "Legacy" 
     await expectGeometry(page, [0, 0, 1]);
     await page.locator("#item").evaluate(el => {
       el.animate([{ transform: "none" }, { transform: "translateX(50px)" }], { duration: 150, fill: "forwards" });
-      AelluxJs.dispatchFrom(el, "Layout", { detail: { durationMs: 250 } });
+      aelluxJs.dispatchFrom(el, "Layout", { detail: { durationMs: 250 } });
     });
     await expectGeometry(page, [.5, 0, 1]);
     const delta = await page.evaluate(async () => {
@@ -414,7 +414,7 @@ for (const legacy of [false, true]) test.describe(`Viewport ${legacy ? "Legacy" 
     await expect.poll(() => values(page)).toEqual(["", "", ".3"]);
     await page.evaluate(async () => {
       const element = document.getElementById("item"); element.setAttribute("data-ae-viewport", "both");
-      await AelluxJs.mount(element);
+      await aelluxJs.mount(element);
     });
     await expectGeometry(page, [0, 0, 1]);
   });
@@ -425,14 +425,14 @@ for (const legacy of [false, true]) test.describe(`Viewport ${legacy ? "Legacy" 
     await page.evaluate(async () => {
       const element = document.getElementById("item");
       document.getElementById("box").dispatchEvent(new Event("scroll"));
-      await AelluxJs.unmount(element, "viewport");
+      await aelluxJs.unmount(element, "viewport");
       await new Promise(resolve => setTimeout(resolve, 100));
     });
     expect(await values(page)).toEqual(["", "", ""]);
     expect(await page.evaluate(() => viewportProbe.listeners.size)).toBe(0);
     await page.evaluate(async () => {
-      await AelluxJs.mount(document.body);
-      await AelluxJs.mount(document.body);
+      await aelluxJs.mount(document.body);
+      await aelluxJs.mount(document.body);
     });
     await expectGeometry(page, [0, 0, 1]);
     expect(await page.evaluate(() => viewportProbe.listeners.size)).toBe(1);
@@ -442,11 +442,11 @@ for (const legacy of [false, true]) test.describe(`Viewport ${legacy ? "Legacy" 
     await setup(page, "", legacy);
     const result = await page.evaluate(async markup => {
       document.body.innerHTML = markup + '<div id="other" style="position:relative;width:400px;height:400px;overflow:scroll"></div>';
-      await AelluxJs.mount(document.body);
+      await aelluxJs.mount(document.body);
       const element = document.getElementById("item");
       const mounted = element.style.getPropertyValue("--ae-viewport-visible");
       document.getElementById("other").appendChild(element);
-      await AelluxJs.mountManager.update(element, "viewport");
+      await aelluxJs.mountManager.update(element, "viewport");
       return { mounted, updated: element.style.getPropertyValue("--ae-viewport-x") };
     }, fixture("", "", "hidden"));
     expect(result).toEqual({ mounted: "1", updated: "-0.5" });
@@ -458,21 +458,21 @@ for (const legacy of [false, true]) test.describe(`Viewport ${legacy ? "Legacy" 
       ${[0, 1, 2].map(i => `<article id="item${i}" data-ae-snap-item style="flex:none;width:200px;height:100px"></article>`).join("")}
       </div></div>`, legacy);
     await page.evaluate(async () => {
-      AelluxJs.ext("scrollbox-snap");
-      await AelluxJs.mount(document.getElementById("box"));
+      aelluxJs.ext("scrollbox-snap");
+      await aelluxJs.mount(document.getElementById("box"));
     });
-    expect(await page.evaluate(() => !!AelluxJs.ext.viewport)).toBe(false);
-    await page.evaluate(() => AelluxJs.mountManager.controller("box").scrollbox.goto(1));
+    expect(await page.evaluate(() => !!aelluxJs.ext.viewport)).toBe(false);
+    await page.evaluate(() => aelluxJs.mountManager.controller("box").scrollbox.goto(1));
     await expect.poll(() => page.locator("#box").evaluate(el => el.scrollLeft)).toBe(200);
     await expect.poll(() => page.locator("#item1").evaluate(el => el.style.getPropertyValue("--ae-snap-focus"))).toBe("1");
     await page.evaluate(async () => {
       document.getElementById("item1").setAttribute("data-ae-viewport", "x");
-      await AelluxJs.mount(document.getElementById("item1"));
+      await aelluxJs.mount(document.getElementById("item1"));
     });
     await expect.poll(() => values(page, "item1").then(v => v[0])).toBe("0");
-    await page.evaluate(() => AelluxJs.mountManager.controller("box").scrollbox.next());
+    await page.evaluate(() => aelluxJs.mountManager.controller("box").scrollbox.next());
     await expect.poll(() => page.locator("#box").evaluate(el => el.scrollLeft)).toBe(400);
-    await page.evaluate(() => AelluxJs.mountManager.controller("box").scrollbox.previous());
+    await page.evaluate(() => aelluxJs.mountManager.controller("box").scrollbox.previous());
     await expect.poll(() => page.locator("#box").evaluate(el => el.scrollLeft)).toBe(200);
     expect(await page.locator("[data-ae-snap-item]").evaluateAll(items => items.map(el => el.style.getPropertyValue("--ae-snap-viewport")))).toEqual(["", "", ""]);
   });
@@ -482,7 +482,7 @@ const eventLog = page => page.evaluate(() => viewportEvents);
 const changes = async page => (await eventLog(page)).filter(event => event.name === "ViewportChange");
 async function changeGeometry(page, style) {
   await page.locator("#item").evaluate((element, style) => Object.assign(element.style, style), style);
-  await page.evaluate(() => AelluxJs.mountManager.update(document.getElementById("item"), "viewport"));
+  await page.evaluate(() => aelluxJs.mountManager.update(document.getElementById("item"), "viewport"));
 }
 
 for (const legacy of [false, true]) test.describe(`Viewport events ${legacy ? "Legacy" : "Modern"}`, () => {
@@ -544,8 +544,8 @@ for (const legacy of [false, true]) test.describe(`Viewport events ${legacy ? "L
     await page.evaluate(async () => {
       const element = document.getElementById("item"), box = document.getElementById("box");
       for (let index = 0; index < 20; index++) box.dispatchEvent(new Event("scroll"));
-      await AelluxJs.mountManager.update(element, "viewport");
-      await AelluxJs.mountManager.update(element, "viewport");
+      await aelluxJs.mountManager.update(element, "viewport");
+      await aelluxJs.mountManager.update(element, "viewport");
     });
     const log = await eventLog(page);
     expect(log.map(event => event.name)).toEqual(expected);
@@ -580,14 +580,14 @@ for (const legacy of [false, true]) test.describe(`Viewport events ${legacy ? "L
           top: value.top, bottom: value.bottom, width: value.width, height: value.height };
       };
     });
-    await page.evaluate(() => AelluxJs.mountManager.update(document.getElementById("item"), "viewport"));
+    await page.evaluate(() => aelluxJs.mountManager.update(document.getElementById("item"), "viewport"));
     expect(await changes(page)).toHaveLength(1);
     await page.evaluate(() => { viewportNoise = 0; });
     await changeGeometry(page, { left: "0px" });
     expect((await changes(page)).at(-1).detail.state).toBe("inside");
     await page.evaluate(async () => {
       viewportNoise = -.00001;
-      await AelluxJs.mountManager.update(document.getElementById("item"), "viewport");
+      await aelluxJs.mountManager.update(document.getElementById("item"), "viewport");
     });
     expect((await changes(page)).at(-1).detail.state).toBe("partial");
     await page.evaluate(() => { viewportNoise = 0; });
@@ -595,7 +595,7 @@ for (const legacy of [false, true]) test.describe(`Viewport events ${legacy ? "L
     expect((await changes(page)).at(-1).detail.state).toBe("outside");
     await page.evaluate(async () => {
       viewportNoise = -.00001;
-      await AelluxJs.mountManager.update(document.getElementById("item"), "viewport");
+      await aelluxJs.mountManager.update(document.getElementById("item"), "viewport");
     });
     expect((await changes(page)).at(-1).detail.state).toBe("partial");
     await page.evaluate(() => { viewportNoise = 0; });
@@ -603,7 +603,7 @@ for (const legacy of [false, true]) test.describe(`Viewport events ${legacy ? "L
     const before = (await changes(page)).length;
     await page.evaluate(async () => {
       viewportNoise = -.00001;
-      await AelluxJs.mountManager.update(document.getElementById("item"), "viewport");
+      await aelluxJs.mountManager.update(document.getElementById("item"), "viewport");
     });
     const log = await changes(page);
     expect(log).toHaveLength(before + 1);
@@ -615,10 +615,10 @@ for (const legacy of [false, true]) test.describe(`Viewport events ${legacy ? "L
     await setup(page, '<article id="item" data-ae-viewport style="position:absolute;left:50px;top:50px;width:100px;height:100px"></article>', legacy, false, true);
     expect((await changes(page))[0].detail.viewport).toBe("document");
     await page.evaluate(async markup => {
-      await AelluxJs.unmount(document.getElementById("item"), "viewport");
+      await aelluxJs.unmount(document.getElementById("item"), "viewport");
       document.body.innerHTML = markup;
       viewportEvents.length = 0;
-      await AelluxJs.mount(document.body);
+      await aelluxJs.mount(document.body);
     }, fixture("direction:rtl", "", "hidden"));
     const detail = (await changes(page))[0].detail;
     const expected = await page.evaluate(() => {
@@ -638,7 +638,7 @@ for (const legacy of [false, true]) test.describe(`Viewport events ${legacy ? "L
       '<div id="other" style="position:relative;width:200px;height:200px;border:10px solid;overflow:hidden"><div style="width:1000px;height:1000px"></div></div>', legacy, false, true);
     await page.evaluate(async () => {
       document.getElementById("other").firstElementChild.appendChild(document.getElementById("item"));
-      await AelluxJs.mountManager.update(document.getElementById("item"), "viewport");
+      await aelluxJs.mountManager.update(document.getElementById("item"), "viewport");
     });
     const log = await eventLog(page);
     expect(log.map(event => event.name)).toEqual(["ViewportChange", "ViewportFullyInside", "ViewportChange"]);
@@ -653,13 +653,13 @@ for (const legacy of [false, true]) test.describe(`Viewport events ${legacy ? "L
       ["box", "width", "0px", "200px"], ["box", "height", "0px", "200px"]]) {
       const before = (await eventLog(page)).length;
       await page.locator(`#${id}`).evaluate((el, [property, value]) => { el.style[property] = value; }, [property, invalid]);
-      await page.evaluate(() => AelluxJs.mountManager.update(document.getElementById("item"), "viewport"));
+      await page.evaluate(() => aelluxJs.mountManager.update(document.getElementById("item"), "viewport"));
       let log = await eventLog(page);
       expect(log.slice(before).map(event => event.name)).toEqual(["ViewportChange"]);
       expect(log.at(-1).detail).toMatchObject({ x1: null, y1: null, x2: null, y2: null,
         x: null, y: null, visible: 0, state: null, measurable: false, initial: false });
       await page.locator(`#${id}`).evaluate((el, [property, value]) => { el.style[property] = value; }, [property, restored]);
-      await page.evaluate(() => AelluxJs.mountManager.update(document.getElementById("item"), "viewport"));
+      await page.evaluate(() => aelluxJs.mountManager.update(document.getElementById("item"), "viewport"));
       log = await eventLog(page);
       expect(log.slice(before + 1).map(event => event.name)).toEqual(["ViewportChange", "ViewportFullyInside"]);
     }
@@ -667,10 +667,10 @@ for (const legacy of [false, true]) test.describe(`Viewport events ${legacy ? "L
       window.viewportNativeRect = element.getBoundingClientRect.bind(element);
       element.getBoundingClientRect = () => ({ left: NaN, right: Infinity, top: 0, bottom: 100, width: 100, height: 100 });
     });
-    await page.evaluate(() => AelluxJs.mountManager.update(document.getElementById("item"), "viewport"));
+    await page.evaluate(() => aelluxJs.mountManager.update(document.getElementById("item"), "viewport"));
     expect((await changes(page)).at(-1).detail).toMatchObject({ measurable: false, x: null, state: null });
     await page.locator("#item").evaluate(element => { element.getBoundingClientRect = viewportNativeRect; });
-    await page.evaluate(() => AelluxJs.mountManager.update(document.getElementById("item"), "viewport"));
+    await page.evaluate(() => aelluxJs.mountManager.update(document.getElementById("item"), "viewport"));
     expect((await changes(page)).at(-1).detail.measurable).toBe(true);
     expect((await eventLog(page)).some(event => event.name === "ViewportFullyOutside")).toBe(false);
   });
@@ -710,13 +710,13 @@ for (const legacy of [false, true]) test.describe(`Viewport events ${legacy ? "L
     await setup(page, fixture("", "", "hidden"), legacy, false, true);
     await page.evaluate(async () => {
       const item = document.getElementById("item");
-      await AelluxJs.unmount(item, "viewport");
-      await AelluxJs.mount(item, "viewport");
-      await AelluxJs.mount(item, "viewport");
+      await aelluxJs.unmount(item, "viewport");
+      await aelluxJs.mount(item, "viewport");
+      await aelluxJs.mount(item, "viewport");
       item.removeAttribute("data-ae-viewport");
-      await AelluxJs.mountManager.update(item, "viewport");
+      await aelluxJs.mountManager.update(item, "viewport");
       item.setAttribute("data-ae-viewport", "");
-      await AelluxJs.mount(item, "viewport");
+      await aelluxJs.mount(item, "viewport");
     });
     const log = await eventLog(page);
     expect(log.map(event => event.name)).toEqual(Array(3).fill(["ViewportChange", "ViewportFullyInside"]).flat());

@@ -43,38 +43,38 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
 (function (root) {
   "use strict";
 
-  const AelluxJs = root.AelluxJs;
+  const aelluxJs = root.aelluxJs;
   const extensionName = "present";
-  if (!AelluxJs) {
-    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+  if (!aelluxJs) {
+    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.`);
   }
   const attr = {
-    present: AelluxJs.attr(extensionName),
-    group: AelluxJs.attr("present-group"),
-    active: AelluxJs.attr("present-active"),
-    when: AelluxJs.attr("present-when"),
-    triggerOn: AelluxJs.attr("present-trigger-on"),
-    autoDismiss: AelluxJs.attr("auto-dismiss"),
-    presentMotion: AelluxJs.attr("present-motion"),
-    dismissOnClick: AelluxJs.attr("dismiss-on-click"),
-    trigger: AelluxJs.attr("present-trigger"), //toggle,pop,dismiss,unpop,effect
-    target: AelluxJs.attr("present-target"), //target ID
-    effect: AelluxJs.attr("present-effect"),
+    present: aelluxJs.attr(extensionName),
+    group: aelluxJs.attr("present-group"),
+    active: aelluxJs.attr("present-active"),
+    when: aelluxJs.attr("present-when"),
+    triggerOn: aelluxJs.attr("present-trigger-on"),
+    autoDismiss: aelluxJs.attr("auto-dismiss"),
+    presentMotion: aelluxJs.attr("present-motion"),
+    dismissOnClick: aelluxJs.attr("dismiss-on-click"),
+    trigger: aelluxJs.attr("present-trigger"), //toggle,pop,dismiss,unpop,effect
+    target: aelluxJs.attr("present-target"), //target ID
+    effect: aelluxJs.attr("present-effect"),
   };
   const className = {
-    pop: AelluxJs.className("pop"),
-    popping: AelluxJs.className("popping"),
-    dismissing: AelluxJs.className("dismissing"),
-    unpopping: AelluxJs.className("unpopping"),
-    unpop: AelluxJs.className("unpop"),
-    dismissed: AelluxJs.className("dismissed"),
-    willChange: AelluxJs.className("will-change"),
-    grid: AelluxJs.className("present-grid")
+    pop: aelluxJs.className("pop"),
+    popping: aelluxJs.className("popping"),
+    dismissing: aelluxJs.className("dismissing"),
+    unpopping: aelluxJs.className("unpopping"),
+    unpop: aelluxJs.className("unpop"),
+    dismissed: aelluxJs.className("dismissed"),
+    willChange: aelluxJs.className("will-change"),
+    grid: aelluxJs.className("present-grid")
   };
   const presentSelector = `[${attr.present}]`;
   const groupSelector = `[${attr.group}]`;
 
-  AelluxJs.extAttach(extensionName, {
+  aelluxJs.extAttach(extensionName, {
     init, destroy,
     pop, dismiss, unpop, toggle, trigger, show, selected, popNext, effect, cancelEffect
   });
@@ -93,7 +93,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
   const TRANSITION_PREPARE_TIME = 100;
   const TAP_CLICK_WAIT_TIME = 32;
   const presentElements = new Map();
-  const effects = createPresentEffects(root, AelluxJs, presentElements);
+  const effects = createPresentEffects(root, aelluxJs, presentElements);
   const openPresentElements = new Set();
   let fallbackMotionId = 5000000;
   const triggerElementsSet = new Set();
@@ -112,8 +112,8 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
   let groupsQueued = false;
   let interpolatedProgress = false;
   let interpolatedUnpop = false;
-  const playback = createPresentPlayback(root, AelluxJs);
-  const gestures = createPresentGestures(root, AelluxJs, {
+  const playback = createPresentPlayback(root, aelluxJs);
+  const gestures = createPresentGestures(root, aelluxJs, {
     state: element => presentElements.get(element)?.state,
     busy: element => !!presentElements.get(element)?.transition,
     order: element => presentElements.get(element)?.presentationOrder || 0,
@@ -150,26 +150,26 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
   function init(options) {
     const communication = { owner: extensionName };
     for (const [name, method] of Object.entries({ pop, unpop, dismiss }))
-      AelluxJs.comm.handle("present." + name, ({ element }) => method(element), communication);
-    AelluxJs.comm.handle("present.toggle", ({ element, goto }) => toggle(element, goto), communication);
-    AelluxJs.comm.handle("present.effect", ({ element, effect: name, effectTarget }) => effect(element, name, effectTarget), communication);
-    AelluxJs.comm.handle("present.show", ({ group, member }) => show(group, member), communication);
-    AelluxJs.comm.handle("present.selection", ({ group }) => selected(group), communication);
-    AelluxJs.comm.handle("present.pop-next", request => popNext(request.group, member => {
+      aelluxJs.comm.handle("present." + name, ({ element }) => method(element), communication);
+    aelluxJs.comm.handle("present.toggle", ({ element, goto }) => toggle(element, goto), communication);
+    aelluxJs.comm.handle("present.effect", ({ element, effect: name, effectTarget }) => effect(element, name, effectTarget), communication);
+    aelluxJs.comm.handle("present.show", ({ group, member }) => show(group, member), communication);
+    aelluxJs.comm.handle("present.selection", ({ group }) => selected(group), communication);
+    aelluxJs.comm.handle("present.pop-next", request => popNext(request.group, member => {
       if (request.preparation) {
-        const result = AelluxJs.comm.request(request.preparation.contract, { ...request.preparation.payload, element: member });
+        const result = aelluxJs.comm.request(request.preparation.contract, { ...request.preparation.payload, element: member });
         if (!result.handled || result.value === false) throw new Error("Present preparation is unavailable.");
       }
     }), communication);
     playback.init();
     const descriptors = cssProperties.map(([name, syntax, initialValue]) =>
       ({ name: `--ae-${name}`, syntax, initialValue }));
-    const progressRegistered = AelluxJs.registerCssProperty(...descriptors.slice(0, 4));
+    const progressRegistered = aelluxJs.registerCssProperty(...descriptors.slice(0, 4));
     interpolatedProgress = !!(progressRegistered && root.CSS.supports &&
       root.CSS.supports("opacity", "clamp(0, 0.5, 1)"));
-    interpolatedUnpop = !!AelluxJs.registerCssProperty({ name: "--ae-unpop-progress", syntax: "<number>", initialValue: "1" });
-    AelluxJs.registerCssProperty(...descriptors.slice(4));
-    AelluxJs.mountManager.add({
+    interpolatedUnpop = !!aelluxJs.registerCssProperty({ name: "--ae-unpop-progress", syntax: "<number>", initialValue: "1" });
+    aelluxJs.registerCssProperty(...descriptors.slice(4));
+    aelluxJs.mountManager.add({
       extensionName, selector: presentSelector,
       priority: 0,
       mount: mountPresentContainer, unmount: unmountPresentContainer,
@@ -177,7 +177,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
       controllers: ["pop", "dismiss", "unpop", "trigger", "toggle", "effect", "cancelEffect"]
     });
 
-    AelluxJs.mountManager.add({
+    aelluxJs.mountManager.add({
       extensionName,
       priority: 0,
       selector: `[${attr.trigger}]`,
@@ -185,13 +185,13 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
       update: refreshTriggerTargets
     });
 
-    AelluxJs.mountManager.add({
+    aelluxJs.mountManager.add({
       extensionName, selector: groupSelector, priority: 1,
       mount: mountGroup, unmount: unmountGroup, controllers: ["show", "selected", "popNext"]
     });
     autoObserver = new root.MutationObserver(records => {
       for (const record of records) {
-        if (record.target === document.documentElement && record.attributeName === AelluxJs.attr("reduced-motion")) effects.preferences();
+        if (record.target === document.documentElement && record.attributeName === aelluxJs.attr("reduced-motion")) effects.preferences();
         const controller = presentElements.get(record.target);
         if (controller) {
           if (record.attributeName !== attr.autoDismiss) gestures.update(record.target);
@@ -199,29 +199,29 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
         }
       }
       if (records.some(record => record.type === "childList" || record.attributeName === "id")) {
-        for (const element of presentElements.keys()) if (element.hasAttribute(AelluxJs.attr("present-gesture-source"))) gestures.update(element);
+        for (const element of presentElements.keys()) if (element.hasAttribute(aelluxJs.attr("present-gesture-source"))) gestures.update(element);
       }
     });
-    autoObserver.observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: [attr.autoDismiss, "id", AelluxJs.attr("reduced-motion"),
-      ...["", "-source", "-unpop", "-dismiss"].map(suffix => AelluxJs.attr(`present-gesture${suffix}`))] });
+    autoObserver.observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: [attr.autoDismiss, "id", aelluxJs.attr("reduced-motion"),
+      ...["", "-source", "-unpop", "-dismiss"].map(suffix => aelluxJs.attr(`present-gesture${suffix}`))] });
     document.addEventListener("pointerover", onHover);
     document.addEventListener("pointerout", onHover);
-    AelluxJs.on("$click", OnClick);
-    AelluxJs.on("tap", onTap);
-    AelluxJs.onEvent(root, "$resize", refreshExpandedStates);
+    aelluxJs.on("$click", OnClick);
+    aelluxJs.on("tap", onTap);
+    aelluxJs.onEvent(root, "$resize", refreshExpandedStates);
   }
 
   function destroy() {
-    AelluxJs.comm.removeOwner(extensionName);
+    aelluxJs.comm.removeOwner(extensionName);
     effects.destroy();
     gestures.destroy();
     autoObserver?.disconnect();
     autoObserver = null;
-    AelluxJs.mountManager.remove({ extensionName });
-    AelluxJs.off("$click", OnClick);
-    AelluxJs.off("tap", onTap);
+    aelluxJs.mountManager.remove({ extensionName });
+    aelluxJs.off("$click", OnClick);
+    aelluxJs.off("tap", onTap);
     for (const pending of pendingTaps) cancelPendingTap(pending);
-    AelluxJs.offEvent(root, "$resize", refreshExpandedStates);
+    aelluxJs.offEvent(root, "$resize", refreshExpandedStates);
     document.removeEventListener("pointerover", onHover);
     document.removeEventListener("pointerout", onHover);
     for (const group of groups.keys()) unmountGroup(group);
@@ -239,13 +239,13 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
 
   function mountPresentContainer(element) {
     if (presentElements.has(element)) return;
-    elementMemories.set(element, AelluxJs.persist.element.save(
+    elementMemories.set(element, aelluxJs.persist.element.save(
       element,
       [attr.present, attr.presentMotion, "hidden"],
       ["--ae-pop-progress", "--ae-dismiss-progress", "--ae-unpop-progress",
         "--ae-present-pop-phase", "--ae-present-dismiss-phase"]
     ));
-    containerAriaHandlers.set(element, AelluxJs.aria.register(element));
+    containerAriaHandlers.set(element, aelluxJs.aria.register(element));
     const initialState = element.classList.contains(className.dismissed) ? DISMISS
       : element.classList.contains(className.unpop) || element.hidden ? UNPOP : POP;
     const legacyHidden = element.hidden || ![className.pop, className.unpop, className.dismissed].some(name => element.classList.contains(name));
@@ -261,8 +261,8 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
     const measuredWidth = !presentMotion && tokens.includes("width");
     if (presentMotion) element.classList.add(className.grid);
     else if (measuredHeight || measuredWidth) {
-      AelluxJs.diagnostics.info(
-        AelluxJs.diagnostics.INFO_PRESENT_MEASURED_LAYOUT,
+      aelluxJs.diagnostics.info(
+        aelluxJs.diagnostics.INFO_PRESENT_MEASURED_LAYOUT,
         { extension: extensionName, element }
       );
     }
@@ -276,7 +276,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
       measuredHeight,
       measuredWidth,
       motionEnabled: (element.getAttribute(attr.present) || "").trim() !== "",
-      motionId: AelluxJs.motion ? AelluxJs.motion.id() : fallbackMotionId++,
+      motionId: aelluxJs.motion ? aelluxJs.motion.id() : fallbackMotionId++,
       transition: null,
       handoff: null,
       opening: null,
@@ -307,7 +307,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
         if (transition) {
           transition.cancelled = true;
           transition.replacement = replacement;
-          if (AelluxJs.motion) AelluxJs.motion.cancel(this.motionId);
+          if (aelluxJs.motion) aelluxJs.motion.cancel(this.motionId);
           if (transition.timeout !== null) {
             clearTimeout(transition.timeout);
             transition.timeout = null;
@@ -317,8 +317,8 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
           }
           this.transition = null;
           transition.interrupt(
-            AelluxJs.diagnostics.create(
-              AelluxJs.diagnostics.WARN_INTERRUPTION,
+            aelluxJs.diagnostics.create(
+              aelluxJs.diagnostics.WARN_INTERRUPTION,
               { extensionName, replacement }
             )
           );
@@ -377,7 +377,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
     cancelHoverClose(element);
     for (const button of controller.triggers) hoveredTriggers.delete(button);
     controller.stop();
-    AelluxJs.waitLayout?.cancel(controller.motionId);
+    aelluxJs.waitLayout?.cancel(controller.motionId);
     element.classList.remove(className.grid);
     element.classList.remove(className.pop, className.unpop, className.dismissed);
     element.classList.add(...controller.initialClasses);
@@ -393,7 +393,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
 
   function mountTriggerElement(triggerElement) {
     if (triggerElementsSet.has(triggerElement) || !triggerElement.hasAttribute(attr.trigger)) return;
-    triggerAriaHandlers.set(triggerElement, AelluxJs.aria.register(triggerElement));
+    triggerAriaHandlers.set(triggerElement, aelluxJs.aria.register(triggerElement));
     triggerElementsSet.add(triggerElement);
     refreshTriggerTargets(triggerElement);
   }
@@ -423,7 +423,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
   function targetById(value) {
     const id = targetIdFor(value);
     if (!id) {
-      AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_SELECTOR, {
+      aelluxJs.diagnostics.error(aelluxJs.diagnostics.ERROR_EXTENSION_SELECTOR, {
         cause: new SyntaxError(),
         extension: extensionName,
         selector: value,
@@ -522,8 +522,8 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
       (trigger || "toggle").toLowerCase() :
       "toggle";
     if (trigger === "effect") return effect(element, name);
-    if (!["pop", "dismiss", "unpop", "toggle"].includes(trigger)) AelluxJs.diagnostics.warn(
-      AelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
+    if (!["pop", "dismiss", "unpop", "toggle"].includes(trigger)) aelluxJs.diagnostics.warn(
+      aelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
         extension: extensionName, element, attribute: attr.trigger, value: trigger,
         reason: "Unknown Present action; using toggle.",
         suggestion: "Use pop, dismiss, unpop, or toggle."
@@ -546,12 +546,12 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
 
   function captureHandoff(element, controller) {
     if ((controller.measuredHeight || controller.measuredWidth) && !measuredMemories.has(element)) {
-      measuredMemories.set(element, AelluxJs.persist.element.save(element, [], ["max-height", "max-width"]));
+      measuredMemories.set(element, aelluxJs.persist.element.save(element, [], ["max-height", "max-width"]));
     }
     const tokens = (element.getAttribute(attr.present) || "").split(/\s+/);
     const properties = [];
     if (tokens.includes("opacity")) properties.push("opacity");
-    if (tokens.includes("transform") && !element.hasAttribute(AelluxJs.attr("anchor"))) properties.push("transform");
+    if (tokens.includes("transform") && !element.hasAttribute(aelluxJs.attr("anchor"))) properties.push("transform");
     if (tokens.includes("height")) properties.push(...(controller.presentMotion ? ["grid-template-rows", "height"] : ["max-height"]));
     if (tokens.includes("width")) properties.push(...(controller.presentMotion ? ["grid-template-columns", "width"] : ["max-width"]));
     properties.push("--ae-present-pop-phase", "--ae-present-dismiss-phase",
@@ -575,8 +575,8 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
       controller.reverse = null;
       restoreHandoff(controller);
     }
-    const memory = AelluxJs.persist.element.save(element, [], [...properties, "transition-property"]);
-    const transition = AelluxJs.persist.element.save(element, [], ["transition-property"]);
+    const memory = aelluxJs.persist.element.save(element, [], [...properties, "transition-property"]);
+    const transition = aelluxJs.persist.element.save(element, [], ["transition-property"]);
     const freeze = () => {
       element.style.setProperty("transition-property", "none", "important");
       // Progress channels are already owned inline. Keep their priority:
@@ -591,7 +591,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
   async function prepareMeasuredSize(element, controller, gotoVisible, previousSize, waitForPreparation) {
     if (!controller.measuredHeight && !controller.measuredWidth) return null;
     if (!measuredMemories.has(element)) {
-      measuredMemories.set(element, AelluxJs.persist.element.save(
+      measuredMemories.set(element, aelluxJs.persist.element.save(
         element, [], ["max-height", "max-width"]
       ));
     }
@@ -618,7 +618,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
       element.style.setProperty("max-width", `${Math.max(0, start.width)}px`, "important");
     }
     if (!waitForPreparation)
-      await AelluxJs.waitLayout.read(controller.motionId,
+      await aelluxJs.waitLayout.read(controller.motionId,
         () => element.getBoundingClientRect());
     return size;
   }
@@ -666,7 +666,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
 
     try {
       const revision = controller.operationRevision;
-      const allowEvent = groupOperation || AelluxJs.dispatchFrom(
+      const allowEvent = groupOperation || aelluxJs.dispatchFrom(
         element, `${BEFORE}${newDirection}`,
         { bubbles: true, cancelable: true }
       );
@@ -679,7 +679,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
       controller.operationRevision++;
       const impliedReverse = reversing && !controller.opening && !controller.transition;
       const reverseTracks = reversing && controller.motionEnabled &&
-        AelluxJs.currentPreference?.("reduced-motion") !== "reduced"
+        aelluxJs.currentPreference?.("reduced-motion") !== "reduced"
         ? (gesture ? playback.full(element, controller, false) : playback.snapshot(element, controller, interpolatedProgress)) : [];
       if (gotoVisible) controller.opening = null;
       if (gotoVisible) controller.presentationOrder = presentationOrder === undefined
@@ -742,7 +742,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
 
       element.hidden = false;
       if (gesture && root.getComputedStyle(element).display === "none") {
-        controller.gestureDisplay = AelluxJs.persist.element.save(element, [], ["display"]);
+        controller.gestureDisplay = aelluxJs.persist.element.save(element, [], ["display"]);
         element.style.setProperty("display", controller.presentMotion ? "inline-grid" : "block", "important");
       }
       openPresentElements.add(element);
@@ -891,14 +891,14 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
         apply: activateTransition,
         easing: reversing && !impliedReverse ? undefined : advancedEase,
         nativeDuration: timeMs,
-        maxFPS: AelluxJs.layoutMaxFPS ? AelluxJs.layoutMaxFPS(element) : undefined,
+        maxFPS: aelluxJs.layoutMaxFPS ? aelluxJs.layoutMaxFPS(element) : undefined,
         abort: () => controller.transition !== transition || !element.isConnected
       };
-      const completed = gesture ? (activateTransition(), gesture.settled) : AelluxJs.motion
-        ? AelluxJs.motion.run(element, motionOptions)
+      const completed = gesture ? (activateTransition(), gesture.settled) : aelluxJs.motion
+        ? aelluxJs.motion.run(element, motionOptions)
         : legacyMotionRun(motionOptions, transition);
 
-      AelluxJs.dispatchFrom(element, "Layout", {
+      aelluxJs.dispatchFrom(element, "Layout", {
         detail: {
           origin: `present.${newDirection}`.toLowerCase(),
           durationMs: Number.isFinite(timeMs) ? Math.max(0, timeMs) : 0
@@ -914,7 +914,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
         }
       }
       if (controller.transition !== transition || !element.isConnected) return;
-      AelluxJs.dispatchFrom(element, gotoVisible ? "Popping" : reversing ? "Unpopping" : "Dismissing", { bubbles: true });
+      aelluxJs.dispatchFrom(element, gotoVisible ? "Popping" : reversing ? "Unpopping" : "Dismissing", { bubbles: true });
       const motionResult = await Promise.race([completed, interrupted]);
       if (controller.transition !== transition ||
         (gesture && !motionResult) ||
@@ -932,7 +932,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
           publishGroup(group, groupState, selected);
         }
         controller.gesture = null;
-        AelluxJs.dispatchFrom(element, motionResult, { bubbles: true });
+        aelluxJs.dispatchFrom(element, motionResult, { bubbles: true });
         if (finalVisible) autoDismissSchedule(element, controller);
         return;
       }
@@ -942,10 +942,10 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
       if (gotoVisible && !element.hidden) {
         autoDismissSchedule(element, controller);
         controller.classList.add(className.pop);
-        AelluxJs.dispatchFrom(element, POP, { bubbles: true });
+        aelluxJs.dispatchFrom(element, POP, { bubbles: true });
       }
       if (!gotoVisible && controller.state !== POP) {
-        AelluxJs.dispatchFrom(element, newDirection, { bubbles: true });
+        aelluxJs.dispatchFrom(element, newDirection, { bubbles: true });
       }
     } catch (error) {
       const ownsTransition = transition && controller.transition === transition;
@@ -957,12 +957,12 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
         controller.classList.remove(transition.className);
       }
       switch (error && error.code) {
-        case AelluxJs.diagnostics.WARN_INTERRUPTION.code:
+        case aelluxJs.diagnostics.WARN_INTERRUPTION.code:
           // Replacement and teardown are expected lifecycle operations.
           // Unexpected interruption diagnostics still reach the reporter.
           if (transition && transition.cancelled) break;
-          AelluxJs.diagnostics.warn(
-            AelluxJs.diagnostics.WARN_INTERRUPTION,
+          aelluxJs.diagnostics.warn(
+            aelluxJs.diagnostics.WARN_INTERRUPTION,
             {
               cause: error,
               extension: extensionName,
@@ -972,8 +972,8 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
           );
           break;
         default:
-          AelluxJs.diagnostics.error(
-            AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION,
+          aelluxJs.diagnostics.error(
+            aelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION,
             { cause: error, extension: extensionName, element }
           );
           break;
@@ -1025,7 +1025,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
     else openPresentElements.add(element);
     if (focused && !controller.expanded) {
       if (document.activeElement === focused) focused.blur();
-      if (document.activeElement !== focused) AelluxJs.dispatch(`${controller.direction}FocusLost`, {
+      if (document.activeElement !== focused) aelluxJs.dispatch(`${controller.direction}FocusLost`, {
         detail: { element, focused }
       });
     }
@@ -1060,7 +1060,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
     const tick = () => {
       if (!valid()) { if (controller.autoCountdown === countdown) cancelAutoDismiss(controller); return; }
       const now = root.performance.now();
-      const fps = AelluxJs.layoutMaxFPS?.(element) || AelluxJs.options.cssMotionPropertyMaxFPS || 55;
+      const fps = aelluxJs.layoutMaxFPS?.(element) || aelluxJs.options.cssMotionPropertyMaxFPS || 55;
       if (now - countdown.last >= 1000 / fps) {
         countdown.last = now;
         emit(false);
@@ -1083,7 +1083,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
   }
 
   function emitAutoDismissProgress(element, elapsedMs, duration, completed = false) {
-    AelluxJs.dispatchFrom(element, "Progress", { bubbles: false, cancelable: false,
+    aelluxJs.dispatchFrom(element, "Progress", { bubbles: false, cancelable: false,
       detail: { value: completed ? 1 : duration ? elapsedMs / duration : 0, max: 1,
         status: completed ? "completed" : "running", elapsedMs,
         durationMs: duration, remainingMs: Math.max(0, duration - elapsedMs) } });
@@ -1147,7 +1147,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
     const pending = {
       event, target, hoverSuppressed: control && suppressHoverClick(control, event),
       present: triggerTargets.get(control),
-      input: AelluxJs.comm.request("input.mount-token", { element: target }).value,
+      input: aelluxJs.comm.request("input.mount-token", { element: target }).value,
       timer: null
     };
     pendingTaps.add(pending);
@@ -1156,7 +1156,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
     pending.timer = setTimeout(() => {
       pendingTaps.delete(pending);
       if (!target.isConnected ||
-        (pending.input && AelluxJs.comm.request("input.mount-token", { element: target }).value !== pending.input)) return;
+        (pending.input && aelluxJs.comm.request("input.mount-token", { element: target }).value !== pending.input)) return;
       activate(event, target, pending.hoverSuppressed);
     }, TAP_CLICK_WAIT_TIME);
   }
@@ -1194,8 +1194,8 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
         exceptions.push(container);
         if (!(hoverSuppressed ?? suppressHoverClick(button, event))) trigger(container, triggerAttr, button.getAttribute(attr.effect));
       } else {
-        AelluxJs.diagnostics.error(
-          AelluxJs.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING,
+        aelluxJs.diagnostics.error(
+          aelluxJs.diagnostics.ERROR_PRESENT_CONTROL_TARGET_MISSING,
           { extension: extensionName, element: button, action: triggerAttr === "dismiss" ? "dismiss" : "trigger" }
         );
       }
@@ -1208,7 +1208,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
     // Invalid ID syntax already has its specific selector diagnostic (1107).
     if (!targetIdFor(value)) return;
     if (target && target.hasAttribute(attr.present)) return;
-    AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_TARGET, {
+    aelluxJs.diagnostics.warn(aelluxJs.diagnostics.WARN_CONFIGURATION_TARGET, {
       extension: extensionName, element, attribute, value,
       reason: target ? "Target is not a Present container." : "Target element was not found.",
       suggestion: "Use one existing Present element ID, optionally prefixed with #, and mount it before interacting."
@@ -1261,7 +1261,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
     const limit = text === "" ? 1 : Number(text);
     const valid = text === "" || (/^\d+$/.test(text) && Number.isSafeInteger(limit) && limit > 0);
     state.limit = valid ? limit : 1;
-    if (!valid) AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
+    if (!valid) aelluxJs.diagnostics.warn(aelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
       extension: extensionName, element: group, attribute: attr.group, value,
       reason: "Present Group capacity must be a positive integer.",
       suggestion: "Use a positive integer, or leave the attribute empty for a capacity of 1."
@@ -1290,7 +1290,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
       selected: visible.length === 1 ? visible[0] : null,
       accumulating: false, reservations: new Map(),
       revision: 0, pending: Promise.resolve(true), jobs: new Map(),
-      memory: AelluxJs.persist.element.save(group, [attr.active])
+      memory: aelluxJs.persist.element.save(group, [attr.active])
     });
     groupLimit(group, groups.get(group));
     if (!groupObserver && typeof root.MutationObserver === "function") {
@@ -1345,7 +1345,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
   }
 
   function groupDiagnostic(group, reason) {
-    AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_PRESENT_GROUP_SELECTION,
+    aelluxJs.diagnostics.warn(aelluxJs.diagnostics.WARN_PRESENT_GROUP_SELECTION,
       { extension: extensionName, element: group, attribute: attr.active,
         value: group.getAttribute(attr.active), reason,
         suggestion: "Use unique native IDs on Present members of this group; select one ID or one matching condition." });
@@ -1466,7 +1466,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
         return Promise.resolve(null);
       }
       if (typeof prepare === "function") prepare(member);
-      if (!valid(true) || !AelluxJs.dispatchFrom(member, "BeforePop", { bubbles: true, cancelable: true }) ||
+      if (!valid(true) || !aelluxJs.dispatchFrom(member, "BeforePop", { bubbles: true, cancelable: true }) ||
         !valid(true)) {
         release(true);
         return Promise.resolve(null);
@@ -1492,7 +1492,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
     if (state.announced === current) return;
     const previous = state.announced || null;
     state.announced = current;
-    AelluxJs.dispatchFrom(group, "PresentGroupChange", { bubbles: true,
+    aelluxJs.dispatchFrom(group, "PresentGroupChange", { bubbles: true,
       detail: { group, previous, current, key: current && current.id } });
   }
 
@@ -1518,7 +1518,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
         presentElements.has(member) && member.isConnected && member.closest(groupSelector) === group &&
         member.id === ids[index] && member.getAttribute(attr.when) === conditions[index]);
     for (const member of changes) {
-      const allowed = AelluxJs.dispatchFrom(member, member === selected ? "BeforePop" : `${BEFORE}${closingDirection}`,
+      const allowed = aelluxJs.dispatchFrom(member, member === selected ? "BeforePop" : `${BEFORE}${closingDirection}`,
         { bubbles: true, cancelable: true });
       if (!valid()) { queueGroups(); return false; }
       if (!allowed) {

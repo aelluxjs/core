@@ -24,8 +24,8 @@ try {
     const before = await cdp.send("Runtime.getHeapUsage");
 
     await page.addScriptTag({ url: "http://127.0.0.1:4173/dist/aellux.js" });
-    await page.evaluate(() => AelluxJs.init({ mode: "full" }));
-    await page.waitForFunction(() => AelluxJs.ext.scrollbox?.initialized && AelluxJs.ext.present?.initialized);
+    await page.evaluate(() => aelluxJs.init({ mode: "full" }));
+    await page.waitForFunction(() => aelluxJs.ext.scrollbox?.initialized && aelluxJs.ext.present?.initialized);
     await page.waitForTimeout(300);
     await cdp.send("HeapProfiler.collectGarbage");
     const after = await cdp.send("Runtime.getHeapUsage");

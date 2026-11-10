@@ -1,1 +1,1 @@
-AelluxJs.extAttach("private-test",{init:function(){this.loaded=true}});
+aelluxJs.extAttach("private-test",{init:function(){this.loaded=true}});

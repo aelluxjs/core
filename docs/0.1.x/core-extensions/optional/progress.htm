@@ -38,7 +38,7 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-PgrxAHrkt22+F09vWG2iuTeiqQ+UCUeSkyAe/nibdP/XtRk8nTZ+VjetKW+okArJ" crossorigin="anonymous">
+  integrity="sha384-q4bpBk5Vqct9IR80W+4o8g4BlPq84mWWb0mV47Q76mgYStKp6AKgCBgxRwr2FPAE" crossorigin="anonymous">
 </head>
 
 <body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
@@ -192,6 +192,13 @@
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
                                         aellux.js Docs                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/brand-naming.htm" data-ae-overflow-marquee="190px">
+                                        Brand Naming and Migration                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -740,7 +747,7 @@
 <p>Present first emits zero at the start of <code>Popping</code> to reset the bar. This does not start the close timer: after opening completes, the countdown emits zero again, publishes monotonically elapsed progress while waiting, and emits one before requesting closure. Detail includes <code>status: &quot;running&quot;</code> or <code>&quot;completed&quot;</code>, <code>elapsedMs</code>, <code>durationMs</code>, and <code>remainingMs</code>. The timer remains independent of motion duration/easing. A canceled <code>BeforeDismiss</code> leaves completed progress at one without retrying. See <a href="../present.htm">Present</a> and the <a href="../feedback.htm#stacked-notifications">stacked Feedback example</a>.</p>
 <h2>Modern and Legacy compatibility</h2>
 <p>The four artifacts are <code>aellux.ext.progress.js</code>, <code>aellux.ext.progress.min.js</code>, <code>aellux.ext.progress.legacy.js</code>, and <code>aellux.ext.progress.legacy.min.js</code>. Modern uses native controls. Bootstrap probes each tag separately, including numeric reflection and partial APIs; missing capabilities select Legacy. Forced Legacy preserves complete native implementations.</p>
-<p>Only the Legacy Extension includes the small Aellux fallback. Unsupported tags receive element-local property descriptors, a noninteractive visual bar and ARIA range semantics. Attributes remain the source of truth. Determinate progress fills proportionally; indeterminate progress uses a striped full-width indicator (solid where CSS gradients are unsupported). Meter clamps ranges and indicates optimum/suboptimum regions with color. Existing children and authored attributes remain intact. No additional script or stylesheet is requested; no fallback implementation is included in Core, Orchestrator or Full.</p>
+<p>Only the Legacy Extension includes the small aellux.js fallback. Unsupported tags receive element-local property descriptors, a noninteractive visual bar and ARIA range semantics. Attributes remain the source of truth. Determinate progress fills proportionally; indeterminate progress uses a striped full-width indicator (solid where CSS gradients are unsupported). Meter clamps ranges and indicates optimum/suboptimum regions with color. Existing children and authored attributes remain intact. No additional script or stylesheet is requested; no fallback implementation is included in Core, Orchestrator or Full.</p>
 <p>The implementation is original Apache-2.0 code, adding no third-party dependency or notice. Evaluated alternatives were <a href="https://github.com/LeaVerou/HTML5-Progress-polyfill">Lea Verou&#39;s MIT Progress polyfill</a> (separate CSS and obsolete DOM mutation events) and <a href="https://github.com/fisker/meter-polyfill">fisker&#39;s MIT meter-polyfill</a> (a larger standalone implementation with document-wide installation). Their code is not incorporated. Distribution costs are recorded in the <a href="../../progress-implementation-report.htm">implementation report</a>.</p>
 <h2>Lifecycle</h2>
 <p>Fallback property setters reflect numeric values and attributes synchronously. The visual width/colors and ARIA range publication are coalesced into <code>waitLayout.update()</code>, using the shared adaptive cadence even when no CSS Motion operation is active. Multiple changes before that update render the latest values. Unmount cancels the pending render before removing the generated bar and restoring the control. Complete native controls retain their browser-managed rendering.</p>
@@ -824,7 +831,7 @@
                 and
                 <a style="color:inherit!important;" href="https://github.com/" target="_blank"
                   rel="noopener noreferrer">GitHub</a>
-                for the tools and technologies that supported the development of Aellux.
+                for the tools and technologies that supported the development of aellux.js.
               </div>
             </div>
           </footer>

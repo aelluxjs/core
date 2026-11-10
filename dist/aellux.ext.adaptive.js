@@ -20,18 +20,18 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
-    const AelluxJs = root.AelluxJs;
+    const aelluxJs = root.aelluxJs;
     const extensionName = "adaptive";
-    if (!AelluxJs) {
-      throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+    if (!aelluxJs) {
+      throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.`);
     }
     const attr = {
-      adaptive: AelluxJs.attr(extensionName)
+      adaptive: aelluxJs.attr(extensionName)
     };
     const modifier = {
-      shapeHorizontal: AelluxJs.className("shape-horizontal"),
-      shapeVertical: AelluxJs.className("shape-vertical"),
-      shapeSquare: AelluxJs.className("shape-square")
+      shapeHorizontal: aelluxJs.className("shape-horizontal"),
+      shapeVertical: aelluxJs.className("shape-vertical"),
+      shapeSquare: aelluxJs.className("shape-square")
     };
     const adaptiveElements = /* @__PURE__ */ new Set();
     const elementMemories = /* @__PURE__ */ new WeakMap();
@@ -57,9 +57,9 @@
     let managedClasses;
     let sizeThresholds = [];
     const resizeObserver = typeof root.ResizeObserver === "function" ? new root.ResizeObserver(onResize) : null;
-    AelluxJs.extAttach(extensionName, { init, destroy, adaptiveParams });
+    aelluxJs.extAttach(extensionName, { init, destroy, adaptiveParams });
     function init(options = {}) {
-      AelluxJs.registerCssProperty(
+      aelluxJs.registerCssProperty(
         { name: "--ae-width", syntax: "<number>", initialValue: "0" },
         { name: "--ae-height", syntax: "<number>", initialValue: "0" }
       );
@@ -97,7 +97,7 @@
       managedClasses = getManagedClasses();
       for (const group of Object.keys(adaptiveParams)) Object.freeze(adaptiveParams[group]);
       Object.freeze(adaptiveParams);
-      AelluxJs.mountManager.add({
+      aelluxJs.mountManager.add({
         extensionName,
         selector: `[${attr.adaptive}]`,
         priority: 0,
@@ -113,14 +113,14 @@
       ];
       sizeThresholds = [];
       for (const [size, minimum] of Object.entries(adaptiveParams.minSizes)) {
-        const className = AelluxJs.className("fits-" + size);
+        const className = aelluxJs.className("fits-" + size);
         sizeThresholds.push({ className, minimum });
         classes.push(className);
       }
       return classes;
     }
     function parameterDiagnostic(attribute, value, reason) {
-      AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
+      aelluxJs.diagnostics.warn(aelluxJs.diagnostics.WARN_CONFIGURATION_VALUE, {
         extension: extensionName,
         attribute: `adaptiveParams${attribute ? "." + attribute : ""}`,
         value,
@@ -133,22 +133,22 @@
       pendingResizeElements.clear();
       for (const element of adaptiveElements) unmountAdaptive(element);
       if (resizeObserver) resizeObserver.disconnect();
-      AelluxJs.mountManager.remove({ extensionName });
+      aelluxJs.mountManager.remove({ extensionName });
     }
     function mountAdaptive(element) {
       if (adaptiveElements.has(element)) return;
-      elementMemories.set(element, AelluxJs.persist.element.save(
+      elementMemories.set(element, aelluxJs.persist.element.save(
         element,
         [],
         dimensionProperties
       ));
-      ariaHandlers.set(element, AelluxJs.aria.register(element));
+      ariaHandlers.set(element, aelluxJs.aria.register(element));
       adaptiveElements.add(element);
       layoutIds.set(element, nextLayoutId++);
       if (resizeObserver) resizeObserver.observe(element);
       else {
         scheduleElement(element, null);
-        if (adaptiveElements.size === 1) AelluxJs.onEvent(root, "$resize", onWindowResize);
+        if (adaptiveElements.size === 1) aelluxJs.onEvent(root, "$resize", onWindowResize);
       }
     }
     function unmountAdaptive(element) {
@@ -157,10 +157,10 @@
       pendingResizeEntries.delete(element);
       pendingResizeElements.delete(element);
       const id = layoutIds.get(element);
-      if (id !== void 0) AelluxJs.waitLayout.cancel(id);
+      if (id !== void 0) aelluxJs.waitLayout.cancel(id);
       layoutIds.delete(element);
       if (resizeObserver) resizeObserver.unobserve(element);
-      else if (adaptiveElements.size === 0) AelluxJs.offEvent(root, "$resize", onWindowResize);
+      else if (adaptiveElements.size === 0) aelluxJs.offEvent(root, "$resize", onWindowResize);
       for (const name of managedClasses) {
         element.classList.remove(name);
       }
@@ -198,17 +198,17 @@
     function scheduleElement(element, contentRect) {
       const id = layoutIds.get(element);
       if (id === void 0) return;
-      const maxFPS = AelluxJs.layoutMaxFPS(element);
+      const maxFPS = aelluxJs.layoutMaxFPS(element);
       const abort = () => !adaptiveElements.has(element);
       if (contentRect) {
-        AelluxJs.waitLayout.sequence(id, {
+        aelluxJs.waitLayout.sequence(id, {
           update: () => updateAdaptive(element, contentRect.width, contentRect.height),
           maxFPS,
           abort
         });
         return;
       }
-      AelluxJs.waitLayout.sequence(id, {
+      aelluxJs.waitLayout.sequence(id, {
         read: () => element.getBoundingClientRect(),
         update: (rect) => updateAdaptive(element, rect.width, rect.height),
         maxFPS,
@@ -246,7 +246,7 @@
       }
       element.style.setProperty("--ae-width", width);
       element.style.setProperty("--ae-height", height);
-      AelluxJs.dispatchFrom(element, "AdaptiveUpdate", {
+      aelluxJs.dispatchFrom(element, "AdaptiveUpdate", {
         detail: { width, height, ratio }
       });
     }
@@ -256,7 +256,7 @@
         id = nextLayoutId++;
         orientationLayoutIds.set(flexBox, id);
       }
-      return AelluxJs.waitLayout.read(id, () => {
+      return aelluxJs.waitLayout.read(id, () => {
         const fallback = "horizontal";
         var style = getComputedStyle(flexBox);
         if (style.display === "flex" || style.display === "inline-flex") {

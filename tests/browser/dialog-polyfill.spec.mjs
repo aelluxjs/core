@@ -4,8 +4,8 @@ import { readFile, readdir } from "node:fs/promises";
 
 async function initialize(page, options) {
   await page.evaluate(options => new Promise(resolve => {
-    AelluxJs.on("Ready", resolve, { once: true });
-    AelluxJs.init(options);
+    aelluxJs.on("Ready", resolve, { once: true });
+    aelluxJs.init(options);
   }), options);
 }
 
@@ -33,15 +33,15 @@ for (const mode of ["basic", "full"]) {
         </form></dialog>`;
       });
       await page.addScriptTag({ url: `/dist/${boot}` });
-      if (mode === "basic") await page.evaluate(() => AelluxJs.ext("dialog"));
+      if (mode === "basic") await page.evaluate(() => aelluxJs.ext("dialog"));
       await initialize(page, { mode });
       const variant = boot.includes(".min.") ? ".legacy.min.js" : ".legacy.js";
       expect(requests.filter(path => /aellux\.ext\.dialog.*\.js$/.test(path)))
         .toEqual([`/dist/aellux.ext.dialog${variant}`]);
       expect(requests.some(path => /dialog-polyfill|aellux\.ext\.dialog.*\.css$/.test(path))).toBe(false);
       expect(await page.evaluate(() => ({
-        legacy: AelluxJs.diagnostics.legacy,
-        missing: AelluxJs.diagnostics.notAvailable
+        legacy: aelluxJs.diagnostics.legacy,
+        missing: aelluxJs.diagnostics.notAvailable
       }))).toEqual({
         legacy: true,
         missing: ["HTMLDialogElement.prototype.show", "HTMLDialogElement.prototype.showModal", "HTMLDialogElement.prototype.close"]
@@ -109,9 +109,9 @@ for (const missing of ["show", "showModal", "close"]) {
     await page.goto("/tests/index.htm");
     await removeDialogAPI(page, missing);
     await page.addScriptTag({ url: "/dist/aellux.js" });
-    await page.evaluate(() => AelluxJs.ext("dialog"));
+    await page.evaluate(() => aelluxJs.ext("dialog"));
     await initialize(page, { mode: "basic", skipGlobalMount: true });
-    expect(await page.evaluate(() => AelluxJs.diagnostics.notAvailable))
+    expect(await page.evaluate(() => aelluxJs.diagnostics.notAvailable))
       .toEqual([`HTMLDialogElement.prototype.${missing}`]);
     expect(await page.evaluate(async () => {
       const dialog = document.createElement("dialog");
@@ -131,10 +131,10 @@ test("dialog methods are available inside Extension mount callbacks", async ({ p
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => {
     document.body.innerHTML = '<dialog id="extension-dialog">Extension modal</dialog>';
-    AelluxJs.ext("dialog-test");
-    AelluxJs.extAttach("dialog-test", {
+    aelluxJs.ext("dialog-test");
+    aelluxJs.extAttach("dialog-test", {
       init() {
-        AelluxJs.mountManager.add({
+        aelluxJs.mountManager.add({
           extensionName: "dialog-test", selector: "dialog",
           mount(dialog) {
             $ae(dialog).dialog.showModal();
@@ -145,7 +145,7 @@ test("dialog methods are available inside Extension mount callbacks", async ({ p
       }
     });
     // Register the provider after its consumer to exercise mount priority.
-    AelluxJs.ext("dialog", { loadWhen: "dialog" });
+    aelluxJs.ext("dialog", { loadWhen: "dialog" });
   });
   await initialize(page, { mode: "basic" });
   expect(await page.evaluate(() => window.extensionSawOpenDialog)).toBe(true);
@@ -160,10 +160,10 @@ for (const forceLegacy of [false, true]) {
       document.body.innerHTML = '<dialog id="native">Native</dialog>';
     });
     await page.addScriptTag({ url: "/dist/aellux.js" });
-    await page.evaluate(() => AelluxJs.ext("dialog"));
+    await page.evaluate(() => aelluxJs.ext("dialog"));
     await initialize(page, { mode: "basic", forceLegacy });
     expect(await page.evaluate(() => ({
-      legacy: AelluxJs.diagnostics.legacy,
+      legacy: aelluxJs.diagnostics.legacy,
       preserved: window.originalDialogAPI.every((method, index) => method ===
         [HTMLDialogElement.prototype.show, HTMLDialogElement.prototype.showModal,
           HTMLDialogElement.prototype.close, HTMLFormElement.prototype.submit][index]),
@@ -191,7 +191,7 @@ for (const missingAPI of [false, true]) {
     await page.addScriptTag({ url: "/dist/aellux.js" });
     await page.evaluate(() => {
       document.body.innerHTML = '<dialog id="first">First</dialog><dialog id="second">Second</dialog>';
-      AelluxJs.ext("dialog");
+      aelluxJs.ext("dialog");
     });
     await initialize(page, { mode: "basic" });
     expect(await page.evaluate(async () => {
@@ -211,14 +211,14 @@ for (const missingAPI of [false, true]) {
       $ae(first).dialog.showModal();
       $ae(first).dialog.close("remounted");
       const formSubmit = HTMLFormElement.prototype.submit;
-      await AelluxJs.destroyExtensions(["dialog"]);
+      await aelluxJs.destroyExtensions(["dialog"]);
       const destroyed = !controller.dialog;
       // The fallback's native-style methods remain usable without a controller.
       first.show();
       const usableAfterDestroy = first.open;
       first.close();
-      AelluxJs.ext("dialog");
-      await AelluxJs.wait("dialog");
+      aelluxJs.ext("dialog");
+      await aelluxJs.wait("dialog");
       const fresh = document.createElement("dialog");
       document.body.appendChild(fresh);
       await $ae.mount(document);
@@ -243,7 +243,7 @@ test("controllers preserve native return values, argument lists and thrown excep
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => {
     document.body.innerHTML = '<dialog id="forwarding"></dialog>';
-    AelluxJs.ext("dialog");
+    aelluxJs.ext("dialog");
   });
   await initialize(page, { mode: "basic" });
   expect(await page.evaluate(() => {
@@ -277,7 +277,7 @@ for (const mode of ["basic", "full"]) {
     await page.goto("/tests/index.htm");
     await removeDialogAPI(page);
     await page.addScriptTag({ url: "/dist/aellux.min.js" });
-    if (mode === "basic") await page.evaluate(() => AelluxJs.ext("dialog", { loadWhen: "dialog" }));
+    if (mode === "basic") await page.evaluate(() => aelluxJs.ext("dialog", { loadWhen: "dialog" }));
     await initialize(page, { mode, skipGlobalMount: true });
     expect(requests.filter(path => /aellux\.ext\.dialog/.test(path))).toEqual([]);
     expect(await page.evaluate(async () => {

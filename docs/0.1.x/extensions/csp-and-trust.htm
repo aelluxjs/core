@@ -38,7 +38,7 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-PgrxAHrkt22+F09vWG2iuTeiqQ+UCUeSkyAe/nibdP/XtRk8nTZ+VjetKW+okArJ" crossorigin="anonymous">
+  integrity="sha384-q4bpBk5Vqct9IR80W+4o8g4BlPq84mWWb0mV47Q76mgYStKp6AKgCBgxRwr2FPAE" crossorigin="anonymous">
 </head>
 
 <body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
@@ -192,6 +192,13 @@
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
                                         aellux.js Docs                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/brand-naming.htm" data-ae-overflow-marquee="190px">
+                                        Brand Naming and Migration                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -723,7 +730,7 @@
 <p>Replace each placeholder with the hash of the exact published file. The loader selects <code>modern</code>, <code>modernMin</code>, <code>legacy</code>, or <code>legacyMin</code> from the script URL it actually requests. <code>style</code> applies to the optional stylesheet URL. A string <code>integrity</code> value can be used when the Extension always loads the same script bytes; it does not cover CSS. Missing entries do not add SRI to third-party files. <code>crossOrigin</code> is optional and defaults to <code>anonymous</code> when an integrity value is applied; an explicit value is also applied without integrity. Set <code>$ae.init({ crossOrigin: &quot;use-credentials&quot; })</code> to override the <code>crossorigin</code> value for the runtime and all Extension assets; an Extension&#39;s own <code>crossOrigin</code> takes precedence. Cross-origin assets with SRI require CORS support from the asset server. A changed file or wrong hash is rejected by the browser. SRI does not replace CSP source rules or make trusted code safe.</p>
 <h2>URLs and trust boundary</h2>
 <p><code>$ae.ext(&quot;name&quot;)</code> resolves a file relative to the aellux.js boot script. <code>$ae.ext(&quot;./extensions/aellux.ext.example.js&quot;)</code> uses a supplied URL; declarative <code>link[rel=&quot;aelluxjs-ext&quot;]</code> registrations can also supply URLs. A custom <code>loadStyle</code> URL is resolved by the browser relative to the document. Review the final URLs, including any derived Legacy, minified, or CSS variant, before adding their origins to CSP.</p>
-<p>Treat an Extension as application code. Once its script loads, it runs in the page&#39;s JavaScript context and can use the DOM and available browser APIs. <code>AelluxJs.extAttach()</code> registers its API; it does not sandbox the script or grant restricted permissions. Only register third-party Extensions from sources you trust, review the code and dependencies you distribute, and keep the asset URLs under application control. Avoid building registration URLs from untrusted page or user input. CSP limits where resources can be loaded from; it does not make allowed Extension code safe.</p>
+<p>Treat an Extension as application code. Once its script loads, it runs in the page&#39;s JavaScript context and can use the DOM and available browser APIs. <code>aelluxJs.extAttach()</code> registers its API; it does not sandbox the script or grant restricted permissions. Only register third-party Extensions from sources you trust, review the code and dependencies you distribute, and keep the asset URLs under application control. Avoid building registration URLs from untrusted page or user input. CSP limits where resources can be loaded from; it does not make allowed Extension code safe.</p>
 <p>An Extension may load additional scripts, styles, images, fonts, or network data. Its author should document those dependencies; the application must evaluate their origins and the relevant CSP directives, such as <code>connect-src</code> for requests. This page does not claim that arbitrary third-party Extensions work under a given policy.</p>
 <p>See <a href="registration.htm">registration</a>, <a href="declarative-loading.htm">declarative loading</a>, <a href="styles.htm">optional styles</a>, and <a href="authoring.htm">third-party authoring</a> for the corresponding loading contracts.</p>
           </main>
@@ -767,7 +774,7 @@
                 and
                 <a style="color:inherit!important;" href="https://github.com/" target="_blank"
                   rel="noopener noreferrer">GitHub</a>
-                for the tools and technologies that supported the development of Aellux.
+                for the tools and technologies that supported the development of aellux.js.
               </div>
             </div>
           </footer>

@@ -9,7 +9,7 @@ Stability describes implementation maturity and validation, not API compatibilit
 ## Accessibility profile
 
 - **Capabilities:** structure and state; browser-history and application integration.
-- **Owned state:** the Aellux namespace in `history.state`, the snapshot registry, title updates and navigation events.
+- **Owned state:** the aellux.js namespace in `history.state`, the snapshot registry, title updates and navigation events.
 - **Consumer responsibility:** code replacing page content must manage focus, preserve document structure and announce navigation results when needed.
 - **Iframe:** each window keeps its own snapshot, history state and restoration events, including when the parent page also uses `state-navigation`.
 
@@ -62,7 +62,7 @@ See [Core Known Limits & Risks](../runtime/known-limits-and-risks.md) for classi
 | Area | Type | Description | Recommendation |
 | --- | --- | --- | --- |
 | State model | Known Limit | <span class="large">Snapshots serialize through URLSearchParams and use history/hash, not durable application storage. Reload reconstructs hash data when enabled; it does not restore arbitrary component memory or form state.</span> | <span class="large">Store serializable navigation keys and implement application restoration separately.</span> |
-| History ownership | Potential Risk | <span class="large">Only marked Aellux popstate entries are restored. Current-entry replacement merges external fields, but a newly pushed entry does not promise to copy another router state.</span> | <span class="large">Coordinate history and title ownership rather than interleaving independent writers.</span> |
+| History ownership | Potential Risk | <span class="large">Only marked aellux.js popstate entries are restored. Current-entry replacement merges external fields, but a newly pushed entry does not promise to copy another router state.</span> | <span class="large">Coordinate history and title ownership rather than interleaving independent writers.</span> |
 | Restoration | Known Limit | <span class="large">SnapshotRestore publishes state after title/snapshot updates; it does not itself mount or render UI. Ajax replacement requires the separately loaded Ajax Href consumer.</span> | <span class="large">Load consumers before relying on commands and handle their asynchronous completion.</span> |
 | Iframe scope | Known Limit | <span class="large">Each window has its own snapshot and handlers. The Extension is not a cross-origin state-sharing or message-routing layer.</span> | <span class="large">Implement explicit, origin-checked communication when parent and frame must coordinate.</span> |
 | History volume | Potential Risk | <span class="large">Frequent non-silent updates create navigation entries and trigger subscribers. Browser history limits and application listener costs remain relevant.</span> | <span class="large">Use silent replacement for transient state and keep secrets out of URL hashes.</span> |

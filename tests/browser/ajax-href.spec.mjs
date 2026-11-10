@@ -5,7 +5,7 @@ test("A documentation-style consumer chooses navigation messages from technical 
   await page.evaluate(() => {
     window.messages = [];
     window.handlers = {};
-    window.AelluxJs = {
+    window.aelluxJs = {
       dep: () => new Promise(() => {}), init() {},
       on: (name, handler) => { window.handlers[name] = handler; }
     };
@@ -53,42 +53,42 @@ for (const variant of [
     await page.addScriptTag({ url: `/dist/${variant.boot}` });
     const result = await page.evaluate(async forceLegacy => {
       document.body.innerHTML = '<main id="content">Old</main>';
-      AelluxJs.ext("ajax-href", { load: false });
+      aelluxJs.ext("ajax-href", { load: false });
       await new Promise(resolve => {
-        AelluxJs.on("Ready", resolve, { once: true });
-        AelluxJs.init({ mode: "basic", forceLegacy });
+        aelluxJs.on("Ready", resolve, { once: true });
+        aelluxJs.init({ mode: "basic", forceLegacy });
       });
-      await AelluxJs.wait("ajax-href");
+      await aelluxJs.wait("ajax-href");
       const failures = [];
       const completions = [];
       let lastError;
-      AelluxJs.on("AjaxHrefError", event => {
+      aelluxJs.on("AjaxHrefError", event => {
         lastError = event.detail.error;
         failures.push({ status: event.detail.status, name: lastError.name });
       });
-      AelluxJs.on("AjaxHrefComplete", event => completions.push(event.detail.url));
+      aelluxJs.on("AjaxHrefComplete", event => completions.push(event.detail.url));
       const identities = [];
       for (const status of [404, 403, 429, 503]) {
-        try { await AelluxJs.ext.ajaxHref.load(`/ajax-error/${status}`, "#content"); }
+        try { await aelluxJs.ext.ajaxHref.load(`/ajax-error/${status}`, "#content"); }
         catch (error) { identities.push(error === lastError && error.response.status === status); }
       }
       for (const error of [new TypeError("Network failure"), new DOMException("Timed out", "TimeoutError")]) {
-        AelluxJs.request = async () => { throw error; };
-        try { await AelluxJs.ext.ajaxHref.load("/failure", "#content"); }
+        aelluxJs.request = async () => { throw error; };
+        try { await aelluxJs.ext.ajaxHref.load("/failure", "#content"); }
         catch (cause) { identities.push(cause === error && cause === lastError); }
       }
-      AelluxJs.request = async () => { throw new DOMException("Canceled", "AbortError"); };
-      const aborted = await AelluxJs.ext.ajaxHref.load("/abort", "#content");
+      aelluxJs.request = async () => { throw new DOMException("Canceled", "AbortError"); };
+      const aborted = await aelluxJs.ext.ajaxHref.load("/abort", "#content");
 
       // Keep the successor pending until the aborted fetch has settled.
       let resolveNext;
-      AelluxJs.request = (_url, { signal }) => new Promise((_resolve, reject) => {
+      aelluxJs.request = (_url, { signal }) => new Promise((_resolve, reject) => {
         // Some custom request implementations do not preserve AbortError.
         signal.addEventListener("abort", () => reject(new TypeError("Obsolete network failure")));
       });
-      const previous = AelluxJs.ext.ajaxHref.load("/previous", "#content");
-      AelluxJs.request = () => new Promise(resolve => { resolveNext = resolve; });
-      const next = AelluxJs.ext.ajaxHref.load("/next", "#content", { ignoreHistory: true });
+      const previous = aelluxJs.ext.ajaxHref.load("/previous", "#content");
+      aelluxJs.request = () => new Promise(resolve => { resolveNext = resolve; });
+      const next = aelluxJs.ext.ajaxHref.load("/next", "#content", { ignoreHistory: true });
       const superseded = await previous;
       resolveNext({ text: async () => '<main id="content">New</main>' });
       await next;
@@ -108,23 +108,23 @@ for (const variant of [
     await page.addScriptTag({ url: `/dist/${variant.boot}` });
     const result = await page.evaluate(async forceLegacy => {
       document.body.innerHTML = '<main id="content">Old</main><aside id="missing">Keep</aside>';
-      AelluxJs.ext("ajax-href", { load: false });
-      AelluxJs.ext("feedback", { load: false });
+      aelluxJs.ext("ajax-href", { load: false });
+      aelluxJs.ext("feedback", { load: false });
       await new Promise(resolve => {
-        AelluxJs.on("Ready", resolve, { once: true });
-        AelluxJs.init({ mode: "basic", forceLegacy });
+        aelluxJs.on("Ready", resolve, { once: true });
+        aelluxJs.init({ mode: "basic", forceLegacy });
       });
-      await Promise.all([AelluxJs.wait("ajax-href"), AelluxJs.wait("feedback")]);
+      await Promise.all([aelluxJs.wait("ajax-href"), aelluxJs.wait("feedback")]);
       const payloads = [];
-      AelluxJs.ext.feedback.on("*", payload => payloads.push({
+      aelluxJs.ext.feedback.on("*", payload => payloads.push({
         type: payload.type, target: payload.target.id, value: payload.value
       }));
-      AelluxJs.request = async () => ({ url: "/next.htm", text: async () => '<main id="content">New</main>' });
-      await AelluxJs.ext.ajaxHref.load("/next.htm", "#content,#missing", { ignoreHistory: true });
+      aelluxJs.request = async () => ({ url: "/next.htm", text: async () => '<main id="content">New</main>' });
+      await aelluxJs.ext.ajaxHref.load("/next.htm", "#content,#missing", { ignoreHistory: true });
       const loaded = payloads.splice(0);
-      AelluxJs.request = async () => { throw new Error("Request failed"); };
+      aelluxJs.request = async () => { throw new Error("Request failed"); };
       let error;
-      try { await AelluxJs.ext.ajaxHref.load("/failed.htm", "#content,#missing"); }
+      try { await aelluxJs.ext.ajaxHref.load("/failed.htm", "#content,#missing"); }
       catch (cause) { error = cause.message; }
       return { loaded, failed: payloads, error,
         content: document.getElementById("content").textContent,
@@ -149,33 +149,33 @@ for (const variant of [
     await page.addScriptTag({ url: `/dist/${variant.boot}` });
     await page.evaluate(forceLegacy => new Promise(resolve => {
       document.addEventListener("AelluxJsReady", resolve, { once: true });
-      AelluxJs.init({ mode: "full", forceLegacy });
+      aelluxJs.init({ mode: "full", forceLegacy });
     }), variant.forceLegacy);
-    expect(await page.evaluate(() => AelluxJs.ext.ajaxHref?.initialized === true)).toBe(false);
+    expect(await page.evaluate(() => aelluxJs.ext.ajaxHref?.initialized === true)).toBe(false);
     await page.evaluate(async () => {
       window.lifecycle = [];
-      AelluxJs.ext("probe");
-      AelluxJs.extAttach("probe", { init() {} });
-      await AelluxJs.wait("probe");
-      AelluxJs.mountManager.add({
+      aelluxJs.ext("probe");
+      aelluxJs.extAttach("probe", { init() {} });
+      await aelluxJs.wait("probe");
+      aelluxJs.mountManager.add({
         extensionName: "probe", selector: "[data-probe]",
         mount: element => window.lifecycle.push(`mount:${element.textContent}`),
         unmount: element => window.lifecycle.push(`unmount:${element.textContent}`)
       });
-      await AelluxJs.mount(document.querySelector("#content"));
+      await aelluxJs.mount(document.querySelector("#content"));
       const link = document.createElement("a");
       link.id = "ajax-link";
       link.href = "/ajax-next.htm";
       link.textContent = "Next";
       link.setAttribute("data-ae-ajax-href", "title,#content");
       document.body.appendChild(link);
-      await AelluxJs.mount(link);
+      await aelluxJs.mount(link);
       window.ajaxEvents = [];
       for (const name of ["AjaxHrefStart", "AjaxHrefLoaded", "AjaxHrefComplete"]) {
-        AelluxJs.on(name, () => window.ajaxEvents.push(name));
+        aelluxJs.on(name, () => window.ajaxEvents.push(name));
       }
     });
-    expect(await page.evaluate(() => AelluxJs.ext.ajaxHref.initialized)).toBe(true);
+    expect(await page.evaluate(() => aelluxJs.ext.ajaxHref.initialized)).toBe(true);
     await page.click("#ajax-link");
     await expect(page.locator("#content")).toHaveText("New content");
     await expect(page).toHaveTitle("Ajax next");
@@ -209,21 +209,21 @@ for (const variant of [
     await page.addScriptTag({ url: `/dist/${variant.boot}` });
     await page.evaluate(forceLegacy => new Promise(resolve => {
       document.addEventListener("AelluxJsReady", resolve, { once: true });
-      AelluxJs.init({ mode: "full", forceLegacy });
+      aelluxJs.init({ mode: "full", forceLegacy });
     }), variant.forceLegacy);
     await page.evaluate(async () => {
       window.lifecycle = [];
       window.ajaxSelectors = [];
-      AelluxJs.on("AjaxHrefComplete", event => window.ajaxSelectors.push(event.detail.selectors));
-      AelluxJs.ext("probe");
-      AelluxJs.extAttach("probe", { init() {} });
-      await AelluxJs.wait("probe");
-      AelluxJs.mountManager.add({
+      aelluxJs.on("AjaxHrefComplete", event => window.ajaxSelectors.push(event.detail.selectors));
+      aelluxJs.ext("probe");
+      aelluxJs.extAttach("probe", { init() {} });
+      await aelluxJs.wait("probe");
+      aelluxJs.mountManager.add({
         extensionName: "probe", selector: "[data-probe]",
         mount: element => window.lifecycle.push(`mount:${element.textContent}`),
         unmount: element => window.lifecycle.push(`unmount:${element.textContent}`)
       });
-      await AelluxJs.mount(document.body);
+      await aelluxJs.mount(document.body);
     });
 
     for (let step = 1; step <= 3; step++) {
@@ -239,7 +239,7 @@ for (const variant of [
       }))).toEqual({ headPreserved: true, bodyReplaced: true, selectors: "title,body" });
       await expect(page.locator('meta[name="response-head"]')).toHaveCount(0);
       // State Navigation must retain the newly loaded base title.
-      await page.evaluate(() => AelluxJs.ext.stateNavigation.updateBaseTitle());
+      await page.evaluate(() => aelluxJs.ext.stateNavigation.updateBaseTitle());
       await expect(page).toHaveTitle(`Page ${step}`);
     }
     expect(await page.evaluate(() => window.lifecycle)).toEqual([
@@ -255,10 +255,10 @@ test("Basic resolves Ajax Href through the official registry", async ({ page }) 
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => new Promise(resolve => {
     document.body.innerHTML = '<a href="/next.htm" data-ae-ajax-href="main">Next</a>';
-    AelluxJs.ext("ajax-href", { loadWhen: "a[data-ae-ajax-href]" });
+    aelluxJs.ext("ajax-href", { loadWhen: "a[data-ae-ajax-href]" });
     document.addEventListener("AelluxJsReady", resolve, { once: true });
-    AelluxJs.init({ mode: "basic" });
+    aelluxJs.init({ mode: "basic" });
   }));
-  expect(await page.evaluate(() => AelluxJs.ext.ajaxHref.initialized)).toBe(true);
+  expect(await page.evaluate(() => aelluxJs.ext.ajaxHref.initialized)).toBe(true);
   await expect(page.locator('script[src$="aellux.ext.ajax-href.js"]')).toHaveCount(1);
 });

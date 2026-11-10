@@ -1,6 +1,6 @@
 # Authoring aellux.js Extensions
 
-An aellux.js Extension is a classic browser script that attaches one focused behavior through `AelluxJs.extAttach()`. Core and third-party Extensions follow the same naming, lifecycle, compatibility, and cleanup rules.
+An aellux.js Extension is a classic browser script that attaches one focused behavior through `aelluxJs.extAttach()`. Core and third-party Extensions follow the same naming, lifecycle, compatibility, and cleanup rules.
 
 ## Primitives and Full distribution
 
@@ -19,16 +19,16 @@ Start from [`templates/aellux.ext.template.js`](https://github.com/aelluxjs/core
 ## Required Contract
 
 1. Name the source and Modern artifact `aellux.ext.<name>.js`.
-2. Use the same kebab-case `<name>` as `extensionName` in `AelluxJs.extAttach(extensionName, api)`.
+2. Use the same kebab-case `<name>` as `extensionName` in `aelluxJs.extAttach(extensionName, api)`.
 3. Publish a classic script contained by an IIFE. Distribution files must not require ESM imports or exports.
 4. Keep `init(options)` idempotent. It may return a Promise when initialization requires asynchronous work.
 5. Make every `mount` idempotent and release its listeners, observers, timers, and references in the corresponding `unmount`.
 6. Release Extension-wide resources in `destroy()`.
 7. Keep the public API and lifecycle behavior equivalent across Modern and Legacy variants.
-8. Core Extensions that publish or define CSS custom properties must register each property during `init()` with `AelluxJs.registerCssProperty()`, using an appropriate syntax and initial value. Properties inherit by default; set `inherits: false` only when descendants must receive the initial value instead.
+8. Core Extensions that publish or define CSS custom properties must register each property during `init()` with `aelluxJs.registerCssProperty()`, using an appropriate syntax and initial value. Properties inherit by default; set `inherits: false` only when descendants must receive the initial value instead.
 9. Recurring visual publication of CSS custom properties and ordinary CSS properties must follow the shared adaptive `waitLayout` cadence. Batch related writes in `update()` or a sequence's `update` stage, coalesce repeated notifications, and document any correctness-critical synchronous exceptions. See [Adaptive CSS publication](#adaptive-css-publication).
 
-The runtime exposes a kebab-case name as camelCase under `AelluxJs.ext`: `tab-group` becomes `AelluxJs.ext.tabGroup`.
+The runtime exposes a kebab-case name as camelCase under `aelluxJs.ext`: `tab-group` becomes `aelluxJs.ext.tabGroup`.
 An Extension receives its configuration as the `options` argument to `init(options)`. Supply it through `extensions`:
 
 ```js
@@ -61,13 +61,13 @@ Summarize existing explanations with internal links instead of duplicating them.
 
 ## DOM Mount Contract
 
-Extensions with element behavior register their selectors and handlers with `AelluxJs.mountManager` during `init()`:
+Extensions with element behavior register their selectors and handlers with `aelluxJs.mountManager` during `init()`:
 
 ```js
-AelluxJs.extAttach(extensionName, { init, destroy });
+aelluxJs.extAttach(extensionName, { init, destroy });
 
 function init() {
-  AelluxJs.mountManager.add({
+  aelluxJs.mountManager.add({
     extensionName, selector: "[data-ae-example]",
     priority: 0,
     mount: mountElement, unmount: unmountElement
@@ -75,7 +75,7 @@ function init() {
 }
 
 function destroy() {
-  AelluxJs.mountManager.remove({ extensionName });
+  aelluxJs.mountManager.remove({ extensionName });
 }
 ```
 
@@ -89,7 +89,7 @@ Core Extensions must avoid interleaving DOM or CSS writes with reads that can fo
 
 The standard performance cadence for runtime-owned CSS publication is the shared adaptive `waitLayout` cadence. This applies to ordinary properties and custom properties, including values driven by scroll, resize, observers, pointer input, timers, or progress events. Group related writes in one eligible update and retain the latest pending values instead of publishing once per incoming notification. The cadence applies to the visual batch, not separately to each `setProperty()` call within that batch. Avoid independent `requestAnimationFrame()` loops for visual publication that bypass the scheduler's response to sustained frame pressure.
 
-This rule does not impose a fixed FPS ceiling or require an active CSS Motion operation. `cssMotionPropertyMaxFPS` is an additional policy for controlled CSS Motion operations with conservative properties; it is not the default rate for all CSS writes. Use `motion.run()` when coordinating a CSS transition or animation, including optional Aellux easing. Use `waitLayout.update()` when publishing computed values directly. See [CSS publication cadence](../runtime/wait-layout.md#css-publication-cadence).
+This rule does not impose a fixed FPS ceiling or require an active CSS Motion operation. `cssMotionPropertyMaxFPS` is an additional policy for controlled CSS Motion operations with conservative properties; it is not the default rate for all CSS writes. Use `motion.run()` when coordinating a CSS transition or animation, including optional aellux.js easing. Use `waitLayout.update()` when publishing computed values directly. See [CSS publication cadence](../runtime/wait-layout.md#css-publication-cadence).
 
 Native scrolling and momentum do not need to pass through CSS Motion. Publishing CSS values derived from their position is separate work and follows the shared cadence. Keep input decisions and motion cancellation synchronous when deferring them would change the interaction. Initial setup, transition preparation or handoff, interruption freezes, and unmount restoration may also require synchronous writes to preserve a valid state before paint. Keep these operations bounded and tied to their lifecycle boundary; they are not an exemption for recurring visual updates. Cancel pending publications before releasing owned styles, and do not queue restoration that could run after a subsequent mount.
 
@@ -110,12 +110,12 @@ For a single measurement and write, no revision guard is needed. These three for
 
 ```js
 async function refresh() {
-  const geometry = await AelluxJs.waitLayout.read(() => ({
+  const geometry = await aelluxJs.waitLayout.read(() => ({
     width: element.getBoundingClientRect().width,
     available: container.clientWidth
   }));
 
-  await AelluxJs.waitLayout.update(() => {
+  await aelluxJs.waitLayout.update(() => {
     element.style.setProperty("--ae-width", `${geometry.width}px`);
     element.classList.toggle("ae--fits", geometry.width <= geometry.available);
   });
@@ -126,10 +126,10 @@ The equivalent nested Promise form puts `update()` in `.then(geometry => ...)`:
 
 ```js
 function refreshWithThen() {
-  return AelluxJs.waitLayout.read(() => ({
+  return aelluxJs.waitLayout.read(() => ({
     width: element.getBoundingClientRect().width,
     available: container.clientWidth
-  })).then(geometry => AelluxJs.waitLayout.update(() => {
+  })).then(geometry => aelluxJs.waitLayout.update(() => {
     element.style.setProperty("--ae-width", `${geometry.width}px`);
     element.classList.toggle("ae--fits", geometry.width <= geometry.available);
   }));
@@ -140,10 +140,10 @@ An `update()` may also be queued directly inside the `read()` callback after col
 
 ```js
 function refreshInsideRead() {
-  return AelluxJs.waitLayout.read(() => {
+  return aelluxJs.waitLayout.read(() => {
     const width = element.getBoundingClientRect().width;
     const available = container.clientWidth;
-    return AelluxJs.waitLayout.update(() => {
+    return aelluxJs.waitLayout.update(() => {
       element.style.setProperty("--ae-width", `${width}px`);
       element.classList.toggle("ae--fits", width <= available);
     });
@@ -164,8 +164,8 @@ const state = {
 
 function refreshMounted() {
   const revision = ++state.revision;
-  return AelluxJs.waitLayout.read(() => element.getBoundingClientRect().width)
-    .then(width => AelluxJs.waitLayout.update(() => {
+  return aelluxJs.waitLayout.read(() => element.getBoundingClientRect().width)
+    .then(width => aelluxJs.waitLayout.update(() => {
       if (!state.mounted || revision !== state.revision) return;
       element.style.setProperty("--ae-width", `${width}px`);
     }));
@@ -252,7 +252,7 @@ Use `loadStyle: true` when the stylesheet follows the Extension filename, or pas
 Core Extensions must register every CSS custom property they write or define for application customization during `init()`. Group descriptors in one call when possible:
 
 ```js
-AelluxJs.registerCssProperty(
+aelluxJs.registerCssProperty(
   { name: "--ae-example-progress", syntax: "<number>", initialValue: "0" },
   { name: "--ae-example-offset", syntax: "<length>", initialValue: "0px" }
 );
@@ -260,7 +260,7 @@ AelluxJs.registerCssProperty(
 
 `registerCssProperty()` defaults `inherits` to `true`, checks browser support for `CSS.registerProperty()`, and handles rejected registrations, including duplicate names. The Extension should continue to work with ordinary custom properties when the API is unavailable. Match each initial value to the stylesheet's default and cover registered values in browser tests. See the [Runtime API](../runtime/api.md#initialization) for the method's return value.
 
-Do not leave the Extension partially initialized when an optional resource fails. Report failures through `AelluxJs.diagnostics` and preserve usable fallback behavior whenever possible.
+Do not leave the Extension partially initialized when an optional resource fails. Report failures through `aelluxJs.diagnostics` and preserve usable fallback behavior whenever possible.
 
 ## Publication Checklist
 

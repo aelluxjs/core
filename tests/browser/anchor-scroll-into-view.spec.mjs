@@ -31,13 +31,13 @@ async function start(page, { mode = "basic", forceLegacy = false, hidden = false
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(({ mode, forceLegacy }) => {
     if (mode === "basic") {
-      AelluxJs.ext("anchor", { loadStyle: true });
-      if (document.getElementById("group")) AelluxJs.ext("present", { loadStyle: true });
+      aelluxJs.ext("anchor", { loadStyle: true });
+      if (document.getElementById("group")) aelluxJs.ext("present", { loadStyle: true });
     }
-    AelluxJs.init({ mode, forceLegacy });
+    aelluxJs.init({ mode, forceLegacy });
   }, { mode, forceLegacy });
-  await expect.poll(() => page.evaluate(() => !!AelluxJs.ext.anchor?.initialized)).toBe(true);
-  await page.evaluate(() => AelluxJs.mount(document));
+  await expect.poll(() => page.evaluate(() => !!aelluxJs.ext.anchor?.initialized)).toBe(true);
+  await page.evaluate(() => aelluxJs.mount(document));
   await installAnchorProbe(page);
 }
 
@@ -68,7 +68,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
     await page.evaluate(async () => {
       document.getElementById("scroller").scrollTo(0, 0);
       window.dispatchEvent(new Event("resize"));
-      await AelluxJs.mountManager.update(document.getElementById("indicator"), "anchor");
+      await aelluxJs.mountManager.update(document.getElementById("indicator"), "anchor");
     });
     await page.waitForTimeout(250);
     expect((await calls(page)).length).toBe(2);
@@ -82,7 +82,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
     await centered(page);
     for (const id of ["a", "indicator", "scroller"]) {
       await page.locator(`#${id}`).evaluate(element => element.classList.add("invisible"));
-      await page.evaluate(() => AelluxJs.mountManager.update(document.getElementById("indicator"), "anchor"));
+      await page.evaluate(() => aelluxJs.mountManager.update(document.getElementById("indicator"), "anchor"));
       const previous = (await calls(page)).length;
       await page.locator(`#${id}`).evaluate(element => element.classList.remove("invisible"));
       await count(page, previous + 1);
@@ -113,7 +113,7 @@ test("rapid automatic scroll requests create one timeline per genuine target and
   await count(page, 5);
   const styles = await page.evaluate(async () => {
     const anchor = document.getElementById("indicator");
-    await AelluxJs.unmount(anchor, "anchor");
+    await aelluxJs.unmount(anchor, "anchor");
     return anchor.getAttribute("style");
   });
   await page.waitForTimeout(600);
@@ -193,13 +193,13 @@ test("alignment changes, invalid or absent options and reduced motion use the cu
       if (value === null) anchor.removeAttribute("data-ae-anchor-scroll-into-view");
       else anchor.setAttribute("data-ae-anchor-scroll-into-view", value);
       anchor.setAttribute("data-ae-anchor-target", anchor.getAttribute("data-ae-anchor-target") === "a" ? "b" : "a");
-      await AelluxJs.mountManager.update(anchor, "anchor");
+      await aelluxJs.mountManager.update(anchor, "anchor");
     }
   });
   expect((await calls(page)).length).toBe(1);
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" }));
-  await expect.poll(() => page.evaluate(() => AelluxJs.currentPreference("reduced-motion"))).toBe("reduced");
+  await page.evaluate(() => aelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" }));
+  await expect.poll(() => page.evaluate(() => aelluxJs.currentPreference("reduced-motion"))).toBe("reduced");
   await page.locator("#indicator").evaluate(element => {
     element.setAttribute("data-ae-anchor-scroll-into-view", "end nearest");
     element.setAttribute("data-ae-anchor-target", "c");
@@ -213,11 +213,11 @@ for (const forceLegacy of [false, true]) {
     await start(page, { group: true, duration: 200, forceLegacy });
     await count(page, 1);
     await centered(page);
-    await page.evaluate(() => AelluxJs("group").present.show("b"));
+    await page.evaluate(() => aelluxJs("group").present.show("b"));
     await count(page, 2);
     await centered(page);
     expect((await calls(page))[1]).toMatchObject({ id: "b", switching: true });
-    await page.evaluate(() => AelluxJs("group").present.show("b"));
+    await page.evaluate(() => aelluxJs("group").present.show("b"));
     await page.waitForTimeout(200);
     expect((await calls(page)).length).toBe(2);
   });

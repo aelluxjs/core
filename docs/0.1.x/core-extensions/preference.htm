@@ -38,7 +38,7 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-PgrxAHrkt22+F09vWG2iuTeiqQ+UCUeSkyAe/nibdP/XtRk8nTZ+VjetKW+okArJ" crossorigin="anonymous">
+  integrity="sha384-q4bpBk5Vqct9IR80W+4o8g4BlPq84mWWb0mV47Q76mgYStKp6AKgCBgxRwr2FPAE" crossorigin="anonymous">
 </head>
 
 <body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
@@ -192,6 +192,13 @@
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
                                         aellux.js Docs                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/brand-naming.htm" data-ae-overflow-marquee="190px">
+                                        Brand Naming and Migration                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -723,7 +730,7 @@ console.log(preference.get(&quot;colorScheme&quot;));
   transition: none;
 }
 </code></pre>
-<p>In JavaScript, check <code>$ae.currentPreference(&quot;reduced-motion&quot;) === &quot;reduced&quot;</code> before starting optional motion. The method reads the resolved value from <code>&lt;html&gt;</code> and returns <code>null</code> when no value is published. The same approach applies to other resolved preferences, such as <code>contrast</code> and <code>forced-colors</code>. Device media queries remain an input to AelluxJs preference resolution.</p>
+<p>In JavaScript, check <code>$ae.currentPreference(&quot;reduced-motion&quot;) === &quot;reduced&quot;</code> before starting optional motion. The method reads the resolved value from <code>&lt;html&gt;</code> and returns <code>null</code> when no value is published. The same approach applies to other resolved preferences, such as <code>contrast</code> and <code>forced-colors</code>. Device media queries remain an input to aellux.js preference resolution.</p>
 <p><code>AelluxJsPreferencesChange</code> carries a changed-key array and a copy of the current values. The array is empty when an update finds no changed values:</p>
 <pre><code class="language-js">$ae.on(&quot;PreferencesChange&quot;, event =&gt; {
   const { changed, preferences } = event.detail;
@@ -731,7 +738,7 @@ console.log(preference.get(&quot;colorScheme&quot;));
 });
 </code></pre>
 <h2>Bootstrap color mode</h2>
-<p>Set the top-level boot initialization option <code>syncBootstrapThemeTag</code> to <code>true</code> to synchronize Bootstrap&#39;s root color-mode attribute with the resolved AelluxJS color scheme:</p>
+<p>Set the top-level boot initialization option <code>syncBootstrapThemeTag</code> to <code>true</code> to synchronize Bootstrap&#39;s root color-mode attribute with the resolved aellux.js color scheme:</p>
 <pre><code class="language-js">$ae.init({
   mode: &quot;full&quot;,
   syncBootstrapThemeTag: true
@@ -861,7 +868,7 @@ console.log(preference.get(&quot;colorScheme&quot;));
                 and
                 <a style="color:inherit!important;" href="https://github.com/" target="_blank"
                   rel="noopener noreferrer">GitHub</a>
-                for the tools and technologies that supported the development of Aellux.
+                for the tools and technologies that supported the development of aellux.js.
               </div>
             </div>
           </footer>

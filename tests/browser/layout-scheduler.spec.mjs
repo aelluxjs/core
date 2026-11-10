@@ -2,11 +2,11 @@ import { expect, test } from "@playwright/test";
 
 test("runtime exposes identified layout work and ordered sequences", async ({ page }) => {
   await page.goto("/tests/browser/runtime-modern.html");
-  await expect.poll(() => page.evaluate(() => typeof AelluxJs.waitLayout?.sequence))
+  await expect.poll(() => page.evaluate(() => typeof aelluxJs.waitLayout?.sequence))
     .toBe("function");
 
   const result = await page.evaluate(async () => {
-    const scheduler = AelluxJs.waitLayout;
+    const scheduler = aelluxJs.waitLayout;
     const events = [];
     const oldRead = scheduler.read(900, () => events.push("old read"));
     const oldUpdate = scheduler.update(900, () => events.push("old update"));
@@ -48,11 +48,11 @@ test("runtime exposes identified layout work and ordered sequences", async ({ pa
 
 test("runtime accepts AbortController and AbortSignal in sequence abort", async ({ page }) => {
   await page.goto("/tests/browser/runtime-modern.html");
-  await expect.poll(() => page.evaluate(() => typeof AelluxJs.waitLayout?.sequence))
+  await expect.poll(() => page.evaluate(() => typeof aelluxJs.waitLayout?.sequence))
     .toBe("function");
 
   const result = await page.evaluate(async () => {
-    const scheduler = AelluxJs.waitLayout;
+    const scheduler = aelluxJs.waitLayout;
     const calls = [];
     const preAborted = new AbortController();
     preAborted.abort();
@@ -79,17 +79,17 @@ test("runtime accepts AbortController and AbortSignal in sequence abort", async 
 test("legacy runtime executes identified layout sequences", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic", forceLegacy: true }));
-  await expect.poll(() => page.evaluate(() => typeof AelluxJs.waitLayout?.sequence))
+  await page.evaluate(() => aelluxJs.init({ mode: "basic", forceLegacy: true }));
+  await expect.poll(() => page.evaluate(() => typeof aelluxJs.waitLayout?.sequence))
     .toBe("function");
 
   const result = await page.evaluate(async () => {
     const values = [];
-    const outcome = await AelluxJs.waitLayout.sequence(920, {
+    const outcome = await aelluxJs.waitLayout.sequence(920, {
       read: () => 7,
       update: value => values.push(value)
     });
-    return { outcome, values, legacy: AelluxJs.diagnostics.legacy };
+    return { outcome, values, legacy: aelluxJs.diagnostics.legacy };
   });
   expect(result).toEqual({
     outcome: { id: 920, status: "completed" },
@@ -109,13 +109,13 @@ test("active CSS Motion FPS limit preserves anonymous work from separate extensi
     document.body.innerHTML = '<div id="motion" data-ae-maxfps="5"></div>';
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic", skipGlobalMount: true }));
-  await expect.poll(() => page.evaluate(() => typeof AelluxJs.motion?.run)).toBe("function");
+  await page.evaluate(() => aelluxJs.init({ mode: "basic", skipGlobalMount: true }));
+  await expect.poll(() => page.evaluate(() => typeof aelluxJs.motion?.run)).toBe("function");
   await page.evaluate(() => {
     const element = document.getElementById("motion");
     getComputedStyle(element).opacity;
-    window.motionResult = AelluxJs.motion.run(element, {
-      id: AelluxJs.motion.id(),
+    window.motionResult = aelluxJs.motion.run(element, {
+      id: aelluxJs.motion.id(),
       apply: () => element.classList.add("active")
     });
   });
@@ -123,7 +123,7 @@ test("active CSS Motion FPS limit preserves anonymous work from separate extensi
     element.getAnimations()[0]?.playState)).toBe("paused");
 
   const result = await page.evaluate(async () => {
-    const scheduler = AelluxJs.waitLayout;
+    const scheduler = aelluxJs.waitLayout;
     const events = [];
     const work = [
       scheduler.read(() => { events.push("anchor read"); return 1; }),

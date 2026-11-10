@@ -65,7 +65,7 @@ test("runtime Extensions do not consume another Extension's API or import its im
   const directory = new URL("../../src/", import.meta.url);
   for (const file of (await readdir(directory)).filter(file => /^aellux\.ext\..+\.js$/.test(file) && !file.endsWith(".css.js"))) {
     const source = await readFile(new URL(file, directory), "utf8");
-    assert.doesNotMatch(source, /\b(?:AelluxJs|api)\.ext\.[a-zA-Z]/, file);
+    assert.doesNotMatch(source, /\b(?:aelluxJs|api)\.ext\.[a-zA-Z]/, file);
     assert.doesNotMatch(source, /import\s.*["']\.\/aellux\.ext\./, file);
     assert.doesNotMatch(source, /mountManager\.controller\([^)]*\)\?*\.(?:present|input|anchor|focus|scrollbox)/, file);
   }

@@ -18,7 +18,7 @@ export function resolveElementOrId(root, elementOrId, options) {
     return elementOrId;
   }
 
-  var diagnostics = root.AelluxJs.diagnostics;
+  var diagnostics = root.aelluxJs.diagnostics;
   diagnostics.warn(diagnostics.WARN_INVALID_ELEMENT_OR_ID, {
     elementOrId: requested,
     method: options.method

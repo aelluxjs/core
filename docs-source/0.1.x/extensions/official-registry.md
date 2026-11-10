@@ -31,4 +31,4 @@ $ae.ext("./extensions/aellux.ext.example.js", {
 
 Missing compatibility metadata preserves the earlier behavior and is not presented as validated. An incompatible declaration blocks `init()` with `ERROR_EXTENSION_VERSION_INCOMPATIBLE` (`1123`). `skipCompatibilityCheck: true` allows initialization but always records `WARN_EXTENSION_COMPATIBILITY_SKIPPED` (`2018`) with the current Core version and declared range; it never bypasses SRI or URL checks.
 
-Bootscript and Orchestrator expose `AelluxJs.version` and `AelluxJs.orchestratorVersion`. Both are compiled from `package.json`. A mismatch—typically stale cache across releases—records `ERROR_RUNTIME_VERSION_MISMATCH` (`1124`) and prevents runtime startup in Modern, Legacy, Basic, and Full builds.
+Bootscript and Orchestrator expose `aelluxJs.version` and `aelluxJs.orchestratorVersion`. Both are compiled from `package.json`. A mismatch—typically stale cache across releases—records `ERROR_RUNTIME_VERSION_MISMATCH` (`1124`) and prevents runtime startup in Modern, Legacy, Basic, and Full builds.

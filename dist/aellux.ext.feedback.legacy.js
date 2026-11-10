@@ -155,12 +155,12 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
-    var AelluxJs = root.AelluxJs;
+    var aelluxJs = root.aelluxJs;
     var extensionName = "feedback";
-    if (!AelluxJs) {
-      throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.'));
+    if (!aelluxJs) {
+      throw new Error('[aellux.js] Cannot attach the "'.concat(extensionName, '" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.'));
     }
-    AelluxJs.extAttach(extensionName, {
+    aelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
       warning: warning,
@@ -177,15 +177,15 @@
     var motionOptions = ["shake", "yes", "no", "breathe", "tremble", "pulse", "alert"];
     var feedbackTypes = ["warning", "error", "success", "announce", "busy", "progress", "validate"];
     var handlers = /* @__PURE__ */ new Map();
-    var feedbackAttribute = AelluxJs.attr(extensionName);
-    var messageTargetAttribute = AelluxJs.attr("feedback-message-target");
-    var effectTargetAttribute = AelluxJs.attr("feedback-effect-target");
-    var presentTargetAttribute = AelluxJs.attr("presentTarget");
-    var presentSelector = "[".concat(AelluxJs.attr("present"), "]");
+    var feedbackAttribute = aelluxJs.attr(extensionName);
+    var messageTargetAttribute = aelluxJs.attr("feedback-message-target");
+    var effectTargetAttribute = aelluxJs.attr("feedback-effect-target");
+    var presentTargetAttribute = aelluxJs.attr("presentTarget");
+    var presentSelector = "[".concat(aelluxJs.attr("present"), "]");
     var mountedFeedback = /* @__PURE__ */ new Map();
     var applications = /* @__PURE__ */ new WeakMap();
     function init() {
-      AelluxJs.comm.handle("feedback.prepare", function(request) {
+      aelluxJs.comm.handle("feedback.prepare", function(request) {
         var boundary = request.boundary, feedback = request.feedback, element = request.element;
         if (!mountedFeedback.has(boundary) || !boundary.isConnected || !feedback || _typeof(feedback) !== "object") return false;
         applications.set(feedback, applyFeedback(boundary, feedback, element, false));
@@ -193,7 +193,7 @@
       }, {
         owner: extensionName
       });
-      AelluxJs.mountManager.add({
+      aelluxJs.mountManager.add({
         extensionName: extensionName,
         selector: "[".concat(feedbackAttribute, "]"),
         priority: 0,
@@ -210,9 +210,9 @@
         return _regenerator().w(function(_context) {
           while (1) switch (_context.n) {
             case 0:
-              AelluxJs.comm.removeOwner(extensionName);
+              aelluxJs.comm.removeOwner(extensionName);
               mountedFeedback.clear();
-              AelluxJs.mountManager.remove({
+              aelluxJs.mountManager.remove({
                 extensionName: extensionName
               });
               handlers.clear();
@@ -225,12 +225,12 @@
     }
     function mountFeedback(element) {
       mountedFeedback.set(element, {});
-      AelluxJs.onEvent(element, "Feedback", onFeedback);
+      aelluxJs.onEvent(element, "Feedback", onFeedback);
     }
     function unmountFeedback(element) {
       applications.delete(element);
       mountedFeedback.delete(element);
-      AelluxJs.offEvent(element, "Feedback", onFeedback);
+      aelluxJs.offEvent(element, "Feedback", onFeedback);
     }
     function onFeedback(event) {
       var element = event.currentTarget;
@@ -247,13 +247,13 @@
       event.stopPropagation();
       if (!event.detail || _typeof(event.detail) !== "object") return;
       var presentTarget = element.getAttribute(presentTargetAttribute);
-      var presentElement = presentTarget !== null && presentTarget.trim() && (AelluxJs.comm.has("present.pop") || AelluxJs.comm.has("present.pop-next")) ? AelluxJs.elementOrId(presentTarget) : null;
-      if (presentElement !== null && presentElement !== void 0 && presentElement.hasAttribute(AelluxJs.attr("present-group"))) {
+      var presentElement = presentTarget !== null && presentTarget.trim() && (aelluxJs.comm.has("present.pop") || aelluxJs.comm.has("present.pop-next")) ? aelluxJs.elementOrId(presentTarget) : null;
+      if (presentElement !== null && presentElement !== void 0 && presentElement.hasAttribute(aelluxJs.attr("present-group"))) {
         var preparation = {
           boundary: element,
           feedback: event.detail
         };
-        var result = AelluxJs.comm.request("present.pop-next", {
+        var result = aelluxJs.comm.request("present.pop-next", {
           group: presentElement,
           preparation: {
             contract: "feedback.prepare",
@@ -265,7 +265,7 @@
           Promise.resolve(result.value).then(function(member) {
             if (member) requestEffect(element, application);
           }).catch(function(cause) {
-            return AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION, {
+            return aelluxJs.diagnostics.error(aelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION, {
               cause: cause,
               extension: extensionName,
               element: presentElement
@@ -277,7 +277,7 @@
       applyFeedback(element, event.detail, element, function(messageElement, effectElement) {
         if (presentTarget !== null) {
           var target = presentElement || !presentTarget.trim() && ((messageElement === null || messageElement === void 0 ? void 0 : messageElement.closest(presentSelector)) || (effectElement === null || effectElement === void 0 ? void 0 : effectElement.closest(presentSelector)));
-          if (target) AelluxJs.comm.request("present.pop", {
+          if (target) aelluxJs.comm.request("present.pop", {
             element: target
           });
         }
@@ -292,10 +292,10 @@
       };
       var messageTarget = element.getAttribute(messageTargetAttribute);
       var effectTarget = element.getAttribute(effectTargetAttribute);
-      var messageElement = AelluxJs.elementOrId(messageTarget, {
+      var messageElement = aelluxJs.elementOrId(messageTarget, {
         defaultElement: defaultElement
       });
-      var effectElement = AelluxJs.elementOrId(effectTarget, {
+      var effectElement = aelluxJs.elementOrId(effectTarget, {
         defaultElement: defaultElement
       });
       application.effectElement = effectElement;
@@ -321,7 +321,7 @@
         else messageElement.appendChild(messageElement.ownerDocument.createTextNode(message));
       }
       if (feedbackTypes.includes(type)) {
-        var typeClass = AelluxJs.className("feedback-".concat(type));
+        var typeClass = aelluxJs.className("feedback-".concat(type));
         for (var _i = 0, _arr = [element, messageElement, effectElement]; _i < _arr.length; _i++) {
           var target = _arr[_i];
           if (target) {
@@ -330,7 +330,7 @@
               try {
                 for (_iterator2.s(); !(_step2 = _iterator2.n()).done; ) {
                   var previous = _step2.value;
-                  target.classList.remove(AelluxJs.className("feedback-".concat(previous)));
+                  target.classList.remove(aelluxJs.className("feedback-".concat(previous)));
                 }
               } catch (err) {
                 _iterator2.e(err);
@@ -350,7 +350,7 @@
       if (!application || application.mount !== mountedFeedback.get(element) || !element.isConnected) return;
       var effectElement = application.effectElement, motion = application.motion;
       if (!(effectElement !== null && effectElement !== void 0 && effectElement.isConnected) || applications.get(effectElement) !== application || typeof motion !== "string") return;
-      AelluxJs.comm.request("present.effect", {
+      aelluxJs.comm.request("present.effect", {
         element: effectElement.closest(presentSelector) || effectElement,
         effect: motion,
         effectTarget: effectElement
@@ -426,7 +426,7 @@
         return;
       }
       if (typeof motion === "string" && !motionOptions.includes(motion)) {
-        AelluxJs.diagnostics.info(AelluxJs.diagnostics.INFO_FEEDBACK_MOTION_CUSTOM, {
+        aelluxJs.diagnostics.info(aelluxJs.diagnostics.INFO_FEEDBACK_MOTION_CUSTOM, {
           extension: extensionName,
           motion: motion,
           standardMotions: motionOptions.slice()
@@ -444,12 +444,12 @@
         bubbles: true,
         cancelable: true
       };
-      AelluxJs.dispatchFrom(target, "Feedback", options);
+      aelluxJs.dispatchFrom(target, "Feedback", options);
       notifyHandlers(type, feedback);
       notifyHandlers("*", feedback);
     }
     function reportInvalidArgument(argument, value) {
-      AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_FEEDBACK_ARGUMENT, {
+      aelluxJs.diagnostics.error(aelluxJs.diagnostics.ERROR_FEEDBACK_ARGUMENT, {
         extension: extensionName,
         argument: argument,
         value: value
@@ -471,7 +471,7 @@
       });
     }
     function reportCallbackError(error2, type) {
-      AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_CALLBACK, {
+      aelluxJs.diagnostics.error(aelluxJs.diagnostics.ERROR_CALLBACK, {
         cause: error2,
         extension: extensionName,
         type: type

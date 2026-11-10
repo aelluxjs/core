@@ -4,11 +4,11 @@ async function start(page) {
   await page.goto("/tests/fixtures/documentation-app/nested-menu.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => {
-    AelluxJs.ext("present", { loadStyle: true });
-    AelluxJs.init({ mode: "basic", environment: "development" });
+    aelluxJs.ext("present", { loadStyle: true });
+    aelluxJs.init({ mode: "basic", environment: "development" });
   });
-  await expect.poll(() => page.evaluate(() => !!AelluxJs.ext.present?.initialized)).toBe(true);
-  await page.evaluate(() => AelluxJs.mount(document, "present"));
+  await expect.poll(() => page.evaluate(() => !!aelluxJs.ext.present?.initialized)).toBe(true);
+  await page.evaluate(() => aelluxJs.mount(document, "present"));
 }
 
 for (const width of [1280, 390]) {
@@ -27,7 +27,7 @@ for (const width of [1280, 390]) {
       const parent = document.getElementById("children-core-extensions");
       const nested = document.getElementById("children2-optional");
       return [parent, nested].map(panel =>
-        AelluxJs.ext.present.selected(panel.closest("[data-ae-present-group]"))?.id ?? null);
+        aelluxJs.ext.present.selected(panel.closest("[data-ae-present-group]"))?.id ?? null);
     });
     const parentOpen = async () => {
       await expect(core).toBeVisible();
@@ -76,6 +76,6 @@ for (const width of [1280, 390]) {
     await optionalButton.click();
     await expect(optional).toHaveJSProperty("hidden", true);
     await parentOpen();
-    expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(entry => entry.code === 2021))).toEqual([]);
+    expect(await page.evaluate(() => aelluxJs.diagnostics.showHistory().filter(entry => entry.code === 2021))).toEqual([]);
   });
 }

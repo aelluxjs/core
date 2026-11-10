@@ -1,6 +1,6 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
-export function generatePresentEffectsCSS(AelluxJs) {
+export function generatePresentEffectsCSS(aelluxJs) {
   const motions = {
     shake: {
       duration: "500ms",
@@ -64,7 +64,7 @@ export function generatePresentEffectsCSS(AelluxJs) {
   };
   const rules = [];
   for (const [motion, { duration, frames }] of Object.entries(motions)) {
-    const name = AelluxJs.className(`present-effect-${motion}`);
+    const name = aelluxJs.className(`present-effect-${motion}`);
     const declarations = frames.trim().split("\n").map(line => line.trim()).join("\n  ");
     rules.push(`.${name} {
   animation-name: ${name};
@@ -76,9 +76,9 @@ export function generatePresentEffectsCSS(AelluxJs) {
   ${declarations}
 }`);
   }
-  const reducedMotion = AelluxJs.attr("reduced-motion");
+  const reducedMotion = aelluxJs.attr("reduced-motion");
   const selectors = Object.keys(motions)
-    .map(motion => `html[${reducedMotion}="reduced"] .${AelluxJs.className(`present-effect-${motion}`)}`)
+    .map(motion => `html[${reducedMotion}="reduced"] .${aelluxJs.className(`present-effect-${motion}`)}`)
     .join(",\n");
   rules.push(`${selectors} {
   animation: none;

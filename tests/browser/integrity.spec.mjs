@@ -17,7 +17,7 @@ test("each boot embeds SRI only for its asset variant", async ({ page }) => {
   ]) {
     await page.goto("/tests/index.htm");
     await page.addScriptTag({ url: `/dist/${boot}` });
-    const entries = await page.evaluate(() => Object.entries(AelluxJs.coreAssetIntegrity));
+    const entries = await page.evaluate(() => Object.entries(aelluxJs.coreAssetIntegrity));
     expect(entries.length).toBeGreaterThan(0);
     for (const [filename, integrity] of entries) {
       expect(/\.min\.(?:js|css)$/.test(filename)).toBe(minified);
@@ -30,15 +30,15 @@ test("generated integrity covers the orchestrator and built-in Extension assets"
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => {
-    AelluxJs.ext("feedback");
-    AelluxJs.ext("adaptive", { loadStyle: true });
-    AelluxJs.ext("present", { loadStyle: true });
-    AelluxJs.init({ mode: "basic" });
+    aelluxJs.ext("feedback");
+    aelluxJs.ext("adaptive", { loadStyle: true });
+    aelluxJs.ext("present", { loadStyle: true });
+    aelluxJs.init({ mode: "basic" });
   });
-  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
+  await expect.poll(() => page.evaluate(() => aelluxJs.diagnostics.supported)).toBe(true);
   await expect.poll(() => page.evaluate(() =>
-    AelluxJs.ext.feedback?.initialized && AelluxJs.ext.adaptive?.initialized &&
-      AelluxJs.ext.present?.initialized
+    aelluxJs.ext.feedback?.initialized && aelluxJs.ext.adaptive?.initialized &&
+      aelluxJs.ext.present?.initialized
   )).toBe(true);
 
   const assets = await page.evaluate(() => Object.fromEntries(
@@ -81,10 +81,10 @@ test("minified core styles retain SRI when CDN bytes differ", async ({ page }) =
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: `${base}aellux.min.js` });
   await page.evaluate(() => {
-    AelluxJs.ext("present", { loadStyle: true });
-    AelluxJs.init({ mode: "basic" });
+    aelluxJs.ext("present", { loadStyle: true });
+    aelluxJs.init({ mode: "basic" });
   });
-  await expect.poll(() => page.evaluate(() => AelluxJs.ext.present?.initialized)).toBe(true);
+  await expect.poll(() => page.evaluate(() => aelluxJs.ext.present?.initialized)).toBe(true);
   const style = page.locator('link[data-ae-ext-style="present"]');
   await expect(style).toHaveAttribute("href", `${base}aellux.ext.present.min.css`);
   expect(await style.getAttribute("integrity"))
@@ -106,14 +106,14 @@ test("generated integrity matches each runtime variant", async ({ page }) => {
   ]) {
     await page.goto("/tests/index.htm");
     await page.addScriptTag({ url: `/dist/${boot}` });
-    await page.evaluate(options => AelluxJs.init(options), { mode, forceLegacy });
+    await page.evaluate(options => aelluxJs.init(options), { mode, forceLegacy });
     const loaded = await page.locator(`script[src$="${runtime}"]`).getAttribute("integrity");
     expect(loaded).toBe(await expectedIntegrity(runtime));
     expect(await page.locator(`script[src$="${runtime}"]`).getAttribute("crossorigin"))
       .toBe("anonymous");
-    await expect.poll(() => page.evaluate(() => typeof AelluxJs.wait))
+    await expect.poll(() => page.evaluate(() => typeof aelluxJs.wait))
       .toBe("function");
-    expect(await page.evaluate(() => AelluxJs.diagnostics.legacy)).toBe(forceLegacy);
+    expect(await page.evaluate(() => aelluxJs.diagnostics.legacy)).toBe(forceLegacy);
   }
 });
 
@@ -124,11 +124,11 @@ test("changed orchestrator bytes are rejected before Legacy fallback", async ({ 
   }));
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
-  await expect.poll(() => page.evaluate(() => typeof AelluxJs.wait)).toBe("function");
+  await page.evaluate(() => aelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => typeof aelluxJs.wait)).toBe("function");
   await expect.poll(() => page.evaluate(() => ({
     changedExecuted: Boolean(window.changedOrchestratorExecuted),
-    legacy: AelluxJs.diagnostics.legacy
+    legacy: aelluxJs.diagnostics.legacy
   }))).toEqual({ changedExecuted: false, legacy: true });
   expect(await page.locator('script[src$="aellux.orchestrator.legacy.js"]')
     .getAttribute("integrity"))
@@ -139,10 +139,10 @@ test("global crossorigin applies to orchestrator and can be overridden per Exten
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => {
-    AelluxJs.ext("feedback", { crossOrigin: "anonymous" });
-    AelluxJs.init({ mode: "basic", crossOrigin: "use-credentials" });
+    aelluxJs.ext("feedback", { crossOrigin: "anonymous" });
+    aelluxJs.init({ mode: "basic", crossOrigin: "use-credentials" });
   });
-  await expect.poll(() => page.evaluate(() => AelluxJs.ext.feedback?.initialized))
+  await expect.poll(() => page.evaluate(() => aelluxJs.ext.feedback?.initialized))
     .toBe(true);
   expect(await page.locator('script[src$="aellux.orchestrator.js"]')
     .getAttribute("crossorigin")).toBe("use-credentials");
@@ -151,8 +151,8 @@ test("global crossorigin applies to orchestrator and can be overridden per Exten
 });
 
 test("declared Extension integrity accepts matching bytes and rejects changed bytes", async ({ page }) => {
-  const validSource = 'AelluxJs.extAttach("sri-valid", { init: function () {} });';
-  const changedSource = 'AelluxJs.extAttach("sri-changed", { init: function () {} });';
+  const validSource = 'aelluxJs.extAttach("sri-valid", { init: function () {} });';
+  const changedSource = 'aelluxJs.extAttach("sri-changed", { init: function () {} });';
   await page.route("**/aellux.ext.sri-valid.js", route => route.fulfill({
     contentType: "text/javascript", body: validSource
   }));
@@ -161,15 +161,15 @@ test("declared Extension integrity accepts matching bytes and rejects changed by
   }));
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
-  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
+  await page.evaluate(() => aelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => aelluxJs.diagnostics.supported)).toBe(true);
 
   const goodHash = "sha384-" + createHash("sha384").update(validSource).digest("base64");
   const result = await page.evaluate(async hash => {
-    AelluxJs.ext("/virtual/aellux.ext.sri-valid.js", { integrity: { modern: hash } });
-    AelluxJs.ext("/virtual/aellux.ext.sri-changed.js", { integrity: { modern: hash } });
-    const valid = await AelluxJs.wait("sri-valid");
-    const changed = await AelluxJs.wait("sri-changed");
+    aelluxJs.ext("/virtual/aellux.ext.sri-valid.js", { integrity: { modern: hash } });
+    aelluxJs.ext("/virtual/aellux.ext.sri-changed.js", { integrity: { modern: hash } });
+    const valid = await aelluxJs.wait("sri-valid");
+    const changed = await aelluxJs.wait("sri-changed");
     const validScript = document.querySelector('script[data-ae-ext="sri-valid"]');
     return {
       valid: valid?.initialized,
@@ -187,7 +187,7 @@ test("declared Extension integrity accepts matching bytes and rejects changed by
 });
 
 test("declared stylesheet integrity and crossorigin are applied independently", async ({ page }) => {
-  const scriptSource = 'AelluxJs.extAttach("sri-style", { init: function () {} });';
+  const scriptSource = 'aelluxJs.extAttach("sri-style", { init: function () {} });';
   const styleSource = ".sri-style { display: block; }";
   await page.route("**/aellux.ext.sri-style.js", route => route.fulfill({
     contentType: "text/javascript", body: scriptSource
@@ -197,18 +197,18 @@ test("declared stylesheet integrity and crossorigin are applied independently", 
   }));
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
-  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
+  await page.evaluate(() => aelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => aelluxJs.diagnostics.supported)).toBe(true);
 
   const scriptHash = "sha384-" + createHash("sha384").update(scriptSource).digest("base64");
   const styleHash = "sha384-" + createHash("sha384").update(styleSource).digest("base64");
   const result = await page.evaluate(async hashes => {
-    AelluxJs.ext("/virtual/aellux.ext.sri-style.js", {
+    aelluxJs.ext("/virtual/aellux.ext.sri-style.js", {
       loadStyle: true,
       integrity: { modern: hashes.script, style: hashes.style },
       crossOrigin: "use-credentials"
     });
-    const extension = await AelluxJs.wait("sri-style");
+    const extension = await aelluxJs.wait("sri-style");
     const script = document.querySelector('script[data-ae-ext="sri-style"]');
     const style = document.querySelector('link[data-ae-ext-style="sri-style"]');
     return {

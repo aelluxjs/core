@@ -301,7 +301,7 @@
 
   // src/src/aellux.input.gamepad.js
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
-  var api = (typeof globalThis !== "undefined" ? globalThis : window).AelluxJs;
+  var api = (typeof globalThis !== "undefined" ? globalThis : window).aelluxJs;
   api.registry.inputAdapters = api.registry.inputAdapters || {};
   api.registry.inputAdapters.gamepad = function(_ref) {
     var root = _ref.root, emit = _ref.emit, changed = _ref.changed, identify = _ref.identify;

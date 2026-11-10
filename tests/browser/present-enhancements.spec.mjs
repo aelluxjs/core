@@ -21,7 +21,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
       await $ae(panel).present.pop();
       const events = [];
       for (const name of ["BeforeDismiss", "Layout", "Dismissing", "Dismiss", "BeforeUnpop", "Unpopping", "Unpop"])
-        panel.addEventListener(AelluxJs.eventName(name), event => events.push({ name, bubbles: event.bubbles,
+        panel.addEventListener(aelluxJs.eventName(name), event => events.push({ name, bubbles: event.bubbles,
           cancelable: event.cancelable, origin: event.detail?.origin, durationMs: event.detail?.durationMs }));
       await $ae(panel).present.toggle(false);
       await $ae.ext.present.dismiss(panel);
@@ -160,13 +160,13 @@ for (const cssMotionController of [true, false]) for (const forceLegacy of [fals
     await expect.poll(() => page.locator("#panel").evaluate(element => Number(getComputedStyle(element).opacity)), { intervals: [16] }).toBeGreaterThan(.25);
     await page.evaluate(() => { window.closing = $ae("panel").present.dismiss(); });
     await expect.poll(() => page.locator("#panel").evaluate(element =>
-      element.classList.contains(AelluxJs.className("dismissing")) && element.getAnimations().length > 0), { intervals: [16] }).toBe(true);
+      element.classList.contains(aelluxJs.className("dismissing")) && element.getAnimations().length > 0), { intervals: [16] }).toBe(true);
     const cleanup = await page.evaluate(async () => {
       const element = document.getElementById("panel");
       // Allow the shared controller's capture/preparation to own the new effects.
       for (let index = 0; index < 3; index++) await new Promise(requestAnimationFrame);
       const animations = element.getAnimations();
-      await AelluxJs.unmount(element, "present");
+      await aelluxJs.unmount(element, "present");
       await Promise.all([window.opening, window.closing]);
       return { max: element.style.maxHeight, priority: element.style.getPropertyPriority("max-height"),
         temporary: ["opacity", "transition-property", "--ae-pop-progress", "--ae-present-pop-phase"]
@@ -288,11 +288,11 @@ async function start(page, markup, options = {}) {
   await page.evaluate(markup => { document.body.innerHTML = markup; }, markup);
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(options => {
-    if (options.mode === "basic") AelluxJs.ext("present", { loadStyle: true });
-    AelluxJs.init({ mode: "full", ...options });
+    if (options.mode === "basic") aelluxJs.ext("present", { loadStyle: true });
+    aelluxJs.init({ mode: "full", ...options });
   }, options);
-  await expect.poll(() => page.evaluate(() => !!AelluxJs.ext.present?.initialized)).toBe(true);
-  await page.evaluate(() => AelluxJs.mount(document, "present"));
+  await expect.poll(() => page.evaluate(() => !!aelluxJs.ext.present?.initialized)).toBe(true);
+  await page.evaluate(() => aelluxJs.mount(document, "present"));
   await expect(page.locator('link[data-ae-ext-style="present"],link[data-ae-full-style]')).toHaveCount(1);
   await page.evaluate(async () => {
     const link = document.querySelector('link[data-ae-ext-style="present"],link[data-ae-full-style]');
@@ -303,8 +303,8 @@ async function start(page, markup, options = {}) {
 async function trackGroupWarnings(page) {
   await page.evaluate(() => {
     window.groupWarnings = 0;
-    const warn = AelluxJs.diagnostics.warn;
-    AelluxJs.diagnostics.warn = function (definition, context) {
+    const warn = aelluxJs.diagnostics.warn;
+    aelluxJs.diagnostics.warn = function (definition, context) {
       if (definition.code === 2021) window.groupWarnings++;
       return warn.call(this, definition, context);
     };
@@ -329,7 +329,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
     <div id="outside" data-ae-present hidden>Outside</div>
     <div data-ae-present-group><div id="other-member" data-ae-present hidden>Other group</div></div>`, { mode, forceLegacy });
     await trackGroupWarnings(page);
-    await page.evaluate(() => AelluxJs.unmount(document.getElementById("unmounted"), "present"));
+    await page.evaluate(() => aelluxJs.unmount(document.getElementById("unmounted"), "present"));
     for (const id of ["outside", "other-member", "nested-member", "plain-child", "unmounted", "group", "missing"]) {
       const result = await page.evaluate(async id => {
         const controller = $ae("group").present;
@@ -369,7 +369,7 @@ test("group observes member ID changes and rejects duplicate IDs without changin
   await start(page, `<div id="group" data-ae-present-group data-ae-present-active="renamed">
     <div id="a" data-ae-present>A</div><div id="b" data-ae-present hidden>B</div></div>`);
   await expect(page.locator("#a")).toHaveJSProperty("hidden", false);
-  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.showHistory().some(e => e.code === 2021))).toBe(true);
+  await expect.poll(() => page.evaluate(() => aelluxJs.diagnostics.showHistory().some(e => e.code === 2021))).toBe(true);
   await page.locator("#b").evaluate(element => { element.id = "renamed"; });
   await expect(page.locator("#a")).toHaveJSProperty("hidden", true);
   await expect(page.locator("#renamed")).toHaveJSProperty("hidden", false);
@@ -378,7 +378,7 @@ test("group observes member ID changes and rejects duplicate IDs without changin
   await page.evaluate(async () => {
     const group = document.getElementById("group");
     group.insertAdjacentHTML("beforeend", '<div id="duplicate" data-ae-present hidden>1</div><div id="duplicate" data-ae-present hidden>2</div>');
-    await AelluxJs.mount(group, "present");
+    await aelluxJs.mount(group, "present");
   });
   const duplicate = await page.evaluate(async () => {
     const warnings = window.groupWarnings;
@@ -466,7 +466,7 @@ for (const cssMotionController of [true, false]) {
       await Promise.all([$ae("panel").present.pop(), $ae("panel").present.pop()]);
     });
     expect(await progress()).toEqual([1, 0]);
-    await page.evaluate(() => AelluxJs.unmount(document.getElementById("panel"), "present"));
+    await page.evaluate(() => aelluxJs.unmount(document.getElementById("panel"), "present"));
     expect(await page.locator("#panel").evaluate(element => [
       element.style.getPropertyValue("--ae-pop-progress"), element.style.getPropertyValue("--ae-dismiss-progress")
     ])).toEqual(["0.7", ""]);
@@ -480,7 +480,7 @@ test("groups diagnose ambiguity, isolate nested members, mount dynamically and r
     group.removeAttribute("data-ae-present-active");
     group.className = "view-a view-b";
   });
-  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.showHistory().some(entry => entry.code === 2021))).toBe(true);
+  await expect.poll(() => page.evaluate(() => aelluxJs.diagnostics.showHistory().some(entry => entry.code === 2021))).toBe(true);
   await expect(page.locator("#a")).toHaveJSProperty("hidden", false);
   await expect(page.locator("#b")).toHaveJSProperty("hidden", true);
   await page.evaluate(async () => {
@@ -488,7 +488,7 @@ test("groups diagnose ambiguity, isolate nested members, mount dynamically and r
     group.insertAdjacentHTML("beforeend", `<div id="nested" data-ae-present-group data-ae-present-active="nested-a">
       <div id="nested-a" data-ae-present hidden>Nested</div></div>
       <div id="dynamic" data-ae-present hidden>Dynamic</div>`);
-    await AelluxJs.mount(group, "present");
+    await aelluxJs.mount(group, "present");
     await $ae("group").present.show("dynamic");
   });
   await expect(page.locator("#nested-a")).toHaveJSProperty("hidden", false);
@@ -497,11 +497,11 @@ test("groups diagnose ambiguity, isolate nested members, mount dynamically and r
   await page.evaluate(async () => {
     document.getElementById("dynamic").remove();
     await $ae("group").present.show("b");
-    await AelluxJs.unmount(document.getElementById("group"), "present");
+    await aelluxJs.unmount(document.getElementById("group"), "present");
   });
   await expect(page.locator("#group")).toHaveAttribute("data-ae-present-active", "a");
   await expect(page.locator("#b")).toHaveJSProperty("hidden", true);
-  await page.evaluate(() => AelluxJs.mount(document.getElementById("group"), "present"));
+  await page.evaluate(() => aelluxJs.mount(document.getElementById("group"), "present"));
   await page.evaluate(() => $ae("group").present.show("b"));
   await expect(page.locator("#a")).toHaveJSProperty("hidden", true);
 });
@@ -543,8 +543,8 @@ test("touch hover is ignored, click toggles once, descendants and remount do not
   expect(await page.evaluate(() => window.pops)).toBe(1);
   await page.evaluate(async () => {
     await $ae("panel").present.dismiss();
-    await AelluxJs.unmount(document.getElementById("trigger"), "present");
-    await AelluxJs.mount(document.getElementById("trigger"), "present");
+    await aelluxJs.unmount(document.getElementById("trigger"), "present");
+    await aelluxJs.mount(document.getElementById("trigger"), "present");
   });
   await page.locator("#trigger").hover();
   await page.locator("#trigger span").hover();
@@ -553,7 +553,7 @@ test("touch hover is ignored, click toggles once, descendants and remount do not
   await page.locator("#trigger").click();
   await expect(page.locator("#panel")).toHaveJSProperty("hidden", false);
   await page.mouse.move(900, 600);
-  await page.evaluate(() => AelluxJs.unmount(document.getElementById("panel"), "present"));
+  await page.evaluate(() => aelluxJs.unmount(document.getElementById("panel"), "present"));
   await page.waitForTimeout(200);
   await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
 });
@@ -614,7 +614,7 @@ test("group reentrant BeforePop selection and unmount cannot revive obsolete ope
   await expect(page.locator("#c")).toHaveJSProperty("hidden", false);
   await page.evaluate(async () => {
     window.obsolete = $ae("group").present.show("a");
-    await AelluxJs.unmount(document.getElementById("group"), "present");
+    await aelluxJs.unmount(document.getElementById("group"), "present");
     await window.obsolete;
   });
   await expect(page.locator("#a")).toHaveJSProperty("hidden", false);
@@ -672,7 +672,7 @@ test("a member removed or moved during selection cannot complete the former grou
     const pending = $ae("group").present.show("b");
     const member = document.getElementById("b");
     member.remove();
-    await AelluxJs.unmount(member, "present");
+    await aelluxJs.unmount(member, "present");
     return pending;
   });
   expect(removed).toBe(false);

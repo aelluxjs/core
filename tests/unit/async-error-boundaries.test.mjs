@@ -28,7 +28,7 @@ function apiStub() {
 test("PushState reports async failure without escaping, while setState preserves rejection", async () => {
   const { api, events, handlers, diagnostics } = apiStub();
   const error = new Error("History denied");
-  runInNewContext(stateSource, { AelluxJs: api, URLSearchParams,
+  runInNewContext(stateSource, { aelluxJs: api, URLSearchParams,
     window: { location: { hash: "" } }, document: { title: "Test" },
     history: { replaceState() {}, pushState() { throw error; } } });
   api.extension.init({});
@@ -50,7 +50,7 @@ for (const readyState of ["loading", "complete"]) {
       const { api, events, handlers } = apiStub();
       const error = new Error("Mount failed");
       Object.assign(api, { version: "0.1.0-beta.10", shortJSName: "$ae" });
-      runInNewContext(runtimeSource, { AelluxJs: api, document: { readyState },
+      runInNewContext(runtimeSource, { aelluxJs: api, document: { readyState },
         utilsNameCase: {}, buildMountMapManager: () => ({ mount() {
           if (synchronous) throw error;
           return Promise.reject(error);
@@ -77,7 +77,7 @@ test("Viewport reports observer failures, preserves update rejection and recover
     reads++;
     return failure ? Promise.reject(failure) : Promise.resolve(null);
   } };
-  runInNewContext(viewportSource, { AelluxJs: api, document: {}, performance: { now: () => 0 } });
+  runInNewContext(viewportSource, { aelluxJs: api, document: {}, performance: { now: () => 0 } });
   api.extension.init();
   const element = {};
   await map.mount(element);
@@ -105,7 +105,7 @@ test("Viewport cleanup does not block a pending mount and reports its later reje
   api.registerCssProperty = () => {};
   api.waitLayout = { read: (id, callback) => Promise.resolve(callback()),
     update: (id, callback) => Promise.resolve(callback()) };
-  runInNewContext(viewportSource, { AelluxJs: api, document: {}, performance: { now: () => 0 } });
+  runInNewContext(viewportSource, { aelluxJs: api, document: {}, performance: { now: () => 0 } });
   api.extension.init();
   const element = { isConnected: true, hasAttribute: () => false };
   await map.mount(element);
@@ -132,7 +132,7 @@ test("A documentation-style consumer reports initial TOC and BeforeMount enhance
   api.init = () => {};
   const initOrRefreshToc = async () => { throw tocError; };
   window.initOrRefreshToc = initOrRefreshToc;
-  runInNewContext(consumerSource, { AelluxJs: api, window, document, URL, initOrRefreshToc,
+  runInNewContext(consumerSource, { aelluxJs: api, window, document, URL, initOrRefreshToc,
     console: { error() {} } });
   await settle();
   assert.equal(events.length, 1);

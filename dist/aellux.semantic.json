@@ -28,7 +28,7 @@
   ],
   "api": {
     "globals": [
-      "AelluxJs",
+      "aelluxJs",
       "$ae"
     ],
     "bootstrap": {
@@ -4038,7 +4038,7 @@
       "name": "--ae-present-effect-aellux-ease",
       "extension": "present",
       "syntax": "<string>",
-      "description": "Optional Aellux easing name read from the effect target; unsupported sampling retains the authored CSS easing.",
+      "description": "Optional aellux.js easing name read from the effect target; unsupported sampling retains the authored CSS easing.",
       "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     },

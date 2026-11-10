@@ -38,7 +38,7 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-PgrxAHrkt22+F09vWG2iuTeiqQ+UCUeSkyAe/nibdP/XtRk8nTZ+VjetKW+okArJ" crossorigin="anonymous">
+  integrity="sha384-q4bpBk5Vqct9IR80W+4o8g4BlPq84mWWb0mV47Q76mgYStKp6AKgCBgxRwr2FPAE" crossorigin="anonymous">
 </head>
 
 <body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
@@ -192,6 +192,13 @@
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
                                         aellux.js Docs                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/brand-naming.htm" data-ae-overflow-marquee="190px">
+                                        Brand Naming and Migration                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -761,7 +768,7 @@ $ae.ext.pwa.install({ fallback: context =&gt; renderMyInstallUI(context) });
 } });
 </code></pre>
 <h2>Semantic events</h2>
-<p>Subscribe through <code>$ae.on(name, handler)</code> or <code>AelluxJs.eventName(name)</code>. All names use the existing normalization contract. Events bubble from an initiating element or are dispatched on <code>document</code>. Every <code>detail</code> includes a fresh <code>status</code> snapshot.</p>
+<p>Subscribe through <code>$ae.on(name, handler)</code> or <code>aelluxJs.eventName(name)</code>. All names use the existing normalization contract. Events bubble from an initiating element or are dispatched on <code>document</code>. Every <code>detail</code> includes a fresh <code>status</code> snapshot.</p>
 <table>
 <thead>
 <tr>
@@ -833,9 +840,9 @@ updateButton.addEventListener(&quot;click&quot;, () =&gt; pwa.applyUpdate());
 <p>A PWA button or registered Service Worker does not supply these metadata. For the browser&#39;s installable-PWA flow, configure the manifest and the members required by the target browser; a link alone does not establish eligibility or guarantee <code>beforeinstallprompt</code>. Some browsers also allow adding ordinary sites to the Home Screen, so a missing manifest does not prove that every installation route is unavailable. See <a href="https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#installability">MDN: installation requirements and the role of the manifest</a>.</p>
 <p>For the available properties and their meanings, use the <a href="https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Manifest/Reference">MDN manifest members reference</a>. Start with <code>id</code>, <code>name</code>/<code>short_name</code>, <code>icons</code>, <code>start_url</code>, <code>scope</code> and <code>display</code>, then add application-specific fields such as colors or shortcuts. Check each property&#39;s browser compatibility. The <a href="https://www.w3.org/TR/appmanifest/">W3C Web Application Manifest specification</a> defines the format and processing rules; the <a href="https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Manifest#deploying_a_manifest">MDN manifest guide</a> explains linking and serving the file. Serve it as JSON, preferably with <code>Content-Type: application/manifest+json</code>. Relative resource paths, such as icon <code>src</code> values, resolve against the manifest URL; consult each member&#39;s own URL resolution rules. The manifest&#39;s <code>scope</code> describes application navigation and is distinct from the Service Worker&#39;s registration scope.</p>
 <p>When PWA initializes or <code>install()</code> is requested with <code>environment: &quot;development&quot;</code>, it checks for a native <code>link</code> whose <code>rel</code> contains the <code>manifest</code> token and whose <code>href</code> is nonempty. A missing link or missing/blank <code>href</code> records <code>WARN_CONFIGURATION_STRUCTURE</code> (<code>2028</code>), with <code>extension: &quot;pwa&quot;</code>, the relevant element/attribute, reason and corrective suggestion. Repeated equivalent warnings use the existing diagnostic deduplication. A manifest added later is recognized on the next installation request. Production performs no diagnostic presence scan, and pages that never load PWA gain no check or listener.</p>
-<p>This check examines the declaration only: it does not fetch the manifest, parse its JSON, verify icons, validate its members or establish installability. Use browser developer tools to inspect the actual manifest response and installation issues. The warning does not block mounting, installation APIs or independent offline support. Aellux never generates a manifest in the browser.</p>
+<p>This check examines the declaration only: it does not fetch the manifest, parse its JSON, verify icons, validate its members or establish installability. Use browser developer tools to inspect the actual manifest response and installation issues. The warning does not block mounting, installation APIs or independent offline support. aellux.js never generates a manifest in the browser.</p>
 <h2>Minimal <code>sw.js</code> with <code>importScripts()</code></h2>
-<p>Host the principal worker in the application&#39;s origin, for example <code>/my-app/sw.js</code>, and deploy the reusable script beside the other Aellux assets:</p>
+<p>Host the principal worker in the application&#39;s origin, for example <code>/my-app/sw.js</code>, and deploy the reusable script beside the other aellux.js assets:</p>
 <pre><code class="language-js">// /my-app/sw.js — classic worker, executed outside the page
 self.AelluxPWAConfig = { name: &quot;example&quot;, version: &quot;1.0.0&quot; };
 importScripts(&quot;./vendor/aellux.pwa.sw.min.js&quot;);
@@ -844,7 +851,7 @@ importScripts(&quot;./vendor/aellux.pwa.sw.min.js&quot;);
 <pre><code class="language-js">const pwa = await $ae.wait(&quot;pwa&quot;);
 await pwa.register({ script: &quot;./sw.js&quot;, scope: &quot;./&quot;, type: &quot;classic&quot; });
 </code></pre>
-<p><code>importScripts()</code> synchronously executes the shared script inside the same classic worker. Assign <code>self.AelluxPWAConfig</code> <strong>before</strong> importing so that the shared implementation reads your settings while registering its handlers. The relative import above resolves against the principal worker URL, giving <code>/my-app/vendor/aellux.pwa.sw.min.js</code>; Aellux cache/offline configuration URLs instead resolve against the registration scope. This API is named <code>importScripts()</code> (plural), works in workers, and cannot be used with <code>type: &quot;module&quot;</code>. See the <a href="https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope/importScripts">external <code>importScripts()</code> reference</a>.</p>
+<p><code>importScripts()</code> synchronously executes the shared script inside the same classic worker. Assign <code>self.AelluxPWAConfig</code> <strong>before</strong> importing so that the shared implementation reads your settings while registering its handlers. The relative import above resolves against the principal worker URL, giving <code>/my-app/vendor/aellux.pwa.sw.min.js</code>; aellux.js cache/offline configuration URLs instead resolve against the registration scope. This API is named <code>importScripts()</code> (plural), works in workers, and cannot be used with <code>type: &quot;module&quot;</code>. See the <a href="https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope/importScripts">external <code>importScripts()</code> reference</a>.</p>
 <p>This minimum registers worker lifecycle handlers but enables no precache, managed request caching or offline fallback. Add an explicit <code>offline</code> page and <code>cache</code> policies as in the complete example below to enable those capabilities. The manifest link remains in the page; <code>sw.js</code> does not replace it. The principal worker must be same-origin; only the imported reusable script may use a CDN, subject to the applicable security policies. Serve the scripts with a JavaScript MIME type over HTTPS or a trusted local development origin.</p>
 <h2>Complete local example</h2>
 <p>Host these application files in the same directory (for example <code>/my-app/</code>):</p>
@@ -909,7 +916,7 @@ importScripts(&quot;./vendor/aellux.pwa.sw.min.js&quot;);
 <p>Copy the generated worker to <code>vendor/</code>, or import the version-pinned CDN file from your same-origin principal worker:</p>
 <pre><code class="language-js">importScripts(&quot;https://cdn.jsdelivr.net/npm/@aelluxjs/core@0.1.0-beta.10/dist/aellux.pwa.sw.min.js&quot;);
 </code></pre>
-<p>This is a deployment URL for the package version; it requires that version to be published. Configure your CSP, import policies, response headers and availability for your chosen CDN. Never pass a CDN URL as the principal <code>register({ script })</code>. Local hosting avoids this external import dependency. The worker has no Aellux runtime or DOM dependency.</p>
+<p>This is a deployment URL for the package version; it requires that version to be published. Configure your CSP, import policies, response headers and availability for your chosen CDN. Never pass a CDN URL as the principal <code>register({ script })</code>. Local hosting avoids this external import dependency. The worker has no aellux.js runtime or DOM dependency.</p>
 <h2>Cache policies and safety</h2>
 <p>Without configuration no requests are intercepted or cached. All configured URLs resolve relative to the registration scope and must remain on its origin and within its path. <code>offline</code> is automatically added to precache. Precache fetches omit credentials and installation fails for unsuccessful, redirected or unsafe responses. Caches include the application name, registration scope and version; activation deletes only old versions with that exact ownership prefix. Keep <code>name</code> stable and change <code>version</code> for deployments. Separate applications need distinct scope/name identities.</p>
 <p><code>cache.navigation</code> explicitly selects the navigation policy; <code>cache.assets</code> applies only to precached URLs and <code>cache.paths</code>. A path ending in <code>/</code> matches descendants; other paths match exactly, and a path containing a query requires an exact URL match. Supported policies:</p>
@@ -1050,7 +1057,7 @@ importScripts(&quot;./vendor/aellux.pwa.sw.min.js&quot;);
                 and
                 <a style="color:inherit!important;" href="https://github.com/" target="_blank"
                   rel="noopener noreferrer">GitHub</a>
-                for the tools and technologies that supported the development of Aellux.
+                for the tools and technologies that supported the development of aellux.js.
               </div>
             </div>
           </footer>

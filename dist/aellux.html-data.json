@@ -7,7 +7,7 @@
       "description": "Input presentation state. Gamepad presence is independent of the last intentionally used modality.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
       "references": [
         {
-          "name": "AelluxJS input",
+          "name": "aellux.js input",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
         }
       ],
@@ -28,7 +28,7 @@
       "description": "Publishes width-based size classes, aspect-ratio shape classes, dimensions and orientation using the Extension's adaptiveParams thresholds.\n\nValue syntax: presence.",
       "references": [
         {
-          "name": "AelluxJS adaptive",
+          "name": "aellux.js adaptive",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/adaptive.htm"
         }
       ],
@@ -39,7 +39,7 @@
       "description": "Comma-separated target-pivot:self-pivot candidates. Pivots: top-left, top-center, top-right, center-left, center, center-right, bottom-left, bottom-center, bottom-right.\n\nValue syntax: pivot-list.\n\nExamples: `bottom-left:top-left, top-left:bottom-left`.\n\nSuggested values: `bottom-left:top-left`, `bottom-center:top-center`, `bottom-right:top-right`, `top-left:bottom-left`, `center:center`. This is an open grammar, not a closed enumeration.",
       "references": [
         {
-          "name": "AelluxJS anchor",
+          "name": "aellux.js anchor",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
         }
       ],
@@ -66,7 +66,7 @@
       "description": "Match the target's width and/or height through weak CSS. Empty and unknown tokens are invalid; application sizing can override the match.\n\nValue syntax: token-list.\n\nSuggested values: `width`, `height`, `width height`. This is an open grammar, not a closed enumeration.",
       "references": [
         {
-          "name": "AelluxJS anchor",
+          "name": "aellux.js anchor",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
         }
       ],
@@ -87,7 +87,7 @@
       "description": "Scroll the effective target into view on initial visibility, reappearance or target change. Target changes scroll before the Anchor transition, with no completion scroll. Two tokens select block and inline alignment: start, center, end or nearest. Scrolling is smooth; reduced motion uses instant scrolling. Empty, missing and invalid values disable scrolling.\n\nValue syntax: alignment-pair.\n\nExamples: `center center`, `nearest nearest`, `start nearest`.",
       "references": [
         {
-          "name": "AelluxJS anchor",
+          "name": "aellux.js anchor",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
         }
       ],
@@ -108,7 +108,7 @@
       "description": "Target ID or CSS selector. A Present Group target resolves to its accepted selected member, allowing multiple Anchors per group. Empty uses offsetParent. Effective target and Anchor must share a positioning reference.\n\nValue syntax: selector.\n\nDefault behavior: \"\".\n\nExamples: `menu-trigger`, `#menu-trigger`, `#views`.",
       "references": [
         {
-          "name": "AelluxJS anchor",
+          "name": "aellux.js anchor",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/anchor.htm"
         }
       ],
@@ -129,7 +129,7 @@
       "description": "Automatically closes after the specified nonnegative duration. Values use milliseconds by default, or ms/s units.\n\nValue syntax: duration.\n\nExamples: `250ms`, `2s`.",
       "references": [
         {
-          "name": "AelluxJS present",
+          "name": "aellux.js present",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
@@ -147,7 +147,7 @@
       "description": "Close on outside/out clicks (default), inside/in clicks, or disable click dismissal with false/none.\n\nValue syntax: enum.\n\nDefault behavior: \"outside\".",
       "references": [
         {
-          "name": "AelluxJS present",
+          "name": "aellux.js present",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
@@ -177,7 +177,7 @@
       "description": "Feedback boundary. Empty accepts all types; whitespace-separated types filter handled feedback and stop matching events from bubbling further.\n\nValue syntax: token-list.\n\nSuggested values: ``, `warning`, `error`, `success`, `announce`, `busy`, `progress`, `validate`, `warning error success`. This is an open grammar, not a closed enumeration.",
       "references": [
         {
-          "name": "AelluxJS feedback",
+          "name": "aellux.js feedback",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
         }
       ],
@@ -216,7 +216,7 @@
       "description": "One element ID, optionally prefixed with #, receiving semantic classes and the effect requested from its closest mounted Present. Must be inside that Present; omission uses the boundary. Omitted uses the boundary itself.\n\nValue syntax: id.\n\nExamples: `status-icon`.",
       "references": [
         {
-          "name": "AelluxJS feedback",
+          "name": "aellux.js feedback",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
         }
       ],
@@ -231,7 +231,7 @@
       "description": "One element ID, optionally prefixed with #, receiving message text. Omitted uses the boundary itself.\n\nValue syntax: id.\n\nExamples: `status-message`.",
       "references": [
         {
-          "name": "AelluxJS feedback",
+          "name": "aellux.js feedback",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/feedback.htm"
         }
       ],
@@ -246,7 +246,7 @@
       "description": "Enter navigation on a text-entry control. Next supplies enterkeyhint when absent and focuses the next available control.\n\nValue syntax: enum.",
       "references": [
         {
-          "name": "AelluxJS focus",
+          "name": "aellux.js focus",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
         }
       ],
@@ -261,7 +261,7 @@
       "description": "Nearest directional navigation policy: auto uses spatial geometry for gamepad and independent logical contexts; spatial also enables keyboard arrows; native preserves keyboard directions; none disables automatic directions. Tab and native editing/widget keys stay native.\n\nValue syntax: enum.\n\nDefault behavior: \"auto\".",
       "references": [
         {
-          "name": "AelluxJS focus",
+          "name": "aellux.js focus",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
         }
       ],
@@ -285,7 +285,7 @@
       "description": "Isolated navigation and shortcut scope. Logical contexts can be restricted to this container.\n\nValue syntax: presence.",
       "references": [
         {
-          "name": "AelluxJS focus",
+          "name": "aellux.js focus",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
         }
       ],
@@ -296,7 +296,7 @@
       "description": "Input presentation state. Gamepad presence is independent of the last intentionally used modality.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
       "references": [
         {
-          "name": "AelluxJS input",
+          "name": "aellux.js input",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
         }
       ],
@@ -314,7 +314,7 @@
       "description": "Input presentation state. Gamepad presence is independent of the last intentionally used modality.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
       "references": [
         {
-          "name": "AelluxJS input",
+          "name": "aellux.js input",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
         }
       ],
@@ -338,7 +338,7 @@
       "description": "Input hint presentation metadata.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: string.",
       "references": [
         {
-          "name": "AelluxJS input",
+          "name": "aellux.js input",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
         }
       ]
@@ -348,7 +348,7 @@
       "description": "Enabled Input adapters inherited by descendants. Omitted defaults to point keyboard. An empty list disables adapters in this scope; gamepad is opt-in.\n\nValue syntax: token-list.\n\nDefault behavior: \"point keyboard\".\n\nSuggested values: `point`, `keyboard`, `gamepad`, `point keyboard gamepad`. This is an open grammar, not a closed enumeration.",
       "references": [
         {
-          "name": "AelluxJS input",
+          "name": "aellux.js input",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
         }
       ],
@@ -372,7 +372,7 @@
       "description": "Shown when this value matches the enclosing preference; otherwise hidden. It does not copy text into another element.\n\nValue syntax: string.\n\nExamples: `auto`, `light`, `dark`.",
       "references": [
         {
-          "name": "AelluxJS preference",
+          "name": "aellux.js preference",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/preference.htm"
         }
       ],
@@ -393,7 +393,7 @@
       "description": "Optional layout update ceiling on this element. Must be a finite number greater than zero; no attribute means the shared scheduler cadence.\n\nValue syntax: number.\n\nExamples: `20`, `40`, `60`.",
       "references": [
         {
-          "name": "AelluxJS core",
+          "name": "aellux.js core",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/wait-layout.htm"
         }
       ],
@@ -414,7 +414,7 @@
       "description": "Cycles forward through the enclosing preference's built-in values; use a keyboard-operable control.\n\nValue syntax: presence.",
       "references": [
         {
-          "name": "AelluxJS preference",
+          "name": "aellux.js preference",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/preference.htm"
         }
       ],
@@ -425,7 +425,7 @@
       "description": "Sets a value of the enclosing preference. Button options receive synchronized aria-pressed, restored on unmount; labels and checked inputs retain their own semantics. Values depend on that preference; application-defined values remain possible.\n\nValue syntax: string.\n\nSuggested values: `auto`, `light`, `dark`, `no-preference`, `more`, `less`, `reduced`, `active`, `on`, `off`, `low`, `1`, `1.5`, `0.8`. This is an open grammar, not a closed enumeration.",
       "references": [
         {
-          "name": "AelluxJS preference",
+          "name": "aellux.js preference",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/preference.htm"
         }
       ],
@@ -479,7 +479,7 @@
       "description": "Single-line overflow marquee with equal holds at both ends. Optional nonnegative pixel limit, with or without px: considered only when the intrinsic content width or height strictly exceeds it, without setting the layout width. Empty preserves normal overflow detection. Below the limit, keeps nowrap but otherwise preserves author presentation and skips marquee checks; only content/size monitoring remains. Loads Anchor for placement. Starts only when visible; hover and focus pause in place. Root reduced motion keeps ellipsis; desktop overflow receives a native title unless authored.\n\nValue syntax: pixel-limit.\n\nDefault behavior: \"\".\n\nExamples: ``, `250`, `250px`, `250.5px`.",
       "references": [
         {
-          "name": "AelluxJS overflow-marquee",
+          "name": "aellux.js overflow-marquee",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
         }
       ],
@@ -503,7 +503,7 @@
       "description": "Progressive overflow fade. Enabled by default; false disables it. Attribute changes reconfigure the mounted label.\n\nValue syntax: enum.\n\nDefault behavior: \"true\".",
       "references": [
         {
-          "name": "AelluxJS overflow-marquee",
+          "name": "aellux.js overflow-marquee",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm"
         }
       ],
@@ -524,7 +524,7 @@
       "description": "Maximum simultaneously associated pointers. Empty defaults to 1; a nonnegative integer is expected, and 0 disables association.\n\nValue syntax: integer.\n\nDefault behavior: \"1\".\n\nExamples: `0`, `1`, `2`.",
       "references": [
         {
-          "name": "AelluxJS input",
+          "name": "aellux.js input",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
         }
       ],
@@ -545,7 +545,7 @@
       "description": "Preference controlled by descendant option/label/next/previous controls. CamelCase and kebab-case preference names are accepted.\n\nValue syntax: string.\n\nSuggested values: `colorScheme`, `contrast`, `reducedMotion`, `reducedTransparency`, `forcedColors`, `textScale`, `interfaceScale`, `extendedTiming`, `largeTargets`, `haptics`, `sound`, `color-scheme`, `reduced-motion`, `reduced-transparency`, `forced-colors`, `text-scale`, `interface-scale`, `extended-timing`, `large-targets`. This is an open grammar, not a closed enumeration.",
       "references": [
         {
-          "name": "AelluxJS preference",
+          "name": "aellux.js preference",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/preference.htm"
         }
       ],
@@ -614,7 +614,7 @@
       "description": "Present container. Empty disables presentation transitions while allowing temporary effects; all expands to opacity transform height width. Property tokens are whitespace-separated.\n\nValue syntax: token-list.\n\nDefault behavior: \"\".\n\nSuggested values: ``, `all`, `opacity`, `transform`, `height`, `width`, `opacity transform`, `opacity transform height width`. This is an open grammar, not a closed enumeration.",
       "references": [
         {
-          "name": "AelluxJS present",
+          "name": "aellux.js present",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
@@ -650,7 +650,7 @@
       "description": "Selected member's native ID, without #. An empty value selects no member. Invalid or ambiguous selection preserves the previous selection.\n\nValue syntax: id.\n\nDefault behavior: \"\".\n\nExamples: `details`.",
       "references": [
         {
-          "name": "AelluxJS present",
+          "name": "aellux.js present",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
@@ -665,7 +665,7 @@
       "description": "Temporary effect selected by present-trigger=effect. Presets or an application CSS identifier; runs only in an idle, visible mounted Present.\n\nValue syntax: string.\n\nSuggested values: `shake`, `yes`, `no`, `breathe`, `tremble`, `pulse`, `alert`. This is an open grammar, not a closed enumeration.",
       "references": [
         {
-          "name": "AelluxJS present",
+          "name": "aellux.js present",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
@@ -698,7 +698,7 @@
       "description": "Optional continuous pointer control of the Present opening timeline. Opposite movement reverses it with Unpop. Links and buttons require draggable=false to start gestures, as in Scrollbox; presses retain native clicks and drags suppress the release click. Requires inspectable Web Animations transitions.\n\nValue syntax: enum.",
       "references": [
         {
-          "name": "AelluxJS present",
+          "name": "aellux.js present",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
@@ -722,7 +722,7 @@
       "description": "Optional Dismiss direction on the other axis from the Pop gesture. Conflicts disable only gesture Dismiss.\n\nValue syntax: enum.",
       "references": [
         {
-          "name": "AelluxJS present",
+          "name": "aellux.js present",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
@@ -746,7 +746,7 @@
       "description": "Pop gesture source: an element ID, optionally prefixed with #, or document. Defaults to the Present itself. A link/button source without draggable=false emits warning 2026 and receives that attribute automatically. Unpop and Dismiss start on the Present.\n\nValue syntax: id.\n\nExamples: `handle`, `#handle`, `document`.",
       "references": [
         {
-          "name": "AelluxJS present",
+          "name": "aellux.js present",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
@@ -767,7 +767,7 @@
       "description": "False disables only gesture Unpop. Programmatic Unpop remains available.\n\nValue syntax: enum.\n\nDefault behavior: \"true\".",
       "references": [
         {
-          "name": "AelluxJS present",
+          "name": "aellux.js present",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
@@ -785,7 +785,7 @@
       "description": "Present Group capacity: empty or 1 allows one active presentation; a positive integer sets the popNext limit. Uses closed members while capacity is available, then reuses the oldest active member without closing others. show() stays exclusive; nested groups are independent. Invalid values warn and use 1.\n\nValue syntax: positive-integer.\n\nDefault behavior: \"1\".\n\nExamples: ``, `1`, `2`, `3`.",
       "references": [
         {
-          "name": "AelluxJS present",
+          "name": "aellux.js present",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
@@ -809,7 +809,7 @@
       "description": "Direct content child of a Present container; enables grid-based size transitions. Put hidden on the container.\n\nValue syntax: presence.",
       "references": [
         {
-          "name": "AelluxJS present",
+          "name": "aellux.js present",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
@@ -820,7 +820,7 @@
       "description": "One Present target ID, optionally prefixed with #. Alone it creates no interaction control. With present-trigger it selects the action target; with Feedback it requests Pop or pooled popNext. Empty uses the closest Present for a trigger, or the message/effect Present for Feedback.\n\nValue syntax: id.\n\nExamples: `details`, `#details`.",
       "references": [
         {
-          "name": "AelluxJS present",
+          "name": "aellux.js present",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
@@ -838,7 +838,7 @@
       "description": "Present action. unpop reverses opening; dismiss uses its independent outgoing destination. Target is one native ID, or the closest Present ancestor when omitted. Prefer a native button for keyboard activation.\n\nValue syntax: enum.\n\nDefault behavior: \"toggle\".",
       "references": [
         {
-          "name": "AelluxJS present",
+          "name": "aellux.js present",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
@@ -868,7 +868,7 @@
       "description": "Use hover for delegated pointer hover opening/closing. Touch and keyboard activation keep click behavior.\n\nValue syntax: enum.\n\nDefault behavior: \"click\".",
       "references": [
         {
-          "name": "AelluxJS present",
+          "name": "aellux.js present",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
@@ -889,7 +889,7 @@
       "description": "One class token on the Present Group that selects this member when no explicit active attribute is present.\n\nValue syntax: class-token.\n\nExamples: `show-details`.",
       "references": [
         {
-          "name": "AelluxJS present",
+          "name": "aellux.js present",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         }
       ],
@@ -904,7 +904,7 @@
       "description": "Cycles backward through the enclosing preference's built-in values; use a keyboard-operable control.\n\nValue syntax: presence.",
       "references": [
         {
-          "name": "AelluxJS preference",
+          "name": "aellux.js preference",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/preference.htm"
         }
       ],
@@ -915,7 +915,7 @@
       "description": "Explicitly loads the optional external PWA Extension. Install uses native click and never registers a Service Worker automatically.\n\nValue syntax: enum.",
       "references": [
         {
-          "name": "AelluxJS pwa",
+          "name": "aellux.js pwa",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/pwa.htm"
         }
       ],
@@ -930,7 +930,7 @@
       "description": "Custom scrollbars. Empty enables both; none hides native bars without creating custom bars. Axis tokens and aliases can be combined.\n\nValue syntax: token-list.\n\nSuggested values: ``, `vertical`, `horizontal`, `vertical horizontal`, `v h`, `y x`, `none`. This is an open grammar, not a closed enumeration.",
       "references": [
         {
-          "name": "AelluxJS scrollbox",
+          "name": "aellux.js scrollbox",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
         }
       ],
@@ -963,7 +963,7 @@
       "description": "Horizontal custom bar, created automatically or reused when supplied as a direct child of Scrollbox.\n\nValue syntax: presence.",
       "references": [
         {
-          "name": "AelluxJS scrollbox",
+          "name": "aellux.js scrollbox",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
         }
       ],
@@ -974,7 +974,7 @@
       "description": "Custom scrollbar parent. Scrollbox keeps bars inside the scroll region; wrapper places them as siblings in its existing immediate parent, outside its fade mask.\n\nValue syntax: enum.\n\nDefault behavior: \"scrollbox\".",
       "references": [
         {
-          "name": "AelluxJS scrollbox",
+          "name": "aellux.js scrollbox",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
         }
       ],
@@ -992,7 +992,7 @@
       "description": "Vertical custom bar, created automatically or reused when supplied as a direct child of Scrollbox.\n\nValue syntax: presence.",
       "references": [
         {
-          "name": "AelluxJS scrollbox",
+          "name": "aellux.js scrollbox",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
         }
       ],
@@ -1003,7 +1003,7 @@
       "description": "Native scrolling with progress state. Pointer mode adds desktop mouse/pen drag scrolling; it requires usable overflow.\n\nValue syntax: enum.\n\nDefault behavior: \"native\".",
       "references": [
         {
-          "name": "AelluxJS scrollbox",
+          "name": "aellux.js scrollbox",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
         }
       ],
@@ -1024,7 +1024,7 @@
       "description": "Mark exactly one direct content child. Empty uses 1/4; one or two nonnegative fractions or px values set vertical/horizontal limits. False disables elastic behavior.\n\nValue syntax: elastic-limits.\n\nDefault behavior: \"1/4\".\n\nSuggested values: ``, `false`, `1/4`, `80px`, `80px 40px`. This is an open grammar, not a closed enumeration.",
       "references": [
         {
-          "name": "AelluxJS scrollbox",
+          "name": "aellux.js scrollbox",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
         }
       ],
@@ -1051,7 +1051,7 @@
       "description": "Progressive overflow fade on the Scrollbox container. Without this attribute, enabled only when exactly one axis scrolls; disabled for two axes. Empty or true forces on; false forces off. Existing application masks are preserved.\n\nValue syntax: enum.\n\nDefault behavior: \"enabled for one scrollable axis; disabled for two\".",
       "references": [
         {
-          "name": "AelluxJS scrollbox",
+          "name": "aellux.js scrollbox",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
         }
       ],
@@ -1072,7 +1072,7 @@
       "description": "Set false to disable desktop pointer momentum. Snap disables momentum on every axis.\n\nValue syntax: enum.\n\nDefault behavior: \"true\".",
       "references": [
         {
-          "name": "AelluxJS scrollbox",
+          "name": "aellux.js scrollbox",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
         }
       ],
@@ -1090,7 +1090,7 @@
       "description": "Snap axis on an element that also declares Scrollbox. Empty is horizontal; false disables Snap. Snap loads the Scrollbox dependency itself.\n\nValue syntax: enum.\n\nDefault behavior: \"horizontal\".",
       "references": [
         {
-          "name": "AelluxJS scrollbox-snap",
+          "name": "aellux.js scrollbox-snap",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/scrollbox-snap.htm"
         }
       ],
@@ -1114,7 +1114,7 @@
       "description": "Set false to disable vertical-wheel conversion to horizontal scrolling.\n\nValue syntax: enum.\n\nDefault behavior: \"true\".",
       "references": [
         {
-          "name": "AelluxJS scrollbox",
+          "name": "aellux.js scrollbox",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/scrollbox.htm"
         }
       ],
@@ -1132,7 +1132,7 @@
       "description": "Contextual physical shortcuts, separated by semicolons. Exact modifiers use Ctrl/Alt/Shift/Meta+code. Focus chooses the closest eligible action in the active scope.\n\nValue syntax: string.\n\nExamples: `keyboard:KeyI; gamepad:north`, `keyboard:Ctrl+KeyI`.",
       "references": [
         {
-          "name": "AelluxJS focus",
+          "name": "aellux.js focus",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
         }
       ],
@@ -1150,7 +1150,7 @@
       "description": "Action invoked by a shortcut: click, a registered action, or Present pop/unpop/dismiss.\n\nValue syntax: string.\n\nDefault behavior: \"click\".\n\nSuggested values: `click`, `pop`, `unpop`, `dismiss`. This is an open grammar, not a closed enumeration.",
       "references": [
         {
-          "name": "AelluxJS focus",
+          "name": "aellux.js focus",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
         }
       ],
@@ -1174,7 +1174,7 @@
       "description": "Input hint presentation metadata.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: string.",
       "references": [
         {
-          "name": "AelluxJS input",
+          "name": "aellux.js input",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
         }
       ]
@@ -1184,7 +1184,7 @@
       "description": "Logical context used for this hint's presentation metadata. Defaults to 1.\n\nValue syntax: positive-integer.\n\nDefault behavior: \"1\".",
       "references": [
         {
-          "name": "AelluxJS input",
+          "name": "aellux.js input",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
         }
       ]
@@ -1194,7 +1194,7 @@
       "description": "CSS hint descriptor. Empty inherits data-ae-shortcut from the nearest ancestor; an explicit descriptor works without Focus.\n\nValue syntax: string.",
       "references": [
         {
-          "name": "AelluxJS input",
+          "name": "aellux.js input",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
         }
       ]
@@ -1204,7 +1204,7 @@
       "description": "Inline by default. Anchor uses optional CSS Anchor Positioning with inline fallback.\n\nValue syntax: enum.\n\nDefault behavior: \"inline\".",
       "references": [
         {
-          "name": "AelluxJS input",
+          "name": "aellux.js input",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
         }
       ],
@@ -1222,7 +1222,7 @@
       "description": "Input hint presentation metadata.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: string.",
       "references": [
         {
-          "name": "AelluxJS input",
+          "name": "aellux.js input",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
         }
       ]
@@ -1232,7 +1232,7 @@
       "description": "Numeric priority breaking equal DOM-distance shortcut ties. Higher values win; final ties follow DOM order.\n\nValue syntax: number.\n\nDefault behavior: \"0\".",
       "references": [
         {
-          "name": "AelluxJS focus",
+          "name": "aellux.js focus",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
         }
       ]
@@ -1242,7 +1242,7 @@
       "description": "Input hint presentation metadata.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: string.",
       "references": [
         {
-          "name": "AelluxJS input",
+          "name": "aellux.js input",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/input.htm"
         }
       ]
@@ -1252,7 +1252,7 @@
       "description": "Present action target ID, optionally prefixed by #. Omitted uses the shortcut element.\n\nValue syntax: id.",
       "references": [
         {
-          "name": "AelluxJS focus",
+          "name": "aellux.js focus",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/focus.htm"
         }
       ]
@@ -1262,7 +1262,7 @@
       "description": "Snap alignment for an item belonging to the nearest Scrollbox. Left/top alias start; right/bottom alias end; empty is center.\n\nValue syntax: enum.\n\nDefault behavior: \"center\".",
       "references": [
         {
-          "name": "AelluxJS scrollbox-snap",
+          "name": "aellux.js scrollbox-snap",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/scrollbox-snap.htm"
         }
       ],
@@ -1298,7 +1298,7 @@
       "description": "Observes the nearest native scroll container, or the document. Publishes normalized position on the selected axes and a geometric visible area fraction. Empty and both select both axes; invalid values warn and fall back to both.\n\nValue syntax: enum.\n\nDefault behavior: \"both\".",
       "references": [
         {
-          "name": "AelluxJS viewport",
+          "name": "aellux.js viewport",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
         }
       ],
@@ -1322,7 +1322,7 @@
       "description": "Publishes CSS outputs on one existing element ID, optionally prefixed with #, instead of the observed element. Geometry and events remain on the observer. Retargeting restores previous inline styles; conflicting Viewport writers are rejected.\n\nValue syntax: id.\n\nExamples: `indicator`, `#indicator`.",
       "references": [
         {
-          "name": "AelluxJS viewport",
+          "name": "aellux.js viewport",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/viewport.htm"
         }
       ],
@@ -1340,7 +1340,7 @@
       "description": "Keeps the element hidden until mounting completes and exposes aria-busy during the attempt.\n\nValue syntax: presence.",
       "references": [
         {
-          "name": "AelluxJS core",
+          "name": "aellux.js core",
           "url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/visual-mounting.htm"
         }
       ],
@@ -1356,7 +1356,7 @@
           "description": "CSS selectors for regions replaced from a same-origin HTML response. Defaults to title,body when empty. Each selector uses its first match; current and response documents must contain the region.\n\nValue syntax: selector-list.\n\nExamples: `title,body`, `title,#content`.",
           "references": [
             {
-              "name": "AelluxJS ajax-href",
+              "name": "aellux.js ajax-href",
               "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/ajax-href.htm"
             }
           ],
@@ -1379,7 +1379,7 @@
           "description": "Resolved root preference published by the runtime. Use in CSS selectors; configure choices through Preference.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
           "references": [
             {
-              "name": "AelluxJS preference",
+              "name": "aellux.js preference",
               "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/preference.htm"
             }
           ],
@@ -1397,7 +1397,7 @@
           "description": "Resolved root preference published by the runtime. Use in CSS selectors; configure choices through Preference.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
           "references": [
             {
-              "name": "AelluxJS preference",
+              "name": "aellux.js preference",
               "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/preference.htm"
             }
           ],
@@ -1418,7 +1418,7 @@
           "description": "Resolved root preference published by the runtime. Use in CSS selectors; configure choices through Preference.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
           "references": [
             {
-              "name": "AelluxJS preference",
+              "name": "aellux.js preference",
               "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/preference.htm"
             }
           ],
@@ -1436,7 +1436,7 @@
           "description": "Resolved root preference published by the runtime. Use in CSS selectors; configure choices through Preference.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
           "references": [
             {
-              "name": "AelluxJS preference",
+              "name": "aellux.js preference",
               "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/preference.htm"
             }
           ],
@@ -1454,7 +1454,7 @@
           "description": "Resolved root preference published by the runtime. Use in CSS selectors; configure choices through Preference.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: enum.",
           "references": [
             {
-              "name": "AelluxJS preference",
+              "name": "aellux.js preference",
               "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/preference.htm"
             }
           ],
@@ -1477,7 +1477,7 @@
           "description": "Available Extension builds on a declarative link; space/comma-separated modern and legacy tokens. Omitted promises both.\n\nValue syntax: token-list.\n\nSuggested values: `modern`, `legacy`, `modern legacy`. This is an open grammar, not a closed enumeration.",
           "references": [
             {
-              "name": "AelluxJS core",
+              "name": "aellux.js core",
               "url": "https://aelluxjs.github.io/core/docs/0.1.x/extensions/declarative-loading.htm"
             }
           ],
@@ -1498,7 +1498,7 @@
           "description": "On a declarative link, presence/true requests the associated stylesheet, a URL selects a stylesheet, and false disables it. Omission does not request CSS.\n\nValue syntax: string.\n\nSuggested values: ``, `true`, `false`. This is an open grammar, not a closed enumeration.",
           "references": [
             {
-              "name": "AelluxJS core",
+              "name": "aellux.js core",
               "url": "https://aelluxjs.github.io/core/docs/0.1.x/extensions/declarative-loading.htm"
             }
           ],
@@ -1519,7 +1519,7 @@
           "description": "Nonempty CSS selector activating lazy Extension loading on a declarative link.\n\nValue syntax: selector.\n\nExamples: `[data-ae-present]`.",
           "references": [
             {
-              "name": "AelluxJS core",
+              "name": "aellux.js core",
               "url": "https://aelluxjs.github.io/core/docs/0.1.x/extensions/declarative-loading.htm"
             }
           ],
@@ -1531,10 +1531,10 @@
         },
         {
           "name": "rel",
-          "description": "Registers an Aellux Extension declared by this link. href is an official name or compatible Extension URL; data-ae-load-when enables lazy loading.\n\nValue syntax: string.\n\nSuggested values: `aelluxjs-ext`. This is an open grammar, not a closed enumeration.",
+          "description": "Registers an aellux.js Extension declared by this link. href is an official name or compatible Extension URL; data-ae-load-when enables lazy loading.\n\nValue syntax: string.\n\nSuggested values: `aelluxjs-ext`. This is an open grammar, not a closed enumeration.",
           "references": [
             {
-              "name": "AelluxJS core",
+              "name": "aellux.js core",
               "url": "https://aelluxjs.github.io/core/docs/0.1.x/extensions/declarative-loading.htm"
             }
           ],
@@ -1554,7 +1554,7 @@
           "description": "Marker on the runtime-managed theme-color meta tag.\n\nRuntime output; read it in selectors/styles instead of using it as an activation command.\n\nValue syntax: presence.",
           "references": [
             {
-              "name": "AelluxJS core",
+              "name": "aellux.js core",
               "url": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/api.htm"
             }
           ],
@@ -1570,7 +1570,7 @@
           "description": "Existing progress producer ID, optionally prefixed with #. Consumes nonbubbling AelluxJsProgress { value, max } and scales value to the control's own max. Meter is not a temporal consumer.\n\nValue syntax: id.",
           "references": [
             {
-              "name": "AelluxJS progress",
+              "name": "aellux.js progress",
               "url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/optional/progress.htm"
             }
           ]

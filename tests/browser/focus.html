@@ -11,10 +11,10 @@
   <div id="editable" data-ae-focus="next" contenteditable="true"><span>Editable text</span></div>
   <button id="after-editable">After editable</button>
   <script>
-    AelluxJs.ext("state-navigation");
-    AelluxJs.ext("focus");
-    AelluxJs.init({ useHash: false });
-    window.fixtureReady = Promise.all([AelluxJs.wait("state-navigation"), AelluxJs.wait("focus")]);
+    aelluxJs.ext("state-navigation");
+    aelluxJs.ext("focus");
+    aelluxJs.init({ useHash: false });
+    window.fixtureReady = Promise.all([aelluxJs.wait("state-navigation"), aelluxJs.wait("focus")]);
   </script>
 </body>
 </html>

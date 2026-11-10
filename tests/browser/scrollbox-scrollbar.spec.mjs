@@ -7,15 +7,15 @@ async function setup(page, markup, options = {}) {
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(({ html, usesSnap }) => {
     document.body.innerHTML = html;
-    AelluxJs.ext("scrollbox", { loadStyle: true });
-    if (usesSnap) AelluxJs.ext("scrollbox-snap");
+    aelluxJs.ext("scrollbox", { loadStyle: true });
+    if (usesSnap) aelluxJs.ext("scrollbox-snap");
   }, { html: markup, usesSnap });
   await page.addScriptTag({ url: `/dist/aellux.ext.scrollbox${options.forceLegacy ? ".legacy" : ""}.js` });
   if (usesSnap) await page.addScriptTag({ url: "/src/aellux.ext.scrollbox-snap.js" });
-  await page.evaluate(options => AelluxJs.init({ mode: "basic", ...options }), options);
-  await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollbox?.initialized)).toBe(true);
+  await page.evaluate(options => aelluxJs.init({ mode: "basic", ...options }), options);
+  await expect.poll(() => page.evaluate(() => aelluxJs.ext.scrollbox?.initialized)).toBe(true);
   if (usesSnap)
-    await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollboxSnap?.initialized)).toBe(true);
+    await expect.poll(() => page.evaluate(() => aelluxJs.ext.scrollboxSnap?.initialized)).toBe(true);
 }
 
 for (const forceLegacy of [false, true]) test(`wrapper scrollbars stay outside the fade and align, inherit styles, hover and drag on both axes (${forceLegacy})`, async ({ page }) => {
@@ -69,7 +69,7 @@ for (const forceLegacy of [false, true]) test(`wrapper scrollbars stay outside t
   await page.mouse.move(600, 600);
   await expect(vertical).toHaveCSS("opacity", "0");
   await expect(horizontal).toHaveCSS("opacity", "0");
-  await page.evaluate(() => AelluxJs.unmount(document.getElementById("box"), "scrollbox"));
+  await page.evaluate(() => aelluxJs.unmount(document.getElementById("box"), "scrollbox"));
   await expect(wrapper.locator("[data-ae-scrollbar-vertical], [data-ae-scrollbar-horizontal]")).toHaveCount(0);
   expect(await wrapper.evaluate(el => el.style.position)).toBe("");
 });
@@ -94,10 +94,10 @@ test("scrollbar parent changes restore authored bars and share wrapper ownership
   expect(await page.locator("#existing").evaluate(el => [el.style.getPropertyValue("--ae-scrollbar-x"), el.style.getPropertyPriority("--ae-scrollbar-x")])).toEqual(["7px", "important"]);
   await box.evaluate(el => el.setAttribute("data-ae-scrollbar-parent", "wrapper"));
   await expect(wrapper.locator(":scope > #existing")).toHaveCount(1);
-  await page.evaluate(() => AelluxJs.unmount(document.getElementById("box"), "scrollbox"));
+  await page.evaluate(() => aelluxJs.unmount(document.getElementById("box"), "scrollbox"));
   await expect(wrapper).toHaveCSS("position", "relative");
   expect(await page.locator("#existing").evaluate(el => [el.parentElement.id, el.previousElementSibling.id, el.style.getPropertyValue("--ae-scrollbar-size"), el.className])).toEqual(["box", "content", "11px", ""]);
-  await page.evaluate(() => AelluxJs.unmount(document.getElementById("second"), "scrollbox"));
+  await page.evaluate(() => aelluxJs.unmount(document.getElementById("second"), "scrollbox"));
   expect(await wrapper.evaluate(el => el.style.position)).toBe("");
 });
 
@@ -798,10 +798,10 @@ test("scrollbars are siblings of the elastic wrapper and are removed on unmount"
       children: box.children.length,
       vertical: box.querySelectorAll(":scope > [data-ae-scrollbar-vertical]").length,
       horizontal: box.querySelectorAll(":scope > [data-ae-scrollbar-horizontal]").length,
-      errors: AelluxJs.diagnostics.showHistory().filter(item =>
+      errors: aelluxJs.diagnostics.showHistory().filter(item =>
         item.code === 1120 || item.code === 1121).length
     };
-    await AelluxJs.mountManager.unmount(document.body, "scrollbox");
+    await aelluxJs.mountManager.unmount(document.body, "scrollbox");
     return { before, after: box.children.length,
       hiddenClass: box.classList.contains("ae--native-sb-hide") };
   });
@@ -820,7 +820,7 @@ test("an existing scrollbar is reused and its inline values survive unmount", as
     const box = document.getElementById("box");
     const existing = document.getElementById("existing");
     const count = box.querySelectorAll(":scope > [data-ae-scrollbar-vertical]").length;
-    await AelluxJs.mountManager.unmount(document.body, "scrollbox");
+    await aelluxJs.mountManager.unmount(document.body, "scrollbox");
     return { count, retained: box.contains(existing),
       value: existing.style.getPropertyValue("--ae-scrollbar-x"),
       priority: existing.style.getPropertyPriority("--ae-scrollbar-x") };
@@ -874,7 +874,7 @@ test("hidden overflow hides only the scrollbar on that axis", async ({ page }) =
     const element = document.getElementById("box");
     element.style.setProperty("overflow-x", "hidden");
     element.style.setProperty("overflow-y", "auto");
-    AelluxJs.mountManager.update(element, "scrollbox");
+    aelluxJs.mountManager.update(element, "scrollbox");
   });
   await expect(horizontal).toHaveCSS("display", "none");
   await expect(vertical).toHaveCSS("display", "block");

@@ -2,7 +2,7 @@
   "name": "@aelluxjs/core",
   "version": "0.1.0-beta.10",
   "license": "Apache-2.0",
-  "description": "Modular UX behavior management for browser interfaces with an ES5-compatible aellux.js boot script and an ES2017+ runtime",
+  "description": "aellux.js implements the aellux semantic model for interactive Web interfaces, with an ES5-compatible boot script and an ES2017+ runtime",
   "keywords": [
     "aellux",
     "aellux.js",
@@ -44,6 +44,7 @@
     "dist",
     "CHANGELOG.md",
     "README.md",
+    "BRAND_GUIDELINES.md",
     "LICENSE",
     "THIRD_PARTY_LICENSES.md",
     "third-party/licenses"
@@ -54,6 +55,7 @@
     "build:docs": "node scripts/build-docs.mjs",
     "build:editor-data": "node scripts/build-editor-data.mjs",
     "test:budget": "node scripts/check-bundle-budget.mjs",
+    "test:naming": "node scripts/check-naming.mjs",
     "test:unit": "node --test tests/unit/*.test.mjs",
     "pretest:browser": "npm run build:core",
     "test:browser": "playwright test",

@@ -1,9 +1,9 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
-export function generateAnchorCSS(AelluxJs) {
-  const attribute = AelluxJs.attr("anchor");
-  const matchAttribute = AelluxJs.attr("anchor-match");
-  const anchoredClass = AelluxJs.className("anchored");
+export function generateAnchorCSS(aelluxJs) {
+  const attribute = aelluxJs.attr("anchor");
+  const matchAttribute = aelluxJs.attr("anchor-match");
+  const anchoredClass = aelluxJs.className("anchored");
 
   return `/*! aellux.js Anchor Extension | SPDX-License-Identifier: Apache-2.0 */
 

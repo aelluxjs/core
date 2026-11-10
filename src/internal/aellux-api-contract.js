@@ -4,7 +4,7 @@
 // module without loading a browser, executing the bootstrap, or calling API methods.
 // Every listed property is required in its phase. `optionalProperties` lists fields
 // created only after init() or by the full bundle. The planned Extension namespace
-// keeps public Extension APIs at AelluxJs.ext.<camelCaseName> (also $ae.ext.<camelCaseName>).
+// keeps public Extension APIs at aelluxJs.ext.<camelCaseName> (also $ae.ext.<camelCaseName>).
 // `dynamicProperties` describes those APIs; their names come from registry.ext.
 
 (function (root) {
@@ -284,7 +284,7 @@ runtimeProperties.mountManager = Object.freeze({
 
 var aelluxApiContract = Object.freeze({
   // Both browser globals must reference the same object.
-  globals: Object.freeze(["AelluxJs", "$ae"]),
+  globals: Object.freeze(["aelluxJs", "$ae"]),
   bootstrap: Object.freeze({
     type: "function",
     properties: bootstrapProperties,

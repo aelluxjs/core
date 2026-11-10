@@ -11,12 +11,12 @@ async function start(page, html = markup(), options = {}, wrapped = true) {
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(({ html, options }) => {
     document.body.innerHTML = '<style>.wrap{white-space:normal}</style>' + html;
-    if (options.mode === "basic") AelluxJs.ext("overflow-marquee", { loadStyle: true });
-    AelluxJs.init({ mode: "full", ...options });
+    if (options.mode === "basic") aelluxJs.ext("overflow-marquee", { loadStyle: true });
+    aelluxJs.init({ mode: "full", ...options });
   }, { html, options });
-  await expect.poll(() => page.evaluate(() => AelluxJs.ext.overflowMarquee?.initialized)).toBe(true);
-  expect(await page.evaluate(() => AelluxJs.ext.anchor?.initialized)).toBe(true);
-  await page.evaluate(() => AelluxJs.mount(document));
+  await expect.poll(() => page.evaluate(() => aelluxJs.ext.overflowMarquee?.initialized)).toBe(true);
+  expect(await page.evaluate(() => aelluxJs.ext.anchor?.initialized)).toBe(true);
+  await page.evaluate(() => aelluxJs.mount(document));
   await expect(page.locator("#label > [data-ae-overflow-marquee-viewport] > [data-ae-overflow-marquee-content]")).toHaveCount(wrapped ? 1 : 0);
 }
 
@@ -69,7 +69,7 @@ for (const forceLegacy of [false, true]) for (const limit of ["200", "200px"]) {
     await expect(host).toHaveAttribute("data-ae-overflow-marquee-active", "");
     await host.evaluate(element => element.setAttribute("data-ae-overflow-marquee", "1000px"));
     await expect(host.locator("[data-ae-overflow-marquee-viewport]")).toHaveCount(0);
-    await page.evaluate(() => AelluxJs.unmount(document.getElementById("label"), "overflow-marquee"));
+    await page.evaluate(() => aelluxJs.unmount(document.getElementById("label"), "overflow-marquee"));
     await expect(host).not.toHaveAttribute("data-ae-overflow-marquee-ready");
     await expect(host).toHaveCSS("white-space", "nowrap");
     await host.evaluate(element => element.removeAttribute("data-ae-overflow-marquee"));
@@ -144,7 +144,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
     expect(pass.minimum).toBeLessThan(-pass.distance * 0.6);
     expect(Math.abs(pass.x)).toBeLessThan(1);
     expect(await host.textContent()).toBe(text);
-    expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(entry => entry.level === 0))).toEqual([]);
+    expect(await page.evaluate(() => aelluxJs.diagnostics.showHistory().filter(entry => entry.level === 0))).toEqual([]);
   });
 }
 
@@ -218,7 +218,7 @@ for (const options of [{}, { forceLegacy: true }, { cssMotionController: false }
     }
     await page.evaluate(() => document.activeElement.blur());
     await expect.poll(offset, { intervals: [20, 40] }).toBeLessThan(frozen - 25);
-    await page.evaluate(() => AelluxJs.unmount(document.getElementById("label"), "overflow-marquee"));
+    await page.evaluate(() => aelluxJs.unmount(document.getElementById("label"), "overflow-marquee"));
     await host.hover();
     await host.focus();
     await page.waitForTimeout(100);
@@ -250,12 +250,12 @@ test("mounting only Anchor does not mount marquees and Full keeps the separate e
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(html => {
     document.body.innerHTML = html;
-    AelluxJs.ext("anchor", { loadStyle: true });
-    AelluxJs.init({ mode: "basic", skipGlobalMount: true });
+    aelluxJs.ext("anchor", { loadStyle: true });
+    aelluxJs.init({ mode: "basic", skipGlobalMount: true });
   }, markup());
-  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
-  await page.evaluate(() => AelluxJs.wait("anchor"));
-  await page.evaluate(() => AelluxJs.mount(document, "anchor"));
+  await expect.poll(() => page.evaluate(() => aelluxJs.diagnostics.supported)).toBe(true);
+  await page.evaluate(() => aelluxJs.wait("anchor"));
+  await page.evaluate(() => aelluxJs.mount(document, "anchor"));
   await expect(page.locator("[data-ae-overflow-marquee-content]")).toHaveCount(0);
   const requests = [];
   page.on("request", request => { if (request.url().includes("aellux.ext.overflow-marquee")) requests.push(request.url()); });
@@ -263,18 +263,18 @@ test("mounting only Anchor does not mount marquees and Full keeps the separate e
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => {
     document.body.innerHTML = '<div style="position:relative;width:100px;height:40px"><div data-ae-anchor="top-left:top-left">Anchor</div></div>';
-    AelluxJs.init({ mode: "full" });
+    aelluxJs.init({ mode: "full" });
   });
-  await expect.poll(() => page.evaluate(() => AelluxJs.ext.anchor?.initialized)).toBe(true);
-  await page.evaluate(() => AelluxJs.mount(document));
+  await expect.poll(() => page.evaluate(() => aelluxJs.ext.anchor?.initialized)).toBe(true);
+  await page.evaluate(() => aelluxJs.mount(document));
   expect(requests).toEqual([]);
-  expect(await page.evaluate(() => !!AelluxJs.ext.overflowMarquee?.initialized)).toBe(false);
+  expect(await page.evaluate(() => !!aelluxJs.ext.overflowMarquee?.initialized)).toBe(false);
 });
 
 test("destroy releases wrappers and placements while retaining the shared Full stylesheet", async ({ page }) => {
   await start(page);
   await expect(page.locator("link[data-ae-full-style]")).toHaveCount(1);
-  await page.evaluate(() => AelluxJs.destroy());
+  await page.evaluate(() => aelluxJs.destroy());
   await expect(page.locator("[data-ae-overflow-marquee-content]")).toHaveCount(0);
   await expect(page.locator("style[data-ae-overflow-marquee-style]")).toHaveCount(0);
   await expect(page.locator("style[data-ae-anchor-style]")).toHaveCount(0);
@@ -305,9 +305,9 @@ test("unmount restores node identity, listeners, styles and authored title witho
     const originalStyle = host.getAttribute("style");
     let clicks = 0;
     link.addEventListener("click", event => { event.preventDefault(); clicks++; });
-    await AelluxJs.mount(host, "overflow-marquee");
+    await aelluxJs.mount(host, "overflow-marquee");
     const wrappers = host.querySelectorAll("[data-ae-overflow-marquee-content]").length;
-    await AelluxJs.unmount(host, "overflow-marquee");
+    await aelluxJs.unmount(host, "overflow-marquee");
     link.click();
     return { wrappers, sameNode: host.firstChild === link, clicks, title: host.title,
       sameStyle: host.getAttribute("style") === originalStyle,
@@ -319,7 +319,7 @@ test("unmount restores node identity, listeners, styles and authored title witho
 test("desktop title ownership preserves application changes and avoids tooltips without hover", async ({ page }) => {
   await start(page);
   await page.locator("#label").evaluate(element => { element.title = "Application update"; });
-  await page.evaluate(() => AelluxJs.unmount(document.getElementById("label"), "overflow-marquee"));
+  await page.evaluate(() => aelluxJs.unmount(document.getElementById("label"), "overflow-marquee"));
   await expect(page.locator("#label")).toHaveAttribute("title", "Application update");
   await page.addInitScript(() => {
     const original = window.matchMedia.bind(window);
@@ -348,9 +348,9 @@ for (const options of [{}, { forceLegacy: true }, { cssMotionController: false }
     await start(page, `<section id="parent" style="opacity:0">${markup()}</section>`, options);
     const host = page.locator("#label"), parent = page.locator("#parent");
     await page.evaluate(() => {
-      const original = AelluxJs.motion.run;
+      const original = aelluxJs.motion.run;
       window.marqueeRuns = 0;
-      AelluxJs.motion = { ...AelluxJs.motion, run(...args) { window.marqueeRuns++; return original(...args); } };
+      aelluxJs.motion = { ...aelluxJs.motion, run(...args) { window.marqueeRuns++; return original(...args); } };
     });
     await page.waitForTimeout(300);
     expect(await page.evaluate(() => window.marqueeRuns)).toBe(0);
@@ -458,7 +458,7 @@ test("CSS reveal transitions, overridden hidden and missing IntersectionObserver
   await expect(host).toHaveAttribute("data-ae-overflow-marquee-active", "");
   await page.locator("#parent").evaluate(element => { element.style.opacity = "0"; });
   await expect.poll(() => host.evaluate(element => element.querySelector("[data-ae-overflow-marquee-content]").getAnimations().length)).toBe(0);
-  await page.evaluate(() => AelluxJs.unmount(document.getElementById("label"), "overflow-marquee"));
+  await page.evaluate(() => aelluxJs.unmount(document.getElementById("label"), "overflow-marquee"));
   await page.locator("#parent").evaluate(element => { element.style.opacity = "1"; });
   await page.waitForTimeout(200);
   await expect(host.locator("[data-ae-overflow-marquee-content]")).toHaveCount(0);
@@ -541,9 +541,9 @@ for (const forceLegacy of [false, true]) {
       window.marqueeReplacement.textContent = "Short";
       element.replaceChildren(window.marqueeReplacement);
     });
-    await page.evaluate(() => AelluxJs.mountManager.update(document.getElementById("label"), "overflow-marquee"));
+    await page.evaluate(() => aelluxJs.mountManager.update(document.getElementById("label"), "overflow-marquee"));
     expect(await host.textContent()).toBe("Short");
-    await page.evaluate(() => AelluxJs.unmount(document.getElementById("label"), "overflow-marquee"));
+    await page.evaluate(() => aelluxJs.unmount(document.getElementById("label"), "overflow-marquee"));
     expect(await host.textContent()).toBe("Short");
     expect(await host.evaluate(element => element.childNodes.length === 1 &&
       element.firstChild === window.marqueeReplacement)).toBe(true);
@@ -579,7 +579,7 @@ for (const forceLegacy of [false, true]) {
     await expect(viewport).toHaveCSS("mask-image", /linear-gradient/);
     await host.evaluate(element => element.textContent = "Short");
     await expect(viewport).toHaveCSS("mask-image", "none");
-    await page.evaluate(() => AelluxJs.unmount(document.getElementById("label"), "overflow-marquee"));
+    await page.evaluate(() => aelluxJs.unmount(document.getElementById("label"), "overflow-marquee"));
     await expect(host.locator("span")).toHaveCount(0);
     await expect(host).toHaveText("Short");
   });
@@ -594,12 +594,12 @@ for (const forceLegacy of [false, true]) {
     expect(pixels.right).toBeGreaterThan(30);
     expect(pixels.right).toBeLessThan(90);
     await page.locator("#label").evaluate(element => element.setAttribute("data-ae-overflow-marquee-fade", "invalid"));
-    await page.evaluate(() => AelluxJs.mountManager.update(document));
-    const diagnostics = await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(entry =>
+    await page.evaluate(() => aelluxJs.mountManager.update(document));
+    const diagnostics = await page.evaluate(() => aelluxJs.diagnostics.showHistory().filter(entry =>
       entry.context?.attribute === "data-ae-overflow-marquee-fade").map(entry => entry.code));
     expect(diagnostics).toContain(2026);
     await expect(viewport).toHaveCSS("mask-image", /linear-gradient/);
-    expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().filter(entry => entry.level === 0))).toEqual([]);
+    expect(await page.evaluate(() => aelluxJs.diagnostics.showHistory().filter(entry => entry.level === 0))).toEqual([]);
   });
 }
 

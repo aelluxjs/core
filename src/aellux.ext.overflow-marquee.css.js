@@ -1,12 +1,12 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
-export function generateOverflowMarqueeCSS(AelluxJs) {
-  const attribute = AelluxJs.attr("overflow-marquee");
-  const selector = `[${attribute}]:is([${attribute}=""],[${AelluxJs.attr("overflow-marquee-ready")}])`;
-  const contentAttribute = AelluxJs.attr("overflow-marquee-content");
-  const activeAttribute = AelluxJs.attr("overflow-marquee-active");
-  const viewportAttribute = AelluxJs.attr("overflow-marquee-viewport");
-  const reducedMotionAttribute = AelluxJs.attr("reduced-motion");
+export function generateOverflowMarqueeCSS(aelluxJs) {
+  const attribute = aelluxJs.attr("overflow-marquee");
+  const selector = `[${attribute}]:is([${attribute}=""],[${aelluxJs.attr("overflow-marquee-ready")}])`;
+  const contentAttribute = aelluxJs.attr("overflow-marquee-content");
+  const activeAttribute = aelluxJs.attr("overflow-marquee-active");
+  const viewportAttribute = aelluxJs.attr("overflow-marquee-viewport");
+  const reducedMotionAttribute = aelluxJs.attr("reduced-motion");
 
   return `/*! aellux.js Overflow Marquee Extension | SPDX-License-Identifier: Apache-2.0 */
 

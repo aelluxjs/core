@@ -25,19 +25,19 @@
 (function (root) {
   "use strict";
 
-  const AelluxJs = root.AelluxJs;
+  const aelluxJs = root.aelluxJs;
   const extensionName = "template";
-  if (!AelluxJs) {
-    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+  if (!aelluxJs) {
+    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.`);
   }
   const attr = {
-    extensionName: AelluxJs.attr(extensionName)
+    extensionName: aelluxJs.attr(extensionName)
   };
 
-  AelluxJs.extAttach(extensionName, { init, destroy });
+  aelluxJs.extAttach(extensionName, { init, destroy });
 
   async function init(options) {
-    AelluxJs.mountManager.add({
+    aelluxJs.mountManager.add({
       extensionName, selector: `[${attr.extensionName}]`,
       mount: mountElement, unmount: unmountElement, update: updateElement,
       controllers: ["controllerMethod"]
@@ -45,7 +45,7 @@
   }
 
   async function destroy() {
-    AelluxJs.mountManager.remove({ extensionName });
+    aelluxJs.mountManager.remove({ extensionName });
   }
 
   async function mountElement(element) {

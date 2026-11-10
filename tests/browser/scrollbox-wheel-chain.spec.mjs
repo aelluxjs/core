@@ -18,16 +18,16 @@ async function setupChain(page, { axes = ["y", "x", "y"], rooms = [0, 0, 300],
           style="position:relative;display:inline-block;vertical-align:top;width:${size + (axis === "x" ? extra : 0)}px;height:${size + (axis === "y" ? extra : 0)}px">${points}${child}</div></div>`;
     });
     document.body.innerHTML = child;
-    AelluxJs.ext("scrollbox", { loadStyle: true });
-    if (snap) AelluxJs.ext("scrollbox-snap");
+    aelluxJs.ext("scrollbox", { loadStyle: true });
+    if (snap) aelluxJs.ext("scrollbox-snap");
   }, { axes, styles, elastic, plain, zeroRange, snap });
   await page.addScriptTag({ url: "/dist/aellux.ext.scrollbox.js" });
   if (snap) await page.addScriptTag({ url: "/src/aellux.ext.scrollbox-snap.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
-  await page.waitForFunction(snap => AelluxJs.ext.scrollbox?.initialized &&
-    (!snap || AelluxJs.ext.scrollboxSnap?.initialized), snap);
+  await page.evaluate(() => aelluxJs.init({ mode: "basic" }));
+  await page.waitForFunction(snap => aelluxJs.ext.scrollbox?.initialized &&
+    (!snap || aelluxJs.ext.scrollboxSnap?.initialized), snap);
   await page.evaluate(({ axes, rooms, sign, snap }) => {
-    if (snap && rooms[1] === 0) AelluxJs.ext.scrollboxSnap.goto(document.getElementById("level1"), 2, "instant");
+    if (snap && rooms[1] === 0) aelluxJs.ext.scrollboxSnap.goto(document.getElementById("level1"), 2, "instant");
     axes.forEach((axis, index) => {
       const element = document.getElementById(`level${index}`);
       const maximum = axis === "x" ? element.scrollWidth - element.clientWidth : element.scrollHeight - element.clientHeight;
@@ -141,7 +141,7 @@ test("disabled horizontal conversion passes vertical intent to a later ancestor"
   await page.evaluate(() => {
     const middle = document.getElementById("level1");
     middle.setAttribute("data-ae-scrollbox-wheel-horizontal", "false");
-    AelluxJs.mountManager.update(middle, "scrollbox");
+    aelluxJs.mountManager.update(middle, "scrollbox");
   });
   await wheel(page);
   expect(await positions(page, ["y", "x", "y"])).toEqual([300, 0, 120]);
@@ -200,7 +200,7 @@ test("a handed wheel keeps snap navigation at the horizontal parent", async ({ p
   await setupChain(page, { rooms: [0, 300, 300], snap: true });
   await wheel(page);
   await expect.poll(() => positions(page, ["y", "x", "y"])).toEqual([300, 150, 0]);
-  await page.evaluate(() => AelluxJs.ext.scrollboxSnap.goto(document.getElementById("level1"), 2, "instant"));
+  await page.evaluate(() => aelluxJs.ext.scrollboxSnap.goto(document.getElementById("level1"), 2, "instant"));
   await wheel(page);
   expect((await positions(page, ["y", "x", "y"]))[2]).toBe(120);
 });

@@ -21,16 +21,16 @@
 
     AelluxJsValidation.run(async function (assert) {
       var queuedTaskRan = false;
-      var queuedTask = AelluxJs.waitLayout.update(function () { queuedTaskRan = true; });
+      var queuedTask = aelluxJs.waitLayout.update(function () { queuedTaskRan = true; });
 
       await $ae.destroy();
       await queuedTask;
 
       assert(queuedTaskRan === false, "Pending layout work ran after global destroy");
       assert(destroyedExtensions.length === 2, "Global destroy did not destroy every Extension");
-      assert(typeof AelluxJs.ext.lifecycleCoreFirst === "undefined", "First Extension API remains public");
-      assert(typeof AelluxJs.ext.lifecycleCoreSecond === "undefined", "Second Extension API remains public");
-      assert(Object.keys(AelluxJs.registry.ext).length === 0, "Extension registry was not cleared");
+      assert(typeof aelluxJs.ext.lifecycleCoreFirst === "undefined", "First Extension API remains public");
+      assert(typeof aelluxJs.ext.lifecycleCoreSecond === "undefined", "Second Extension API remains public");
+      assert(Object.keys(aelluxJs.registry.ext).length === 0, "Extension registry was not cleared");
     });
 
     $ae.init({ mode: "basic" });

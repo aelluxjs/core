@@ -28,12 +28,12 @@
 (function (root) {
   "use strict";
 
-  const AelluxJs = root.AelluxJs;
+  const aelluxJs = root.aelluxJs;
   const extensionName = "feedback";
-  if (!AelluxJs) {
-    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+  if (!aelluxJs) {
+    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.`);
   }
-  AelluxJs.extAttach(extensionName, {
+  aelluxJs.extAttach(extensionName, {
     init, destroy,
     warning, error, success, announce,
     busy, validate, progress,
@@ -44,22 +44,22 @@
   const feedbackTypes = ["warning", "error", "success", "announce", "busy", "progress", "validate"];
 
   const handlers = new Map();
-  const feedbackAttribute = AelluxJs.attr(extensionName);
-  const messageTargetAttribute = AelluxJs.attr("feedback-message-target");
-  const effectTargetAttribute = AelluxJs.attr("feedback-effect-target");
-  const presentTargetAttribute = AelluxJs.attr("presentTarget");
-  const presentSelector = `[${AelluxJs.attr("present")}]`;
+  const feedbackAttribute = aelluxJs.attr(extensionName);
+  const messageTargetAttribute = aelluxJs.attr("feedback-message-target");
+  const effectTargetAttribute = aelluxJs.attr("feedback-effect-target");
+  const presentTargetAttribute = aelluxJs.attr("presentTarget");
+  const presentSelector = `[${aelluxJs.attr("present")}]`;
   const mountedFeedback = new Map();
   const applications = new WeakMap();
 
   function init() {
-    AelluxJs.comm.handle("feedback.prepare", request => {
+    aelluxJs.comm.handle("feedback.prepare", request => {
       const { boundary, feedback, element } = request;
       if (!mountedFeedback.has(boundary) || !boundary.isConnected || !feedback || typeof feedback !== "object") return false;
       applications.set(feedback, applyFeedback(boundary, feedback, element, false));
       return true;
     }, { owner: extensionName });
-    AelluxJs.mountManager.add({
+    aelluxJs.mountManager.add({
       extensionName, selector: `[${feedbackAttribute}]`, priority: 0,
       mount: mountFeedback, unmount: unmountFeedback,
       controllers: feedbackTypes.concat("send")
@@ -67,21 +67,21 @@
   }
 
   async function destroy() {
-    AelluxJs.comm.removeOwner(extensionName);
+    aelluxJs.comm.removeOwner(extensionName);
     mountedFeedback.clear();
-    AelluxJs.mountManager.remove({ extensionName });
+    aelluxJs.mountManager.remove({ extensionName });
     handlers.clear();
   }
 
   function mountFeedback(element) {
     mountedFeedback.set(element, {});
-    AelluxJs.onEvent(element, "Feedback", onFeedback);
+    aelluxJs.onEvent(element, "Feedback", onFeedback);
   }
 
   function unmountFeedback(element) {
     applications.delete(element);
     mountedFeedback.delete(element);
-    AelluxJs.offEvent(element, "Feedback", onFeedback);
+    aelluxJs.offEvent(element, "Feedback", onFeedback);
   }
 
   function onFeedback(event) {
@@ -100,11 +100,11 @@
     if (!event.detail || typeof event.detail !== "object") return;
     const presentTarget = element.getAttribute(presentTargetAttribute);
     const presentElement = presentTarget !== null && presentTarget.trim() &&
-      (AelluxJs.comm.has("present.pop") || AelluxJs.comm.has("present.pop-next"))
-      ? AelluxJs.elementOrId(presentTarget) : null;
-    if (presentElement?.hasAttribute(AelluxJs.attr("present-group"))) {
+      (aelluxJs.comm.has("present.pop") || aelluxJs.comm.has("present.pop-next"))
+      ? aelluxJs.elementOrId(presentTarget) : null;
+    if (presentElement?.hasAttribute(aelluxJs.attr("present-group"))) {
       const preparation = { boundary: element, feedback: event.detail };
-      const result = AelluxJs.comm.request("present.pop-next", { group: presentElement,
+      const result = aelluxJs.comm.request("present.pop-next", { group: presentElement,
         preparation: { contract: "feedback.prepare", payload: preparation } });
       if (result.handled) {
         // Present adds the reserved element to a new preparation payload.
@@ -112,7 +112,7 @@
         const application = applications.get(event.detail);
         Promise.resolve(result.value).then(member => {
           if (member) requestEffect(element, application);
-        }).catch(cause => AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION,
+        }).catch(cause => aelluxJs.diagnostics.error(aelluxJs.diagnostics.ERROR_EXTENSION_TRANSITION,
           { cause, extension: extensionName, element: presentElement }));
         return;
       }
@@ -121,7 +121,7 @@
       if (presentTarget !== null) {
         const target = presentElement || (!presentTarget.trim() &&
           (messageElement?.closest(presentSelector) || effectElement?.closest(presentSelector)));
-        if (target) AelluxJs.comm.request("present.pop", { element: target });
+        if (target) aelluxJs.comm.request("present.pop", { element: target });
       }
     });
   }
@@ -130,8 +130,8 @@
     const application = { mount: mountedFeedback.get(element) };
     const messageTarget = element.getAttribute(messageTargetAttribute);
     const effectTarget = element.getAttribute(effectTargetAttribute);
-    const messageElement = AelluxJs.elementOrId(messageTarget, { defaultElement });
-    const effectElement = AelluxJs.elementOrId(effectTarget, { defaultElement });
+    const messageElement = aelluxJs.elementOrId(messageTarget, { defaultElement });
+    const effectElement = aelluxJs.elementOrId(effectTarget, { defaultElement });
     application.effectElement = effectElement;
     application.motion = motion;
     if (effectElement) applications.set(effectElement, application);
@@ -149,11 +149,11 @@
     }
 
     if (feedbackTypes.includes(type)) {
-      const typeClass = AelluxJs.className(`feedback-${type}`);
+      const typeClass = aelluxJs.className(`feedback-${type}`);
       for (const target of [element, messageElement, effectElement]) {
         if (target) {
           if (defaultElement !== element) {
-            for (const previous of feedbackTypes) target.classList.remove(AelluxJs.className(`feedback-${previous}`));
+            for (const previous of feedbackTypes) target.classList.remove(aelluxJs.className(`feedback-${previous}`));
           }
           target.classList.add(typeClass);
         }
@@ -169,7 +169,7 @@
     if (!application || application.mount !== mountedFeedback.get(element) || !element.isConnected) return;
     const { effectElement, motion } = application;
     if (!effectElement?.isConnected || applications.get(effectElement) !== application || typeof motion !== "string") return;
-    AelluxJs.comm.request("present.effect", {
+    aelluxJs.comm.request("present.effect", {
       element: effectElement.closest(presentSelector) || effectElement,
       effect: motion, effectTarget: effectElement
     });
@@ -225,7 +225,7 @@
       return;
     }
     if (typeof motion === "string" && !motionOptions.includes(motion)) {
-      AelluxJs.diagnostics.info(AelluxJs.diagnostics.INFO_FEEDBACK_MOTION_CUSTOM, {
+      aelluxJs.diagnostics.info(aelluxJs.diagnostics.INFO_FEEDBACK_MOTION_CUSTOM, {
         extension: extensionName, motion, standardMotions: motionOptions.slice()
       });
     }
@@ -235,13 +235,13 @@
       bubbles: true,
       cancelable: true
     };
-    AelluxJs.dispatchFrom(target, "Feedback", options);
+    aelluxJs.dispatchFrom(target, "Feedback", options);
     notifyHandlers(type, feedback);
     notifyHandlers("*", feedback);
   }
 
   function reportInvalidArgument(argument, value) {
-    AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_FEEDBACK_ARGUMENT, {
+    aelluxJs.diagnostics.error(aelluxJs.diagnostics.ERROR_FEEDBACK_ARGUMENT, {
       extension: extensionName, argument, value
     });
   }
@@ -261,7 +261,7 @@
   }
 
   function reportCallbackError(error, type) {
-    AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_CALLBACK, {
+    aelluxJs.diagnostics.error(aelluxJs.diagnostics.ERROR_CALLBACK, {
       cause: error, extension: extensionName, type
     });
   }

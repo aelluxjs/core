@@ -13,7 +13,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
   const pendingUnmounts = new WeakMap();
   const mountRecords = new WeakMap();
   let mountOrder = 0;
-  const classPrefix = root.AelluxJs.className("");
+  const classPrefix = root.aelluxJs.className("");
   const validateDocumentDoubleAttributeHTML = createDocumentHTMLValidator(root);
 
   return { mount, unmount, unmountDetached, update };
@@ -45,11 +45,11 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
   }
 
   async function mount(elementOrId, extensionNames = null) {
-    const AelluxJs = root.AelluxJs;
+    const aelluxJs = root.aelluxJs;
     const newlyMounted = new Set();
     const rootElement = resolveMountElement(elementOrId, "mount");
     if (!rootElement) return [];
-    if (!AelluxJs.dispatch("BeforeMount", {
+    if (!aelluxJs.dispatch("BeforeMount", {
       cancelable: true,
       detail: {
         root: rootElement,
@@ -58,28 +58,28 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
             .map(name => fromCamelCase(name))
       }
     })) return [];
-    const waitMountedAttr = AelluxJs.attr("wait-mounted");
+    const waitMountedAttr = aelluxJs.attr("wait-mounted");
     const allWaiters = findElements(rootElement, `[${waitMountedAttr}]`);
     allWaiters.forEach(waiter => waiter.setAttribute("aria-busy", "true"));
     try {
       const allLinks = findElements(rootElement, "link[rel='aelluxjs-ext']");
       for (const link of allLinks) {
         const href = link.getAttribute("href");
-        const loadWhen = link.getAttribute(AelluxJs.attr("load-when")) || undefined;
-        const builds = link.getAttribute(AelluxJs.attr("builds")) || undefined;
-        const loadStyleValue = link.getAttribute(AelluxJs.attr("load-style"));
+        const loadWhen = link.getAttribute(aelluxJs.attr("load-when")) || undefined;
+        const builds = link.getAttribute(aelluxJs.attr("builds")) || undefined;
+        const loadStyleValue = link.getAttribute(aelluxJs.attr("load-style"));
         const loadStyle = loadStyleValue === null || loadStyleValue === "false"
           ? false
           : loadStyleValue || true;
         link.setAttribute("rel", "aelluxjs-ext-registered");
-        AelluxJs.ext(href, { builds, loadWhen, loadStyle });
+        aelluxJs.ext(href, { builds, loadWhen, loadStyle });
       }
 
       const waitExtensions = [];
       for (const [key, options] of
-        Object.entries(root.AelluxJs.registry.ext)) {
+        Object.entries(root.aelluxJs.registry.ext)) {
         if (options.load === false) continue;
-        waitExtensions.push(AelluxJs.wait(key));
+        waitExtensions.push(aelluxJs.wait(key));
       }
       await Promise.all(waitExtensions);
 
@@ -88,7 +88,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
       if (rootElement === root.document && extensionNames == null) validateDocumentDoubleAttributeHTML();
 
     } catch (error) {
-      AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_MOUNT, {
+      aelluxJs.diagnostics.error(aelluxJs.diagnostics.ERROR_MOUNT, {
         cause: error, root: rootElement, extensions: extensionNames
       });
     } finally {
@@ -98,30 +98,30 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
   }
 
   async function AelluxJsMount(rootElement, extensionNames, newlyMounted) {
-    const AelluxJs = root.AelluxJs;
+    const aelluxJs = root.aelluxJs;
     if (typeof extensionNames === "string")
       extensionNames = [extensionNames];
 
     var filter;
     if (!extensionNames) {
-      const mounterSelectors = Object.values(AelluxJs.registry.extMounters);
-      const lazySelectors = Object.values(AelluxJs.registry.lazyExtSelectors);
+      const mounterSelectors = Object.values(aelluxJs.registry.extMounters);
+      const lazySelectors = Object.values(aelluxJs.registry.lazyExtSelectors);
       filter = [...mounterSelectors, ...lazySelectors];
     } else {
       filter = [];
       extensionNames = extensionNames.map(_ => fromCamelCase(_));
 
-      for (const [key, selectorString] of Object.entries(AelluxJs.registry.extMounters))
+      for (const [key, selectorString] of Object.entries(aelluxJs.registry.extMounters))
         if (extensionNames.indexOf(fromCamelCase(key)) !== -1)
           filter.push(selectorString);
 
-      for (const [key, selectorString] of Object.entries(AelluxJs.registry.lazyExtSelectors))
+      for (const [key, selectorString] of Object.entries(aelluxJs.registry.lazyExtSelectors))
         if (extensionNames.indexOf(fromCamelCase(key)) !== -1)
           filter.push(selectorString);
     }
 
     if (filter.length === 0) {
-      AelluxJs.dispatch("Mount", {
+      aelluxJs.dispatch("Mount", {
         detail: { root: rootElement, extensions: extensionNames, elements: [] }
       });
       return;
@@ -137,13 +137,13 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
         localExtensionNames = new Set();
         //Load needed lazies
         for (const [key, selector]
-          of Object.entries(AelluxJs.registry.lazyExtSelectors))
+          of Object.entries(aelluxJs.registry.lazyExtSelectors))
           if (element.matches(selector) && filter.indexOf(selector) !== -1)
             localExtensionNames.add(fromCamelCase(key));
 
         //Mount readies
         for (const [key, selector]
-          of Object.entries(AelluxJs.registry.extMounters))
+          of Object.entries(aelluxJs.registry.extMounters))
           if (element.matches(selector) && filter.indexOf(selector) !== -1)
             localExtensionNames.add(fromCamelCase(key));
       }
@@ -160,7 +160,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
 
     const extensions = Array.from(candidatesByExtension);
     const loaded = await Promise.all(
-      extensions.map(([extensionName]) => AelluxJs.wait(extensionName).then(
+      extensions.map(([extensionName]) => aelluxJs.wait(extensionName).then(
         value => ({ value }),
         error => ({ error })
       ))
@@ -202,8 +202,8 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
             continue;
           }
           if (!isMounted(mountable)) {
-            const presentStates = mountable.hasAttribute(AelluxJs.attr("present"))
-              ? ["pop", "unpop", "dismissed"].map(name => AelluxJs.className(name)) : [];
+            const presentStates = mountable.hasAttribute(aelluxJs.attr("present"))
+              ? ["pop", "unpop", "dismissed"].map(name => aelluxJs.className(name)) : [];
             for (const name of Array.from(mountable.classList)) {
               if (name.startsWith(classPrefix) && !presentStates.includes(name)) mountable.classList.remove(name);
             }
@@ -230,8 +230,8 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
               elementController.despawn(mountId);
               if (!elementController.hasMounts()) elementControllers.delete(mountable);
             }
-            AelluxJs.diagnostics.error(
-              AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
+            aelluxJs.diagnostics.error(
+              aelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
               {
                 cause: error,
                 extension: extensionName,
@@ -245,8 +245,8 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
           }
         }
       } catch (error) {
-        AelluxJs.diagnostics.error(
-          AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
+        aelluxJs.diagnostics.error(
+          aelluxJs.diagnostics.ERROR_EXTENSION_MOUNT,
           {
             cause: error,
             extension: extensionName,
@@ -263,9 +263,9 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
         newlyMounted.delete(affected);
         continue;
       }
-      affected.classList.toggle(AelluxJs.className("mounted"), true);
+      affected.classList.toggle(aelluxJs.className("mounted"), true);
     }
-    AelluxJs.dispatch("Mount", {
+    aelluxJs.dispatch("Mount", {
       detail: {
         root: rootElement,
         extensions: extensionNames,
@@ -275,12 +275,12 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
   }
 
   async function AelluxJsMounted(rootElement, method, extensionNames = null, detachedOnly = false) {
-    const AelluxJs = root.AelluxJs;
+    const aelluxJs = root.aelluxJs;
     const selectedNames = extensionNames === null
       ? null
       : new Set((typeof extensionNames === "string" ? [extensionNames] : extensionNames)
         .map(name => fromCamelCase(name)));
-    if (method === UNMOUNT && !AelluxJs.dispatch("BeforeUnmount", {
+    if (method === UNMOUNT && !aelluxJs.dispatch("BeforeUnmount", {
       cancelable: true,
       detail: {
         root: rootElement,
@@ -319,7 +319,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
             await controller[method](element);
           }
         } catch (error) {
-          AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT, {
+          aelluxJs.diagnostics.error(aelluxJs.diagnostics.ERROR_EXTENSION_MOUNT, {
             cause: error, extension: extensionName, method, selector
           });
         }
@@ -332,7 +332,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
           affected.add(element);
       }
     }
-    AelluxJs.dispatch(toCapitalized(method), {
+    aelluxJs.dispatch(toCapitalized(method), {
       detail: {
         root: rootElement,
         extensions: selectedNames ? Array.from(selectedNames) : null,
@@ -358,8 +358,8 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
     }
     let finish;
     tasks.set(mountId, new Promise(resolve => { finish = resolve; }));
-    const AelluxJs = root.AelluxJs;
-    const diagnostics = AelluxJs.diagnostics;
+    const aelluxJs = root.aelluxJs;
+    const diagnostics = aelluxJs.diagnostics;
     try {
       try {
         if (controller && controller.unmount) await controller.unmount(element);
@@ -376,7 +376,7 @@ export function createMountHelper(root, mountMaps, mountedElements, elementContr
           elementController.despawn(mountId);
           if (!elementController.hasMounts()) elementControllers.delete(element);
         }
-        element.classList.toggle(AelluxJs.className("mounted"), isMounted(element));
+        element.classList.toggle(aelluxJs.className("mounted"), isMounted(element));
       } catch (cause) {
         diagnostics.error(diagnostics.ERROR_EXTENSION_MOUNT, {
           cause, extension: extensionName, method: UNMOUNT, selector

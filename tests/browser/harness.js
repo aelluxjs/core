@@ -26,8 +26,8 @@
         if (!condition) throw new Error(message);
       }
 
-      AelluxJs.on("Ready", function onReady() {
-        AelluxJs.off("Ready", onReady);
+      aelluxJs.on("Ready", function onReady() {
+        aelluxJs.off("Ready", onReady);
         try {
           var result = test(assert);
           if (result && typeof result.then === "function") {

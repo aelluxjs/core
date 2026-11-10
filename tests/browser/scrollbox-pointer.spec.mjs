@@ -20,15 +20,15 @@ async function setup(page, html, { coarse = false } = {}) {
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(({ markup, usesSnap }) => {
     document.body.innerHTML = markup;
-    AelluxJs.ext("scrollbox", { loadStyle: true });
-    if (usesSnap) AelluxJs.ext("scrollbox-snap");
+    aelluxJs.ext("scrollbox", { loadStyle: true });
+    if (usesSnap) aelluxJs.ext("scrollbox-snap");
   }, { markup: html, usesSnap });
   await page.addScriptTag({ url: "/dist/aellux.ext.scrollbox.js" });
   if (usesSnap) await page.addScriptTag({ url: "/src/aellux.ext.scrollbox-snap.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "basic" }));
-  await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollbox?.initialized)).toBe(true);
+  await page.evaluate(() => aelluxJs.init({ mode: "basic" }));
+  await expect.poll(() => page.evaluate(() => aelluxJs.ext.scrollbox?.initialized)).toBe(true);
   if (usesSnap)
-    await expect.poll(() => page.evaluate(() => AelluxJs.ext.scrollboxSnap?.initialized)).toBe(true);
+    await expect.poll(() => page.evaluate(() => aelluxJs.ext.scrollboxSnap?.initialized)).toBe(true);
 }
 
 async function drag(page, id, pointerType = "mouse") {
@@ -83,7 +83,7 @@ test("scroll edge classes follow both axes and clear on unmount", async ({ page 
   });
   await expect.poll(classes).toEqual([false, true, false, true]);
 
-  await page.evaluate(() => AelluxJs.mountManager.unmount("edges", "scrollbox"));
+  await page.evaluate(() => aelluxJs.mountManager.unmount("edges", "scrollbox"));
   expect(await classes()).toEqual([false, false, false, false]);
 });
 
@@ -131,13 +131,13 @@ test("snap change reports the selected item after scrolling settles", async ({ p
       const { item, index, previousIndex, axis } = event.detail;
       window.snapEvents.push({ item: item.id, index, previousIndex, axis });
     });
-    AelluxJs.mountManager.controller("snap-events").scrollbox.goto(1);
+    aelluxJs.mountManager.controller("snap-events").scrollbox.goto(1);
   });
 
   await expect.poll(() => page.evaluate(() => window.snapEvents)).toEqual([
     { item: "snap-two", index: 1, previousIndex: 0, axis: "x" }
   ]);
-  await page.evaluate(() => AelluxJs.mountManager.controller("snap-events").scrollbox.goto(1));
+  await page.evaluate(() => aelluxJs.mountManager.controller("snap-events").scrollbox.goto(1));
   await page.waitForTimeout(180);
   expect(await page.evaluate(() => window.snapEvents)).toHaveLength(1);
 });
@@ -157,7 +157,7 @@ test("long smooth snap navigation reports only the reached destination", async (
     element.addEventListener("AelluxJsScrollboxSnapChange", event => {
       window.snapEvents.push(event.detail.index);
     });
-    AelluxJs.mountManager.controller("gallery").scrollbox.goto(4);
+    aelluxJs.mountManager.controller("gallery").scrollbox.goto(4);
   });
 
   await expect.poll(() => page.evaluate(() => window.snapEvents), { timeout: 10000 })
@@ -185,7 +185,7 @@ test("interrupted snap navigation settles without scrollend", async ({ page }) =
       window.snapEvents.push(event.detail.index));
     element.classList.add("ae--snap-suspended");
     element.scrollTo = () => {};
-    AelluxJs.mountManager.controller("gallery").scrollbox.goto(4);
+    aelluxJs.mountManager.controller("gallery").scrollbox.goto(4);
     delete element.scrollTo;
     element.dispatchEvent(new WheelEvent("wheel", {
       deltaX: -120, bubbles: true, cancelable: false
@@ -215,7 +215,7 @@ test("a descendant scrollend does not finish its parent snap navigation", async 
     window.snapEvents = [];
     element.addEventListener("AelluxJsScrollboxSnapChange", event =>
       window.snapEvents.push(event.detail.index));
-    AelluxJs.mountManager.controller("gallery").scrollbox.goto(4);
+    aelluxJs.mountManager.controller("gallery").scrollbox.goto(4);
     setTimeout(() => document.getElementById("item-0")
       .dispatchEvent(new Event("scrollend", { bubbles: true })), 100);
   });
@@ -286,8 +286,8 @@ test("elastic wrapper normalizes non-inline display while snap keeps its layout"
     const ids = ["block", "flex", "grid"];
     const wrappers = ids.map(id => document.getElementById(id).firstElementChild);
     const displays = wrappers.map(item => getComputedStyle(item).display);
-    const warnings = AelluxJs.diagnostics.showHistory().filter(item => item.code === 2016);
-    await AelluxJs.mountManager.unmount(document.body, "scrollbox");
+    const warnings = aelluxJs.diagnostics.showHistory().filter(item => item.code === 2016);
+    await aelluxJs.mountManager.unmount(document.body, "scrollbox");
     return { displays, warnings: warnings.length,
       restored: wrappers.map(item => [item.style.getPropertyValue("display"),
         item.style.getPropertyPriority("display")]) };
@@ -306,18 +306,18 @@ test("snap initializes and controller navigates its direct children", async ({ p
     </div>
   </div>`);
   expect(await page.evaluate(() => document.getElementById("gallery").scrollLeft)).toBe(0);
-  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(2))).toBe(true);
+  expect(await page.evaluate(() => aelluxJs.mountManager.controller("gallery").scrollbox.goto(2))).toBe(true);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
     .toBe(200);
-  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.previous()))
+  expect(await page.evaluate(() => aelluxJs.mountManager.controller("gallery").scrollbox.previous()))
     .toBe(true);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
     .toBe(100);
-  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.next()))
+  expect(await page.evaluate(() => aelluxJs.mountManager.controller("gallery").scrollbox.next()))
     .toBe(true);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
     .toBe(200);
-  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(3)))
+  expect(await page.evaluate(() => aelluxJs.mountManager.controller("gallery").scrollbox.goto(3)))
     .toBe(false);
 });
 
@@ -337,16 +337,16 @@ test("snap without an elastic wrapper ignores custom scrollbars", async ({ page 
       children: box.children.length,
       barAlign: bar.style.scrollSnapAlign,
       itemAlign: getComputedStyle(box.children[1]).scrollSnapAlign,
-      errors: AelluxJs.diagnostics.showHistory().filter(item => item.code === 1121).length
+      errors: aelluxJs.diagnostics.showHistory().filter(item => item.code === 1121).length
     };
   });
   expect(initial).toEqual({ children: 4, barAlign: "", itemAlign: "center", errors: 0 });
 
-  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(2)))
+  expect(await page.evaluate(() => aelluxJs.mountManager.controller("gallery").scrollbox.goto(2)))
     .toBe(true);
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
     .toBe(200);
-  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(3)))
+  expect(await page.evaluate(() => aelluxJs.mountManager.controller("gallery").scrollbox.goto(3)))
     .toBe(false);
 });
 
@@ -357,8 +357,8 @@ test("snap requires marked items and follows marker changes", async ({ page }) =
   </div>`);
 
   const initial = await page.evaluate(() => ({
-    enabled: AelluxJs.mountManager.controller("gallery").scrollbox.goto(0),
-    errors: AelluxJs.diagnostics.showHistory().filter(item => item.code === 1121).length
+    enabled: aelluxJs.mountManager.controller("gallery").scrollbox.goto(0),
+    errors: aelluxJs.diagnostics.showHistory().filter(item => item.code === 1121).length
   }));
   expect(initial).toEqual({ enabled: false, errors: 1 });
 
@@ -366,14 +366,14 @@ test("snap requires marked items and follows marker changes", async ({ page }) =
     .setAttribute("data-ae-snap-item", ""));
   await expect.poll(() => page.evaluate(() => getComputedStyle(
     document.getElementById("item")).scrollSnapAlign)).toBe("center");
-  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(0)))
+  expect(await page.evaluate(() => aelluxJs.mountManager.controller("gallery").scrollbox.goto(0)))
     .toBe(true);
 
   await page.evaluate(() => document.getElementById("item")
     .removeAttribute("data-ae-snap-item"));
   await expect.poll(() => page.evaluate(() => getComputedStyle(
     document.getElementById("item")).scrollSnapAlign)).toBe("start");
-  expect(await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(0)))
+  expect(await page.evaluate(() => aelluxJs.mountManager.controller("gallery").scrollbox.goto(0)))
     .toBe(false);
 });
 
@@ -411,8 +411,8 @@ test("snap uses horizontal by default and centers only its selected axis", async
     document.getElementById("vertical")).scrollSnapType)).toBe("y mandatory");
 
   await page.evaluate(() => {
-    AelluxJs.mountManager.controller("horizontal").scrollbox.goto(1);
-    AelluxJs.mountManager.controller("vertical").scrollbox.goto(1);
+    aelluxJs.mountManager.controller("horizontal").scrollbox.goto(1);
+    aelluxJs.mountManager.controller("vertical").scrollbox.goto(1);
   });
   await expect.poll(() => page.evaluate(() => ["horizontal", "vertical"].map(id => {
     const element = document.getElementById(id);
@@ -444,7 +444,7 @@ test("snap item values align controller navigation on both axes", async ({ page 
   expect(alignments).toEqual([["center", "start", "end"], ["center", "start", "end"]]);
 
   await page.evaluate(() => ["horizontal", "vertical"].forEach(id =>
-    AelluxJs.mountManager.controller(id).scrollbox.goto(1)));
+    aelluxJs.mountManager.controller(id).scrollbox.goto(1)));
   await expect.poll(() => page.evaluate(() => [
     document.getElementById("horizontal").scrollLeft,
     document.getElementById("vertical").scrollTop
@@ -455,7 +455,7 @@ test("snap item values align controller navigation on both axes", async ({ page 
   }))).toEqual([1, 1]);
 
   await page.evaluate(() => ["horizontal", "vertical"].forEach(id =>
-    AelluxJs.mountManager.controller(id).scrollbox.goto(2)));
+    aelluxJs.mountManager.controller(id).scrollbox.goto(2)));
   await expect.poll(() => page.evaluate(() => [
     document.getElementById("horizontal").scrollLeft,
     document.getElementById("vertical").scrollTop
@@ -468,7 +468,7 @@ test("snap item values align controller navigation on both axes", async ({ page 
   await page.evaluate(() => {
     const box = document.getElementById("horizontal");
     box.firstElementChild.children[1].setAttribute("data-ae-snap-item", "center");
-    AelluxJs.mountManager.controller("horizontal").scrollbox.goto(1);
+    aelluxJs.mountManager.controller("horizontal").scrollbox.goto(1);
   });
   await expect.poll(() => page.evaluate(() => document.getElementById("horizontal")
     .scrollLeft)).toBe(60);
@@ -488,10 +488,10 @@ test("snap restores the box and child inline rules on unmount", async ({ page })
     const child = element.firstElementChild.firstElementChild;
     const during = [getComputedStyle(element).scrollSnapType,
       getComputedStyle(child).scrollSnapAlign];
-    await AelluxJs.mountManager.unmount(element, "scrollbox-snap");
+    await aelluxJs.mountManager.unmount(element, "scrollbox-snap");
     return { during, after: [element.style.scrollSnapType, child.style.scrollSnapAlign],
       ready: element.classList.contains("ae--snap-ready"),
-      scrollbox: !!AelluxJs.mountManager.controller(element)?.scrollbox };
+      scrollbox: !!aelluxJs.mountManager.controller(element)?.scrollbox };
   });
   expect(styles).toEqual({ during: ["x mandatory", "center"],
     after: ["x", "start"], ready: false, scrollbox: true });
@@ -521,7 +521,7 @@ test("snap children publish focus only through native scrolling", async ({ page 
   await expect.poll(values).toEqual([["", 1], ["", 0], ["", 0]]);
   expect(await values(50)).toEqual([["", 0.5], ["", 0.5], ["", 0]]);
   expect(await values(100)).toEqual([["", 0], ["", 1], ["", 0]]);
-  await page.evaluate(() => AelluxJs.mountManager.unmount(document.body, "scrollbox-snap"));
+  await page.evaluate(() => aelluxJs.mountManager.unmount(document.body, "scrollbox-snap"));
   expect(await page.evaluate(() => Array.from(
     document.querySelectorAll("[data-ae-snap-item]"), item => [
       item.style.getPropertyValue("--ae-snap-viewport"),
@@ -635,7 +635,7 @@ for (const ending of ["pointerup", "pointercancel"]) {
         bubbles: true, isPrimary: true, pointerId: 91,
         pointerType: "touch", button: 0, buttons: 1
       }));
-      AelluxJs.mountManager.controller("gallery").scrollbox.goto(1);
+      aelluxJs.mountManager.controller("gallery").scrollbox.goto(1);
     });
     await page.waitForTimeout(170);
     expect(await page.evaluate(() => window.snapChanges)).toEqual([]);
@@ -838,7 +838,7 @@ test("wheel at a snap edge waits for the navigation target before releasing", as
   </div>`);
   const pending = await page.evaluate(() => {
     const element = document.getElementById("gallery");
-    const controller = AelluxJs.mountManager.controller("gallery").scrollbox;
+    const controller = aelluxJs.mountManager.controller("gallery").scrollbox;
     const wheel = deltaY => {
       const event = new WheelEvent("wheel", { deltaY, bubbles: true, cancelable: true });
       element.dispatchEvent(event);
@@ -963,7 +963,7 @@ test("snap wheel at the edge stretches the elastic wrapper without scrolling a h
       <div data-ae-snap-item style="flex:none;width:100px;height:200px"></div>
     </div>
   </div>`);
-  await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(2));
+  await page.evaluate(() => aelluxJs.mountManager.controller("gallery").scrollbox.goto(2));
   await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
     .toBe(200);
   const result = await page.evaluate(async () => {
@@ -972,7 +972,7 @@ test("snap wheel at the edge stretches the elastic wrapper without scrolling a h
       deltaY: 120, bubbles: true, cancelable: true
     });
     element.dispatchEvent(event);
-    await AelluxJs.waitLayout.update(() => {});
+    await aelluxJs.waitLayout.update(() => {});
     return { prevented: event.defaultPrevented,
       overflowY: getComputedStyle(element).overflowY,
       maxY: element.scrollHeight - element.clientHeight,
@@ -1147,7 +1147,7 @@ test("horizontal wheel ignores hidden vertical overflow during elastic pressure"
       deltaX: 130, deltaY: 120, bubbles: true, cancelable: true
     });
     element.dispatchEvent(event);
-    await AelluxJs.waitLayout.update(() => {});
+    await aelluxJs.waitLayout.update(() => {});
     return { maxY: element.scrollHeight - element.clientHeight,
       maxX: element.scrollWidth - element.clientWidth,
       scrollLeft: element.scrollLeft,
@@ -1340,7 +1340,7 @@ for (const axis of ["x", "y"]) {
               };
               element.addEventListener("scroll", interrupt);
               if (trigger === "controller") {
-                AelluxJs.mountManager.controller("gallery").scrollbox.goto(8);
+                aelluxJs.mountManager.controller("gallery").scrollbox.goto(8);
               } else if (trigger === "wheel") {
                 element.dispatchEvent(new WheelEvent("wheel", {
                   bubbles: true, cancelable: true, [axis === "x" ? "deltaX" : "deltaY"]: 80
@@ -1448,7 +1448,7 @@ test("real mouse interrupts a flick and only the new drag moves the held box", a
   await page.mouse.up();
   await expect.poll(() => page.evaluate(() => getComputedStyle(
     document.getElementById("gallery")).scrollSnapType)).toBe("x mandatory");
-  await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(2));
+  await page.evaluate(() => aelluxJs.mountManager.controller("gallery").scrollbox.goto(2));
   await expect.poll(position).toBe(700);
 });
 
@@ -1595,7 +1595,7 @@ test("CSS snap flick advances wide items while a slow drag stays within one poin
     }));
   }, { point, pointerId });
   const reset = async () => {
-    await page.evaluate(() => AelluxJs.mountManager.controller("gallery").scrollbox.goto(0));
+    await page.evaluate(() => aelluxJs.mountManager.controller("gallery").scrollbox.goto(0));
     await expect.poll(() => page.evaluate(() => document.getElementById("gallery").scrollLeft))
       .toBe(100);
   };
@@ -1789,7 +1789,7 @@ test("native is the default and never loads a dependency", async ({ page }) => {
   await page.route("https://unpkg.com/**", route => { requests++; return route.abort(); });
   await setup(page, box("empty", "") + box("native", "native") + box("pointer"));
   expect(requests).toBe(0);
-  expect(await page.evaluate(() => Object.keys(AelluxJs.registry.dep))).toEqual([]);
+  expect(await page.evaluate(() => Object.keys(aelluxJs.registry.dep))).toEqual([]);
   expect(await drag(page, "empty")).toMatchObject({ x: 0, y: 0 });
   expect(await drag(page, "native")).toMatchObject({ x: 0, y: 0 });
   expect(await drag(page, "pointer")).toMatchObject({ x: 50, y: 0 });
@@ -2511,7 +2511,7 @@ for (const axis of ["x", "y"]) {
           ${'<div data-ae-snap-item style="width:100px;height:100px;flex:none"></div>'.repeat(10)}
         </div></div>`);
       await page.locator("#box").evaluate((element, axis) => {
-        if (element.hasAttribute("data-ae-scrollbox-snap")) AelluxJs.ext.scrollboxSnap.goto(element, 3, "instant");
+        if (element.hasAttribute("data-ae-scrollbox-snap")) aelluxJs.ext.scrollboxSnap.goto(element, 3, "instant");
         else element.scrollTo({ left: axis === "x" ? 300 : 0, top: axis === "y" ? 300 : 0, behavior: "instant" });
       }, axis);
       const rect = await page.locator("#box").boundingBox();
@@ -3193,7 +3193,7 @@ test("mode changes and unmount stop an active drag and restore inline styles", a
       button: 0, buttons: 1, clientX: x, clientY: y
     }));
     element.setAttribute("data-ae-scrollbox", "native");
-    await AelluxJs.mountManager.update(element, "scrollbox");
+    await aelluxJs.mountManager.update(element, "scrollbox");
     window.dispatchEvent(new PointerEvent("pointermove", {
       bubbles: true, isPrimary: true, pointerId: 7, pointerType: "mouse",
       buttons: 1, clientX: x - 50, clientY: y - 50
@@ -3201,7 +3201,7 @@ test("mode changes and unmount stop an active drag and restore inline styles", a
     const afterSwitch = { x: element.scrollLeft, y: element.scrollTop,
       userSelect: element.style.getPropertyValue("user-select"),
       priority: element.style.getPropertyPriority("user-select") };
-    await AelluxJs.unmount(element, "scrollbox");
+    await aelluxJs.unmount(element, "scrollbox");
     return { afterSwitch,
       progress: [element.style.getPropertyValue("--ae-scroll-x-progress"),
         element.style.getPropertyValue("--ae-scroll-y-progress")] };
@@ -3334,7 +3334,7 @@ test("converted wheel stretches an elastic child and scrolls its vertical parent
     const element = document.getElementById("box");
     const event = new WheelEvent("wheel", { deltaY: value, bubbles: true, cancelable: true });
     element.dispatchEvent(event);
-    await AelluxJs.waitLayout.update(() => {});
+    await aelluxJs.waitLayout.update(() => {});
     return { prevented: event.defaultPrevented, x: element.scrollLeft,
       parent: document.getElementById("parent").scrollTop,
       transform: document.getElementById("elastic").style.transform };
@@ -3592,7 +3592,7 @@ test("disabling momentum while coasting stops the animation", async ({ page }) =
   const stopped = await page.evaluate(async () => {
     const element = document.getElementById("box");
     element.setAttribute("data-ae-scrollbox-momentum", "false");
-    await AelluxJs.mountManager.update(element, "scrollbox");
+    await aelluxJs.mountManager.update(element, "scrollbox");
     return [element.scrollLeft, element.scrollTop];
   });
   await page.waitForTimeout(100);
@@ -3641,12 +3641,12 @@ test("weak CSS makes scrolling smooth and honors reduced motion on every element
   ].map(element => getComputedStyle(element).scrollBehavior));
   await expect.poll(behaviors).toEqual(["smooth", "smooth", "smooth"]);
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "auto" }));
+  await page.evaluate(() => aelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "auto" }));
   await expect.poll(behaviors).toEqual(["auto", "auto", "auto"]);
-  await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "no-preference" }));
+  await page.evaluate(() => aelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "no-preference" }));
   await expect.poll(behaviors).toEqual(["smooth", "smooth", "smooth"]);
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" }));
+  await page.evaluate(() => aelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" }));
   await expect.poll(behaviors).toEqual(["auto", "auto", "auto"]);
 });
 
@@ -3655,7 +3655,7 @@ test("local reduced-motion preference removes custom scrollbar transitions", asy
   const duration = () => page.locator("[data-ae-scrollbar-vertical]").evaluate(element =>
     getComputedStyle(element).transitionDuration);
   await expect.poll(duration).toBe("0.16s");
-  await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" }));
+  await page.evaluate(() => aelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" }));
   expect(await duration()).toBe("0s");
 });
 
@@ -3677,21 +3677,21 @@ test("elastic pointer drag transforms its marked wrapper and restores it on unmo
     });
     element.dispatchEvent(pointer("pointerdown", x, y, 1));
     window.dispatchEvent(pointer("pointermove", x + 30, y + 60, 1));
-    await AelluxJs.waitLayout.update(() => {});
+    await aelluxJs.waitLayout.update(() => {});
     const stretched = wrapper.style.transform;
     const activeOrigin = wrapper.style.transformOrigin;
     const partialRect = wrapper.getBoundingClientRect();
     const partialGrowth = { x: partialRect.width - wrapper.offsetWidth,
       y: partialRect.height - wrapper.offsetHeight };
     window.dispatchEvent(pointer("pointermove", x + 120, y + 120, 1));
-    await AelluxJs.waitLayout.update(() => {});
+    await aelluxJs.waitLayout.update(() => {});
     const maxRect = wrapper.getBoundingClientRect();
     const maxGrowth = { x: maxRect.width - wrapper.offsetWidth,
       y: maxRect.height - wrapper.offsetHeight };
     const maxSpace = { x: element.clientWidth / 4, y: element.clientHeight / 4 };
     window.dispatchEvent(pointer("pointerup", x + 120, y + 120, 0));
     const releasing = wrapper.classList.contains("ae--scrollbox-elastic-release");
-    await AelluxJs.unmount(element, "scrollbox");
+    await aelluxJs.unmount(element, "scrollbox");
     return { stretched, activeOrigin, partialGrowth, maxGrowth, maxSpace,
       releasing, transform: wrapper.style.transform,
       origin: wrapper.style.transformOrigin,
@@ -3857,7 +3857,7 @@ test("elastic native wheel transforms its wrapper and settles", async ({ page })
     const wrapper = element.firstElementChild;
     const event = new WheelEvent("wheel", { deltaY: -60, bubbles: true, cancelable: true });
     element.dispatchEvent(event);
-    await AelluxJs.waitLayout.update(() => {});
+    await aelluxJs.waitLayout.update(() => {});
     const transform = wrapper.style.transform;
     await new Promise(resolve => setTimeout(resolve, 160));
     return { prevented: event.defaultPrevented, limit: element.clientHeight / 4,
@@ -3898,7 +3898,7 @@ test("overscroll-behavior none suppresses elastic pressure in its axis", async (
       deltaY: -60, bubbles: true, cancelable: true
     });
     element.dispatchEvent(wheel);
-    await AelluxJs.waitLayout.update(() => {});
+    await aelluxJs.waitLayout.update(() => {});
     return { id, prevented: wheel.defaultPrevented,
       transform: element.firstElementChild.style.transform };
   })));
@@ -3990,7 +3990,7 @@ test("elastic native touch stretches while pulling beyond an edge", async ({ pag
     element.dispatchEvent(touchEvent("touchstart", 40, true));
     const move = touchEvent("touchmove", 100, true);
     element.dispatchEvent(move);
-    await AelluxJs.waitLayout.update(() => {});
+    await aelluxJs.waitLayout.update(() => {});
     const transform = element.firstElementChild.style.transform;
     element.dispatchEvent(touchEvent("touchend", 100, false));
     return { prevented: move.defaultPrevented, limit: element.clientHeight / 4, transform,
@@ -4066,7 +4066,7 @@ test("elastic pointer drag moves its wrapper away from the right edge", async ({
       bubbles: true, cancelable: true, isPrimary: true, pointerId: 23,
       pointerType: "mouse", buttons: 1, clientX: x - 60, clientY: y - 60
     }));
-    await AelluxJs.waitLayout.update(() => {});
+    await aelluxJs.waitLayout.update(() => {});
     return {
       transform: wrapper.style.transform,
       origin: wrapper.style.transformOrigin,
@@ -4106,7 +4106,7 @@ test("elastic pointer drag moves its wrapper away from the bottom edge", async (
       bubbles: true, cancelable: true, isPrimary: true, pointerId: 124,
       pointerType: "mouse", buttons: 1, clientX: x, clientY: y - 60
     }));
-    await AelluxJs.waitLayout.update(() => {});
+    await aelluxJs.waitLayout.update(() => {});
     const result = { transform: wrapper.style.transform,
       origin: wrapper.style.transformOrigin, scrollTop: element.scrollTop,
       maxY, gapY: before - wrapper.getBoundingClientRect().bottom };
@@ -4145,14 +4145,14 @@ test("elastic trailing pivot keeps wrapper dimensions without minimum sizes", as
       bubbles: true, cancelable: true, isPrimary: true, pointerId: 53,
       pointerType: "mouse", buttons: 1, clientX: x - 60, clientY: y - 60
     }));
-    await AelluxJs.waitLayout.update(() => {});
+    await aelluxJs.waitLayout.update(() => {});
     const origin = wrapper.style.transformOrigin.split(" ");
     const result = { originX: Number.parseFloat(origin[0]), originY: Number.parseFloat(origin[1]),
       wrapperWidth: wrapper.offsetWidth, wrapperHeight: wrapper.offsetHeight, beforeWrapper,
       contentWidth: wrapper.scrollWidth, contentHeight: wrapper.scrollHeight,
       minWidth: wrapper.style.minWidth, minHeight: wrapper.style.minHeight,
       transform: wrapper.style.transform };
-    await AelluxJs.unmount(element, "scrollbox");
+    await aelluxJs.unmount(element, "scrollbox");
     return { ...result, restoredMinWidth: wrapper.style.minWidth,
       restoredMinHeight: wrapper.style.minHeight };
   });
@@ -4192,7 +4192,7 @@ test("elastic bottom and right transform animates during release", async ({ page
       bubbles: true, cancelable: true, isPrimary: true, pointerId: 41,
       pointerType: "mouse", buttons: 1, clientX: x - 60, clientY: y - 60
     }));
-    await AelluxJs.waitLayout.update(() => {});
+    await aelluxJs.waitLayout.update(() => {});
     const during = gap();
     window.dispatchEvent(new PointerEvent("pointerup", {
       bubbles: true, isPrimary: true, pointerId: 41, pointerType: "mouse",
@@ -4223,7 +4223,7 @@ test("elastic native wheel moves its wrapper at bottom and right limits", async 
       deltaX: 60, deltaY: 60, bubbles: true, cancelable: true
     });
     element.dispatchEvent(event);
-    await AelluxJs.waitLayout.update(() => {});
+    await aelluxJs.waitLayout.update(() => {});
     return {
       prevented: event.defaultPrevented,
       transform: element.firstElementChild.style.transform,
@@ -4256,7 +4256,7 @@ test("elastic margins preserve the scroll range at trailing edges", async ({ pag
       element.dispatchEvent(new WheelEvent("wheel", {
         deltaX, deltaY, bubbles: true, cancelable: true
       }));
-      await AelluxJs.waitLayout.update(() => {});
+      await aelluxJs.waitLayout.update(() => {});
       return {
         before, width: element.scrollWidth, height: element.scrollHeight,
         left: element.scrollLeft, top: element.scrollTop,
@@ -4303,7 +4303,7 @@ test("elastic limits accept fractions and pixel values per axis", async ({ page 
     element.dispatchEvent(new WheelEvent("wheel", {
       deltaX: -600, deltaY: -600, bubbles: true, cancelable: true
     }));
-    await AelluxJs.waitLayout.update(() => {});
+    await aelluxJs.waitLayout.update(() => {});
     const transform = wrapper.style.transform;
     const scale = /scale\(([^,()]+)(?:,\s*([^)]+))?\)/.exec(transform);
     const translate = /translate3d\(([^p]+)px, ([^p]+)px, 0(?:px)?\)/.exec(transform);
@@ -4328,7 +4328,7 @@ test("elastic limits accept fractions and pixel values per axis", async ({ page 
     expect(item.grownY, JSON.stringify(item)).toBeCloseTo(2 * y, 1);
     expect(item.grownX).toBeCloseTo(2 * x, 1);
   }
-  expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory(1)[0]?.code)).toBe(2015);
+  expect(await page.evaluate(() => aelluxJs.diagnostics.showHistory(1)[0]?.code)).toBe(2015);
 });
 
 test("elastic returns by 15 percent per native frame independently of CSS publication", async ({ page }) => {
@@ -4364,8 +4364,8 @@ test("elastic returns by 15 percent per native frame independently of CSS public
     window.elasticReleaseFrames = 0;
     window.elasticPublications = [];
     window.inElasticUpdate = false;
-    const scheduler = AelluxJs.waitLayout;
-    AelluxJs.waitLayout = { ...scheduler, update(...args) {
+    const scheduler = aelluxJs.waitLayout;
+    aelluxJs.waitLayout = { ...scheduler, update(...args) {
       const i = typeof args[0] === "number" ? 1 : 0, callback = args[i];
       args[i] = (...values) => { inElasticUpdate = true; try { return callback(...values); } finally { inElasticUpdate = false; } };
       return scheduler.update(...args);
@@ -4378,7 +4378,7 @@ test("elastic returns by 15 percent per native frame independently of CSS public
       });
       return result;
     };
-    AelluxJs.waitLayout.setVisualFPSLimit(990099, 20);
+    aelluxJs.waitLayout.setVisualFPSLimit(990099, 20);
     elasticPointer("pointerup", 90, 0);
     // Register after the release callback so the counter represents completed
     // native physics steps at the instant each CSS publication occurs.
@@ -4388,7 +4388,7 @@ test("elastic returns by 15 percent per native frame independently of CSS public
     window.restoreElasticProbe = () => {
       cancelAnimationFrame(frameId);
       scheduler.setVisualFPSLimit(990099, null);
-      AelluxJs.waitLayout = scheduler;
+      aelluxJs.waitLayout = scheduler;
       CSSStyleDeclaration.prototype.setProperty = set;
     };
   });
@@ -4414,7 +4414,7 @@ test("elastic snapback is immediate with reduced motion", async ({ page }) => {
   await setup(page, `<div id="box" data-ae-scrollbox="pointer"
     data-ae-scrollbox-momentum="false" style="width:100px;height:100px;overflow:auto">
     <div data-ae-scrollbox-elastic style="width:100px;height:300px"></div></div>`);
-  await page.evaluate(() => AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" }));
+  await page.evaluate(() => aelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "reduced" }));
   const result = await page.evaluate(async () => {
     const element = document.getElementById("box");
     const wrapper = element.firstElementChild;
@@ -4427,7 +4427,7 @@ test("elastic snapback is immediate with reduced motion", async ({ page }) => {
     });
     element.dispatchEvent(pointer("pointerdown", y, 1));
     window.dispatchEvent(pointer("pointermove", y + 60, 1));
-    await AelluxJs.waitLayout.update(() => {});
+    await aelluxJs.waitLayout.update(() => {});
     const during = wrapper.style.transform;
     window.dispatchEvent(pointer("pointerup", y + 60, 0));
     return { during, after: wrapper.style.transform,
@@ -4464,7 +4464,7 @@ test("elastic reports a diagnostic when its marked child is not the only direct 
     const event = new WheelEvent("wheel", { deltaY: -60, bubbles: true, cancelable: true });
     element.dispatchEvent(event);
     return { prevented: event.defaultPrevented,
-      code: AelluxJs.diagnostics.showHistory(1)[0]?.code,
+      code: aelluxJs.diagnostics.showHistory(1)[0]?.code,
       transform: element.firstElementChild.style.transform };
   });
   expect(result).toEqual({ prevented: false, code: 1120, transform: "" });

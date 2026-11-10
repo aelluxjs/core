@@ -22,16 +22,16 @@
       record("SnapshotRestore", event.detail.popState);
     });
     document.getElementById("child-ajax-replace").addEventListener("click", function () {
-      AelluxJs.dispatch("PushAjaxReplace", {
+      aelluxJs.dispatch("PushAjaxReplace", {
         detail: {
           url: "./state-navigation-iframe-child.html?ajax=next",
           selectors: ["#content"]
         }
       });
     });
-    AelluxJs.ext("state-navigation");
-    AelluxJs.init({ mode: "basic", useHash: false });
-    window.fixtureReady = AelluxJs.wait("state-navigation");
+    aelluxJs.ext("state-navigation");
+    aelluxJs.init({ mode: "basic", useHash: false });
+    window.fixtureReady = aelluxJs.wait("state-navigation");
   </script>
 </body>
 </html>

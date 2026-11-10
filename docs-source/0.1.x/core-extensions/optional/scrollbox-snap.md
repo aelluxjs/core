@@ -6,7 +6,7 @@ Stability describes implementation maturity and validation, not API compatibilit
 
 In Basic mode, register `$ae.ext("scrollbox", { loadStyle: true })` alongside Scrollbox Snap, or supply Scrollbox CSS yourself. Full includes Scrollbox styles in its shared stylesheet, but loads the Snap implementation as a separate signed script. Its registration is temporary pending migration to an external extension.
 
-Scrollbox Snap é uma Extensão opcional que adiciona pontos de alinhamento ao [Scrollbox](../scrollbox.md). Carregue somente `scrollbox-snap`; durante seu `init`, ela registra Scrollbox caso ainda não esteja registrado e aguarda `AelluxJs.wait("scrollbox")` antes de montar qualquer ponto.
+Scrollbox Snap é uma Extensão opcional que adiciona pontos de alinhamento ao [Scrollbox](../scrollbox.md). Carregue somente `scrollbox-snap`; durante seu `init`, ela registra Scrollbox caso ainda não esteja registrado e aguarda `aelluxJs.wait("scrollbox")` antes de montar qualquer ponto.
 
 ```js
 $ae.ext("scrollbox-snap");

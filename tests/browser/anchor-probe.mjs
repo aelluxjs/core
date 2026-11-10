@@ -1,7 +1,7 @@
 // Test-only observation of scheduler operations; no runtime hooks.
 export async function installAnchorProbe(page) {
   await page.evaluate(() => {
-    const scheduler = AelluxJs.waitLayout;
+    const scheduler = aelluxJs.waitLayout;
     window.switchProbe = { operations: [] };
     window.waitAnchor = async predicate => {
       const deadline = performance.now() + 3000;
@@ -15,7 +15,7 @@ export async function installAnchorProbe(page) {
       await waitAnchor(() => operation.frames.some(frame => frame.switching && frame.at - operation.at >= age));
       return operation.frames.find(frame => frame.switching && frame.at - operation.at >= age);
     };
-    AelluxJs.waitLayout = { ...scheduler, sequence(id, ...stages) {
+    aelluxJs.waitLayout = { ...scheduler, sequence(id, ...stages) {
       const anchor = document.getElementById("indicator");
       if (id < 4000000 || !anchor?.classList.contains("ae--anchor-switching")) return scheduler.sequence(id, ...stages);
       const operation = { id, target: anchor.getAttribute("data-ae-anchor-target"), at: performance.now(), frames: [] };

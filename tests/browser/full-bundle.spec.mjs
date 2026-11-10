@@ -17,19 +17,19 @@ for (const { boot, forceLegacy } of [
   test(`full ${boot} keeps only foundational extensions eager with forceLegacy=${forceLegacy}`, async ({ page, baseURL }) => {
     await page.goto("/tests/index.htm");
     await page.addScriptTag({ url: `/dist/${boot}` });
-    await page.evaluate(forceLegacy => AelluxJs.init({ mode: "full", forceLegacy }), forceLegacy);
+    await page.evaluate(forceLegacy => aelluxJs.init({ mode: "full", forceLegacy }), forceLegacy);
     await expect.poll(() => page.evaluate(() =>
       ["preference", "stateNavigation"].filter(name =>
-        AelluxJs.ext[name]?.initialized !== true)
+        aelluxJs.ext[name]?.initialized !== true)
     )).toEqual([]);
 
     const state = await page.evaluate(() => ({
-      bundled: Object.keys(AelluxJs.bundledExtensions).sort(),
-      registered: Object.keys(AelluxJs.registry.ext).sort(),
-      lazy: Object.keys(AelluxJs.registry.lazyExtSelectors).sort(),
-      externalScripts: [...document.querySelectorAll(`script[${AelluxJs.attr("ext")}]`)]
-        .map(script => script.getAttribute(AelluxJs.attr("ext"))),
-      legacy: AelluxJs.diagnostics.legacy
+      bundled: Object.keys(aelluxJs.bundledExtensions).sort(),
+      registered: Object.keys(aelluxJs.registry.ext).sort(),
+      lazy: Object.keys(aelluxJs.registry.lazyExtSelectors).sort(),
+      externalScripts: [...document.querySelectorAll(`script[${aelluxJs.attr("ext")}]`)]
+        .map(script => script.getAttribute(aelluxJs.attr("ext"))),
+      legacy: aelluxJs.diagnostics.legacy
     }));
     expect(state).toEqual({
       bundled: bundledExtensions,
@@ -53,19 +53,19 @@ for (const { boot, forceLegacy } of [
     });
     await page.goto("/tests/index.htm");
     await page.addScriptTag({ url: `/dist/${boot}` });
-    await page.evaluate(forceLegacy => AelluxJs.init({ mode: "full", forceLegacy }), forceLegacy);
-    await expect.poll(() => page.evaluate(() => AelluxJs.ext.preference?.initialized)).toBe(true);
+    await page.evaluate(forceLegacy => aelluxJs.init({ mode: "full", forceLegacy }), forceLegacy);
+    await expect.poll(() => page.evaluate(() => aelluxJs.ext.preference?.initialized)).toBe(true);
     expect(requests).toEqual([]);
     await page.evaluate(async () => {
       document.body.innerHTML = '<div id="observed" data-ae-viewport style="width:100px;height:50px"></div>';
-      await AelluxJs.mount(document.body);
+      await aelluxJs.mount(document.body);
     });
     await expect.poll(() => page.locator("#observed").evaluate(element =>
       element.style.getPropertyValue("--ae-viewport-visible"))).toBe("1");
     expect(requests).toEqual([]);
     await page.evaluate(async () => {
       document.body.insertAdjacentHTML("beforeend", '<div id="label" data-ae-overflow-marquee style="width:100px">A long overflowing marquee label</div>');
-      await AelluxJs.mount(document.getElementById("label"));
+      await aelluxJs.mount(document.getElementById("label"));
     });
     const min = boot.includes(".min.") ? ".min" : "";
     expect(requests.sort()).toEqual([
@@ -77,7 +77,7 @@ for (const { boot, forceLegacy } of [
     const style = page.locator('link[data-ae-ext-style="overflow-marquee"]');
     expect(await style.getAttribute("integrity")).toBe("sha384-" + createHash("sha384")
       .update(await readFile(new URL(`../../dist/aellux.ext.overflow-marquee${min}.css`, import.meta.url))).digest("base64"));
-    await page.evaluate(() => AelluxJs.destroyExtensions("overflow-marquee"));
+    await page.evaluate(() => aelluxJs.destroyExtensions("overflow-marquee"));
     await expect(style).toHaveCount(0);
     await expect(page.locator("link[data-ae-full-style]")).toHaveCount(1);
   });
@@ -103,9 +103,9 @@ test("Full waits for its shared CSS and mounts lazy extensions without separate 
       <div data-ae-adaptive></div><div data-ae-present="opacity"></div><div data-ae-feedback></div>
     </section>`;
     window.readyCount = 0;
-    AelluxJs.on("Ready", () => window.readyCount++);
-    AelluxJs.init({ mode: "full" });
-    AelluxJs.init({ mode: "full" });
+    aelluxJs.on("Ready", () => window.readyCount++);
+    aelluxJs.init({ mode: "full" });
+    aelluxJs.init({ mode: "full" });
   });
   await expect(page.locator("link[data-ae-full-style]")).toHaveCount(1);
   expect(await page.evaluate(() => window.readyCount)).toBe(0);
@@ -116,11 +116,11 @@ test("Full waits for its shared CSS and mounts lazy extensions without separate 
   await expect(page.locator("#anchor")).toHaveCSS("position", "absolute");
   await expect(page.locator("link[data-ae-ext-style],style[data-ae-weak-style],style[data-ae-anchor-style],style[data-ae-scrollbox-style],style[data-ae-overflow-marquee-style]")).toHaveCount(0);
   expect(requests).toEqual(["/dist/aellux.full.css"]);
-  await page.evaluate(() => AelluxJs.destroyExtensions(["anchor", "scrollbox"]));
+  await page.evaluate(() => aelluxJs.destroyExtensions(["anchor", "scrollbox"]));
   await expect(page.locator("link[data-ae-full-style]")).toHaveCount(1);
   await page.evaluate(async () => {
-    AelluxJs.ext("scrollbox", { loadStyle: true });
-    await AelluxJs.mount(document, "scrollbox");
+    aelluxJs.ext("scrollbox", { loadStyle: true });
+    await aelluxJs.mount(document, "scrollbox");
   });
   await expect(page.locator("#box")).toHaveCSS("overflow", "auto");
   await expect(page.locator("link[data-ae-ext-style]")).toHaveCount(0);
@@ -131,10 +131,10 @@ test("Full reports a missing shared stylesheet and continues runtime startup", a
   await page.route("**/dist/aellux.full.css", route => route.abort());
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
-  await expect.poll(() => page.evaluate(() => AelluxJs.diagnostics.supported)).toBe(true);
-  expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().some(entry =>
-    entry.code === AelluxJs.diagnostics.WARN_EXTENSION_STYLE_LOAD.code && entry.context.extension === "full"))).toBe(true);
+  await page.evaluate(() => aelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => aelluxJs.diagnostics.supported)).toBe(true);
+  expect(await page.evaluate(() => aelluxJs.diagnostics.showHistory().some(entry =>
+    entry.code === aelluxJs.diagnostics.WARN_EXTENSION_STYLE_LOAD.code && entry.context.extension === "full"))).toBe(true);
 });
 
 test("a Present trigger alone loads its lazy extension in full mode", async ({ page }) => {
@@ -142,9 +142,9 @@ test("a Present trigger alone loads its lazy extension in full mode", async ({ p
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => {
     document.body.innerHTML = '<button id="trigger" data-ae-present-trigger="toggle" data-ae-present-target="#later"></button>';
-    AelluxJs.init({ mode: "full" });
+    aelluxJs.init({ mode: "full" });
   });
-  await expect.poll(() => page.evaluate(() => AelluxJs.ext.present?.initialized)).toBe(true);
+  await expect.poll(() => page.evaluate(() => aelluxJs.ext.present?.initialized)).toBe(true);
   await expect.poll(() => page.evaluate(() =>
-    !!AelluxJs.mountManager.controller("trigger")?.present)).toBe(true);
+    !!aelluxJs.mountManager.controller("trigger")?.present)).toBe(true);
 });

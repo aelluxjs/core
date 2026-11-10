@@ -1,7 +1,7 @@
 <div class="text-center">
 <h1>aellux.js 0.1.x</h1>
 <strong class="fs-5">UX Made Easy</strong>
-<p>Modular UX behavior management for browser interfaces with an ES5-compatible AelluxJs boot script and an ES2017+ runtime</p>
+<p>A JavaScript implementation of the aellux semantic model for the Web Platform, with an ES5-compatible boot script and an ES2017+ runtime.</p>
 </div>
 
 During `0.1.x`, only minimal global initialization and declarative Extension activation/mounting are protected. Stable indicates implementation maturity and validation; Extension methods, behavioral settings, events and CSS may change incompatibly, with relevant changes documented. See the [Compatibility Commitment](runtime/compatibility-commitment.md).
@@ -16,6 +16,8 @@ Get Started
 </div>
 
 ## Project Goal
+
+The aellux brand represents the manifesto, principles and semantic model for interactive digital user interfaces. The aellux.js library implements this model; the model's scope extends beyond this implementation. See [Brand Naming and Migration](brand-naming.md) and the authoritative [Brand Naming Guidelines](https://github.com/aelluxjs/core/blob/main/BRAND_GUIDELINES.md).
 
 The goal of aellux.js is to make rich browser experiences easier to build and maintain. It helps developers organize UX features into reusable, modular pieces, reduce duplicated code, and keep applications lean as they grow. For end users, the aim is a faster, more consistent, and more reliable experience across pages and devices.
 
@@ -84,4 +86,4 @@ The [Core Extensions overview](core-extensions/README.md) explains distribution 
 
 ## Acknowledgments
 
-Special thanks to [ChatGPT](https://chatgpt.com/), [Codex](https://openai.com/codex/), [Google](https://www.google.com/), [Gemini](https://gemini.google.com/), [Visual Studio Code](https://code.visualstudio.com/), [Bootstrap](https://getbootstrap.com/), and [GitHub](https://github.com/) for the tools and technologies that supported the development of Aellux.
+Special thanks to [ChatGPT](https://chatgpt.com/), [Codex](https://openai.com/codex/), [Google](https://www.google.com/), [Gemini](https://gemini.google.com/), [Visual Studio Code](https://code.visualstudio.com/), [Bootstrap](https://getbootstrap.com/), and [GitHub](https://github.com/) for the tools and technologies that supported the development of aellux.js.

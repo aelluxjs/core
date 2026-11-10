@@ -97,34 +97,34 @@ const bootstrapEvaluationBuild = await build({
   define: { ...versionDefine, __AELLUX_CORE_ASSET_INTEGRITY__: "{}" }
 });
 runInContext(bootstrapEvaluationBuild.outputFiles[0].text, bootstrapContext);
-runInContext('AelluxJs.ext("adaptive")', bootstrapContext);
+runInContext('aelluxJs.ext("adaptive")', bootstrapContext);
 runInContext(await readFile(adaptiveExtensionPath, "utf8"), bootstrapContext);
 await buildGeneratedStylesheet(
   "aellux.ext.adaptive.css",
-  generateAdaptiveCSS(bootstrapContext.AelluxJs)
+  generateAdaptiveCSS(bootstrapContext.aelluxJs)
 );
 await buildGeneratedStylesheet(
   "aellux.ext.present.css",
-  generatePresentCSS(bootstrapContext.AelluxJs)
+  generatePresentCSS(bootstrapContext.aelluxJs)
 );
 await buildGeneratedStylesheet(
   "aellux.ext.feedback.css",
-  generateFeedbackCSS(bootstrapContext.AelluxJs)
+  generateFeedbackCSS(bootstrapContext.aelluxJs)
 );
 await buildGeneratedStylesheet(
   "aellux.ext.scrollbox.css",
-  generateScrollboxCSS(bootstrapContext.AelluxJs)
+  generateScrollboxCSS(bootstrapContext.aelluxJs)
 );
 await buildGeneratedStylesheet(
   "aellux.ext.anchor.css",
-  generateAnchorCSS(bootstrapContext.AelluxJs)
+  generateAnchorCSS(bootstrapContext.aelluxJs)
 );
 await buildGeneratedStylesheet(
   "aellux.ext.overflow-marquee.css",
-  generateOverflowMarqueeCSS(bootstrapContext.AelluxJs)
+  generateOverflowMarqueeCSS(bootstrapContext.aelluxJs)
 );
-await buildGeneratedStylesheet("aellux.full.css", generateFullCSS(bootstrapContext.AelluxJs));
-await buildGeneratedStylesheet("aellux.ext.input.css", generateInputCSS(bootstrapContext.AelluxJs));
+await buildGeneratedStylesheet("aellux.full.css", generateFullCSS(bootstrapContext.aelluxJs));
+await buildGeneratedStylesheet("aellux.ext.input.css", generateInputCSS(bootstrapContext.aelluxJs));
 
 async function buildGeneratedStylesheet(filename, contents) {
   const outputPath = join(outputDirectory, filename);
@@ -395,10 +395,13 @@ for (const entry of await readdir(outputDirectory, { withFileTypes: true })) {
 
 const readme = await readFile(join(projectRoot, "README.md"), "utf8");
 const distributionReadme = readme.replace(
-  /\]\((docs\/|templates\/|CHANGELOG\.md)/g,
+  /\]\((docs-source\/|docs\/|templates\/|CHANGELOG\.md)/g,
   "](../$1"
 );
 await writeFile(join(outputDirectory, "README.md"), distributionReadme, "utf8");
+const brandGuidelines = await readFile(join(projectRoot, "BRAND_GUIDELINES.md"), "utf8");
+await writeFile(join(outputDirectory, "BRAND_GUIDELINES.md"),
+  brandGuidelines.replace(/\]\((docs-source\/)/g, "](../$1"), "utf8");
 await copyFile(join(projectRoot, "LICENSE"), join(outputDirectory, "LICENSE"));
 await copyFile(join(projectRoot, "THIRD_PARTY_LICENSES.md"), join(outputDirectory, "THIRD_PARTY_LICENSES.md"));
 await cp(join(projectRoot, "third-party", "licenses"), join(outputDirectory, "third-party", "licenses"), { recursive: true });

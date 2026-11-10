@@ -7,19 +7,19 @@
   <script src="../../dist/aellux.js"></script>
   <script>
     var diagnosticCodes = [];
-    var originalError = AelluxJs.diagnostics.error;
-    AelluxJs.diagnostics.error = function (definition, details) {
+    var originalError = aelluxJs.diagnostics.error;
+    aelluxJs.diagnostics.error = function (definition, details) {
       diagnosticCodes.push(definition.code);
-      return originalError.call(AelluxJs.diagnostics, definition, details);
+      return originalError.call(aelluxJs.diagnostics, definition, details);
     };
 
     AelluxJsValidation.run(async function (assert) {
       var incompatible = await $ae.wait("feedback");
-      assert(AelluxJs.diagnostics.legacy === true, "Scenario did not select the Legacy runtime");
+      assert(aelluxJs.diagnostics.legacy === true, "Scenario did not select the Legacy runtime");
       assert(incompatible === null, "Modern-only Extension loaded under the Legacy runtime");
       assert(diagnosticCodes.indexOf(1106) !== -1, "Compatibility diagnostic was not emitted");
       assert(!document.querySelector("script[data-ae-ext='feedback']"), "Incompatible Extension asset was requested");
-      assert(AelluxJs.ext.preference, "Compatible Extension did not initialize after incompatibility");
+      assert(aelluxJs.ext.preference, "Compatible Extension did not initialize after incompatibility");
     });
 
     $ae.ext("feedback", { builds: ["modern"] });

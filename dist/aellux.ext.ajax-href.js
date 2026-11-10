@@ -130,20 +130,20 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
-    const AelluxJs = root.AelluxJs;
+    const aelluxJs = root.aelluxJs;
     const extensionName = "ajax-href";
-    if (!AelluxJs) {
-      throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+    if (!aelluxJs) {
+      throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.`);
     }
-    AelluxJs.extAttach(extensionName, { init, destroy, load });
-    const attribute = AelluxJs.attr(extensionName);
+    aelluxJs.extAttach(extensionName, { init, destroy, load });
+    const attribute = aelluxJs.attr(extensionName);
     function init() {
       document.addEventListener("click", onClick);
-      AelluxJs.on("SnapshotRestore", OnSnapshotRestoreAjax);
+      aelluxJs.on("SnapshotRestore", OnSnapshotRestoreAjax);
     }
     function destroy() {
       document.removeEventListener("click", onClick);
-      AelluxJs.off("SnapshotRestore", OnSnapshotRestoreAjax);
+      aelluxJs.off("SnapshotRestore", OnSnapshotRestoreAjax);
       if (previousController) {
         previousController.abort();
       }
@@ -153,7 +153,7 @@
     async function load(url, selectors, options = {}) {
       var _a, _b, _c, _d;
       options = options || {};
-      const selectorList = AelluxJs.parseSelectors(selectors, (invalid) => selectorDiagnostic(invalid.value, invalid.reason));
+      const selectorList = aelluxJs.parseSelectors(selectors, (invalid) => selectorDiagnostic(invalid.value, invalid.reason));
       if (!selectorList) return null;
       const elements = /* @__PURE__ */ new Map();
       for (const selector of selectorList) {
@@ -167,12 +167,12 @@
       }
       const controller = "AbortController" in window ? new AbortController() : { signal: null, abort: () => null };
       previousController = controller;
-      AelluxJs.dispatch("AjaxHrefStart", { detail: { url, selectors } });
+      aelluxJs.dispatch("AjaxHrefStart", { detail: { url, selectors } });
       try {
-        const response = await AelluxJs.request(url, { signal: controller.signal });
+        const response = await aelluxJs.request(url, { signal: controller.signal });
         const html = await response.text();
         if (previousController !== controller) return null;
-        validateDoubleAttributeHTML(AelluxJs, html, response.url || String(url));
+        validateDoubleAttributeHTML(aelluxJs, html, response.url || String(url));
         const loadedDocument = new DOMParser().parseFromString(html, "text/html");
         let historyRequested = false;
         for (const selector of selectorList) {
@@ -180,7 +180,7 @@
           const currentElement = elements.get(selector);
           if (!currentElement) continue;
           const loadedElement = loadedDocument.querySelector(selector);
-          if (!loadedElement || await AelluxJs.unmount(currentElement) === false) {
+          if (!loadedElement || await aelluxJs.unmount(currentElement) === false) {
             if (!loadedElement)
               selectorDiagnostic(selector, "No response element matches the selector.", currentElement);
             continue;
@@ -188,32 +188,32 @@
           const replacement = document.importNode(loadedElement, true);
           if (previousController !== controller) return null;
           if (!historyRequested && !options.ignoreHistory) {
-            AelluxJs.dispatch("PushAjaxReplace", { detail: { url, selectors } });
+            aelluxJs.dispatch("PushAjaxReplace", { detail: { url, selectors } });
             historyRequested = true;
           }
           currentElement.parentNode.replaceChild(replacement, currentElement);
           if (selector === "title") {
-            AelluxJs.dispatch("UpdateBaseTitle", {
+            aelluxJs.dispatch("UpdateBaseTitle", {
               detail: { title: replacement.textContent }
             });
           }
-          await AelluxJs.mount(replacement);
+          await aelluxJs.mount(replacement);
         }
-        AelluxJs.dispatch("AjaxHrefLoaded", { detail: { url, selectors } });
+        aelluxJs.dispatch("AjaxHrefLoaded", { detail: { url, selectors } });
       } catch (error) {
         if (previousController !== controller) return null;
         if (((_a = controller.signal) == null ? void 0 : _a.aborted) || (error == null ? void 0 : error.name) === "AbortError") return null;
         const status = (_d = (_c = (_b = error == null ? void 0 : error.response) == null ? void 0 : _b.status) != null ? _c : error == null ? void 0 : error.status) != null ? _d : null;
-        AelluxJs.dispatch("AjaxHrefError", { detail: { url, selectors, error, status } });
+        aelluxJs.dispatch("AjaxHrefError", { detail: { url, selectors, error, status } });
         throw error;
       } finally {
         if (previousController === controller)
           previousController = null;
-        AelluxJs.dispatch("AjaxHrefComplete", { detail: { url, selectors } });
+        aelluxJs.dispatch("AjaxHrefComplete", { detail: { url, selectors } });
       }
     }
     function selectorDiagnostic(value, reason, element = null) {
-      AelluxJs.diagnostics.warn(AelluxJs.diagnostics.WARN_CONFIGURATION_TARGET, {
+      aelluxJs.diagnostics.warn(aelluxJs.diagnostics.WARN_CONFIGURATION_TARGET, {
         extension: extensionName,
         element,
         attribute,
@@ -237,16 +237,16 @@
       const destinyUrl = comparableUrl(link.href);
       const currentUrl = comparableUrl(window.location.href);
       if (destinyUrl.origin !== currentUrl.origin) {
-        AelluxJs.dispatch("AjaxHrefDropOrigin");
+        aelluxJs.dispatch("AjaxHrefDropOrigin");
         return;
       }
       if (destinyUrl.href === currentUrl.href) {
         if (destinyUrl.hash && destinyUrl.hash !== currentUrl.hash) return;
         event.preventDefault();
         const url = link.href;
-        AelluxJs.dispatch("AjaxHrefStart", { detail: { url, selectors } });
-        AelluxJs.dispatch("AjaxHrefLoaded", { detail: { url, selectors } });
-        AelluxJs.dispatch("AjaxHrefComplete", { detail: { url, selectors } });
+        aelluxJs.dispatch("AjaxHrefStart", { detail: { url, selectors } });
+        aelluxJs.dispatch("AjaxHrefLoaded", { detail: { url, selectors } });
+        aelluxJs.dispatch("AjaxHrefComplete", { detail: { url, selectors } });
         return;
       }
       event.preventDefault();

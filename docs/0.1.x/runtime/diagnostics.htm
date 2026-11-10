@@ -38,7 +38,7 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-PgrxAHrkt22+F09vWG2iuTeiqQ+UCUeSkyAe/nibdP/XtRk8nTZ+VjetKW+okArJ" crossorigin="anonymous">
+  integrity="sha384-q4bpBk5Vqct9IR80W+4o8g4BlPq84mWWb0mV47Q76mgYStKp6AKgCBgxRwr2FPAE" crossorigin="anonymous">
 </head>
 
 <body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
@@ -192,6 +192,13 @@
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
                                         aellux.js Docs                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/brand-naming.htm" data-ae-overflow-marquee="190px">
+                                        Brand Naming and Migration                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -697,7 +704,7 @@
           <main id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content"
             ajax-load="doc-content">
             <h1>Diagnostics</h1>
-<p>The aellux.js boot script exposes structured diagnostics through <code>AelluxJs.diagnostics</code> and <code>$ae.diagnostics</code>. This capability is available before the orchestrator starts, allowing boot, runtime, and Extension failures to use the same catalog.</p>
+<p>The aellux.js boot script exposes structured diagnostics through <code>aelluxJs.diagnostics</code> and <code>$ae.diagnostics</code>. This capability is available before the orchestrator starts, allowing boot, runtime, and Extension failures to use the same catalog.</p>
 <p>Runtime status is also available there: <code>diagnostics.legacy</code> identifies the selected Legacy runtime, <code>diagnostics.supported</code> indicates that the Modern runtime started successfully, and <code>diagnostics.notAvailable</code> lists missing Modern browser capabilities.</p>
 <p>Each catalog entry contains a numeric aellux.js diagnostic code and its default message:</p>
 <p>Shared communication adds <code>ERROR_COMM_DUPLICATE</code> (<strong>1130</strong>) for a second command/query provider and <code>ERROR_COMM_CALLBACK</code> (<strong>1131</strong>) for a failed notification listener. Duplicate registration throws while preserving the first provider; notification failures are isolated and reported with contract/owner context. See <a href="communication.htm">Shared Communication</a>.</p>
@@ -832,7 +839,7 @@ $ae.init({ environment: &quot;production&quot;, verboseLevel: &quot;warn&quot; }
 </tr>
 <tr>
 <td><code>2024</code></td>
-<td><span class="large">Likely misspelled Aellux attribute, with a suggested spelling.</span></td>
+<td><span class="large">Likely misspelled aellux.js attribute, with a suggested spelling.</span></td>
 </tr>
 <tr>
 <td><code>2025</code></td>
@@ -1116,7 +1123,7 @@ $ae.init({ environment: &quot;production&quot;, verboseLevel: &quot;warn&quot; }
                 and
                 <a style="color:inherit!important;" href="https://github.com/" target="_blank"
                   rel="noopener noreferrer">GitHub</a>
-                for the tools and technologies that supported the development of Aellux.
+                for the tools and technologies that supported the development of aellux.js.
               </div>
             </div>
           </footer>

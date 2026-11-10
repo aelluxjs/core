@@ -7,18 +7,18 @@ test("currentPreference reads the resolved HTML value before and after initializ
 
   const values = await page.evaluate(() => {
     const root = document.documentElement;
-    const absent = AelluxJs.currentPreference("reduced-motion");
+    const absent = aelluxJs.currentPreference("reduced-motion");
     root.setAttribute("data-ae-reduced-motion", "no-preference");
     const beforeInit = $ae.currentPreference("reducedMotion");
     root.removeAttribute("data-ae-reduced-motion");
-    AelluxJs.init({ mode: "basic" });
-    const device = AelluxJs.currentPreference("reduced-motion");
-    AelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "no-preference" });
-    const local = AelluxJs.currentPreference("reducedMotion");
+    aelluxJs.init({ mode: "basic" });
+    const device = aelluxJs.currentPreference("reduced-motion");
+    aelluxJs.updatePreferenceAttributesHTML({ reducedMotion: "no-preference" });
+    const local = aelluxJs.currentPreference("reducedMotion");
     root.removeAttribute("data-ae-reduced-motion");
     return { absent, beforeInit, device, local,
-      cleared: AelluxJs.currentPreference("reduced-motion"),
-      sharedAlias: AelluxJs.currentPreference === $ae.currentPreference };
+      cleared: aelluxJs.currentPreference("reduced-motion"),
+      sharedAlias: aelluxJs.currentPreference === $ae.currentPreference };
   });
 
   expect(values).toEqual({ absent: null, beforeInit: "no-preference", device: "reduced",

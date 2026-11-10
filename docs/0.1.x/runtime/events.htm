@@ -38,7 +38,7 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-PgrxAHrkt22+F09vWG2iuTeiqQ+UCUeSkyAe/nibdP/XtRk8nTZ+VjetKW+okArJ" crossorigin="anonymous">
+  integrity="sha384-q4bpBk5Vqct9IR80W+4o8g4BlPq84mWWb0mV47Q76mgYStKp6AKgCBgxRwr2FPAE" crossorigin="anonymous">
 </head>
 
 <body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
@@ -192,6 +192,13 @@
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
                                         aellux.js Docs                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/brand-naming.htm" data-ae-overflow-marquee="190px">
+                                        Brand Naming and Migration                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -698,7 +705,7 @@
             ajax-load="doc-content">
             <h1>Events</h1>
 <p><code>AelluxJsProgress</code> is a generic numeric notification emitted on the producer with <code>bubbles: false</code> and <code>cancelable: false</code>. Detail contains finite numbers <code>{ value, max }</code>, with <code>max &gt; 0</code> and <code>0 &lt;= value &lt;= max</code>. Listen directly with <code>$ae.onEvent(producer, &quot;Progress&quot;, handler)</code>. It is independent of Feedback; <code>feedback.progress()</code> still emits <code>AelluxJsFeedback</code>. Present auto-dismiss adds <code>status</code>, <code>elapsedMs</code>, <code>durationMs</code> and <code>remainingMs</code>; see <a href="../core-extensions/optional/progress.htm">Progress</a>.</p>
-<p>AelluxJs uses the <code>AelluxJs</code> prefix for its DOM events by default. Its event helpers also accept exact names without this prefix. The main API listens on <code>document</code>; <code>onEvent</code> and <code>offEvent</code> listen on an explicit target; a mounted element controller listens on its element. A document listener also receives bubbling events from elements:</p>
+<p>aellux.js retains its DOM event prefix, as in <code>AelluxJsReady</code>, independently of the public global object&#39;s spelling. Its event helpers also accept exact names without this prefix. The main API listens on <code>document</code>; <code>onEvent</code> and <code>offEvent</code> listen on an explicit target; a mounted element controller listens on its element. A document listener also receives bubbling events from elements:</p>
 <pre><code class="language-js">const onUpdate = event =&gt; console.log(event.type);
 $ae.on(&quot;Update&quot;, onUpdate);
 $ae.off(&quot;Update&quot;, onUpdate);
@@ -710,13 +717,13 @@ panel.off(&quot;Layout&quot;, onLayout);
 </code></pre>
 <p>The modern runtime dispatches <code>CustomEvent</code> objects; the boot API uses a regular <code>Event</code> until the runtime starts. Unless noted below, events bubble, are not cancelable, and have no <code>detail</code> payload.</p>
 <h2>Event names and formatting</h2>
-<p><code>$ae.eventName(name)</code> returns the DOM event type used by AelluxJs. The same conversion applies to <code>on</code>, <code>off</code>, <code>onEvent</code>, <code>offEvent</code>, <code>dispatch</code>, <code>dispatchFrom</code>, and a mounted element controller&#39;s <code>on</code>, <code>off</code> and <code>dispatch</code>. Naming follows the same rules in the boot API and the Modern and Legacy runtimes.</p>
+<p><code>$ae.eventName(name)</code> returns the DOM event type used by aellux.js. The same conversion applies to <code>on</code>, <code>off</code>, <code>onEvent</code>, <code>offEvent</code>, <code>dispatch</code>, <code>dispatchFrom</code>, and a mounted element controller&#39;s <code>on</code>, <code>off</code> and <code>dispatch</code>. Naming follows the same rules in the boot API and the Modern and Legacy runtimes.</p>
 <pre><code class="language-js">$ae.eventName(&quot;ready&quot;);           // &quot;AelluxJsReady&quot;
 $ae.eventName(&quot;viewportChange&quot;);  // &quot;AelluxJsViewportChange&quot;
 $ae.eventName(&quot;viewport-change&quot;); // &quot;AelluxJsViewportChange&quot;
 $ae.eventName(&quot;AelluxJsReady&quot;);   // &quot;AelluxJsReady&quot;
 </code></pre>
-<p>For a name without an escape marker, a name already starting with the exact <code>AelluxJs</code> prefix is returned unchanged. Otherwise, the helper uppercases an initial lowercase ASCII letter and lowercase letters following <code>-</code>, removes those hyphens, and adds the prefix. Existing uppercase letters and other characters are preserved. The table below uses the default prefix shipped with aellux.js:</p>
+<p>For a name without an escape marker, a name already starting with the exact DOM event prefix shown above is returned unchanged. Otherwise, the helper uppercases an initial lowercase ASCII letter and lowercase letters following <code>-</code>, removes those hyphens, and adds the prefix. Existing uppercase letters and other characters are preserved. The table below uses the default prefix shipped with aellux.js:</p>
 <table>
 <thead>
 <tr>
@@ -776,7 +783,7 @@ $ae.eventName(&quot;AelluxJsReady&quot;);   // &quot;AelluxJsReady&quot;
 $ae.eventName(&quot;!my-CustomEvent&quot;); // &quot;my-CustomEvent&quot;
 $ae.eventName(&quot;!!custom&quot;);        // &quot;!custom&quot;
 </code></pre>
-<p>Use an exact name to listen for a native DOM event through the Aellux helpers:</p>
+<p>Use an exact name to listen for a native DOM event through the aellux.js helpers:</p>
 <pre><code class="language-js">const button = document.createElement(&quot;button&quot;);
 const onClick = event =&gt; console.log(event.type); // &quot;click&quot;
 
@@ -787,7 +794,7 @@ $ae.offEvent(button, &quot;$click&quot;, onClick);
 <p>Without the marker, <code>onEvent(button, &quot;click&quot;, handler)</code> listens for <code>AelluxJsClick</code>. The same escape syntax works for custom events from other libraries; it is not restricted to native event names.</p>
 <p>The markers only select the event name. They do not enable delegation, change propagation or cancellation, or convert a dispatched <code>CustomEvent</code> into a <code>MouseEvent</code> or <code>PointerEvent</code>. For example, <code>dispatch(&quot;$click&quot;)</code> emits an event named <code>click</code> using the dispatch implementation described above.</p>
 <h3>Native DOM APIs and listener removal</h3>
-<p>Native <code>addEventListener</code>, <code>removeEventListener</code>, <code>Event</code> and <code>CustomEvent</code> use the exact string supplied to them. They do not apply Aellux prefixes or remove escape markers. Use <code>click</code> directly for a native click listener, and use <code>$ae.eventName(name)</code> to obtain an Aellux event type:</p>
+<p>Native <code>addEventListener</code>, <code>removeEventListener</code>, <code>Event</code> and <code>CustomEvent</code> use the exact string supplied to them. They do not apply aellux.js prefixes or remove escape markers. Use <code>click</code> directly for a native click listener, and use <code>$ae.eventName(name)</code> to obtain an aellux.js event type:</p>
 <pre><code class="language-js">const type = $ae.eventName(&quot;panel-ready&quot;);
 const onPanelReady = event =&gt; console.log(event.detail.panelId);
 
@@ -1034,7 +1041,7 @@ $ae.on(&quot;ViewportError&quot;, event =&gt; {
 </code></pre>
 <p>See <a href="../core-extensions/state-navigation.htm">State Navigation</a> for validation rules and history behavior. Scrollbox publishes native <code>scroll</code> events rather than a separate <code>AelluxJsScroll</code> event.</p>
 <h2>Optional PWA notifications</h2>
-<p>The external <a href="../core-extensions/optional/pwa.htm">PWA Extension</a> normalizes <code>PwaInstallAvailable</code>, <code>PwaInstallRequested</code>, <code>PwaInstallAccepted</code>, <code>PwaInstallDismissed</code>, <code>PwaInstallManual</code>, <code>PwaInstalled</code>, <code>PwaWorkerRegistered</code>, <code>PwaUpdateAvailable</code>, <code>PwaUpdateComplete</code> and <code>PwaError</code> through <code>AelluxJs.eventName()</code>. All include <code>detail.status</code>; worker notifications include <code>registration</code>, and errors include <code>operation</code> and <code>error</code>. They bubble from an initiating control or dispatch on <code>document</code>. No PWA event listener is installed until the Extension is explicitly initialized.</p>
+<p>The external <a href="../core-extensions/optional/pwa.htm">PWA Extension</a> normalizes <code>PwaInstallAvailable</code>, <code>PwaInstallRequested</code>, <code>PwaInstallAccepted</code>, <code>PwaInstallDismissed</code>, <code>PwaInstallManual</code>, <code>PwaInstalled</code>, <code>PwaWorkerRegistered</code>, <code>PwaUpdateAvailable</code>, <code>PwaUpdateComplete</code> and <code>PwaError</code> through <code>aelluxJs.eventName()</code>. All include <code>detail.status</code>; worker notifications include <code>registration</code>, and errors include <code>operation</code> and <code>error</code>. They bubble from an initiating control or dispatch on <code>document</code>. No PWA event listener is installed until the Extension is explicitly initialized.</p>
           </main>
 
           <div id="doc-navlinks2" ajax-load="doc-navlinks2">
@@ -1076,7 +1083,7 @@ $ae.on(&quot;ViewportError&quot;, event =&gt; {
                 and
                 <a style="color:inherit!important;" href="https://github.com/" target="_blank"
                   rel="noopener noreferrer">GitHub</a>
-                for the tools and technologies that supported the development of Aellux.
+                for the tools and technologies that supported the development of aellux.js.
               </div>
             </div>
           </footer>

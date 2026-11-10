@@ -38,7 +38,7 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-PgrxAHrkt22+F09vWG2iuTeiqQ+UCUeSkyAe/nibdP/XtRk8nTZ+VjetKW+okArJ" crossorigin="anonymous">
+  integrity="sha384-q4bpBk5Vqct9IR80W+4o8g4BlPq84mWWb0mV47Q76mgYStKp6AKgCBgxRwr2FPAE" crossorigin="anonymous">
 </head>
 
 <body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
@@ -192,6 +192,13 @@
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
                                         aellux.js Docs                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/brand-naming.htm" data-ae-overflow-marquee="190px">
+                                        Brand Naming and Migration                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -841,7 +848,7 @@
 </ul>
 <h3>Visual and adaptive presentation</h3>
 <ul>
-<li>Respect the applicable AelluxJs preferences when the Extension produces behavior related to motion, contrast, transparency, forced colors, text scale, or interface scale.</li>
+<li>Respect the applicable aelluxJs preferences when the Extension produces behavior related to motion, contrast, transparency, forced colors, text scale, or interface scale.</li>
 <li>Do not communicate state through color alone.</li>
 <li>Enlarged text, zoom, and interface scaling must not remove essential content or make an owned control unreachable in supported layouts.</li>
 <li>Adaptation based on viewport or input characteristics must not remove the only available path to essential content or actions.</li>
@@ -872,7 +879,7 @@
 <li>Diagnostics intended only for developers must not be announced to users unless a consuming interface explicitly chooses to present them.</li>
 </ul>
 <h2>Lifecycle Requirements</h2>
-<p><code>mount</code> may add temporary ARIA and AelluxJs data attributes to its mounted element. Each Extension must save the specific attributes and inline styles it changes and restore them during <code>unmount</code>, including changes to descendants. Use <code>AelluxJs.persist.element.save(element, attributes, cssProperties)</code> to create an independent snapshot for each element.</p>
+<p><code>mount</code> may add temporary ARIA and aelluxJs data attributes to its mounted element. Each Extension must save the specific attributes and inline styles it changes and restore them during <code>unmount</code>, including changes to descendants. Use <code>aelluxJs.persist.element.save(element, attributes, cssProperties)</code> to create an independent snapshot for each element.</p>
 <p>For every resource or user-facing state it owns, an Extension must:</p>
 <ol>
 <li>Read the initial state before overwriting it.</li>
@@ -983,7 +990,7 @@
                 and
                 <a style="color:inherit!important;" href="https://github.com/" target="_blank"
                   rel="noopener noreferrer">GitHub</a>
-                for the tools and technologies that supported the development of Aellux.
+                for the tools and technologies that supported the development of aellux.js.
               </div>
             </div>
           </footer>

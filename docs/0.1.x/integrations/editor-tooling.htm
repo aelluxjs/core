@@ -38,7 +38,7 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-PgrxAHrkt22+F09vWG2iuTeiqQ+UCUeSkyAe/nibdP/XtRk8nTZ+VjetKW+okArJ" crossorigin="anonymous">
+  integrity="sha384-q4bpBk5Vqct9IR80W+4o8g4BlPq84mWWb0mV47Q76mgYStKp6AKgCBgxRwr2FPAE" crossorigin="anonymous">
 </head>
 
 <body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
@@ -192,6 +192,13 @@
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
                                         aellux.js Docs                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/brand-naming.htm" data-ae-overflow-marquee="190px">
+                                        Brand Naming and Migration                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -679,7 +686,7 @@
           <main id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content"
             ajax-load="doc-content">
             <h1>Editor support</h1>
-<p>Aellux ships generated semantic metadata for HTML/CSS completion, hover documentation and values. These files are development tooling; browsers do not load them and they add no code to the runtime bundles.</p>
+<p>aellux.js ships generated semantic metadata for HTML/CSS completion, hover documentation and values. These files are development tooling; browsers do not load them and they add no code to the runtime bundles.</p>
 <table>
 <thead>
 <tr>
@@ -715,7 +722,7 @@
   ]
 }
 </code></pre>
-<p>Paths are relative to the workspace. In an Aellux checkout, use <code>./dist/aellux.html-data.json</code> and <code>./dist/aellux.css-data.json</code>; the repository settings already reference these paths. Reload the VS Code window after changing Custom Data settings. The built-in HTML/CSS language services consume these files; other template-language extensions may require their own configuration.</p>
+<p>Paths are relative to the workspace. In an aellux.js checkout, use <code>./dist/aellux.html-data.json</code> and <code>./dist/aellux.css-data.json</code>; the repository settings already reference these paths. Reload the VS Code window after changing Custom Data settings. The built-in HTML/CSS language services consume these files; other template-language extensions may require their own configuration.</p>
 <p>These are the native <a href="https://code.visualstudio.com/api/extension-guides/custom-data-extension">VS Code Custom Data</a> formats. Custom Data does not supply JavaScript signatures or a runtime linter. VS Code&#39;s CSS Custom Data format has no custom class contribution kind; the class catalog is available through Web Types and the shared semantic file.</p>
 <h2>JetBrains</h2>
 <p>The published package declares its metadata through:</p>
@@ -728,7 +735,7 @@
   &quot;web-types&quot;: &quot;./node_modules/@aelluxjs/core/dist/aellux.web-types.json&quot;
 }
 </code></pre>
-<p>Use <code>./dist/aellux.web-types.json</code> in an Aellux checkout. Existing native HTML tags are extended rather than replaced. DOM events are contributed in the JS namespace. Closed attribute sets use TypeScript literal unions; selectors, IDs, pivot lists, property lists and preference values remain open strings. The metadata does not override the library&#39;s normal JavaScript symbols or claim to provide TypeScript declarations.</p>
+<p>Use <code>./dist/aellux.web-types.json</code> in an aellux.js checkout. Existing native HTML tags are extended rather than replaced. DOM events are contributed in the JS namespace. Closed attribute sets use TypeScript literal unions; selectors, IDs, pivot lists, property lists and preference values remain open strings. The metadata does not override the library&#39;s normal JavaScript symbols or claim to provide TypeScript declarations.</p>
 <h2>Semantic coverage</h2>
 <p>The catalog snapshot generated on 2026-11-09 contains 92 attributes, 103 CSS properties, 1,575 classes and 72 events. Native editor files expose 66 global input/output attributes and 58 public CSS properties; tag-specific declarations also appear on native elements. Private runtime markers and implementation properties stay in the shared catalog. The native <code>link</code> tag receives the <code>aelluxjs-ext</code> relation suggestion. Counts and catalog inclusion do not expand the minimal initialization and declarative activation/mounting <a href="../runtime/compatibility-commitment.htm">compatibility guarantee</a>.</p>
 <p>Descriptions distinguish editable inputs from runtime outputs such as progress, measured dimensions, resolved root preferences and state classes. Suggestions for open grammars are examples, not exhaustive allowed values. For example, <code>data-ae-present-target</code> accepts application IDs, and <code>data-ae-anchor</code> accepts candidate lists; neither is restricted to the examples. Removed <code>data-ae-present-key</code> is excluded: Present Group membership uses native IDs.</p>
@@ -770,7 +777,7 @@ npm run test:unit
                 and
                 <a style="color:inherit!important;" href="https://github.com/" target="_blank"
                   rel="noopener noreferrer">GitHub</a>
-                for the tools and technologies that supported the development of Aellux.
+                for the tools and technologies that supported the development of aellux.js.
               </div>
             </div>
           </footer>

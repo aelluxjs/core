@@ -711,7 +711,7 @@
             },
             {
               "name": "rel",
-              "description": "Registers an Aellux Extension declared by this link. href is an official name or compatible Extension URL; data-ae-load-when enables lazy loading.\n\nValue syntax: string.\n\nSuggested values: `aelluxjs-ext`. This is an open grammar, not a closed enumeration.",
+              "description": "Registers an aellux.js Extension declared by this link. href is an official name or compatible Extension URL; data-ae-load-when enables lazy loading.\n\nValue syntax: string.\n\nSuggested values: `aelluxjs-ext`. This is an open grammar, not a closed enumeration.",
               "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/extensions/declarative-loading.htm",
               "value": {
                 "kind": "plain",
@@ -963,7 +963,7 @@
         },
         {
           "name": "--ae-present-effect-aellux-ease",
-          "description": "Optional Aellux easing name read from the effect target; unsupported sampling retains the authored CSS easing.\n\nValue syntax: <string>.",
+          "description": "Optional aellux.js easing name read from the effect target; unsupported sampling retains the authored CSS easing.\n\nValue syntax: <string>.",
           "doc-url": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
         },
         {

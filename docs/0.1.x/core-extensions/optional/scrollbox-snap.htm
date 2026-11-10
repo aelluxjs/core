@@ -38,7 +38,7 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-PgrxAHrkt22+F09vWG2iuTeiqQ+UCUeSkyAe/nibdP/XtRk8nTZ+VjetKW+okArJ" crossorigin="anonymous">
+  integrity="sha384-q4bpBk5Vqct9IR80W+4o8g4BlPq84mWWb0mV47Q76mgYStKp6AKgCBgxRwr2FPAE" crossorigin="anonymous">
 </head>
 
 <body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
@@ -192,6 +192,13 @@
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
                                         aellux.js Docs                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/brand-naming.htm" data-ae-overflow-marquee="190px">
+                                        Brand Naming and Migration                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -704,7 +711,7 @@
 <p><strong>Distribution:</strong> Optional Extension. <strong>Stability:</strong> Stable.</p>
 <p>Stability describes implementation maturity and validation, not API compatibility. Only the <a href="../../runtime/compatibility-commitment.htm">minimal initialization and declarative activation/mounting contract</a> is protected during <code>0.1.x</code>.</p>
 <p>In Basic mode, register <code>$ae.ext(&quot;scrollbox&quot;, { loadStyle: true })</code> alongside Scrollbox Snap, or supply Scrollbox CSS yourself. Full includes Scrollbox styles in its shared stylesheet, but loads the Snap implementation as a separate signed script. Its registration is temporary pending migration to an external extension.</p>
-<p>Scrollbox Snap é uma Extensão opcional que adiciona pontos de alinhamento ao <a href="../scrollbox.htm">Scrollbox</a>. Carregue somente <code>scrollbox-snap</code>; durante seu <code>init</code>, ela registra Scrollbox caso ainda não esteja registrado e aguarda <code>AelluxJs.wait(&quot;scrollbox&quot;)</code> antes de montar qualquer ponto.</p>
+<p>Scrollbox Snap é uma Extensão opcional que adiciona pontos de alinhamento ao <a href="../scrollbox.htm">Scrollbox</a>. Carregue somente <code>scrollbox-snap</code>; durante seu <code>init</code>, ela registra Scrollbox caso ainda não esteja registrado e aguarda <code>aelluxJs.wait(&quot;scrollbox&quot;)</code> antes de montar qualquer ponto.</p>
 <pre><code class="language-js">$ae.ext(&quot;scrollbox-snap&quot;);
 $ae.init({ mode: &quot;basic&quot; });
 </code></pre>
@@ -835,7 +842,7 @@ gallery.previous();
                 and
                 <a style="color:inherit!important;" href="https://github.com/" target="_blank"
                   rel="noopener noreferrer">GitHub</a>
-                for the tools and technologies that supported the development of Aellux.
+                for the tools and technologies that supported the development of aellux.js.
               </div>
             </div>
           </footer>

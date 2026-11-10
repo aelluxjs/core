@@ -1,6 +1,6 @@
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 
-// Forward CSS easing, independent of Web Animations and of Aellux easing names.
+// Forward CSS easing, independent of Web Animations and of aellux.js easing names.
 // Input time is clamped by the caller; output may overshoot the endpoints.
 export function createCssEasing(value, api) {
   const name = String(value || "ease-in-out").trim().toLowerCase();

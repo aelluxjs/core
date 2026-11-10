@@ -20,7 +20,7 @@ for (const boot of ["aellux.js", "aellux.min.js"]) {
       const cause = [];
       parse(["main", "["], invalid => cause.push({ value: invalid.value, native: invalid.cause instanceof Error }));
       return {
-        aliases: valid === AelluxJs.isValidSelector && parse === AelluxJs.parseSelectors,
+        aliases: valid === aelluxJs.isValidSelector && parse === aelluxJs.parseSelectors,
         valid: ["#missing-selector-probe", "main, aside", ":is(main, aside)", "::before"].map(valid),
         invalid: [null, undefined, [], {}, false, 123, "", " ", "[", "main,,aside"].map(valid),
         missing: document.querySelector("#missing-selector-probe"),

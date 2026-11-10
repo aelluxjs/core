@@ -8,7 +8,7 @@ test("document validators retain their initial URL and independent one-shot stat
   const requests = [];
   const root = {
     document: { URL: "https://example.test/initial", contentType: "text/html" },
-    AelluxJs: {
+    aelluxJs: {
       options: { environment: "production" },
       request: async (url, options) => {
         requests.push({ url, options });
@@ -18,7 +18,7 @@ test("document validators retain their initial URL and independent one-shot stat
   };
   const first = createDocumentHTMLValidator(root);
   first();
-  root.AelluxJs.options.environment = "development";
+  root.aelluxJs.options.environment = "development";
   root.document.URL = "https://example.test/next";
   const second = createDocumentHTMLValidator(root);
   first();

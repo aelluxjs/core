@@ -81,7 +81,7 @@
   function installProgressFallback(root, element) {
     var tag = element.tagName.toLowerCase();
     if (hasProgressAPI(root, tag)) return null;
-    var api = root.AelluxJs;
+    var api = root.aelluxJs;
     var marker = api.attr("progress-fallback");
     var names = tag === "progress" ? ["value", "max", "position"] : ["value", "min", "max", "low", "high", "optimum"];
     var descriptors = names.map(function(name) {
@@ -239,17 +239,17 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
-    var AelluxJs = root.AelluxJs;
+    var aelluxJs = root.aelluxJs;
     var extensionName = "progress";
-    if (!AelluxJs) throw new Error("[aellux.js] Load the boot script before the progress Extension.");
-    var targetAttribute = AelluxJs.attr("progress-target");
+    if (!aelluxJs) throw new Error("[aellux.js] Load the boot script before the progress Extension.");
+    var targetAttribute = aelluxJs.attr("progress-target");
     var mounted = /* @__PURE__ */ new Map();
-    AelluxJs.extAttach(extensionName, {
+    aelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy
     });
     function init() {
-      AelluxJs.mountManager.add({
+      aelluxJs.mountManager.add({
         extensionName: extensionName,
         selector: "progress, meter",
         priority: -1,
@@ -259,7 +259,7 @@
       });
     }
     function destroy() {
-      AelluxJs.mountManager.remove({
+      aelluxJs.mountManager.remove({
         extensionName: extensionName
       });
       var _iterator = _createForOfIteratorHelper(mounted.keys()), _step;
@@ -278,7 +278,7 @@
       if (mounted.has(element)) return;
       var state = {
         target: null,
-        memory: AelluxJs.persist.element.save(element, ["value"]),
+        memory: aelluxJs.persist.element.save(element, ["value"]),
         fallback: true ? installProgressFallback(root, element) : null,
         observer: null,
         listener: null
@@ -306,12 +306,12 @@
     function connect(element) {
       var state = mounted.get(element);
       if (!state || element.tagName.toLowerCase() !== "progress") return;
-      if (state.target) AelluxJs.offEvent(state.target, "Progress", state.listener);
+      if (state.target) aelluxJs.offEvent(state.target, "Progress", state.listener);
       var id = element.getAttribute(targetAttribute);
-      state.target = id === null ? null : AelluxJs.elementOrId(id, {
+      state.target = id === null ? null : aelluxJs.elementOrId(id, {
         method: "progress.target"
       });
-      if (state.target) AelluxJs.onEvent(state.target, "Progress", state.listener);
+      if (state.target) aelluxJs.onEvent(state.target, "Progress", state.listener);
     }
     function unmount(element) {
       var _state$observer, _state$fallback;
@@ -319,7 +319,7 @@
       if (!state) return;
       mounted.delete(element);
       (_state$observer = state.observer) === null || _state$observer === void 0 || _state$observer.disconnect();
-      if (state.target) AelluxJs.offEvent(state.target, "Progress", state.listener);
+      if (state.target) aelluxJs.offEvent(state.target, "Progress", state.listener);
       state.memory.restore();
       (_state$fallback = state.fallback) === null || _state$fallback === void 0 || _state$fallback.destroy();
     }

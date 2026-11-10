@@ -13,8 +13,8 @@ async function start(page, options = {}) {
     document.body.innerHTML = '<div id="motion-box" data-ae-maxfps="30" style="height:20px;transition-property:opacity,height"></div>';
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(options => AelluxJs.init({ mode: "basic", skipGlobalMount: true, ...options }), options);
-  await expect.poll(() => page.evaluate(() => typeof AelluxJs.motion?.run)).toBe("function");
+  await page.evaluate(options => aelluxJs.init({ mode: "basic", skipGlobalMount: true, ...options }), options);
+  await expect.poll(() => page.evaluate(() => typeof aelluxJs.motion?.run)).toBe("function");
 }
 
 async function startPresent(page, options = {}) {
@@ -26,9 +26,9 @@ async function startPresent(page, options = {}) {
     element.hidden = true;
     element.style.cssText = "width:100px;height:20px;--ae-pop-duration:600ms;--ae-from-transform:translateX(0);--ae-pop-transform:translateX(100px)";
     document.getElementById("motion-box").replaceWith(element);
-    AelluxJs.ext("present", { loadStyle: true });
-    await AelluxJs.wait("present");
-    await AelluxJs.mount(element, "present");
+    aelluxJs.ext("present", { loadStyle: true });
+    await aelluxJs.wait("present");
+    await aelluxJs.mount(element, "present");
   });
 }
 
@@ -76,8 +76,8 @@ test("CSS motion is controlled or safely falls back per browser operation", asyn
   await page.evaluate(() => {
     const element = document.getElementById("motion-box");
     getComputedStyle(element).opacity;
-    window.motionResult = AelluxJs.motion.run(element, {
-      id: AelluxJs.motion.id(),
+    window.motionResult = aelluxJs.motion.run(element, {
+      id: aelluxJs.motion.id(),
       apply: () => element.classList.add("active")
     });
   });
@@ -96,8 +96,8 @@ test("cssMotionController false leaves CSS motion native", async ({ page }) => {
   const result = await page.evaluate(async () => {
     const element = document.getElementById("motion-box");
     getComputedStyle(element).opacity;
-    const promise = AelluxJs.motion.run(element, {
-      id: AelluxJs.motion.id(),
+    const promise = aelluxJs.motion.run(element, {
+      id: aelluxJs.motion.id(),
       apply: () => element.classList.add("active")
     });
     await new Promise(resolve => setTimeout(resolve, 30));
@@ -112,9 +112,9 @@ test("rapid replacements cannot schedule an obsolete capture over the current op
   await start(page);
   const results = await page.evaluate(async () => {
     const element = document.getElementById("motion-box");
-    const id = AelluxJs.motion.id();
+    const id = aelluxJs.motion.id();
     getComputedStyle(element).opacity;
-    const run = visible => AelluxJs.motion.run(element, {
+    const run = visible => aelluxJs.motion.run(element, {
       id, apply: () => element.classList.toggle("active", visible), nativeDuration: 240
     });
     return Promise.all([run(true), run(false), run(true)]);
@@ -124,12 +124,12 @@ test("rapid replacements cannot schedule an obsolete capture over the current op
   await expect(page.locator("#motion-box")).toHaveCSS("opacity", "1");
 });
 
-test("advanced Aellux easing is represented as native linear samples", async ({ page }) => {
+test("advanced aellux.js easing is represented as native linear samples", async ({ page }) => {
   await start(page);
   await page.evaluate(() => {
     const element = document.getElementById("motion-box");
-    window.motionResult = AelluxJs.motion.run(element, {
-      id: AelluxJs.motion.id(),
+    window.motionResult = aelluxJs.motion.run(element, {
+      id: aelluxJs.motion.id(),
       easing: "elasticOut",
       apply: () => element.classList.add("animated")
     });
@@ -155,8 +155,8 @@ test("a mixed-property operation uses one timeline at the conservative FPS", asy
       if (running) requestAnimationFrame(sample);
     }
     requestAnimationFrame(sample);
-    const result = await AelluxJs.motion.run(element, {
-      id: AelluxJs.motion.id(),
+    const result = await aelluxJs.motion.run(element, {
+      id: aelluxJs.motion.id(),
       apply: () => element.classList.add("combined")
     });
     running = false;

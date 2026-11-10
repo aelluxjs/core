@@ -12,9 +12,9 @@ async function start(page, markup, { mode = "full", forceLegacy = false, missing
   }, { markup, missing });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(({ mode, forceLegacy }) => new Promise(resolve => {
-    if (mode === "basic") for (const name of ["progress", "present", "feedback"]) AelluxJs.ext(name);
-    AelluxJs.on("Ready", resolve, { once: true });
-    AelluxJs.init({ mode, forceLegacy });
+    if (mode === "basic") for (const name of ["progress", "present", "feedback"]) aelluxJs.ext(name);
+    aelluxJs.on("Ready", resolve, { once: true });
+    aelluxJs.init({ mode, forceLegacy });
   }), { mode, forceLegacy });
 }
 
@@ -44,7 +44,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
         window.valueAtPopping = notice.querySelector("progress").value;
       });
       // Hold opening completion independently of browser animation clocks.
-      AelluxJs.motion = { ...AelluxJs.motion, run(element, options) {
+      aelluxJs.motion = { ...aelluxJs.motion, run(element, options) {
         options.apply();
         return new Promise(resolve => {
           window.finishOpening = () => resolve({ status: "completed" });
@@ -66,7 +66,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
     expect(zeros).toEqual([0, 0]);
     await page.clock.runFor(400);
     expect(await page.locator("#notice progress").evaluate(p => p.value)).toBeGreaterThan(35);
-    await page.evaluate(() => AelluxJs.unmount(document.getElementById("notice")));
+    await page.evaluate(() => aelluxJs.unmount(document.getElementById("notice")));
   });
 
   test(`native controls, generic producer and lifecycle (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
@@ -76,7 +76,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
     expect(await page.evaluate(() => {
       const p = document.getElementById("p"), m = document.getElementById("m");
       const before = p.position;
-      const send = detail => AelluxJs.dispatchFrom(document.getElementById("producer"), "Progress", { bubbles: false, detail });
+      const send = detail => aelluxJs.dispatchFrom(document.getElementById("producer"), "Progress", { bubbles: false, detail });
       send({ value: 1, max: 4 });
       const value = p.value;
       for (const detail of [{ value: NaN, max: 1 }, { value: Infinity, max: 1 }, { value: -1, max: 1 },
@@ -86,15 +86,15 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
     })).toEqual({ before: -1, value: 10, after: 10, max: 40, meter: [-10, 20, 0, 15, 10, 5], fallback: 0 });
     await page.locator("#p").evaluate(p => p.setAttribute("data-ae-progress-target", "other"));
     await expect.poll(() => page.evaluate(() => {
-      AelluxJs.dispatchFrom(document.getElementById("other"), "Progress", { bubbles: false, detail: { value: 1, max: 2 } });
+      aelluxJs.dispatchFrom(document.getElementById("other"), "Progress", { bubbles: false, detail: { value: 1, max: 2 } });
       return document.getElementById("p").value;
     })).toBe(20);
     expect(await page.evaluate(async () => {
       const p = document.getElementById("p");
-      AelluxJs.dispatchFrom(document.getElementById("producer"), "Progress", { bubbles: false, detail: { value: 1, max: 1 } });
+      aelluxJs.dispatchFrom(document.getElementById("producer"), "Progress", { bubbles: false, detail: { value: 1, max: 1 } });
       const retargeted = p.value;
-      await AelluxJs.unmount(p, "progress");
-      AelluxJs.dispatchFrom(document.getElementById("other"), "Progress", { detail: { value: 1, max: 1 } });
+      await aelluxJs.unmount(p, "progress");
+      aelluxJs.dispatchFrom(document.getElementById("other"), "Progress", { detail: { value: 1, max: 1 } });
       return { retargeted, position: p.position, max: p.max, valueAttribute: p.getAttribute("value") };
     })).toEqual({ retargeted: 20, position: -1, max: 40, valueAttribute: null });
   });
@@ -105,12 +105,12 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
       const source = document.getElementById("source"), group = document.getElementById("group");
       const before = [];
       group.addEventListener("AelluxJsBeforePop", event => before.push([event.target.id, event.target.textContent]));
-      AelluxJs.ext.feedback.success("First", source);
-      AelluxJs.ext.feedback.error("Second", source);
-      AelluxJs.ext.feedback.warning("Third", source);
+      aelluxJs.ext.feedback.success("First", source);
+      aelluxJs.ext.feedback.error("Second", source);
+      aelluxJs.ext.feedback.warning("Third", source);
       await new Promise(resolve => setTimeout(resolve, 100));
       const messages = Array.from(group.children).map(e => [e.id, e.textContent, e.hidden]);
-      AelluxJs.ext.feedback.announce("Fourth", source);
+      aelluxJs.ext.feedback.announce("Fourth", source);
       await new Promise(resolve => setTimeout(resolve, 100));
       const order = Array.from(group.children).map(e => e.id);
       const reused = document.getElementById("n3");
@@ -168,7 +168,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
     await page.clock.runFor(50);
     expect(await page.evaluate(() => window.samples.slice(-2).map(e => [e.value, e.status])))
       .toEqual([[0, "running"], [1, "completed"]]);
-    await page.evaluate(() => AelluxJs.unmount(document.getElementById("group")));
+    await page.evaluate(() => aelluxJs.unmount(document.getElementById("group")));
     const unmountedCount = await page.evaluate(() => window.samples.length);
     await page.clock.runFor(6000);
     expect(await page.evaluate(() => window.samples.length)).toBe(unmountedCount);
@@ -180,7 +180,7 @@ for (const missing of [["progress"], ["meter"], ["progress", "meter"]]) {
     const requests = [];
     page.on("request", request => requests.push(new URL(request.url()).pathname));
     await start(page, '<progress id="p">Original</progress><meter id="m" min="10" max="50" value="30">Measure</meter>', { missing });
-    expect(await page.evaluate(() => AelluxJs.diagnostics.legacy)).toBe(true);
+    expect(await page.evaluate(() => aelluxJs.diagnostics.legacy)).toBe(true);
     for (const tag of ["progress", "meter"]) {
       await expect(page.locator(`${tag}[data-ae-progress-fallback]`)).toHaveCount(missing.includes(tag) ? 1 : 0);
     }
@@ -199,7 +199,7 @@ for (const missing of [["progress"], ["meter"], ["progress", "meter"]]) {
     }
     expect(requests.filter(path => /progress.*\.(js|css)$/.test(path))).toEqual(["/dist/aellux.ext.progress.legacy.js"]);
     expect(await page.evaluate(async () => {
-      await AelluxJs.unmount(document, "progress");
+      await aelluxJs.unmount(document, "progress");
       return { text: [document.getElementById("p").textContent, document.getElementById("m").textContent],
         markers: document.querySelectorAll("[data-ae-progress-fallback]").length };
     })).toEqual({ text: ["Original", "Measure"], markers: 0 });
@@ -215,19 +215,19 @@ test("Full loads Progress only for dynamic controls and restores fallback on rem
     const subtree = document.createElement("section");
     subtree.innerHTML = '<progress max="80" value="4" data-ae-progress-target="producer">Original</progress><meter value=".5">Half</meter>';
     document.body.appendChild(subtree);
-    await AelluxJs.mount(subtree);
+    await aelluxJs.mount(subtree);
     const p = subtree.firstChild;
-    const emit = () => AelluxJs.dispatchFrom(document.getElementById("producer"), "Progress",
+    const emit = () => aelluxJs.dispatchFrom(document.getElementById("producer"), "Progress",
       { bubbles: false, detail: { value: 1, max: 2 } });
     emit();
     const value = p.value;
     const fallback = subtree.querySelectorAll("[data-ae-progress-fallback]").length;
-    await AelluxJs.unmount(subtree);
+    await aelluxJs.unmount(subtree);
     const restored = p.getAttribute("value");
-    await AelluxJs.mount(subtree);
+    await aelluxJs.mount(subtree);
     emit();
     const remounted = p.value;
-    await AelluxJs.destroyExtensions("progress");
+    await aelluxJs.destroyExtensions("progress");
     emit();
     return { value, fallback, restored, remounted, final: p.getAttribute("value"), text: p.textContent,
       markers: subtree.querySelectorAll("[data-ae-progress-fallback]").length };
@@ -246,8 +246,8 @@ test("missing constructors select independent Legacy fallbacks without patching 
   });
   await page.addScriptTag({ url: "/dist/aellux.min.js" });
   await page.evaluate(() => new Promise(resolve => {
-    AelluxJs.on("Ready", resolve, { once: true });
-    AelluxJs.init();
+    aelluxJs.on("Ready", resolve, { once: true });
+    aelluxJs.init();
   }));
   expect(await page.evaluate(() => {
     const p = document.getElementById("p"), m = document.getElementById("m");
@@ -296,7 +296,7 @@ for (const forceLegacy of [false, true]) {
     const beforeDestroy = await page.evaluate(() => window.emissions);
     expect(beforeDestroy).toBeGreaterThan(count);
     const afterDestroy = await page.evaluate(async () => {
-      await AelluxJs.destroyExtensions("present");
+      await aelluxJs.destroyExtensions("present");
       return window.emissions;
     });
     await page.clock.runFor(6000);
@@ -312,7 +312,7 @@ test("dynamic groups retain accumulation until declarative selection changes", a
     const dynamic = document.createElement("article");
     dynamic.id = "new"; dynamic.hidden = true; dynamic.setAttribute("data-ae-present", "");
     group.appendChild(dynamic);
-    await AelluxJs.mount(dynamic);
+    await aelluxJs.mount(dynamic);
     const next = await $ae(group).present.popNext();
     const accumulated = [document.getElementById("n3").hidden, dynamic.hidden];
     dynamic.remove();
@@ -330,7 +330,7 @@ test("popNext ignores wrappers, nested groups, unmounted members and handles vet
     <div id="nested" data-ae-present-group><div id="inner" data-ae-present hidden>I</div></div>
     <div id="b" data-ae-present hidden>B</div><div id="unmounted" data-ae-present hidden>U</div></div>`);
   expect(await page.evaluate(async () => {
-    await AelluxJs.unmount(document.getElementById("unmounted"), "present");
+    await aelluxJs.unmount(document.getElementById("unmounted"), "present");
     document.getElementById("b").addEventListener("AelluxJsBeforePop", event => event.preventDefault(), { once: true });
     const veto = await $ae("group").present.popNext();
     const jobs = [$ae("group").present.popNext(), $ae("group").present.popNext()];
@@ -375,8 +375,8 @@ test("empty pooled feedback reuses one text node and preserves child controls", 
     '<div id="g" data-ae-present-group><article id="n" data-ae-present hidden><b>Child</b><progress></progress></article></div>');
   expect(await page.evaluate(() => {
     const source = document.getElementById("source"), member = document.getElementById("n");
-    for (let i = 0; i < 20; i++) AelluxJs.ext.feedback.success("", source);
-    AelluxJs.ext.feedback.success("Final", source);
+    for (let i = 0; i < 20; i++) aelluxJs.ext.feedback.success("", source);
+    aelluxJs.ext.feedback.success("Final", source);
     return { textNodes: Array.from(member.childNodes).filter(n => n.nodeType === 3).length,
       text: member.textContent, controls: member.querySelectorAll("b,progress").length };
   })).toEqual({ textNodes: 1, text: "ChildFinal", controls: 2 });
@@ -386,14 +386,14 @@ test("late producer resolution supports multiple consumers and diagnoses missing
   await start(page, '<progress id="p" max="40" data-ae-progress-target="late"></progress>' +
     '<progress id="second" max="100" value="5" data-ae-progress-target="#late"></progress>' +
     '<meter id="m" value=".5" data-ae-progress-target="late"></meter>');
-  expect(await page.evaluate(() => AelluxJs.diagnostics.showHistory().some(e => e.code === 2011))).toBe(true);
+  expect(await page.evaluate(() => aelluxJs.diagnostics.showHistory().some(e => e.code === 2011))).toBe(true);
   expect(await page.evaluate(async () => {
     const producer = document.createElement("div"); producer.id = "late"; document.body.appendChild(producer);
-    await AelluxJs.mountManager.update(document, "progress");
-    AelluxJs.dispatchFrom(producer, "Progress", { bubbles: false, cancelable: false, detail: { value: 1, max: 4 } });
+    await aelluxJs.mountManager.update(document, "progress");
+    aelluxJs.dispatchFrom(producer, "Progress", { bubbles: false, cancelable: false, detail: { value: 1, max: 4 } });
     const result = { values: [document.getElementById("p").value, document.getElementById("second").value],
       meter: document.getElementById("m").value };
-    await AelluxJs.unmount(document, "progress");
+    await aelluxJs.unmount(document, "progress");
     result.restored = [document.getElementById("p").getAttribute("value"), document.getElementById("second").value];
     return result;
   })).toEqual({ values: [10, 25], meter: .5, restored: [null, 5] });
@@ -408,12 +408,12 @@ test("initially visible Present emits zero without Progress or Feedback installe
   });
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(() => new Promise(resolve => {
-    AelluxJs.ext("present");
-    AelluxJs.on("Ready", resolve, { once: true });
-    AelluxJs.init({ mode: "basic" });
+    aelluxJs.ext("present");
+    aelluxJs.on("Ready", resolve, { once: true });
+    aelluxJs.init({ mode: "basic" });
   }));
   expect(await page.evaluate(() => ({ first: window.initialSamples[0],
-    registered: Object.keys(AelluxJs.registry.ext) }))).toMatchObject({
+    registered: Object.keys(aelluxJs.registry.ext) }))).toMatchObject({
       first: { value: 0, max: 1, status: "running", elapsedMs: 0, durationMs: 60000 }, registered: ["present"]
     });
   await page.clock.install();

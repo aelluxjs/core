@@ -28,7 +28,7 @@ import { hasProgressAPI } from "./internal/has-progress-api.js";
 
   var scriptExtension = ".js";
   var loadingFullStyle = false;
-  var existingApi = root.AelluxJs;
+  var existingApi = root.aelluxJs;
   var api = existingApi &&
     existingApi.shortJSName === CONSTANTS.AELLUXJS_SHORT_JS_NAME &&
     existingApi.registry && existingApi.registry.ext &&
@@ -60,7 +60,7 @@ import { hasProgressAPI } from "./internal/has-progress-api.js";
 
   api.minified = aelluxBootstrapSrc.indexOf(".min.js") !== -1;
   api.coreAssetIntegrity = coreAssetIntegrity;
-  root.AelluxJs = api;
+  root.aelluxJs = api;
   if (embeddedOfficialManifest) api.extIndex.official = embeddedOfficialManifest;
   root[api.shortJSName] = api;
   api.aelluxBasePath = aelluxBasePath;
@@ -116,7 +116,7 @@ import { hasProgressAPI } from "./internal/has-progress-api.js";
   if (api.minified) scriptExtension = ".min.js";
 
   function loadOrchestrator() {
-    var attr = AelluxJs.attr("esm");
+    var attr = aelluxJs.attr("esm");
 
     ["progress", "meter"].forEach(function (tag) {
       if (!hasProgressAPI(root, tag)) api.diagnostics.notAvailable.push(
@@ -127,7 +127,7 @@ import { hasProgressAPI } from "./internal/has-progress-api.js";
       .forEach(function (option) {
         if (typeof option === "string") {
           if (typeof window[option] !== "function") {
-            AelluxJs.diagnostics.notAvailable.push(option);
+            aelluxJs.diagnostics.notAvailable.push(option);
           }
         } else {
           option.function.forEach(function (method) {
@@ -137,7 +137,7 @@ import { hasProgressAPI } from "./internal/has-progress-api.js";
                 window[option.name] :
                 window[option.name[0]] && window[option.name[0]][option.name[1]];
               if (!obj || typeof obj[method] !== "function") {
-                AelluxJs.diagnostics.notAvailable.push(fullname + "." + method);
+                aelluxJs.diagnostics.notAvailable.push(fullname + "." + method);
               }
             } catch (error) {
               console.error(error);
@@ -147,31 +147,31 @@ import { hasProgressAPI } from "./internal/has-progress-api.js";
       });
 
     if (!window.Element || typeof window.Element.prototype.matches !== "function")
-      AelluxJs.diagnostics.notAvailable.push("Element.matches");
+      aelluxJs.diagnostics.notAvailable.push("Element.matches");
     if (!window.NodeList || typeof window.NodeList.prototype.forEach !== "function")
-      AelluxJs.diagnostics.notAvailable.push("NodeList.forEach");
+      aelluxJs.diagnostics.notAvailable.push("NodeList.forEach");
 
-    if (AelluxJs.diagnostics.notAvailable.length !== 0 || isLegacyForced())
+    if (aelluxJs.diagnostics.notAvailable.length !== 0 || isLegacyForced())
       return loadLegacyOrchestratorFallback();
 
     var script = document.createElement("script");
-    if (AelluxJs.options.mode === "basic") {
-      script.src = AelluxJs.aelluxBasePath + "aellux.orchestrator" + scriptExtension;
+    if (aelluxJs.options.mode === "basic") {
+      script.src = aelluxJs.aelluxBasePath + "aellux.orchestrator" + scriptExtension;
     } else {
-      script.src = AelluxJs.aelluxBasePath + "aellux.full" + scriptExtension;
+      script.src = aelluxJs.aelluxBasePath + "aellux.full" + scriptExtension;
     }
     script.setAttribute(attr, "true");
-    applyCoreIntegrity(script, AelluxJs.options.mode === "basic"
+    applyCoreIntegrity(script, aelluxJs.options.mode === "basic"
       ? "aellux.orchestrator" + scriptExtension
       : "aellux.full" + scriptExtension);
 
     assetLoadHelper(script, {
       loadCallback: function () {
-        AelluxJs.dispatch("Awake");
-        AelluxJs.startAelluxJs()
+        aelluxJs.dispatch("Awake");
+        aelluxJs.startAelluxJs()
           .then(function () {
-            AelluxJs.diagnostics.legacy = false;
-            AelluxJs.diagnostics.supported = true;
+            aelluxJs.diagnostics.legacy = false;
+            aelluxJs.diagnostics.supported = true;
           }).catch(function (error) {
             script.parentNode.removeChild(script);
             diagnostics.error(diagnostics.ERROR_MODERN_RUNTIME_START, { cause: error });
@@ -187,42 +187,42 @@ import { hasProgressAPI } from "./internal/has-progress-api.js";
   }
 
   function loadLegacyOrchestratorFallback() {
-    var attr = AelluxJs.attr("legacy");
+    var attr = aelluxJs.attr("legacy");
     if (typeof document === "undefined" ||
       document.querySelector("[" + attr + "]"))
       return;
 
-    if (AelluxJs.diagnostics.notAvailable.length !== 0)
+    if (aelluxJs.diagnostics.notAvailable.length !== 0)
       diagnostics.warn(diagnostics.WARN_BROWSER_CAPABILITIES, {
-        notAvailable: AelluxJs.diagnostics.notAvailable
+        notAvailable: aelluxJs.diagnostics.notAvailable
       });
     diagnostics.info(diagnostics.INFO_LEGACY_FALLBACK);
 
-    AelluxJs.diagnostics.legacy = true;
-    AelluxJs.diagnostics.supported = false;
+    aelluxJs.diagnostics.legacy = true;
+    aelluxJs.diagnostics.supported = false;
 
     var script = document.createElement("script");
-    var runtime = AelluxJs.options.mode === "basic"
+    var runtime = aelluxJs.options.mode === "basic"
       ? "aellux.orchestrator.legacy"
       : "aellux.full.legacy";
-    script.src = AelluxJs.aelluxBasePath + runtime + scriptExtension;
+    script.src = aelluxJs.aelluxBasePath + runtime + scriptExtension;
     script.setAttribute(attr, "true");
     applyCoreIntegrity(script, runtime + scriptExtension);
 
     assetLoadHelper(script, {
       loadCallback: function () {
-        AelluxJs.dispatch("Legacy");
-        AelluxJs.startAelluxJs()
+        aelluxJs.dispatch("Legacy");
+        aelluxJs.startAelluxJs()
           .catch(function (error) {
-            AelluxJs.diagnostics.error(
-              AelluxJs.diagnostics.ERROR_LEGACY_RUNTIME_START,
+            aelluxJs.diagnostics.error(
+              aelluxJs.diagnostics.ERROR_LEGACY_RUNTIME_START,
               { cause: error }
             );
           });
       },
       errorCallback: function () {
-        AelluxJs.diagnostics.error(
-          AelluxJs.diagnostics.ERROR_LEGACY_RUNTIME_LOAD,
+        aelluxJs.diagnostics.error(
+          aelluxJs.diagnostics.ERROR_LEGACY_RUNTIME_LOAD,
           { url: script.src }
         );
       }
@@ -256,15 +256,15 @@ import { hasProgressAPI } from "./internal/has-progress-api.js";
   }
 
   function addWeakStyles() {
-    var attr = AelluxJs.attr("weak-style");
+    var attr = aelluxJs.attr("weak-style");
     if (typeof document === "undefined" ||
       document.querySelector("[" + attr + "]"))
       return;
 
     var style = document.createElement("style");
     style.setAttribute(attr, "true");
-    var a = AelluxJs.attr("$1");
-    var c = AelluxJs.className("$1");
+    var a = aelluxJs.attr("$1");
+    var c = aelluxJs.className("$1");
     style.textContent = createWeakCss()
       .replace(/\?([a-z][0-9a-z\-]*)/gi, a)
       .replace(/\%([a-z][0-9a-z\-]*)/gi, c);
@@ -273,7 +273,7 @@ import { hasProgressAPI } from "./internal/has-progress-api.js";
   }
 
   function updateViewportMeta() {
-    if (AelluxJs.options.autoViewportMeta === false ||
+    if (aelluxJs.options.autoViewportMeta === false ||
       document.head.querySelector('meta[name="viewport"]')) return;
     var meta = document.createElement("meta");
     meta.name = "viewport";
@@ -285,7 +285,7 @@ import { hasProgressAPI } from "./internal/has-progress-api.js";
     var integrity = coreAssetIntegrity[filename];
     if (!integrity) return;
     asset.setAttribute("integrity", integrity);
-    asset.setAttribute("crossorigin", AelluxJs.options.crossOrigin || "anonymous");
+    asset.setAttribute("crossorigin", aelluxJs.options.crossOrigin || "anonymous");
   }
 
   function mergeOptions(target, source) {
@@ -347,7 +347,7 @@ import { hasProgressAPI } from "./internal/has-progress-api.js";
   }
 
   function isLegacyForced() {
-    return AelluxJs.options.forceLegacy ? true : /(?:^|[?&])aellux-debug-legacy(?:=1|=true)?(?:&|$)/i
+    return aelluxJs.options.forceLegacy ? true : /(?:^|[?&])aellux-debug-legacy(?:=1|=true)?(?:&|$)/i
       .test(window.location.search);
   }
 

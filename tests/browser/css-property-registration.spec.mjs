@@ -9,8 +9,8 @@ test("public CSS property registration detects support and rejected registration
       syntax: "<length>", inherits: false, initialValue: "0px"
     };
     const supported = !!(window.CSS && typeof CSS.registerProperty === "function");
-    const beforeInit = AelluxJs.registerCssProperty(descriptor);
-    const implicitInheritance = AelluxJs.registerCssProperty({
+    const beforeInit = aelluxJs.registerCssProperty(descriptor);
+    const implicitInheritance = aelluxJs.registerCssProperty({
       name: "--ae-public-inheritance-probe", syntax: "<number>", initialValue: "0"
     });
     const parent = document.createElement("div");
@@ -22,27 +22,27 @@ test("public CSS property registration detects support and rejected registration
     const inheritedValue = getComputedStyle(child).getPropertyValue("--ae-public-inheritance-probe").trim();
     const isolatedValue = getComputedStyle(child).getPropertyValue(descriptor.name).trim();
     parent.remove();
-    const duplicate = AelluxJs.registerCssProperty(descriptor);
-    const invalid = AelluxJs.registerCssProperty({ ...descriptor, name: "invalid-name" });
-    const batch = AelluxJs.registerCssProperty(
+    const duplicate = aelluxJs.registerCssProperty(descriptor);
+    const invalid = aelluxJs.registerCssProperty({ ...descriptor, name: "invalid-name" });
+    const batch = aelluxJs.registerCssProperty(
       { ...descriptor, name: "--ae-batch-registration-first" },
       { ...descriptor, name: "--ae-batch-registration-second" }
     );
-    const partial = AelluxJs.registerCssProperty(
+    const partial = aelluxJs.registerCssProperty(
       descriptor,
       { ...descriptor, name: "--ae-batch-registration-after-failure" }
     );
-    const continued = AelluxJs.registerCssProperty({
+    const continued = aelluxJs.registerCssProperty({
       ...descriptor, name: "--ae-batch-registration-after-failure"
     });
-    const empty = AelluxJs.registerCssProperty();
+    const empty = aelluxJs.registerCssProperty();
 
     const css = window.CSS;
     const original = css && Object.getOwnPropertyDescriptor(css, "registerProperty");
     if (css) Object.defineProperty(css, "registerProperty", {
       configurable: true, value: undefined
     });
-    const unavailable = AelluxJs.registerCssProperty({ ...descriptor, name: "--ae-no-api-probe" });
+    const unavailable = aelluxJs.registerCssProperty({ ...descriptor, name: "--ae-no-api-probe" });
     if (css) {
       if (original) Object.defineProperty(css, "registerProperty", original);
       else delete css.registerProperty;
@@ -51,7 +51,7 @@ test("public CSS property registration detects support and rejected registration
       supported, beforeInit, implicitInheritance, inheritedValue, isolatedValue,
       duplicate, invalid, batch, partial, continued,
       empty, unavailable,
-      sharedAlias: AelluxJs.registerCssProperty === $ae.registerCssProperty
+      sharedAlias: aelluxJs.registerCssProperty === $ae.registerCssProperty
     };
   });
   expect(result).toEqual({
@@ -74,14 +74,14 @@ test("public CSS property registration detects support and rejected registration
 test("extensions register the CSS properties they publish during init", async ({ page }) => {
   await page.goto("/tests/index.htm");
   await page.addScriptTag({ url: "/dist/aellux.js" });
-  await page.evaluate(() => AelluxJs.init({ mode: "full" }));
-  await expect.poll(() => page.evaluate(() => AelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
+  await page.evaluate(() => aelluxJs.init({ mode: "full" }));
+  await expect.poll(() => page.evaluate(() => aelluxJs.orchestratorVersion)).toBe("0.1.0-beta.10");
   await page.evaluate(() => Promise.all([
     "adaptive", "anchor", "present", "scrollbox", "scrollbox-snap", "viewport"
-  ].map(name => AelluxJs.wait(name))));
+  ].map(name => aelluxJs.wait(name))));
   await expect.poll(() => page.evaluate(() =>
     ["adaptive", "anchor", "present", "scrollbox", "scrollboxSnap"].every(name =>
-      AelluxJs.ext[name]?.initialized)
+      aelluxJs.ext[name]?.initialized)
   )).toBe(true);
 
   const values = await page.evaluate(() => {

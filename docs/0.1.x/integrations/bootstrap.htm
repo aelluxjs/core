@@ -38,7 +38,7 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-PgrxAHrkt22+F09vWG2iuTeiqQ+UCUeSkyAe/nibdP/XtRk8nTZ+VjetKW+okArJ" crossorigin="anonymous">
+  integrity="sha384-q4bpBk5Vqct9IR80W+4o8g4BlPq84mWWb0mV47Q76mgYStKp6AKgCBgxRwr2FPAE" crossorigin="anonymous">
 </head>
 
 <body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
@@ -192,6 +192,13 @@
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
                                         aellux.js Docs                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/brand-naming.htm" data-ae-overflow-marquee="190px">
+                                        Brand Naming and Migration                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -701,7 +708,7 @@
 <ul>
 <li>aellux.js declarations use <code>data-ae-*</code>.</li>
 <li>Runtime state classes use <code>ae--*</code>.</li>
-<li>aellux.js events use the <code>AelluxJs</code> prefix.</li>
+<li>aellux.js events retain their existing prefix, as in <code>AelluxJsReady</code>.</li>
 </ul>
 <p>These namespaces are designed to avoid collisions with <a href="https://getbootstrap.com/">Bootstrap</a>&#39;s public classes and data attributes.</p>
 <h2>Loading Order</h2>
@@ -711,7 +718,7 @@
 &lt;script src=&quot;./dist/aellux.js&quot;&gt;&lt;/script&gt;
 </code></pre>
 <p>The application controls the selectors and priority of its Extension stylesheet.</p>
-<p>When adding motion or accessibility rules alongside <a href="https://getbootstrap.com/">Bootstrap</a>, target AelluxJs preference attributes on <code>&lt;html&gt;</code> so a saved local choice and the device setting both affect the result. For example, use <code>html[data-ae-reduced-motion=&quot;reduced&quot;] .custom-transition { transition: none; }</code> for application owned motion. Apply this convention to future integration styles and scripts; use <code>$ae.currentPreference(&quot;reduced-motion&quot;)</code> in JavaScript before starting optional animations.</p>
+<p>When adding motion or accessibility rules alongside <a href="https://getbootstrap.com/">Bootstrap</a>, target aelluxJs preference attributes on <code>&lt;html&gt;</code> so a saved local choice and the device setting both affect the result. For example, use <code>html[data-ae-reduced-motion=&quot;reduced&quot;] .custom-transition { transition: none; }</code> for application owned motion. Apply this convention to future integration styles and scripts; use <code>$ae.currentPreference(&quot;reduced-motion&quot;)</code> in JavaScript before starting optional animations.</p>
 <h2>Color Modes</h2>
 <p>The boot script can synchronize Bootstrap 5.3&#39;s <code>data-bs-theme</code> attribute on <code>&lt;html&gt;</code> without Bootstrap JavaScript or the Preference Extension:</p>
 <pre><code class="language-js">$ae.init({
@@ -770,7 +777,7 @@
                 and
                 <a style="color:inherit!important;" href="https://github.com/" target="_blank"
                   rel="noopener noreferrer">GitHub</a>
-                for the tools and technologies that supported the development of Aellux.
+                for the tools and technologies that supported the development of aellux.js.
               </div>
             </div>
           </footer>

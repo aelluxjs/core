@@ -50,10 +50,10 @@ When an Extension needs another aellux.js Extension, declare and await that Exte
 
 ```js
 async function init() {
-  if (!AelluxJs.registry.ext.input)
-    AelluxJs.ext("input");
+  if (!aelluxJs.registry.ext.input)
+    aelluxJs.ext("input");
 
-  const input = await AelluxJs.wait("input");
+  const input = await aelluxJs.wait("input");
   if (!input) throw new Error("The Input extension could not initialize.");
 
   // Input is loaded and initialized here.
@@ -69,8 +69,8 @@ Call `$ae.dep(label, url)` before or after `$ae.init()`, including from an Exten
 
 ```js
 async function init() {
-  await AelluxJs.dep("shared-widget@1.0", "/vendor/shared-widget.min.js");
-  await AelluxJs.dep("shared-widget-css@1.0", "/vendor/shared-widget.min.css");
+  await aelluxJs.dep("shared-widget@1.0", "/vendor/shared-widget.min.js");
+  await aelluxJs.dep("shared-widget-css@1.0", "/vendor/shared-widget.min.css");
   // The script and stylesheet are ready here.
 }
 ```
@@ -81,18 +81,18 @@ As with Extension assets, a URL beginning with `./` resolves relative to the ael
 
 ## Extension Attachment
 
-An Extension script exposes its API through `AelluxJs.extAttach()`:
+An Extension script exposes its API through `aelluxJs.extAttach()`:
 
 ```js
 (function (root) {
   "use strict";
 
-  const AelluxJs = root.AelluxJs;
+  const aelluxJs = root.aelluxJs;
   const extensionName = "example";
-  if (!AelluxJs) {
-    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.AelluxJs is not defined. Load the aellux.js boot script before this extension.`);
+  if (!aelluxJs) {
+    throw new Error(`[aellux.js] Cannot attach the "${extensionName}" extension: root.aelluxJs is not defined. Load the aellux.js boot script before this extension.`);
   }
-  AelluxJs.extAttach(extensionName, { init, destroy });
+  aelluxJs.extAttach(extensionName, { init, destroy });
 
   function init() {}
   function destroy() {}

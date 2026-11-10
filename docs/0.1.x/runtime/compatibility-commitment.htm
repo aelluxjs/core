@@ -38,7 +38,7 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-PgrxAHrkt22+F09vWG2iuTeiqQ+UCUeSkyAe/nibdP/XtRk8nTZ+VjetKW+okArJ" crossorigin="anonymous">
+  integrity="sha384-q4bpBk5Vqct9IR80W+4o8g4BlPq84mWWb0mV47Q76mgYStKp6AKgCBgxRwr2FPAE" crossorigin="anonymous">
 </head>
 
 <body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
@@ -192,6 +192,13 @@
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
                                         aellux.js Docs                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/brand-naming.htm" data-ae-overflow-marquee="190px">
+                                        Brand Naming and Migration                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
@@ -696,8 +703,8 @@
 
           <main id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content"
             ajax-load="doc-content">
-            <h1>Compatibility Commitment — AelluxJS 0.1.x</h1>
-<p>AelluxJS is currently in its initial development stage.</p>
+            <h1>Compatibility Commitment — aellux.js 0.1.x</h1>
+<p>aellux.js is currently in its initial development stage.</p>
 <p>Throughout the <code>0.1.x</code> release line, compatibility is maintained for the minimal global initialization contract and the core declarative Extension activation and mounting mechanisms documented for version <code>0.1.0</code>.</p>
 <p>Extension-specific APIs, behavioral configuration attributes, methods, events, CSS interfaces, and implementation details may evolve, including through incompatible changes, regardless of whether an Extension is classified as Stable or Not stable. Extension stability classifications indicate implementation maturity and validation status, not API compatibility guarantees. Relevant changes will be documented, with migration guidance provided when appropriate.</p>
 <p>This commitment begins with <code>0.1.0</code>; it does not retroactively stabilize earlier betas. The package currently remains a prerelease. <a href="../compatibility.htm">Technical compatibility</a> and <a href="browser-support.htm">Browser support</a> describe platform requirements and tested environments, independently of this maintenance policy.</p>
@@ -705,7 +712,8 @@
 <p>This is an exhaustive list of protected interfaces. Being documented, public, reachable through <code>$ae</code>, or included in generated editor metadata does not add an interface to this list.</p>
 <h3>Global initialization</h3>
 <ul>
-<li>The browser boot exposes the global namespace <code>AelluxJs</code> and its alias <code>$ae</code>.</li>
+<li>The browser boot exposes the global namespace <code>aelluxJs</code> and its alias <code>$ae</code>.</li>
+<li>This is the finalized spelling for <code>0.1.0</code>; earlier beta globals are not covered retroactively. See <a href="../brand-naming.htm">Brand Naming and Migration</a> before upgrading an existing integration.</li>
 <li><code>$ae.init()</code> initializes the selected distribution. <code>$ae.init({ mode: &quot;basic&quot; })</code> and <code>$ae.init({ mode: &quot;full&quot; })</code> remain the fundamental modes.</li>
 <li>Basic permits explicit declarations of desired Extensions before initialization through <code>$ae.ext(nameOrUrl, options?)</code>. Protection covers registration by name or Extension URL and participation in initial loading/mounting, rather than every registration option or runtime helper.</li>
 <li>Full automatically registers the official Extensions, permitting initial declarative activation/mounting without declaring each one separately. Bundling versus loading a separate script is an implementation choice; deploy matching boot/runtime/Extension assets and satisfy documented platform prerequisites.</li>
@@ -865,7 +873,7 @@
                 and
                 <a style="color:inherit!important;" href="https://github.com/" target="_blank"
                   rel="noopener noreferrer">GitHub</a>
-                for the tools and technologies that supported the development of Aellux.
+                for the tools and technologies that supported the development of aellux.js.
               </div>
             </div>
           </footer>

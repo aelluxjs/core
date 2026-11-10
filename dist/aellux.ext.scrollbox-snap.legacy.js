@@ -88,9 +88,9 @@
   /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
   (function(root) {
     "use strict";
-    var AelluxJs = root.AelluxJs;
+    var aelluxJs = root.aelluxJs;
     var extensionName = "scrollbox-snap";
-    if (!AelluxJs) throw new Error("[aellux.js] Load the boot script before the scrollbox-snap extension.");
+    if (!aelluxJs) throw new Error("[aellux.js] Load the boot script before the scrollbox-snap extension.");
     var POINTER = "pointer", GESTURE = "gesture", TOUCH = "touch", HORIZONTAL = "x", VERTICAL = "y", FALSE = "false", INSTANT = "instant", SMOOTH = "smooth", START = "start", END = "end", CENTER = "center", SCROLL_EVENT = "$scroll", SCROLL_END_EVENT = "$scrollend", INTERACTION_EVENT = "$AelluxJsScrollboxInteraction", SNAP_GESTURE_EVENT = "$AelluxJsScrollboxSnapGesture", SCROLLBOX_WHEEL_EVENT = "$AelluxJsScrollboxWheel", POINTER_DOWN_EVENT = "$pointerdown", POINTER_UP_EVENT = "$pointerup", POINTER_CANCEL_EVENT = "$pointercancel", TOUCH_START_EVENT = "$touchstart", TOUCH_END_EVENT = "$touchend", TOUCH_CANCEL_EVENT = "$touchcancel";
     var SNAP_SCROLL_IDLE_MS = 120;
     var SNAP_TARGET_IDLE_MS = 500;
@@ -100,17 +100,17 @@
     var SNAP_FLICK_FAST_TIME_MS = 50;
     var SNAP_FLICK_MAX_DISTANCE_PX = 100;
     var SNAP_FLICK_MIN_DISTANCE_PX = 1;
-    var scrollboxAttribute = AelluxJs.attr("scrollbox");
-    var wheelAttribute = AelluxJs.attr("scrollbox-wheel-horizontal");
-    var snapAttribute = AelluxJs.attr("scrollbox-snap");
-    var itemAttribute = AelluxJs.attr("snap-item");
-    var elasticAttribute = AelluxJs.attr("scrollbox-elastic");
-    var readyClass = AelluxJs.className("snap-ready");
-    var suspendedClass = AelluxJs.className("snap-suspended");
+    var scrollboxAttribute = aelluxJs.attr("scrollbox");
+    var wheelAttribute = aelluxJs.attr("scrollbox-wheel-horizontal");
+    var snapAttribute = aelluxJs.attr("scrollbox-snap");
+    var itemAttribute = aelluxJs.attr("snap-item");
+    var elasticAttribute = aelluxJs.attr("scrollbox-elastic");
+    var readyClass = aelluxJs.className("snap-ready");
+    var suspendedClass = aelluxJs.className("snap-suspended");
     var properties = ["--ae-snap-focus"];
     var states = /* @__PURE__ */ new Map();
     var nextLayoutId = 7e6;
-    AelluxJs.extAttach(extensionName, {
+    aelluxJs.extAttach(extensionName, {
       init: init,
       destroy: destroy,
       next: next,
@@ -118,10 +118,10 @@
       goto: goto
     });
     function init() {
-      if (!AelluxJs.registry.ext.scrollbox) AelluxJs.ext("scrollbox");
-      return AelluxJs.wait("scrollbox").then(function(loaded) {
+      if (!aelluxJs.registry.ext.scrollbox) aelluxJs.ext("scrollbox");
+      return aelluxJs.wait("scrollbox").then(function(loaded) {
         if (!loaded) throw new Error("[aellux.js] Scrollbox Snap requires the Scrollbox extension.");
-        AelluxJs.registerCssProperty.apply(AelluxJs, _toConsumableArray(properties.map(function(name) {
+        aelluxJs.registerCssProperty.apply(aelluxJs, _toConsumableArray(properties.map(function(name) {
           return {
             name: name,
             syntax: "<number>",
@@ -130,7 +130,7 @@
         })));
         var _loop = function _loop2() {
           var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2), name = _Object$entries$_i[0], method = _Object$entries$_i[1];
-          AelluxJs.comm.handle("scrollbox-snap." + name, function(_ref) {
+          aelluxJs.comm.handle("scrollbox-snap." + name, function(_ref) {
             var element = _ref.element, index = _ref.index, behavior = _ref.behavior;
             return method(element, index, behavior);
           }, {
@@ -144,7 +144,7 @@
         }); _i < _Object$entries.length; _i++) {
           _loop();
         }
-        AelluxJs.mountManager.add({
+        aelluxJs.mountManager.add({
           extensionName: extensionName,
           selector: "[".concat(scrollboxAttribute, "][").concat(snapAttribute, "]:not([").concat(snapAttribute, '="').concat(FALSE, '"])'),
           priority: 1,
@@ -167,8 +167,8 @@
       } finally {
         _iterator.f();
       }
-      AelluxJs.comm.removeOwner(extensionName);
-      AelluxJs.mountManager.remove({
+      aelluxJs.comm.removeOwner(extensionName);
+      aelluxJs.mountManager.remove({
         extensionName: extensionName
       });
     }
@@ -237,25 +237,25 @@
         return handlePointerScroll(state, event);
       };
       states.set(element, state);
-      AelluxJs.onEvent(element, SCROLL_EVENT, state.onScroll, {
+      aelluxJs.onEvent(element, SCROLL_EVENT, state.onScroll, {
         passive: true
       });
-      AelluxJs.onEvent(element, SCROLL_END_EVENT, state.onScrollEnd, {
+      aelluxJs.onEvent(element, SCROLL_END_EVENT, state.onScrollEnd, {
         passive: true
       });
-      AelluxJs.onEvent(element, POINTER_DOWN_EVENT, state.onPointerDown, true);
-      AelluxJs.onEvent(element, TOUCH_START_EVENT, state.onTouchStart, {
+      aelluxJs.onEvent(element, POINTER_DOWN_EVENT, state.onPointerDown, true);
+      aelluxJs.onEvent(element, TOUCH_START_EVENT, state.onTouchStart, {
         passive: true,
         capture: true
       });
-      AelluxJs.onEvent(element, INTERACTION_EVENT, state.onInteraction);
-      AelluxJs.onEvent(element, SNAP_GESTURE_EVENT, state.onSnapGesture);
-      AelluxJs.onEvent(element, SCROLLBOX_WHEEL_EVENT, state.onScrollboxWheel);
-      AelluxJs.onEvent(root, POINTER_UP_EVENT, state.onPointerEnd, true);
-      AelluxJs.onEvent(root, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
-      AelluxJs.onEvent(root, TOUCH_END_EVENT, state.onTouchEnd, true);
-      AelluxJs.onEvent(root, TOUCH_CANCEL_EVENT, state.onTouchEnd, true);
-      AelluxJs.onEvent(root, "$blur", state.onBlur);
+      aelluxJs.onEvent(element, INTERACTION_EVENT, state.onInteraction);
+      aelluxJs.onEvent(element, SNAP_GESTURE_EVENT, state.onSnapGesture);
+      aelluxJs.onEvent(element, SCROLLBOX_WHEEL_EVENT, state.onScrollboxWheel);
+      aelluxJs.onEvent(root, POINTER_UP_EVENT, state.onPointerEnd, true);
+      aelluxJs.onEvent(root, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
+      aelluxJs.onEvent(root, TOUCH_END_EVENT, state.onTouchEnd, true);
+      aelluxJs.onEvent(root, TOUCH_CANCEL_EVENT, state.onTouchEnd, true);
+      aelluxJs.onEvent(root, "$blur", state.onBlur);
       observe(state);
       configure(state);
     }
@@ -268,25 +268,25 @@
       var state = states.get(element);
       if (!state) return;
       state.disposed = true;
-      AelluxJs.waitLayout.cancel(state.valuesLayoutId);
+      aelluxJs.waitLayout.cancel(state.valuesLayoutId);
       cancelRelease(state);
       clearTimer(state, "timeout");
       clearTimer(state, "wheelTimeout");
       clearTimer(state, "edgeWheelTimeout");
       (_state$observer = state.observer) === null || _state$observer === void 0 || _state$observer.disconnect();
       (_state$resizeObserver = state.resizeObserver) === null || _state$resizeObserver === void 0 || _state$resizeObserver.disconnect();
-      AelluxJs.offEvent(element, SCROLL_EVENT, state.onScroll);
-      AelluxJs.offEvent(element, SCROLL_END_EVENT, state.onScrollEnd);
-      AelluxJs.offEvent(element, POINTER_DOWN_EVENT, state.onPointerDown, true);
-      AelluxJs.offEvent(element, TOUCH_START_EVENT, state.onTouchStart, true);
-      AelluxJs.offEvent(element, INTERACTION_EVENT, state.onInteraction);
-      AelluxJs.offEvent(element, SNAP_GESTURE_EVENT, state.onSnapGesture);
-      AelluxJs.offEvent(element, SCROLLBOX_WHEEL_EVENT, state.onScrollboxWheel);
-      AelluxJs.offEvent(root, POINTER_UP_EVENT, state.onPointerEnd, true);
-      AelluxJs.offEvent(root, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
-      AelluxJs.offEvent(root, TOUCH_END_EVENT, state.onTouchEnd, true);
-      AelluxJs.offEvent(root, TOUCH_CANCEL_EVENT, state.onTouchEnd, true);
-      AelluxJs.offEvent(root, "$blur", state.onBlur);
+      aelluxJs.offEvent(element, SCROLL_EVENT, state.onScroll);
+      aelluxJs.offEvent(element, SCROLL_END_EVENT, state.onScrollEnd);
+      aelluxJs.offEvent(element, POINTER_DOWN_EVENT, state.onPointerDown, true);
+      aelluxJs.offEvent(element, TOUCH_START_EVENT, state.onTouchStart, true);
+      aelluxJs.offEvent(element, INTERACTION_EVENT, state.onInteraction);
+      aelluxJs.offEvent(element, SNAP_GESTURE_EVENT, state.onSnapGesture);
+      aelluxJs.offEvent(element, SCROLLBOX_WHEEL_EVENT, state.onScrollboxWheel);
+      aelluxJs.offEvent(root, POINTER_UP_EVENT, state.onPointerEnd, true);
+      aelluxJs.offEvent(root, POINTER_CANCEL_EVENT, state.onPointerEnd, true);
+      aelluxJs.offEvent(root, TOUCH_END_EVENT, state.onTouchEnd, true);
+      aelluxJs.offEvent(root, TOUCH_CANCEL_EVENT, state.onTouchEnd, true);
+      aelluxJs.offEvent(root, "$blur", state.onBlur);
       restoreItems(state);
       element.classList.remove(readyClass, suspendedClass);
       states.delete(element);
@@ -317,7 +317,7 @@
         }
       }
       if (!items.length) {
-        AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_SCROLLBOX_SNAP_ITEMS, {
+        aelluxJs.diagnostics.error(aelluxJs.diagnostics.ERROR_SCROLLBOX_SNAP_ITEMS, {
           extension: extensionName,
           element: state.element,
           attribute: itemAttribute,
@@ -385,7 +385,7 @@
     }
     function updateValues(state) {
       if (state.disposed) return;
-      AelluxJs.waitLayout.sequence(state.valuesLayoutId, {
+      aelluxJs.waitLayout.sequence(state.valuesLayoutId, {
         read: function read() {
           var axis = axisFor(state), element = state.element, root2 = state.root;
           var rect = element.getBoundingClientRect();
@@ -409,7 +409,7 @@
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done; ) {
               var _step3$value = _step3.value, item = _step3$value.item, value = _step3$value.value;
               if (!state.root.contains(item) || !item.hasAttribute(itemAttribute) || item.closest("[".concat(scrollboxAttribute, "]")) !== state.element) continue;
-              if (!state.savedItems.has(item)) state.savedItems.set(item, AelluxJs.persist.element.save(item, [], properties));
+              if (!state.savedItems.has(item)) state.savedItems.set(item, aelluxJs.persist.element.save(item, [], properties));
               if (item.style.getPropertyPriority(properties[0])) item.style.removeProperty(properties[0]);
               item.style.setProperty(properties[0], value);
             }
@@ -423,7 +423,7 @@
           return state.disposed;
         }
       }).catch(function(cause) {
-        AelluxJs.diagnostics.error(AelluxJs.diagnostics.ERROR_EXTENSION_MOUNT, {
+        aelluxJs.diagnostics.error(aelluxJs.diagnostics.ERROR_EXTENSION_MOUNT, {
           cause: cause,
           extension: extensionName,
           element: state.element,
@@ -677,7 +677,7 @@
       if (state.disposed || !releaseReady(state) || state.target !== null || hasActiveGesture(state)) return;
       var flick = state.flick;
       state.flick = null;
-      goto(state.element, flick !== null ? flick : selectedIndex(state, true), AelluxJs.currentPreference("reduced-motion") === "reduced" ? INSTANT : SMOOTH, flick === null);
+      goto(state.element, flick !== null ? flick : selectedIndex(state, true), aelluxJs.currentPreference("reduced-motion") === "reduced" ? INSTANT : SMOOTH, flick === null);
     }
     function releaseReady(state) {
       return state.release && state.suspensions.size === 1;
@@ -708,7 +708,7 @@
       state.index = index;
       state.notifiedItem = item;
       state.notifiedIndex = index;
-      AelluxJs.dispatchFrom(state.element, "ScrollboxSnapChange", {
+      aelluxJs.dispatchFrom(state.element, "ScrollboxSnapChange", {
         detail: {
           item: item,
           index: index,

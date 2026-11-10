@@ -515,7 +515,7 @@ function resolveElementOrId(root2, elementOrId, options) {
   if (elementOrId && allowedNodeTypes.indexOf(elementOrId.nodeType) !== -1) {
     return elementOrId;
   }
-  var diagnostics = root2.AelluxJs.diagnostics;
+  var diagnostics = root2.aelluxJs.diagnostics;
   diagnostics.warn(diagnostics.WARN_INVALID_ELEMENT_OR_ID, {
     elementOrId: requested,
     method: options.method
@@ -1168,13 +1168,13 @@ function createAelluxConstants() {
       WARN_PRESENT_GROUP_SELECTION: { code: 2021, message: "Present Group selection is invalid or ambiguous; the previous selection is preserved." },
       WARN_ANCHOR_MATCH: { code: 2022, message: "Anchor match accepts width and/or height." },
       WARN_ANCHOR_GROUP: { code: 2023, message: "Anchor association or geometry is invalid." },
-      WARN_ATTRIBUTE_UNKNOWN: { code: 2024, message: "An Aellux attribute may be misspelled; check the suggested name." },
+      WARN_ATTRIBUTE_UNKNOWN: { code: 2024, message: "An aellux.js attribute may be misspelled; check the suggested name." },
       WARN_EXTENSION_REQUIRED: { code: 2025, message: "A declared behavior requires an initialized Extension." },
-      WARN_CONFIGURATION_VALUE: { code: 2026, message: "An Aellux configuration value is invalid; check the expected format." },
-      WARN_CONFIGURATION_TARGET: { code: 2027, message: "An Aellux target is missing, incompatible, or cannot be measured." },
-      WARN_CONFIGURATION_STRUCTURE: { code: 2028, message: "An Aellux declaration is missing required HTML structure." },
-      WARN_CONTROL_ACCESSIBILITY: { code: 2029, message: "An Aellux control is not reachable with the keyboard." },
-      WARN_CONFIGURATION_STYLE: { code: 2030, message: "Effective CSS prevents the declared Aellux behavior." },
+      WARN_CONFIGURATION_VALUE: { code: 2026, message: "An aellux.js configuration value is invalid; check the expected format." },
+      WARN_CONFIGURATION_TARGET: { code: 2027, message: "An aellux.js target is missing, incompatible, or cannot be measured." },
+      WARN_CONFIGURATION_STRUCTURE: { code: 2028, message: "An aellux.js declaration is missing required HTML structure." },
+      WARN_CONTROL_ACCESSIBILITY: { code: 2029, message: "An aellux.js control is not reachable with the keyboard." },
+      WARN_CONFIGURATION_STYLE: { code: 2030, message: "Effective CSS prevents the declared aellux.js behavior." },
       WARN_PRESENT_ANCHOR_TRANSFORM: { code: 2031, message: "Anchor owns transform; Present transform is ignored." },
       WARN_ATTRIBUTE_DUPLICATE: { code: 2032, message: "Duplicate HTML attributes discard values and may affect appearance or behavior." },
       WARN_RESOURCE_CONFLICT: { code: 2033, message: "Behaviors replace the same CSS resource; animate a child element instead." },
@@ -1218,10 +1218,10 @@ function createAelluxConstants() {
 // src/aellux.esm.js
 /*! aellux.js | SPDX-License-Identifier: Apache-2.0 | See LICENSE for terms. */
 var root = typeof globalThis !== "undefined" ? globalThis : window;
-var AelluxJs = root.AelluxJs || createAelluxApi(root, createAelluxConstants());
-root.AelluxJs = AelluxJs;
-root[AelluxJs.shortJSName] = AelluxJs;
-var aellux_esm_default = AelluxJs;
+var aelluxJs = root.aelluxJs || createAelluxApi(root, createAelluxConstants());
+root.aelluxJs = aelluxJs;
+root[aelluxJs.shortJSName] = aelluxJs;
+var aellux_esm_default = aelluxJs;
 export {
   aellux_esm_default as default
 };

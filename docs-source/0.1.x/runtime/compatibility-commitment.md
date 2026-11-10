@@ -1,6 +1,6 @@
-# Compatibility Commitment — AelluxJS 0.1.x
+# Compatibility Commitment — aellux.js 0.1.x
 
-AelluxJS is currently in its initial development stage.
+aellux.js is currently in its initial development stage.
 
 Throughout the `0.1.x` release line, compatibility is maintained for the minimal global initialization contract and the core declarative Extension activation and mounting mechanisms documented for version `0.1.0`.
 
@@ -14,7 +14,8 @@ This is an exhaustive list of protected interfaces. Being documented, public, re
 
 ### Global initialization
 
-- The browser boot exposes the global namespace `AelluxJs` and its alias `$ae`.
+- The browser boot exposes the global namespace `aelluxJs` and its alias `$ae`.
+- This is the finalized spelling for `0.1.0`; earlier beta globals are not covered retroactively. See [Brand Naming and Migration](../brand-naming.md) before upgrading an existing integration.
 - `$ae.init()` initializes the selected distribution. `$ae.init({ mode: "basic" })` and `$ae.init({ mode: "full" })` remain the fundamental modes.
 - Basic permits explicit declarations of desired Extensions before initialization through `$ae.ext(nameOrUrl, options?)`. Protection covers registration by name or Extension URL and participation in initial loading/mounting, rather than every registration option or runtime helper.
 - Full automatically registers the official Extensions, permitting initial declarative activation/mounting without declaring each one separately. Bundling versus loading a separate script is an implementation choice; deploy matching boot/runtime/Extension assets and satisfy documented platform prerequisites.
