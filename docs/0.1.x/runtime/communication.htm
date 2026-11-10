@@ -204,6 +204,13 @@
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/recent-changes.htm" data-ae-overflow-marquee="190px">
+                                        Recent Behavior and Beta Migration                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/getting-started.htm" data-ae-overflow-marquee="190px">
                                         Getting Started                                      </a>
                                     </div>
@@ -817,14 +824,14 @@ if (response.handled) await response.value;
 <p>Instrumentation that previously replaced a public Extension method to observe internal calls should observe the communication contract or public DOM lifecycle events instead. Providers bind their own implementation when registering a contract, independently of later changes to their public API object.</p>
 <p>Contracts are local JavaScript communication, not an RPC serialization or security boundary. Payloads may contain DOM elements and opaque identity tokens, but should not expose Extension APIs or implementation callbacks. Use immutable command data where routing must remain fixed. The mediator performs no buffering, replay, scheduling, player assignment or automatic retries.</p>
 <h2>Distribution cost</h2>
-<p>The mediator replaces the provisional Input-only channel. Boot/ESM contain the shared helper; Full contains the provider/consumer contracts and lifecycle cleanup. Minified artifacts are measured in raw / gzip level 9 bytes. Limits are in KiB. These figures measure distribution size, not runtime latency or memory.</p>
+<p>These measurements record the mediator migration before later Focus, Present and naming changes; see the <a href="performance.htm#artifact-snapshot-2026-11-10">current artifact snapshot</a>. The mediator replaces the provisional Input-only channel. Boot/ESM contain the shared helper; Full contains the provider/consumer contracts and lifecycle cleanup. Minified artifacts are measured in raw / gzip level 9 bytes. Limits are in KiB. These figures measure distribution size, not runtime latency or memory.</p>
 <table>
 <thead>
 <tr>
 <th>Artifact</th>
 <th>Measured raw / gzip bytes</th>
 <th>Previous limits</th>
-<th>Current limits</th>
+<th>Limits at that revision</th>
 </tr>
 </thead>
 <tbody><tr>

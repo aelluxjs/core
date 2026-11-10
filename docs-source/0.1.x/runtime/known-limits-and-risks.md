@@ -105,7 +105,7 @@ The unestablished scenarios above are **Validation Gaps**, not browser-specific 
 
 ## Official Extension Reference
 
-The [official catalog](https://github.com/aelluxjs/core/blob/update/beta.10/src/official-extension-definitions.js) defines these sixteen Extensions. Optional distribution status does not remove an Extension from this documentation contract.
+The [official catalog](https://github.com/aelluxjs/core/blob/release/0.1.0/src/official-extension-definitions.js) defines these sixteen Extensions. Optional distribution status does not remove an Extension from this documentation contract.
 
 | Bundled Extensions | Optional Extensions |
 | --- | --- |
@@ -120,4 +120,4 @@ The [official catalog](https://github.com/aelluxjs/core/blob/update/beta.10/src/
 | [State Navigation](../core-extensions/state-navigation.md#known-limits-risks) |  |
 | [Viewport](../core-extensions/viewport.md#known-limits-risks) |  |
 
-Evidence for the shared boundaries includes the [mount helper](https://github.com/aelluxjs/core/blob/update/beta.10/src/internal/create-mount-helper.js), [storage helper](https://github.com/aelluxjs/core/blob/update/beta.10/src/internal/build-persist-memory.js), [element snapshot helper](https://github.com/aelluxjs/core/blob/update/beta.10/src/internal/create-save-element-memory-helper.js), [preflight checks](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/lifecycle-preflight.spec.mjs), [runtime contract checks](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/scenarios.spec.mjs), and the guides linked above.
+Evidence for the shared boundaries includes the [mount helper](https://github.com/aelluxjs/core/blob/release/0.1.0/src/internal/create-mount-helper.js), [storage helper](https://github.com/aelluxjs/core/blob/release/0.1.0/src/internal/build-persist-memory.js), [element snapshot helper](https://github.com/aelluxjs/core/blob/release/0.1.0/src/internal/create-save-element-memory-helper.js), [preflight checks](https://github.com/aelluxjs/core/blob/release/0.1.0/tests/browser/lifecycle-preflight.spec.mjs), [runtime contract checks](https://github.com/aelluxjs/core/blob/release/0.1.0/tests/browser/scenarios.spec.mjs), and the guides linked above.

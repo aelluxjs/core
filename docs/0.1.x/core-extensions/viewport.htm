@@ -204,6 +204,13 @@
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/recent-changes.htm" data-ae-overflow-marquee="190px">
+                                        Recent Behavior and Beta Migration                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/getting-started.htm" data-ae-overflow-marquee="190px">
                                         Getting Started                                      </a>
                                     </div>
@@ -965,7 +972,7 @@ After:  add data-ae-viewport=&quot;x&quot; or &quot;y&quot; to the item
 <p>Use the normal mount, update, unmount and destroy APIs, including subtree mounting. Viewport saves prior inline output values and priorities on the CSS destination through <code>persist.element.save()</code> when acquiring it. Unmounting the observed source removes it from observation, invalidates its pending writes and restores the destination&#39;s saved values, including when the destination is outside the source subtree. Retargeting also releases and restores the previous destination. The last element leaving a reference releases the group&#39;s listener, observer, timer and scheduler tasks. Removing mounted elements uses mountManager&#39;s detached cleanup. Destroy releases all Extension resources; remounting creates fresh observation without duplicate listeners.</p>
 <p>Scheduled refresh failures emit <code>ViewportError</code> on <code>document</code> with the original error, the scroll reference and the observed sources. Automatic observer work records a diagnostic and stops retrying for the current Layout transition; a new external update can retry. The pending refresh still rejects for direct callers. See <a href="../runtime/events.htm#asynchronous-failures">Asynchronous failures</a>.</p>
 <h2>Known Limits &amp; Risks</h2>
-<p>See <a href="../runtime/known-limits-and-risks.htm">Core Known Limits &amp; Risks</a> for the shared architecture and classification convention. <strong>Known Limit</strong> means a confirmed implementation or contract restriction. <strong>Potential Risk</strong> describes an outcome that may occur under the stated conditions, without identifying a confirmed defect. <strong>Validation Gap</strong> means the available tests do not establish reliability for that scenario. <strong>Known Issue</strong> is reserved for a reproducible defect. Evaluate these boundaries before depending on Viewport geometry for interactions or animations. The <a href="https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.viewport.js">implementation</a> and the linked spec below provide the evidence for this section.</p>
+<p>See <a href="../runtime/known-limits-and-risks.htm">Core Known Limits &amp; Risks</a> for the shared architecture and classification convention. <strong>Known Limit</strong> means a confirmed implementation or contract restriction. <strong>Potential Risk</strong> describes an outcome that may occur under the stated conditions, without identifying a confirmed defect. <strong>Validation Gap</strong> means the available tests do not establish reliability for that scenario. <strong>Known Issue</strong> is reserved for a reproducible defect. Evaluate these boundaries before depending on Viewport geometry for interactions or animations. The <a href="https://github.com/aelluxjs/core/blob/release/0.1.0/src/aellux.ext.viewport.js">implementation</a> and the linked spec below provide the evidence for this section.</p>
 <h3>Known Limits</h3>
 <p>All entries below are <strong>Known Limits</strong>. See <a href="#axes-and-outputs">Axes and outputs</a>, <a href="#choosing-the-reference-and-keeping-it-current">Choosing the reference and keeping it current</a>, and <a href="#transforms-and-present">Transforms and Present</a> for formulas and examples.</p>
 <table>
@@ -1092,7 +1099,7 @@ After:  add data-ae-viewport=&quot;x&quot; or &quot;y&quot; to the item
 </tr>
 </tbody></table>
 <p>Update coverage and freshness depend on the available triggers. Legacy syntax and shared polyfills do not establish support for every historical browser. Forced Legacy execution in current engines is distinct from testing old browsers directly; see <a href="../runtime/browser-support.htm#legacy-scope">Browser support</a>.</p>
-<p><strong>Coverage boundaries (Validation Gaps).</strong> The existing <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/viewport.spec.mjs">Viewport spec</a> defines Modern and forced Legacy cases for the desktop engine matrix. Its presence establishes the scope of automated checks, not a new test-run result. See <a href="../validation-scenarios.htm#core-contract-regression-matrix">Validation scenarios</a> for the broader contract matrix.</p>
+<p><strong>Coverage boundaries (Validation Gaps).</strong> The existing <a href="https://github.com/aelluxjs/core/blob/release/0.1.0/tests/browser/viewport.spec.mjs">Viewport spec</a> defines Modern and forced Legacy cases for the desktop engine matrix. Its presence establishes the scope of automated checks, not a new test-run result. See <a href="../validation-scenarios.htm#core-contract-regression-matrix">Validation scenarios</a> for the broader contract matrix.</p>
 <table>
 <thead>
 <tr>

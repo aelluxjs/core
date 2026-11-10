@@ -204,6 +204,13 @@
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/recent-changes.htm" data-ae-overflow-marquee="190px">
+                                        Recent Behavior and Beta Migration                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/getting-started.htm" data-ae-overflow-marquee="190px">
                                         Getting Started                                      </a>
                                     </div>
@@ -704,13 +711,89 @@
           <main id="doc-content" style="min-height: calc(100vh - 200px);" class="js-toc-content"
             ajax-load="doc-content">
             <h1>Performance and Bundle Budget</h1>
-<p>The <a href="../progress-implementation-report.htm#distribution-costs">Progress implementation report</a> records current Progress variant sizes and the measured Present, Feedback, Full and boot deltas for accumulated notifications. Progress and its Legacy fallback remain external Optional artifacts.</p>
+<p>The <a href="../progress-implementation-report.htm#distribution-costs">Progress implementation report</a> records historical Progress variant sizes and the measured Present, Feedback, Full and boot deltas for accumulated notifications. Progress and its Legacy fallback remain external Optional artifacts.</p>
 <p>The release build checks the byte size of each shipped minified runtime, Core Extension, and generated Extension stylesheet. The check measures raw bytes and gzip bytes at compression level 9. It excludes source maps because browsers do not request them as part of a normal production load.</p>
 <p>Run the check after a build:</p>
 <pre><code class="language-sh">npm run build:core
 npm run test:budget
 </code></pre>
 <p>The CI workflow runs the same command after <code>npm run build</code>. A pull request fails if an artifact exceeds either limit. Review the generated artifact and its delivery cost before changing a limit.</p>
+<h2>Artifact snapshot - 2026-11-10</h2>
+<p>Measured from the checked-in <code>dist/</code> artifacts at <code>19979d63</code> (<code>0.1.0-beta.10</code>), without rebuilding runtime code. Raw and gzip level 9 sizes are bytes; limits come from the current budget configuration. Later sections and individual Extension cost tables are historical change measurements, not current size or limit guarantees. Run <code>npm run test:budget</code> to refresh all artifact measurements.</p>
+<table>
+<thead>
+<tr>
+<th>Minified artifact</th>
+<th>Raw / gzip bytes</th>
+<th>Limits raw / gzip KiB</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>aellux.min.js</td>
+<td>54,621 / 18,781</td>
+<td>53.5 / 18.75</td>
+</tr>
+<tr>
+<td>aellux.esm.min.js</td>
+<td>29,877 / 10,229</td>
+<td>29.5 / 10</td>
+</tr>
+<tr>
+<td>aellux.full.min.js</td>
+<td>238,732 / 74,616</td>
+<td>234 / 73.25</td>
+</tr>
+<tr>
+<td>aellux.full.legacy.min.js</td>
+<td>581,413 / 171,383</td>
+<td>569 / 168</td>
+</tr>
+<tr>
+<td>aellux.full.min.css</td>
+<td>124,866 / 11,867</td>
+<td>124 / 12</td>
+</tr>
+<tr>
+<td>aellux.ext.present.min.js</td>
+<td>54,650 / 17,681</td>
+<td>54 / 17.75</td>
+</tr>
+<tr>
+<td>aellux.ext.present.legacy.min.js</td>
+<td>75,541 / 22,443</td>
+<td>75 / 22.5</td>
+</tr>
+<tr>
+<td>aellux.ext.present.min.css</td>
+<td>8,892 / 1,459</td>
+<td>9 / 1.5</td>
+</tr>
+<tr>
+<td>aellux.ext.feedback.min.js</td>
+<td>4,666 / 2,049</td>
+<td>4.75 / 2.125</td>
+</tr>
+<tr>
+<td>aellux.ext.feedback.legacy.min.js</td>
+<td>8,980 / 3,902</td>
+<td>8.875 / 3.875</td>
+</tr>
+<tr>
+<td>aellux.ext.feedback.min.css</td>
+<td>74 / 94</td>
+<td>0.25 / 0.25</td>
+</tr>
+<tr>
+<td>aellux.ext.focus.min.js</td>
+<td>14,417 / 5,577</td>
+<td>14.5 / 5.75</td>
+</tr>
+<tr>
+<td>aellux.ext.input.min.js</td>
+<td>10,060 / 3,975</td>
+<td>10 / 4</td>
+</tr>
+</tbody></table>
 <h2>Primitives-only Full bundle</h2>
 <p>Full automatically includes all Core primitives, including Preference and Viewport. It does not embed every available Core Extension: optional navigation, environment and Legacy compatibility extensions remain separate. Overflow Marquee and Scrollbox Snap now load signed scripts on demand pending migration to external extensions. Marquee CSS also loads separately; Scrollbox retains its existing native snap rules for compatibility. Compared with the preceding checked-in artifacts, minified raw/gzip level 9 bytes are:</p>
 <table>
@@ -737,9 +820,9 @@ npm run test:budget
 <td>124,146 / 11,648</td>
 </tr>
 </tbody></table>
-<p>All existing artifact budgets pass without increasing their limits. These measurements describe delivery size, not runtime performance.</p>
+<p>At that revision, the existing artifact budgets passed without increasing their limits. These measurements describe delivery size, not runtime performance.</p>
 <h2>Limits</h2>
-<p><a href="https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs"><code>scripts/bundle-budget.config.mjs</code></a> is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The <code>test:budget</code> command prints each artifact&#39;s measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates ten Bundled Extensions. Only the Optional Extensions (Ajax Href, Dialog, Overflow Marquee, Progress, PWA and Scrollbox Snap) use separate on-demand scripts in Full. Basic loads separately the Extensions explicitly registered by the developer and their declared dependencies.</p>
+<p><a href="https://github.com/aelluxjs/core/blob/release/0.1.0/scripts/bundle-budget.config.mjs"><code>scripts/bundle-budget.config.mjs</code></a> is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The <code>test:budget</code> command prints each artifact&#39;s measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates ten Bundled Extensions. Only the Optional Extensions (Ajax Href, Dialog, Overflow Marquee, Progress, PWA and Scrollbox Snap) use separate on-demand scripts in Full. Basic loads separately the Extensions explicitly registered by the developer and their declared dependencies.</p>
 <h2>Adaptive CSS publication</h2>
 <p>Scrollbox custom scrollbar geometry, Snap focus, elastic styles and Legacy Progress fallback rendering use the shared adaptive update phase. This adds replaceable Snap measurement/publication and cancellable coalesced updates while preserving independent scrolling and gesture calculations. Compared with the preceding checked-in artifacts, minified raw/gzip level 9 sizes are:</p>
 <table>
@@ -860,7 +943,7 @@ npm run test:budget
 <td>508 / 150</td>
 </tr>
 </tbody></table>
-<p>The Full increase includes Scrollbox, Snap and Overflow Marquee and removes Ajax Href. The two existing standalone Ajax Href budget excesses are unchanged by this delivery split.</p>
+<p>The Full increase includes Scrollbox, Snap and Overflow Marquee and removes Ajax Href. At that earlier revision, two standalone Ajax Href budget excesses remained; this is not a statement about the current artifacts.</p>
 <h2>Viewport delivery</h2>
 <p>The <a href="../core-extensions/viewport.htm">Viewport Extension</a> now ships inside Full, without CSS or additional dependencies; Basic retains separate artifacts. The following historical sizes record its initial separate delivery, before the primitives-only bundle revision, using raw bytes and gzip level 9:</p>
 <table>

@@ -133,7 +133,7 @@ See [Core Known Limits & Risks](../runtime/known-limits-and-risks.md) for classi
 | Messages | Potential Risk | <span class="large">Frequent feedback or multiple renderers can repeat announcements and work. Message and value payloads are visible to application subscribers.</span> | <span class="large">Coalesce progress, avoid duplicate rendering and exclude sensitive data from shared messages.</span> |
 | Coverage | Validation Gap | <span class="large">Boundary text, filtering, argument checks, motion and explicit Present targets have automated checks; these do not validate live-region announcements in real screen readers.</span> | <span class="large">Review announcement priority and repetition with the target assistive technologies.</span> |
 
-Evidence: [Implementation](https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.feedback.js), [feedback.spec.mjs](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/feedback.spec.mjs), [extension-composition.spec.mjs](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/extension-composition.spec.mjs).
+Evidence: [Implementation](https://github.com/aelluxjs/core/blob/release/0.1.0/src/aellux.ext.feedback.js), [feedback.spec.mjs](https://github.com/aelluxjs/core/blob/release/0.1.0/tests/browser/feedback.spec.mjs), [extension-composition.spec.mjs](https://github.com/aelluxjs/core/blob/release/0.1.0/tests/browser/extension-composition.spec.mjs).
 
 ## Effect distribution change
 

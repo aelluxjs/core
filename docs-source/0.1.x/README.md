@@ -37,6 +37,8 @@ Add aellux.js to a page and enable the Extensions it needs. The library coordina
 
 ## Getting Started
 
+- [Recent behavior and beta migration](recent-changes.md)
+- [Homepage, examples and Library](https://aelluxjs.github.io/), maintained in the separate [website repository](https://github.com/aelluxjs/aelluxjs.github.io).
 - [Installation, build, and runtime modes](getting-started.md)
 - [Technical compatibility and validated environments](compatibility.md)
 - [Compatibility Commitment for 0.1.x](runtime/compatibility-commitment.md)

@@ -237,7 +237,7 @@ Scheduled refresh failures emit `ViewportError` on `document` with the original 
 
 ## Known Limits & Risks
 
-See [Core Known Limits & Risks](../runtime/known-limits-and-risks.md) for the shared architecture and classification convention. **Known Limit** means a confirmed implementation or contract restriction. **Potential Risk** describes an outcome that may occur under the stated conditions, without identifying a confirmed defect. **Validation Gap** means the available tests do not establish reliability for that scenario. **Known Issue** is reserved for a reproducible defect. Evaluate these boundaries before depending on Viewport geometry for interactions or animations. The [implementation](https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.viewport.js) and the linked spec below provide the evidence for this section.
+See [Core Known Limits & Risks](../runtime/known-limits-and-risks.md) for the shared architecture and classification convention. **Known Limit** means a confirmed implementation or contract restriction. **Potential Risk** describes an outcome that may occur under the stated conditions, without identifying a confirmed defect. **Validation Gap** means the available tests do not establish reliability for that scenario. **Known Issue** is reserved for a reproducible defect. Evaluate these boundaries before depending on Viewport geometry for interactions or animations. The [implementation](https://github.com/aelluxjs/core/blob/release/0.1.0/src/aellux.ext.viewport.js) and the linked spec below provide the evidence for this section.
 
 ### Known Limits
 
@@ -314,7 +314,7 @@ Use the transition's expected duration; this requests scheduled checks rather th
 
 Update coverage and freshness depend on the available triggers. Legacy syntax and shared polyfills do not establish support for every historical browser. Forced Legacy execution in current engines is distinct from testing old browsers directly; see [Browser support](../runtime/browser-support.md#legacy-scope).
 
-**Coverage boundaries (Validation Gaps).** The existing [Viewport spec](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/viewport.spec.mjs) defines Modern and forced Legacy cases for the desktop engine matrix. Its presence establishes the scope of automated checks, not a new test-run result. See [Validation scenarios](../validation-scenarios.md#core-contract-regression-matrix) for the broader contract matrix.
+**Coverage boundaries (Validation Gaps).** The existing [Viewport spec](https://github.com/aelluxjs/core/blob/release/0.1.0/tests/browser/viewport.spec.mjs) defines Modern and forced Legacy cases for the desktop engine matrix. Its presence establishes the scope of automated checks, not a new test-run result. See [Validation scenarios](../validation-scenarios.md#core-contract-regression-matrix) for the broader contract matrix.
 
 | Area | Existing checks | Additional validation needed |
 | --- | --- | --- |

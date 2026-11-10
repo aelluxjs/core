@@ -1,6 +1,6 @@
 # Performance and Bundle Budget
 
-The [Progress implementation report](../progress-implementation-report.md#distribution-costs) records current Progress variant sizes and the measured Present, Feedback, Full and boot deltas for accumulated notifications. Progress and its Legacy fallback remain external Optional artifacts.
+The [Progress implementation report](../progress-implementation-report.md#distribution-costs) records historical Progress variant sizes and the measured Present, Feedback, Full and boot deltas for accumulated notifications. Progress and its Legacy fallback remain external Optional artifacts.
 
 The release build checks the byte size of each shipped minified runtime, Core Extension, and generated Extension stylesheet. The check measures raw bytes and gzip bytes at compression level 9. It excludes source maps because browsers do not request them as part of a normal production load.
 
@@ -13,6 +13,26 @@ npm run test:budget
 
 The CI workflow runs the same command after `npm run build`. A pull request fails if an artifact exceeds either limit. Review the generated artifact and its delivery cost before changing a limit.
 
+## Artifact snapshot - 2026-11-10
+
+Measured from the checked-in `dist/` artifacts at `19979d63` (`0.1.0-beta.10`), without rebuilding runtime code. Raw and gzip level 9 sizes are bytes; limits come from the current budget configuration. Later sections and individual Extension cost tables are historical change measurements, not current size or limit guarantees. Run `npm run test:budget` to refresh all artifact measurements.
+
+| Minified artifact | Raw / gzip bytes | Limits raw / gzip KiB |
+| --- | --- | --- |
+| aellux.min.js | 54,621 / 18,781 | 53.5 / 18.75 |
+| aellux.esm.min.js | 29,877 / 10,229 | 29.5 / 10 |
+| aellux.full.min.js | 238,732 / 74,616 | 234 / 73.25 |
+| aellux.full.legacy.min.js | 581,413 / 171,383 | 569 / 168 |
+| aellux.full.min.css | 124,866 / 11,867 | 124 / 12 |
+| aellux.ext.present.min.js | 54,650 / 17,681 | 54 / 17.75 |
+| aellux.ext.present.legacy.min.js | 75,541 / 22,443 | 75 / 22.5 |
+| aellux.ext.present.min.css | 8,892 / 1,459 | 9 / 1.5 |
+| aellux.ext.feedback.min.js | 4,666 / 2,049 | 4.75 / 2.125 |
+| aellux.ext.feedback.legacy.min.js | 8,980 / 3,902 | 8.875 / 3.875 |
+| aellux.ext.feedback.min.css | 74 / 94 | 0.25 / 0.25 |
+| aellux.ext.focus.min.js | 14,417 / 5,577 | 14.5 / 5.75 |
+| aellux.ext.input.min.js | 10,060 / 3,975 | 10 / 4 |
+
 ## Primitives-only Full bundle
 
 Full automatically includes all Core primitives, including Preference and Viewport. It does not embed every available Core Extension: optional navigation, environment and Legacy compatibility extensions remain separate. Overflow Marquee and Scrollbox Snap now load signed scripts on demand pending migration to external extensions. Marquee CSS also loads separately; Scrollbox retains its existing native snap rules for compatibility. Compared with the preceding checked-in artifacts, minified raw/gzip level 9 bytes are:
@@ -23,11 +43,11 @@ Full automatically includes all Core primitives, including Preference and Viewpo
 | aellux.full.legacy.min.js | 562,863 / 165,880 | 540,520 / 161,215 |
 | aellux.full.min.css | 126,807 / 12,017 | 124,146 / 11,648 |
 
-All existing artifact budgets pass without increasing their limits. These measurements describe delivery size, not runtime performance.
+At that revision, the existing artifact budgets passed without increasing their limits. These measurements describe delivery size, not runtime performance.
 
 ## Limits
 
-[`scripts/bundle-budget.config.mjs`](https://github.com/aelluxjs/core/blob/main/scripts/bundle-budget.config.mjs) is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The `test:budget` command prints each artifact's measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates ten Bundled Extensions. Only the Optional Extensions (Ajax Href, Dialog, Overflow Marquee, Progress, PWA and Scrollbox Snap) use separate on-demand scripts in Full. Basic loads separately the Extensions explicitly registered by the developer and their declared dependencies.
+[`scripts/bundle-budget.config.mjs`](https://github.com/aelluxjs/core/blob/release/0.1.0/scripts/bundle-budget.config.mjs) is the source of truth for every raw and gzip limit. It covers the minified boot, ESM entry, Modern and Legacy orchestrators, Full runtimes, Core Extensions (including separate Dialog and Scrollbox Snap files), and generated Extension stylesheets. The `test:budget` command prints each artifact's measured size beside its current limit and fails if a new minified JavaScript or CSS file has no budget. Full incorporates ten Bundled Extensions. Only the Optional Extensions (Ajax Href, Dialog, Overflow Marquee, Progress, PWA and Scrollbox Snap) use separate on-demand scripts in Full. Basic loads separately the Extensions explicitly registered by the developer and their declared dependencies.
 
 ## Adaptive CSS publication
 
@@ -69,7 +89,7 @@ Bundled Extensions ship inside Full, while Optional Extensions (Ajax Href, Dialo
 | Modern Full | 128,936 / 40,488 | 190,435 / 58,625 | 188 / 58 |
 | Legacy Full | 439,936 / 130,175 | 517,539 / 152,376 | 508 / 150 |
 
-The Full increase includes Scrollbox, Snap and Overflow Marquee and removes Ajax Href. The two existing standalone Ajax Href budget excesses are unchanged by this delivery split.
+The Full increase includes Scrollbox, Snap and Overflow Marquee and removes Ajax Href. At that earlier revision, two standalone Ajax Href budget excesses remained; this is not a statement about the current artifacts.
 
 ## Viewport delivery
 

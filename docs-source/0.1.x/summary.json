@@ -7,6 +7,7 @@
       "children": [
         { "label": "aellux.js Docs", "href": "README.md" },
         { "label": "Brand Naming and Migration", "href": "brand-naming.md" },
+        { "label": "Recent Behavior and Beta Migration", "href": "recent-changes.md" },
         { "label": "Getting Started", "href": "getting-started.md" },
         { "label": "Compatibility", "href": "compatibility.md" },
         { "label": "Validation Scenarios", "href": "validation-scenarios.md" }

@@ -33,6 +33,7 @@ For a transform presentation, use an internal target programmatically or through
 
 ```html
 <article id="notice" data-ae-present="opacity transform" data-ae-feedback
+         data-ae-feedback-message-target="notice-content"
          data-ae-feedback-effect-target="notice-content" hidden>
   <div id="notice-content">Message</div>
 </article>
@@ -425,7 +426,7 @@ See [Core Known Limits & Risks](../runtime/known-limits-and-risks.md) for classi
 | Semantics | Known Limit | <span class="large">Groups add no tabs/dialog roles. Focus is released when closing hides the active element; restoration relies on Focus or application integration.</span> | <span class="large">Provide the semantics, keyboard behavior, reduced-motion styles and focus destination required by the UI pattern.</span> |
 | Coverage | Validation Gap | <span class="large">Tests exercise group vetoes, reversal, ARIA, progress fallbacks and tap/click routing. Real assistive-technology workflows and physical hover/touch hybrids are not established by desktop fixtures.</span> | <span class="large">Validate the UI pattern and devices beyond DOM/ARIA assertions.</span> |
 
-Evidence: [Implementation](https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.present.js), [present-enhancements.spec.mjs](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/present-enhancements.spec.mjs), [present-aria.spec.mjs](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/present-aria.spec.mjs), [present-tap.spec.mjs](https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/present-tap.spec.mjs).
+Evidence: [Implementation](https://github.com/aelluxjs/core/blob/release/0.1.0/src/aellux.ext.present.js), [present-enhancements.spec.mjs](https://github.com/aelluxjs/core/blob/release/0.1.0/tests/browser/present-enhancements.spec.mjs), [present-aria.spec.mjs](https://github.com/aelluxjs/core/blob/release/0.1.0/tests/browser/present-aria.spec.mjs), [present-tap.spec.mjs](https://github.com/aelluxjs/core/blob/release/0.1.0/tests/browser/present-tap.spec.mjs).
 
 ## Effect distribution cost
 

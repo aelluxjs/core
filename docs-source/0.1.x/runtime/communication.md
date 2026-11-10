@@ -75,9 +75,9 @@ Contracts are local JavaScript communication, not an RPC serialization or securi
 
 ## Distribution cost
 
-The mediator replaces the provisional Input-only channel. Boot/ESM contain the shared helper; Full contains the provider/consumer contracts and lifecycle cleanup. Minified artifacts are measured in raw / gzip level 9 bytes. Limits are in KiB. These figures measure distribution size, not runtime latency or memory.
+These measurements record the mediator migration before later Focus, Present and naming changes; see the [current artifact snapshot](performance.md#artifact-snapshot-2026-11-10). The mediator replaces the provisional Input-only channel. Boot/ESM contain the shared helper; Full contains the provider/consumer contracts and lifecycle cleanup. Minified artifacts are measured in raw / gzip level 9 bytes. Limits are in KiB. These figures measure distribution size, not runtime latency or memory.
 
-| Artifact | Measured raw / gzip bytes | Previous limits | Current limits |
+| Artifact | Measured raw / gzip bytes | Previous limits | Limits at that revision |
 | --- | --- | --- | --- |
 | aellux.min.js | 54,044 / 18,630 | 51.5 / 18 | 53.25 / 18.75 |
 | aellux.esm.min.js | 29,509 / 10,087 | 27.25 / 9.5 | 29 / 10 |

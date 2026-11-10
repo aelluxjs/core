@@ -204,6 +204,13 @@
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
                                       <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                        href="/core/docs/0.1.x/recent-changes.htm" data-ae-overflow-marquee="190px">
+                                        Recent Behavior and Beta Migration                                      </a>
+                                    </div>
+                                                                                                                                              <div
+                                      class="nav-item mt-1 small-md rounded-1 ps-md-1"
+                                      style="flex:0">
+                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/getting-started.htm" data-ae-overflow-marquee="190px">
                                         Getting Started                                      </a>
                                     </div>
@@ -725,6 +732,7 @@
 </code></pre>
 <p>For a transform presentation, use an internal target programmatically or through Feedback:</p>
 <pre><code class="language-html">&lt;article id=&quot;notice&quot; data-ae-present=&quot;opacity transform&quot; data-ae-feedback
+         data-ae-feedback-message-target=&quot;notice-content&quot;
          data-ae-feedback-effect-target=&quot;notice-content&quot; hidden&gt;
   &lt;div id=&quot;notice-content&quot;&gt;Message&lt;/div&gt;
 &lt;/article&gt;
@@ -1239,7 +1247,7 @@ await $ae(&quot;views&quot;).present.show(&quot;home&quot;);
 <td><span class="large">Validate the UI pattern and devices beyond DOM/ARIA assertions.</span></td>
 </tr>
 </tbody></table>
-<p>Evidence: <a href="https://github.com/aelluxjs/core/blob/update/beta.10/src/aellux.ext.present.js">Implementation</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/present-enhancements.spec.mjs">present-enhancements.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/present-aria.spec.mjs">present-aria.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/update/beta.10/tests/browser/present-tap.spec.mjs">present-tap.spec.mjs</a>.</p>
+<p>Evidence: <a href="https://github.com/aelluxjs/core/blob/release/0.1.0/src/aellux.ext.present.js">Implementation</a>, <a href="https://github.com/aelluxjs/core/blob/release/0.1.0/tests/browser/present-enhancements.spec.mjs">present-enhancements.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/release/0.1.0/tests/browser/present-aria.spec.mjs">present-aria.spec.mjs</a>, <a href="https://github.com/aelluxjs/core/blob/release/0.1.0/tests/browser/present-tap.spec.mjs">present-tap.spec.mjs</a>.</p>
 <h2>Effect distribution cost</h2>
 <p>Measured against the committed pre-migration artifacts (<code>fa32fa5c</code>) in this working branch, in bytes (raw / gzip level 9). These measurements supersede the historical delivery snapshots above.</p>
 <table>
