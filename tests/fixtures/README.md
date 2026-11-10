@@ -11,16 +11,5 @@ stored locally so the browser suite does not depend on a CDN or network access.
 
 The fixture is test-only and is not included in the published npm package.
 
-`highlightjs-11.12.0/` freezes the official Highlight.js browser build and GitHub
-light/dark styles from `@highlightjs/cdn-assets@11.12.0`, matching Docweaver's 11.12
-CDN series. Homepage tests route `$ae.dep()` requests to these files so they test
-real tokenization, dependency reuse and theme switching without network access.
-The build includes the HTML/XML, JavaScript and CSS grammars used by the examples.
-The upstream BSD-3-Clause license is included as `highlightjs-11.12.0/LICENSE`.
-These fixtures are test-only and excluded from the published npm package. Google
-Fonts requests use an empty stylesheet during behavior tests; font fallback is
-independent of the example interactions.
-
-The homepage brand SVGs load Geist directly from Google Fonts. Their requests
-use the real frozen Latin WOFF2 in `geist-v5/`, including its OFL license, so
-font embedding and SVG/PNG typography are verified without network access.
+Homepage-specific Highlight.js and Geist fixtures and the homepage/Library tests
+are maintained in https://github.com/aelluxjs/aelluxjs.github.io.

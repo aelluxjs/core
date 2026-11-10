@@ -4,7 +4,7 @@ import { readFile, readdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
 const root = new URL("../", import.meta.url);
-const directories = new Set([".github", ".vscode", "src", "scripts", "templates", "tests", "docs-source", "home", "dist", "docs"]);
+const directories = new Set([".github", ".vscode", "src", "scripts", "templates", "tests", "docs-source", "dist", "docs"]);
 const textFile = /\.(?:[cm]?js|json|map|md|html?|css|webmanifest|ya?ml|txt)$/;
 // Historical reports, released changelog entries, third-party/vendor assets,
 // licenses and existing artwork are outside current first-party naming.

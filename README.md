@@ -48,6 +48,7 @@ See [Getting Started](docs-source/0.1.x/getting-started.md) for build instructio
 
 ## Documentation
 
+- [Official homepage, examples and Library](https://aelluxjs.github.io/), maintained in the separate [website repository](https://github.com/aelluxjs/aelluxjs.github.io).
 - [Brand naming and global object migration](docs-source/0.1.x/brand-naming.md)
 - [Published documentation](https://aelluxjs.github.io/core/docs/0.1.x/)
 - [Documentation source index](docs-source/0.1.x/README.md)
