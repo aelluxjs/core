@@ -20,9 +20,11 @@
       <link rel="icon" type="image/png" sizes="192x192" href="<%= it.faviconPath %>/android-chrome-192x192.png">
       <link rel="icon" type="image/png" sizes="512x512" href="<%= it.faviconPath %>/android-chrome-512x512.png">
       <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="<%= it.faviconPath %>/apple-touch-icon.png">
-      <% } %>
+      <% } else { %>
+        <link rel="icon" type="image/svg+xml" sizes="any" href="<%= it.outputPath %>/icon.svg">
+        <% } %>
 
-        <%~ include("./js-head.eta.htm") %>
+          <%~ include("./js-head.eta.htm") %>
 
 </head>
 
@@ -56,13 +58,14 @@
 
             <a class="navbar-brand m-0 me-auto p-0 lh-1 d-flex align-items-center" href="<%= it.homeHref %>"
               style="font-size:1.5em;letter-spacing:-0.03em;color:inherit;">
-              <span class="fw-semibold">aellux</span><span class="fw-normal">.js</span>
+              <span class="fw-semibold">ællux</span><span class="fw-normal">.js</span>
             </a>
 
           </div>
 
-          <button class="navbar-toggler" type="button" data-ae-present-trigger="toggle" data-ae-present-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" data-ae-point>
+          <button class="navbar-toggler" type="button" data-ae-present-trigger="toggle"
+            data-ae-present-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+            aria-expanded="false" aria-label="Toggle navigation" data-ae-point>
             <div class="hamburger">
               <span></span>
               <span></span>
@@ -113,7 +116,8 @@
                                     style="flex:0">
                                     <button data-ae-point type="button"
                                       class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
-                                      data-ae-present-trigger="toggle" data-ae-present-target="#children2-<%= child.slug %>">
+                                      data-ae-present-trigger="toggle"
+                                      data-ae-present-target="#children2-<%= child.slug %>">
                                       <%= child.label %>
                                         <% if (child.children !==undefined) { %><span class="chevron"><svg
                                               class="svg-icon small" aria-hidden="true" focusable="false">

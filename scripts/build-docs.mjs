@@ -46,6 +46,9 @@ await writeFile(path.join(outputPath, "0.1.x", "core-extensions", "point.htm"),
   '<body><a href="input.htm">Input Extension documentation</a></body></html>\n', "utf8");
 
 const docweaverAssetPath = path.join(outputPath, "assets", "docweaver");
+for (const asset of ["icon.svg", "geist.OFL.txt"]) {
+  await copyFile(path.join(themePath, asset), path.join(docweaverAssetPath, asset));
+}
 // Docweaver copies its default assets before overlaying the local theme.
 // Ajax Href is now supplied by Core, so discard the upstream standalone copy.
 await unlink(path.join(docweaverAssetPath, "js", "aellux.ext.ajax-href.js"))
