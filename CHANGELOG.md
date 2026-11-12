@@ -20,7 +20,7 @@ Changes in this section are pending for the `0.1.0` release candidate.
 
 - Present optional interactive gestures now scrub the existing Pop/Unpop and independent Dismiss timelines, with direction/source configuration, CSS thresholds and distance, deterministic pointer ownership, cancellation and lifecycle cleanup. Explicit `ae--pop`, `ae--unpop` and `ae--dismissed` initial classes opt into CSS-owned closed visibility; legacy hidden closing is preserved. Added hidden-source INFO `3004`, editor metadata, documentation examples and browser regression coverage.
 
-- Present `unpop()` now reverses the captured opening trajectory back to `from`, including nonlinear easing and partially travelled duration, independently of `dismiss()`. Added the `unpop` trigger action, `ae--unpopping`, reverse lifecycle/focus events, `present.unpop` layout origin and bounded `--ae-unpop-progress`. Native fallback replays opening CSS with reverse direction and clipped time. Calling `unpop()` during an active independent dismissal returns false and preserves it. Default close controls, toggle/groups and automation still dismiss.
+- Present `unpop()` now reverses the captured opening trajectory back to `from`, including nonlinear easing and partially travelled duration, independently of `dismiss()`. Added the `unpop` trigger action, `ae--unpopping`, reverse lifecycle/focus events, `present.unpop` layout origin and bounded `--ae-unpop-progress`. Native fallback replays opening CSS with reverse direction and clipped time. Calling `unpop()` during an active independent dismissal returns false and preserves it. Explicit dismiss controls, automatic closing and outgoing group selection still dismiss.
 
 - Added the homepage's four standalone interactive examples with runnable source disclosure, shared Bootstrap/homepage styling, a horizontal Viewport demo, an anchored carousel highlight, and fixed section navigation including Start.
 - Added browser regressions for adaptive CSS publication, latest-value coalescing, interruption/unmount cleanup and inline-priority restoration across Modern and Legacy distributions.
@@ -29,6 +29,8 @@ Changes in this section are pending for the `0.1.0` release candidate.
 - Added the Compatibility Commitment for aellux.js `0.1.x`, effective from `0.1.0`, covering only minimal global initialization and declarative activation/mounting. Stable indicates maturity and validation, without an Extension API compatibility guarantee. Linked it from the documentation navigation and reference pages; recorded pending support policies and contract discrepancies separately for maintainer review without changing Extension stability or runtime behavior.
 
 ### Changed
+
+- Present `toggle()` and declarative toggle controls now close through Unpop; `dismiss()` and its trigger remain available for an independent outgoing transition. The documentation navbar and TOC use reverse close actions and mobile drag handles for gesture Unpop.
 
 - **Breaking: public global naming.** Replaced the pre-0.1.0 `AelluxJs` global with `aelluxJs`, without a compatibility alias. Update application callbacks, third-party extensions and conventional ESM import bindings; `$ae` remains available. Deploy matching boot, Modern/Legacy runtimes, Full bundles, independent extensions and input adapters together, and refresh application-owned offline caches. DOM event names, storage keys, package names, filenames and published URLs retain their existing spelling. Added the authoritative `BRAND_GUIDELINES.md`, public migration guide and CI naming check.
 

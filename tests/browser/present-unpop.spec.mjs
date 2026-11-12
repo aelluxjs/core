@@ -225,7 +225,7 @@ for (const forceLegacy of [false, true]) {
   });
 }
 
-test("unpop trigger clears exclusive selection; groups and toggle still dismiss by default", async ({ page }) => {
+test("unpop trigger clears exclusive selection; group replacement dismisses while toggle reverses", async ({ page }) => {
   await start(page, `<button id="reverse" data-ae-present-trigger="unpop" data-ae-present-target="panel">Reverse</button>
     <div id="group" data-ae-present-group data-ae-present-active="panel">
       <div id="panel" data-ae-present="opacity" style="--ae-pop-duration:180ms">A</div>
@@ -242,7 +242,7 @@ test("unpop trigger clears exclusive selection; groups and toggle still dismiss 
     await $ae("group").present.show("other");
     await $ae("other").present.toggle(false);
   });
-  expect(await page.evaluate(() => window.names)).toEqual(["BeforeUnpop", "BeforeDismiss", "BeforeDismiss"]);
+  expect(await page.evaluate(() => window.names)).toEqual(["BeforeUnpop", "BeforeDismiss", "BeforeUnpop"]);
 });
 
 test("reverse focus release, discrete progress and reduced motion retain lifecycle", async ({ page }) => {

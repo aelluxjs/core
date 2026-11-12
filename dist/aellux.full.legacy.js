@@ -36991,7 +36991,7 @@
           return presentTransition(element, false, false, false, void 0, UNPOP);
         }
         function toggle(element, goto) {
-          return presentTransition(element, goto);
+          return presentTransition(element, goto, false, false, void 0, UNPOP);
         }
         function effect(element, name, effectTarget) {
           return effects.effect(element, name, effectTarget);

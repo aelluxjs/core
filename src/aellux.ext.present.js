@@ -514,7 +514,7 @@ import { createPresentEffects } from "./internal/create-present-effects.js";
   function pop(element) { return presentTransition(element, true, true); }
   function dismiss(element) { return presentTransition(element, false); }
   function unpop(element) { return presentTransition(element, false, false, false, undefined, UNPOP); }
-  function toggle(element, goto) { return presentTransition(element, goto); }
+  function toggle(element, goto) { return presentTransition(element, goto, false, false, undefined, UNPOP); }
   function effect(element, name, effectTarget) { return effects.effect(element, name, effectTarget); }
   function cancelEffect(element) { effects.cancelWithin(element); }
   function trigger(element, trigger, name) {

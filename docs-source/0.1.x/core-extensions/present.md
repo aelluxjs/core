@@ -8,7 +8,7 @@ Stability describes implementation maturity and validation, not API compatibilit
 
 ## Declarative actions
 
-Present follows the normative [Declarative Action Naming Convention](../extensions/declarative-action-naming.md). Mount controls with `data-ae-present-trigger="pop|unpop|dismiss|toggle|effect"`; empty defaults to toggle. `data-ae-present-target` selects one native ID, optionally prefixed with #, or omission uses the closest Present ancestor. A target without a trigger creates no control or ARIA relationship. Use `data-ae-present-trigger="dismiss"` for explicit and implicit close buttons. `data-ae-present-trigger-on="hover"` retains delegated hover behavior; click, keyboard and Input Tap share the same action routing. Attribute values are read at command time; use the normal mount/update lifecycle after changing declarations.
+Present follows the normative [Declarative Action Naming Convention](../extensions/declarative-action-naming.md). Mount controls with `data-ae-present-trigger="pop|unpop|dismiss|toggle|effect"`; empty defaults to toggle. `data-ae-present-target` selects one native ID, optionally prefixed with #, or omission uses the closest Present ancestor. A target without a trigger creates no control or ARIA relationship. Use `unpop` for a close button that reverses the opening motion, and `dismiss` for an independent outgoing motion. `data-ae-present-trigger-on="hover"` retains delegated hover behavior; click, keyboard and Input Tap share the same action routing. Attribute values are read at command time; use the normal mount/update lifecycle after changing declarations.
 
 ## Temporary effects
 
@@ -46,7 +46,7 @@ await $ae("notice").present.effect("shake", document.getElementById("notice-cont
 
 ## Operations and prerelease migration
 
-`pop()` shows a region using its opening animation. `dismiss()` closes it from the current rendered state using an independent destination, duration and easing. `toggle(element, false)` dismisses; `toggle(element, true)` opens idempotently. Explicit `pop()` restarts from `from`.
+`pop()` shows a region using its opening animation. `dismiss()` closes it from the current rendered state using an independent destination, duration and easing. `toggle(element, false)` reverses with Unpop; `toggle(element, true)` opens idempotently. Explicit `pop()` restarts from `from`.
 
 `unpop()` reverses the original opening trajectory back to `from`, including the travelled portion of an incomplete opening. With `--ae-from-transform: scale(0.5)`, `--ae-pop-transform: scale(1)` and `--ae-dismiss-transform: scale(1.2)`, opening travels from 0.5 to 1, dismissal travels from the current scale to 1.2, and reverse playback returns toward 0.5 along the opening trajectory. Dismissal does not reverse the opening timeline.
 
@@ -136,7 +136,7 @@ Reverse playback starts at the rendered position without the opening preparation
 
 Calling `unpop()` during an independent `dismiss()` resolves to `false`, without interrupting it, changing its styles or emitting reverse events. The dismissal may already lie outside the original opening trajectory. Calling `dismiss()` during reversal remains supported and closes continuously toward its own destination. Explicit `pop()` replaces either closing operation and restarts from `from`.
 
-An explicit reverse control is `<button data-ae-present-trigger="unpop" data-ae-present-target="details">Reverse</button>`. Existing close controls, toggle(false), timed/click/hover closing and outgoing group selection continue using `dismiss()`. Reversing an exclusively selected member clears that selection with the same group preflight/ownership rules; independent pool members release their capacity when reversal is accepted.
+An explicit reverse control is `<button data-ae-present-trigger="unpop" data-ae-present-target="details">Reverse</button>`. Toggle closing also uses Unpop. Timed/click/hover closing and outgoing group selection continue using `dismiss()`. Reversing an exclusively selected member clears that selection with the same group preflight/ownership rules; independent pool members release their capacity when reversal is accepted.
 
 `--ae-unpop-progress` is bounded normalized reverse-operation progress, 0 at acceptance and 1 on completion, using the remaining travel time. `--ae-pop-progress` follows the captured opening curve backwards and remains clamped; `--ae-dismiss-progress` is not animated as an independent dismissal during reversal. Stable hidden endpoints are `(pop, dismiss, unpop) = (0, 1, 1)` and fully presented endpoints are `(1, 0, 0)`. Opening resets all closing progress to zero. Missing property registration uses discrete reverse progress while preserving visual completion.
 

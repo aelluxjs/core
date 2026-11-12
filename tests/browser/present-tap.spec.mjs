@@ -22,7 +22,7 @@ async function start(page, mode, forceLegacy) {
   await page.evaluate(() => {
     window.actions = [];
     window.tapCount = 0;
-    for (const name of ["BeforePop", "BeforeDismiss"]) document.addEventListener(aelluxJs.eventName(name), event => {
+    for (const name of ["BeforePop", "BeforeUnpop", "BeforeDismiss"]) document.addEventListener(aelluxJs.eventName(name), event => {
       actions.push({ name, target: event.target.id });
     });
     document.addEventListener(aelluxJs.eventName("tap"), () => tapCount++);
@@ -112,7 +112,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
       // The next physical gesture is independent and closes the same control once.
       await page.evaluate(() => { tapGesture(); clickGesture(); });
       await page.waitForTimeout(64);
-      expect(await page.evaluate(() => actions.map(action => action.name))).toEqual(["BeforePop", "BeforeDismiss"]);
+      expect(await page.evaluate(() => actions.map(action => action.name))).toEqual(["BeforePop", "BeforeUnpop"]);
       await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
     });
 
@@ -159,7 +159,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
       expect(await page.evaluate(() => actions.length)).toBe(2);
       await page.evaluate(() => { actions.length = 0; tapGesture(); clickGesture("child", 72); });
       await page.waitForTimeout(64);
-      expect(await page.evaluate(() => actions.map(action => action.name))).toEqual(["BeforeDismiss", "BeforePop"]);
+      expect(await page.evaluate(() => actions.map(action => action.name))).toEqual(["BeforeUnpop", "BeforePop"]);
       await expect(page.locator("#panel")).toHaveJSProperty("hidden", false);
     });
 

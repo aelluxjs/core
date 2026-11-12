@@ -56,7 +56,7 @@ async function initOrRefreshToc() {
   }
 
   toc?.querySelectorAll("a[href]").forEach((link) => {
-    link.setAttribute("data-ae-present-trigger", "dismiss");
+    link.setAttribute("data-ae-present-trigger", "unpop");
     link.setAttribute("data-ae-present-target", "toc-collapse");
   });
 }

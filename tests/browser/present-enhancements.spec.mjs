@@ -24,10 +24,15 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
         panel.addEventListener(aelluxJs.eventName(name), event => events.push({ name, bubbles: event.bubbles,
           cancelable: event.cancelable, origin: event.detail?.origin, durationMs: event.detail?.durationMs }));
       await $ae(panel).present.toggle(false);
+      const toggleEvents = events.splice(0);
+      await $ae(panel).present.pop();
+      events.length = 0;
       await $ae.ext.present.dismiss(panel);
-      return { events, progress: ["--ae-pop-progress", "--ae-dismiss-progress"].map(name => getComputedStyle(panel).getPropertyValue(name).trim()),
+      return { toggleEvents, events, progress: ["--ae-pop-progress", "--ae-dismiss-progress"].map(name => getComputedStyle(panel).getPropertyValue(name).trim()),
         oldProgress: getComputedStyle(panel).getPropertyValue("--ae-unpop-progress"), classes: [...panel.classList] };
     });
+    expect(result.toggleEvents.map(event => event.name)).toEqual(["BeforeUnpop", "Layout", "Unpopping", "Unpop"]);
+    expect(result.toggleEvents[1]).toMatchObject({ origin: "present.unpop", durationMs: 0 });
     expect(result.events.map(event => event.name)).toEqual(["BeforeDismiss", "Layout", "Dismissing", "Dismiss"]);
     expect(result.events.map(event => event.cancelable)).toEqual([true, false, false, false]);
     expect(result.events.every(event => event.bubbles)).toBe(true);

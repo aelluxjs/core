@@ -39,7 +39,8 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-q4bpBk5Vqct9IR80W+4o8g4BlPq84mWWb0mV47Q76mgYStKp6AKgCBgxRwr2FPAE" crossorigin="anonymous">
+  integrity="sha384-XlVIRqhlomwMqMiNaz9Ci/AJFExJb2Ps4KRhPVlexZfwNLzqtwPLsPjCCnM7nlLv" crossorigin="anonymous">
+
 </head>
 
 <body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
@@ -134,7 +135,8 @@
 
           </div>
 
-          <button class="navbar-toggler" type="button" data-ae-present-trigger="toggle"
+          <button id="button-navbar-menu" class="navbar-toggler" type="button" draggable="false"
+            data-ae-present-trigger="toggle"
             data-ae-present-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
             aria-expanded="false" aria-label="Toggle navigation" data-ae-point>
             <div class="hamburger">
@@ -145,7 +147,9 @@
           </button>
 
           <div class="navbar-collapse bg-white border-end d-md-block" id="navbarSupportedContent" hidden
-            data-ae-present="transform">
+            data-ae-present="transform" data-ae-present-gesture="left"
+            data-ae-present-gesture-source="button-navbar-menu">
+            <div class="docs-drawer-handle" aria-hidden="true"></div>
             <nav class="h-100 w-100" data-ae-scrollbox="pointer" data-ae-scrollbar
               style="overscroll-behavior: contain;">
               <div class="navbar-nav w-100 gap-1 my-0 p-2 ps-md-3 pe-md-3 pb-4 flex-column align-self-start text-white">
@@ -671,7 +675,7 @@
           style="top:64px;z-index:1;" role="contentinfo">
 
           <div class="menu-toggle d-flex flex-row gap-2 small">
-            <button data-ae-point id="button-toc-menu" type="button"
+            <button data-ae-point id="button-toc-menu" type="button" draggable="false"
               class="btn btn-outline-adaptive rounded-1 text-nowrap" data-ae-present-trigger="toggle"
               data-ae-present-target="#toc-collapse" aria-expanded="false" aria-controls="toc-collapse"
               aria-label="Table of Contents" title="Summary">
@@ -687,7 +691,8 @@
           </div>
 
           <div class="toc-collapse bg-white overflow-hidden" id="toc-collapse" data-ae-present="transform opacity"
-            hidden>
+            data-ae-present-gesture="down" data-ae-present-gesture-source="button-toc-menu" hidden>
+            <div class="toc-drag-handle" aria-hidden="true"></div>
             <div data-ae-scrollbox data-ae-scrollbar class="d-block overflow-auto"
               style="overscroll-behavior: contain;">
               <div class="pt-1 pt-lg-2 p-4 p-lg-0 d-table w-100">

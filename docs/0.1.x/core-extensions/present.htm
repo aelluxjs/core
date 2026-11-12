@@ -39,7 +39,8 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-q4bpBk5Vqct9IR80W+4o8g4BlPq84mWWb0mV47Q76mgYStKp6AKgCBgxRwr2FPAE" crossorigin="anonymous">
+  integrity="sha384-XlVIRqhlomwMqMiNaz9Ci/AJFExJb2Ps4KRhPVlexZfwNLzqtwPLsPjCCnM7nlLv" crossorigin="anonymous">
+
 </head>
 
 <body data-ae-feedback="error" data-ae-present-target="#toast-present-group">
@@ -134,7 +135,8 @@
 
           </div>
 
-          <button class="navbar-toggler" type="button" data-ae-present-trigger="toggle"
+          <button id="button-navbar-menu" class="navbar-toggler" type="button" draggable="false"
+            data-ae-present-trigger="toggle"
             data-ae-present-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
             aria-expanded="false" aria-label="Toggle navigation" data-ae-point>
             <div class="hamburger">
@@ -145,7 +147,9 @@
           </button>
 
           <div class="navbar-collapse bg-white border-end d-md-block" id="navbarSupportedContent" hidden
-            data-ae-present="transform">
+            data-ae-present="transform" data-ae-present-gesture="left"
+            data-ae-present-gesture-source="button-navbar-menu">
+            <div class="docs-drawer-handle" aria-hidden="true"></div>
             <nav class="h-100 w-100" data-ae-scrollbox="pointer" data-ae-scrollbar
               style="overscroll-behavior: contain;">
               <div class="navbar-nav w-100 gap-1 my-0 p-2 ps-md-3 pe-md-3 pb-4 flex-column align-self-start text-white">
@@ -671,7 +675,7 @@
           style="top:64px;z-index:1;" role="contentinfo">
 
           <div class="menu-toggle d-flex flex-row gap-2 small">
-            <button data-ae-point id="button-toc-menu" type="button"
+            <button data-ae-point id="button-toc-menu" type="button" draggable="false"
               class="btn btn-outline-adaptive rounded-1 text-nowrap" data-ae-present-trigger="toggle"
               data-ae-present-target="#toc-collapse" aria-expanded="false" aria-controls="toc-collapse"
               aria-label="Table of Contents" title="Summary">
@@ -687,7 +691,8 @@
           </div>
 
           <div class="toc-collapse bg-white overflow-hidden" id="toc-collapse" data-ae-present="transform opacity"
-            hidden>
+            data-ae-present-gesture="down" data-ae-present-gesture-source="button-toc-menu" hidden>
+            <div class="toc-drag-handle" aria-hidden="true"></div>
             <div data-ae-scrollbox data-ae-scrollbar class="d-block overflow-auto"
               style="overscroll-behavior: contain;">
               <div class="pt-1 pt-lg-2 p-4 p-lg-0 d-table w-100">
@@ -750,7 +755,7 @@
 <p>Stability describes implementation maturity and validation, not API compatibility. Only the <a href="../runtime/compatibility-commitment.htm">minimal initialization and declarative activation/mounting contract</a> is protected during <code>0.1.x</code>.</p>
 <p><code>present</code> controls the visibility of elements marked with <code>data-ae-present</code>. It is included in the <code>full</code> runtime, with CSS supplied by the shared Full stylesheet. In Basic, register it explicitly with <code>$ae.ext(&quot;present&quot;, { loadStyle: true })</code>. Supply <code>loadWhen</code> to choose a lazy activation selector, including trigger markup when needed.</p>
 <h2>Declarative actions</h2>
-<p>Present follows the normative <a href="../extensions/declarative-action-naming.htm">Declarative Action Naming Convention</a>. Mount controls with <code>data-ae-present-trigger=&quot;pop|unpop|dismiss|toggle|effect&quot;</code>; empty defaults to toggle. <code>data-ae-present-target</code> selects one native ID, optionally prefixed with #, or omission uses the closest Present ancestor. A target without a trigger creates no control or ARIA relationship. Use <code>data-ae-present-trigger=&quot;dismiss&quot;</code> for explicit and implicit close buttons. <code>data-ae-present-trigger-on=&quot;hover&quot;</code> retains delegated hover behavior; click, keyboard and Input Tap share the same action routing. Attribute values are read at command time; use the normal mount/update lifecycle after changing declarations.</p>
+<p>Present follows the normative <a href="../extensions/declarative-action-naming.htm">Declarative Action Naming Convention</a>. Mount controls with <code>data-ae-present-trigger=&quot;pop|unpop|dismiss|toggle|effect&quot;</code>; empty defaults to toggle. <code>data-ae-present-target</code> selects one native ID, optionally prefixed with #, or omission uses the closest Present ancestor. A target without a trigger creates no control or ARIA relationship. Use <code>unpop</code> for a close button that reverses the opening motion, and <code>dismiss</code> for an independent outgoing motion. <code>data-ae-present-trigger-on=&quot;hover&quot;</code> retains delegated hover behavior; click, keyboard and Input Tap share the same action routing. Attribute values are read at command time; use the normal mount/update lifecycle after changing declarations.</p>
 <h2>Temporary effects</h2>
 <p>Present manages state transitions and temporary effects independently. Effects do not change Pop/Unpop/Dismiss state. They also work on already visible <code>data-ae-present=&quot;&quot;</code> elements without a preceding Pop.</p>
 <p><code>$ae.ext.present.effect(element, name, effectTarget?)</code> and <code>$ae(element).present.effect(name, effectTarget?)</code> return a Promise resolving to <code>{ status }</code>: <code>completed</code>, <code>aborted</code> or <code>skipped</code>. The optional target must be the mounted Present itself or a descendant Element. <code>cancelEffect()</code> cancels active and pending requests within the region. Each Present owns at most one request; the latest request replaces the previous one. Two owners cannot animate the same effect target concurrently.</p>
@@ -772,7 +777,7 @@
 await $ae(&quot;notice&quot;).present.effect(&quot;shake&quot;, document.getElementById(&quot;notice-content&quot;));
 </code></pre>
 <h2>Operations and prerelease migration</h2>
-<p><code>pop()</code> shows a region using its opening animation. <code>dismiss()</code> closes it from the current rendered state using an independent destination, duration and easing. <code>toggle(element, false)</code> dismisses; <code>toggle(element, true)</code> opens idempotently. Explicit <code>pop()</code> restarts from <code>from</code>.</p>
+<p><code>pop()</code> shows a region using its opening animation. <code>dismiss()</code> closes it from the current rendered state using an independent destination, duration and easing. <code>toggle(element, false)</code> reverses with Unpop; <code>toggle(element, true)</code> opens idempotently. Explicit <code>pop()</code> restarts from <code>from</code>.</p>
 <p><code>unpop()</code> reverses the original opening trajectory back to <code>from</code>, including the travelled portion of an incomplete opening. With <code>--ae-from-transform: scale(0.5)</code>, <code>--ae-pop-transform: scale(1)</code> and <code>--ae-dismiss-transform: scale(1.2)</code>, opening travels from 0.5 to 1, dismissal travels from the current scale to 1.2, and reverse playback returns toward 0.5 along the opening trajectory. Dismissal does not reverse the opening timeline.</p>
 <p>This is a breaking prerelease finalization before the <code>0.1.0</code> compatibility baseline. Migrate existing beta dismissal consumers together. The current <code>unpop()</code> is a distinct reverse operation, never an alias for dismissal.</p>
 <table>
@@ -881,7 +886,7 @@ await panel.dismiss();
 <p>Reverse playback starts at the rendered position without the opening preparation delay. The same CSS Motion scheduler can control it; with control disabled it runs natively. Without Web Animations inspection, generated native CSS keyframes replay the captured CSS opening endpoints/easing with reverse direction and a negative delay that excludes the untravelled segment. Inline values, priorities, transition/animation declarations and temporary endpoint variables are restored after completion, replacement, errors and teardown. Reduced motion completes immediately. Layout/content changes during playback do not recapture an earlier opening.</p>
 <p><code>BeforeUnpop</code> is cancelable and leaves the current presentation untouched when vetoed. The accepted operation emits <code>Layout</code> (<code>origin: &quot;present.unpop&quot;</code>, <code>durationMs</code> equal to the longest reverse segment), <code>Unpopping</code> and, after hiding/cleanup, <code>Unpop</code>. Focus release uses <code>UnpopFocusLost</code> on document with the same <code>{ element, focused }</code> payload as dismissal. Repeated reversal or a hidden target is idempotent.</p>
 <p>Calling <code>unpop()</code> during an independent <code>dismiss()</code> resolves to <code>false</code>, without interrupting it, changing its styles or emitting reverse events. The dismissal may already lie outside the original opening trajectory. Calling <code>dismiss()</code> during reversal remains supported and closes continuously toward its own destination. Explicit <code>pop()</code> replaces either closing operation and restarts from <code>from</code>.</p>
-<p>An explicit reverse control is <code>&lt;button data-ae-present-trigger=&quot;unpop&quot; data-ae-present-target=&quot;details&quot;&gt;Reverse&lt;/button&gt;</code>. Existing close controls, toggle(false), timed/click/hover closing and outgoing group selection continue using <code>dismiss()</code>. Reversing an exclusively selected member clears that selection with the same group preflight/ownership rules; independent pool members release their capacity when reversal is accepted.</p>
+<p>An explicit reverse control is <code>&lt;button data-ae-present-trigger=&quot;unpop&quot; data-ae-present-target=&quot;details&quot;&gt;Reverse&lt;/button&gt;</code>. Toggle closing also uses Unpop. Timed/click/hover closing and outgoing group selection continue using <code>dismiss()</code>. Reversing an exclusively selected member clears that selection with the same group preflight/ownership rules; independent pool members release their capacity when reversal is accepted.</p>
 <p><code>--ae-unpop-progress</code> is bounded normalized reverse-operation progress, 0 at acceptance and 1 on completion, using the remaining travel time. <code>--ae-pop-progress</code> follows the captured opening curve backwards and remains clamped; <code>--ae-dismiss-progress</code> is not animated as an independent dismissal during reversal. Stable hidden endpoints are <code>(pop, dismiss, unpop) = (0, 1, 1)</code> and fully presented endpoints are <code>(1, 0, 0)</code>. Opening resets all closing progress to zero. Missing property registration uses discrete reverse progress while preserving visual completion.</p>
 <p>There are no <code>--ae-unpop-opacity</code>, transform, size, duration or easing settings: reverse playback derives its trajectory from opening. The old <code>data-ae-auto-unpop</code> and <code>data-ae-unpop-on-click</code> attributes remain inactive. Generic <code>AelluxJsProgress</code> remains the auto-dismiss countdown event.</p>
 <p>The handoff temporarily retains computed values inline. Grid closing resolves its destination tracks and container size in pixels in one synchronous layout pass, preserving both the visible box and its tracks during fractional-grid interpolation. Measured closing retains the current size instead of restoring the expanded cap before measurement. Temporary declarations, including author values and priorities, are restored on completion, replacement, error and unmount; endpoint custom properties remain authored. The grid destination is measured when closing starts, so content/layout changes during that close do not retarget its pixel destination. Native CSS and CSS Motion use the same handoff; CSS Motion still starts each replacement timeline at zero. Reduced motion retains immediate endpoints.</p>
