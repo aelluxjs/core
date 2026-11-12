@@ -1189,6 +1189,13 @@
     const pointerScroll = state.pointerScroll;
     if (!pointerScroll || event.pointerId !== pointerScroll.pointerId) return;
 
+    // Present can claim outward travel at a scroll edge, including after PDS
+    // has reached that edge. Release the current drag without momentum.
+    if (event.defaultPrevented) {
+      endPointerScroll(state);
+      return;
+    }
+
     if ((event.buttons & 1) === 0) {
       endPointerScroll(state);
       return;

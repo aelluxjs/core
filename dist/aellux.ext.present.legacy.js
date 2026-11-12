@@ -786,7 +786,7 @@
     var attribute = function attribute2(name) {
       return api.attr("present-gesture".concat(name ? "-".concat(name) : ""));
     };
-    var inputExceptions = "a:not([draggable='false']),button:not([draggable='false']),input,textarea,select,[contenteditable],[draggable='true']," + "[".concat(api.attr("scrollbar-vertical"), "],[").concat(api.attr("scrollbar-horizontal"), "],[").concat(api.attr("scrollbox"), "]");
+    var inputExceptions = "a:not([draggable='false']),button:not([draggable='false']),input,textarea,select,[contenteditable],[draggable='true']," + "[".concat(api.attr("scrollbar-vertical"), "],[").concat(api.attr("scrollbar-horizontal"), "]");
     var warn = function warn2(element, name, value, reason) {
       return api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_VALUE, {
         extension: "present",
@@ -862,7 +862,7 @@
           var target = _step.value;
           if (!sources.has(target)) {
             sources.set(target, /* @__PURE__ */ new Set());
-            target.addEventListener("pointerdown", down);
+            target.addEventListener("pointerdown", down, true);
           }
           sources.get(target).add(entry);
         }
@@ -895,7 +895,7 @@
           var set = sources.get(target);
           set.delete(entry);
           if (!set.size) {
-            target.removeEventListener("pointerdown", down);
+            target.removeEventListener("pointerdown", down, true);
             sources.delete(target);
           }
         }
@@ -924,7 +924,7 @@
         };
         for (var _i = 0, _arr = ["pointermove", "pointerup", "pointercancel", "lostpointercapture"]; _i < _arr.length; _i++) {
           var name = _arr[_i];
-          root.document.addEventListener(name, move, {
+          root.addEventListener(name, move, {
             capture: true,
             passive: false
           });
@@ -1017,8 +1017,13 @@
           return services.order(b.entry.element) - services.order(a.entry.element);
         });
         var candidate = candidates[0];
-        if (!candidate || nativeScroll(current.target, candidate.entry.element, axis, delta)) {
+        if (!candidate) {
           clear();
+          return;
+        }
+        if (nativeScroll(current.target, candidate.entry.element, axis, delta)) {
+          current.x = event.clientX;
+          current.y = event.clientY;
           return;
         }
         if (!((_root$KeyframeEffect = root.KeyframeEffect) !== null && _root$KeyframeEffect !== void 0 && _root$KeyframeEffect.prototype.setKeyframes) || !candidate.entry.element.getAnimations) {
@@ -1122,7 +1127,7 @@
       interaction = null;
       for (var _i3 = 0, _arr3 = ["pointermove", "pointerup", "pointercancel", "lostpointercapture"]; _i3 < _arr3.length; _i3++) {
         var name = _arr3[_i3];
-        root.document.removeEventListener(name, move, true);
+        root.removeEventListener(name, move, true);
       }
       if (previous !== null && previous !== void 0 && previous.captured) try {
         previous.target.releasePointerCapture(previous.id);

@@ -1178,6 +1178,10 @@
     function movePointerScroll(state, event) {
       const pointerScroll = state.pointerScroll;
       if (!pointerScroll || event.pointerId !== pointerScroll.pointerId) return;
+      if (event.defaultPrevented) {
+        endPointerScroll(state);
+        return;
+      }
       if ((event.buttons & 1) === 0) {
         endPointerScroll(state);
         return;

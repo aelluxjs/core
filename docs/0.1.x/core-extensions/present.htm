@@ -39,7 +39,7 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-XlVIRqhlomwMqMiNaz9Ci/AJFExJb2Ps4KRhPVlexZfwNLzqtwPLsPjCCnM7nlLv" crossorigin="anonymous">
+  integrity="sha384-MYNS0nKbqOY64PY2SMBIHO7GPOq9Hu+4GDIHr/8YgibQnViqLNEAEC1rYma/FGof" crossorigin="anonymous">
 
 </head>
 
@@ -1084,7 +1084,7 @@ await $ae(&quot;views&quot;).present.show(&quot;home&quot;);
 </tr>
 </tbody></table>
 <p>Unpop always uses the opposite of the Pop direction. Unpop and Dismiss begin on the Present itself; the configured source supplies Pop input. Changing these attributes, replacing the source ID, or adding a previously missing source refreshes the listeners. A missing source reports configuration diagnostic <code>2027</code>. An invalid direction or a Dismiss direction on the Pop/Unpop axis reports <code>2026</code>; a conflicting Dismiss disables only that gesture.</p>
-<p>Links and buttons, including their descendants, can start gestures when they have an explicit <code>draggable=&quot;false&quot;</code>, following the Scrollbox rule. An effective gesture source that is itself a link or button is automatically given <code>draggable=&quot;false&quot;</code> when missing or different, with configuration warning <code>2026</code> identifying the source and its previous value. Declare the attribute explicitly to avoid the warning. This correction also applies when the source appears later or is replaced. Other form controls, elements with a <code>contenteditable</code> attribute, explicitly draggable descendants and Scrollbox regions/bars remain excluded.</p>
+<p>Links and buttons, including their descendants, can start gestures when they have an explicit <code>draggable=&quot;false&quot;</code>, following the Scrollbox rule. An effective gesture source that is itself a link or button is automatically given <code>draggable=&quot;false&quot;</code> when missing or different, with configuration warning <code>2026</code> identifying the source and its previous value. Declare the attribute explicitly to avoid the warning. This correction also applies when the source appears later or is replaced. Other form controls, elements with a <code>contenteditable</code> attribute, explicitly draggable descendants and Scrollbox scrollbar thumbs remain excluded.</p>
 <table>
 <thead>
 <tr>
@@ -1149,7 +1149,7 @@ await $ae(&quot;views&quot;).present.show(&quot;home&quot;);
   &lt;button data-ae-present-trigger=&quot;unpop&quot;&gt;Reverse programmatically&lt;/button&gt;
 &lt;/aside&gt;
 </code></pre>
-<p>Choose touch-action on a local handle or region according to the intended gesture axes. Browsers decide native touch scrolling at pointerdown, so preventing a later pointermove cannot reclaim a gesture already assigned to scrolling. A local handle needing both axes may require <code>touch-action:none</code>; Present never sets it globally. Inputs, links/buttons without <code>draggable=&quot;false&quot;</code>, contenteditable regions and nested Scrollboxes retain their input. Nested native scroll containers take precedence when they can scroll in the requested direction. Completed drags suppress the associated compatibility click, while ordinary presses remain clicks. Shared sources choose the most specific matching region, then the most recently presented region; one pointer controls one Present. Keep keyboard buttons available and choose accessible semantics for the component built with Present.</p>
+<p>Choose touch-action on a local handle or region according to the intended gesture axes. Browsers decide native touch scrolling at pointerdown, so preventing a later pointermove cannot reclaim a gesture already assigned to scrolling. A local handle needing both axes may require <code>touch-action:none</code>; Present never sets it globally. Inputs, links/buttons without <code>draggable=&quot;false&quot;</code> and contenteditable regions retain their input. A nested Scrollbox or native scroll container takes precedence while it can scroll in the drag direction; Present keeps observing and can claim the remaining outward drag when it reaches that edge. Scrollbar thumbs remain excluded. On touch surfaces, the browser may cancel the pointer after assigning it to native scrolling, so a separate gesture from the edge or a dedicated handle may be needed. Completed drags suppress the associated compatibility click, while ordinary presses remain clicks. Shared sources choose the most specific matching region, then the most recently presented region; one pointer controls one Present. Keep keyboard buttons available and choose accessible semantics for the component built with Present.</p>
 <h3>Gesture distribution cost</h3>
 <p>The gesture recognizer is private to Present and introduces no package dependency. Measurements compare the preceding build with this implementation, including Scrollbox-compatible controls and automatic interactive-source correction, in bytes (gzip level 9):</p>
 <table>

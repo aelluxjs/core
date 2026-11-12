@@ -8,10 +8,11 @@ export function createPresentGestures(root, api, services) {
   const entries = new Map(), sources = new Map();
   let interaction = null, suppressed = null, suppressTimer = null;
   const attribute = name => api.attr(`present-gesture${name ? `-${name}` : ""}`);
-  // Match Scrollbox's control opt-in while leaving its regions to native/PDS input.
+  // Keep native controls and scrollbar thumbs out; scrollable regions are
+  // arbitrated by direction and remaining travel after pointer intent.
   const inputExceptions = "a:not([draggable='false']),button:not([draggable='false'])," +
     "input,textarea,select,[contenteditable],[draggable='true']," +
-    `[${api.attr("scrollbar-vertical")}],[${api.attr("scrollbar-horizontal")}],[${api.attr("scrollbox")}]`;
+    `[${api.attr("scrollbar-vertical")}],[${api.attr("scrollbar-horizontal")}]`;
   const warn = (element, name, value, reason) => api.diagnostics.warn(api.diagnostics.WARN_CONFIGURATION_VALUE,
     { extension: "present", element, attribute: name, value, reason });
   const state = element => services.state(element);
@@ -50,7 +51,7 @@ export function createPresentGestures(root, api, services) {
     const entry = { element, source, direction, dismiss, unpop: unpop !== "false", signature };
     entries.set(element, entry);
     for (const target of new Set([source, element])) {
-      if (!sources.has(target)) { sources.set(target, new Set()); target.addEventListener("pointerdown", down); }
+      if (!sources.has(target)) { sources.set(target, new Set()); target.addEventListener("pointerdown", down, true); }
       sources.get(target).add(entry);
     }
     inspect(element);
@@ -69,7 +70,7 @@ export function createPresentGestures(root, api, services) {
     for (const target of new Set([entry.source, element])) {
       const set = sources.get(target);
       set.delete(entry);
-      if (!set.size) { target.removeEventListener("pointerdown", down); sources.delete(target); }
+      if (!set.size) { target.removeEventListener("pointerdown", down, true); sources.delete(target); }
     }
   }
 
@@ -81,7 +82,7 @@ export function createPresentGestures(root, api, services) {
     if (!interaction) {
       interaction = { id: event.pointerId, x: event.clientX, y: event.clientY, candidates: [], owner: null, target };
       for (const name of ["pointermove", "pointerup", "pointercancel", "lostpointercapture"])
-        root.document.addEventListener(name, move, { capture: true, passive: false });
+        root.addEventListener(name, move, { capture: true, passive: false });
     }
     for (const entry of sources.get(event.currentTarget) || []) {
       if (interaction.candidates.some(candidate => candidate.entry === entry)) continue;
@@ -151,7 +152,14 @@ export function createPresentGestures(root, api, services) {
         return services.order(b.entry.element) - services.order(a.entry.element);
       });
       const candidate = candidates[0];
-      if (!candidate || nativeScroll(current.target, candidate.entry.element, axis, delta)) { clear(); return; }
+      if (!candidate) { clear(); return; }
+      if (nativeScroll(current.target, candidate.entry.element, axis, delta)) {
+        // Let the scroll container consume this movement, but keep watching.
+        // If it reaches an edge, start Present from the remaining drag only.
+        current.x = event.clientX;
+        current.y = event.clientY;
+        return;
+      }
       if (!root.KeyframeEffect?.prototype.setKeyframes || !candidate.entry.element.getAnimations) {
         warn(candidate.entry.element, attribute(""), candidate.entry.direction, "Interactive Present requires inspectable Web Animations transitions."); clear(); return;
       }
@@ -226,7 +234,7 @@ export function createPresentGestures(root, api, services) {
   function clear() {
     const previous = interaction; interaction = null;
     for (const name of ["pointermove", "pointerup", "pointercancel", "lostpointercapture"])
-      root.document.removeEventListener(name, move, true);
+      root.removeEventListener(name, move, true);
     if (previous?.captured) try { previous.target.releasePointerCapture(previous.id); } catch (_) { /* detached target */ }
   }
   function cancel() { release(true); }

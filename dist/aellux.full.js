@@ -4356,6 +4356,10 @@
         function movePointerScroll(state, event) {
           const pointerScroll = state.pointerScroll;
           if (!pointerScroll || event.pointerId !== pointerScroll.pointerId) return;
+          if (event.defaultPrevented) {
+            endPointerScroll(state);
+            return;
+          }
           if ((event.buttons & 1) === 0) {
             endPointerScroll(state);
             return;
@@ -5973,7 +5977,7 @@
     const entries = /* @__PURE__ */ new Map(), sources = /* @__PURE__ */ new Map();
     let interaction = null, suppressed = null, suppressTimer = null;
     const attribute = (name) => api.attr(`present-gesture${name ? `-${name}` : ""}`);
-    const inputExceptions = `a:not([draggable='false']),button:not([draggable='false']),input,textarea,select,[contenteditable],[draggable='true'],[${api.attr("scrollbar-vertical")}],[${api.attr("scrollbar-horizontal")}],[${api.attr("scrollbox")}]`;
+    const inputExceptions = `a:not([draggable='false']),button:not([draggable='false']),input,textarea,select,[contenteditable],[draggable='true'],[${api.attr("scrollbar-vertical")}],[${api.attr("scrollbar-horizontal")}]`;
     const warn = (element, name, value, reason) => api.diagnostics.warn(
       api.diagnostics.WARN_CONFIGURATION_VALUE,
       { extension: "present", element, attribute: name, value, reason }
@@ -6031,7 +6035,7 @@
       for (const target of /* @__PURE__ */ new Set([source, element])) {
         if (!sources.has(target)) {
           sources.set(target, /* @__PURE__ */ new Set());
-          target.addEventListener("pointerdown", down);
+          target.addEventListener("pointerdown", down, true);
         }
         sources.get(target).add(entry);
       }
@@ -6052,7 +6056,7 @@
         const set = sources.get(target);
         set.delete(entry);
         if (!set.size) {
-          target.removeEventListener("pointerdown", down);
+          target.removeEventListener("pointerdown", down, true);
           sources.delete(target);
         }
       }
@@ -6068,7 +6072,7 @@
       if (!interaction) {
         interaction = { id: event.pointerId, x: event.clientX, y: event.clientY, candidates: [], owner: null, target };
         for (const name of ["pointermove", "pointerup", "pointercancel", "lostpointercapture"])
-          root2.document.addEventListener(name, move, { capture: true, passive: false });
+          root2.addEventListener(name, move, { capture: true, passive: false });
       }
       for (const entry of sources.get(event.currentTarget) || []) {
         if (interaction.candidates.some((candidate) => candidate.entry === entry)) continue;
@@ -6140,8 +6144,13 @@
           return services.order(b.entry.element) - services.order(a.entry.element);
         });
         const candidate = candidates[0];
-        if (!candidate || nativeScroll(current.target, candidate.entry.element, axis, delta)) {
+        if (!candidate) {
           clear();
+          return;
+        }
+        if (nativeScroll(current.target, candidate.entry.element, axis, delta)) {
+          current.x = event.clientX;
+          current.y = event.clientY;
           return;
         }
         if (!((_a = root2.KeyframeEffect) == null ? void 0 : _a.prototype.setKeyframes) || !candidate.entry.element.getAnimations) {
@@ -6238,7 +6247,7 @@
       const previous = interaction;
       interaction = null;
       for (const name of ["pointermove", "pointerup", "pointercancel", "lostpointercapture"])
-        root2.document.removeEventListener(name, move, true);
+        root2.removeEventListener(name, move, true);
       if (previous == null ? void 0 : previous.captured) try {
         previous.target.releasePointerCapture(previous.id);
       } catch (_) {

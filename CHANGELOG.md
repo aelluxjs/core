@@ -30,6 +30,8 @@ Changes in this section are pending for the `0.1.0` release candidate.
 
 ### Changed
 
+- Present gestures now observe Scrollbox surfaces and yield only while the nested area can scroll in the drag direction. An outward drag at the scroll edge can pass to Present; Scrollbox releases its pointer drag without momentum when Present takes ownership.
+
 - Present `toggle()` and declarative toggle controls now close through Unpop; `dismiss()` and its trigger remain available for an independent outgoing transition. The documentation navbar and TOC use reverse close actions and mobile drag handles for gesture Unpop.
 
 - **Breaking: public global naming.** Replaced the pre-0.1.0 `AelluxJs` global with `aelluxJs`, without a compatibility alias. Update application callbacks, third-party extensions and conventional ESM import bindings; `$ae` remains available. Deploy matching boot, Modern/Legacy runtimes, Full bundles, independent extensions and input adapters together, and refresh application-owned offline caches. DOM event names, storage keys, package names, filenames and published URLs retain their existing spelling. Added the authoritative `BRAND_GUIDELINES.md`, public migration guide and CI naming check.

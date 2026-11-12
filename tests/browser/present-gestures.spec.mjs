@@ -14,7 +14,9 @@ async function start(page, markup = panel(), options = {}) {
   await page.addScriptTag({ url: "/dist/aellux.js" });
   await page.evaluate(options => {
     $ae.ext("present", { loadStyle: true });
-    $ae.init({ mode: "basic", ...options });
+    if (options.withScrollbox) $ae.ext("scrollbox", { loadStyle: true });
+    const { withScrollbox, ...initOptions } = options;
+    $ae.init({ mode: "basic", ...initOptions });
   }, options);
   await expect.poll(() => page.evaluate(() => typeof $ae("panel")?.present?.pop)).toBe("function");
   await page.evaluate(async () => {
@@ -167,21 +169,20 @@ test("destroy and programmatic replacement release a manually paused timeline", 
   expect(value.classes).toBe("ae--unpop");
 });
 
-test("without opt-in or on controls/native scrollboxes, pointer input remains native", async ({ page }) => {
+test("without opt-in or on native controls and scrollbar thumbs, pointer input remains native", async ({ page }) => {
   await start(page, panel('class="ae--unpop"'));
   await page.evaluate(() => { pointer("pointerdown", 0, 200); pointer("pointermove", 0, 25); pointer("pointerup", 0, 25); });
   expect((await page.evaluate(() => read())).classes).toBe("ae--unpop");
   await page.evaluate(() => { document.getElementById("panel").setAttribute("data-ae-present-gesture", "up"); });
   for (const markup of [
     '<input id="input" draggable="false">', '<select id="input" draggable="false"></select>',
-    '<textarea id="input" draggable="false"></textarea>', '<div id="input" data-ae-scrollbox>Scroll</div>',
+    '<textarea id="input" draggable="false"></textarea>',
     '<button id="input">Control</button>', '<a id="input" href="#native">Link</a>',
     '<button draggable="true"><span id="input">Control</span></button>',
     '<a href="#native"><span id="input">Link</span></a>',
     '<button draggable="false"><span id="input" draggable="true">Native drag</span></button>',
     '<div contenteditable><button id="input" draggable="false">Editable</button></div>',
     '<div contenteditable="false"><a id="input" draggable="false">Contenteditable attribute</a></div>',
-    '<div data-ae-scrollbox><button id="input" draggable="false">Scrollbox</button></div>',
     '<div data-ae-scrollbar-vertical><button id="input" draggable="false">Scrollbar</button></div>',
     '<div data-ae-scrollbar-horizontal><a id="input" draggable="false">Scrollbar</a></div>'
   ]) {
@@ -406,6 +407,30 @@ test("scrollable descendants keep native movement and scrolling", async ({ page 
   await page.locator("#scroller").hover();
   await page.mouse.wheel(0, 100);
   await expect.poll(() => page.locator("#scroller").evaluate(element => element.scrollTop)).toBeGreaterThan(0);
+});
+
+test("Scrollbox scrolls while it can, then hands an outward drag to Present at its edge", async ({ page }) => {
+  await start(page, panel('class="ae--pop" data-ae-present-gesture="up"')
+    .replace("Content</div>", '<div id="scroller" data-ae-scrollbox="pointer" data-ae-scrollbox-momentum="false" style="height:100px;overflow:auto"><div id="content" style="height:500px"></div></div></div>'),
+  { withScrollbox: true });
+  const box = await page.locator("#scroller").boundingBox();
+  const x = box.x + box.width / 2, y = box.y + box.height / 2;
+  await page.locator("#scroller").evaluate(element => { element.scrollTo({ top: 150, behavior: "instant" }); });
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x, y + 60, { steps: 6 });
+  await page.mouse.up();
+  expect(await page.locator("#scroller").evaluate(element => element.scrollTop)).toBeLessThan(150);
+  await expect(page.locator("#panel")).toHaveClass(/\bae--pop\b/);
+
+  await page.locator("#scroller").evaluate(element => { element.scrollTo({ top: 40, behavior: "instant" }); });
+  await expect(page.locator("#scroller")).toHaveJSProperty("scrollTop", 40);
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x, y + 260, { steps: 26 });
+  await page.mouse.up();
+  await expect(page.locator("#panel")).toHaveClass(/\bae--unpop\b/);
+  await expect(page.locator("#scroller")).toHaveJSProperty("scrollTop", 0);
 });
 
 test("a more specific gesture source wins over document ownership", async ({ page }) => {
