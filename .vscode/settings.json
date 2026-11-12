@@ -1,5 +1,17 @@
 {
+  "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#ffd900",
+    "titleBar.activeForeground": "#000000",
+    "titleBar.inactiveBackground": "#ffe100",
+    "activityBar.background": "#000000",
+    "statusBar.background": "#ffd900",
+    "statusBar.foreground": "#000000"
+  },
   "editor.wordWrap": "off",
-  "html.customData": ["./dist/aellux.html-data.json"],
-  "css.customData": ["./dist/aellux.css-data.json"]
+  "html.customData": [
+    "./dist/aellux.html-data.json"
+  ],
+  "css.customData": [
+    "./dist/aellux.css-data.json"
+  ]
 }

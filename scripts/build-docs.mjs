@@ -50,9 +50,11 @@ for (const asset of ["icon.svg", "geist.OFL.txt"]) {
   await copyFile(path.join(themePath, asset), path.join(docweaverAssetPath, asset));
 }
 // Docweaver copies its default assets before overlaying the local theme.
-// Ajax Href is now supplied by Core, so discard the upstream standalone copy.
-await unlink(path.join(docweaverAssetPath, "js", "aellux.ext.ajax-href.js"))
-  .catch(error => { if (error.code !== "ENOENT") throw error; });
+// Discard the standalone Ajax Href and the unused CSS that still selects Geist.
+for (const asset of ["js/aellux.ext.ajax-href.js", "css/inline-style.css"]) {
+  await unlink(path.join(docweaverAssetPath, asset))
+    .catch(error => { if (error.code !== "ENOENT") throw error; });
+}
 await copyFile(
   path.join(themePath, "LICENSE"),
   path.join(docweaverAssetPath, "LICENSE")

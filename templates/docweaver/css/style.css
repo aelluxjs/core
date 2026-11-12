@@ -38,6 +38,20 @@
   vertical-align: -0.125em;
 }
 
+.docs-brand {
+  display: block;
+  flex-shrink: 0;
+}
+
+.docs-brand .ae-brand-tile {
+  fill: var(--bs-warning, #ffc107);
+}
+
+[data-bs-theme="dark"] .docs-brand .ae-brand-tile,
+[data-ae-color-scheme="dark"] .docs-brand .ae-brand-tile {
+  fill: #F7DF1E;
+}
+
 :root {
   --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --bs-body-font-family: var(--bs-font-sans-serif);
