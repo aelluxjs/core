@@ -955,6 +955,13 @@
       } finally {
         _iterator3.f();
       }
+      if (interaction.candidates.length && !interaction.captured) {
+        try {
+          target.setPointerCapture(event.pointerId);
+          interaction.captured = true;
+        } catch (_) {
+        }
+      }
     }
     function parameters(element, axis) {
       var style = root.getComputedStyle(element);
@@ -990,6 +997,10 @@
       if (!current || current.id !== event.pointerId) return;
       if (event.type !== "pointermove") {
         release(event.type !== "pointerup");
+        return;
+      }
+      if (event.isTrusted && event.pointerType !== "touch" && (event.buttons & 1) === 0) {
+        release(false);
         return;
       }
       var x = event.clientX - current.x, y = event.clientY - current.y;
@@ -1075,11 +1086,6 @@
         _owner.start = _owner.progress;
         services.begin(candidate.entry.element, candidate.dismiss ? "Dismiss" : candidate.origin === "Pop" ? "Unpop" : "Pop", _owner);
         if (interaction !== current) return;
-        try {
-          current.target.setPointerCapture(event.pointerId);
-          current.captured = true;
-        } catch (_) {
-        }
       }
       var owner = current.owner;
       var displacement = (owner.axis === "x" ? x : y) * owner.sign;

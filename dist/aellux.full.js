@@ -6083,6 +6083,13 @@
         if (origin === "Pop" ? onElement : onSource)
           interaction.candidates.push({ entry, origin });
       }
+      if (interaction.candidates.length && !interaction.captured) {
+        try {
+          target.setPointerCapture(event.pointerId);
+          interaction.captured = true;
+        } catch (_) {
+        }
+      }
     }
     function parameters(element, axis) {
       const style = root2.getComputedStyle(element);
@@ -6118,6 +6125,10 @@
       if (!current || current.id !== event.pointerId) return;
       if (event.type !== "pointermove") {
         release(event.type !== "pointerup");
+        return;
+      }
+      if (event.isTrusted && event.pointerType !== "touch" && (event.buttons & 1) === 0) {
+        release(false);
         return;
       }
       const x = event.clientX - current.x, y = event.clientY - current.y;
@@ -6197,11 +6208,6 @@
         owner2.start = owner2.progress;
         services.begin(candidate.entry.element, candidate.dismiss ? "Dismiss" : candidate.origin === "Pop" ? "Unpop" : "Pop", owner2);
         if (interaction !== current) return;
-        try {
-          current.target.setPointerCapture(event.pointerId);
-          current.captured = true;
-        } catch (_) {
-        }
       }
       const owner = current.owner;
       const displacement = (owner.axis === "x" ? x : y) * owner.sign;

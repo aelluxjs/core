@@ -93,6 +93,12 @@ export function createPresentGestures(root, api, services) {
       if (origin === "Pop" ? onElement : onSource)
         interaction.candidates.push({ entry, origin });
     }
+    // Capture the eligible press before it can leave the viewport. This keeps
+    // the eventual release paired with the same interaction even when the
+    // movement crosses the drawer or window edge.
+    if (interaction.candidates.length && !interaction.captured) {
+      try { target.setPointerCapture(event.pointerId); interaction.captured = true; } catch (_) { /* window routing remains available */ }
+    }
   }
 
   function parameters(element, axis) {
@@ -126,6 +132,13 @@ export function createPresentGestures(root, api, services) {
     const current = interaction;
     if (!current || current.id !== event.pointerId) return;
     if (event.type !== "pointermove") { release(event.type !== "pointerup"); return; }
+    // Some browsers report a final zero-button move when the mouse is released
+    // outside the viewport, without delivering pointerup to the page. Keep
+    // the last real drag position instead of seeking back to its zeroed coords.
+    if (event.isTrusted && event.pointerType !== "touch" && (event.buttons & 1) === 0) {
+      release(false);
+      return;
+    }
     const x = event.clientX - current.x, y = event.clientY - current.y;
     if (!current.owner) {
       if (Math.max(Math.abs(x), Math.abs(y)) < 8) return;
@@ -190,8 +203,6 @@ export function createPresentGestures(root, api, services) {
       owner.start = owner.progress;
       services.begin(candidate.entry.element, candidate.dismiss ? "Dismiss" : candidate.origin === "Pop" ? "Unpop" : "Pop", owner);
       if (interaction !== current) return;
-      // Capture starts only after intent. Failure/veto keeps native input free.
-      try { current.target.setPointerCapture(event.pointerId); current.captured = true; } catch (_) { /* document routing remains available */ }
     }
     const owner = current.owner;
     const displacement = (owner.axis === "x" ? x : y) * owner.sign;

@@ -52,3 +52,32 @@ test("mobile documentation drawers reverse from their exposed drag handles", asy
   await expect(page.locator("#toc-collapse")).toHaveJSProperty("hidden", true);
   expect(await page.evaluate(() => drawerEvents)).toEqual(["navbarSupportedContent", "toc-collapse"]);
 });
+
+for (const selector of ["a.nav-link:visible", "button.nav-link:visible"]) test(`mouse drag on drawer ${selector.split(".")[0]} closes without native dragging`, async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/tests/index.htm");
+  await page.addStyleTag({ url: "/tests/fixtures/bootstrap-5.3.8.min.css" });
+  await page.addStyleTag({ url: "/docs/assets/docweaver/css/style.css" });
+  await page.evaluate(markup => {
+    const parsed = new DOMParser().parseFromString(markup, "text/html");
+    document.body.replaceChildren(document.importNode(parsed.querySelector("header"), true));
+  }, html);
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => new Promise(resolve => {
+    aelluxJs.ext("present", { loadStyle: true });
+    aelluxJs.ext("scrollbox", { loadStyle: true });
+    aelluxJs.on("Ready", resolve, { once: true });
+    aelluxJs.init({ mode: "basic" });
+  }));
+  await page.locator("#button-navbar-menu").click();
+  await expect(page.locator("#navbarSupportedContent")).toHaveClass(/\bae--pop\b/);
+  const control = page.locator(`#navbarSupportedContent nav ${selector}`).first();
+  await expect(control).toHaveAttribute("draggable", "false");
+  const box = await control.boundingBox();
+  const x = box.x + 12, y = box.y + box.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + 420, y, { steps: 24 });
+  await page.mouse.up();
+  await expect(page.locator("#navbarSupportedContent")).toHaveJSProperty("hidden", true);
+});

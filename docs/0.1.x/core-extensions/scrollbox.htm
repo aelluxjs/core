@@ -39,7 +39,7 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-MYNS0nKbqOY64PY2SMBIHO7GPOq9Hu+4GDIHr/8YgibQnViqLNEAEC1rYma/FGof" crossorigin="anonymous">
+  integrity="sha384-06Irgn2ilV/cxBnVQ7rbzxW/ZQoWoPCfCEbFVh8kGuryKwBJYSdoxb/Y1hHDa8q9" crossorigin="anonymous">
 
 </head>
 
@@ -157,7 +157,7 @@
                 <div class="d-flex flex-row gap-2 justify-content-between pb-2 pt-0 pt-md-2">
 
                   <div class="dropdown position-relative">
-  <button id="btn-version" class="btn btn-outline-adaptive ps-3 dropdown-toggle rounded-1 border" type="button"
+  <button id="btn-version" class="btn btn-outline-adaptive ps-3 dropdown-toggle rounded-1 border" type="button" draggable="false"
     data-ae-present-trigger="toggle" data-ae-present-target="dropdown-version" aria-expanded="false">
     0.1.x  </button>
   <div class="position-absolute" data-ae-anchor-target="btn-version" data-ae-anchor="bottom-right:top-right">
@@ -166,7 +166,7 @@
       style="min-width: unset;transform-origin: 100% 0%;">
 
               <li>
-          <a class="dropdown-item active" data-no-ajax=true
+          <a draggable="false" class="dropdown-item active" data-no-ajax=true
             href="/core/docs/0.1.x/index.htm">
             0.1.x          </a>
         </li>
@@ -174,6 +174,7 @@
     </ul>
   </div>
 </div>
+
                     <div data-ae-preference="color-scheme" class="btn-group border rounded-1 rounded overflow-hidden" role="group"
   aria-label="Basic example" style="--bs-border-radius:--bs-border-radius-sm;gap:1px;">
 
@@ -205,7 +206,7 @@
                 </div>
                 <div class="d-flex flex-column" data-ae-present-group>
                                       <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
-                      <button data-ae-point type="button"
+                      <button data-ae-point type="button" draggable="false"
                         class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
                         data-ae-present-trigger="toggle" data-ae-present-target="#children-overview">
                         Overview                          <span class="chevron"><svg class="svg-icon small"
@@ -222,49 +223,49 @@
                                                                                                   <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/index.htm" data-ae-overflow-marquee="190px">
                                         aellux.js Docs                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/brand-naming.htm" data-ae-overflow-marquee="190px">
                                         Brand Naming and Migration                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/recent-changes.htm" data-ae-overflow-marquee="190px">
                                         Recent Behavior and Beta Migration                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/getting-started.htm" data-ae-overflow-marquee="190px">
                                         Getting Started                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/compatibility.htm" data-ae-overflow-marquee="190px">
                                         Compatibility                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/validation-scenarios.htm" data-ae-overflow-marquee="190px">
                                         Validation Scenarios                                      </a>
                                     </div>
                                                                                                     </div>
                       </div>
                                                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
-                      <button data-ae-point type="button"
+                      <button data-ae-point type="button" draggable="false"
                         class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
                         data-ae-present-trigger="toggle" data-ae-present-target="#children-runtime">
                         Runtime                          <span class="chevron"><svg class="svg-icon small"
@@ -281,98 +282,98 @@
                                                                                                   <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/api.htm" data-ae-overflow-marquee="190px">
                                         Runtime API                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/compatibility-commitment.htm" data-ae-overflow-marquee="190px">
                                         Compatibility Commitment                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/compatibility-policy-review.htm" data-ae-overflow-marquee="190px">
                                         Compatibility Policy Review (Pending)                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/wait-layout.htm" data-ae-overflow-marquee="190px">
                                         waitLayout                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/events.htm" data-ae-overflow-marquee="190px">
                                         Events                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/communication.htm" data-ae-overflow-marquee="190px">
                                         Shared Communication                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/modern-legacy.htm" data-ae-overflow-marquee="190px">
                                         Modern &amp; Legacy                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/browser-support.htm" data-ae-overflow-marquee="190px">
                                         Browser Support                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/performance.htm" data-ae-overflow-marquee="190px">
                                         Performance and Bundle Budget                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/known-limits-and-risks.htm" data-ae-overflow-marquee="190px">
                                         Known Limits &amp; Risks                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/es5-support.htm" data-ae-overflow-marquee="190px">
                                         ES5 Support                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/visual-mounting.htm" data-ae-overflow-marquee="190px">
                                         Visual Mounting                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/runtime/diagnostics.htm" data-ae-overflow-marquee="190px">
                                         Diagnostics                                      </a>
                                     </div>
                                                                                                     </div>
                       </div>
                                                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
-                      <button data-ae-point type="button"
+                      <button data-ae-point type="button" draggable="false"
                         class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
                         data-ae-present-trigger="toggle" data-ae-present-target="#children-extensions">
                         Extensions                          <span class="chevron"><svg class="svg-icon small"
@@ -389,77 +390,77 @@
                                                                                                   <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/extensions/declarative-action-naming.htm" data-ae-overflow-marquee="190px">
                                         Declarative Action Naming Convention                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/extensions/authoring.htm" data-ae-overflow-marquee="190px">
                                         Extension Authoring                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/extensions/accessibility.htm" data-ae-overflow-marquee="190px">
                                         Accessibility Requirements                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/extensions/registration.htm" data-ae-overflow-marquee="190px">
                                         Registration                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/extensions/official-registry.htm" data-ae-overflow-marquee="190px">
                                         Official Registry                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/extensions/declarative-loading.htm" data-ae-overflow-marquee="190px">
                                         Declarative Loading                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/extensions/lazy-loading.htm" data-ae-overflow-marquee="190px">
                                         Lazy Loading                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/extensions/styles.htm" data-ae-overflow-marquee="190px">
                                         Extension Styles                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/extensions/csp-and-trust.htm" data-ae-overflow-marquee="190px">
                                         CSP and Extension Trust                                      </a>
                                     </div>
                                                                                                                                               <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/extensions/legacy-variants.htm" data-ae-overflow-marquee="190px">
                                         Modern &amp; Legacy Variants                                      </a>
                                     </div>
                                                                                                     </div>
                       </div>
                                                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
-                      <button data-ae-point type="button"
+                      <button data-ae-point type="button" draggable="false"
                         class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
                         data-ae-present-trigger="toggle" data-ae-present-target="#children-core-extensions">
                         Core Extensions                          <span class="chevron"><svg class="svg-icon small"
@@ -475,14 +476,14 @@
                                                                                                   <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/core-extensions/index.htm" data-ae-overflow-marquee="190px">
                                         Overview                                      </a>
                                     </div>
 
                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
                                     style="flex:0">
-                                    <button data-ae-point type="button"
+                                    <button data-ae-point type="button" draggable="false"
                                       class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       data-ae-present-trigger="toggle"
                                       data-ae-present-target="#children2-bundled">
@@ -499,70 +500,70 @@
                                                                                   <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/adaptive.htm" data-ae-overflow-marquee="190px">
                                               Adaptive                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/anchor.htm" data-ae-overflow-marquee="190px">
                                               Anchor                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/feedback.htm" data-ae-overflow-marquee="190px">
                                               Feedback                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/focus.htm" data-ae-overflow-marquee="190px">
                                               Focus                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/input.htm" data-ae-overflow-marquee="190px">
                                               Input                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/preference.htm" data-ae-overflow-marquee="190px">
                                               Preference                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/present.htm" data-ae-overflow-marquee="190px">
                                               Present                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1 active"
                                             style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/scrollbox.htm" data-ae-overflow-marquee="190px">
                                               Scrollbox                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/state-navigation.htm" data-ae-overflow-marquee="190px">
                                               State Navigation                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/viewport.htm" data-ae-overflow-marquee="190px">
                                               Viewport                                            </a>
                                           </div>
@@ -571,7 +572,7 @@
 
                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive"
                                     style="flex:0">
-                                    <button data-ae-point type="button"
+                                    <button data-ae-point type="button" draggable="false"
                                       class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
                                       data-ae-present-trigger="toggle"
                                       data-ae-present-target="#children2-optional">
@@ -588,42 +589,42 @@
                                                                                   <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/optional/ajax-href.htm" data-ae-overflow-marquee="190px">
                                               Ajax Href                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/optional/dialog.htm" data-ae-overflow-marquee="190px">
                                               Dialog                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/optional/overflow-marquee.htm" data-ae-overflow-marquee="190px">
                                               Overflow Marquee                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/optional/progress.htm" data-ae-overflow-marquee="190px">
                                               Progress                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/optional/pwa.htm" data-ae-overflow-marquee="190px">
                                               PWA                                            </a>
                                           </div>
                                                                                     <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                             style="flex:0">
-                                            <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="/core/docs/0.1.x/core-extensions/optional/scrollbox-snap.htm" data-ae-overflow-marquee="190px">
                                               Scrollbox Snap                                            </a>
                                           </div>
@@ -632,7 +633,7 @@
                                                                                                   </div>
                       </div>
                                                                   <div class="nav-item mt-1 small-md fw-bold rounded-1 ps-md-1 bg-light-adaptive" style="flex:0">
-                      <button data-ae-point type="button"
+                      <button data-ae-point type="button" draggable="false"
                         class="nav-link w-100 text-start text-capitalize p-2 p-md-1 px-3 px-md-2"
                         data-ae-present-trigger="toggle" data-ae-present-target="#children-integrations">
                         Integrations                          <span class="chevron"><svg class="svg-icon small"
@@ -649,7 +650,7 @@
                                                                                                   <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1"
                                       style="flex:0">
-                                      <a class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="/core/docs/0.1.x/integrations/bootstrap.htm" data-ae-overflow-marquee="190px">
                                         Bootstrap Integration                                      </a>
                                     </div>
