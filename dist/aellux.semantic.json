@@ -2642,7 +2642,7 @@
     {
       "name": "data-ae-dismiss-on-click",
       "extension": "present",
-      "description": "Close on outside/out clicks (default), inside/in clicks, or disable click dismissal with false/none.",
+      "description": "Dismiss on outside/out or inside/in clicks; false/none disables it (default). Takes priority over Unpop when both match.",
       "syntax": "enum",
       "values": [
         "outside",
@@ -2652,7 +2652,7 @@
         "false",
         "none"
       ],
-      "default": "outside",
+      "default": "false",
       "role": "input",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     },
@@ -3575,6 +3575,23 @@
       "role": "output",
       "doc": "runtime/api",
       "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/runtime/api.htm"
+    },
+    {
+      "name": "data-ae-unpop-on-click",
+      "extension": "present",
+      "description": "Reverse Pop on outside/out or inside/in clicks; false/none disables it (default). Dismiss takes priority when both match.",
+      "syntax": "enum",
+      "values": [
+        "outside",
+        "inside",
+        "out",
+        "in",
+        "false",
+        "none"
+      ],
+      "default": "false",
+      "role": "input",
+      "docURL": "https://aelluxjs.github.io/core/docs/0.1.x/core-extensions/present.htm"
     },
     {
       "name": "data-ae-viewport",

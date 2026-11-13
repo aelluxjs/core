@@ -45,7 +45,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
 
   test(`only renamed automatic dismissal attributes are active (${mode}, legacy=${forceLegacy})`, async ({ page }) => {
     await start(page, `<button id="outside">Outside</button><div id="panel" data-ae-present=""
-      data-ae-auto-unpop="0ms" data-ae-unpop-on-click="inside" data-ae-unpop-on-outside="false" hidden>
+      data-ae-auto-unpop="0ms" data-ae-unpop-on-outside="false" hidden>
       <button id="inside">Inside</button></div>`, { mode, forceLegacy });
     await page.evaluate(() => $ae("panel").present.pop());
     await page.waitForTimeout(100);
@@ -53,7 +53,7 @@ for (const mode of ["basic", "full"]) for (const forceLegacy of [false, true]) {
     await page.locator("#inside").click();
     await expect(page.locator("#panel")).toHaveJSProperty("hidden", false);
     await page.locator("#outside").click();
-    await expect(page.locator("#panel")).toHaveJSProperty("hidden", true);
+    await expect(page.locator("#panel")).toHaveJSProperty("hidden", false);
     await page.evaluate(async () => {
       await $ae("panel").present.pop();
       const panel = document.getElementById("panel");
@@ -530,6 +530,7 @@ test("hover shares trigger/panel region, tolerates gaps, preserves keyboard and 
   await page.locator("#trigger").focus();
   await page.keyboard.press("Enter");
   await expect(page.locator("#b")).toHaveAttribute("aria-expanded", "true");
+  await page.locator("#b").evaluate(element => element.setAttribute("data-ae-dismiss-on-click", "outside"));
   await page.locator("#trigger").evaluate(element => element.blur());
   await page.mouse.click(900, 600);
   await expect(page.locator("#b")).toHaveJSProperty("hidden", true);

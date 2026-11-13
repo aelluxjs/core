@@ -135,7 +135,7 @@ test("real touch drag closes both mobile drawer handles", async ({ browser, brow
   } finally { await context.close(); }
 });
 
-test("TOC toggle visibly reverses its opening transition", async ({ page }) => {
+for (const closing of ["toggle", "outside"]) test(`TOC ${closing} visibly reverses its opening transition`, async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/tests/index.htm");
   await page.addStyleTag({ url: "/tests/fixtures/bootstrap-5.3.8.min.css" });
@@ -153,7 +153,8 @@ test("TOC toggle visibly reverses its opening transition", async ({ page }) => {
   const panel = page.locator("#toc-collapse");
   await page.locator("#button-toc-menu").click();
   await expect(panel).toHaveClass(/\bae--pop\b/);
-  await page.locator("#button-toc-menu").click();
+  if (closing === "toggle") await page.locator("#button-toc-menu").click();
+  else await page.locator("body").evaluate(element => element.click());
   const samples = await panel.evaluate(async element => {
     const read = () => ({ klass: element.className, hidden: element.hidden,
       scale: new DOMMatrix(getComputedStyle(element).transform).m22 });

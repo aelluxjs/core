@@ -20,7 +20,7 @@ test("Present metadata distinguishes dismissal and opening reversal", () => {
     assert.ok(find(catalog.attributes, name), name);
   assert.equal(find(catalog.attributes, "data-ae-present-target").extension, "present");
   assert.deepEqual(find(catalog.attributes, "data-ae-present-trigger").values, ["", "toggle", "pop", "dismiss", "unpop", "effect"]);
-  for (const name of ["data-ae-auto-dismiss", "data-ae-dismiss-on-click", "data-ae-present-trigger"])
+  for (const name of ["data-ae-auto-dismiss", "data-ae-unpop-on-click", "data-ae-dismiss-on-click", "data-ae-present-trigger"])
     assert.ok(find(catalog.attributes, name), name);
   for (const suffix of ["opacity", "transform", "height", "width", "duration", "ease", "aellux-ease", "progress"])
     assert.ok(find(catalog.cssProperties, `--ae-dismiss-${suffix}`), suffix);
@@ -31,8 +31,10 @@ test("Present metadata distinguishes dismissal and opening reversal", () => {
   assert.ok(find(catalog.cssProperties, "--ae-unpop-progress"));
   for (const name of ["opacity", "transform", "height", "width", "duration", "ease", "aellux-ease"])
     assert.equal(find(catalog.cssProperties, `--ae-unpop-${name}`), undefined);
-  for (const name of ["data-ae-auto-unpop", "data-ae-unpop-on-click"])
+  for (const name of ["data-ae-auto-unpop"])
     assert.equal(find(catalog.attributes, name), undefined);
+  for (const name of ["data-ae-dismiss-on-click", "data-ae-unpop-on-click"])
+    assert.equal(find(catalog.attributes, name).default, "false");
 });
 
 for (const [name, schemaName] of [["aellux.html-data.json", "html"], ["aellux.css-data.json", "css"], ["aellux.web-types.json", "web-types"]]) {

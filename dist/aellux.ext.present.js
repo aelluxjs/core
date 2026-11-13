@@ -864,6 +864,7 @@
       autoDismiss: aelluxJs.attr("auto-dismiss"),
       presentMotion: aelluxJs.attr("present-motion"),
       dismissOnClick: aelluxJs.attr("dismiss-on-click"),
+      unpopOnClick: aelluxJs.attr("unpop-on-click"),
       trigger: aelluxJs.attr("present-trigger"),
       //toggle,pop,dismiss,unpop,effect
       target: aelluxJs.attr("present-target"),
@@ -1901,13 +1902,16 @@
       controller.autoDismissTimeout = null;
       controller.autoCountdown = null;
     }
+    function matchesClick(element, attribute, inside) {
+      const mode = (element.getAttribute(attribute) || "").trim();
+      return (inside ? /^in(side)?$/i : /^out(side)?$/i).test(mode);
+    }
     function clickAutoDismiss(eventTarget, currentExceptions) {
       for (const pContainer of openPresentElements) {
         if (pContainer.hidden === true || currentExceptions.some((e) => pContainer.contains(e))) continue;
-        const mode = (pContainer.getAttribute(attr.dismissOnClick) || "outside").trim().toLowerCase();
-        if (mode === "false" || mode === "none") continue;
         const inside = pContainer.contains(eventTarget);
-        if (inside === (mode === "inside" || mode === "in")) dismiss(pContainer);
+        if (matchesClick(pContainer, attr.dismissOnClick, inside)) dismiss(pContainer);
+        else if (matchesClick(pContainer, attr.unpopOnClick, inside)) unpop(pContainer);
       }
     }
     function refreshChangedTrigger(button) {

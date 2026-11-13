@@ -1698,6 +1698,7 @@
       autoDismiss: aelluxJs.attr("auto-dismiss"),
       presentMotion: aelluxJs.attr("present-motion"),
       dismissOnClick: aelluxJs.attr("dismiss-on-click"),
+      unpopOnClick: aelluxJs.attr("unpop-on-click"),
       trigger: aelluxJs.attr("present-trigger"),
       //toggle,pop,dismiss,unpop,effect
       target: aelluxJs.attr("present-target"),
@@ -3028,6 +3029,10 @@
       controller.autoDismissTimeout = null;
       controller.autoCountdown = null;
     }
+    function matchesClick(element, attribute, inside) {
+      var mode = (element.getAttribute(attribute) || "").trim();
+      return (inside ? /^in(side)?$/i : /^out(side)?$/i).test(mode);
+    }
     function clickAutoDismiss(eventTarget, currentExceptions) {
       var _iterator10 = _createForOfIteratorHelper4(openPresentElements), _step10;
       try {
@@ -3035,15 +3040,13 @@
           var pContainer = _step10.value;
           if (pContainer.hidden === true || currentExceptions.some(function(e) {
             return pContainer.contains(e);
-          })) return 0;
-          var mode = (pContainer.getAttribute(attr.dismissOnClick) || "outside").trim().toLowerCase();
-          if (mode === "false" || mode === "none") return 0;
+          })) return 1;
           var inside = pContainer.contains(eventTarget);
-          if (inside === (mode === "inside" || mode === "in")) dismiss(pContainer);
-        }, _ret;
+          if (matchesClick(pContainer, attr.dismissOnClick, inside)) dismiss(pContainer);
+          else if (matchesClick(pContainer, attr.unpopOnClick, inside)) unpop(pContainer);
+        };
         for (_iterator10.s(); !(_step10 = _iterator10.n()).done; ) {
-          _ret = _loop2();
-          if (_ret === 0) continue;
+          if (_loop2()) continue;
         }
       } catch (err) {
         _iterator10.e(err);
@@ -3563,10 +3566,10 @@
           job.then(function() {
             if (state.jobs.get(member2) === job) state.jobs.delete(member2);
           });
-        }, _ret2;
+        }, _ret;
         for (_iterator16.s(); !(_step16 = _iterator16.n()).done; ) {
-          _ret2 = _loop3();
-          if (_ret2) return _ret2.v;
+          _ret = _loop3();
+          if (_ret) return _ret.v;
         }
       } catch (err) {
         _iterator16.e(err);

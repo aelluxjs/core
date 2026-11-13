@@ -16,6 +16,8 @@ Reviewed against the `release/0.1.0` checkout on 2026-11-10, based on commit `19
 
 ## New behavior to account for
 
+- **Present click closing:** click closing is opt-in. Both `data-ae-unpop-on-click` and `data-ae-dismiss-on-click` default to `false`. Both accept `inside`, `outside` and `false`; matching Dismiss takes priority. Set both to `false` to disable automatic click closing.
+
 - **Present effects:** `effect()` returns a Promise with `completed`, `aborted` or `skipped` status. Only the latest request survives; effects wait for the captured transition, stop on accepted replacement transitions, and skip reduced motion. Preset transforms need an untransformed target; use an inner element when Present, Anchor or Elastic owns the outer transform. See [Temporary effects](core-extensions/present.md#temporary-effects).
 - **Present gestures:** optional gestures scrub Pop, Unpop and Dismiss. Authored initial state classes can opt into CSS-owned closed visibility; a closed state does not necessarily mean hidden. Keep keyboard controls and configure local touch behavior. See [Interactive gestures](core-extensions/present.md#interactive-gestures).
 - **Focus directions:** candidates follow visual geometry, scoped boundaries and native scrolling. `data-ae-focus-nav` is resolved for each command. Keyboard directions remain native under `auto` in synchronized context 1; spatial navigation requires opt-in there. Gamepad and independent contexts use spatial navigation automatically. See [Spatial navigation](core-extensions/focus.md#spatial-navigation-and-input-policy).

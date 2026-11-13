@@ -154,7 +154,7 @@ The `--ae-from-height`, `--ae-pop-height`, and `--ae-dismiss-height` properties 
 
 When an `dismiss` hides a region containing the active element, Present releases focus if the browser has not already done so, then dispatches `DismissFocusLost` through `aelluxJs.dispatch`. If the active element is outside the region at the time it becomes hidden, no focus event is dispatched.
 
-`data-ae-auto-dismiss` specifies a delay before closing an open container. `data-ae-dismiss-on-click` controls click dismissal: `outside` (default) or `out` closes on outside clicks; `inside` or `in` closes on clicks within the container; `false` or `none` disables click dismissal. Trigger and dismiss controls retain their explicit action without a second automatic action on the same target. This option also applies to Input tap activation. On unmount, Present restores the attributes it changes on each container and trigger control, including `data-ae-present`, `data-ae-present-motion`, `aria-expanded`, `aria-controls`, and `hidden` where applicable.
+`data-ae-auto-dismiss` specifies a delay before closing an open container. `data-ae-dismiss-on-click` controls click dismissal: `outside` or `out` dismisses on outside clicks; `inside` or `in` closes on clicks within the container; `false` (default) or `none` disables click dismissal. `data-ae-unpop-on-click` independently selects where clicks reverse Pop, defaulting to `false`. Trigger and dismiss controls retain their explicit action without a second automatic action on the same target. This option also applies to Input tap activation. On unmount, Present restores the attributes it changes on each container and trigger control, including `data-ae-present`, `data-ae-present-motion`, `aria-expanded`, `aria-controls`, and `hidden` where applicable.
 
 ### Click dismissal
 
@@ -162,9 +162,9 @@ Set `data-ae-dismiss-on-click` on the Present container:
 
 | Value | Behavior |
 | --- | --- |
-| Omitted, empty, `outside`, or `out` | Close when a click occurs outside the container. |
+| `outside` or `out` | Close when a click occurs outside the container. |
 | `inside` or `in` | Close when a click occurs inside the container. |
-| `false` or `none` | Disable automatic click dismissal. Explicit controls and auto-dismiss still work. |
+| Omitted, empty, `false` or `none` | Disable automatic click dismissal. Explicit controls and auto-dismiss still work. |
 
 ```html
 <div data-ae-present="opacity" data-ae-dismiss-on-click="inside" hidden>
@@ -177,7 +177,9 @@ Set `data-ae-dismiss-on-click` on the Present container:
 </div>
 ```
 
-This replaces `data-ae-unpop-on-outside`; the old attribute is no longer read. Replace `data-ae-unpop-on-outside="false"` with `data-ae-dismiss-on-click="false"`. For the previous default behavior, omit the new attribute or use `outside`. Input taps use the same policy, and explicit trigger/dismiss actions are not followed by a second automatic dismissal on the same target. The setting does not change hover dismissal.
+Set `data-ae-unpop-on-click="inside|outside|false"` to select where clicks reverse the captured Pop trajectory. Omitted, empty or invalid values disable the operation; aliases `in`, `out` and `none` are also supported. Both policies are read at activation time. If both match, Dismiss takes priority and only one operation runs, even if its Before event is cancelled. Explicit trigger actions retain priority. Input taps follow the same rules. Hover and timed auto-dismiss are unchanged.
+
+**Migration:** automatic click closing is now opt-in for both operations. Without either attribute, inside and outside clicks leave the region open. Set `data-ae-unpop-on-click="outside"` to reverse Pop on outside clicks. To retain the previous outside dismissal, set `data-ae-dismiss-on-click="outside"`. To disable all automatic click closing, omit both attributes or set both to `false`. The old `data-ae-unpop-on-outside` attribute remains inactive.
 
 ## Present Progress
 
@@ -268,7 +270,7 @@ The `Popping` reset starts no timer. Counting starts after opening completes, or
 
 `data-ae-present-trigger-on="click"` is the default. `hover` changes how `pop`, `dismiss`, `unpop` or `toggle` is invoked. Pointer entry activates the trigger once, ignoring movements between its descendants and touch pointer events. Hover `pop` keeps an already open region open. In exclusive mode, triggers targeting group members select those members through the group.
 
-Opening controls and their target form one shared hover region, including multiple triggers for the same target. Moving into the target keeps it open. Leaving the region schedules close after 120 ms; returning cancels it. Focus inside the shared region prevents hover dismissal. Click dismissal follows `data-ae-dismiss-on-click`; hover close is independent of that click option. Dismiss and auto-dismiss retain their normal behavior.
+Opening controls and their target form one shared hover region, including multiple triggers for the same target. Moving into the target keeps it open. Leaving the region schedules close after 120 ms; returning cancels it. Focus inside the shared region prevents hover dismissal. Click closing follows `data-ae-dismiss-on-click` and `data-ae-unpop-on-click`; hover close is independent of that click option. Dismiss and auto-dismiss retain their normal behavior.
 
 Keep native buttons or links: keyboard activation continues to invoke the configured action, and ordinary click/tap remains available on devices without hover. A mouse click on a currently hovered trigger does not invoke its action a second time. Touch pointer entry is ignored so a tap is handled once by conventional activation. Listeners are delegated and removed on extension destruction; pending target close timers are canceled when the target is unmounted.
 
