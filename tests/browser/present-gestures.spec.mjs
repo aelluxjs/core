@@ -379,6 +379,65 @@ test("a completed real mouse drag suppresses its click; a press remains a click"
   expect(await page.evaluate(() => clicks)).toBe(1);
 });
 
+test("a short fast outward mouse flick finishes Unpop", async ({ page }) => {
+  await start(page, panel('class="ae--pop" data-ae-present-gesture="up"'));
+  const box = await page.locator("#panel").boundingBox();
+  const x = box.x + 40, y = box.y + 40;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x, y + 60, { steps: 3 });
+  await page.mouse.up();
+  await expect(page.locator("#panel")).toHaveClass(/\bae--unpop\b/);
+});
+
+test("a short slow drag or a reversed finish returns to Pop", async ({ page }) => {
+  await start(page, panel('class="ae--pop" data-ae-present-gesture="up"'));
+  const box = await page.locator("#panel").boundingBox();
+  const x = box.x + 40, y = box.y + 40;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  for (const distance of [20, 40, 60]) {
+    await page.waitForTimeout(90);
+    await page.mouse.move(x, y + distance);
+  }
+  await page.mouse.up();
+  await expect(page.locator("#panel")).toHaveClass(/\bae--pop\b/);
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x, y + 70, { steps: 3 });
+  await page.mouse.move(x, y + 50, { steps: 2 });
+  await page.mouse.up();
+  await expect(page.locator("#panel")).toHaveClass(/\bae--pop\b/);
+});
+
+test("a flick after holding still uses recent movement", async ({ page }) => {
+  await start(page, panel('class="ae--pop" data-ae-present-gesture="up"'));
+  const box = await page.locator("#panel").boundingBox();
+  const x = box.x + 40, y = box.y + 40;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.waitForTimeout(260);
+  for (const distance of [20, 40, 60]) await page.mouse.move(x, y + distance);
+  await page.mouse.up();
+  await expect(page.locator("#panel")).toHaveClass(/\bae--unpop\b/);
+});
+
+test("a short fast outward touch flick finishes Unpop", async ({ browser, browserName }) => {
+  test.skip(browserName !== "chromium", "Touch injection uses Chromium's input protocol.");
+  const context = await browser.newContext({ hasTouch: true });
+  const page = await context.newPage();
+  try {
+    await start(page, panel('class="ae--pop" data-ae-present-gesture="up"'));
+    const box = await page.locator("#panel").boundingBox();
+    const point = { x: box.x + 40, y: box.y + 40, id: 1 };
+    const input = await context.newCDPSession(page);
+    await input.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [point] });
+    await input.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ ...point, y: point.y + 70 }] });
+    await input.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await expect(page.locator("#panel")).toHaveClass(/\bae--unpop\b/);
+  } finally { await context.close(); }
+});
+
 test("group selection and trigger expansion follow the actual gesture destination", async ({ page }) => {
   await start(page, '<button id="trigger" data-ae-present-target="panel" data-ae-present-trigger="pop">Open</button>' +
     '<div id="group" data-ae-present-group>' + panel() + '</div>');

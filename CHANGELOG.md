@@ -30,6 +30,8 @@ Changes in this section are pending for the `0.1.0` release candidate.
 
 ### Changed
 
+- A short, fast outward flick can now finish gesture Unpop from its current rendered position, even before the distance threshold. The recent directional velocity decides the destination; slow, paused, reversed and canceled drags keep the existing threshold behavior. Pop and independent Dismiss are unchanged.
+
 - Present now captures eligible mouse and pen drawer presses from pointerdown, while touch capture waits for gesture intent. It preserves the last drag position when a mouse is released outside the viewport. Documentation drawer links and buttons use `draggable="false"` so native dragging does not interrupt their gesture.
 
 - Present gestures now observe Scrollbox surfaces. When a nested area can scroll in the drag direction, Scrollbox owns that entire gesture even after reaching its edge; a new outward gesture from the edge can move Present. Scrollbox releases a pending pointer drag without momentum when Present takes ownership.

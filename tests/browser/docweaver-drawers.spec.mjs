@@ -108,20 +108,28 @@ test("real touch drag closes both mobile drawer handles", async ({ browser, brow
     await page.locator("#button-navbar-menu").click();
     await expect(page.locator("#navbarSupportedContent")).toHaveClass(/\bae--pop\b/);
     const input = await context.newCDPSession(page);
-    const dragTouch = async (selector, dx, dy) => {
+    const dragTouch = async (selector, dx, dy, steps = 8) => {
       const box = await page.locator(selector).boundingBox();
       const start = { x: box.x + box.width / 2, y: box.y + box.height / 2, id: 1 };
       await input.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [start] });
-      for (let step = 1; step <= 8; step++)
+      for (let step = 1; step <= steps; step++)
         await input.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ ...start,
-          x: start.x + dx * step / 8, y: start.y + dy * step / 8 }] });
+          x: start.x + dx * step / steps, y: start.y + dy * step / steps }] });
       await input.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
     };
     await dragTouch(".docs-drawer-handle", 300, 0);
     await expect(page.locator("#navbarSupportedContent")).toHaveJSProperty("hidden", true);
+    await page.locator("#button-navbar-menu").click();
+    await expect(page.locator("#navbarSupportedContent")).toHaveClass(/\bae--pop\b/);
+    await dragTouch(".docs-drawer-handle", 80, 0, 1);
+    await expect(page.locator("#navbarSupportedContent")).toHaveJSProperty("hidden", true);
     await page.locator("#button-toc-menu").click();
     await expect(page.locator("#toc-collapse")).toHaveClass(/\bae--pop\b/);
     await dragTouch(".toc-drag-handle", 0, -600);
+    await expect(page.locator("#toc-collapse")).toHaveJSProperty("hidden", true);
+    await page.locator("#button-toc-menu").click();
+    await expect(page.locator("#toc-collapse")).toHaveClass(/\bae--pop\b/);
+    await dragTouch(".toc-drag-handle", 0, -80, 1);
     await expect(page.locator("#toc-collapse")).toHaveJSProperty("hidden", true);
     expect(await page.evaluate(() => pointerCancels)).toBe(0);
   } finally { await context.close(); }

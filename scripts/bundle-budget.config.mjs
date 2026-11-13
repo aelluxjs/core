@@ -57,7 +57,7 @@ export const bundleBudget = Object.freeze([
   // measured before/after costs: core-extensions/focus.md#bundle-cost.
   // Anchor dynamic destination interpolation and CSS easing; measured before/after
   // bytes and former budgets: core-extensions/anchor.md#dynamic-destination-cost.
-  { file: "aellux.full.min.js", maxRawBytes: 234 * 1024, maxGzipBytes: 73.25 * 1024 },
+  { file: "aellux.full.min.js", maxRawBytes: 235 * 1024, maxGzipBytes: 73.25 * 1024 },
   { file: "aellux.full.legacy.min.js", maxRawBytes: 569 * 1024, maxGzipBytes: 168 * 1024 },
   { file: "aellux.full.min.css", maxRawBytes: 124 * 1024, maxGzipBytes: 12 * 1024 },
   { file: "aellux.ext.adaptive.min.css", maxRawBytes: 121 * 1024, maxGzipBytes: 11 * 1024 },
@@ -103,7 +103,7 @@ export const bundleBudget = Object.freeze([
   // superseded limits are recorded in core-extensions/present.md.
   // Opening trajectory capture/reversal and native CSS-only playback.
   // Scrollbox-compatible gesture controls and automatic source correction/warning.
-  { file: "aellux.ext.present.min.js", maxRawBytes: 54 * 1024, maxGzipBytes: 17.75 * 1024 },
+  { file: "aellux.ext.present.min.js", maxRawBytes: 55 * 1024, maxGzipBytes: 17.75 * 1024 },
   { file: "aellux.ext.present.legacy.min.js", maxRawBytes: 75 * 1024, maxGzipBytes: 22.5 * 1024 },
   { file: "aellux.ext.scrollbox.min.js", maxRawBytes: 46 * 1024, maxGzipBytes: 14 * 1024 },
   // Progressive 2D overflow fade; measured deltas: core-extensions/scrollbox.md.

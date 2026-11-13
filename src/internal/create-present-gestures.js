@@ -2,6 +2,8 @@
 
 const directions = { up: ["y", -1], down: ["y", 1], left: ["x", -1], right: ["x", 1] };
 const clamp = value => Math.max(0, Math.min(1, value));
+const FLICK_WINDOW_MS = 120, FLICK_RELEASE_MS = 90;
+const FLICK_MIN_DISTANCE_PX = 24, FLICK_MIN_SPEED_PX_MS = 0.55;
 
 // Input recognition only. Present owns the transition, timeline and lifecycle.
 export function createPresentGestures(root, api, services) {
@@ -81,7 +83,7 @@ export function createPresentGestures(root, api, services) {
     if (!target.closest || target.closest(inputExceptions)) return;
     if (!interaction) {
       interaction = { id: event.pointerId, pointerType: event.pointerType, x: event.clientX, y: event.clientY,
-        candidates: [], owner: null, target };
+        started: root.performance.now(), trusted: event.isTrusted, candidates: [], owner: null, target };
       for (const name of ["pointermove", "pointerup", "pointercancel", "lostpointercapture"])
         root.addEventListener(name, move, { capture: true, passive: false });
       if (event.pointerType === "touch") root.addEventListener("touchmove", touchMove, { capture: true, passive: false });
@@ -182,7 +184,8 @@ export function createPresentGestures(root, api, services) {
       let resolve;
       const settled = new Promise(done => { resolve = done; });
       const owner = current.owner = { ...candidate, params, axis, displacement: 0, progress: candidate.dismiss ? 0 : candidate.origin === "Pop" ? 1 : 0,
-        handle: null, released: null, settled,
+        handle: null, released: null, settled, trusted: current.trusted,
+        motion: [{ time: current.started, travel: 0 }],
         attach(handle, autoDistance) {
           this.handle = handle;
           if (!params.distance) params.distance = autoDistance || Math.max(1, axis === "x" ? this.entry.element.offsetWidth : this.entry.element.offsetHeight);
@@ -196,7 +199,7 @@ export function createPresentGestures(root, api, services) {
           if (!this.handle) return;
           const target = cancelled ? this.dismiss ? 0 : this.origin === "Pop" ? 1 : 0
             : this.dismiss ? +(this.progress >= params.dismiss)
-            : this.origin === "Pop" ? +(this.progress > params.unpop) : +(this.progress >= params.pop);
+            : this.origin === "Pop" ? +(this.progress > params.unpop && !flickUnpop(this)) : +(this.progress >= params.pop);
           const destination = this.dismiss ? target ? "Dismiss" : this.origin : target ? "Pop" : this.origin === "Dismiss" ? "Dismiss" : "Unpop";
           this.handle.playTo(target).then(() => resolve(destination), () => resolve(null));
         },
@@ -213,8 +216,23 @@ export function createPresentGestures(root, api, services) {
     const displacement = (owner.axis === "x" ? x : y) * owner.sign;
     owner.displacement = displacement;
     owner.progress = clamp(owner.start + displacement / (owner.params.distance || owner.params.fallback));
+    if (!owner.dismiss && owner.origin === "Pop") {
+      const sample = { time: root.performance.now(), travel: -displacement };
+      owner.motion.push(sample);
+      while (owner.motion.length > 2 && owner.motion[0].time < sample.time - FLICK_WINDOW_MS)
+        owner.motion.shift();
+    }
     owner.seek();
     if (event.cancelable) event.preventDefault();
+  }
+
+  function flickUnpop(owner) {
+    if (!owner.trusted || owner.motion.length < 2) return false;
+    const samples = owner.motion, first = samples[0], last = samples[samples.length - 1];
+    const previous = samples[samples.length - 2];
+    return last.travel >= FLICK_MIN_DISTANCE_PX && last.travel > previous.travel &&
+      root.performance.now() - last.time <= FLICK_RELEASE_MS &&
+      (last.travel - first.travel) / Math.max(8, last.time - first.time) >= FLICK_MIN_SPEED_PX_MS;
   }
 
   function nativeScroll(target, element, axis, delta) {

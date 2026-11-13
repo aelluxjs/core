@@ -780,6 +780,10 @@
   var clamp = function clamp2(value) {
     return Math.max(0, Math.min(1, value));
   };
+  var FLICK_WINDOW_MS = 120;
+  var FLICK_RELEASE_MS = 90;
+  var FLICK_MIN_DISTANCE_PX = 24;
+  var FLICK_MIN_SPEED_PX_MS = 0.55;
   function createPresentGestures(root, api, services) {
     var entries = /* @__PURE__ */ new Map(), sources = /* @__PURE__ */ new Map();
     var interaction = null, suppressed = null, suppressTimer = null;
@@ -919,6 +923,8 @@
           pointerType: event.pointerType,
           x: event.clientX,
           y: event.clientY,
+          started: root.performance.now(),
+          trusted: event.isTrusted,
           candidates: [],
           owner: null,
           target: target
@@ -1060,6 +1066,11 @@
           handle: null,
           released: null,
           settled: settled,
+          trusted: current.trusted,
+          motion: [{
+            time: current.started,
+            travel: 0
+          }],
           attach: function attach(handle, autoDistance) {
             this.handle = handle;
             if (!params.distance) params.distance = autoDistance || Math.max(1, axis === "x" ? this.entry.element.offsetWidth : this.entry.element.offsetHeight);
@@ -1074,7 +1085,7 @@
           finish: function finish(cancelled) {
             this.released = cancelled;
             if (!this.handle) return;
-            var target = cancelled ? this.dismiss ? 0 : this.origin === "Pop" ? 1 : 0 : this.dismiss ? +(this.progress >= params.dismiss) : this.origin === "Pop" ? +(this.progress > params.unpop) : +(this.progress >= params.pop);
+            var target = cancelled ? this.dismiss ? 0 : this.origin === "Pop" ? 1 : 0 : this.dismiss ? +(this.progress >= params.dismiss) : this.origin === "Pop" ? +(this.progress > params.unpop && !flickUnpop(this)) : +(this.progress >= params.pop);
             var destination = this.dismiss ? target ? "Dismiss" : this.origin : target ? "Pop" : this.origin === "Dismiss" ? "Dismiss" : "Unpop";
             this.handle.playTo(target).then(function() {
               return resolve(destination);
@@ -1103,8 +1114,22 @@
       var displacement = (owner.axis === "x" ? x : y) * owner.sign;
       owner.displacement = displacement;
       owner.progress = clamp(owner.start + displacement / (owner.params.distance || owner.params.fallback));
+      if (!owner.dismiss && owner.origin === "Pop") {
+        var sample = {
+          time: root.performance.now(),
+          travel: -displacement
+        };
+        owner.motion.push(sample);
+        while (owner.motion.length > 2 && owner.motion[0].time < sample.time - FLICK_WINDOW_MS) owner.motion.shift();
+      }
       owner.seek();
       if (event.cancelable) event.preventDefault();
+    }
+    function flickUnpop(owner) {
+      if (!owner.trusted || owner.motion.length < 2) return false;
+      var samples = owner.motion, first = samples[0], last = samples[samples.length - 1];
+      var previous = samples[samples.length - 2];
+      return last.travel >= FLICK_MIN_DISTANCE_PX && last.travel > previous.travel && root.performance.now() - last.time <= FLICK_RELEASE_MS && (last.travel - first.travel) / Math.max(8, last.time - first.time) >= FLICK_MIN_SPEED_PX_MS;
     }
     function nativeScroll(target, element, axis, delta) {
       for (var current = target; current && current !== element && current !== root.document; current = current.parentElement) {
