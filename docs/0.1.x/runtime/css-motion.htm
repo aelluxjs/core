@@ -731,7 +731,7 @@
                 <use href="#bi-layout-text-sidebar"></use>
               </svg>
             </button>
-            <button type="button"
+            <button type="button" draggable="false"
               class="p-2 text-nowrap overflow-hidden text-truncate fw-bold border-0 bg-transparent text-start"
               id="tocbot-current-label" data-ae-present-trigger="toggle" data-ae-present-target="#toc-collapse">
               -
@@ -739,8 +739,8 @@
           </div>
 
           <div class="toc-collapse bg-white overflow-hidden" id="toc-collapse" data-ae-present="transform opacity"
-            data-ae-unpop-on-click="outside"
-            data-ae-present-gesture="down" data-ae-present-gesture-source="toc-region" hidden>
+            data-ae-unpop-on-click="outside" data-ae-present-gesture="down" data-ae-present-gesture-source="toc-region"
+            hidden>
             <div class="toc-drag-handle" aria-hidden="true"></div>
             <div data-ae-scrollbox data-ae-scrollbar class="d-block overflow-auto"
               style="overscroll-behavior: contain;">
