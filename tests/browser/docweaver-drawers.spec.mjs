@@ -126,3 +126,34 @@ test("real touch drag closes both mobile drawer handles", async ({ browser, brow
     expect(await page.evaluate(() => pointerCancels)).toBe(0);
   } finally { await context.close(); }
 });
+
+test("TOC toggle visibly reverses its opening transition", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/tests/index.htm");
+  await page.addStyleTag({ url: "/tests/fixtures/bootstrap-5.3.8.min.css" });
+  await page.addStyleTag({ url: "/docs/assets/docweaver/css/style.css" });
+  await page.evaluate(markup => {
+    const parsed = new DOMParser().parseFromString(markup, "text/html");
+    document.body.replaceChildren(document.importNode(parsed.querySelector(".toc-header"), true));
+  }, html);
+  await page.addScriptTag({ url: "/dist/aellux.js" });
+  await page.evaluate(() => new Promise(resolve => {
+    aelluxJs.ext("present", { loadStyle: true });
+    aelluxJs.on("Ready", resolve, { once: true });
+    aelluxJs.init({ mode: "basic" });
+  }));
+  const panel = page.locator("#toc-collapse");
+  await page.locator("#button-toc-menu").click();
+  await expect(panel).toHaveClass(/\bae--pop\b/);
+  await page.locator("#button-toc-menu").click();
+  const samples = await panel.evaluate(async element => {
+    const read = () => ({ klass: element.className, hidden: element.hidden,
+      scale: new DOMMatrix(getComputedStyle(element).transform).m22 });
+    const values = [read()];
+    for (let i = 0; i < 7; i++) { await new Promise(resolve => setTimeout(resolve, 20)); values.push(read()); }
+    return values;
+  });
+  expect(samples.some(sample => sample.klass.includes("ae--unpopping") && !sample.hidden && sample.scale > 0 && sample.scale < 1)).toBe(true);
+  expect(samples.some(sample => sample.klass.includes("ae--dismissing"))).toBe(false);
+  await expect(panel).toHaveJSProperty("hidden", true);
+});

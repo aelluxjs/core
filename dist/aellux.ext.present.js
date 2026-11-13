@@ -1441,12 +1441,12 @@
       const controller = presentElements.get(element);
       if (!controller) return;
       const gesture = controller.gestureRequest;
-      const reversing = closingDirection === UNPOP && gotoVisible === false;
-      if (reversing && controller.direction === DISMISS && controller.transition) return false;
       if (controller.direction === null)
         controller.direction = element.hidden ? DISMISS : POP;
       if (typeof gotoVisible === "undefined" || gotoVisible === null)
         gotoVisible = controller.direction === POP ? false : true;
+      const reversing = closingDirection === UNPOP && gotoVisible === false;
+      if (reversing && controller.direction === DISMISS && controller.transition) return false;
       const group = element.closest(groupSelector);
       const groupState = groups.get(group);
       const groupRevision = groupState == null ? void 0 : groupState.revision;

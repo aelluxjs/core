@@ -37186,6 +37186,8 @@
                   return _context2.a(2);
                 case 1:
                   gesture = controller.gestureRequest;
+                  if (controller.direction === null) controller.direction = element.hidden ? DISMISS : POP;
+                  if (typeof gotoVisible === "undefined" || gotoVisible === null) gotoVisible = controller.direction === POP ? false : true;
                   reversing = closingDirection === UNPOP && gotoVisible === false;
                   if (!(reversing && controller.direction === DISMISS && controller.transition)) {
                     _context2.n = 2;
@@ -37193,8 +37195,6 @@
                   }
                   return _context2.a(2, false);
                 case 2:
-                  if (controller.direction === null) controller.direction = element.hidden ? DISMISS : POP;
-                  if (typeof gotoVisible === "undefined" || gotoVisible === null) gotoVisible = controller.direction === POP ? false : true;
                   group = element.closest(groupSelector);
                   groupState = groups.get(group);
                   groupRevision = groupState === null || groupState === void 0 ? void 0 : groupState.revision;

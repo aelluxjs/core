@@ -77,6 +77,8 @@ Changes in this section are pending for the `0.1.0` release candidate.
 
 ### Fixed
 
+- Present `toggle()` now resolves its destination before choosing reverse playback, so declarative toggle controls animate Unpop instead of collapsing through the Dismiss path. The documentation TOC closes with its visible `scaleY` transition.
+
 - Present auto-dismiss completion now reports the full duration and zero remaining time even when timer and performance-clock precision differ. Added deterministic regression coverage, updated Present test stubs for the communication service, and aligned Elastic measurements with scheduled CSS publication.
 - Homepage navigation now keeps its Anchor targets inside the menu, exposes the current section through `aria-current`, and clears the highlight in the hero while preserving the separate Back to top control.
 
