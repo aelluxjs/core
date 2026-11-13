@@ -64,9 +64,8 @@
           </div>
 
           <button id="button-navbar-menu" class="navbar-toggler" type="button" draggable="false"
-            data-ae-present-trigger="toggle"
-            data-ae-present-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-            aria-expanded="false" aria-label="Toggle navigation" data-ae-point>
+            data-ae-present-trigger="toggle" data-ae-present-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" data-ae-point>
             <div class="hamburger">
               <span></span>
               <span></span>
@@ -139,7 +138,8 @@
                                           <div
                                             class="nav-item mt-1 small-md rounded-1 ps-md-1<% if (child2.active) { %> active<% } %>"
                                             style="flex:0">
-                                            <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                            <a draggable="false"
+                                              class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                               href="<%= child2.href %>" data-ae-overflow-marquee="190px">
                                               <%= child2.label %>
                                             </a>
@@ -151,7 +151,8 @@
                                     <div
                                       class="nav-item mt-1 small-md rounded-1 ps-md-1<% if (child.active) { %> active<% } %>"
                                       style="flex:0">
-                                      <a draggable="false" class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
+                                      <a draggable="false"
+                                        class="nav-link d-block text-capitalize p-2 p-md-1 px-3 px-md-2"
                                         href="<%= child.href %>" data-ae-overflow-marquee="190px">
                                         <%= child.label %>
                                       </a>
@@ -181,7 +182,7 @@
         <div class=" toc-header position-relative bg-white p-2 position-sticky border-bottom border-md-0"
           style="top:64px;z-index:1;" role="contentinfo">
 
-          <div class="menu-toggle d-flex flex-row gap-2 small">
+          <div class="menu-toggle d-flex flex-row gap-2 small" id="toc-region">
             <button data-ae-point id="button-toc-menu" type="button" draggable="false"
               class="btn btn-outline-adaptive rounded-1 text-nowrap" data-ae-present-trigger="toggle"
               data-ae-present-target="#toc-collapse" aria-expanded="false" aria-controls="toc-collapse"
@@ -198,7 +199,7 @@
           </div>
 
           <div class="toc-collapse bg-white overflow-hidden" id="toc-collapse" data-ae-present="transform opacity"
-            data-ae-present-gesture="down" data-ae-present-gesture-source="button-toc-menu" hidden>
+            data-ae-present-gesture="down" data-ae-present-gesture-source="toc-region" hidden>
             <div class="toc-drag-handle" aria-hidden="true"></div>
             <div data-ae-scrollbox data-ae-scrollbar class="d-block overflow-auto"
               style="overscroll-behavior: contain;">
