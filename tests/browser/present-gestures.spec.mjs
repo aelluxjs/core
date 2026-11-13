@@ -409,7 +409,7 @@ test("scrollable descendants keep native movement and scrolling", async ({ page 
   await expect.poll(() => page.locator("#scroller").evaluate(element => element.scrollTop)).toBeGreaterThan(0);
 });
 
-test("Scrollbox scrolls while it can, then hands an outward drag to Present at its edge", async ({ page }) => {
+test("Scrollbox keeps an entire drag, and a new outward drag at its edge reaches Present", async ({ page }) => {
   await start(page, panel('class="ae--pop" data-ae-present-gesture="up"')
     .replace("Content</div>", '<div id="scroller" data-ae-scrollbox="pointer" data-ae-scrollbox-momentum="false" style="height:100px;overflow:auto"><div id="content" style="height:500px"></div></div></div>'),
   { withScrollbox: true });
@@ -429,8 +429,59 @@ test("Scrollbox scrolls while it can, then hands an outward drag to Present at i
   await page.mouse.down();
   await page.mouse.move(x, y + 260, { steps: 26 });
   await page.mouse.up();
+  await expect(page.locator("#panel")).toHaveClass(/\bae--pop\b/);
+  await expect(page.locator("#scroller")).toHaveJSProperty("scrollTop", 0);
+
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x, y + 260, { steps: 26 });
+  await page.mouse.up();
   await expect(page.locator("#panel")).toHaveClass(/\bae--unpop\b/);
   await expect(page.locator("#scroller")).toHaveJSProperty("scrollTop", 0);
+
+  await page.evaluate(() => $ae("panel").present.pop());
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x, y - 40, { steps: 4 });
+  await page.mouse.up();
+  await expect(page.locator("#panel")).toHaveClass(/\bae--pop\b/);
+  await expect.poll(() => page.locator("#scroller").evaluate(element => element.scrollTop)).toBeGreaterThan(0);
+});
+
+test("touch scroll reaches an edge before a separate outward drawer gesture", async ({ browser, browserName }) => {
+  test.skip(browserName !== "chromium", "Touch injection uses Chromium's input protocol.");
+  const context = await browser.newContext({ hasTouch: true });
+  const page = await context.newPage();
+  try {
+    await start(page, panel('class="ae--pop" data-ae-present-gesture="up"')
+      .replace("Content</div>", '<div id="scroller" data-ae-scrollbox style="height:100px;overflow:auto"><div style="height:500px"></div></div></div>'),
+    { withScrollbox: true });
+    const box = await page.locator("#scroller").boundingBox();
+    await page.evaluate(() => {
+      window.touchCancels = 0;
+      window.addEventListener("pointercancel", () => touchCancels++, true);
+    });
+    const input = await context.newCDPSession(page);
+    const touch = async (distance) => {
+      const point = { x: box.x + box.width / 2, y: box.y + box.height / 2, id: 1 };
+      await input.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [point] });
+      for (let step = 1; step <= 8; step++)
+        await input.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ ...point, y: point.y + distance * step / 8 }] });
+      await input.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    };
+    await page.locator("#scroller").evaluate(element => element.scrollTo({ top: 40, behavior: "instant" }));
+    await touch(220);
+    await expect(page.locator("#scroller")).toHaveJSProperty("scrollTop", 0);
+    await expect(page.locator("#panel")).toHaveClass(/\bae--pop\b/);
+    const cancelsAfterScroll = await page.evaluate(() => touchCancels);
+    await touch(220);
+    await expect(page.locator("#panel")).toHaveClass(/\bae--unpop\b/);
+    expect(await page.evaluate(() => touchCancels)).toBe(cancelsAfterScroll);
+    await page.evaluate(() => $ae("panel").present.pop());
+    await touch(-60);
+    await expect(page.locator("#panel")).toHaveClass(/\bae--pop\b/);
+    await expect.poll(() => page.locator("#scroller").evaluate(element => element.scrollTop)).toBeGreaterThan(0);
+  } finally { await context.close(); }
 });
 
 test("a more specific gesture source wins over document ownership", async ({ page }) => {

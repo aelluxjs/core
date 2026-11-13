@@ -39,7 +39,7 @@
 <script src="/core/docs/assets/docweaver/js/main.js"></script>
 
 <link rel="preload" as="script" href="/core/dist/aellux.full.min.js"
-  integrity="sha384-06Irgn2ilV/cxBnVQ7rbzxW/ZQoWoPCfCEbFVh8kGuryKwBJYSdoxb/Y1hHDa8q9" crossorigin="anonymous">
+  integrity="sha384-ELU8wGZGLFkyoVVNJ5o4YrgugzIvBPDWMy7nAuapeO2FYOBFx2AuZJUkDXOH8wzp" crossorigin="anonymous">
 
 </head>
 
@@ -1150,7 +1150,7 @@ await $ae(&quot;views&quot;).present.show(&quot;home&quot;);
   &lt;button data-ae-present-trigger=&quot;unpop&quot;&gt;Reverse programmatically&lt;/button&gt;
 &lt;/aside&gt;
 </code></pre>
-<p>Choose touch-action on a local handle or region according to the intended gesture axes. Browsers decide native touch scrolling at pointerdown, so preventing a later pointermove cannot reclaim a gesture already assigned to scrolling. A local handle needing both axes may require <code>touch-action:none</code>; Present never sets it globally. Inputs, links/buttons without <code>draggable=&quot;false&quot;</code> and contenteditable regions retain their input. A nested Scrollbox or native scroll container takes precedence while it can scroll in the drag direction; Present keeps observing and can claim the remaining outward drag when it reaches that edge. Scrollbar thumbs remain excluded. On touch surfaces, the browser may cancel the pointer after assigning it to native scrolling, so a separate gesture from the edge or a dedicated handle may be needed. Completed drags suppress the associated compatibility click, while ordinary presses remain clicks. Shared sources choose the most specific matching region, then the most recently presented region; one pointer controls one Present. Keep keyboard buttons available and choose accessible semantics for the component built with Present.</p>
+<p>Choose touch-action on a local handle or region according to the intended gesture axes. Browsers decide native touch scrolling at pointerdown, so preventing a later pointermove cannot reclaim a gesture already assigned to scrolling. A local handle needing both axes may require <code>touch-action:none</code>; Present never sets it globally. Inputs, links/buttons without <code>draggable=&quot;false&quot;</code> and contenteditable regions retain their input. If a nested Scrollbox or native scroll container can scroll in the initial drag direction, it owns that entire press even after reaching its edge. Release and start a new outward gesture from the edge to move Present. Scrollbar thumbs remain excluded. On touch surfaces, the browser may cancel the pointer after assigning it to native scrolling; a dedicated handle remains useful. Completed drags suppress the associated compatibility click, while ordinary presses remain clicks. Shared sources choose the most specific matching region, then the most recently presented region; one pointer controls one Present. Keep keyboard buttons available and choose accessible semantics for the component built with Present.</p>
 <h3>Gesture distribution cost</h3>
 <p>The gesture recognizer is private to Present and introduces no package dependency. Measurements compare the preceding build with this implementation, including Scrollbox-compatible controls and automatic interactive-source correction, in bytes (gzip level 9):</p>
 <table>

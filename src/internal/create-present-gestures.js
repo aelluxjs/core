@@ -80,9 +80,11 @@ export function createPresentGestures(root, api, services) {
     const target = event.target;
     if (!target.closest || target.closest(inputExceptions)) return;
     if (!interaction) {
-      interaction = { id: event.pointerId, x: event.clientX, y: event.clientY, candidates: [], owner: null, target };
+      interaction = { id: event.pointerId, pointerType: event.pointerType, x: event.clientX, y: event.clientY,
+        candidates: [], owner: null, target };
       for (const name of ["pointermove", "pointerup", "pointercancel", "lostpointercapture"])
         root.addEventListener(name, move, { capture: true, passive: false });
+      if (event.pointerType === "touch") root.addEventListener("touchmove", touchMove, { capture: true, passive: false });
     }
     for (const entry of sources.get(event.currentTarget) || []) {
       if (interaction.candidates.some(candidate => candidate.entry === entry)) continue;
@@ -93,10 +95,10 @@ export function createPresentGestures(root, api, services) {
       if (origin === "Pop" ? onElement : onSource)
         interaction.candidates.push({ entry, origin });
     }
-    // Capture the eligible press before it can leave the viewport. This keeps
-    // the eventual release paired with the same interaction even when the
-    // movement crosses the drawer or window edge.
-    if (interaction.candidates.length && !interaction.captured) {
+    // Mouse/pen presses need early capture to survive a viewport exit. Touch
+    // already has implicit capture; leave it alone until gesture intent so
+    // native touch scrolling can keep control of the pointer.
+    if (event.pointerType !== "touch" && interaction.candidates.length && !interaction.captured) {
       try { target.setPointerCapture(event.pointerId); interaction.captured = true; } catch (_) { /* window routing remains available */ }
     }
   }
@@ -139,6 +141,7 @@ export function createPresentGestures(root, api, services) {
       release(false);
       return;
     }
+    if (current.scrollOwned) return;
     const x = event.clientX - current.x, y = event.clientY - current.y;
     if (!current.owner) {
       if (Math.max(Math.abs(x), Math.abs(y)) < 8) return;
@@ -167,10 +170,9 @@ export function createPresentGestures(root, api, services) {
       const candidate = candidates[0];
       if (!candidate) { clear(); return; }
       if (nativeScroll(current.target, candidate.entry.element, axis, delta)) {
-        // Let the scroll container consume this movement, but keep watching.
-        // If it reaches an edge, start Present from the remaining drag only.
-        current.x = event.clientX;
-        current.y = event.clientY;
+        // Scrollbox owns this complete press, even if it reaches an edge.
+        // A new press from that edge can start Present instead.
+        current.scrollOwned = true;
         return;
       }
       if (!root.KeyframeEffect?.prototype.setKeyframes || !candidate.entry.element.getAnimations) {
@@ -203,6 +205,9 @@ export function createPresentGestures(root, api, services) {
       owner.start = owner.progress;
       services.begin(candidate.entry.element, candidate.dismiss ? "Dismiss" : candidate.origin === "Pop" ? "Unpop" : "Pop", owner);
       if (interaction !== current) return;
+      if (event.pointerType === "touch" && !current.captured) {
+        try { current.target.setPointerCapture(event.pointerId); current.captured = true; } catch (_) { /* implicit capture or window routing remains available */ }
+      }
     }
     const owner = current.owner;
     const displacement = (owner.axis === "x" ? x : y) * owner.sign;
@@ -221,6 +226,13 @@ export function createPresentGestures(root, api, services) {
       if (maximum > 0 && (delta < 0 ? position < maximum : position > 0)) return true;
     }
     return false;
+  }
+
+  function touchMove(event) {
+    // Pointermove identifies Present intent first. Cancel the following native
+    // scroll only for that owned touch; Scrollbox-owned presses stay native.
+    if (interaction?.pointerType === "touch" && interaction.owner && event.touches.length === 1 && event.cancelable)
+      event.preventDefault();
   }
 
   function release(cancelled) {
@@ -246,6 +258,7 @@ export function createPresentGestures(root, api, services) {
     const previous = interaction; interaction = null;
     for (const name of ["pointermove", "pointerup", "pointercancel", "lostpointercapture"])
       root.removeEventListener(name, move, true);
+    if (previous?.pointerType === "touch") root.removeEventListener("touchmove", touchMove, true);
     if (previous?.captured) try { previous.target.releasePointerCapture(previous.id); } catch (_) { /* detached target */ }
   }
   function cancel() { release(true); }

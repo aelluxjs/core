@@ -916,6 +916,7 @@
       if (!interaction) {
         interaction = {
           id: event.pointerId,
+          pointerType: event.pointerType,
           x: event.clientX,
           y: event.clientY,
           candidates: [],
@@ -929,6 +930,10 @@
             passive: false
           });
         }
+        if (event.pointerType === "touch") root.addEventListener("touchmove", touchMove, {
+          capture: true,
+          passive: false
+        });
       }
       var _iterator3 = _createForOfIteratorHelper2(sources.get(event.currentTarget) || []), _step3;
       try {
@@ -955,7 +960,7 @@
       } finally {
         _iterator3.f();
       }
-      if (interaction.candidates.length && !interaction.captured) {
+      if (event.pointerType !== "touch" && interaction.candidates.length && !interaction.captured) {
         try {
           target.setPointerCapture(event.pointerId);
           interaction.captured = true;
@@ -1003,6 +1008,7 @@
         release(false);
         return;
       }
+      if (current.scrollOwned) return;
       var x = event.clientX - current.x, y = event.clientY - current.y;
       if (!current.owner) {
         var _root$KeyframeEffect;
@@ -1033,8 +1039,7 @@
           return;
         }
         if (nativeScroll(current.target, candidate.entry.element, axis, delta)) {
-          current.x = event.clientX;
-          current.y = event.clientY;
+          current.scrollOwned = true;
           return;
         }
         if (!((_root$KeyframeEffect = root.KeyframeEffect) !== null && _root$KeyframeEffect !== void 0 && _root$KeyframeEffect.prototype.setKeyframes) || !candidate.entry.element.getAnimations) {
@@ -1086,6 +1091,13 @@
         _owner.start = _owner.progress;
         services.begin(candidate.entry.element, candidate.dismiss ? "Dismiss" : candidate.origin === "Pop" ? "Unpop" : "Pop", _owner);
         if (interaction !== current) return;
+        if (event.pointerType === "touch" && !current.captured) {
+          try {
+            current.target.setPointerCapture(event.pointerId);
+            current.captured = true;
+          } catch (_) {
+          }
+        }
       }
       var owner = current.owner;
       var displacement = (owner.axis === "x" ? x : y) * owner.sign;
@@ -1104,9 +1116,13 @@
       }
       return false;
     }
-    function release(cancelled) {
+    function touchMove(event) {
       var _interaction4;
-      var owner = (_interaction4 = interaction) === null || _interaction4 === void 0 ? void 0 : _interaction4.owner;
+      if (((_interaction4 = interaction) === null || _interaction4 === void 0 ? void 0 : _interaction4.pointerType) === "touch" && interaction.owner && event.touches.length === 1 && event.cancelable) event.preventDefault();
+    }
+    function release(cancelled) {
+      var _interaction5;
+      var owner = (_interaction5 = interaction) === null || _interaction5 === void 0 ? void 0 : _interaction5.owner;
       if (owner) {
         owner.finish(cancelled);
         suppressed = interaction.target;
@@ -1135,6 +1151,7 @@
         var name = _arr3[_i3];
         root.removeEventListener(name, move, true);
       }
+      if ((previous === null || previous === void 0 ? void 0 : previous.pointerType) === "touch") root.removeEventListener("touchmove", touchMove, true);
       if (previous !== null && previous !== void 0 && previous.captured) try {
         previous.target.releasePointerCapture(previous.id);
       } catch (_) {

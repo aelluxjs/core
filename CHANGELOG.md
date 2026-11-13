@@ -30,9 +30,9 @@ Changes in this section are pending for the `0.1.0` release candidate.
 
 ### Changed
 
-- Present now captures eligible drawer presses from pointerdown and preserves the last drag position when a mouse is released outside the viewport. Documentation drawer links and buttons use `draggable="false"` so native dragging does not interrupt their gesture.
+- Present now captures eligible mouse and pen drawer presses from pointerdown, while touch capture waits for gesture intent. It preserves the last drag position when a mouse is released outside the viewport. Documentation drawer links and buttons use `draggable="false"` so native dragging does not interrupt their gesture.
 
-- Present gestures now observe Scrollbox surfaces and yield only while the nested area can scroll in the drag direction. An outward drag at the scroll edge can pass to Present; Scrollbox releases its pointer drag without momentum when Present takes ownership.
+- Present gestures now observe Scrollbox surfaces. When a nested area can scroll in the drag direction, Scrollbox owns that entire gesture even after reaching its edge; a new outward gesture from the edge can move Present. Scrollbox releases a pending pointer drag without momentum when Present takes ownership.
 
 - Present `toggle()` and declarative toggle controls now close through Unpop; `dismiss()` and its trigger remain available for an independent outgoing transition. The documentation navbar and TOC use reverse close actions and mobile drag handles for gesture Unpop.
 

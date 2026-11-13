@@ -6070,9 +6070,18 @@
       const target = event.target;
       if (!target.closest || target.closest(inputExceptions)) return;
       if (!interaction) {
-        interaction = { id: event.pointerId, x: event.clientX, y: event.clientY, candidates: [], owner: null, target };
+        interaction = {
+          id: event.pointerId,
+          pointerType: event.pointerType,
+          x: event.clientX,
+          y: event.clientY,
+          candidates: [],
+          owner: null,
+          target
+        };
         for (const name of ["pointermove", "pointerup", "pointercancel", "lostpointercapture"])
           root2.addEventListener(name, move, { capture: true, passive: false });
+        if (event.pointerType === "touch") root2.addEventListener("touchmove", touchMove, { capture: true, passive: false });
       }
       for (const entry of sources.get(event.currentTarget) || []) {
         if (interaction.candidates.some((candidate) => candidate.entry === entry)) continue;
@@ -6083,7 +6092,7 @@
         if (origin === "Pop" ? onElement : onSource)
           interaction.candidates.push({ entry, origin });
       }
-      if (interaction.candidates.length && !interaction.captured) {
+      if (event.pointerType !== "touch" && interaction.candidates.length && !interaction.captured) {
         try {
           target.setPointerCapture(event.pointerId);
           interaction.captured = true;
@@ -6131,6 +6140,7 @@
         release(false);
         return;
       }
+      if (current.scrollOwned) return;
       const x = event.clientX - current.x, y = event.clientY - current.y;
       if (!current.owner) {
         if (Math.max(Math.abs(x), Math.abs(y)) < 8) return;
@@ -6160,8 +6170,7 @@
           return;
         }
         if (nativeScroll(current.target, candidate.entry.element, axis, delta)) {
-          current.x = event.clientX;
-          current.y = event.clientY;
+          current.scrollOwned = true;
           return;
         }
         if (!((_a = root2.KeyframeEffect) == null ? void 0 : _a.prototype.setKeyframes) || !candidate.entry.element.getAnimations) {
@@ -6208,6 +6217,13 @@
         owner2.start = owner2.progress;
         services.begin(candidate.entry.element, candidate.dismiss ? "Dismiss" : candidate.origin === "Pop" ? "Unpop" : "Pop", owner2);
         if (interaction !== current) return;
+        if (event.pointerType === "touch" && !current.captured) {
+          try {
+            current.target.setPointerCapture(event.pointerId);
+            current.captured = true;
+          } catch (_) {
+          }
+        }
       }
       const owner = current.owner;
       const displacement = (owner.axis === "x" ? x : y) * owner.sign;
@@ -6225,6 +6241,10 @@
         if (maximum > 0 && (delta < 0 ? position < maximum : position > 0)) return true;
       }
       return false;
+    }
+    function touchMove(event) {
+      if ((interaction == null ? void 0 : interaction.pointerType) === "touch" && interaction.owner && event.touches.length === 1 && event.cancelable)
+        event.preventDefault();
     }
     function release(cancelled) {
       const owner = interaction == null ? void 0 : interaction.owner;
@@ -6254,6 +6274,7 @@
       interaction = null;
       for (const name of ["pointermove", "pointerup", "pointercancel", "lostpointercapture"])
         root2.removeEventListener(name, move, true);
+      if ((previous == null ? void 0 : previous.pointerType) === "touch") root2.removeEventListener("touchmove", touchMove, true);
       if (previous == null ? void 0 : previous.captured) try {
         previous.target.releasePointerCapture(previous.id);
       } catch (_) {

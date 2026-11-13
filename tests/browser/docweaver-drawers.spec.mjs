@@ -81,3 +81,48 @@ for (const selector of ["a.nav-link:visible", "button.nav-link:visible"]) test(`
   await page.mouse.up();
   await expect(page.locator("#navbarSupportedContent")).toHaveJSProperty("hidden", true);
 });
+
+test("real touch drag closes both mobile drawer handles", async ({ browser, browserName }) => {
+  test.skip(browserName !== "chromium", "Touch injection uses Chromium's input protocol.");
+  const context = await browser.newContext({ hasTouch: true, viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  try {
+    await page.goto("/tests/index.htm");
+    await page.addStyleTag({ url: "/tests/fixtures/bootstrap-5.3.8.min.css" });
+    await page.addStyleTag({ url: "/docs/assets/docweaver/css/style.css" });
+    await page.evaluate(markup => {
+      const parsed = new DOMParser().parseFromString(markup, "text/html");
+      document.body.replaceChildren(
+        document.importNode(parsed.querySelector("header"), true),
+        document.importNode(parsed.querySelector(".toc-header"), true)
+      );
+      window.pointerCancels = 0;
+      window.addEventListener("pointercancel", () => pointerCancels++, true);
+    }, html);
+    await page.addScriptTag({ url: "/dist/aellux.js" });
+    await page.evaluate(() => new Promise(resolve => {
+      aelluxJs.ext("present", { loadStyle: true });
+      aelluxJs.on("Ready", resolve, { once: true });
+      aelluxJs.init({ mode: "basic" });
+    }));
+    await page.locator("#button-navbar-menu").click();
+    await expect(page.locator("#navbarSupportedContent")).toHaveClass(/\bae--pop\b/);
+    const input = await context.newCDPSession(page);
+    const dragTouch = async (selector, dx, dy) => {
+      const box = await page.locator(selector).boundingBox();
+      const start = { x: box.x + box.width / 2, y: box.y + box.height / 2, id: 1 };
+      await input.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [start] });
+      for (let step = 1; step <= 8; step++)
+        await input.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ ...start,
+          x: start.x + dx * step / 8, y: start.y + dy * step / 8 }] });
+      await input.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    };
+    await dragTouch(".docs-drawer-handle", 300, 0);
+    await expect(page.locator("#navbarSupportedContent")).toHaveJSProperty("hidden", true);
+    await page.locator("#button-toc-menu").click();
+    await expect(page.locator("#toc-collapse")).toHaveClass(/\bae--pop\b/);
+    await dragTouch(".toc-drag-handle", 0, -600);
+    await expect(page.locator("#toc-collapse")).toHaveJSProperty("hidden", true);
+    expect(await page.evaluate(() => pointerCancels)).toBe(0);
+  } finally { await context.close(); }
+});
